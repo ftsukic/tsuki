@@ -1,0 +1,36 @@
+{
+  "name": "react-native-ui-monorepo",
+  "version": "0.0.1",
+  "private": true,
+  "packageManager": "yarn@4.9.2",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "yarn workspace @ftsukic/react-native-ui build && yarn workspace @ftsukic/dumi-theme-rn-snack build && yarn workspace @ftsukic/react-native-ui-docs build",
+    "typecheck": "yarn workspace @ftsukic/react-native-ui typecheck && yarn workspace @ftsukic/dumi-theme-rn-snack typecheck && yarn workspace @ftsukic/react-native-ui-docs typecheck",
+    "lint": "eslint packages --ext .ts,.tsx && eslint --no-ignore apps/docs/.dumirc.ts",
+    "test": "jest --runInBand",
+    "docs:dev": "yarn workspace @ftsukic/react-native-ui-docs dev",
+    "docs:build": "yarn workspace @ftsukic/react-native-ui-docs build",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@babel/core": "^7.28.4",
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
+    "@types/jest": "^29.5.14",
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@typescript-eslint/parser": "^8.42.0",
+    "babel-jest": "^29.7.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}

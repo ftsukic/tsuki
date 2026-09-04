@@ -1,0 +1,66 @@
+{
+  "name": "@ftsukic/react-native-ui",
+  "version": "0.0.1",
+  "description": "基础 React Native UI 组件库。",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ftsukic/react-native-ui.git",
+    "directory": "packages/ui"
+  },
+  "bugs": {
+    "url": "https://github.com/ftsukic/react-native-ui/issues"
+  },
+  "homepage": "https://github.com/ftsukic/react-native-ui#readme",
+  "source": "src/index.ts",
+  "main": "lib/commonjs/index.js",
+  "module": "lib/module/index.js",
+  "react-native": "src/index.ts",
+  "types": "lib/typescript/commonjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/typescript/module/index.d.ts",
+        "default": "./lib/module/index.js"
+      },
+      "require": {
+        "types": "./lib/typescript/commonjs/index.d.ts",
+        "default": "./lib/commonjs/index.js"
+      }
+    }
+  },
+  "files": [
+    "src",
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "peerDependencies": {
+    "react": ">=19.1.1",
+    "react-native": ">=0.82.0"
+  },
+  "scripts": {
+    "build": "bob build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "jest --runInBand"
+  },
+  "devDependencies": {
+    "react-native-builder-bob": "0.43.0"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
+      "commonjs",
+      "typescript"
+    ]
+  }
+}

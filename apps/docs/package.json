@@ -1,0 +1,22 @@
+{
+  "name": "@ftsukic/react-native-ui-docs",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "dumi dev",
+    "build": "dumi build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "jest --runInBand"
+  },
+  "dependencies": {
+    "@ftsukic/dumi-theme-rn-snack": "workspace:*",
+    "dumi": "2.4.49",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7"
+  }
+}
