@@ -45,7 +45,7 @@
   },
   "scripts": {
     "build": "bob build",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
     "test": "jest --config jest.config.cjs --runInBand"
   },
