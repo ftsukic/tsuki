@@ -25,6 +25,18 @@ module.exports = {
       version: 'detect',
     },
   },
+  overrides: [
+    {
+      files: ['**/*.cjs'],
+      rules: {
+        '@typescript-eslint/no-require-imports': 'off',
+      },
+    },
+    {
+      files: ['**/__tests__/**/*.{js,jsx,ts,tsx}', '**/*.{test,spec}.{js,jsx,ts,tsx}'],
+      extends: ['plugin:testing-library/react'],
+    },
+  ],
   rules: {
     '@typescript-eslint/consistent-type-imports': [
       'error',

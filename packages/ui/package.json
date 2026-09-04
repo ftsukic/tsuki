@@ -38,16 +38,30 @@
   "sideEffects": false,
   "peerDependencies": {
     "react": ">=19.1.1",
-    "react-native": ">=0.82.0"
+    "react-native": ">=0.82.1"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "scripts": {
     "build": "bob build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts,.tsx",
-    "test": "jest --runInBand"
+    "test": "jest --config jest.config.cjs --runInBand"
   },
   "devDependencies": {
-    "react-native-builder-bob": "0.43.0"
+    "@babel/core": "^7.28.4",
+    "@react-native/babel-preset": "0.82.1",
+    "@testing-library/react-native": "^14.0.1",
+    "@types/jest": "^29.5.14",
+    "@types/react": "^19.1.10",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "react": "19.1.1",
+    "react-native": "0.82.1",
+    "react-native-builder-bob": "0.43.0",
+    "test-renderer": "1.1.0",
+    "typescript": "^5.9.2"
   },
   "react-native-builder-bob": {
     "source": "src",

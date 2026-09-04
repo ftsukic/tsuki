@@ -10,17 +10,27 @@
   "scripts": {
     "build": "yarn workspace @ftsukic/react-native-ui build && yarn workspace @ftsukic/dumi-theme-rn-snack build && yarn workspace @ftsukic/react-native-ui-docs build",
     "typecheck": "yarn workspace @ftsukic/react-native-ui typecheck && yarn workspace @ftsukic/dumi-theme-rn-snack typecheck && yarn workspace @ftsukic/react-native-ui-docs typecheck",
-    "lint": "eslint packages --ext .ts,.tsx && eslint --no-ignore apps/docs/.dumirc.ts",
-    "test": "jest --runInBand",
+    "lint": "eslint packages --ext .ts,.tsx && eslint --no-ignore apps/docs/.dumirc.ts .eslintrc.cjs commitlint.config.mjs lint-staged.config.mjs packages/ui/babel.config.cjs packages/ui/jest.config.cjs scripts/changeset-status.cjs",
+    "test": "yarn workspace @ftsukic/react-native-ui test && jest --runInBand --testPathIgnorePatterns=/packages/ui/",
     "docs:dev": "yarn workspace @ftsukic/react-native-ui-docs dev",
     "docs:build": "yarn workspace @ftsukic/react-native-ui-docs build",
-    "format:check": "prettier --check ."
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "commitlint": "commitlint",
+    "changeset": "changeset",
+    "changeset:status": "node scripts/changeset-status.cjs",
+    "release:version": "changeset version",
+    "release:publish": "changeset publish",
+    "postinstall": "husky"
   },
   "devDependencies": {
     "@babel/core": "^7.28.4",
     "@babel/preset-env": "^7.28.3",
     "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.27.1",
+    "@changesets/cli": "^3.0.2",
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
     "@types/jest": "^29.5.14",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
@@ -28,8 +38,11 @@
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-testing-library": "^7.16.2",
+    "husky": "^9.1.7",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
+    "lint-staged": "^17.4.1",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2"
   }

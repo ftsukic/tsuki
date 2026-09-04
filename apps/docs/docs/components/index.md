@@ -12,3 +12,5 @@ order: 1
 - 默认值和边界行为
 - iOS、Android、HarmonyOS、Snack 支持矩阵
 - Native Runtime 限制说明
+
+当前组件库兼容基线：React `19.1.1`、React Native `0.82.1+`；Harmony 使用 React Native `0.82.1` 基线。

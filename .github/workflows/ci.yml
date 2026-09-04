@@ -8,10 +8,14 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    env:
+      HUSKY: 0
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -24,6 +28,20 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Commitlint
+        shell: bash
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            yarn commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}" --verbose
+          elif [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
+            yarn commitlint --last --verbose
+          else
+            yarn commitlint --from "${{ github.event.before }}" --to "${{ github.sha }}" --verbose
+          fi
+
+      - name: Format check
+        run: yarn format:check
+
       - name: Typecheck
         run: yarn typecheck
 
@@ -33,5 +51,8 @@ jobs:
       - name: Test
         run: yarn test
 
-      - name: Build documentation
-        run: yarn docs:build
+      - name: Build packages and documentation
+        run: yarn build
+
+      - name: Validate changesets
+        run: yarn changeset:status

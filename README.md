@@ -4,6 +4,8 @@
 
 当前版本：`0.0.1`
 
+兼容基线：React `19.1.1`、React Native `0.82.1+`；Harmony 使用 React Native `0.82.1` 基线。组件库不直接依赖 RNOH、Expo 或其他 Native Module。
+
 ## 当前状态
 
 当前版本完成仓库、组件包、dumi 文档和 Expo Snack Previewer 的基础骨架，暂不包含具体组件实现。
@@ -34,6 +36,7 @@ yarn install
 yarn typecheck
 yarn lint
 yarn test
+yarn format:check
 yarn docs:dev
 ```
 
