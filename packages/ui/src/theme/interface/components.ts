@@ -104,16 +104,35 @@ export interface InputToken {
   wordLimitFontSize: number
 }
 
+export interface RadioToken {
+  indicatorSize: number
+  dotSize: number
+  borderWidth: number
+  borderRadius: number
+  borderColor: string
+  checkedColor: string
+  labelColor: string
+  disabledColor: string
+  disabledLabelColor: string
+  fontSize: number
+  lineHeight: number
+  gap: number
+  activeOpacity: number
+  disabledOpacity: number
+}
+
 export interface ComponentTokenOverrides {
   Button?: Partial<ButtonToken>
   Cell?: Partial<CellToken>
   Input?: Partial<InputToken>
+  Radio?: Partial<RadioToken>
 }
 
 export interface ComponentTokenMap {
   Button: ButtonToken
   Cell: CellToken
   Input: InputToken
+  Radio: RadioToken
 }
 
 export type ComponentTokenName = keyof ComponentTokenMap
