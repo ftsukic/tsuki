@@ -15,6 +15,7 @@ export function Col({ offset = 0, span, style, ...restProps }: ColProps) {
           flexShrink: 0,
           marginLeft: `${(offset / 24) * 100}%`,
           paddingHorizontal: gap / 2,
+          paddingVertical: gap / 2,
         },
         style,
       ]}

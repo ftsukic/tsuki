@@ -18,10 +18,11 @@ describe('Grid', () => {
       flexWrap: 'wrap',
       justifyContent: 'space-between',
       marginHorizontal: -8,
+      marginVertical: -8,
     })
   })
 
-  it('applies 24-column span, offset and row gap to columns', async () => {
+  it('applies 24-column span, offset and both-axis gap to columns', async () => {
     await render(
       <Row gap={12}>
         <Col testID="col" span={6} offset={2}>
@@ -38,6 +39,7 @@ describe('Grid', () => {
       flexShrink: 0,
       marginLeft: `${(2 / 24) * 100}%`,
       paddingHorizontal: 6,
+      paddingVertical: 6,
     })
   })
 })

@@ -17,6 +17,7 @@ export function Row({ align, gap = 0, justify, style, ...restProps }: RowProps) 
             flexWrap: 'wrap',
             justifyContent: justify,
             marginHorizontal: -gap / 2,
+            marginVertical: -gap / 2,
           },
           style,
         ]}

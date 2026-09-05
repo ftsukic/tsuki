@@ -23,7 +23,7 @@ import { Col, Row } from '@ftsukic/react-native-ui';
 </Row>;
 ```
 
-`Row` 支持 `gap`、`justify` 和 `align`，并继承 React Native `ViewProps`。`gap` 会通过上下文传递给内部 `Col`，每个列使用一半间距作为左右内边距。
+`Row` 支持 `gap`、`justify` 和 `align`，并继承 React Native `ViewProps`。`gap` 会通过上下文传递给内部 `Col`，每个列使用一半间距作为上下左右内边距，因此换行后的行之间也会保持相同间距。
 
 `Col` 必须设置 `span`，取值表示占用 24 栅格中的列数；`offset` 表示左侧偏移的栅格数，默认为 `0`。`Col` 同样继承 React Native `ViewProps`。
 
