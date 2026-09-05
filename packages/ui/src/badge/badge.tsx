@@ -89,10 +89,10 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
   const indicatorBase: ViewStyle = hasChildren
     ? {
         position: 'absolute',
-        top: -(height / 2),
-        right: -(height / 2),
-        minHeight: height,
-        minWidth,
+        top: -(dot ? token.dotSize / 2 : height / 2),
+        right: -(dot ? token.dotSize / 2 : height / 2),
+        minHeight: dot ? token.dotSize : height,
+        minWidth: dot ? token.dotSize : minWidth,
       }
     : {
         minHeight: height,

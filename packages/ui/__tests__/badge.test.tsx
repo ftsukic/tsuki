@@ -57,7 +57,11 @@ describe('Badge', () => {
     const status = findViewWithBackground(toJSON(), '#07C160')
     expect(dot).toBeTruthy()
     expect(status).toBeTruthy()
-    expect(StyleSheet.flatten(dot?.props.style).borderWidth ?? 0).toBe(0)
+    expect(StyleSheet.flatten(dot?.props.style)).toMatchObject({
+      top: -4,
+      right: -4,
+      borderWidth: 0,
+    })
 
     const view = await render(
       <ConfigProvider>
