@@ -66,17 +66,74 @@ describe('Button', () => {
   })
 
   it('resolves semantic styles as an object or function', async () => {
-    const styles = jest.fn(({ state }) => ({ root: { marginTop: state.pressed ? 2 : 1 } }))
+    const styles = jest.fn(({ props, state }) => ({
+      root: { marginTop: state.pressed ? 2 : 1, opacity: props.variant === 'outlined' ? 0.9 : 1 },
+    }))
     await render(
       <ConfigProvider>
-        <Button testID="styled" styles={styles}>
+        <Button testID="styled" plain styles={styles}>
           样式
         </Button>
       </ConfigProvider>,
     )
 
     expect(styles).toHaveBeenCalled()
+    expect(styles.mock.calls.some(([info]) => info.props.variant === 'outlined')).toBe(true)
     expect(screen.getByTestId('styled')).toBeTruthy()
+  })
+
+  it('supports visual variants and maps plain to outlined', async () => {
+    await render(
+      <ConfigProvider>
+        <Button testID="solid" type="primary" variant="solid">
+          实心
+        </Button>
+        <Button testID="outlined" type="primary" variant="outlined">
+          细边框
+        </Button>
+        <Button testID="plain" type="primary" plain>
+          兼容
+        </Button>
+        <Button testID="dashed" type="primary" variant="dashed">
+          虚线
+        </Button>
+        <Button testID="filled" type="primary" variant="filled">
+          填充
+        </Button>
+        <Button testID="text" type="primary" variant="text">
+          文字
+        </Button>
+        <Button testID="default-outlined" variant="outlined">
+          默认细边框
+        </Button>
+        <Button testID="default-filled" variant="filled">
+          默认填充
+        </Button>
+        <Button testID="default-text" variant="text">
+          默认文字
+        </Button>
+      </ConfigProvider>,
+    )
+
+    const getStyle = (testID: string) => StyleSheet.flatten(screen.getByTestId(testID).props.style)
+    const outlinedStyle = getStyle('outlined')
+
+    expect(getStyle('solid')).toMatchObject({ borderStyle: 'solid', borderWidth: 1 })
+    expect(outlinedStyle).toMatchObject({ borderStyle: 'solid', borderWidth: 1 })
+    expect(getStyle('plain')).toMatchObject({
+      backgroundColor: outlinedStyle.backgroundColor,
+      borderColor: outlinedStyle.borderColor,
+      borderWidth: outlinedStyle.borderWidth,
+    })
+    expect(getStyle('dashed')).toMatchObject({ borderStyle: 'dashed', borderWidth: 1 })
+    expect(getStyle('filled')).toMatchObject({ borderWidth: 0 })
+    expect(getStyle('text')).toMatchObject({ backgroundColor: 'transparent', borderWidth: 0 })
+    expect(getStyle('default-outlined')).toMatchObject({ borderWidth: 1 })
+    expect(getStyle('default-filled')).toMatchObject({ borderWidth: 0 })
+    expect(getStyle('default-filled').backgroundColor).not.toBe('transparent')
+    expect(StyleSheet.flatten(screen.getByText('默认文字').props.style).color).not.toBe(
+      getStyle('default-text').borderColor,
+    )
   })
 
   it('uses a gray overlay instead of pressed opacity', async () => {

@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native'
 import type { ColorValue, TextStyle, ViewStyle } from 'react-native'
 import { alphaColor } from '../theme/util/colors'
-import type { ButtonProps, ButtonStyleState } from './interface'
+import type { ButtonProps, ButtonStyleState, ButtonVariant } from './interface'
 import type { ButtonToken } from '../theme'
 
 export interface ButtonResolvedStyles {
@@ -49,28 +49,32 @@ function getTypeColors(token: ButtonToken, type: NonNullable<ButtonProps['type']
         color: token.primaryColor,
         backgroundColor: token.primaryBackgroundColor,
         borderColor: token.primaryBorderColor,
-        plainBackgroundColor: token.primaryPlainBackgroundColor,
+        outlinedBackgroundColor: token.primaryPlainBackgroundColor,
+        filledBackgroundColor: token.primaryFilledBackgroundColor,
       }
     case 'success':
       return {
         color: token.successColor,
         backgroundColor: token.successBackgroundColor,
         borderColor: token.successBorderColor,
-        plainBackgroundColor: `${token.successBackgroundColor}14`,
+        outlinedBackgroundColor: `${token.successBackgroundColor}14`,
+        filledBackgroundColor: token.successFilledBackgroundColor,
       }
     case 'warning':
       return {
         color: token.warningColor,
         backgroundColor: token.warningBackgroundColor,
         borderColor: token.warningBorderColor,
-        plainBackgroundColor: `${token.warningBackgroundColor}14`,
+        outlinedBackgroundColor: `${token.warningBackgroundColor}14`,
+        filledBackgroundColor: token.warningFilledBackgroundColor,
       }
     case 'danger':
       return {
         color: token.dangerColor,
         backgroundColor: token.dangerBackgroundColor,
         borderColor: token.dangerBorderColor,
-        plainBackgroundColor: `${token.dangerBackgroundColor}14`,
+        outlinedBackgroundColor: `${token.dangerBackgroundColor}14`,
+        filledBackgroundColor: token.dangerFilledBackgroundColor,
       }
     case 'default':
     default:
@@ -78,9 +82,14 @@ function getTypeColors(token: ButtonToken, type: NonNullable<ButtonProps['type']
         color: token.defaultColor,
         backgroundColor: token.defaultBackgroundColor,
         borderColor: token.defaultBorderColor,
-        plainBackgroundColor: 'transparent',
+        outlinedBackgroundColor: 'transparent',
+        filledBackgroundColor: token.defaultFilledBackgroundColor,
       }
   }
+}
+
+function resolveVariant(props: ButtonProps): ButtonVariant {
+  return props.variant ?? (props.plain ? 'outlined' : 'solid')
 }
 
 export function getButtonStyles(
@@ -89,14 +98,29 @@ export function getButtonStyles(
   state: ButtonStyleState,
 ): ButtonResolvedStyles {
   const size = getSizeStyles(token, props.size ?? 'normal')
-  const colors = getTypeColors(token, props.type ?? 'default')
-  const color = props.color ?? (props.plain ? colors.borderColor : colors.color)
-  const plainBackgroundColor =
-    typeof props.color === 'string' ? alphaColor(props.color, 0.1) : colors.plainBackgroundColor
-  const backgroundColor = props.plain
-    ? plainBackgroundColor
-    : (props.color ?? colors.backgroundColor)
+  const type = props.type ?? 'default'
+  const colors = getTypeColors(token, type)
+  const variant = resolveVariant(props)
+  const isSolid = variant === 'solid'
+  const isBorderless = variant === 'filled' || variant === 'text'
+  const color = props.color ?? (isSolid || type === 'default' ? colors.color : colors.borderColor)
+  const variantBackgroundColor =
+    typeof props.color === 'string'
+      ? alphaColor(props.color, 0.1)
+      : variant === 'filled'
+        ? colors.filledBackgroundColor
+        : colors.outlinedBackgroundColor
+  const backgroundColor = isSolid
+    ? (props.color ?? colors.backgroundColor)
+    : variant === 'text'
+      ? 'transparent'
+      : variantBackgroundColor
   const borderColor = props.color ?? colors.borderColor
+  const borderWidth = isBorderless
+    ? 0
+    : props.hairline
+      ? StyleSheet.hairlineWidth
+      : token.borderWidth
   const content = state.loading ? props.loadingText : props.children
   const hasContent = content !== undefined && content !== null
   const radius = props.circle
@@ -115,7 +139,8 @@ export function getButtonStyles(
       height: props.circle ? size.height : undefined,
       paddingHorizontal: props.circle ? 0 : size.paddingHorizontal,
       borderRadius: radius,
-      borderWidth: props.hairline ? StyleSheet.hairlineWidth : token.borderWidth,
+      borderWidth,
+      borderStyle: variant === 'dashed' ? 'dashed' : 'solid',
       borderColor,
       backgroundColor,
       flexDirection: 'row',

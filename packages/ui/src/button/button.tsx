@@ -18,6 +18,7 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
     type = 'default',
     size = 'normal',
     color,
+    variant,
     plain = false,
     block = false,
     round = false,
@@ -40,11 +41,13 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
   const buttonToken = useComponentToken('Button', getButtonToken)
   const lastPressTime = useRef(0)
   const isDisabled = disabled || loading
+  const resolvedVariant = variant ?? (plain ? 'outlined' : undefined)
   const buttonProps: ButtonProps = {
     children,
     type,
     size,
     color,
+    variant: resolvedVariant,
     plain,
     block,
     round,

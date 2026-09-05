@@ -5,6 +5,7 @@ import type { StyleInfo, StyleResolver } from '../style'
 export type ButtonType = 'default' | 'primary' | 'success' | 'warning' | 'danger'
 export type ButtonSize = 'large' | 'normal' | 'small' | 'mini'
 export type ButtonIconPosition = 'left' | 'right'
+export type ButtonVariant = 'solid' | 'filled' | 'outlined' | 'dashed' | 'text'
 
 export interface ButtonStyleState {
   pressed: boolean
@@ -25,6 +26,8 @@ export interface ButtonProps extends Omit<PressableProps, 'children' | 'style' |
   type?: ButtonType
   size?: ButtonSize
   color?: ColorValue
+  variant?: ButtonVariant
+  /** @deprecated Use `variant="outlined"` instead. */
   plain?: boolean
   block?: boolean
   round?: boolean

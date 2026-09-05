@@ -9,4 +9,5 @@ export type {
   ButtonStyleState,
   ButtonStyles,
   ButtonType,
+  ButtonVariant,
 } from './interface'

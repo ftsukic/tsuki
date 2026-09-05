@@ -21,18 +21,23 @@ export interface ButtonToken {
   primaryBackgroundColor: string
   primaryBorderColor: string
   primaryPlainBackgroundColor: string
+  primaryFilledBackgroundColor: string
   defaultColor: string
   defaultBackgroundColor: string
   defaultBorderColor: string
+  defaultFilledBackgroundColor: string
   successColor: string
   successBackgroundColor: string
   successBorderColor: string
+  successFilledBackgroundColor: string
   warningColor: string
   warningBackgroundColor: string
   warningBorderColor: string
+  warningFilledBackgroundColor: string
   dangerColor: string
   dangerBackgroundColor: string
   dangerBorderColor: string
+  dangerFilledBackgroundColor: string
   borderWidth: number
   activeOpacity: number
   disabledOpacity: number
