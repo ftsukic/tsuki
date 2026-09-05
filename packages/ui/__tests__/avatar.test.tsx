@@ -25,6 +25,12 @@ describe('Avatar', () => {
         <Avatar testID="square" size="large" shape="square">
           A
         </Avatar>
+        <Avatar testID="custom-radius" size={48} borderRadius={6}>
+          R
+        </Avatar>
+        <Avatar testID="style-radius" size={48} borderRadius={6} style={{ borderRadius: 10 }}>
+          S
+        </Avatar>
         <Avatar testID="image" src="https://example.com/avatar.png" alt="用户头像" />
       </ConfigProvider>,
     )
@@ -37,6 +43,8 @@ describe('Avatar', () => {
     expect(squareStyle.width).toBe(40)
     expect(squareStyle.height).toBe(40)
     expect(squareStyle.borderRadius).toBeGreaterThan(0)
+    expect(StyleSheet.flatten(screen.getByTestId('custom-radius').props.style).borderRadius).toBe(6)
+    expect(StyleSheet.flatten(screen.getByTestId('style-radius').props.style).borderRadius).toBe(10)
     expect(screen.getByTestId('image').props.accessibilityRole).toBe('image')
     expect(screen.getByTestId('image').props.accessibilityLabel).toBe('用户头像')
     expect(findNode(view.toJSON(), 'Image')).toBeTruthy()
@@ -112,7 +120,7 @@ describe('Avatar.Group', () => {
           onOverflowPress={onOverflowPress}
         >
           <Avatar testID="first">A</Avatar>
-          <Avatar testID="second" size="small">
+          <Avatar testID="second" size="small" borderRadius={3}>
             B
           </Avatar>
           <Avatar testID="third">C</Avatar>
@@ -127,6 +135,7 @@ describe('Avatar.Group', () => {
     expect(StyleSheet.flatten(screen.getByTestId('second').props.style)).toMatchObject({
       width: 24,
       height: 24,
+      borderRadius: 3,
     })
     expect(screen.queryByTestId('third')).toBeNull()
     const overflow = screen.getByLabelText('还有 2 个头像')

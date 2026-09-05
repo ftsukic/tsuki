@@ -37,6 +37,7 @@ export const Avatar = forwardRef<ViewComponent, AvatarProps>(function Avatar(
     alt,
     size,
     shape = 'circle',
+    borderRadius,
     gap = 4,
     onError,
     style,
@@ -51,7 +52,20 @@ export const Avatar = forwardRef<ViewComponent, AvatarProps>(function Avatar(
   const fontSize = resolveFontSize(size, token)
   const source = useMemo(() => (src === undefined ? undefined : normalizeSource(src)), [src])
   const semantic = resolveStyles(styles, {
-    props: { ...viewProps, children, src, icon, alt, size, shape, gap, onError, style, styles },
+    props: {
+      ...viewProps,
+      children,
+      src,
+      icon,
+      alt,
+      size,
+      shape,
+      borderRadius,
+      gap,
+      onError,
+      style,
+      styles,
+    },
     state: { imageError },
   })
 
@@ -67,7 +81,7 @@ export const Avatar = forwardRef<ViewComponent, AvatarProps>(function Avatar(
   const hasImage = source !== undefined && !imageError
   const hasIcon = isRenderable(icon)
   const hasText = isRenderable(children)
-  const rootRadius = shape === 'circle' ? resolvedSize / 2 : token.borderRadius
+  const rootRadius = borderRadius ?? (shape === 'circle' ? resolvedSize / 2 : token.borderRadius)
 
   return (
     <View

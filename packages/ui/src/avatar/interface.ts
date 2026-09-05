@@ -38,6 +38,7 @@ export interface AvatarProps extends Omit<ViewProps, 'children' | 'style'> {
   alt?: string
   size?: AvatarSize
   shape?: AvatarShape
+  borderRadius?: number
   gap?: number
   onError?: ImageProps['onError']
   style?: StyleProp<ViewStyle>
