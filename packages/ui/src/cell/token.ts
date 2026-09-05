@@ -3,7 +3,7 @@ import type { AliasToken, CellToken } from '../theme'
 export function getCellToken(token: AliasToken): CellToken {
   return {
     backgroundColor: token.colorBgContainer,
-    activeColor: token.colorFillTertiary,
+    activeColor: token.colorFillSecondary,
     borderColor: token.colorBorderSecondary,
     paddingHorizontal: token.paddingMD,
     paddingMD: token.paddingMD,
