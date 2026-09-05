@@ -1,9 +1,15 @@
 ---
 title: Theme
-order: 1
+nav:
+  title: 组件
+group:
+  title: 主题
+  order: 3
 ---
 
 # Theme
+
+<code src="./__fixtures__/algorithms.tsx"></code>
 
 Theme 使用 `SeedToken → MappingAlgorithm → MapToken → AliasToken` 四层模型。Provider 只负责全局 token、algorithm 和组件 overrides；组件自己的 token 派生函数位于组件目录内。
 
@@ -39,7 +45,7 @@ export function App() {
 
 公开 API：
 
-```ts
+```text
 useToken();
 useComponentToken('Button', getButtonToken);
 getDesignToken({ token, algorithm, components, inherit });

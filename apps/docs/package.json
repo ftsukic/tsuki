@@ -5,18 +5,22 @@
   "scripts": {
     "dev": "dumi dev",
     "build": "dumi build",
+    "build:github": "cross-env PUBLIC_PATH=react-native-ui/ dumi build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "jest --runInBand"
   },
   "dependencies": {
-    "@ftsukic/dumi-theme-rn-snack": "workspace:*",
     "dumi": "2.4.49",
+    "dumi-theme-mobile": "2.3.5",
     "react": "19.1.1",
-    "react-dom": "19.1.1"
+    "react-dom": "19.1.1",
+    "react-native-svg": "^15.15.0"
   },
   "devDependencies": {
     "@types/react": "^19.1.10",
-    "@types/react-dom": "^19.1.7"
+    "@types/react-dom": "^19.1.7",
+    "cross-env": "^10.0.0",
+    "react-native-web": "^0.21.2"
   }
 }

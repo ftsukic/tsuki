@@ -1,18 +1,22 @@
 ---
-title: Expo Snack 预览
+title: Native Runtime 验证
 order: 3
 ---
 
-# Expo Snack 预览
+# Native Runtime 验证
 
-`@ftsukic/dumi-theme-rn-snack` 覆盖 dumi 默认的 H5 Previewer，并保留 dumi 原有 demo 写法。
+当前文档不接入 Expo Snack，所有组件 demo 通过 `react-native-web` 在 H5 页面中预览。
 
-主题会把 demo asset 转换为以下 Snack payload：
+H5 预览适合检查：
 
-- `entry` 转为 `App.tsx`
-- `FILE` dependency 转为 Snack file
-- `NPM` dependency 转为 Snack dependency
+- 组件布局、颜色和 token 派生结果
+- Button、Cell、TextInput 等组件的基础交互
+- Theme algorithm 和 token override 的切换效果
 
-当前骨架还没有已发布的 Snack ID，因此会显示占位状态。后续可以由 registry 或生成脚本为每个 demo 绑定 saved Snack。
+以下场景必须使用 Native Runtime：
 
-依赖 Native Module、Fabric 原生组件或 HarmonyOS 专属能力的 demo，必须明确标记为 Native Runtime，不能把 Snack 结果当成原生验证结果。
+- Native Module、原生权限、原生导航或平台系统 API
+- Fabric 原生组件、原生动画性能和手势行为
+- iOS、Android、HarmonyOS 的平台差异和安装包集成
+
+`packages/dumi-theme-rn-snack` 和 `examples/snack` 暂作为未来占位保留，不参与当前文档构建，也不会加载 Snack embed script。

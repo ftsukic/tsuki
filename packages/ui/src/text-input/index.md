@@ -1,9 +1,15 @@
 ---
 title: TextInput
-order: 4
+nav:
+  title: 组件
+group:
+  title: 表单组件
+  order: 2
 ---
 
 # TextInput
+
+<code src="./__fixtures__/basic.tsx"></code>
 
 `TextInput` 保留 React Native 的组件名称和输入事件，同时使用 Vant Mobile 的 token 和布局。
 

@@ -1,9 +1,17 @@
 ---
 title: Cell
-order: 3
+nav:
+  title: 组件
+group:
+  title: 基础组件
+  order: 1
 ---
 
 # Cell
+
+<code src="./__fixtures__/basic.tsx"></code>
+
+Cell 用于列表中的信息展示和导航操作。
 
 ```text
 import { Cell, Icon } from '@ftsukic/react-native-ui';

@@ -8,7 +8,7 @@
 
 ## 当前状态
 
-当前版本已完成仓库、组件包、dumi 文档和 Expo Snack Previewer 基础骨架，并实现首轮 Theme/Provider、Button、Cell、TextInput、Icon 和 LoadingIcon。
+当前版本已完成仓库、组件包、dumi 文档 H5 预览，并实现首轮 Theme/Provider、Button、Cell、TextInput、Icon 和 LoadingIcon。文档使用 `dumi-theme-mobile`、`react-native-web` 和源码同目录 `__fixtures__`，不接入 Expo Snack。
 
 计划中的基础组件包括：
 
@@ -23,9 +23,9 @@
 
 ```text
 packages/ui/                 # @ftsukic/react-native-ui
-packages/dumi-theme-rn-snack/ # dumi Snack 主题
-apps/docs/                   # dumi 文档站
-examples/snack/              # Snack 示例源码约定
+packages/dumi-theme-rn-snack/ # 未来 Snack 主题占位，当前未接入
+apps/docs/                   # dumi H5 文档站
+examples/snack/              # 未来 Snack 示例约定，当前未接入
 ```
 
 ## 开发

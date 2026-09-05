@@ -1,5 +1,5 @@
 # @ftsukic/dumi-theme-rn-snack
 
-内部 dumi 主题骨架，用于将组件 demo 的 Previewer 接入 Expo Snack。
+内部 dumi 主题骨架，未来用于将组件 demo 的 Previewer 接入 Expo Snack。
 
-当前版本只提供 Previewer 覆盖、Snack asset 转换和嵌入脚本加载器；需要有效的 Snack ID 才会显示在线预览，没有 ID 时会展示可诊断的占位状态。
+当前文档暂不依赖或加载该主题。当前 H5 文档使用 `dumi-theme-mobile` 和 `react-native-web`；本包只作为未来占位保留。

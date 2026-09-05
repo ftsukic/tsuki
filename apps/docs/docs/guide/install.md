@@ -9,7 +9,7 @@ order: 1
 yarn add @ftsukic/react-native-ui
 ```
 
-当前 `0.0.1` 是基础仓库骨架，尚未提供具体组件导出。
+当前已提供 Theme/Provider、Button、Cell、Cell.Group、TextInput、Icon 和 LoadingIcon。
 
 目标兼容范围：
 
@@ -17,4 +17,10 @@ yarn add @ftsukic/react-native-ui
 | --------- | ------------ |
 | `19.1.1+` | `0.82.0+`    |
 
-组件实现加入后，会在对应文档页面补充完整 API、默认值和平台支持矩阵。
+启动本地 H5 文档：
+
+```bash
+yarn docs:dev
+```
+
+文档页面中的 demo 使用 `react-native-web` 渲染；需要 Native Module、Fabric 或平台专属能力时，请在对应 Native Runtime 中验证。

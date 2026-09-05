@@ -1,9 +1,17 @@
 ---
 title: Button
-order: 2
+nav:
+  title: 组件
+group:
+  title: 基础组件
+  order: 1
 ---
 
 # Button
+
+<code src="./__fixtures__/variants.tsx"></code>
+
+Button 用于触发操作，支持常用的类型、尺寸、加载和按压状态。
 
 ```text
 import { Button } from '@ftsukic/react-native-ui';
@@ -15,7 +23,7 @@ import { Button } from '@ftsukic/react-native-ui';
 
 支持的类型和尺寸：
 
-```ts
+```text
 type ButtonType = 'default' | 'primary' | 'success' | 'warning' | 'danger';
 type ButtonSize = 'large' | 'normal' | 'small' | 'mini';
 ```
