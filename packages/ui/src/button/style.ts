@@ -17,21 +17,18 @@ function getSizeStyles(token: ButtonToken, size: NonNullable<ButtonProps['size']
     case 'mini':
       return {
         height: token.heightXS,
-        borderRadius: token.borderRadiusXS,
         paddingHorizontal: token.paddingHorizontalXS,
         fontSize: token.contentFontSizeXS,
       }
     case 'small':
       return {
         height: token.heightSM,
-        borderRadius: token.borderRadiusSM,
         paddingHorizontal: token.paddingHorizontalSM,
         fontSize: token.contentFontSizeSM,
       }
     case 'large':
       return {
         height: token.heightLG,
-        borderRadius: token.borderRadiusLG,
         paddingHorizontal: token.paddingHorizontalLG,
         fontSize: token.contentFontSizeLG,
       }
@@ -39,7 +36,6 @@ function getSizeStyles(token: ButtonToken, size: NonNullable<ButtonProps['size']
     default:
       return {
         height: token.height,
-        borderRadius: token.borderRadius,
         paddingHorizontal: token.paddingHorizontal,
         fontSize: token.contentFontSize,
       }
@@ -109,7 +105,7 @@ export function getButtonStyles(
       ? 0
       : props.round
         ? 999
-        : size.borderRadius
+        : token.borderRadius
 
   return {
     root: {

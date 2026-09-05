@@ -120,6 +120,31 @@ describe('Button', () => {
     expect(style.minWidth).toBeUndefined()
   })
 
+  it('keeps the same border radius across sizes', async () => {
+    await render(
+      <ConfigProvider theme={{ components: { Button: { borderRadius: 20 } } }}>
+        <Button testID="large" size="large">
+          大号
+        </Button>
+        <Button testID="normal" size="normal">
+          普通
+        </Button>
+        <Button testID="small" size="small">
+          小号
+        </Button>
+        <Button testID="mini" size="mini">
+          迷你
+        </Button>
+      </ConfigProvider>,
+    )
+
+    const radius = StyleSheet.flatten(screen.getByTestId('normal').props.style).borderRadius
+    expect(radius).toBe(20)
+    expect(StyleSheet.flatten(screen.getByTestId('large').props.style).borderRadius).toBe(radius)
+    expect(StyleSheet.flatten(screen.getByTestId('small').props.style).borderRadius).toBe(radius)
+    expect(StyleSheet.flatten(screen.getByTestId('mini').props.style).borderRadius).toBe(radius)
+  })
+
   it('renders a circle button as an icon-sized circle', async () => {
     const { toJSON } = await render(
       <ConfigProvider>
