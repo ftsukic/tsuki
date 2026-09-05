@@ -5,7 +5,14 @@ order: 1
 
 # 组件
 
-组件文档目录已预留。后续每个组件至少包含：
+首轮已实现：
+
+- [Theme](./theme.md)
+- [Button](./button.md)
+- [Cell](./cell.md)
+- [TextInput](./text-input.md)
+
+后续每个组件至少包含：
 
 - 用法和状态示例
 - TypeScript Props API

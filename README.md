@@ -8,7 +8,7 @@
 
 ## 当前状态
 
-当前版本完成仓库、组件包、dumi 文档和 Expo Snack Previewer 的基础骨架，暂不包含具体组件实现。
+当前版本已完成仓库、组件包、dumi 文档和 Expo Snack Previewer 基础骨架，并实现首轮 Theme/Provider、Button、Cell、TextInput、Icon 和 LoadingIcon。
 
 计划中的基础组件包括：
 

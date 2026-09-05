@@ -36,9 +36,15 @@
     "LICENSE"
   ],
   "sideEffects": false,
+  "dependencies": {
+    "@ant-design/colors": "^8.0.1",
+    "@ant-design/fast-color": "^3.0.1",
+    "@ant-design/icons-svg": "^4.6.0"
+  },
   "peerDependencies": {
     "react": ">=19.1.1",
-    "react-native": ">=0.82.1"
+    "react-native": ">=0.82.1",
+    "react-native-svg": ">=15.13.0"
   },
   "publishConfig": {
     "access": "public"
@@ -46,7 +52,7 @@
   "scripts": {
     "build": "bob build",
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
-    "lint": "eslint src --ext .ts,.tsx",
+    "lint": "yarn exec eslint src --ext .ts,.tsx",
     "test": "jest --config jest.config.cjs --runInBand"
   },
   "devDependencies": {
@@ -56,10 +62,12 @@
     "@types/jest": "^29.5.14",
     "@types/react": "^19.1.10",
     "babel-jest": "^29.7.0",
+    "eslint": "^8.57.1",
     "jest": "^29.7.0",
     "react": "19.1.1",
     "react-native": "0.82.1",
     "react-native-builder-bob": "0.43.0",
+    "react-native-svg": "^15.15.0",
     "test-renderer": "1.1.0",
     "typescript": "^5.9.2"
   },
