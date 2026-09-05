@@ -1,5 +1,19 @@
 import { Button, ConfigProvider } from '../src'
 import { fireEvent, render, screen } from '@testing-library/react-native'
+import { StyleSheet } from 'react-native'
+import type { JsonElement, JsonNode } from 'test-renderer'
+
+function findOverlay(node: JsonNode | null): JsonElement | undefined {
+  if (node === null || typeof node === 'string') return undefined
+  if (node.props.pointerEvents === 'none') return node
+
+  for (const child of node.children) {
+    const overlay = findOverlay(child)
+    if (overlay) return overlay
+  }
+
+  return undefined
+}
 
 describe('Button', () => {
   it('renders Vant variants and invokes onPress', async () => {
@@ -48,5 +62,30 @@ describe('Button', () => {
 
     expect(styles).toHaveBeenCalled()
     expect(screen.getByTestId('styled')).toBeTruthy()
+  })
+
+  it('uses a gray overlay instead of pressed opacity', async () => {
+    const { toJSON } = await render(
+      <ConfigProvider>
+        <Button testID="pressed" testOnly_pressed>
+          按下
+        </Button>
+      </ConfigProvider>,
+    )
+
+    const button = screen.getByTestId('pressed')
+    const rootStyle = StyleSheet.flatten(button.props.style)
+    expect(rootStyle).toMatchObject({ opacity: 1, overflow: 'hidden', position: 'relative' })
+
+    const overlay = findOverlay(toJSON())
+    if (!overlay) throw new Error('Pressed Button overlay was not rendered')
+
+    expect(StyleSheet.flatten(overlay.props.style)).toMatchObject({
+      backgroundColor: 'rgba(0,0,0,0.1)',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      top: 0,
+    })
   })
 })

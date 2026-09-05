@@ -105,6 +105,8 @@ export function getButtonStyles(
 
   return {
     root: {
+      position: 'relative',
+      overflow: 'hidden',
       minHeight: size.height,
       paddingHorizontal: props.square ? 0 : size.paddingHorizontal,
       borderRadius: radius,
@@ -117,7 +119,7 @@ export function getButtonStyles(
       alignSelf: props.block ? 'stretch' : 'auto',
       minWidth: props.square ? size.height : undefined,
       width: props.square ? size.height : undefined,
-      opacity: state.disabled ? token.disabledOpacity : state.pressed ? token.activeOpacity : 1,
+      opacity: state.disabled ? token.disabledOpacity : 1,
     },
     contentContainer: {
       flexDirection: 'row',

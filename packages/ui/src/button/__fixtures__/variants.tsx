@@ -53,10 +53,7 @@ export default function ButtonVariantsFixture() {
           block
           hairline
           icon={<Icon name="CheckOutlined" size={16} color="#ffffff" />}
-          styles={({ state }) => ({
-            root: { opacity: state.pressed ? 0.72 : 1 },
-            content: { fontWeight: '600' },
-          })}
+          styles={{ content: { fontWeight: '600' } }}
         >
           Semantic styles
         </Button>

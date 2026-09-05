@@ -5,7 +5,7 @@ import { getButtonStyles } from './style'
 import { getButtonToken } from './token'
 import type { ButtonProps, ButtonStyleState } from './interface'
 import { forwardRef, useCallback, useRef } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import type { ReactNode } from 'react'
 
 function isTextContent(value: ReactNode): value is string | number {
@@ -94,32 +94,40 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
         const content = loading ? loadingText : children
 
         return (
-          <View style={resolved.contentContainer}>
-            {icon && iconPosition === 'left' ? (
-              <View style={[resolved.icon, semantic?.icon]}>{icon}</View>
+          <>
+            <View style={resolved.contentContainer}>
+              {icon && iconPosition === 'left' ? (
+                <View style={[resolved.icon, semantic?.icon]}>{icon}</View>
+              ) : null}
+              {loading ? (
+                <View style={[resolved.icon, semantic?.icon]}>
+                  <LoadingIcon
+                    size={resolved.label.fontSize ?? buttonToken.contentFontSize}
+                    color={resolved.iconColor}
+                    duration={900}
+                    active
+                    style={{ marginRight: content ? buttonToken.iconGap : 0 }}
+                  />
+                </View>
+              ) : null}
+              {content !== undefined ? (
+                isTextContent(content) ? (
+                  <Text style={[resolved.label, semantic?.content]}>{content}</Text>
+                ) : (
+                  <View style={semantic?.content}>{content}</View>
+                )
+              ) : null}
+              {icon && iconPosition === 'right' ? (
+                <View style={[resolved.icon, semantic?.icon]}>{icon}</View>
+              ) : null}
+            </View>
+            {pressed ? (
+              <View
+                pointerEvents="none"
+                style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.1)' }]}
+              />
             ) : null}
-            {loading ? (
-              <View style={[resolved.icon, semantic?.icon]}>
-                <LoadingIcon
-                  size={resolved.label.fontSize ?? buttonToken.contentFontSize}
-                  color={resolved.iconColor}
-                  duration={900}
-                  active
-                  style={{ marginRight: content ? buttonToken.iconGap : 0 }}
-                />
-              </View>
-            ) : null}
-            {content !== undefined ? (
-              isTextContent(content) ? (
-                <Text style={[resolved.label, semantic?.content]}>{content}</Text>
-              ) : (
-                <View style={semantic?.content}>{content}</View>
-              )
-            ) : null}
-            {icon && iconPosition === 'right' ? (
-              <View style={[resolved.icon, semantic?.icon]}>{icon}</View>
-            ) : null}
-          </View>
+          </>
         )
       }}
     </Pressable>

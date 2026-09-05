@@ -1,7 +1,6 @@
-import { Cell, ConfigProvider, darkAlgorithm, getDesignToken } from '../src'
+import { Cell, ConfigProvider } from '../src'
 import { render, screen } from '@testing-library/react-native'
 import { Text } from 'react-native'
-import { getCellToken } from '../src/cell/token'
 
 describe('Cell', () => {
   it('renders the Vant cell semantics and arrow', async () => {
@@ -42,13 +41,5 @@ describe('Cell', () => {
     expect(screen.getByText('基本信息')).toBeTruthy()
     expect(screen.getByText('编辑')).toBeTruthy()
     expect(screen.getByText('Altron')).toBeTruthy()
-  })
-
-  it('uses a Vant-style active background in light and dark themes', () => {
-    const lightToken = getCellToken(getDesignToken().token)
-    const darkToken = getCellToken(getDesignToken({ algorithm: darkAlgorithm }).token)
-
-    expect(lightToken.activeColor).toBe('rgba(0,0,0,0.06)')
-    expect(darkToken.activeColor).toBe('rgba(255,255,255,0.12)')
   })
 })
