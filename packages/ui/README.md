@@ -2,7 +2,7 @@
 
 基础 React Native UI 组件库。
 
-首轮提供 Theme/Provider、Button、Cell、Cell.Group、TextInput、Icon 和 LoadingIcon。
+首轮提供 Theme/Provider、Button、Cell、Cell.Group、Grid、TextInput、Icon 和 LoadingIcon。
 
 组件 API 采用 breaking change：使用 Vant Mobile 语义、Ant Design v6 token 分层和 React Native semantic slots，不提供 altron-app 旧 API 兼容层。
 

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
-import { Button, ConfigProvider, Icon } from '../..'
+import { Button, Col, ConfigProvider, Icon, Row } from '../..'
 
 /**
  * @title Button variants
@@ -12,22 +12,33 @@ export default function ButtonVariantsFixture() {
   return (
     <ConfigProvider>
       <View style={styles.container}>
-        <Text style={styles.heading}>Types</Text>
-        <View style={styles.stack}>
-          <Button type="primary" block onPress={() => setPressCount((count) => count + 1)}>
-            Primary
-          </Button>
-          <Text style={styles.caption}>Pressed {pressCount} times</Text>
-          <Button type="success" block>
-            Success
-          </Button>
-          <Button type="warning" block>
-            Warning
-          </Button>
-          <Button type="danger" block>
-            Danger
-          </Button>
-        </View>
+        <Text style={styles.heading}>按钮类型</Text>
+        <Row gap={16}>
+          <Col span={8}>
+            <Button type="primary" block onPress={() => setPressCount((count) => count + 1)}>
+              主要按钮
+            </Button>
+          </Col>
+          <Col span={8}>
+            <Button type="success" block>
+              成功按钮
+            </Button>
+          </Col>
+          <Col span={8}>
+            <Button block>默认按钮</Button>
+          </Col>
+          <Col span={8}>
+            <Button type="danger" block>
+              危险按钮
+            </Button>
+          </Col>
+          <Col span={8}>
+            <Button type="warning" block>
+              警告按钮
+            </Button>
+          </Col>
+        </Row>
+        <Text style={styles.caption}>Pressed {pressCount} times</Text>
 
         <Text style={styles.heading}>Sizes and states</Text>
         <View style={styles.row}>
@@ -75,9 +86,6 @@ const styles = StyleSheet.create({
   caption: {
     color: '#666666',
     fontSize: 13,
-  },
-  stack: {
-    gap: 10,
   },
   row: {
     flexDirection: 'row',
