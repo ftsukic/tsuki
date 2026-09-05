@@ -1,5 +1,5 @@
-import React, { forwardRef } from 'react';
-import { StyleSheet } from 'react-native';
+import React, { forwardRef } from 'react'
+import { StyleSheet } from 'react-native'
 
 const SVG_TAGS = {
   RNSVGSvgView: 'svg',
@@ -33,10 +33,10 @@ const SVG_TAGS = {
   RNSVGText: 'text',
   RNSVGTextPath: 'textPath',
   RNSVGUse: 'use',
-};
+}
 
 export default function codegenNativeComponent(componentName) {
-  const tagName = SVG_TAGS[componentName] || 'div';
+  const tagName = SVG_TAGS[componentName] || 'div'
 
   return forwardRef(function NativeComponent(
     {
@@ -59,9 +59,9 @@ export default function codegenNativeComponent(componentName) {
       ...props,
       ref,
       style: StyleSheet.flatten(style),
-    };
-    if (accessibilityLabel !== undefined) domProps['aria-label'] = accessibilityLabel;
+    }
+    if (accessibilityLabel !== undefined) domProps['aria-label'] = accessibilityLabel
 
-    return React.createElement(tagName, domProps, children);
-  });
+    return React.createElement(tagName, domProps, children)
+  })
 }

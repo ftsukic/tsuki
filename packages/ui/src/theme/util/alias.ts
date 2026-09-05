@@ -1,8 +1,8 @@
-import type { AliasToken, MapToken } from '../interface';
-import { alphaColor } from './colors';
+import type { AliasToken, MapToken } from '../interface'
+import { alphaColor } from './colors'
 
 export function createAliasToken(map: MapToken, overrides: Partial<AliasToken> = {}): AliasToken {
-  const shadowColor = map.colorShadow;
+  const shadowColor = map.colorShadow
 
   return {
     ...map,
@@ -64,5 +64,5 @@ export function createAliasToken(map: MapToken, overrides: Partial<AliasToken> =
     boxShadowTertiary: `0 1px 2px ${alphaColor(shadowColor, 0.08)}`,
     motion: map.motion,
     ...overrides,
-  };
+  }
 }

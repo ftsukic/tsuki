@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { ConfigProvider, TextInput } from '../..';
+import { useState } from 'react'
+import { StyleSheet, Text, View } from 'react-native'
+import { ConfigProvider, TextInput } from '../..'
 
 /**
  * @title TextInput states
  * @description Try controlled text input, clearable textarea and word-limit feedback.
  */
 export default function TextInputBasicFixture() {
-  const [value, setValue] = useState('');
+  const [value, setValue] = useState('')
 
   return (
     <ConfigProvider>
@@ -42,7 +42,7 @@ export default function TextInputBasicFixture() {
         <Text style={styles.value}>Current value: {value || '—'}</Text>
       </View>
     </ConfigProvider>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -63,4 +63,4 @@ const styles = StyleSheet.create({
     color: '#666666',
     fontSize: 13,
   },
-});
+})

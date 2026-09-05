@@ -1,5 +1,5 @@
-import type { PresetColorTokens } from '../interface';
-import type { SeedToken } from '../interface';
+import type { PresetColorTokens } from '../interface'
+import type { SeedToken } from '../interface'
 
 export const defaultPresetColors: PresetColorTokens = {
   blue: '#1989FA',
@@ -15,7 +15,7 @@ export const defaultPresetColors: PresetColorTokens = {
   geekblue: '#2F54EB',
   lime: '#A0D911',
   gold: '#FAAD14',
-};
+}
 
 export const defaultSeed: SeedToken = {
   ...defaultPresetColors,
@@ -44,4 +44,4 @@ export const defaultSeed: SeedToken = {
   motionBase: 0,
   motion: true,
   wireframe: false,
-};
+}

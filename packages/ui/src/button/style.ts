@@ -1,15 +1,15 @@
-import { StyleSheet } from 'react-native';
-import type { ColorValue, TextStyle, ViewStyle } from 'react-native';
-import { alphaColor } from '../theme/util/colors';
-import type { ButtonProps, ButtonStyleState } from './interface';
-import type { ButtonToken } from '../theme';
+import { StyleSheet } from 'react-native'
+import type { ColorValue, TextStyle, ViewStyle } from 'react-native'
+import { alphaColor } from '../theme/util/colors'
+import type { ButtonProps, ButtonStyleState } from './interface'
+import type { ButtonToken } from '../theme'
 
 export interface ButtonResolvedStyles {
-  root: ViewStyle;
-  contentContainer: ViewStyle;
-  label: TextStyle;
-  icon: ViewStyle;
-  iconColor: ColorValue;
+  root: ViewStyle
+  contentContainer: ViewStyle
+  label: TextStyle
+  icon: ViewStyle
+  iconColor: ColorValue
 }
 
 function getSizeStyles(token: ButtonToken, size: NonNullable<ButtonProps['size']>) {
@@ -20,21 +20,21 @@ function getSizeStyles(token: ButtonToken, size: NonNullable<ButtonProps['size']
         borderRadius: token.borderRadiusXS,
         paddingHorizontal: token.paddingHorizontalXS,
         fontSize: token.contentFontSizeXS,
-      };
+      }
     case 'small':
       return {
         height: token.heightSM,
         borderRadius: token.borderRadiusSM,
         paddingHorizontal: token.paddingHorizontalSM,
         fontSize: token.contentFontSizeSM,
-      };
+      }
     case 'large':
       return {
         height: token.heightLG,
         borderRadius: token.borderRadiusLG,
         paddingHorizontal: token.paddingHorizontalLG,
         fontSize: token.contentFontSizeLG,
-      };
+      }
     case 'normal':
     default:
       return {
@@ -42,7 +42,7 @@ function getSizeStyles(token: ButtonToken, size: NonNullable<ButtonProps['size']
         borderRadius: token.borderRadius,
         paddingHorizontal: token.paddingHorizontal,
         fontSize: token.contentFontSize,
-      };
+      }
   }
 }
 
@@ -54,28 +54,28 @@ function getTypeColors(token: ButtonToken, type: NonNullable<ButtonProps['type']
         backgroundColor: token.primaryBackgroundColor,
         borderColor: token.primaryBorderColor,
         plainBackgroundColor: token.primaryPlainBackgroundColor,
-      };
+      }
     case 'success':
       return {
         color: token.successColor,
         backgroundColor: token.successBackgroundColor,
         borderColor: token.successBorderColor,
         plainBackgroundColor: `${token.successBackgroundColor}14`,
-      };
+      }
     case 'warning':
       return {
         color: token.warningColor,
         backgroundColor: token.warningBackgroundColor,
         borderColor: token.warningBorderColor,
         plainBackgroundColor: `${token.warningBackgroundColor}14`,
-      };
+      }
     case 'danger':
       return {
         color: token.dangerColor,
         backgroundColor: token.dangerBackgroundColor,
         borderColor: token.dangerBorderColor,
         plainBackgroundColor: `${token.dangerBackgroundColor}14`,
-      };
+      }
     case 'default':
     default:
       return {
@@ -83,7 +83,7 @@ function getTypeColors(token: ButtonToken, type: NonNullable<ButtonProps['type']
         backgroundColor: token.defaultBackgroundColor,
         borderColor: token.defaultBorderColor,
         plainBackgroundColor: 'transparent',
-      };
+      }
   }
 }
 
@@ -92,16 +92,16 @@ export function getButtonStyles(
   props: ButtonProps,
   state: ButtonStyleState,
 ): ButtonResolvedStyles {
-  const size = getSizeStyles(token, props.size ?? 'normal');
-  const colors = getTypeColors(token, props.type ?? 'default');
-  const color = props.color ?? (props.plain ? colors.borderColor : colors.color);
+  const size = getSizeStyles(token, props.size ?? 'normal')
+  const colors = getTypeColors(token, props.type ?? 'default')
+  const color = props.color ?? (props.plain ? colors.borderColor : colors.color)
   const plainBackgroundColor =
-    typeof props.color === 'string' ? alphaColor(props.color, 0.1) : colors.plainBackgroundColor;
+    typeof props.color === 'string' ? alphaColor(props.color, 0.1) : colors.plainBackgroundColor
   const backgroundColor = props.plain
     ? plainBackgroundColor
-    : (props.color ?? colors.backgroundColor);
-  const borderColor = props.color ?? colors.borderColor;
-  const radius = props.square ? 0 : props.round ? 999 : size.borderRadius;
+    : (props.color ?? colors.backgroundColor)
+  const borderColor = props.color ?? colors.borderColor
+  const radius = props.square ? 0 : props.round ? 999 : size.borderRadius
 
   return {
     root: {
@@ -138,5 +138,5 @@ export function getButtonStyles(
       justifyContent: 'center',
     },
     iconColor: color,
-  };
+  }
 }

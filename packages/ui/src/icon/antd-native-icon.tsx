@@ -1,9 +1,9 @@
-import { useOptionalToken } from '../theme';
-import type { AntdNativeIconProps } from './interface';
-import type { AbstractNode, IconDefinition } from '@ant-design/icons-svg/lib/types';
-import { memo, type ReactNode } from 'react';
-import type { ColorValue, PressableProps, StyleProp, ViewStyle } from 'react-native';
-import { Pressable, View } from 'react-native';
+import { useOptionalToken } from '../theme'
+import type { AntdNativeIconProps } from './interface'
+import type { AbstractNode, IconDefinition } from '@ant-design/icons-svg/lib/types'
+import { memo, type ReactNode } from 'react'
+import type { ColorValue, PressableProps, StyleProp, ViewStyle } from 'react-native'
+import { Pressable, View } from 'react-native'
 import {
   Circle,
   ClipPath,
@@ -19,9 +19,9 @@ import {
   Svg,
   Symbol,
   Use,
-} from 'react-native-svg';
+} from 'react-native-svg'
 
-type NativeSvgAttributes = Record<string, string>;
+type NativeSvgAttributes = Record<string, string>
 type NativeSvgProps = Omit<
   AntdNativeIconProps,
   | 'definition'
@@ -35,13 +35,13 @@ type NativeSvgProps = Omit<
   | 'touchableSize'
   | 'hitSlop'
   | 'twoToneColor'
->;
+>
 
 const defaultStyle: ViewStyle = {
   alignSelf: 'center',
   alignItems: 'center',
   justifyContent: 'center',
-};
+}
 
 const attributeAliases: Record<string, string> = {
   'clip-path': 'clipPath',
@@ -55,10 +55,10 @@ const attributeAliases: Record<string, string> = {
   'stroke-miterlimit': 'strokeMiterlimit',
   'stroke-opacity': 'strokeOpacity',
   'stroke-width': 'strokeWidth',
-};
+}
 
 function toColorString(color: ColorValue): string {
-  return typeof color === 'string' ? color : String(color);
+  return typeof color === 'string' ? color : String(color)
 }
 
 function resolveTwoToneColors(
@@ -66,23 +66,23 @@ function resolveTwoToneColors(
   twoToneColor: AntdNativeIconProps['twoToneColor'],
   fallbackSecondaryColor: string,
 ): readonly [string, string] {
-  if (twoToneColor && typeof twoToneColor !== 'string') return twoToneColor;
-  if (twoToneColor) return [twoToneColor, twoToneColor];
-  return [color, fallbackSecondaryColor];
+  if (twoToneColor && typeof twoToneColor !== 'string') return twoToneColor
+  if (twoToneColor) return [twoToneColor, twoToneColor]
+  return [color, fallbackSecondaryColor]
 }
 
 function resolveAttributes(attrs: NativeSvgAttributes, color: string): NativeSvgAttributes {
   return Object.entries(attrs).reduce<NativeSvgAttributes>((result, [key, value]) => {
-    const normalizedKey = attributeAliases[key] ?? key;
-    result[normalizedKey] = value === 'currentColor' ? color : value;
-    return result;
-  }, {});
+    const normalizedKey = attributeAliases[key] ?? key
+    result[normalizedKey] = value === 'currentColor' ? color : value
+    return result
+  }, {})
 }
 
 function getNodeColor(attrs: NativeSvgAttributes, color: string): NativeSvgAttributes {
-  const resolved = resolveAttributes(attrs, color);
-  if (resolved.fill === undefined && resolved.stroke === undefined) resolved.fill = color;
-  return resolved;
+  const resolved = resolveAttributes(attrs, color)
+  if (resolved.fill === undefined && resolved.stroke === undefined) resolved.fill = color
+  return resolved
 }
 
 function renderNode(
@@ -95,78 +95,78 @@ function renderNode(
 ): ReactNode {
   const children = node.children?.map((child, index) =>
     renderNode(child, `${key}-${index}`, size, primaryColor, undefined, svgProps),
-  );
+  )
 
   switch (node.tag) {
     case 'svg': {
-      const attrs = resolveAttributes(node.attrs, primaryColor);
+      const attrs = resolveAttributes(node.attrs, primaryColor)
       return (
         <Svg {...svgProps} {...attrs} key={key} width={size} height={size} style={svgStyle}>
           {children}
         </Svg>
-      );
+      )
     }
     case 'g':
       return (
         <G {...getNodeColor(node.attrs, primaryColor)} key={key}>
           {children}
         </G>
-      );
+      )
     case 'path':
-      return <Path {...getNodeColor(node.attrs, primaryColor)} key={key} />;
+      return <Path {...getNodeColor(node.attrs, primaryColor)} key={key} />
     case 'circle':
-      return <Circle {...getNodeColor(node.attrs, primaryColor)} key={key} />;
+      return <Circle {...getNodeColor(node.attrs, primaryColor)} key={key} />
     case 'ellipse':
-      return <Ellipse {...getNodeColor(node.attrs, primaryColor)} key={key} />;
+      return <Ellipse {...getNodeColor(node.attrs, primaryColor)} key={key} />
     case 'line':
-      return <Line {...getNodeColor(node.attrs, primaryColor)} key={key} />;
+      return <Line {...getNodeColor(node.attrs, primaryColor)} key={key} />
     case 'polygon':
-      return <Polygon {...getNodeColor(node.attrs, primaryColor)} key={key} />;
+      return <Polygon {...getNodeColor(node.attrs, primaryColor)} key={key} />
     case 'polyline':
-      return <Polyline {...getNodeColor(node.attrs, primaryColor)} key={key} />;
+      return <Polyline {...getNodeColor(node.attrs, primaryColor)} key={key} />
     case 'rect':
-      return <Rect {...getNodeColor(node.attrs, primaryColor)} key={key} />;
+      return <Rect {...getNodeColor(node.attrs, primaryColor)} key={key} />
     case 'defs':
       return (
         <Defs {...node.attrs} key={key}>
           {children}
         </Defs>
-      );
+      )
     case 'clipPath':
       return (
         <ClipPath {...node.attrs} key={key}>
           {children}
         </ClipPath>
-      );
+      )
     case 'mask':
       return (
         <Mask {...node.attrs} key={key}>
           {children}
         </Mask>
-      );
+      )
     case 'symbol':
       return (
         <Symbol {...node.attrs} key={key}>
           {children}
         </Symbol>
-      );
+      )
     case 'use':
-      return <Use {...node.attrs} key={key} />;
+      return <Use {...node.attrs} key={key} />
     default:
-      return null;
+      return null
   }
 }
 
 function getIconNode(definition: IconDefinition, primaryColor: string, secondaryColor: string) {
   return typeof definition.icon === 'function'
     ? definition.icon(primaryColor, secondaryColor)
-    : definition.icon;
+    : definition.icon
 }
 
 function getIconHitSlop(size: number, touchableSize: number, hitSlop: PressableProps['hitSlop']) {
-  if (hitSlop !== undefined) return hitSlop;
-  const padding = Math.max(0, (touchableSize - size) / 2);
-  return { top: padding, right: padding, bottom: padding, left: padding };
+  if (hitSlop !== undefined) return hitSlop
+  const padding = Math.max(0, (touchableSize - size) / 2)
+  return { top: padding, right: padding, bottom: padding, left: padding }
 }
 
 export function AntdNativeIcon({
@@ -183,31 +183,24 @@ export function AntdNativeIcon({
   twoToneColor,
   ...svgProps
 }: AntdNativeIconProps) {
-  const theme = useOptionalToken();
-  const resolvedColor = toColorString(color ?? theme?.token.colorIcon ?? '#5A6068');
+  const theme = useOptionalToken()
+  const resolvedColor = toColorString(color ?? theme?.token.colorIcon ?? '#5A6068')
   const [primaryColor, secondaryColor] = resolveTwoToneColors(
     resolvedColor,
     twoToneColor,
     theme?.token.colorFillSecondary ?? '#E6E6E6',
-  );
-  const iconNode = getIconNode(definition, primaryColor, secondaryColor);
-  const renderedIcon = renderNode(
-    iconNode,
-    definition.name,
-    size,
-    primaryColor,
-    svgStyle,
-    svgProps,
-  );
+  )
+  const iconNode = getIconNode(definition, primaryColor, secondaryColor)
+  const renderedIcon = renderNode(iconNode, definition.name, size, primaryColor, svgStyle, svgProps)
   const iconContent =
     rotation === undefined ? (
       renderedIcon
     ) : (
       <View style={{ transform: [{ rotate: `${rotation}deg` }] }}>{renderedIcon}</View>
-    );
-  const resolvedStyle = [defaultStyle, disabled && { opacity: 0.4 }, style] as StyleProp<ViewStyle>;
+    )
+  const resolvedStyle = [defaultStyle, disabled && { opacity: 0.4 }, style] as StyleProp<ViewStyle>
 
-  if (!onPress) return <View style={resolvedStyle}>{iconContent}</View>;
+  if (!onPress) return <View style={resolvedStyle}>{iconContent}</View>
 
   return (
     <Pressable
@@ -218,7 +211,7 @@ export function AntdNativeIcon({
     >
       {iconContent}
     </Pressable>
-  );
+  )
 }
 
-export default memo(AntdNativeIcon);
+export default memo(AntdNativeIcon)

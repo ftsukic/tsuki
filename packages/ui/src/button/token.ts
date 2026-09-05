@@ -1,4 +1,4 @@
-import type { AliasToken, ButtonToken } from '../theme';
+import type { AliasToken, ButtonToken } from '../theme'
 
 export function getButtonToken(token: AliasToken): ButtonToken {
   return {
@@ -38,5 +38,5 @@ export function getButtonToken(token: AliasToken): ButtonToken {
     activeOpacity: 0.6,
     disabledOpacity: 0.4,
     iconGap: token.paddingXS,
-  };
+  }
 }

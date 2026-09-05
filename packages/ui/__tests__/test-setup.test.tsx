@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react-native';
-import { Text, View } from 'react-native';
+import { render, screen } from '@testing-library/react-native'
+import { Text, View } from 'react-native'
 
 describe('React Native test setup', () => {
   it('renders native primitives with the library test environment', async () => {
@@ -7,8 +7,8 @@ describe('React Native test setup', () => {
       <View>
         <Text>RN UI test setup</Text>
       </View>,
-    );
+    )
 
-    expect(screen.getByText('RN UI test setup')).toBeTruthy();
-  });
-});
+    expect(screen.getByText('RN UI test setup')).toBeTruthy()
+  })
+})

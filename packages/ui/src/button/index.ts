@@ -1,5 +1,5 @@
-export { Button } from './button';
-export { getButtonToken } from './token';
+export { Button } from './button'
+export { getButtonToken } from './token'
 export type {
   ButtonIconPosition,
   ButtonProps,
@@ -9,4 +9,4 @@ export type {
   ButtonStyleState,
   ButtonStyles,
   ButtonType,
-} from './interface';
+} from './interface'

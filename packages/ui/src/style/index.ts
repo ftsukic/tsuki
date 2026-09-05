@@ -1,1 +1,1 @@
-export * from './resolve-styles';
+export * from './resolve-styles'

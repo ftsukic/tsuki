@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from 'react'
 
-import type { SnackPreviewProps } from '../../types';
-import { ensureSnackEmbedScript } from '../../utils/loadSnackEmbed';
+import type { SnackPreviewProps } from '../../types'
+import { ensureSnackEmbedScript } from '../../utils/loadSnackEmbed'
 
 export function SnackPreview({
   snackId,
@@ -11,16 +11,16 @@ export function SnackPreview({
 }: SnackPreviewProps): React.JSX.Element {
   useEffect(() => {
     if (snackId) {
-      ensureSnackEmbedScript();
+      ensureSnackEmbedScript()
     }
-  }, [snackId]);
+  }, [snackId])
 
   if (!snackId) {
     return (
       <div role="status" style={{ padding: 16, border: '1px dashed #cbd5e1', borderRadius: 8 }}>
         Snack demo is not configured yet. Add a saved Snack ID to enable the preview.
       </div>
-    );
+    )
   }
 
   return (
@@ -32,5 +32,5 @@ export function SnackPreview({
       data-snack-loading="lazy"
       style={{ width: '100%', height, overflow: 'hidden', borderRadius: 8 }}
     />
-  );
+  )
 }

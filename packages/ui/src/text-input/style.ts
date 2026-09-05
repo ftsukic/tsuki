@@ -1,31 +1,31 @@
-import type { TextStyle, ViewStyle } from 'react-native';
-import type { InputToken } from '../theme';
-import type { TextInputProps, TextInputStyleState } from './interface';
+import type { TextStyle, ViewStyle } from 'react-native'
+import type { InputToken } from '../theme'
+import type { TextInputProps, TextInputStyleState } from './interface'
 
 export interface TextInputResolvedStyles {
-  root: ViewStyle;
-  addonGroup: ViewStyle;
-  addon: TextStyle;
-  addonBefore: TextStyle;
-  addonAfter: TextStyle;
-  shell: ViewStyle;
-  content: ViewStyle;
-  input: TextStyle;
-  prefix: TextStyle;
-  suffix: TextStyle;
-  clear: ViewStyle;
-  wordLimit: TextStyle;
+  root: ViewStyle
+  addonGroup: ViewStyle
+  addon: TextStyle
+  addonBefore: TextStyle
+  addonAfter: TextStyle
+  shell: ViewStyle
+  content: ViewStyle
+  input: TextStyle
+  prefix: TextStyle
+  suffix: TextStyle
+  clear: ViewStyle
+  wordLimit: TextStyle
 }
 
 function getInputHeight(token: InputToken, size: NonNullable<TextInputProps['size']>) {
   switch (size) {
     case 'small':
-      return token.heightSM;
+      return token.heightSM
     case 'large':
-      return token.heightLG;
+      return token.heightLG
     case 'normal':
     default:
-      return token.height;
+      return token.height
   }
 }
 
@@ -34,8 +34,8 @@ export function getTextInputStyles(
   props: TextInputProps,
   state: TextInputStyleState,
 ): TextInputResolvedStyles {
-  const height = getInputHeight(token, props.size ?? 'normal');
-  const textarea = props.type === 'textarea';
+  const height = getInputHeight(token, props.size ?? 'normal')
+  const textarea = props.type === 'textarea'
 
   return {
     root: {
@@ -119,5 +119,5 @@ export function getTextInputStyles(
       fontSize: token.wordLimitFontSize,
       marginLeft: token.paddingHorizontal,
     },
-  };
+  }
 }

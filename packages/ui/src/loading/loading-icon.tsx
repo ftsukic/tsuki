@@ -1,13 +1,13 @@
-import { Icon } from '../icon';
-import { memo, useEffect, useRef } from 'react';
-import { Animated, Easing } from 'react-native';
-import type { ColorValue, ViewProps } from 'react-native';
+import { Icon } from '../icon'
+import { memo, useEffect, useRef } from 'react'
+import { Animated, Easing } from 'react-native'
+import type { ColorValue, ViewProps } from 'react-native'
 
 export interface LoadingIconProps extends ViewProps {
-  size: number;
-  color: ColorValue;
-  duration: number;
-  active?: boolean;
+  size: number
+  color: ColorValue
+  duration: number
+  active?: boolean
 }
 
 function LoadingIconComponent({
@@ -17,13 +17,13 @@ function LoadingIconComponent({
   active = true,
   ...props
 }: LoadingIconProps) {
-  const rotation = useRef(new Animated.Value(0)).current;
+  const rotation = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
-    rotation.stopAnimation();
-    rotation.setValue(0);
+    rotation.stopAnimation()
+    rotation.setValue(0)
 
-    if (!active) return;
+    if (!active) return
 
     const animation = Animated.loop(
       Animated.timing(rotation, {
@@ -32,15 +32,15 @@ function LoadingIconComponent({
         easing: Easing.linear,
         useNativeDriver: true,
       }),
-    );
-    animation.start();
+    )
+    animation.start()
 
     return () => {
-      animation.stop();
-      rotation.stopAnimation();
-      rotation.setValue(0);
-    };
-  }, [active, duration, rotation]);
+      animation.stop()
+      rotation.stopAnimation()
+      rotation.setValue(0)
+    }
+  }, [active, duration, rotation])
 
   return (
     <Animated.View
@@ -63,8 +63,8 @@ function LoadingIconComponent({
     >
       <Icon name="LoadingOutlined" size={size} color={color} />
     </Animated.View>
-  );
+  )
 }
 
-export const LoadingIcon = memo(LoadingIconComponent);
-export default LoadingIcon;
+export const LoadingIcon = memo(LoadingIconComponent)
+export default LoadingIcon

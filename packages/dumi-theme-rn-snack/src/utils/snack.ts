@@ -1,28 +1,28 @@
-import type { SnackAsset, SnackAssetDependency, SnackFiles, SnackPayload } from '../types';
+import type { SnackAsset, SnackAssetDependency, SnackFiles, SnackPayload } from '../types'
 
-const ENTRY_FILE = 'App.tsx';
+const ENTRY_FILE = 'App.tsx'
 
 function normalizeFilePath(filePath: string): string {
-  return filePath.replace(/^\.\/?/, '');
+  return filePath.replace(/^\.\/?/, '')
 }
 
 function isSnackAssetDependency(
   value: SnackAssetDependency | unknown,
 ): value is SnackAssetDependency {
   if (typeof value !== 'object' || value === null) {
-    return false;
+    return false
   }
 
-  const dependency = value as Partial<SnackAssetDependency>;
+  const dependency = value as Partial<SnackAssetDependency>
   return (
     (dependency.type === 'FILE' || dependency.type === 'NPM') &&
     typeof dependency.value === 'string'
-  );
+  )
 }
 
 export function createSnackPayload(asset: SnackAsset): SnackPayload | null {
   if (typeof asset.entry !== 'string' || asset.entry.length === 0) {
-    return null;
+    return null
   }
 
   const files: SnackFiles = {
@@ -30,35 +30,35 @@ export function createSnackPayload(asset: SnackAsset): SnackPayload | null {
       type: 'CODE' as const,
       contents: asset.entry,
     },
-  };
-  const dependencies: Record<string, string> = {};
+  }
+  const dependencies: Record<string, string> = {}
 
   for (const [name, rawDependency] of Object.entries(asset.dependencies ?? {})) {
     if (!isSnackAssetDependency(rawDependency)) {
-      continue;
+      continue
     }
 
     if (rawDependency.type === 'FILE') {
       files[normalizeFilePath(name)] = {
         type: 'CODE',
         contents: rawDependency.value,
-      };
-      continue;
+      }
+      continue
     }
 
-    dependencies[name] = rawDependency.value;
+    dependencies[name] = rawDependency.value
   }
 
-  return { files, dependencies };
+  return { files, dependencies }
 }
 
 export function readSnackId(asset: unknown): string | undefined {
   if (typeof asset !== 'object' || asset === null) {
-    return undefined;
+    return undefined
   }
 
-  const candidate = asset as { snackId?: unknown };
+  const candidate = asset as { snackId?: unknown }
   return typeof candidate.snackId === 'string' && candidate.snackId.length > 0
     ? candidate.snackId
-    : undefined;
+    : undefined
 }

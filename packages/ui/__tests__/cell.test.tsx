@@ -1,6 +1,6 @@
-import { Cell, ConfigProvider } from '../src';
-import { render, screen } from '@testing-library/react-native';
-import { Text } from 'react-native';
+import { Cell, ConfigProvider } from '../src'
+import { render, screen } from '@testing-library/react-native'
+import { Text } from 'react-native'
 
 describe('Cell', () => {
   it('renders the Vant cell semantics and arrow', async () => {
@@ -18,15 +18,15 @@ describe('Cell', () => {
           arrowDirection="right"
         />
       </ConfigProvider>,
-    );
+    )
 
-    expect(screen.getByTestId('cell')).toBeTruthy();
-    expect(screen.getByText('账户')).toBeTruthy();
-    expect(screen.getByText('已绑定')).toBeTruthy();
-    expect(screen.getByText('查看')).toBeTruthy();
-    expect(screen.getByText('更多')).toBeTruthy();
-    expect(screen.getByText('*')).toBeTruthy();
-  });
+    expect(screen.getByTestId('cell')).toBeTruthy()
+    expect(screen.getByText('账户')).toBeTruthy()
+    expect(screen.getByText('已绑定')).toBeTruthy()
+    expect(screen.getByText('查看')).toBeTruthy()
+    expect(screen.getByText('更多')).toBeTruthy()
+    expect(screen.getByText('*')).toBeTruthy()
+  })
 
   it('supports Cell.Group inset and group slots', async () => {
     await render(
@@ -35,11 +35,11 @@ describe('Cell', () => {
           <Cell title="昵称" value="Altron" border={false} />
         </Cell.Group>
       </ConfigProvider>,
-    );
+    )
 
-    expect(screen.getByTestId('group')).toBeTruthy();
-    expect(screen.getByText('基本信息')).toBeTruthy();
-    expect(screen.getByText('编辑')).toBeTruthy();
-    expect(screen.getByText('Altron')).toBeTruthy();
-  });
-});
+    expect(screen.getByTestId('group')).toBeTruthy()
+    expect(screen.getByText('基本信息')).toBeTruthy()
+    expect(screen.getByText('编辑')).toBeTruthy()
+    expect(screen.getByText('Altron')).toBeTruthy()
+  })
+})

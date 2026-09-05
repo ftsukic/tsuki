@@ -1,19 +1,19 @@
-import type { TextStyle, ViewStyle } from 'react-native';
-import type { CellProps, CellStyleState } from './interface';
-import type { CellToken } from '../theme';
+import type { TextStyle, ViewStyle } from 'react-native'
+import type { CellProps, CellStyleState } from './interface'
+import type { CellToken } from '../theme'
 
 export interface CellResolvedStyles {
-  root: ViewStyle;
-  row: ViewStyle;
-  content: ViewStyle;
-  icon: ViewStyle;
-  title: TextStyle;
-  label: TextStyle;
-  value: TextStyle;
-  extra: TextStyle;
-  suffix: ViewStyle;
-  required: TextStyle;
-  divider: ViewStyle;
+  root: ViewStyle
+  row: ViewStyle
+  content: ViewStyle
+  icon: ViewStyle
+  title: TextStyle
+  label: TextStyle
+  value: TextStyle
+  extra: TextStyle
+  suffix: ViewStyle
+  required: TextStyle
+  divider: ViewStyle
 }
 
 export function getCellStyles(
@@ -89,5 +89,5 @@ export function getCellStyles(
       marginLeft: token.paddingHorizontal,
       marginRight: token.paddingHorizontal,
     },
-  };
+  }
 }

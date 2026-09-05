@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Button, Cell, ConfigProvider, darkAlgorithm, defaultAlgorithm, TextInput } from '../..';
+import { useState } from 'react'
+import { StyleSheet, Text, View } from 'react-native'
+import { Button, Cell, ConfigProvider, darkAlgorithm, defaultAlgorithm, TextInput } from '../..'
 
 /**
  * @title Theme algorithms and overrides
  * @description Switch between light and dark algorithms and inspect a component token override.
  */
 export default function ThemeAlgorithmsFixture() {
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(false)
 
   return (
     <ConfigProvider
@@ -31,7 +31,7 @@ export default function ThemeAlgorithmsFixture() {
         <TextInput bordered placeholder="The provider supplies tokens" />
       </View>
     </ConfigProvider>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -49,4 +49,4 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
-});
+})

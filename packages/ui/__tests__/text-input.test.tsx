@@ -1,10 +1,10 @@
-import { ConfigProvider, TextInput } from '../src';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { ConfigProvider, TextInput } from '../src'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 
 describe('TextInput', () => {
   it('supports uncontrolled formatting and native change handlers', async () => {
-    const onChangeText = jest.fn();
-    const onChange = jest.fn();
+    const onChangeText = jest.fn()
+    const onChange = jest.fn()
     await render(
       <ConfigProvider>
         <TextInput
@@ -15,13 +15,13 @@ describe('TextInput', () => {
           onChange={onChange}
         />
       </ConfigProvider>,
-    );
+    )
 
-    const input = screen.getByTestId('input');
-    fireEvent.changeText(input, 'abc');
-    expect(onChangeText).toHaveBeenLastCalledWith('ABC');
-    await waitFor(() => expect(screen.getByTestId('input').props.value).toBe('ABC'));
-  });
+    const input = screen.getByTestId('input')
+    fireEvent.changeText(input, 'abc')
+    expect(onChangeText).toHaveBeenLastCalledWith('ABC')
+    await waitFor(() => expect(screen.getByTestId('input').props.value).toBe('ABC'))
+  })
 
   it('supports textarea word limits and clearable behavior', async () => {
     await render(
@@ -37,22 +37,22 @@ describe('TextInput', () => {
           styles={{ wordLimit: { color: 'red' } }}
         />
       </ConfigProvider>,
-    );
+    )
 
-    expect(screen.getByTestId('textarea')).toBeTruthy();
-    expect(screen.getByText('5/10')).toBeTruthy();
-    expect(screen.getByLabelText('清除输入')).toBeTruthy();
-  });
+    expect(screen.getByTestId('textarea')).toBeTruthy()
+    expect(screen.getByText('5/10')).toBeTruthy()
+    expect(screen.getByLabelText('清除输入')).toBeTruthy()
+  })
 
   it('applies root semantic styles without replacing the native input style contract', async () => {
-    const styles = jest.fn(() => ({ root: { padding: 4 }, input: { fontSize: 18 } }));
+    const styles = jest.fn(() => ({ root: { padding: 4 }, input: { fontSize: 18 } }))
     await render(
       <ConfigProvider>
         <TextInput testID="styled-input" styles={styles} />
       </ConfigProvider>,
-    );
+    )
 
-    expect(styles).toHaveBeenCalled();
-    expect(screen.getByTestId('styled-input')).toBeTruthy();
-  });
-});
+    expect(styles).toHaveBeenCalled()
+    expect(screen.getByTestId('styled-input')).toBeTruthy()
+  })
+})

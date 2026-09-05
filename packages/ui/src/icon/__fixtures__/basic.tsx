@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { ConfigProvider, Icon } from '../..';
+import { StyleSheet, Text, View } from 'react-native'
+import { ConfigProvider, Icon } from '../..'
 
 /**
  * @title Icon gallery
@@ -27,7 +27,7 @@ export default function IconBasicFixture() {
         />
       </View>
     </ConfigProvider>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -45,4 +45,4 @@ const styles = StyleSheet.create({
     gap: 20,
     alignItems: 'center',
   },
-});
+})

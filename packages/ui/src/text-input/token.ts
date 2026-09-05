@@ -1,4 +1,4 @@
-import type { AliasToken, InputToken } from '../theme';
+import type { AliasToken, InputToken } from '../theme'
 
 export function getInputToken(token: AliasToken): InputToken {
   return {
@@ -29,5 +29,5 @@ export function getInputToken(token: AliasToken): InputToken {
     addonColor: token.colorTextSecondary,
     wordLimitColor: token.colorTextTertiary,
     wordLimitFontSize: token.fontSizeSM,
-  };
+  }
 }

@@ -12,16 +12,16 @@ export const presetColors = [
   'geekblue',
   'lime',
   'gold',
-] as const;
+] as const
 
-export type PresetColorKey = (typeof presetColors)[number];
+export type PresetColorKey = (typeof presetColors)[number]
 
-export type PresetColorTokens = Record<PresetColorKey, string>;
+export type PresetColorTokens = Record<PresetColorKey, string>
 
-type PaletteIndex = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+type PaletteIndex = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
 
 export type ColorPalettes = {
-  [key in `${PresetColorKey}-${PaletteIndex}`]: string;
+  [key in `${PresetColorKey}-${PaletteIndex}`]: string
 } & {
-  [key in `${PresetColorKey}${PaletteIndex}`]: string;
-};
+  [key in `${PresetColorKey}${PaletteIndex}`]: string
+}

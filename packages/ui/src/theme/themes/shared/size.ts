@@ -1,7 +1,7 @@
-import type { HeightMapToken, SeedToken, SizeMapToken } from '../../interface';
+import type { HeightMapToken, SeedToken, SizeMapToken } from '../../interface'
 
 export function genSizeMapToken(seed: SeedToken): SizeMapToken {
-  const { sizeUnit, sizeStep } = seed;
+  const { sizeUnit, sizeStep } = seed
 
   return {
     sizeXXL: sizeUnit * (sizeStep + 8),
@@ -13,21 +13,21 @@ export function genSizeMapToken(seed: SeedToken): SizeMapToken {
     sizeSM: sizeUnit * Math.max(1, sizeStep - 1),
     sizeXS: sizeUnit * Math.max(1, sizeStep - 2),
     sizeXXS: sizeUnit * Math.max(1, sizeStep - 3),
-  };
+  }
 }
 
 export function genControlHeight(seed: SeedToken): HeightMapToken {
-  const height = Math.max(1, Math.round(seed.controlHeight));
+  const height = Math.max(1, Math.round(seed.controlHeight))
 
   return {
     controlHeightXS: Math.max(1, height - 20),
     controlHeightSM: Math.max(1, height - 12),
     controlHeightLG: height + 6,
-  };
+  }
 }
 
 export function genRadius(radius: number) {
-  const base = Math.max(0, Math.round(radius));
+  const base = Math.max(0, Math.round(radius))
 
   return {
     borderRadiusXS: Math.max(1, base - 3),
@@ -35,5 +35,5 @@ export function genRadius(radius: number) {
     borderRadius: base,
     borderRadiusLG: base + 4,
     borderRadiusOuter: base + 4,
-  };
+  }
 }

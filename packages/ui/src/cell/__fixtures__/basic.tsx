@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Cell, ConfigProvider, Icon } from '../..';
+import { useState } from 'react'
+import { StyleSheet, Text, View } from 'react-native'
+import { Cell, ConfigProvider, Icon } from '../..'
 
 /**
  * @title Cell groups and interactions
  * @description Render grouped cells with labels, links, required markers and custom content.
  */
 export default function CellBasicFixture() {
-  const [message, setMessage] = useState('Tap a link cell');
+  const [message, setMessage] = useState('Tap a link cell')
 
   return (
     <ConfigProvider>
@@ -35,7 +35,7 @@ export default function CellBasicFixture() {
         <Text style={styles.message}>{message}</Text>
       </View>
     </ConfigProvider>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -48,4 +48,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
     paddingHorizontal: 16,
   },
-});
+})

@@ -1,8 +1,8 @@
-import { resolveStyles } from '../style';
-import { useComponentToken } from '../theme';
-import { getCellToken } from './token';
-import type { CellGroupProps } from './interface';
-import { View, Text } from 'react-native';
+import { resolveStyles } from '../style'
+import { useComponentToken } from '../theme'
+import { getCellToken } from './token'
+import type { CellGroupProps } from './interface'
+import { View, Text } from 'react-native'
 
 export function CellGroup({
   children,
@@ -14,11 +14,11 @@ export function CellGroup({
   style,
   styles,
 }: CellGroupProps) {
-  const token = useComponentToken('Cell', getCellToken);
+  const token = useComponentToken('Cell', getCellToken)
   const semantic = resolveStyles(styles, {
     props: { children, testID, title, extra, inset, border, style, styles },
     state: {},
-  });
+  })
 
   return (
     <View
@@ -72,5 +72,5 @@ export function CellGroup({
       ) : null}
       <View style={[semantic?.body]}>{children}</View>
     </View>
-  );
+  )
 }

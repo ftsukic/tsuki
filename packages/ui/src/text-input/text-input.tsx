@@ -1,9 +1,9 @@
-import { Icon } from '../icon';
-import { resolveStyles } from '../style';
-import { useComponentToken } from '../theme';
-import { getTextInputStyles } from './style';
-import { getInputToken } from './token';
-import type { TextInputProps, TextInputStyleState } from './interface';
+import { Icon } from '../icon'
+import { resolveStyles } from '../style'
+import { useComponentToken } from '../theme'
+import { getTextInputStyles } from './style'
+import { getInputToken } from './token'
+import type { TextInputProps, TextInputStyleState } from './interface'
 import {
   forwardRef,
   useCallback,
@@ -11,19 +11,19 @@ import {
   useRef,
   useState,
   type ReactNode,
-} from 'react';
-import { Pressable, Text, TextInput as NativeTextInput, View } from 'react-native';
-import type { StyleProp, TextStyle } from 'react-native';
+} from 'react'
+import { Pressable, Text, TextInput as NativeTextInput, View } from 'react-native'
+import type { StyleProp, TextStyle } from 'react-native'
 
 function isVisible(value: ReactNode): boolean {
-  return value !== null && value !== undefined && value !== false;
+  return value !== null && value !== undefined && value !== false
 }
 
 function renderAddon(value: ReactNode, style: StyleProp<TextStyle>) {
-  if (!isVisible(value)) return null;
+  if (!isVisible(value)) return null
   if (typeof value === 'string' || typeof value === 'number')
-    return <Text style={style}>{value}</Text>;
-  return value;
+    return <Text style={style}>{value}</Text>
+  return value
 }
 
 export const TextInput = forwardRef<NativeTextInput, TextInputProps>(function TextInput(
@@ -56,14 +56,14 @@ export const TextInput = forwardRef<NativeTextInput, TextInputProps>(function Te
   },
   ref,
 ) {
-  const inputToken = useComponentToken('Input', getInputToken);
-  const inputRef = useRef<NativeTextInput>(null);
-  const [internalValue, setInternalValue] = useState(defaultValue ?? '');
-  const [focused, setFocused] = useState(false);
-  const currentValue = value ?? internalValue;
-  const isTextarea = type === 'textarea';
-  const isDisabled = editable === false;
-  const state: TextInputStyleState = { focused, disabled: isDisabled };
+  const inputToken = useComponentToken('Input', getInputToken)
+  const inputRef = useRef<NativeTextInput>(null)
+  const [internalValue, setInternalValue] = useState(defaultValue ?? '')
+  const [focused, setFocused] = useState(false)
+  const currentValue = value ?? internalValue
+  const isTextarea = type === 'textarea'
+  const isDisabled = editable === false
+  const state: TextInputStyleState = { focused, disabled: isDisabled }
   const inputProps: TextInputProps = {
     type,
     size,
@@ -89,58 +89,58 @@ export const TextInput = forwardRef<NativeTextInput, TextInputProps>(function Te
     onFocus,
     onBlur,
     onEndEditing,
-  };
-  const semantic = resolveStyles(styles, { props: inputProps, state });
-  const resolved = getTextInputStyles(inputToken, inputProps, state);
-  const showClear = clearable && currentValue.length > 0 && (clearTrigger === 'always' || focused);
-  const showLimit = showWordLimit && maxLength !== undefined;
+  }
+  const semantic = resolveStyles(styles, { props: inputProps, state })
+  const resolved = getTextInputStyles(inputToken, inputProps, state)
+  const showClear = clearable && currentValue.length > 0 && (clearTrigger === 'always' || focused)
+  const showLimit = showWordLimit && maxLength !== undefined
 
   useImperativeHandle(ref, () => {
-    const input = inputRef.current;
-    if (!input) throw new Error('TextInput ref is not ready');
-    return input;
-  }, []);
+    const input = inputRef.current
+    if (!input) throw new Error('TextInput ref is not ready')
+    return input
+  }, [])
 
   const updateValue = useCallback(
     (nextValue: string) => {
       const nextValueWithFormat =
-        formatter && formatTrigger === 'onChangeText' ? formatter(nextValue) : nextValue;
-      if (value === undefined) setInternalValue(nextValueWithFormat);
-      onChangeText?.(nextValueWithFormat);
+        formatter && formatTrigger === 'onChangeText' ? formatter(nextValue) : nextValue
+      if (value === undefined) setInternalValue(nextValueWithFormat)
+      onChangeText?.(nextValueWithFormat)
     },
     [formatTrigger, formatter, onChangeText, value],
-  );
+  )
 
   const handleEndEditing = useCallback(
     (event: Parameters<NonNullable<TextInputProps['onEndEditing']>>[0]) => {
       if (formatter && formatTrigger === 'onEndEditing')
-        updateValue(formatter(event.nativeEvent.text));
-      onEndEditing?.(event);
+        updateValue(formatter(event.nativeEvent.text))
+      onEndEditing?.(event)
     },
     [formatTrigger, formatter, onEndEditing, updateValue],
-  );
+  )
 
   const handleFocus = useCallback(
     (event: Parameters<NonNullable<TextInputProps['onFocus']>>[0]) => {
-      setFocused(true);
-      onFocus?.(event);
+      setFocused(true)
+      onFocus?.(event)
     },
     [onFocus],
-  );
+  )
 
   const handleBlur = useCallback(
     (event: Parameters<NonNullable<TextInputProps['onBlur']>>[0]) => {
-      setFocused(false);
-      onBlur?.(event);
+      setFocused(false)
+      onBlur?.(event)
     },
     [onBlur],
-  );
+  )
 
   const handleClear = useCallback(() => {
-    inputRef.current?.clear();
-    updateValue('');
-    inputRef.current?.focus();
-  }, [updateValue]);
+    inputRef.current?.clear()
+    updateValue('')
+    inputRef.current?.focus()
+  }, [updateValue])
 
   return (
     <View style={[resolved.root, semantic?.root, style]}>
@@ -196,7 +196,7 @@ export const TextInput = forwardRef<NativeTextInput, TextInputProps>(function Te
         {renderAddon(addonAfter, [resolved.addon, resolved.addonAfter, semantic?.addonAfter])}
       </View>
     </View>
-  );
-});
+  )
+})
 
-TextInput.displayName = 'TextInput';
+TextInput.displayName = 'TextInput'

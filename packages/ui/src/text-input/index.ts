@@ -1,5 +1,5 @@
-export { TextInput } from './text-input';
-export { getInputToken } from './token';
+export { TextInput } from './text-input'
+export { getInputToken } from './token'
 export type {
   TextInputClearTrigger,
   TextInputFormatTrigger,
@@ -11,4 +11,4 @@ export type {
   TextInputStyleState,
   TextInputStyles,
   TextInputType,
-} from './interface';
+} from './interface'

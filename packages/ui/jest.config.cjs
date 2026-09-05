@@ -1,6 +1,6 @@
-const path = require('node:path');
+const path = require('node:path')
 
-const rootDir = path.resolve(__dirname, '../..');
+const rootDir = path.resolve(__dirname, '../..')
 
 module.exports = {
   rootDir,
@@ -16,4 +16,4 @@ module.exports = {
     ],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-};
+}

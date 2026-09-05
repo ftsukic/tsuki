@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Button, ConfigProvider, Icon } from '../..';
+import { useState } from 'react'
+import { StyleSheet, Text, View } from 'react-native'
+import { Button, ConfigProvider, Icon } from '../..'
 
 /**
  * @title Button variants
  * @description Check the common button types, states, sizes and semantic slots.
  */
 export default function ButtonVariantsFixture() {
-  const [pressCount, setPressCount] = useState(0);
+  const [pressCount, setPressCount] = useState(0)
 
   return (
     <ConfigProvider>
@@ -62,7 +62,7 @@ export default function ButtonVariantsFixture() {
         </Button>
       </View>
     </ConfigProvider>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -88,4 +88,4 @@ const styles = StyleSheet.create({
     gap: 10,
     alignItems: 'center',
   },
-});
+})

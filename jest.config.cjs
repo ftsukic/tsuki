@@ -6,4 +6,4 @@ module.exports = {
     '^.+\\.(ts|tsx)$': ['babel-jest', { configFile: './babel.config.cjs' }],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-};
+}

@@ -1,1 +1,1 @@
-export * from 'react-native-svg/src/ReactNativeSVG.web';
+export * from 'react-native-svg/src/ReactNativeSVG.web'

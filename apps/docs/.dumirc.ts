@@ -1,9 +1,9 @@
-import { defineConfig } from 'dumi';
-import path from 'node:path';
+import { defineConfig } from 'dumi'
+import path from 'node:path'
 
-const repo = process.env.PUBLIC_PATH || '';
-const publicPath = repo ? `/${repo}` : '/';
-const sourceRoot = path.resolve(__dirname, '../../packages/ui/src');
+const repo = process.env.PUBLIC_PATH || ''
+const publicPath = repo ? `/${repo}` : '/'
+const sourceRoot = path.resolve(__dirname, '../../packages/ui/src')
 
 export default defineConfig({
   title: 'React Native UI',
@@ -30,4 +30,4 @@ export default defineConfig({
     logo: false,
     deviceWidth: 375,
   },
-});
+})

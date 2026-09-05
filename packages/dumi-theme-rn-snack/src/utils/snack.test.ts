@@ -1,4 +1,4 @@
-import { createSnackPayload } from './snack';
+import { createSnackPayload } from './snack'
 
 describe('createSnackPayload', () => {
   it('converts dumi entry, FILE dependencies and NPM dependencies', () => {
@@ -24,10 +24,10 @@ describe('createSnackPayload', () => {
       dependencies: {
         react: '^19.1.1',
       },
-    });
-  });
+    })
+  })
 
   it('returns null when dumi has no entry source', () => {
-    expect(createSnackPayload({})).toBeNull();
-  });
-});
+    expect(createSnackPayload({})).toBeNull()
+  })
+})

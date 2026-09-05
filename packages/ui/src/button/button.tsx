@@ -1,15 +1,15 @@
-import { LoadingIcon } from '../loading';
-import { resolveStyles } from '../style';
-import { useComponentToken } from '../theme';
-import { getButtonStyles } from './style';
-import { getButtonToken } from './token';
-import type { ButtonProps, ButtonStyleState } from './interface';
-import { forwardRef, useCallback, useRef } from 'react';
-import { Pressable, Text, View } from 'react-native';
-import type { ReactNode } from 'react';
+import { LoadingIcon } from '../loading'
+import { resolveStyles } from '../style'
+import { useComponentToken } from '../theme'
+import { getButtonStyles } from './style'
+import { getButtonToken } from './token'
+import type { ButtonProps, ButtonStyleState } from './interface'
+import { forwardRef, useCallback, useRef } from 'react'
+import { Pressable, Text, View } from 'react-native'
+import type { ReactNode } from 'react'
 
 function isTextContent(value: ReactNode): value is string | number {
-  return typeof value === 'string' || typeof value === 'number';
+  return typeof value === 'string' || typeof value === 'number'
 }
 
 export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(function Button(
@@ -36,9 +36,9 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
   },
   ref,
 ) {
-  const buttonToken = useComponentToken('Button', getButtonToken);
-  const lastPressTime = useRef(0);
-  const isDisabled = disabled || loading;
+  const buttonToken = useComponentToken('Button', getButtonToken)
+  const lastPressTime = useRef(0)
+  const isDisabled = disabled || loading
   const buttonProps: ButtonProps = {
     children,
     type,
@@ -58,20 +58,20 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
     styles,
     onPress,
     onPressDebounceWait,
-  };
+  }
 
   const handlePress = useCallback<NonNullable<ButtonProps['onPress']>>(
     (event) => {
-      if (!onPress || isDisabled) return;
+      if (!onPress || isDisabled) return
 
-      const now = Date.now();
+      const now = Date.now()
       if (onPressDebounceWait !== undefined && now - lastPressTime.current < onPressDebounceWait)
-        return;
-      lastPressTime.current = now;
-      onPress(event);
+        return
+      lastPressTime.current = now
+      onPress(event)
     },
     [isDisabled, onPress, onPressDebounceWait],
-  );
+  )
 
   return (
     <Pressable
@@ -81,17 +81,17 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
       disabled={isDisabled}
       onPress={handlePress}
       style={({ pressed }) => {
-        const state: ButtonStyleState = { pressed, disabled: isDisabled, loading };
-        const resolved = getButtonStyles(buttonToken, buttonProps, state);
-        const semantic = resolveStyles(styles, { props: buttonProps, state });
-        return [resolved.root, semantic?.root, style];
+        const state: ButtonStyleState = { pressed, disabled: isDisabled, loading }
+        const resolved = getButtonStyles(buttonToken, buttonProps, state)
+        const semantic = resolveStyles(styles, { props: buttonProps, state })
+        return [resolved.root, semantic?.root, style]
       }}
     >
       {({ pressed }) => {
-        const state: ButtonStyleState = { pressed, disabled: isDisabled, loading };
-        const resolved = getButtonStyles(buttonToken, buttonProps, state);
-        const semantic = resolveStyles(styles, { props: buttonProps, state });
-        const content = loading ? loadingText : children;
+        const state: ButtonStyleState = { pressed, disabled: isDisabled, loading }
+        const resolved = getButtonStyles(buttonToken, buttonProps, state)
+        const semantic = resolveStyles(styles, { props: buttonProps, state })
+        const content = loading ? loadingText : children
 
         return (
           <View style={resolved.contentContainer}>
@@ -120,10 +120,10 @@ export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps
               <View style={[resolved.icon, semantic?.icon]}>{icon}</View>
             ) : null}
           </View>
-        );
+        )
       }}
     </Pressable>
-  );
-});
+  )
+})
 
-Button.displayName = 'Button';
+Button.displayName = 'Button'

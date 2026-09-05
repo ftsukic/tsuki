@@ -1,18 +1,18 @@
-import React from 'react';
+import React from 'react'
 
-import { SnackPreview } from '../../components/SnackPreview';
-import type { SnackAsset } from '../../types';
-import { createSnackPayload, readSnackId } from '../../utils/snack';
+import { SnackPreview } from '../../components/SnackPreview'
+import type { SnackAsset } from '../../types'
+import { createSnackPayload, readSnackId } from '../../utils/snack'
 
 export interface PreviewerProps {
-  asset?: SnackAsset;
-  children?: React.ReactNode;
-  identifier?: string;
+  asset?: SnackAsset
+  children?: React.ReactNode
+  identifier?: string
 }
 
 export default function Previewer({ asset, children }: PreviewerProps): React.JSX.Element {
-  const payload = asset ? createSnackPayload(asset) : null;
-  const snackId = readSnackId(asset);
+  const payload = asset ? createSnackPayload(asset) : null
+  const snackId = readSnackId(asset)
 
   return (
     <section>
@@ -25,5 +25,5 @@ export default function Previewer({ asset, children }: PreviewerProps): React.JS
       ) : null}
       {children}
     </section>
-  );
+  )
 }

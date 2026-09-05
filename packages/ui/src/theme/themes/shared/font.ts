@@ -1,15 +1,15 @@
-import type { FontMapToken } from '../../interface';
+import type { FontMapToken } from '../../interface'
 
 export function genFontMapToken(fontSize: number): FontMapToken {
-  const size = Math.max(1, Math.round(fontSize));
-  const fontSizeXS = Math.max(1, size - 4);
-  const fontSizeSM = Math.max(1, size - 2);
-  const fontSizeLG = size + 2;
-  const fontSizeXL = size + 4;
-  const lineHeightXS = (fontSizeXS + 8) / fontSizeXS;
-  const lineHeightSM = (fontSizeSM + 8) / fontSizeSM;
-  const lineHeight = (size + 8) / size;
-  const lineHeightLG = (fontSizeLG + 8) / fontSizeLG;
+  const size = Math.max(1, Math.round(fontSize))
+  const fontSizeXS = Math.max(1, size - 4)
+  const fontSizeSM = Math.max(1, size - 2)
+  const fontSizeLG = size + 2
+  const fontSizeXL = size + 4
+  const lineHeightXS = (fontSizeXS + 8) / fontSizeXS
+  const lineHeightSM = (fontSizeSM + 8) / fontSizeSM
+  const lineHeight = (size + 8) / size
+  const lineHeightLG = (fontSizeLG + 8) / fontSizeLG
 
   return {
     fontSizeXS,
@@ -35,5 +35,5 @@ export function genFontMapToken(fontSize: number): FontMapToken {
     fontHeightSM: Math.round(fontSizeSM * lineHeightSM),
     fontHeight: Math.round(size * lineHeight),
     fontHeightLG: Math.round(fontSizeLG * lineHeightLG),
-  };
+  }
 }

@@ -1,4 +1,4 @@
-import type { AliasToken, CellToken } from '../theme';
+import type { AliasToken, CellToken } from '../theme'
 
 export function getCellToken(token: AliasToken): CellToken {
   return {
@@ -29,5 +29,5 @@ export function getCellToken(token: AliasToken): CellToken {
     groupTitleColor: token.colorTextSecondary,
     groupTitleFontSize: token.fontSizeSM,
     insetRadius: token.borderRadius,
-  };
+  }
 }

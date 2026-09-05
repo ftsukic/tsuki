@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { ConfigProvider, LoadingIcon } from '../..';
+import { StyleSheet, Text, View } from 'react-native'
+import { ConfigProvider, LoadingIcon } from '../..'
 
 /**
  * @title LoadingIcon
@@ -23,7 +23,7 @@ export default function LoadingBasicFixture() {
         </View>
       </View>
     </ConfigProvider>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -41,4 +41,4 @@ const styles = StyleSheet.create({
     color: '#666666',
     fontSize: 13,
   },
-});
+})

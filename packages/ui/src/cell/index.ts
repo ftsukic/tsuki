@@ -1,10 +1,10 @@
-import { Cell } from './cell';
-import { CellGroup } from './group';
+import { Cell } from './cell'
+import { CellGroup } from './group'
 
-export const CellWithGroup = Object.assign(Cell, { Group: CellGroup });
-export { CellWithGroup as Cell };
-export { CellGroup };
-export { getCellToken } from './token';
+export const CellWithGroup = Object.assign(Cell, { Group: CellGroup })
+export { CellWithGroup as Cell }
+export { CellGroup }
+export { getCellToken } from './token'
 export type {
   CellArrowDirection,
   CellGroupProps,
@@ -14,4 +14,4 @@ export type {
   CellStyleInfo,
   CellStyleState,
   CellStyles,
-} from './interface';
+} from './interface'

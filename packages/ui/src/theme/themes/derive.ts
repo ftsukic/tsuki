@@ -1,16 +1,16 @@
-import { generate } from '@ant-design/colors';
-import { FastColor } from '@ant-design/fast-color';
-import type { ColorPalettes, MapToken, PresetColorKey, SeedToken } from '../interface';
-import { presetColors } from '../interface';
-import { alphaColor, solidColor } from '../util/colors';
-import { genFontMapToken } from './shared/font';
-import { genControlHeight, genRadius, genSizeMapToken } from './shared/size';
+import { generate } from '@ant-design/colors'
+import { FastColor } from '@ant-design/fast-color'
+import type { ColorPalettes, MapToken, PresetColorKey, SeedToken } from '../interface'
+import { presetColors } from '../interface'
+import { alphaColor, solidColor } from '../util/colors'
+import { genFontMapToken } from './shared/font'
+import { genControlHeight, genRadius, genSizeMapToken } from './shared/size'
 
-type Palette = [string, string, string, string, string, string, string, string, string, string];
+type Palette = [string, string, string, string, string, string, string, string, string, string]
 
 function getPalette(color: string, dark: boolean): Palette {
-  const values = generate(color, dark ? { theme: 'dark' } : undefined);
-  const fallback = color;
+  const values = generate(color, dark ? { theme: 'dark' } : undefined)
+  const fallback = color
 
   return [
     values[0] ?? fallback,
@@ -23,30 +23,30 @@ function getPalette(color: string, dark: boolean): Palette {
     values[7] ?? fallback,
     values[8] ?? fallback,
     values[9] ?? fallback,
-  ];
+  ]
 }
 
 function getPresetPalettes(seed: SeedToken, dark: boolean): ColorPalettes {
   const palettes = presetColors.reduce<Partial<ColorPalettes>>(
     (result, colorKey: PresetColorKey) => {
-      const palette = getPalette(seed[colorKey], dark);
+      const palette = getPalette(seed[colorKey], dark)
 
       palette.forEach((value, index) => {
-        result[`${colorKey}-${index + 1}` as keyof ColorPalettes] = value;
-        result[`${colorKey}${index + 1}` as keyof ColorPalettes] = value;
-      });
+        result[`${colorKey}-${index + 1}` as keyof ColorPalettes] = value
+        result[`${colorKey}${index + 1}` as keyof ColorPalettes] = value
+      })
 
-      return result;
+      return result
     },
     {},
-  );
+  )
 
-  return palettes as ColorPalettes;
+  return palettes as ColorPalettes
 }
 
 function getNeutralColors(seed: SeedToken, dark: boolean) {
-  const background = seed.colorBgBase;
-  const text = seed.colorTextBase;
+  const background = seed.colorBgBase
+  const text = seed.colorTextBase
 
   if (dark) {
     return {
@@ -73,7 +73,7 @@ function getNeutralColors(seed: SeedToken, dark: boolean) {
       colorBgSolid: '#1F1F1F',
       colorBgSolidHover: '#262626',
       colorBgSolidActive: '#141414',
-    };
+    }
   }
 
   return {
@@ -100,20 +100,20 @@ function getNeutralColors(seed: SeedToken, dark: boolean) {
     colorBgSolid: alphaColor(text, 1),
     colorBgSolidHover: alphaColor(text, 0.75),
     colorBgSolidActive: alphaColor(text, 0.95),
-  };
+  }
 }
 
 export function deriveMapToken(seed: SeedToken, dark = false): MapToken {
-  const primary = getPalette(seed.colorPrimary, dark);
-  const success = getPalette(seed.colorSuccess, dark);
-  const warning = getPalette(seed.colorWarning, dark);
-  const error = getPalette(seed.colorError, dark);
-  const info = getPalette(seed.colorInfo, dark);
-  const link = getPalette(seed.colorLink || seed.colorInfo, dark);
-  const neutral = getNeutralColors(seed, dark);
+  const primary = getPalette(seed.colorPrimary, dark)
+  const success = getPalette(seed.colorSuccess, dark)
+  const warning = getPalette(seed.colorWarning, dark)
+  const error = getPalette(seed.colorError, dark)
+  const info = getPalette(seed.colorInfo, dark)
+  const link = getPalette(seed.colorLink || seed.colorInfo, dark)
+  const neutral = getNeutralColors(seed, dark)
   const colorErrorBgFilledHover = new FastColor(error[1])
     .mix(new FastColor(error[3]), 50)
-    .toHexString();
+    .toHexString()
 
   const map: MapToken = {
     ...seed,
@@ -182,7 +182,7 @@ export function deriveMapToken(seed: SeedToken, dark = false): MapToken {
     motionDurationFast: seed.motionBase + seed.motionUnit,
     motionDurationMid: seed.motionBase + seed.motionUnit * 2,
     motionDurationSlow: seed.motionBase + seed.motionUnit * 3,
-  };
+  }
 
-  return map;
+  return map
 }
