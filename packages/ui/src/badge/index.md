@@ -58,7 +58,7 @@ Badge 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style
 
 ## 主题定制
 
-通过 `ConfigProvider` 的 `theme.components.Badge` 配置尺寸、颜色和文字 token；`styles` 可进一步定制单个实例。
+通过 `ConfigProvider` 的 `theme.components.Badge` 配置尺寸、颜色、细边框和文字 token；`styles` 可进一步定制单个实例。
 
 ```tsx | pure
 import { Avatar, Badge, ConfigProvider } from '@ftsukic/react-native-ui'

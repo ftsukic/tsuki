@@ -58,6 +58,16 @@ describe('Badge', () => {
     expect(dot).toBeTruthy()
     expect(status).toBeTruthy()
     expect(StyleSheet.flatten(dot?.props.style).borderWidth ?? 0).toBe(0)
+
+    const view = await render(
+      <ConfigProvider>
+        <Badge count={5}>
+          <Text>内容</Text>
+        </Badge>
+      </ConfigProvider>,
+    )
+    const count = findViewWithBackground(view.toJSON(), '#EE0A24')
+    expect(StyleSheet.flatten(count?.props.style).borderWidth).toBe(1)
   })
 
   it('supports offset and semantic styles', async () => {

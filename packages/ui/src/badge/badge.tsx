@@ -126,6 +126,8 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
               gap: status && isRenderable(text) ? 4 : undefined,
               justifyContent: 'center',
               borderRadius: dot || status ? token.dotSize / 2 : token.borderRadius,
+              borderWidth: dot || status ? 0 : hasChildren ? token.borderWidth : 0,
+              borderColor: token.borderColor,
               backgroundColor: dot ? indicatorColor : status ? 'transparent' : indicatorColor,
               paddingHorizontal: showCount ? paddingHorizontal : 0,
               ...(dot
