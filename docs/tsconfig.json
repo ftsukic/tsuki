@@ -1,0 +1,51 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["react", "react-dom"],
+    "noEmit": true,
+    "paths": {
+      "@ftsukic/react-native-ui": ["../packages/ui/src/index.ts"]
+    }
+  },
+  "include": [
+    ".dumirc.ts",
+    "docs",
+    ".dumi/theme",
+    "theme",
+    "../packages/ui/src/button/__fixtures__/examples",
+    "../packages/ui/src/button/__fixtures__/overview.tsx",
+    "../packages/ui/src/loading/__fixtures__/examples",
+    "../packages/ui/src/loading/__fixtures__/overview.tsx",
+    "../packages/ui/src/progress/__fixtures__/examples",
+    "../packages/ui/src/progress/__fixtures__/overview.tsx",
+    "../packages/ui/src/radio/__fixtures__/examples",
+    "../packages/ui/src/radio/__fixtures__/overview.tsx",
+    "../packages/ui/src/switch/__fixtures__/examples",
+    "../packages/ui/src/switch/__fixtures__/overview.tsx",
+    "../packages/ui/src/avatar/__fixtures__/examples",
+    "../packages/ui/src/avatar/__fixtures__/overview.tsx",
+    "../packages/ui/src/badge/__fixtures__/examples",
+    "../packages/ui/src/badge/__fixtures__/overview.tsx",
+    "../packages/ui/src/cell/__fixtures__/examples",
+    "../packages/ui/src/cell/__fixtures__/overview.tsx",
+    "../packages/ui/src/divider/__fixtures__/examples",
+    "../packages/ui/src/divider/__fixtures__/overview.tsx",
+    "../packages/ui/src/space/__fixtures__/examples",
+    "../packages/ui/src/space/__fixtures__/overview.tsx",
+    "../packages/ui/src/toast/__fixtures__/examples",
+    "../packages/ui/src/toast/__fixtures__/overview.tsx",
+    "../packages/ui/src/notify/__fixtures__/examples",
+    "../packages/ui/src/notify/__fixtures__/overview.tsx",
+    "../packages/ui/src/popup/__fixtures__/examples",
+    "../packages/ui/src/popup/__fixtures__/overview.tsx",
+    "../packages/ui/src/floating-panel/__fixtures__/examples",
+    "../packages/ui/src/floating-panel/__fixtures__/overview.tsx",
+    "../packages/ui/src/overlay/__fixtures__/examples",
+    "../packages/ui/src/overlay/__fixtures__/overview.tsx",
+    "../packages/ui/src/dialog/__fixtures__/examples",
+    "../packages/ui/src/dialog/__fixtures__/overview.tsx",
+    "../packages/ui/src/portal/__fixtures__/examples",
+    "../packages/ui/src/portal/__fixtures__/overview.tsx"
+  ]
+}

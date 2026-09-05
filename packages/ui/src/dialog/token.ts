@@ -1,0 +1,36 @@
+import type { AliasToken, DialogToken } from '../theme'
+
+export function getDialogToken(token: AliasToken): DialogToken {
+  return {
+    width: 320,
+    smallScreenWidth: '90%',
+    backgroundColor: token.colorBgElevated,
+    overlayColor: token.colorBgMask,
+    borderRadius: token.borderRadiusLG + token.paddingSM,
+    titleColor: token.colorTextHeading,
+    messageColor: token.colorText,
+    fontSize: token.fontSize,
+    titleFontSize: token.fontSizeLG,
+    titleLineHeight: token.lineHeightLG * token.fontSizeLG,
+    messageLineHeight: token.lineHeight * token.fontSize,
+    headerFontWeight: '600',
+    headerPaddingTop: token.paddingLG + 2,
+    headerPaddingHorizontal: token.paddingLG,
+    headerPaddingBottom: token.paddingXS,
+    headerIsolatedPaddingVertical: token.paddingLG,
+    messagePaddingHorizontal: token.paddingLG,
+    messagePaddingTop: token.paddingXS,
+    messagePaddingBottom: token.paddingLG,
+    messageMaxHeightRatio: 0.6,
+    buttonHeight: token.controlHeight + token.sizeUnit,
+    roundButtonHeight: Math.max(token.controlHeight - token.sizeUnit * 2, token.controlHeightXS),
+    confirmButtonColor: token.colorPrimary,
+    cancelButtonColor: token.colorText,
+    dividerColor: token.colorBorderSecondary,
+    buttonGap: token.paddingSM,
+    footerPaddingHorizontal: token.paddingLG,
+    footerPaddingVertical: token.paddingSM,
+    animationDuration: Math.max(0, token.motionDurationMid * 1000),
+    zIndex: token.zIndexPopupBase + 1000,
+  }
+}
