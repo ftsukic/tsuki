@@ -53,8 +53,11 @@ describe('Badge', () => {
     )
 
     expect(screen.getByText('在线')).toBeTruthy()
-    expect(findViewWithBackground(toJSON(), '#7232DD')).toBeTruthy()
-    expect(findViewWithBackground(toJSON(), '#07C160')).toBeTruthy()
+    const dot = findViewWithBackground(toJSON(), '#7232DD')
+    const status = findViewWithBackground(toJSON(), '#07C160')
+    expect(dot).toBeTruthy()
+    expect(status).toBeTruthy()
+    expect(StyleSheet.flatten(dot?.props.style).borderWidth ?? 0).toBe(0)
   })
 
   it('supports offset and semantic styles', async () => {

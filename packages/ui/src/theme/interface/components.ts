@@ -130,14 +130,12 @@ export interface BadgeToken {
   minWidthSM: number
   dotSize: number
   borderRadius: number
-  borderWidth: number
   paddingHorizontal: number
   paddingHorizontalSM: number
   fontSize: number
   fontSizeSM: number
   color: string
   textColor: string
-  borderColor: string
   successColor: string
   processingColor: string
   defaultColor: string
