@@ -1,5 +1,6 @@
 export * from './button'
 export * from './cell'
+export * from './grid'
 export * from './icon'
 export * from './loading'
 export * from './style'
