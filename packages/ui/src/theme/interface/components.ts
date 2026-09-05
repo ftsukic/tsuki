@@ -104,6 +104,47 @@ export interface InputToken {
   wordLimitFontSize: number
 }
 
+export interface AvatarToken {
+  containerSizeSM: number
+  containerSize: number
+  containerSizeLG: number
+  borderRadius: number
+  backgroundColor: string
+  textColor: string
+  textFontSizeSM: number
+  textFontSize: number
+  textFontSizeLG: number
+  iconFontSizeSM: number
+  iconFontSize: number
+  iconFontSizeLG: number
+  groupBorderColor: string
+  groupBorderWidth: number
+  groupOverlapping: number
+  groupSpace: number
+}
+
+export interface BadgeToken {
+  height: number
+  heightSM: number
+  minWidth: number
+  minWidthSM: number
+  dotSize: number
+  borderRadius: number
+  borderWidth: number
+  paddingHorizontal: number
+  paddingHorizontalSM: number
+  fontSize: number
+  fontSizeSM: number
+  color: string
+  textColor: string
+  borderColor: string
+  successColor: string
+  processingColor: string
+  defaultColor: string
+  errorColor: string
+  warningColor: string
+}
+
 export interface RadioToken {
   indicatorSize: number
   dotSize: number
@@ -126,6 +167,8 @@ export interface ComponentTokenOverrides {
   Cell?: Partial<CellToken>
   Input?: Partial<InputToken>
   Radio?: Partial<RadioToken>
+  Avatar?: Partial<AvatarToken>
+  Badge?: Partial<BadgeToken>
 }
 
 export interface ComponentTokenMap {
@@ -133,6 +176,8 @@ export interface ComponentTokenMap {
   Cell: CellToken
   Input: InputToken
   Radio: RadioToken
+  Avatar: AvatarToken
+  Badge: BadgeToken
 }
 
 export type ComponentTokenName = keyof ComponentTokenMap

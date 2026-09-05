@@ -1,4 +1,6 @@
 export * from './button'
+export * from './avatar'
+export * from './badge'
 export * from './cell'
 export * from './grid'
 export * from './icon'
