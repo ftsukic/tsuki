@@ -28,7 +28,9 @@ type ButtonType = 'default' | 'primary' | 'success' | 'warning' | 'danger';
 type ButtonSize = 'large' | 'normal' | 'small' | 'mini';
 ```
 
-Props 还包括 `color`、`plain`、`block`、`round`、`square`、`hairline`、`disabled`、`loading`、`loadingText`、`icon`、`iconPosition`、`style` 和 `onPressDebounceWait`。组件继承 React Native `PressableProps`，`style` 始终是 root 样式。
+Props 还包括 `color`、`plain`、`block`、`round`、`square`、`circle`、`hairline`、`disabled`、`loading`、`loadingText`、`icon`、`iconPosition`、`style` 和 `onPressDebounceWait`。组件继承 React Native `PressableProps`，`style` 始终是 root 样式。
+
+`square` 仅将按钮的 `borderRadius` 设置为 `0`，不会改变按钮的内容宽度或水平内边距。`circle` 会使用当前 `size` 对应的正方形尺寸并裁剪为圆形，适合搭配 `icon` 使用；纯图标按钮应提供 `accessibilityLabel`。
 
 Semantic slots：
 

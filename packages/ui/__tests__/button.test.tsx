@@ -1,6 +1,6 @@
 import { Button, ConfigProvider } from '../src'
 import { fireEvent, render, screen } from '@testing-library/react-native'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, Text } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
 
 function findOverlay(node: JsonNode | null): JsonElement | undefined {
@@ -10,6 +10,21 @@ function findOverlay(node: JsonNode | null): JsonElement | undefined {
   for (const child of node.children) {
     const overlay = findOverlay(child)
     if (overlay) return overlay
+  }
+
+  return undefined
+}
+
+function findParentOfTestID(node: JsonNode | null, testID: string): JsonElement | undefined {
+  if (node === null || typeof node === 'string') return undefined
+
+  if (node.children.some((child) => typeof child !== 'string' && child.props.testID === testID)) {
+    return node
+  }
+
+  for (const child of node.children) {
+    const parent = findParentOfTestID(child, testID)
+    if (parent) return parent
   }
 
   return undefined
@@ -86,6 +101,51 @@ describe('Button', () => {
       left: 0,
       right: 0,
       top: 0,
+    })
+  })
+
+  it('uses square only to remove the border radius', async () => {
+    await render(
+      <ConfigProvider>
+        <Button testID="square" square>
+          方形按钮
+        </Button>
+      </ConfigProvider>,
+    )
+
+    const style = StyleSheet.flatten(screen.getByTestId('square').props.style)
+    expect(style.borderRadius).toBe(0)
+    expect(style.paddingHorizontal).toBeGreaterThan(0)
+    expect(style.width).toBeUndefined()
+    expect(style.minWidth).toBeUndefined()
+  })
+
+  it('renders a circle button as an icon-sized circle', async () => {
+    const { toJSON } = await render(
+      <ConfigProvider>
+        <Button
+          testID="circle"
+          circle
+          icon={<Text testID="circle-icon">+</Text>}
+          accessibilityLabel="更多操作"
+        />
+      </ConfigProvider>,
+    )
+
+    const button = screen.getByTestId('circle')
+    const style = StyleSheet.flatten(button.props.style)
+    expect(button.props.accessibilityLabel).toBe('更多操作')
+    expect(screen.getByTestId('circle-icon')).toBeTruthy()
+    expect(style.width).toBe(style.height)
+    expect(style.paddingHorizontal).toBe(0)
+    expect(style.borderRadius).toBe(style.height / 2)
+
+    const iconContainer = findParentOfTestID(toJSON(), 'circle-icon')
+    if (!iconContainer) throw new Error('Circle icon container was not rendered')
+
+    expect(StyleSheet.flatten(iconContainer.props.style)).toMatchObject({
+      marginLeft: 0,
+      marginRight: 0,
     })
   })
 })

@@ -101,14 +101,23 @@ export function getButtonStyles(
     ? plainBackgroundColor
     : (props.color ?? colors.backgroundColor)
   const borderColor = props.color ?? colors.borderColor
-  const radius = props.square ? 0 : props.round ? 999 : size.borderRadius
+  const content = state.loading ? props.loadingText : props.children
+  const hasContent = content !== undefined && content !== null
+  const radius = props.circle
+    ? size.height / 2
+    : props.square
+      ? 0
+      : props.round
+        ? 999
+        : size.borderRadius
 
   return {
     root: {
       position: 'relative',
       overflow: 'hidden',
       minHeight: size.height,
-      paddingHorizontal: props.square ? 0 : size.paddingHorizontal,
+      height: props.circle ? size.height : undefined,
+      paddingHorizontal: props.circle ? 0 : size.paddingHorizontal,
       borderRadius: radius,
       borderWidth: props.hairline ? StyleSheet.hairlineWidth : token.borderWidth,
       borderColor,
@@ -117,8 +126,7 @@ export function getButtonStyles(
       alignItems: 'center',
       justifyContent: 'center',
       alignSelf: props.block ? 'stretch' : 'auto',
-      minWidth: props.square ? size.height : undefined,
-      width: props.square ? size.height : undefined,
+      width: props.circle ? size.height : undefined,
       opacity: state.disabled ? token.disabledOpacity : 1,
     },
     contentContainer: {
@@ -134,8 +142,8 @@ export function getButtonStyles(
       textAlign: 'center',
     },
     icon: {
-      marginRight: props.iconPosition === 'right' ? 0 : token.iconGap,
-      marginLeft: props.iconPosition === 'right' ? token.iconGap : 0,
+      marginRight: props.iconPosition === 'right' || !hasContent ? 0 : token.iconGap,
+      marginLeft: props.iconPosition === 'right' && hasContent ? token.iconGap : 0,
       alignItems: 'center',
       justifyContent: 'center',
     },

@@ -29,6 +29,7 @@ export interface ButtonProps extends Omit<PressableProps, 'children' | 'style' |
   block?: boolean
   round?: boolean
   square?: boolean
+  circle?: boolean
   hairline?: boolean
   disabled?: boolean
   loading?: boolean
