@@ -145,6 +145,17 @@ export interface BadgeToken {
   warningColor: string
 }
 
+export interface FloatingPanelToken {
+  borderRadius: number
+  headerHeight: number
+  zIndex: number
+  backgroundColor: string
+  barWidth: number
+  barHeight: number
+  barColor: string
+  animationDuration: number
+}
+
 export interface RadioToken {
   indicatorSize: number
   dotSize: number
@@ -169,6 +180,7 @@ export interface ComponentTokenOverrides {
   Radio?: Partial<RadioToken>
   Avatar?: Partial<AvatarToken>
   Badge?: Partial<BadgeToken>
+  FloatingPanel?: Partial<FloatingPanelToken>
 }
 
 export interface ComponentTokenMap {
@@ -178,6 +190,7 @@ export interface ComponentTokenMap {
   Radio: RadioToken
   Avatar: AvatarToken
   Badge: BadgeToken
+  FloatingPanel: FloatingPanelToken
 }
 
 export type ComponentTokenName = keyof ComponentTokenMap

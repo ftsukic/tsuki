@@ -2733,12 +2733,14 @@ __metadata:
     react: "npm:19.1.1"
     react-native: "npm:0.82.1"
     react-native-builder-bob: "npm:0.43.0"
+    react-native-safe-area-context: "npm:^5.9.1"
     react-native-svg: "npm:^15.15.0"
     test-renderer: "npm:1.1.0"
     typescript: "npm:^5.9.2"
   peerDependencies:
     react: ">=19.1.1"
     react-native: ">=0.82.1"
+    react-native-safe-area-context: ">=5.9.1"
     react-native-svg: ">=15.13.0"
   languageName: unknown
   linkType: soft
@@ -16097,6 +16099,16 @@ __metadata:
   bin:
     bob: bin/bob
   checksum: 10c0/b084598636b26bb6f1942c01b77d65d9bea09e148627c61bd9f79145ddb9ec947d7b004a718d14f3db2d4960d67c1e8c70fb0377864d6c3a572f611d489cb970
+  languageName: node
+  linkType: hard
+
+"react-native-safe-area-context@npm:^5.9.1":
+  version: 5.9.1
+  resolution: "react-native-safe-area-context@npm:5.9.1"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10c0/ffe37c7d6ebd412673cb3042b370b2d2551b3ba32d73c51246fbd4f01bb6374ff3ec2511c96a55f62e895758ae645ac372e876fd93c690889cfd27a6daa4e389
   languageName: node
   linkType: hard
 
