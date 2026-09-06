@@ -15,11 +15,15 @@ group:
 
 ## 介绍
 
-NavTab 是 React Native 组件库中的公开组件，提供与 altron-app 一致的调用和数据模型。
+NavTab 是轻量的横向单选标签组，使用 `options` 渲染选项，并支持受控与非受控选中值。
 
 </section>
 
 <code src="./__fixtures__/overview.tsx" title="组件预览"></code>
+
+## 代码演示
+
+<code src="./__fixtures__/examples/basic.tsx" title="基础标签" description="使用 options、defaultValue 和 onChange 构建标签切换。"></code>
 
 ## 引入
 
@@ -29,6 +33,13 @@ import { NavTab } from '@ftsukic/react-native-ui'
 
 ## API
 
-公开 Props 和类型请以导出的 `NavTabProps` 为准。组件继承的 React Native 属性保持原生语义；可配置的主题字段通过 `ThemeProvider` 的 `theme.components.NavTab` 传入，组件实例样式使用对应的 `style` 或语义样式入口。
+| 属性                     | 说明               | 类型                   | 默认值 |
+| ------------------------ | ------------------ | ---------------------- | ------ |
+| `options`                | 标签选项           | `NavTabOption<T>[]`    | —      |
+| `value` / `defaultValue` | 受控或非受控选中值 | `T`                    | —      |
+| `onChange`               | 选中值变化回调     | `(value: T) => void`   | —      |
+| `theme`                  | 覆盖 NavTab token  | `Partial<NavTabToken>` | —      |
+
+选项的 `value` 会通过 `String(value)` 作为 React key，因此同一组中应保持唯一。组件的 tab Pressable 设置 `accessibilityRole="tab"` 和 `accessibilityState.selected`；组件本身没有 `style` 或 `styles` Props，需要通过主题 token 调整外观。
 
 React Native 版本不提供 Web 专用的 `className`、HTML 字符串、`teleport` 或 CSS 属性；浮层组件使用最近的 `PortalHost`。

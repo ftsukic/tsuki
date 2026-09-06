@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 使用字符串选项构建分段控制器并设置默认值。
  */
 import { Segmented, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

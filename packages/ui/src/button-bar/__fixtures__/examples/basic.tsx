@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 使用 buttons 配置底部操作按钮，并在超出数量时收纳到更多菜单。
  */
 import { ButtonBar, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

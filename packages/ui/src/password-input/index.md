@@ -15,11 +15,15 @@ group:
 
 ## 介绍
 
-PasswordInput 是 React Native 组件库中的公开组件，提供与 altron-app 一致的调用和数据模型。
+PasswordInput 是带显示/隐藏按钮的密码输入框，复用 TextInput 的布局、清除和主题能力，并为按钮提供无障碍标签。
 
 </section>
 
 <code src="./__fixtures__/overview.tsx" title="组件预览"></code>
+
+## 代码演示
+
+<code src="./__fixtures__/examples/basic.tsx" title="密码输入" description="展示密码隐藏状态、提示文案和显示密码按钮。"></code>
 
 ## 引入
 
@@ -29,6 +33,13 @@ import { PasswordInput } from '@ftsukic/react-native-ui'
 
 ## API
 
-公开 Props 和类型请以导出的 `PasswordInputProps` 为准。组件继承的 React Native 属性保持原生语义；可配置的主题字段通过 `ThemeProvider` 的 `theme.components.PasswordInput` 传入，组件实例样式使用对应的 `style` 或语义样式入口。
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `showPasswordText` | 密码已显示时按钮的无障碍文案 | `string` | `'显示密码'` |
+| `hidePasswordText` | 密码隐藏时按钮的无障碍文案 | `string` | `'隐藏密码'` |
+| `value` / `defaultValue` | 受控或非受控输入值 | `string` | — |
+| `onChange` / `onChangeText` | 输入变化回调 | React Native / TextInput 回调 | — |
+
+PasswordInput 继承 TextInput Props，但不接受 `secureTextEntry` 和 `suffix`，这两个属性由组件内部管理。显示按钮使用 `accessibilityRole="button"`，`style`、`containerStyle` 和其他 TextInput 样式 Props 遵循 TextInput 的作用范围。
 
 React Native 版本不提供 Web 专用的 `className`、HTML 字符串、`teleport` 或 CSS 属性；浮层组件使用最近的 `PortalHost`。

@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 使用文字水印覆盖父容器，水印层不拦截触摸事件。
  */
 import { WaterMark, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

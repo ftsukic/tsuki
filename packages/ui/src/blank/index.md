@@ -15,11 +15,15 @@ group:
 
 ## 介绍
 
-Blank 是 React Native 组件库中的公开组件，提供与 altron-app 一致的调用和数据模型。
+Blank 用于在布局中按主题间距在指定方向留白，适合替代重复的 margin 或 padding 配置。`true` 使用主题间距，数字使用精确值。
 
 </section>
 
 <code src="./__fixtures__/overview.tsx" title="组件预览"></code>
+
+## 代码演示
+
+<code src="./__fixtures__/examples/basic.tsx" title="基础间距" description="使用 top、bottom、left、right 和 type 组合布局间距。"></code>
 
 ## 引入
 
@@ -29,6 +33,13 @@ import { Blank } from '@ftsukic/react-native-ui'
 
 ## API
 
-公开 Props 和类型请以导出的 `BlankProps` 为准。组件继承的 React Native 属性保持原生语义；可配置的主题字段通过 `ThemeProvider` 的 `theme.components.Blank` 传入，组件实例样式使用对应的 `style` 或语义样式入口。
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `top` / `bottom` / `left` / `right` | 对应方向是否留白；数字表示精确间距 | `boolean \| number` | `false` |
+| `size` | 布尔值使用的主题间距尺寸 | `'s' \| 'm' \| 'l'` | `'m'` |
+| `type` | 将间距应用为 margin 或 padding | `'margin' \| 'padding'` | `'margin'` |
+| `style` | 根 `View` 样式 | `StyleProp<ViewStyle>` | — |
+
+Blank 继承 React Native `ViewProps`，不提供 `styles` 或组件 token。`false` 等价于 `0`；使用数字时不会再按 `size` 换算。
 
 React Native 版本不提供 Web 专用的 `className`、HTML 字符串、`teleport` 或 CSS 属性；浮层组件使用最近的 `PortalHost`。

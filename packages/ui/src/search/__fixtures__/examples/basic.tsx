@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 展示搜索输入、提交事件和可选的搜索按钮。
  */
 import { Search, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

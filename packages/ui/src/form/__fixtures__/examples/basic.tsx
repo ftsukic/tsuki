@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 使用 Form.Item 将 TextInput 接入表单字段。
  */
 import { Form, TextInput, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

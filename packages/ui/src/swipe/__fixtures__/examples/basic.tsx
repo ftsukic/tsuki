@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 使用多个子页面展示可滑动的轮播容器。
  */
 import { Swipe, ThemeProvider } from '@ftsukic/react-native-ui'
 import { Text, View } from 'react-native'

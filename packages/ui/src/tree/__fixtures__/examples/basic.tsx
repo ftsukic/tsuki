@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 使用树形 options 展示单选、展开和搜索能力的入口。
  */
 import { Tree, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

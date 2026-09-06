@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 使用 label 和 text 展示一条描述信息。
  */
 import { Description, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

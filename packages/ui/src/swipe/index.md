@@ -15,11 +15,15 @@ group:
 
 ## 介绍
 
-Swipe 是 React Native 组件库中的公开组件，提供与 altron-app 一致的调用和数据模型。
+Swipe 用于分页滑动内容，支持横向/纵向、循环、自动播放、懒加载、自定义分页器和 imperative ref 控制。
 
 </section>
 
 <code src="./__fixtures__/overview.tsx" title="组件预览"></code>
+
+## 代码演示
+
+<code src="./__fixtures__/examples/basic.tsx" title="基础轮播" description="使用多个子页面展示分页滑动和默认分页点。"></code>
 
 ## 引入
 
@@ -29,6 +33,20 @@ import { Swipe } from '@ftsukic/react-native-ui'
 
 ## API
 
-公开 Props 和类型请以导出的 `SwipeProps` 为准。组件继承的 React Native 属性保持原生语义；可配置的主题字段通过 `ThemeProvider` 的 `theme.components.Swipe` 传入，组件实例样式使用对应的 `style` 或语义样式入口。
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `children` | 分页内容；每个直接子节点是一页 | `ReactNode` | — |
+| `selectedIndex` | 初始或受控目标页索引 | `number` | `0` |
+| `vertical` | 是否纵向滑动 | `boolean` | `false` |
+| `dots` | 是否显示默认分页点 | `boolean` | `true` |
+| `infinite` | 是否循环 | `boolean` | `false` |
+| `autoplay` / `autoplayInterval` | 自动播放及间隔（ms） | `boolean` / `number` | `false` / `3000` |
+| `lazy` | 是否懒加载，可传函数决定具体页 | `boolean \| (index) => boolean` | `false` |
+| `afterChange` | 页面稳定后的索引回调 | `(index: number) => void` | — |
+| `pagination` | 自定义分页器 | `(props) => ReactNode` | 默认分页器 |
+| `renderLazyPlaceholder` | 懒加载占位节点 | `(index) => ReactNode` | — |
+| `style` / `pageStyle` | 容器和页面样式 | `StyleProp<ViewStyle>` | — |
+
+Swipe 继承可兼容的 React Native `ScrollViewProps`，但内部接管 `children`、`horizontal`、`pagingEnabled`、`contentOffset` 和相关布局属性。通过 `ref` 可调用 `goTo`、`scrollNextPage`、`scrollToStart` 和 `scrollToEnd`。`afterChange` 只在分页稳定后触发；`onScrollAnimationEnd` 用于观察滚动动画结束。
 
 React Native 版本不提供 Web 专用的 `className`、HTML 字符串、`teleport` 或 CSS 属性；浮层组件使用最近的 `PortalHost`。

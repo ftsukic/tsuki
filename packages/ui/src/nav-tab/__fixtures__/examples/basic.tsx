@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 使用 options 和受控值切换导航标签。
  */
 import { NavTab, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 展示成功状态、标题和补充说明。
  */
 import { Result, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

@@ -15,11 +15,15 @@ group:
 
 ## 介绍
 
-Selector 是 React Native 组件库中的公开组件，提供与 altron-app 一致的调用和数据模型。
+Selector 将 `Tree` 选项包装为底部 Popup 选择器，支持单选、多选、确认按钮和立即变更回调，适合需要弹层选择的表单字段。
 
 </section>
 
 <code src="./__fixtures__/overview.tsx" title="组件预览"></code>
+
+## 代码演示
+
+<code src="./__fixtures__/examples/basic.tsx" title="基础选择" description="使用 options 和 Popup visible 展示选择器入口。"></code>
 
 ## 引入
 
@@ -29,6 +33,17 @@ import { Selector } from '@ftsukic/react-native-ui'
 
 ## API
 
-公开 Props 和类型请以导出的 `SelectorProps` 为准。组件继承的 React Native 属性保持原生语义；可配置的主题字段通过 `ThemeProvider` 的 `theme.components.Selector` 传入，组件实例样式使用对应的 `style` 或语义样式入口。
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `options` | 树形选择项 | `SelectorOption[]` | 必填 |
+| `value` / `defaultValue` | 单选值或多选值 | `SelectorValue \| SelectorValue[]` | — |
+| `multiple` | 是否允许多选 | `boolean` | `false` |
+| `onChange` | 选择变化回调 | `(value, options) => void` | — |
+| `onChangeImmediate` | 每次选中后立即变更值 | `(value) => value` | — |
+| `closeOnPressOverlay` | 点击遮罩是否关闭 | `boolean` | `true` |
+| `title` / `confirmButtonText` | 弹层标题和确认文案 | `ReactNode` / `string` | — |
+| `visible` | 是否展示 Popup | `boolean` | `false` |
+
+Selector 继承 Tree 的选择、展开和搜索 Props，以及 Popup 的浮层 Props（不含 `children`、`position` 和 `onPressOverlay`）；位置固定为 `bottom`。单选默认在选中后结束命令式流程，多选通过确认按钮提交；主题和样式分别遵循 Tree/Popup 的 API。
 
 React Native 版本不提供 Web 专用的 `className`、HTML 字符串、`teleport` 或 CSS 属性；浮层组件使用最近的 `PortalHost`。

@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 展示列配置、默认选中值和滚轮选择变化。
  */
 import { PickerView, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

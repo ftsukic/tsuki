@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 展示单个复选框的默认值、标签和选中状态。
  */
 import { Checkbox, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

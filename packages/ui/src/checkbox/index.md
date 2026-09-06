@@ -15,11 +15,15 @@ group:
 
 ## 介绍
 
-Checkbox 是 React Native 组件库中的公开组件，提供与 altron-app 一致的调用和数据模型。
+Checkbox 用于表示布尔或自定义值的选中状态，支持标签位置、圆形/方形指示器和自定义图标；`CheckboxGroup` 用于从选项数组生成单选或多选组。
 
 </section>
 
 <code src="./__fixtures__/overview.tsx" title="组件预览"></code>
+
+## 代码演示
+
+<code src="./__fixtures__/examples/basic.tsx" title="基础用法" description="展示单个 Checkbox 的标签、默认值和受控变化入口。"></code>
 
 ## 引入
 
@@ -29,6 +33,23 @@ import { Checkbox } from '@ftsukic/react-native-ui'
 
 ## API
 
-公开 Props 和类型请以导出的 `CheckboxProps` 为准。组件继承的 React Native 属性保持原生语义；可配置的主题字段通过 `ThemeProvider` 的 `theme.components.Checkbox` 传入，组件实例样式使用对应的 `style` 或语义样式入口。
+| 属性 | 说明 | 类型 | 默认值 |
+| --- | --- | --- | --- |
+| `value` / `defaultValue` | 受控或非受控当前值 | `ActiveValue \| InactiveValue` | `inactiveValue` |
+| `activeValue` / `inactiveValue` | 选中和未选中的值 | `ActiveValue` / `InactiveValue` | `true` / `false` |
+| `label` / `children` | 标签内容 | `ReactNode` | — |
+| `labelPosition` | 标签位置 | `'left' \| 'right'` | `'right'` |
+| `shape` | 指示器形状 | `'circle' \| 'square'` | `'square'` |
+| `disabled` | 是否禁用指示器和标签 | `boolean` | `false` |
+| `labelDisabled` | 是否只禁用标签点击 | `boolean` | `false` |
+| `iconSize` / `gap` | 指示器尺寸和标签间距 | `number` | 主题值 |
+| `onChange` | 值变化回调 | `(value) => void` | — |
+| `renderIcon` | 自定义指示器 | `(props) => ReactNode` | — |
+
+Checkbox 继承 React Native `ViewProps`，`style` 作用于根容器；`labelTextStyle` 和 `iconStyle` 分别作用于标签和指示器。`onChange` 只有在未禁用时触发。
+
+### CheckboxGroup
+
+`CheckboxGroup` 的 `options` 必填，支持 `multiple`、`direction`、`wrap`、`editable`、`deselect`、`scrollable` 和 `gap`。`multiple=false` 时默认选择单项，`multiple=true` 时值为数组；选项级 `disabled` 优先于组级可编辑状态。组的 `style` 作用于选项容器。
 
 React Native 版本不提供 Web 专用的 `className`、HTML 字符串、`teleport` 或 CSS 属性；浮层组件使用最近的 `PortalHost`。

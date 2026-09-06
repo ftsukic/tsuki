@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 展示带标题和正文的卡片。
  */
 import { Card, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

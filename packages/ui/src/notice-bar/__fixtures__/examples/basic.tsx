@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 展示信息状态通知栏和关闭、链接两种操作模式。
  */
 import { NoticeBar, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

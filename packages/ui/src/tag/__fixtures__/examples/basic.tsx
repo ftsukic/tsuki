@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 展示默认标签以及尺寸、类型和关闭操作的扩展点。
  */
 import { Tag, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

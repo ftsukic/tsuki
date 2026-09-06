@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 使用 options 和默认值展示侧边栏导航。
  */
 import { Sidebar, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

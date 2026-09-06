@@ -1,5 +1,7 @@
 ---
-title: Grid
+title: Grid 栅格
+componentDoc: true
+toc: false
 nav:
   title: 组件
 group:
@@ -7,24 +9,51 @@ group:
   order: 1
 ---
 
-# Grid
+# Grid 栅格
 
-<code src="./__fixtures__/examples/basic.tsx"></code>
+<section className="component-doc-intro">
 
-Grid 提供基于 24 栅格的行列布局，适合实现按钮组、表单项和响应式卡片排列。
+## 介绍
 
-```text
-import { Col, Row } from '@ftsukic/react-native-ui';
+Grid 提供基于 24 栅格的 `Row` 和 `Col` 布局，用于组织按钮组、表单项和响应式卡片。布局使用 React Native 的 `View`，不依赖 CSS Grid。
 
-<Row gap={16}>
-  <Col span={8}>第一列</Col>
-  <Col span={8}>第二列</Col>
-  <Col span={8}>第三列</Col>
-</Row>;
+</section>
+
+<code src="./__fixtures__/overview.tsx" title="组件预览"></code>
+
+## 引入
+
+```tsx | pure
+import { Col, Row } from '@ftsukic/react-native-ui'
 ```
 
-`Row` 支持 `gap`、`justify` 和 `align`，并继承 React Native `ViewProps`。`gap` 会通过上下文传递给内部 `Col`，每个列使用一半间距作为上下左右内边距，因此换行后的行之间也会保持相同间距。
+## 代码演示
 
-`Col` 必须设置 `span`，取值表示占用 24 栅格中的列数；`offset` 表示左侧偏移的栅格数，默认为 `0`。`Col` 同样继承 React Native `ViewProps`。
+<code src="./__fixtures__/examples/basic.tsx" title="基础栅格" description="使用 Row 和 Col 组织 24 栅格，并通过 gap 保持列间距。"></code>
 
-`Col` 建议放在 `Row` 内使用，这样才能获得 `Row` 配置的间距；组件的 `style` 会覆盖默认布局样式。
+## API
+
+### Row Props
+
+| 属性       | 说明                             | 类型                          | 默认值 |
+| ---------- | -------------------------------- | ----------------------------- | ------ |
+| `gap`      | 列之间的间距，并传递给内部 `Col` | `number`                      | `0`    |
+| `justify`  | 主轴对齐方式                     | `FlexStyle['justifyContent']` | —      |
+| `align`    | 交叉轴对齐方式                   | `FlexStyle['alignItems']`     | —      |
+| `style`    | 根 `View` 样式                   | `StyleProp<ViewStyle>`        | —      |
+| `children` | 栅格列内容                       | `ReactNode`                   | —      |
+
+`Row` 继承 React Native `ViewProps`。它默认横向排列并允许换行；`gap` 通过左右各一半的内边距实现列间距，因此换行后的行间距也会保持一致。
+
+### Col Props
+
+| 属性       | 说明                                     | 类型                   | 默认值 |
+| ---------- | ---------------------------------------- | ---------------------- | ------ |
+| `span`     | 占用 24 栅格的数量，建议使用 `1` 到 `24` | `number`               | 必填   |
+| `offset`   | 左侧偏移的栅格数量                       | `number`               | `0`    |
+| `style`    | 根 `View` 样式                           | `StyleProp<ViewStyle>` | —      |
+| `children` | 列内容                                   | `ReactNode`            | —      |
+
+`Col` 继承 React Native `ViewProps`。`span` 和 `offset` 会转换为百分比 `flexBasis` 与 `marginLeft`；超出 24 的值不会被组件自动截断。`Col` 建议放在 `Row` 内使用，以获得 `Row` 的 `gap`。
+
+Grid 不提供 `theme` 或 `styles` 语义样式入口；使用 `style` 和继承的 React Native `ViewProps` 定制布局。它也不提供 Web 专用的 `className`、CSS Grid 属性或 HTML 子节点。

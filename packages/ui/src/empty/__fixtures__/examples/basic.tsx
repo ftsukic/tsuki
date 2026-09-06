@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 展示无数据时的默认图标和提示文案。
  */
 import { Empty, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 使用 Flex 和 Flex.Item 快速构建带主轴分布的行布局。
  */
 import { Flex, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'

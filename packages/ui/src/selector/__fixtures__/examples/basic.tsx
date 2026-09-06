@@ -1,5 +1,6 @@
 /**
  * @title 组件预览
+ * @description 展示基于 Tree 选项的底部选择器。
  */
 import { Selector, ThemeProvider } from '@ftsukic/react-native-ui'
 import { View } from 'react-native'
