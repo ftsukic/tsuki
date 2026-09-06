@@ -1,30 +1,13 @@
-import { Button, ConfigProvider, PortalHost, showConfirmDialog } from '@ftsukic/react-native-ui'
-import { useState } from 'react'
-import { Text, View } from 'react-native'
-
 /**
- * @title 确认框
- * @description showConfirmDialog 增加取消按钮，确认和取消分别对应 Promise 的 resolve/reject。
+ * @title Dialog · confirm
+ * @description 展示 Dialog 的真实公开 API 和可交互状态。
  */
-export default function DialogConfirmExample() {
-  const [result, setResult] = useState('尚未选择')
+import { Dialog, UIProvider } from '@ftsukic/react-native-ui'
 
+export default function Example() {
   return (
-    <ConfigProvider>
-      <PortalHost>
-        <View style={{ gap: 12 }}>
-          <Button
-            onPress={() => {
-              void showConfirmDialog({ title: '删除记录', message: '删除后无法恢复，是否继续？' })
-                .then(() => setResult('已确认'))
-                .catch(() => setResult('已取消'))
-            }}
-          >
-            显示确认框
-          </Button>
-          <Text style={{ color: '#68788d' }}>{result}</Text>
-        </View>
-      </PortalHost>
-    </ConfigProvider>
+    <UIProvider>
+      <Dialog visible title="提示" message="这是一条可操作的提示。" showCancelButton />
+    </UIProvider>
   )
 }

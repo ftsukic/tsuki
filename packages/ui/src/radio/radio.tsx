@@ -26,6 +26,9 @@ export const Radio = forwardRef<React.ElementRef<typeof Pressable>, RadioProps>(
     defaultChecked = false,
     disabled = false,
     shape = 'round',
+    optionType,
+    buttonStyle,
+    size,
     labelPosition = 'right',
     checkedColor,
     style,
@@ -42,6 +45,9 @@ export const Radio = forwardRef<React.ElementRef<typeof Pressable>, RadioProps>(
   const warnedMissingValue = useRef(false)
   const isControlled = checked !== undefined
   const effectiveDisabled = disabled || !!group?.disabled
+  const effectiveOptionType = optionType ?? group?.optionType ?? 'default'
+  const effectiveButtonStyle = buttonStyle ?? group?.buttonStyle ?? 'outline'
+  const effectiveSize = size ?? group?.size ?? 'middle'
   const isChecked = group
     ? value !== undefined && Object.is(group.value, value)
     : isControlled
@@ -82,6 +88,9 @@ export const Radio = forwardRef<React.ElementRef<typeof Pressable>, RadioProps>(
     defaultChecked,
     disabled: effectiveDisabled,
     shape,
+    optionType: effectiveOptionType,
+    buttonStyle: effectiveButtonStyle,
+    size: effectiveSize,
     labelPosition,
     checkedColor,
     style,
@@ -107,7 +116,7 @@ export const Radio = forwardRef<React.ElementRef<typeof Pressable>, RadioProps>(
           disabled: effectiveDisabled,
           pressed,
         }
-        const resolved = getRadioStyles(token, radioProps, state)
+        const resolved = getRadioStyles(token, radioProps, state, group)
         const semantic = resolveStyles(styles, { props: radioProps, state })
         return [resolved.root, semantic?.root, style]
       }}
@@ -118,7 +127,7 @@ export const Radio = forwardRef<React.ElementRef<typeof Pressable>, RadioProps>(
           disabled: effectiveDisabled,
           pressed,
         }
-        const resolved = getRadioStyles(token, radioProps, state)
+        const resolved = getRadioStyles(token, radioProps, state, group)
         const semantic = resolveStyles(styles, { props: radioProps, state })
         const label = isTextContent(children) ? (
           <Text style={[resolved.label, semantic?.label]}>{children}</Text>
@@ -129,9 +138,11 @@ export const Radio = forwardRef<React.ElementRef<typeof Pressable>, RadioProps>(
         return (
           <>
             {labelPosition === 'left' ? label : null}
-            <View style={[resolved.indicator, semantic?.indicator]}>
-              <View style={resolved.mark} />
-            </View>
+            {effectiveOptionType === 'default' ? (
+              <View style={[resolved.indicator, semantic?.indicator]}>
+                <View style={resolved.mark} />
+              </View>
+            ) : null}
             {labelPosition === 'right' ? label : null}
           </>
         )

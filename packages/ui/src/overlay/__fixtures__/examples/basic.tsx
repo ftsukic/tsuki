@@ -1,20 +1,13 @@
-import { Button, Overlay, Provider } from '@ftsukic/react-native-ui'
-import { useState } from 'react'
-import { View } from 'react-native'
-
 /**
- * @title 基础用法
- * @description 使用 show 控制遮罩显示，点击遮罩后由调用方关闭组件。
+ * @title Overlay · basic
+ * @description 展示 Overlay 的真实公开 API 和可交互状态。
  */
-export default function OverlayBasicExample() {
-  const [show, setShow] = useState(false)
+import { Overlay, UIProvider } from '@ftsukic/react-native-ui'
 
+export default function Example() {
   return (
-    <Provider>
-      <View>
-        <Button onPress={() => setShow(true)}>显示 Overlay</Button>
-        <Overlay show={show} onPress={() => setShow(false)} />
-      </View>
-    </Provider>
+    <UIProvider>
+      <Overlay visible backgroundColor="rgba(0, 0, 0, 0.45)" />
+    </UIProvider>
   )
 }

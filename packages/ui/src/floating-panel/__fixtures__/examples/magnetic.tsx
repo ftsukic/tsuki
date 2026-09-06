@@ -1,4 +1,4 @@
-import { FloatingPanel, Provider } from '@ftsukic/react-native-ui'
+import { FloatingPanel } from '@ftsukic/react-native-ui'
 import { StyleSheet, Text, View } from 'react-native'
 
 /**
@@ -7,16 +7,14 @@ import { StyleSheet, Text, View } from 'react-native'
  */
 export default function FloatingPanelMagneticExample() {
   return (
-    <Provider>
-      <View style={styles.page}>
-        <FloatingPanel anchors={[100, 220, 520]} magnetic={false}>
-          <View style={styles.content}>
-            <Text style={styles.title}>自由高度</Text>
-            <Text style={styles.description}>拖动后可以停留在 100～520px 的任意高度。</Text>
-          </View>
-        </FloatingPanel>
-      </View>
-    </Provider>
+    <View style={styles.page}>
+      <FloatingPanel anchors={[100, 220, 520]} magnetic={false}>
+        <View style={styles.content}>
+          <Text style={styles.title}>自由高度</Text>
+          <Text style={styles.description}>拖动后可以停留在 100～520px 的任意高度。</Text>
+        </View>
+      </FloatingPanel>
+    </View>
   )
 }
 

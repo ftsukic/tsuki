@@ -13,6 +13,15 @@ export default function Example() {
         <Avatar style={{ backgroundColor: '#07C160' }}>B</Avatar>
         <Avatar style={{ backgroundColor: '#FF976A' }}>C</Avatar>
       </Avatar.Group>
+      <Avatar.Group
+        max={{ count: 2, style: { color: '#f56a00', backgroundColor: '#fde3cf' } }}
+        onOverflowPress={() => undefined}
+      >
+        <Avatar style={{ backgroundColor: '#1989FA' }}>A</Avatar>
+        <Avatar style={{ backgroundColor: '#07C160' }}>B</Avatar>
+        <Avatar style={{ backgroundColor: '#FF976A' }}>C</Avatar>
+        <Avatar style={{ backgroundColor: '#7232DD' }}>D</Avatar>
+      </Avatar.Group>
       <Avatar.Group maxCount={2} onOverflowPress={() => undefined}>
         <Avatar style={{ backgroundColor: '#1989FA' }}>A</Avatar>
         <Avatar style={{ backgroundColor: '#07C160' }}>B</Avatar>

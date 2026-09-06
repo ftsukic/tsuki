@@ -1,42 +1,13 @@
-import { Button, ConfigProvider, Dialog, PortalHost } from '@ftsukic/react-native-ui'
-import { useState } from 'react'
-import { View } from 'react-native'
-
 /**
- * @title 主题定制
- * @description 通过 Dialog token 和 semantic styles 定制面板、按钮和正文样式。
+ * @title Dialog · theme
+ * @description 展示 Dialog 的真实公开 API 和可交互状态。
  */
-export default function DialogThemeExample() {
-  const [show, setShow] = useState(false)
+import { Dialog, UIProvider } from '@ftsukic/react-native-ui'
 
+export default function Example() {
   return (
-    <ConfigProvider
-      theme={{
-        components: {
-          Dialog: {
-            backgroundColor: '#172b3a',
-            borderRadius: 20,
-            messageColor: '#d9f7be',
-            titleColor: '#ffffff',
-          },
-        },
-      }}
-    >
-      <PortalHost>
-        <View style={{ gap: 12 }}>
-          <Button onPress={() => setShow(true)}>显示主题 Dialog</Button>
-          <Dialog
-            show={show}
-            title="主题 Dialog"
-            message="组件 token 和 semantic styles 可以同时使用。"
-            onShowChange={setShow}
-            styles={{
-              message: { fontWeight: '600' },
-              root: { borderWidth: 1, borderColor: '#52c41a' },
-            }}
-          />
-        </View>
-      </PortalHost>
-    </ConfigProvider>
+    <UIProvider>
+      <Dialog visible title="提示" message="这是一条可操作的提示。" showCancelButton />
+    </UIProvider>
   )
 }

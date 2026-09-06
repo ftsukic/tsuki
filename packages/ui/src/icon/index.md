@@ -9,7 +9,7 @@ group:
 
 # Icon
 
-<code src="./__fixtures__/basic.tsx"></code>
+<code src="./__fixtures__/examples/basic.tsx"></code>
 
 `Icon` 使用 `@ant-design/icons-svg` 图标定义，并通过 `react-native-svg` 渲染到 React Native。H5 文档预览使用 `react-native-svg` 的 Web 实现。
 

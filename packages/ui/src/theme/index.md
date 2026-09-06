@@ -9,16 +9,16 @@ group:
 
 # Theme
 
-<code src="./__fixtures__/algorithms.tsx"></code>
+<code src="./__fixtures__/examples/basic.tsx"></code>
 
 Theme 使用 `SeedToken → MappingAlgorithm → MapToken → AliasToken` 四层模型。Provider 只负责全局 token、algorithm 和组件 overrides；组件自己的 token 派生函数位于组件目录内。
 
 ```text
-import { Button, ConfigProvider, darkAlgorithm } from '@ftsukic/react-native-ui';
+import { Button, ThemeProvider, darkAlgorithm } from '@ftsukic/react-native-ui';
 
 export function App() {
   return (
-    <ConfigProvider
+    <ThemeProvider
       theme={{
         algorithm: darkAlgorithm,
         token: { colorPrimary: '#1989FA' },
@@ -26,7 +26,7 @@ export function App() {
       }}
     >
       <Button type="primary">保存</Button>
-    </ConfigProvider>
+    </ThemeProvider>
   );
 }
 ```
@@ -51,4 +51,4 @@ useComponentToken('Button', getButtonToken);
 getDesignToken({ token, algorithm, components, inherit });
 ```
 
-`ThemeConfig.token` 使用 `Partial<AliasToken>`。嵌套 `ConfigProvider` 默认继承父级，设置 `inherit: false` 后从默认 seed 开始解析。`useToken` 必须在 `ConfigProvider` 内使用。Theme 不包含业务主题或平台专用 token。
+`ThemeConfig.token` 使用 `Partial<AliasToken>`。嵌套 `ThemeProvider` 默认继承父级，设置 `inherit: false` 后从默认 seed 开始解析。`useToken` 必须在 `ThemeProvider` 内使用。Theme 不包含业务主题或平台专用 token。

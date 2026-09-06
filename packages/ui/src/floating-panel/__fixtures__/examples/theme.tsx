@@ -1,4 +1,4 @@
-import { FloatingPanel, Provider } from '@ftsukic/react-native-ui'
+import { FloatingPanel, ThemeProvider } from '@ftsukic/react-native-ui'
 import { StyleSheet, Text, View } from 'react-native'
 
 /**
@@ -7,7 +7,7 @@ import { StyleSheet, Text, View } from 'react-native'
  */
 export default function FloatingPanelThemeExample() {
   return (
-    <Provider
+    <ThemeProvider
       theme={{
         components: {
           FloatingPanel: {
@@ -33,7 +33,7 @@ export default function FloatingPanelThemeExample() {
           </View>
         </FloatingPanel>
       </View>
-    </Provider>
+    </ThemeProvider>
   )
 }
 

@@ -1,4 +1,4 @@
-import { FloatingPanel, Provider } from '@ftsukic/react-native-ui'
+import { FloatingPanel } from '@ftsukic/react-native-ui'
 import { StyleSheet, Text, View } from 'react-native'
 
 /**
@@ -7,18 +7,16 @@ import { StyleSheet, Text, View } from 'react-native'
  */
 export default function FloatingPanelSafeAreaExample() {
   return (
-    <Provider>
-      <View style={styles.page}>
-        <FloatingPanel safeAreaInsetBottom>
-          <View style={styles.content}>
-            <Text style={styles.title}>安全区适配</Text>
-            <Text style={styles.description}>
-              在带有 Home Indicator 的设备上，内容底部会自动留出安全距离。
-            </Text>
-          </View>
-        </FloatingPanel>
-      </View>
-    </Provider>
+    <View style={styles.page}>
+      <FloatingPanel safeAreaInsetBottom>
+        <View style={styles.content}>
+          <Text style={styles.title}>安全区适配</Text>
+          <Text style={styles.description}>
+            在带有 Home Indicator 的设备上，内容底部会自动留出安全距离。
+          </Text>
+        </View>
+      </FloatingPanel>
+    </View>
   )
 }
 

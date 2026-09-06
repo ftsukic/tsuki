@@ -46,6 +46,10 @@
     "../packages/ui/src/dialog/__fixtures__/examples",
     "../packages/ui/src/dialog/__fixtures__/overview.tsx",
     "../packages/ui/src/portal/__fixtures__/examples",
-    "../packages/ui/src/portal/__fixtures__/overview.tsx"
+    "../packages/ui/src/portal/__fixtures__/overview.tsx",
+    "../packages/ui/src/action-sheet/__fixtures__/examples",
+    "../packages/ui/src/action-sheet/__fixtures__/overview.tsx",
+    "../packages/ui/src/*/__fixtures__/examples",
+    "../packages/ui/src/*/__fixtures__/overview.tsx"
   ]
 }

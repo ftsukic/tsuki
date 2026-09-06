@@ -1,13 +1,2 @@
 export { Button } from './button'
-export { getButtonToken } from './token'
-export type {
-  ButtonIconPosition,
-  ButtonProps,
-  ButtonSemanticStyles,
-  ButtonSize,
-  ButtonStyleInfo,
-  ButtonStyleState,
-  ButtonStyles,
-  ButtonType,
-  ButtonVariant,
-} from './interface'
+export type { ButtonPadding, ButtonProps, ButtonSize, ButtonType } from './interface'

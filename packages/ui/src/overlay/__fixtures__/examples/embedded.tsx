@@ -1,33 +1,13 @@
-import { Button, Overlay, Provider } from '@ftsukic/react-native-ui'
-import { useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
-
 /**
- * @title 嵌入内容
- * @description children 会显示在遮罩上方，可放置按钮等交互内容。
+ * @title Overlay · embedded
+ * @description 展示 Overlay 的真实公开 API 和可交互状态。
  */
-export default function OverlayEmbeddedExample() {
-  const [show, setShow] = useState(false)
+import { Overlay, UIProvider } from '@ftsukic/react-native-ui'
 
+export default function Example() {
   return (
-    <Provider>
-      <View style={styles.container}>
-        <Button onPress={() => setShow(true)}>显示内容</Button>
-        <Overlay show={show} onPress={() => setShow(false)}>
-          <View style={styles.card}>
-            <Text style={styles.title}>嵌入内容</Text>
-            <Text style={styles.description}>子内容可以继续响应自己的触摸事件。</Text>
-            <Button onPress={() => setShow(false)}>关闭</Button>
-          </View>
-        </Overlay>
-      </View>
-    </Provider>
+    <UIProvider>
+      <Overlay visible backgroundColor="rgba(0, 0, 0, 0.45)" />
+    </UIProvider>
   )
 }
-
-const styles = StyleSheet.create({
-  container: { gap: 12 },
-  card: { alignItems: 'center', backgroundColor: '#ffffff', gap: 12, padding: 20 },
-  title: { color: '#1f2937', fontSize: 18, fontWeight: '600' },
-  description: { color: '#68788d', textAlign: 'center' },
-})

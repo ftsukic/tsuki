@@ -85,8 +85,8 @@ function isVerticalGesture(gestureState: PanResponderGestureState) {
   return Math.abs(gestureState.dy) > Math.abs(gestureState.dx) && Math.abs(gestureState.dy) > 2
 }
 
-export const FloatingPanel = forwardRef<View, FloatingPanelProps>(
-  function FloatingPanel(props, ref) {
+export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
+  function FloatingPanelContent(props, ref) {
     const { token: themeToken } = useToken()
     const token = useComponentToken('FloatingPanel', getFloatingPanelToken)
     const safeAreaInsets = useContext(SafeAreaInsetsContext)
@@ -343,41 +343,48 @@ export const FloatingPanel = forwardRef<View, FloatingPanelProps>(
     const contentPaddingBottom = Math.max(0, maxHeight - currentHeight) + bottomInset
 
     return (
-      <Portal>
-        <Animated.View
-          ref={ref}
-          {...viewProps}
-          collapsable={false}
-          style={[
-            resolvedStyles.root,
-            { height: maxHeight },
-            semantic?.root,
-            style,
-            { transform: [{ translateY: translation }] },
-          ]}
-        >
-          {header !== undefined || draggable ? (
-            <View
-              {...headerResponder.panHandlers}
-              style={[resolvedStyles.header, semantic?.header]}
-            >
-              {header ?? <View style={[resolvedStyles.bar, semantic?.bar]} />}
-            </View>
-          ) : null}
-          <View {...contentResponder.panHandlers} style={{ flex: 1 }}>
-            <ScrollView
-              style={[resolvedStyles.content, semantic?.content]}
-              contentContainerStyle={[
-                { paddingBottom: contentPaddingBottom },
-                semantic?.contentContainer,
-              ]}
-              onScroll={handleScroll}
-              scrollEventThrottle={16}
-            >
-              {children}
-            </ScrollView>
+      <Animated.View
+        ref={ref}
+        {...viewProps}
+        collapsable={false}
+        style={[
+          resolvedStyles.root,
+          { height: maxHeight },
+          semantic?.root,
+          style,
+          { transform: [{ translateY: translation }] },
+        ]}
+      >
+        {header !== undefined || draggable ? (
+          <View {...headerResponder.panHandlers} style={[resolvedStyles.header, semantic?.header]}>
+            {header ?? <View style={[resolvedStyles.bar, semantic?.bar]} />}
           </View>
-        </Animated.View>
+        ) : null}
+        <View {...contentResponder.panHandlers} style={{ flex: 1 }}>
+          <ScrollView
+            style={[resolvedStyles.content, semantic?.content]}
+            contentContainerStyle={[
+              { paddingBottom: contentPaddingBottom },
+              semantic?.contentContainer,
+            ]}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+          >
+            {children}
+          </ScrollView>
+        </View>
+      </Animated.View>
+    )
+  },
+)
+
+FloatingPanelContent.displayName = 'FloatingPanelContent'
+
+export const FloatingPanel = forwardRef<View, FloatingPanelProps>(
+  function FloatingPanel(props, ref) {
+    return (
+      <Portal>
+        <FloatingPanelContent {...props} ref={ref} />
       </Portal>
     )
   },

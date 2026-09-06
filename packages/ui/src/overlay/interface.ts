@@ -1,28 +1,18 @@
+import type { OverlayToken } from '../theme'
 import type { ReactNode } from 'react'
-import type { ColorValue, PressableProps, StyleProp, ViewProps, ViewStyle } from 'react-native'
-import type { StyleInfo, StyleResolver } from '../style'
+import type { ColorValue, StyleProp, ViewProps, ViewStyle } from 'react-native'
 
-export interface OverlayStyleState {
-  show: boolean
-  rendered: boolean
-}
-
-export interface OverlaySemanticStyles {
-  root?: StyleProp<ViewStyle>
-  content?: StyleProp<ViewStyle>
-}
-
-export type OverlayStyles = StyleResolver<OverlayProps, OverlayStyleState, OverlaySemanticStyles>
-
-export interface OverlayProps extends Omit<ViewProps, 'children' | 'style'> {
-  show?: boolean
-  backgroundColor?: ColorValue
-  duration?: number
-  zIndex?: number
+export interface OverlayProps {
   children?: ReactNode
-  onPress?: PressableProps['onPress']
+  theme?: Partial<OverlayToken>
   style?: StyleProp<ViewStyle>
-  styles?: OverlayStyles
+  overlayStyle?: StyleProp<ViewStyle>
+  visible: boolean
+  zIndex?: number
+  duration?: number
+  onPress?: () => void
+  onClosed?: () => void
+  onRequestClose?: () => boolean
+  backgroundColor?: ColorValue
+  testID?: ViewProps['testID']
 }
-
-export type OverlayStyleInfo = StyleInfo<OverlayProps, OverlayStyleState>

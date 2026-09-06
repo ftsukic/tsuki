@@ -15,7 +15,7 @@ export function getAvatarToken(token: AliasToken): AvatarToken {
     iconFontSize: 18,
     iconFontSizeLG: 24,
     groupBorderColor: token.colorBgContainer,
-    groupBorderWidth: 2,
+    groupBorderWidth: 1,
     groupOverlapping: -8,
     groupSpace: token.paddingXS,
   }

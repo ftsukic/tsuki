@@ -81,7 +81,9 @@ function resolveAttributes(attrs: NativeSvgAttributes, color: string): NativeSvg
 
 function getNodeColor(attrs: NativeSvgAttributes, color: string): NativeSvgAttributes {
   const resolved = resolveAttributes(attrs, color)
-  if (resolved.fill === undefined && resolved.stroke === undefined) resolved.fill = color
+  if (resolved.fill === undefined && resolved.stroke === undefined) {
+    resolved.fill = color
+  }
   return resolved
 }
 
@@ -200,7 +202,9 @@ export function AntdNativeIcon({
     )
   const resolvedStyle = [defaultStyle, disabled && { opacity: 0.4 }, style] as StyleProp<ViewStyle>
 
-  if (!onPress) return <View style={resolvedStyle}>{iconContent}</View>
+  if (!onPress) {
+    return <View style={resolvedStyle}>{iconContent}</View>
+  }
 
   return (
     <Pressable

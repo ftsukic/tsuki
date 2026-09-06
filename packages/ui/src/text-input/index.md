@@ -9,7 +9,7 @@ group:
 
 # TextInput
 
-<code src="./__fixtures__/basic.tsx"></code>
+<code src="./__fixtures__/examples/basic.tsx"></code>
 
 `TextInput` 保留 React Native 的组件名称和输入事件，同时使用 Vant Mobile 的 token 和布局。
 

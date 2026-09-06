@@ -1,14 +1,10 @@
-export { TextInput } from './text-input'
-export { getInputToken } from './token'
-export type {
-  TextInputClearTrigger,
-  TextInputFormatTrigger,
-  TextInputInstance,
-  TextInputProps,
-  TextInputSemanticStyles,
-  TextInputSize,
-  TextInputStyleInfo,
-  TextInputStyleState,
-  TextInputStyles,
-  TextInputType,
-} from './interface'
+import { NumberInput } from '../number-input/number-input'
+import { PasswordInput } from '../password-input/password-input'
+import { TextInput as BaseTextInput } from './text-input'
+
+export const TextInput = Object.assign(BaseTextInput, {
+  Number: NumberInput,
+  Password: PasswordInput,
+})
+
+export type { TextInputInstance, TextInputProps } from './interface'

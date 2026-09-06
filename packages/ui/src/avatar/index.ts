@@ -7,6 +7,8 @@ export { AvatarGroup }
 export { getAvatarToken } from './token'
 export type {
   AvatarGroupProps,
+  AvatarGroupMax,
+  AvatarGroupMaxStyle,
   AvatarGroupSemanticStyles,
   AvatarGroupStyleInfo,
   AvatarGroupStyleState,

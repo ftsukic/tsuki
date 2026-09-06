@@ -10,7 +10,10 @@ import type {
 import type { StyleInfo, StyleResolver } from '../style'
 
 export type RadioValue = string | number
-export type RadioShape = 'round' | 'square'
+export type RadioShape = 'round' | 'square' | 'dot'
+export type RadioOptionType = 'default' | 'button'
+export type RadioButtonStyle = 'outline' | 'solid'
+export type RadioButtonSize = 'large' | 'middle' | 'small'
 export type RadioDirection = 'vertical' | 'horizontal'
 export type RadioLabelPosition = 'left' | 'right'
 
@@ -35,6 +38,9 @@ export interface RadioProps extends Omit<PressableProps, 'children' | 'style' | 
   defaultChecked?: boolean
   disabled?: boolean
   shape?: RadioShape
+  optionType?: RadioOptionType
+  buttonStyle?: RadioButtonStyle
+  size?: RadioButtonSize
   labelPosition?: RadioLabelPosition
   checkedColor?: ColorValue
   onChange?: (checked: boolean) => void
@@ -57,6 +63,10 @@ export interface RadioGroupProps extends ViewProps {
   defaultValue?: RadioValue
   disabled?: boolean
   direction?: RadioDirection
+  optionType?: RadioOptionType
+  buttonStyle?: RadioButtonStyle
+  size?: RadioButtonSize
   gap?: number
+  block?: boolean
   onChange?: (value: RadioValue) => void
 }

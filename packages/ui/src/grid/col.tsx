@@ -4,7 +4,6 @@ import { View } from 'react-native'
 
 export function Col({ offset = 0, span, style, ...restProps }: ColProps) {
   const { gap } = useRow()
-
   return (
     <View
       {...restProps}
@@ -15,7 +14,6 @@ export function Col({ offset = 0, span, style, ...restProps }: ColProps) {
           flexShrink: 0,
           marginLeft: `${(offset / 24) * 100}%`,
           paddingHorizontal: gap / 2,
-          paddingVertical: gap / 2,
         },
         style,
       ]}

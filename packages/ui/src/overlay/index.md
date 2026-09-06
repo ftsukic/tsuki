@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-Overlay 用于创建全屏遮罩，强调当前操作并阻止用户操作底层内容。支持受控显示、淡入淡出、嵌入内容、遮罩点击和主题定制。
+Overlay 提供覆盖页面的受控遮罩，可承载自定义内容。
 
 </section>
 
@@ -23,68 +23,25 @@ Overlay 用于创建全屏遮罩，强调当前操作并阻止用户操作底层
 
 ## 引入
 
-```tsx | pure
-import { Overlay, Provider } from '@ftsukic/react-native-ui'
-```
-
-Overlay 内部使用 `Portal`，推荐放在应用根节点的 `Provider` 中：
-
-```tsx | pure
-<Provider>
-  <App />
-</Provider>
-```
+import { Overlay, OverlaySurface, Provider } from '@ftsukic/react-native-ui'
 
 ## 代码演示
 
-<code src="./__fixtures__/examples/basic.tsx" title="基础用法" description="使用 show 受控显示遮罩，点击遮罩后由调用方关闭。"></code>
-
-<code src="./__fixtures__/examples/embedded.tsx" title="嵌入内容" description="通过 children 放置自定义内容和交互控件。"></code>
-
-<code src="./__fixtures__/examples/interactions.tsx" title="透明遮罩与动画" description="自定义背景色并使用 duration 控制淡入淡出速度。"></code>
-
-<code src="./__fixtures__/examples/theme.tsx" title="主题定制" description="通过 Overlay token 和 semantic styles 定制外观。"></code>
+<code src="./__fixtures__/examples/basic.tsx" title="基础用法" description="使用 visible 控制遮罩。"></code> <code src="./__fixtures__/examples/embedded.tsx" title="嵌入内容" description="通过 children 放置内容。"></code> <code src="./__fixtures__/examples/interactions.tsx" title="点击和动画" description="使用 onPress、onClosed 和 duration。"></code> <code src="./__fixtures__/examples/theme.tsx" title="主题定制" description="通过 backgroundColor 和 theme 覆盖外观。"></code>
 
 ## API
 
-### OverlayProps
+| 属性                 | 类型                  | 默认值                  | 说明                   |
+| -------------------- | --------------------- | ----------------------- | ---------------------- |
+| visible              | boolean               | false                   | 是否显示               |
+| children             | ReactNode             | —                       | 遮罩上的内容           |
+| backgroundColor      | ColorValue            | token.colorBgMask       | 遮罩颜色               |
+| duration             | number                | token.animationDuration | 淡入淡出时长，单位毫秒 |
+| zIndex               | number                | token.zIndex            | 层级                   |
+| onPress              | function              | —                       | 点击遮罩               |
+| onClosed             | function              | —                       | 退出动画完成           |
+| onRequestClose       | () => boolean         | —                       | 请求关闭               |
+| style / overlayStyle | StyleProp<ViewStyle>  | —                       | 根节点和遮罩样式       |
+| theme                | Partial<OverlayToken> | —                       | 覆盖 Overlay token     |
 
-| 属性 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `show` | `boolean` | `false` | 是否显示；关闭后由调用方更新状态 |
-| `backgroundColor` | `ColorValue` | 主题 `colorBgMask` | 遮罩背景色；`transparent` 可创建透明触摸拦截层 |
-| `duration` | `number` | 主题值 | 淡入淡出动画时长，单位为毫秒；负数按 `0` 处理，非有限值回退到主题值 |
-| `zIndex` | `number` | 主题 `zIndexPopupBase` | 根节点层级 |
-| `children` | `ReactNode` | — | 显示在遮罩上方的自定义内容 |
-| `onPress` | `PressableProps['onPress']` | — | 点击遮罩区域时触发；不会自动修改 `show` |
-| `style` | `StyleProp<ViewStyle>` | — | 遮罩根节点样式，优先于默认样式 |
-| `styles` | `OverlayStyles` | — | `root / content` 语义样式，可传对象或函数 |
-
-组件继承 React Native `ViewProps`，除 `children` 和 `style` 外透传到遮罩根节点。`style` 与 `styles.root` 作用于完整遮罩，`styles.content` 作用于嵌入内容容器。
-
-遮罩显示时会拦截底层触摸；嵌入内容通过 `children` 放置在遮罩上方，交互组件可以继续响应自己的 `onPress`。Overlay 不提供 Vant Web 专用的 `lockScroll`、`lazyRender`、`customStyle`、`teleport` 和 class API。
-
-### 无障碍与动画
-
-遮罩触摸层不会进入无障碍导航，嵌入内容保持可访问。组件默认只在首次显示后挂载，隐藏时完成淡出动画再卸载；主题设置 `motion: false` 时立即显示或卸载。
-
-### 主题定制
-
-通过 `ConfigProvider` 的 `theme.components.Overlay` 配置默认背景色、动画时长和层级：
-
-```tsx | pure
-<ConfigProvider
-  theme={{
-    components: {
-      Overlay: {
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-        animationDuration: 240,
-      },
-    },
-  }}
->
-  <Overlay show />
-</ConfigProvider>
-```
-
-支持的 Overlay token：`backgroundColor`、`animationDuration` 和 `zIndex`。
+Overlay 使用 active PortalHost；局部布局场景可直接使用 OverlaySurface。组件不自动修改 visible。

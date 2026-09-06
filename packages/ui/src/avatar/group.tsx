@@ -11,6 +11,7 @@ export function AvatarGroup({
   children,
   size,
   shape,
+  max,
   maxCount,
   onOverflowPress,
   style,
@@ -26,10 +27,11 @@ export function AvatarGroup({
   const groupSize = size ?? avatars[0]?.props.size ?? 'medium'
   const groupShape = shape ?? avatars[0]?.props.shape ?? 'circle'
 
+  const resolvedMaxCount = max?.count ?? maxCount
   const normalizedMaxCount =
-    maxCount === undefined || !Number.isFinite(maxCount)
+    resolvedMaxCount === undefined || !Number.isFinite(resolvedMaxCount)
       ? undefined
-      : Math.max(0, Math.floor(maxCount))
+      : Math.max(0, Math.floor(resolvedMaxCount))
   const visibleAvatars =
     normalizedMaxCount === undefined ? avatars : avatars.slice(0, normalizedMaxCount)
   const overflowCount = avatars.length - visibleAvatars.length
@@ -39,6 +41,7 @@ export function AvatarGroup({
       children,
       size,
       shape,
+      max,
       maxCount,
       onOverflowPress,
       style,
@@ -105,7 +108,8 @@ export function AvatarGroup({
           <Avatar
             size={groupSize}
             shape={groupShape}
-            style={{ backgroundColor: token.groupBorderColor }}
+            styles={max?.style?.color ? { text: { color: max.style.color } } : undefined}
+            style={{ backgroundColor: max?.style?.backgroundColor ?? token.groupBorderColor }}
           >
             {`+${overflowCount}`}
           </Avatar>

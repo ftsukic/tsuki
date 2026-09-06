@@ -1,93 +1,81 @@
-import type { TextStyle, ViewStyle } from 'react-native'
-import type { CellProps, CellStyleState } from './interface'
-import type { CellToken } from '../theme'
+import type { AliasToken, CellToken } from '../theme'
+import { StyleSheet } from 'react-native'
 
-export interface CellResolvedStyles {
-  root: ViewStyle
-  row: ViewStyle
-  content: ViewStyle
-  icon: ViewStyle
-  title: TextStyle
-  label: TextStyle
-  value: TextStyle
-  extra: TextStyle
-  suffix: ViewStyle
-  required: TextStyle
-  divider: ViewStyle
-}
-
-export function getCellStyles(
-  token: CellToken,
-  props: CellProps,
-  state: CellStyleState,
-): CellResolvedStyles {
-  return {
-    root: {
+export function createCellStyles(token: CellToken, themeToken: AliasToken) {
+  return StyleSheet.create({
+    cell: {
       backgroundColor: token.backgroundColor,
-      opacity: state.disabled ? 0.4 : 1,
     },
-    row: {
-      minHeight: props.size === 'large' ? token.largeMinHeight : token.minHeight,
-      paddingHorizontal: token.paddingHorizontal,
+    inner: {
+      marginHorizontal: token.paddingHorizontal,
       paddingVertical: token.paddingVertical,
+      minHeight: token.minHeight,
+    },
+    innerRow: {
       flexDirection: 'row',
-      alignItems: props.center ? 'center' : 'flex-start',
-    },
-    content: {
-      flex: 1,
-      minWidth: 0,
-      justifyContent: 'center',
-    },
-    icon: {
-      marginRight: token.iconGap,
-      width: token.iconSize,
-      minHeight: token.iconSize,
-      alignItems: 'center',
-      justifyContent: 'center',
     },
     title: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexShrink: 1,
+      marginRight: token.iconGap,
+    },
+    titleExtra: {
+      marginRight: token.iconGap,
+    },
+    titleText: {
       color: token.titleColor,
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
-      flexShrink: 1,
-    },
-    label: {
-      color: token.labelColor,
-      fontSize: token.labelFontSize,
-      lineHeight: token.lineHeightSM,
-      marginTop: 2,
     },
     value: {
+      flex: 1,
+      justifyContent: 'center',
+    },
+    valueText: {
       color: token.valueColor,
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
-      textAlign: 'right',
-      flexShrink: 1,
     },
-    extra: {
+    extraText: {
       color: token.extraColor,
       fontSize: token.extraFontSize,
       lineHeight: token.extraLineHeight,
-      marginLeft: token.iconGap,
-      flexShrink: 1,
+      marginHorizontal: token.paddingHorizontal,
+      paddingBottom: token.paddingVertical,
     },
-    suffix: {
-      marginLeft: token.iconGap,
+    content: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    required: {
+      width: token.requiredWidth,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    required: {
+    requiredText: {
       color: token.requiredColor,
       fontSize: token.fontSize,
-      lineHeight: token.lineHeight,
-      width: token.requiredWidth,
-      marginRight: 2,
+    },
+    arrow: {
+      alignSelf: 'center',
+      marginLeft: token.iconGap,
     },
     divider: {
-      height: token.borderColor ? 1 : 0,
+      height: themeToken.lineWidth,
       backgroundColor: token.borderColor,
-      marginLeft: token.paddingHorizontal,
-      marginRight: token.paddingHorizontal,
     },
-  }
+    groupTitle: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      paddingHorizontal: token.paddingHorizontal,
+      paddingVertical: token.paddingVertical,
+    },
+    groupTitleText: {
+      color: token.groupTitleColor,
+      fontSize: token.groupTitleFontSize,
+      lineHeight: token.lineHeight,
+    },
+  })
 }

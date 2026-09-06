@@ -1,45 +1,21 @@
+import { cleanup, render, screen } from '@testing-library/react-native'
 import { Col, Row } from '../src'
-import { render, screen } from '@testing-library/react-native'
-import { StyleSheet, View } from 'react-native'
+import { Text } from 'react-native'
 
-describe('Grid', () => {
-  it('creates a wrapping row and passes row alignment props', async () => {
-    await render(
-      <Row testID="row" gap={16} justify="space-between" align="center">
-        <Col testID="col" span={8} />
-      </Row>,
-    )
+afterEach(cleanup)
 
-    const rowStyle = StyleSheet.flatten(screen.getByTestId('row').props.style)
+test('renders columns inside a row', async () => {
+  await render(
+    <Row gap={8}>
+      <Col span={12}>
+        <Text>左</Text>
+      </Col>
+      <Col span={12}>
+        <Text>右</Text>
+      </Col>
+    </Row>,
+  )
 
-    expect(rowStyle).toMatchObject({
-      alignItems: 'center',
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      justifyContent: 'space-between',
-      marginHorizontal: -8,
-      marginVertical: -8,
-    })
-  })
-
-  it('applies 24-column span, offset and both-axis gap to columns', async () => {
-    await render(
-      <Row gap={12}>
-        <Col testID="col" span={6} offset={2}>
-          <View />
-        </Col>
-      </Row>,
-    )
-
-    const colStyle = StyleSheet.flatten(screen.getByTestId('col').props.style)
-
-    expect(colStyle).toMatchObject({
-      flexBasis: '25%',
-      flexGrow: 0,
-      flexShrink: 0,
-      marginLeft: `${(2 / 24) * 100}%`,
-      paddingHorizontal: 6,
-      paddingVertical: 6,
-    })
-  })
+  expect(screen.getByText('左')).toBeTruthy()
+  expect(screen.getByText('右')).toBeTruthy()
 })

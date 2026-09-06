@@ -30,18 +30,18 @@ export function AppRoot() {
 
 可以直接调用 `showDialog`、`showToast` 和 `showNotify`，Popup、Overlay 以及受控浮层也会渲染到同一个 Portal 宿主。
 
-不使用 Notify 时，也可以只组合 `ConfigProvider` 和 `PortalHost`：
+不使用 Notify 时，也可以只组合 `ThemeProvider` 和 `PortalHost`：
 
 ```tsx
-import { ConfigProvider, PortalHost } from '@ftsukic/react-native-ui'
+import { ThemeProvider, PortalHost } from '@ftsukic/react-native-ui'
 
 export function AppRoot() {
   return (
-    <ConfigProvider>
+    <ThemeProvider>
       <PortalHost>
         <App />
       </PortalHost>
-    </ConfigProvider>
+    </ThemeProvider>
   )
 }
 ```

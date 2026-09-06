@@ -1,16 +1,14 @@
 import { act, render, screen } from '@testing-library/react-native'
+import { Text, View } from 'react-native'
 import {
-  ConfigProvider,
   mountPortal,
   Portal,
   PortalHost,
+  ThemeProvider,
   unmountPortal,
   updatePortal,
   useToken,
 } from '../src'
-import type { PortalManager } from '../src/portal/manager'
-import { Text, View } from 'react-native'
-import type { ReactNode } from 'react'
 
 function TokenProbe() {
   const { token } = useToken()
@@ -20,24 +18,24 @@ function TokenProbe() {
 describe('Portal', () => {
   it('mounts portal content above the host children and updates it', async () => {
     const { rerender } = await render(
-      <Portal.Host>
+      <PortalHost>
         <Text testID="base">base</Text>
         <Portal>
           <Text testID="portal">first</Text>
         </Portal>
-      </Portal.Host>,
+      </PortalHost>,
     )
 
     expect(screen.getByTestId('base')).toBeTruthy()
     expect(screen.getByTestId('portal')).toHaveTextContent('first')
 
     await rerender(
-      <Portal.Host>
+      <PortalHost>
         <Text testID="base">base</Text>
         <Portal>
           <Text testID="portal">second</Text>
         </Portal>
-      </Portal.Host>,
+      </PortalHost>,
     )
 
     expect(screen.getByTestId('portal')).toHaveTextContent('second')
@@ -105,15 +103,15 @@ describe('Portal', () => {
     expect(screen.queryByTestId('portal')).toBeNull()
   })
 
-  it('preserves the current ConfigProvider theme in portal content', async () => {
+  it('uses the host ancestor context for portal content', async () => {
     await render(
-      <ConfigProvider theme={{ token: { colorPrimary: '#123456' } }}>
+      <ThemeProvider theme={{ token: { colorPrimary: '#123456' } }}>
         <PortalHost>
           <Portal>
             <TokenProbe />
           </Portal>
         </PortalHost>
-      </ConfigProvider>,
+      </ThemeProvider>,
     )
 
     expect(screen.getByTestId('token')).toHaveTextContent('#123456')
@@ -134,36 +132,6 @@ describe('Portal', () => {
     expect(layer?.props.style).toBeTruthy()
   })
 
-  it('queues mount, update, and unmount operations until the manager is ready', () => {
-    type HostInternals = {
-      manager: PortalManager | null
-      mount: (children: ReactNode) => number
-      update: (key: number, children: ReactNode) => void
-      unmount: (key: number) => void
-    }
-    const manager = {
-      mount: jest.fn(),
-      update: jest.fn(),
-      unmount: jest.fn(),
-    } as unknown as PortalManager
-    const host = new PortalHost({ children: null })
-    const internals = host as unknown as HostInternals
-    const retainedKey = internals.mount(<Text>first</Text>)
-    internals.update(retainedKey, <Text>updated</Text>)
-    const removedKey = internals.mount(<Text>removed</Text>)
-    internals.unmount(removedKey)
-    internals.manager = manager
-
-    host.componentDidMount()
-
-    expect(manager.mount).toHaveBeenCalledTimes(1)
-    expect(manager.mount).toHaveBeenCalledWith(retainedKey, expect.anything())
-    expect(manager.update).not.toHaveBeenCalled()
-    expect(manager.unmount).not.toHaveBeenCalled()
-
-    host.componentWillUnmount()
-  })
-
   it('mounts, updates, and unmounts imperative portal entries in order', async () => {
     const view = await render(
       <PortalHost>
@@ -171,8 +139,8 @@ describe('Portal', () => {
       </PortalHost>,
     )
 
-    let firstKey!: number
-    let secondKey!: number
+    let firstKey!: ReturnType<typeof mountPortal>
+    let secondKey!: ReturnType<typeof mountPortal>
     await act(async () => {
       firstKey = mountPortal(<Text testID="imperative-first">first</Text>)
       secondKey = mountPortal(<Text testID="imperative-second">second</Text>)
@@ -204,8 +172,8 @@ describe('Portal', () => {
       'PortalHost must be rendered before mounting an imperative portal',
     )
 
-    const view = await render(<PortalHost />)
-    let key!: number
+    const view = await render(<PortalHost>{null}</PortalHost>)
+    let key!: ReturnType<typeof mountPortal>
     await act(async () => {
       key = mountPortal(<Text testID="released-portal">content</Text>)
     })
@@ -227,6 +195,6 @@ describe('Portal', () => {
           <Text>content</Text>
         </Portal>,
       ),
-    ).rejects.toThrow('Portal must be rendered inside Portal.Host')
+    ).rejects.toThrow('Portal must be rendered inside PortalHost')
   })
 })

@@ -1,47 +1,16 @@
-import type { PopupPosition } from '@ftsukic/react-native-ui'
-import { Button, Popup, Provider } from '@ftsukic/react-native-ui'
-import { useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
-
 /**
- * @title 五种位置
- * @description position 支持 center、top、bottom、left 和 right，round 会按位置裁剪对应圆角。
+ * @title Popup · positions
+ * @description 展示 Popup 的真实公开 API 和可交互状态。
  */
-export default function PopupPositionsExample() {
-  const [position, setPosition] = useState<PopupPosition | null>(null)
+import { Popup, UIProvider } from '@ftsukic/react-native-ui'
+import { Text } from 'react-native'
 
+export default function Example() {
   return (
-    <Provider>
-      <View style={styles.container}>
-        <View style={styles.row}>
-          {(['center', 'top', 'bottom', 'left', 'right'] as const).map((item) => (
-            <Button key={item} size="small" onPress={() => setPosition(item)}>
-              {item}
-            </Button>
-          ))}
-        </View>
-        <Popup
-          visible={position !== null}
-          position={position ?? 'center'}
-          round
-          closeOnPressOverlay
-          onRequestClose={() => setPosition(null)}
-        >
-          <View style={styles.panel}>
-            <Text style={styles.title}>{position} Popup</Text>
-            <Button size="small" onPress={() => setPosition(null)}>
-              关闭
-            </Button>
-          </View>
-        </Popup>
-      </View>
-    </Provider>
+    <UIProvider>
+      <Popup visible position="bottom" round>
+        <Text style={{ padding: 24 }}>弹层内容</Text>
+      </Popup>
+    </UIProvider>
   )
 }
-
-const styles = StyleSheet.create({
-  container: { gap: 12 },
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  panel: { minWidth: 180, gap: 16, padding: 20 },
-  title: { color: '#1f2937', fontSize: 16, fontWeight: '600' },
-})

@@ -2,7 +2,10 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "types": [],
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@ftsukic/react-native-ui": ["./src/index.ts"]
+    }
   },
   "include": ["src"]
 }

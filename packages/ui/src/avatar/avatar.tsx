@@ -2,7 +2,8 @@ import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import { getAvatarToken } from './token'
 import type { AvatarProps, AvatarSize } from './interface'
-import { forwardRef, useEffect, useMemo, useState } from 'react'
+import { cloneElement, forwardRef, isValidElement, useEffect, useMemo, useState } from 'react'
+import type { ReactElement } from 'react'
 import { Image, Text, View } from 'react-native'
 import type { ImageSourcePropType, View as ViewComponent } from 'react-native'
 
@@ -29,6 +30,28 @@ function resolveFontSize(size: AvatarSize | undefined, token: ReturnType<typeof 
   return token.textFontSize
 }
 
+function resolveIconSize(
+  size: AvatarSize | undefined,
+  resolvedSize: number,
+  token: ReturnType<typeof getAvatarToken>,
+) {
+  if (typeof size === 'number' && Number.isFinite(size) && size > 0) {
+    return Math.max(1, Math.min(resolvedSize * 0.6, token.iconFontSizeLG))
+  }
+  if (size === 'small') return token.iconFontSizeSM
+  if (size === 'large') return token.iconFontSizeLG
+  return token.iconFontSize
+}
+
+function adaptIcon(icon: AvatarProps['icon'], size: number) {
+  if (!isValidElement(icon) || typeof icon.type === 'string') return icon
+
+  const iconProps = icon.props as { size?: number }
+  if (iconProps.size !== undefined) return icon
+
+  return cloneElement(icon as ReactElement<{ size?: number }>, { size })
+}
+
 export const Avatar = forwardRef<ViewComponent, AvatarProps>(function Avatar(
   {
     children,
@@ -50,6 +73,7 @@ export const Avatar = forwardRef<ViewComponent, AvatarProps>(function Avatar(
   const [imageError, setImageError] = useState(false)
   const resolvedSize = resolveSize(size, token)
   const fontSize = resolveFontSize(size, token)
+  const resolvedIcon = adaptIcon(icon, resolveIconSize(size, resolvedSize, token))
   const source = useMemo(() => (src === undefined ? undefined : normalizeSource(src)), [src])
   const semantic = resolveStyles(styles, {
     props: {
@@ -79,7 +103,7 @@ export const Avatar = forwardRef<ViewComponent, AvatarProps>(function Avatar(
   }
 
   const hasImage = source !== undefined && !imageError
-  const hasIcon = isRenderable(icon)
+  const hasIcon = isRenderable(resolvedIcon)
   const hasText = isRenderable(children)
   const rootRadius = borderRadius ?? (shape === 'circle' ? resolvedSize / 2 : token.borderRadius)
 
@@ -115,7 +139,7 @@ export const Avatar = forwardRef<ViewComponent, AvatarProps>(function Avatar(
         />
       ) : hasIcon ? (
         <View style={[{ alignItems: 'center', justifyContent: 'center' }, semantic?.icon]}>
-          {icon}
+          {resolvedIcon}
         </View>
       ) : hasText ? (
         typeof children === 'string' || typeof children === 'number' ? (

@@ -1,142 +1,265 @@
-import { LoadingIcon } from '../loading'
-import { resolveStyles } from '../style'
-import { useComponentToken } from '../theme'
-import { getButtonStyles } from './style'
-import { getButtonToken } from './token'
-import type { ButtonProps, ButtonStyleState } from './interface'
-import { forwardRef, useCallback, useRef } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
-import type { ReactNode } from 'react'
+import LoadingIcon from '../loading/loading-icon'
+import { useToken } from '../theme'
+import type { ButtonProps, ButtonType } from './interface'
+import { createButtonStyles } from './style'
+import { useCallback, useMemo, useRef } from 'react'
+import {
+  Pressable,
+  Text,
+  type ColorValue,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from 'react-native'
 
-function isTextContent(value: ReactNode): value is string | number {
-  return typeof value === 'string' || typeof value === 'number'
-}
-
-export const Button = forwardRef<React.ElementRef<typeof Pressable>, ButtonProps>(function Button(
-  {
-    children,
-    type = 'default',
-    size = 'normal',
-    color,
-    variant,
-    plain = false,
-    block = false,
-    round = false,
-    square = false,
-    circle = false,
-    hairline = false,
-    disabled = false,
-    loading = false,
-    loadingText,
-    icon,
-    iconPosition = 'left',
-    style,
-    styles,
-    onPress,
-    onPressDebounceWait,
-    ...pressableProps
+const SIZE_CONFIG = {
+  large: {
+    height: 'controlHeightLG',
+    fontSize: 'contentFontSizeLG',
+    padding: 'paddingInlineLG',
+    borderRadius: 'borderRadiusLG',
   },
-  ref,
+  medium: {
+    height: 'controlHeight',
+    fontSize: 'contentFontSize',
+    padding: 'paddingInline',
+    borderRadius: 'borderRadius',
+  },
+  small: {
+    height: 'controlHeightSM',
+    fontSize: 'contentFontSizeSM',
+    padding: 'paddingInlineSM',
+    borderRadius: 'borderRadiusSM',
+  },
+} as const
+
+function getColors(
+  type: ButtonType,
+  danger: boolean,
+  token: ReturnType<typeof useToken>['components']['Button'],
 ) {
-  const buttonToken = useComponentToken('Button', getButtonToken)
-  const lastPressTime = useRef(0)
-  const isDisabled = disabled || loading
-  const resolvedVariant = variant ?? (plain ? 'outlined' : undefined)
-  const buttonProps: ButtonProps = {
-    children,
-    type,
-    size,
-    color,
-    variant: resolvedVariant,
-    plain,
-    block,
-    round,
-    square,
-    circle,
-    hairline,
-    disabled,
-    loading,
-    loadingText,
-    icon,
-    iconPosition,
-    style,
-    styles,
-    onPress,
-    onPressDebounceWait,
+  if (danger) {
+    switch (type) {
+      case 'text':
+      case 'link':
+        return {
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+          textColor: token.dangerColor,
+        }
+      case 'hazy':
+        return {
+          backgroundColor: token.dangerBgHover,
+          borderColor: token.dangerBgHover,
+          textColor: token.dangerColor,
+        }
+      case 'default':
+      case 'dashed':
+      case 'outline':
+      case 'ghost':
+        return {
+          backgroundColor: 'transparent',
+          borderColor: token.dangerColor,
+          textColor: token.dangerColor,
+        }
+      case 'primary':
+      default:
+        return {
+          backgroundColor: token.dangerBg,
+          borderColor: token.dangerBg,
+          textColor: token.primaryColor,
+        }
+    }
   }
 
-  const handlePress = useCallback<NonNullable<ButtonProps['onPress']>>(
-    (event) => {
-      if (!onPress || isDisabled) return
+  switch (type) {
+    case 'default':
+      return {
+        backgroundColor: token.defaultBg,
+        borderColor: token.defaultBorderColor,
+        textColor: token.defaultColor,
+      }
+    case 'dashed':
+      return {
+        backgroundColor: token.defaultBg,
+        borderColor: token.defaultBorderColor,
+        textColor: token.defaultColor,
+      }
+    case 'text':
+      return {
+        backgroundColor: 'transparent',
+        borderColor: 'transparent',
+        textColor: token.defaultColor,
+      }
+    case 'link':
+      return {
+        backgroundColor: 'transparent',
+        borderColor: 'transparent',
+        textColor: token.linkColor,
+      }
+    case 'hazy':
+      return {
+        backgroundColor: token.primaryBgHover,
+        borderColor: token.primaryBgHover,
+        textColor: token.primaryBg,
+      }
+    case 'outline':
+    case 'ghost':
+      return {
+        backgroundColor: 'transparent',
+        borderColor: token.primaryBg,
+        textColor: token.primaryBg,
+      }
+    case 'primary':
+    default:
+      return {
+        backgroundColor: token.primaryBg,
+        borderColor: token.primaryBg,
+        textColor: token.primaryColor,
+      }
+  }
+}
 
+export function Button({
+  children,
+  text,
+  subtext,
+  textStyle,
+  style,
+  padding,
+  type = 'primary',
+  size = 'medium',
+  danger = false,
+  disabled = false,
+  loading = false,
+  loadingText,
+  square = false,
+  round = false,
+  circle = false,
+  renderLeftIcon,
+  color,
+  textColor,
+  theme,
+  onPress,
+  onPressDebounceWait = 0,
+  ...restProps
+}: ButtonProps) {
+  const { components, token: themeToken } = useToken()
+  const baseToken = components.Button
+  const loadingToken = components.Loading
+  const token = { ...baseToken, ...theme }
+  const styles = useMemo(() => createButtonStyles(token, themeToken), [themeToken, token])
+  const lastPressAt = useRef(0)
+  const sizeConfig = SIZE_CONFIG[size]
+  const palette = getColors(type, danger, token)
+  const buttonColor = color ?? palette.backgroundColor
+  const resolvedTextColor = textColor ?? palette.textColor
+  const label = loading ? (loadingText ?? text ?? children) : (text ?? children)
+  const height = themeToken[sizeConfig.height]
+  const iconSize = token[sizeConfig.fontSize]
+  const hasCustomVerticalPadding = padding?.vertical !== undefined
+  const paddingHorizontal = padding?.horizontal ?? token[sizeConfig.padding]
+
+  const handlePress = useCallback(
+    (event: Parameters<NonNullable<ButtonProps['onPress']>>[0]) => {
+      if (!onPress) return
       const now = Date.now()
-      if (onPressDebounceWait !== undefined && now - lastPressTime.current < onPressDebounceWait)
-        return
-      lastPressTime.current = now
+      if (onPressDebounceWait > 0 && now - lastPressAt.current < onPressDebounceWait) return
+      lastPressAt.current = now
       onPress(event)
     },
-    [isDisabled, onPress, onPressDebounceWait],
+    [onPress, onPressDebounceWait],
   )
+
+  const getStyle = (pressed: boolean): StyleProp<ViewStyle> => [
+    styles.button,
+    {
+      height: circle ? height : hasCustomVerticalPadding ? undefined : height,
+      minHeight: circle ? undefined : hasCustomVerticalPadding ? height : undefined,
+      width: circle ? height : undefined,
+      paddingHorizontal: circle ? 0 : paddingHorizontal,
+      paddingVertical: circle ? undefined : padding?.vertical,
+      borderRadius: circle
+        ? height / 2
+        : square
+          ? 0
+          : round
+            ? height
+            : themeToken[sizeConfig.borderRadius],
+      backgroundColor: buttonColor,
+      borderColor: palette.borderColor,
+      borderWidth: ['default', 'dashed', 'outline', 'ghost'].includes(type)
+        ? themeToken.lineWidth
+        : 0,
+      borderStyle: type === 'dashed' ? 'dashed' : 'solid',
+      opacity: pressed ? token.activeOpacity : 1,
+    },
+    (disabled || loading) && styles.disabled,
+    typeof style === 'function' ? style({ pressed }) : style,
+    circle && {
+      width: height,
+      minWidth: height,
+      maxWidth: height,
+      height,
+      minHeight: height,
+      maxHeight: height,
+      paddingHorizontal: 0,
+      paddingVertical: undefined,
+      borderRadius: height / 2,
+    },
+  ]
 
   return (
     <Pressable
-      ref={ref}
-      {...pressableProps}
-      accessibilityRole={pressableProps.accessibilityRole ?? 'button'}
-      disabled={isDisabled}
+      accessibilityRole="button"
+      {...restProps}
+      disabled={disabled || loading}
       onPress={handlePress}
-      style={({ pressed }) => {
-        const state: ButtonStyleState = { pressed, disabled: isDisabled, loading }
-        const resolved = getButtonStyles(buttonToken, buttonProps, state)
-        const semantic = resolveStyles(styles, { props: buttonProps, state })
-        return [resolved.root, semantic?.root, style]
-      }}
+      style={({ pressed }) => getStyle(pressed)}
     >
-      {({ pressed }) => {
-        const state: ButtonStyleState = { pressed, disabled: isDisabled, loading }
-        const resolved = getButtonStyles(buttonToken, buttonProps, state)
-        const semantic = resolveStyles(styles, { props: buttonProps, state })
-        const content = loading ? loadingText : children
-
-        return (
-          <>
-            <View style={resolved.contentContainer}>
-              {icon && iconPosition === 'left' ? (
-                <View style={[resolved.icon, semantic?.icon]}>{icon}</View>
-              ) : null}
-              {loading ? (
-                <View style={[resolved.icon, semantic?.icon]}>
-                  <LoadingIcon
-                    size={resolved.label.fontSize ?? buttonToken.contentFontSize}
-                    color={resolved.iconColor}
-                    duration={900}
-                    active
-                    style={{ marginRight: content ? buttonToken.iconGap : 0 }}
-                  />
-                </View>
-              ) : null}
-              {content !== undefined ? (
-                isTextContent(content) ? (
-                  <Text style={[resolved.label, semantic?.content]}>{content}</Text>
-                ) : (
-                  <View style={semantic?.content}>{content}</View>
-                )
-              ) : null}
-              {icon && iconPosition === 'right' ? (
-                <View style={[resolved.icon, semantic?.icon]}>{icon}</View>
-              ) : null}
-            </View>
-            {pressed ? (
-              <View
-                pointerEvents="none"
-                style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.1)' }]}
-              />
-            ) : null}
-          </>
-        )
-      }}
+      {loading ? (
+        <Pressable style={styles.content} pointerEvents="none">
+          <LoadingIcon
+            color={resolvedTextColor as ColorValue}
+            duration={loadingToken.animationDuration}
+            size={iconSize}
+          />
+          {label ? (
+            <Text
+              numberOfLines={1}
+              style={
+                [
+                  { color: resolvedTextColor, fontSize: iconSize, marginLeft: token.iconGap },
+                  textStyle,
+                ] as StyleProp<TextStyle>
+              }
+            >
+              {label}
+            </Text>
+          ) : null}
+        </Pressable>
+      ) : (
+        <>
+          <Pressable style={styles.content} pointerEvents="none">
+            {renderLeftIcon?.(resolvedTextColor, iconSize)}
+            <Text
+              numberOfLines={1}
+              style={
+                [
+                  { color: resolvedTextColor, fontSize: iconSize },
+                  renderLeftIcon && { marginLeft: token.iconGap },
+                  textStyle,
+                ] as StyleProp<TextStyle>
+              }
+            >
+              {label}
+            </Text>
+          </Pressable>
+          {subtext ? (
+            <Text style={[styles.subtext, { color: resolvedTextColor }]}>{subtext}</Text>
+          ) : null}
+        </>
+      )}
     </Pressable>
   )
-})
-
-Button.displayName = 'Button'
+}

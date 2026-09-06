@@ -1,57 +1,17 @@
-import type { TextStyle, ViewStyle } from 'react-native'
 import type { InputToken } from '../theme'
-import type { TextInputProps, TextInputStyleState } from './interface'
+import { StyleSheet } from 'react-native'
 
-export interface TextInputResolvedStyles {
-  root: ViewStyle
-  addonGroup: ViewStyle
-  addon: TextStyle
-  addonBefore: TextStyle
-  addonAfter: TextStyle
-  shell: ViewStyle
-  content: ViewStyle
-  input: TextStyle
-  prefix: TextStyle
-  suffix: TextStyle
-  clear: ViewStyle
-  wordLimit: TextStyle
-}
-
-function getInputHeight(token: InputToken, size: NonNullable<TextInputProps['size']>) {
-  switch (size) {
-    case 'small':
-      return token.heightSM
-    case 'large':
-      return token.heightLG
-    case 'normal':
-    default:
-      return token.height
-  }
-}
-
-export function getTextInputStyles(
-  token: InputToken,
-  props: TextInputProps,
-  state: TextInputStyleState,
-): TextInputResolvedStyles {
-  const height = getInputHeight(token, props.size ?? 'normal')
-  const textarea = props.type === 'textarea'
-
-  return {
-    root: {
-      width: '100%',
-      minWidth: 0,
-    },
+export function createTextInputStyles(token: InputToken) {
+  return StyleSheet.create({
     addonGroup: {
-      width: '100%',
-      minWidth: 0,
-      flexDirection: 'row',
       alignItems: 'center',
+      flexDirection: 'row',
+      flexShrink: 1,
+      minWidth: 0,
+      width: '100%',
     },
-    addon: {
+    addonText: {
       color: token.addonColor,
-      fontSize: token.fontSize,
-      lineHeight: token.lineHeight * token.fontSize,
     },
     addonBefore: {
       marginRight: token.paddingHorizontal,
@@ -59,42 +19,49 @@ export function getTextInputStyles(
     addonAfter: {
       marginLeft: token.paddingHorizontal,
     },
-    shell: {
-      flex: 1,
-      minWidth: 0,
-      minHeight: textarea ? height * Math.max(1, props.rows ?? 2) : height,
-      flexDirection: 'row',
-      alignItems: textarea ? 'flex-start' : 'center',
-      paddingHorizontal: token.paddingHorizontal,
-      borderWidth: props.bordered ? token.borderWidth : 0,
-      borderColor: state.focused ? token.activeBorderColor : token.borderColor,
+    fixGroup: {
+      alignItems: 'center',
+      borderColor: token.borderColor,
       borderRadius: token.borderRadius,
-      backgroundColor: state.disabled ? token.disabledBackgroundColor : token.backgroundColor,
-    },
-    content: {
-      flex: 1,
-      minWidth: 0,
+      borderWidth: token.borderWidth,
       flexDirection: 'row',
-      alignItems: textarea ? 'flex-start' : 'center',
+      flex: 1,
+      flexGrow: 1,
+      flexShrink: 1,
+      minWidth: 0,
+      paddingHorizontal: token.paddingHorizontal,
+      width: '100%',
     },
     input: {
+      color: token.textColor,
       flex: 1,
+      flexGrow: 1,
+      flexShrink: 1,
       minWidth: 0,
       paddingHorizontal: 0,
-      paddingVertical: textarea ? token.paddingVertical : 0,
-      color: state.disabled ? token.disabledColor : token.textColor,
-      fontSize:
-        props.size === 'small'
-          ? token.fontSizeSM
-          : props.size === 'large'
-            ? token.fontSizeLG
-            : token.fontSize,
-      lineHeight:
-        props.size === 'small'
-          ? token.lineHeightSM * token.fontSizeSM
-          : props.size === 'large'
-            ? token.lineHeight * token.fontSizeLG
-            : token.lineHeight * token.fontSize,
+      paddingVertical: 0,
+    },
+    content: {
+      alignItems: 'center',
+      flex: 1,
+      flexDirection: 'row',
+      minWidth: 0,
+    },
+    inputDisabled: {
+      color: token.disabledColor,
+    },
+    clear: {
+      alignItems: 'center',
+      backgroundColor: token.clearButtonBackgroundColor,
+      borderRadius: token.clearButtonSize / 2,
+      height: token.clearButtonSize,
+      justifyContent: 'center',
+      marginLeft: token.paddingHorizontal,
+      flexShrink: 0,
+      width: token.clearButtonSize,
+    },
+    clearHidden: {
+      opacity: 0,
     },
     prefix: {
       color: token.prefixColor,
@@ -104,20 +71,12 @@ export function getTextInputStyles(
       color: token.prefixColor,
       marginLeft: token.paddingHorizontal,
     },
-    clear: {
-      width: token.clearButtonSize,
-      height: token.clearButtonSize,
-      flexShrink: 0,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginLeft: token.paddingHorizontal,
-      borderRadius: token.clearButtonSize / 2,
-      backgroundColor: token.clearButtonBackgroundColor,
-    },
     wordLimit: {
+      bottom: token.paddingVertical,
       color: token.wordLimitColor,
       fontSize: token.wordLimitFontSize,
-      marginLeft: token.paddingHorizontal,
+      position: 'absolute',
+      right: token.paddingHorizontal,
     },
-  }
+  })
 }

@@ -1,28 +1,13 @@
-import { StyleSheet, View } from 'react-native'
-import { Button, ConfigProvider, PortalHost, showToast } from '@ftsukic/react-native-ui'
-
 /**
- * @title 位置
- * @description 使用 position 将提示放在顶部、中间或底部。
+ * @title Toast · positions
+ * @description 展示 Toast 的真实公开 API 和可交互状态。
  */
-export default function ToastPositionsExample() {
+import { Toast, UIProvider } from '@ftsukic/react-native-ui'
+
+export default function Example() {
   return (
-    <ConfigProvider>
-      <PortalHost>
-        <View style={styles.container}>
-          <Button onPress={() => showToast({ message: '顶部提示', position: 'top' })}>top</Button>
-          <Button onPress={() => showToast({ message: '中间提示', position: 'middle' })}>
-            middle
-          </Button>
-          <Button onPress={() => showToast({ message: '底部提示', position: 'bottom' })}>
-            bottom
-          </Button>
-        </View>
-      </PortalHost>
-    </ConfigProvider>
+    <UIProvider>
+      <Toast type="success" message="操作成功" duration={0} />
+    </UIProvider>
   )
 }
-
-const styles = StyleSheet.create({
-  container: { gap: 12 },
-})

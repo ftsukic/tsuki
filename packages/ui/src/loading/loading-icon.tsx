@@ -10,13 +10,7 @@ export interface LoadingIconProps extends ViewProps {
   active?: boolean
 }
 
-function LoadingIconComponent({
-  size,
-  color,
-  duration,
-  active = true,
-  ...props
-}: LoadingIconProps) {
+function LoadingIcon({ size, color, duration, active = true, ...props }: LoadingIconProps) {
   const rotation = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
@@ -66,5 +60,4 @@ function LoadingIconComponent({
   )
 }
 
-export const LoadingIcon = memo(LoadingIconComponent)
-export default LoadingIcon
+export default memo(LoadingIcon)

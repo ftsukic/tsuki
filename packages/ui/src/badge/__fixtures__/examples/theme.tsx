@@ -1,22 +1,18 @@
 /**
- * @title 主题和语义样式
- * @description Badge 支持组件 token 和 root、indicator、dot、text 语义样式。
+ * @title Badge · theme
+ * @description 展示 Badge 的真实公开 API 和可交互状态。
  */
-import { Avatar, Badge, ConfigProvider } from '@ftsukic/react-native-ui'
+import { Badge } from '@ftsukic/react-native-ui'
+import { View } from 'react-native'
 
 export default function Example() {
   return (
-    <ConfigProvider theme={{ components: { Badge: { color: '#7232DD' } } }}>
-      <Badge
-        count={8}
-        styles={({ state }) => ({
-          root: { opacity: state.visible ? 1 : 0.5 },
-          indicator: { transform: [{ translateX: 3 }, { translateY: -3 }] },
-          text: { fontWeight: '700' },
-        })}
-      >
-        <Avatar style={{ backgroundColor: '#1989FA' }}>A</Avatar>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+      <Badge count={8}>
+        <View style={{ width: 32, height: 32, backgroundColor: '#1989fa' }} />
       </Badge>
-    </ConfigProvider>
+      <Badge dot />
+      <Badge status="success" />
+    </View>
   )
 }

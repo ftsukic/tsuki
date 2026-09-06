@@ -1,29 +1,13 @@
-import { Button, ConfigProvider, Dialog, PortalHost } from '@ftsukic/react-native-ui'
-import { useState } from 'react'
-import { View } from 'react-native'
-
 /**
- * @title 圆角按钮
- * @description theme="round-button" 使用 Vant 风格的圆角操作按钮。
+ * @title Dialog · round
+ * @description 展示 Dialog 的真实公开 API 和可交互状态。
  */
-export default function DialogRoundExample() {
-  const [show, setShow] = useState(false)
+import { Dialog, UIProvider } from '@ftsukic/react-native-ui'
 
+export default function Example() {
   return (
-    <ConfigProvider>
-      <PortalHost>
-        <View style={{ gap: 12 }}>
-          <Button onPress={() => setShow(true)}>圆角按钮风格</Button>
-          <Dialog
-            show={show}
-            theme="round-button"
-            title="圆角按钮"
-            message="适合强调确认和取消两个动作。"
-            showCancelButton
-            onShowChange={setShow}
-          />
-        </View>
-      </PortalHost>
-    </ConfigProvider>
+    <UIProvider>
+      <Dialog visible title="提示" message="这是一条可操作的提示。" showCancelButton />
+    </UIProvider>
   )
 }

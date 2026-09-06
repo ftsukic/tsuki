@@ -9,7 +9,7 @@ group:
 
 # Grid
 
-<code src="./__fixtures__/basic.tsx"></code>
+<code src="./__fixtures__/examples/basic.tsx"></code>
 
 Grid 提供基于 24 栅格的行列布局，适合实现按钮组、表单项和响应式卡片排列。
 
