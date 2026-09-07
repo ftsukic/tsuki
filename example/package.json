@@ -17,13 +17,14 @@
     "typescript": "~6.0.3"
   },
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web",
-    "typecheck": "tsc --noEmit",
-    "config": "expo config --type public",
-    "export:web": "expo export --platform web"
+    "generate:fixtures": "node ../scripts/generate-fixture-catalog.cjs",
+    "start": "yarn generate:fixtures && expo start",
+    "android": "yarn generate:fixtures && expo start --android",
+    "ios": "yarn generate:fixtures && expo start --ios",
+    "web": "yarn generate:fixtures && expo start --web",
+    "typecheck": "yarn generate:fixtures && tsc --noEmit",
+    "config": "yarn generate:fixtures && expo config --type public",
+    "export:web": "yarn generate:fixtures && expo export --platform web"
   },
   "private": true
 }

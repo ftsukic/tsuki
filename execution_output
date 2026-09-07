@@ -1,0 +1,85 @@
+[C2C]
+STATE: EXECUTED
+TASK_ID: portal_xiaoshu_fixture_preview
+ITERATION: 1
+
+FINAL COMMAND OUTPUT
+
+$ corepack yarn test portal.test.tsx --runInBand
+EXIT: 0
+PASS src/__tests__/portal.test.tsx
+Test Suites: 1 passed, 1 total
+Tests:       10 passed, 10 total
+
+$ corepack yarn test portal.test.tsx dialog.test.tsx popup.test.tsx toast.test.tsx overlay.test.tsx floating-panel.test.tsx --runInBand
+EXIT: 0
+Test Suites: 6 passed, 6 total
+Tests:       58 passed, 58 total
+
+$ corepack yarn typecheck
+EXIT: 0
+
+$ corepack yarn lint
+EXIT: 0
+
+$ corepack yarn test
+EXIT: 0
+Test Suites: 17 passed, 17 total
+Tests:       101 passed, 101 total
+
+$ corepack yarn docs:build
+EXIT: 0
+utoo pack v1.5.14 built in 4323ms
+Output: docs-dist
+Assets: 172 files
+Built demo routes for Portal, Dialog, Popup, Toast, Overlay and FloatingPanel.
+
+$ corepack yarn example:typecheck
+EXIT: 0
+Generated 66 fixture imports at example/fixtures/catalog.ts
+
+$ corepack yarn example:config
+EXIT: 0
+Generated 66 fixture imports at example/fixtures/catalog.ts
+sdkVersion: '57.0.0'
+platforms: [ 'ios', 'android', 'web' ]
+
+$ corepack yarn example:export
+EXIT: 0
+Generated 66 fixture imports at example/fixtures/catalog.ts
+Web Bundled 220ms index.ts (1321 modules)
+Exported: dist
+
+$ git diff --check
+EXIT: 0
+
+$ corepack yarn prettier --check .dumi/app.tsx example/App.tsx example/components/fixture-explorer.tsx example/fixtures/catalog.ts example/package.json package.json scripts/generate-fixture-catalog.cjs
+EXIT: 0
+All matched files use Prettier code style!
+
+$ npm pack --dry-run --json
+EXIT: 0
+filename: ftsukic-tsuki-0.0.1.tgz
+fileCount: 1005
+fixtureFiles: []
+
+STATIC CATALOG CHECKS
+
+- Catalog source: src/**/__fixtures__/**/*.tsx
+- Static imports: 66
+- Priority entries present: portal/examples/imperative, dialog/examples/basic, toast/examples/positions, popup/examples/positions, overlay/examples/basic, floating-panel/examples/basic, button/variants
+- src/portal custom multi-host names: none
+
+MANUAL WEB SMOKE
+
+- Expo Web fixture list loaded from http://localhost:8083/ with all 66 catalog entries visible.
+- Portal imperative fixture showed mountPortal, updatePortal and unmountPortal content transitions.
+- Dialog fixture rendered its imperative dialog content inside the Expo preview viewport.
+- Dumi Dialog demos loaded in separate /~demos/* iframe runtimes; the basic Dialog demo opened its dialog content without covering the docs shell.
+
+NON-BLOCKING WARNINGS
+
+- Watchman reported a recrawl warning during Jest runs.
+- Expo/RN Web reported the existing pointerEvents deprecation warning.
+- Dumi reported the existing React 19 element.ref warning.
+- No command or browser smoke produced a runtime error.

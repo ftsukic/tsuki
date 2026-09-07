@@ -1,5 +1,5 @@
-import AppEnter from './app/app'
+import FixtureExplorer from './components/fixture-explorer'
 
 export default function App() {
-  return <AppEnter />
+  return <FixtureExplorer />
 }

@@ -55,6 +55,7 @@
   },
   "scripts": {
     "build": "bob build",
+    "fixtures:generate": "node scripts/generate-fixture-catalog.cjs",
     "docs:dev": "dumi dev",
     "docs:build": "dumi build",
     "docs:preview": "dumi preview",
