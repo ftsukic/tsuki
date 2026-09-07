@@ -1,4 +1,4 @@
-import { FloatingPanel } from '@ftsukic/react-native-ui'
+import { FloatingPanel, Provider } from '@ftsukic/react-native-ui'
 import { StyleSheet, Text, View } from 'react-native'
 
 /**
@@ -7,16 +7,18 @@ import { StyleSheet, Text, View } from 'react-native'
  */
 export default function FloatingPanelBasicExample() {
   return (
-    <View style={styles.page}>
-      <Text style={styles.title}>页面内容</Text>
-      <Text style={styles.description}>面板通过 Portal 固定在视口底部，不会被页面布局裁剪。</Text>
-      <FloatingPanel>
-        <View style={styles.panelContent}>
-          <Text style={styles.panelTitle}>浮动面板</Text>
-          <Text style={styles.description}>拖动顶部横条浏览面板内容。</Text>
-        </View>
-      </FloatingPanel>
-    </View>
+    <Provider>
+      <View style={styles.page}>
+        <Text style={styles.title}>页面内容</Text>
+        <Text style={styles.description}>面板通过 Portal 固定在视口底部，不会被页面布局裁剪。</Text>
+        <FloatingPanel>
+          <View style={styles.panelContent}>
+            <Text style={styles.panelTitle}>浮动面板</Text>
+            <Text style={styles.description}>拖动顶部横条浏览面板内容。</Text>
+          </View>
+        </FloatingPanel>
+      </View>
+    </Provider>
   )
 }
 

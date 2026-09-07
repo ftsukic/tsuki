@@ -1,13 +1,17 @@
-import { Cell as BaseCell } from './cell'
-import { CellGroup } from './cell-group'
-import { SwipeCellView } from './swipe-cell'
+import { Cell } from './cell'
+import { CellGroup } from './group'
 
-export const Cell = Object.assign(BaseCell, { Group: CellGroup, Swipe: SwipeCellView })
+export const CellWithGroup = Object.assign(Cell, { Group: CellGroup })
+export { CellWithGroup as Cell }
 export { CellGroup }
+export { getCellToken } from './token'
 export type {
+  CellArrowDirection,
   CellGroupProps,
   CellProps,
-  SwipeCellAction,
-  SwipeCellProps,
-  SwipeCellRef,
+  CellSemanticStyles,
+  CellSize,
+  CellStyleInfo,
+  CellStyleState,
+  CellStyles,
 } from './interface'

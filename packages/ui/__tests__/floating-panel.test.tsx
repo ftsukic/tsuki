@@ -3,7 +3,7 @@ import { Animated, StyleSheet, Text } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import type { RenderResult } from '@testing-library/react-native'
 import type { TestInstance } from 'test-renderer'
-import { ThemeProvider, FloatingPanel, PortalHost } from '../src'
+import { ConfigProvider, FloatingPanel, PortalHost } from '../src'
 import type { ReactNode } from 'react'
 
 type TouchEvent = ReturnType<typeof touchEvent>
@@ -26,12 +26,12 @@ function AppProvider({
   theme,
 }: {
   children: ReactNode
-  theme?: React.ComponentProps<typeof ThemeProvider>['theme']
+  theme?: React.ComponentProps<typeof ConfigProvider>['theme']
 }) {
   return (
-    <ThemeProvider theme={{ token: { motion: false }, ...theme }}>
+    <ConfigProvider theme={{ token: { motion: false }, ...theme }}>
       <PortalHost>{children}</PortalHost>
-    </ThemeProvider>
+    </ConfigProvider>
   )
 }
 
@@ -272,8 +272,8 @@ describe('FloatingPanel', () => {
 
   it('adds the bottom safe-area inset to content padding and resolves semantic styles', async () => {
     const view = await render(
-      <SafeAreaInsetsContext.Provider value={{ bottom: 12, left: 0, right: 0, top: 0 }}>
-        <AppProvider>
+      <AppProvider>
+        <SafeAreaInsetsContext.Provider value={{ bottom: 12, left: 0, right: 0, top: 0 }}>
           <FloatingPanel
             anchors={[100, 300]}
             styles={({ state }) => ({
@@ -282,8 +282,8 @@ describe('FloatingPanel', () => {
           >
             <Text>safe area content</Text>
           </FloatingPanel>
-        </AppProvider>
-      </SafeAreaInsetsContext.Provider>,
+        </SafeAreaInsetsContext.Provider>
+      </AppProvider>,
     )
 
     const scrollView = getScrollView(view)
@@ -294,13 +294,13 @@ describe('FloatingPanel', () => {
     await view.unmount()
 
     const utils = await render(
-      <SafeAreaInsetsContext.Provider value={{ bottom: 12, left: 0, right: 0, top: 0 }}>
-        <AppProvider>
+      <AppProvider>
+        <SafeAreaInsetsContext.Provider value={{ bottom: 12, left: 0, right: 0, top: 0 }}>
           <FloatingPanel anchors={[100, 300]} safeAreaInsetBottom={false}>
             <Text>safe area disabled</Text>
           </FloatingPanel>
-        </AppProvider>
-      </SafeAreaInsetsContext.Provider>,
+        </SafeAreaInsetsContext.Provider>
+      </AppProvider>,
     )
 
     expect(StyleSheet.flatten(getScrollView(utils).props.contentContainerStyle)).toMatchObject({

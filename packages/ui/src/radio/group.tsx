@@ -1,18 +1,10 @@
-import { Children, isValidElement, useCallback, useMemo, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import { Children, useCallback, useMemo, useRef, useState } from 'react'
 import { View } from 'react-native'
 import { useComponentToken } from '../theme'
-import { RadioButton } from './button'
 import { RadioGroupContext } from './context'
 import { Radio } from './radio'
 import { getRadioToken } from './token'
-import type {
-  RadioGroupProps,
-  RadioOption,
-  RadioOptionType,
-  RadioProps,
-  RadioValue,
-} from './interface'
+import type { RadioGroupProps, RadioOption, RadioValue } from './interface'
 
 function warnOptionsAndChildren() {
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
@@ -24,24 +16,14 @@ function getOptionKey(option: RadioOption, index: number) {
   return `${String(option.value)}-${index}`
 }
 
-function getChildOptionType(child: ReactNode, groupOptionType: RadioOptionType): RadioOptionType {
-  if (!isValidElement(child)) return groupOptionType
-  if (child.type === RadioButton) return 'button'
-  return (child.props as RadioProps).optionType ?? groupOptionType
-}
-
 export function RadioGroup({
   children,
   options,
   value,
   defaultValue,
   disabled = false,
-  direction,
-  optionType = 'default',
-  buttonStyle = 'outline',
-  size = 'middle',
+  direction = 'vertical',
   gap,
-  block = false,
   onChange,
   style,
   ...viewProps
@@ -69,31 +51,18 @@ export function RadioGroup({
     [isControlled, onChange, selectedValue],
   )
 
+  const contextValue = useMemo(
+    () => ({ value: selectedValue, disabled, select }),
+    [disabled, select, selectedValue],
+  )
+
   const optionChildren = options?.map((option, index) => (
     <Radio key={getOptionKey(option, index)} value={option.value} disabled={option.disabled}>
       {option.label}
     </Radio>
   ))
   const content = hasChildren ? children : optionChildren
-  const contentChildren = Children.toArray(content)
-  const childOptionTypes = contentChildren.map((child) => getChildOptionType(child, optionType))
-  const hasButtonType = childOptionTypes.some((type) => type === 'button')
-  const resolvedGap = gap ?? (hasButtonType ? 0 : token.gap)
-  const resolvedDirection = direction ?? (hasButtonType ? 'horizontal' : 'vertical')
-  const contextValue = useMemo(
-    () => ({
-      value: selectedValue,
-      disabled,
-      optionType,
-      buttonStyle,
-      size,
-      block,
-      first: true,
-      last: true,
-      select,
-    }),
-    [block, buttonStyle, disabled, optionType, select, selectedValue, size],
-  )
+  const resolvedGap = gap ?? token.gap
 
   return (
     <RadioGroupContext.Provider value={contextValue}>
@@ -103,29 +72,14 @@ export function RadioGroup({
         accessibilityState={{ ...viewProps.accessibilityState, disabled }}
         style={[
           {
-            flexDirection: resolvedDirection === 'horizontal' ? 'row' : 'column',
-            flexWrap: 'nowrap',
-            alignItems:
-              resolvedDirection === 'horizontal' ? 'center' : block ? 'stretch' : 'flex-start',
-            alignSelf: block ? 'stretch' : 'flex-start',
+            flexDirection: direction === 'horizontal' ? 'row' : 'column',
+            alignItems: direction === 'horizontal' ? 'center' : 'flex-start',
             gap: resolvedGap,
           },
           style,
         ]}
       >
-        {contentChildren.map((child, index) => (
-          <RadioGroupContext.Provider
-            key={isValidElement(child) && child.key != null ? child.key : index}
-            value={{
-              ...contextValue,
-              first: index === 0,
-              last: index === contentChildren.length - 1,
-              previousOptionType: childOptionTypes[index - 1],
-            }}
-          >
-            {child}
-          </RadioGroupContext.Provider>
-        ))}
+        {content}
       </View>
     </RadioGroupContext.Provider>
   )

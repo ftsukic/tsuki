@@ -1,384 +1,130 @@
 import type { MappingAlgorithm } from './interface'
 import type { AliasToken } from './interface/alias'
-import {
-  createComponentTokens,
-  type ComponentTokenFactory,
-  type ComponentTokenName,
-  type ComponentTokenOverrides,
-  type ComponentTokens,
+import type {
+  ComponentTokenFactory,
+  ComponentTokenMap,
+  ComponentTokenName,
+  ComponentTokenOverrides,
 } from './interface/components'
-import type { MapToken } from './interface/maps'
-import type { SeedToken } from './interface/seeds'
-import { composeAlgorithms, defaultAlgorithm, darkAlgorithm } from './themes'
+import type { MapToken } from './interface/map'
+import type { SeedToken } from './interface/seed'
+import { composeAlgorithms, defaultAlgorithm } from './themes'
 import { defaultSeed } from './themes/seed'
-import createAliasToken from './util/alias'
+import { createAliasToken } from './util/alias'
 import { createContext, useContext, useMemo } from 'react'
 import type { PropsWithChildren } from 'react'
 
-type MapTokenOverrideKey =
-  | 'fontSizeSM'
-  | 'fontSizeLG'
-  | 'fontSizeXL'
-  | 'fontSizeHeading1'
-  | 'fontSizeHeading2'
-  | 'fontSizeHeading3'
-  | 'fontSizeHeading4'
-  | 'fontSizeHeading5'
-  | 'lineHeight'
-  | 'lineHeightSM'
-  | 'lineHeightLG'
-  | 'lineHeightHeading1'
-  | 'lineHeightHeading2'
-  | 'lineHeightHeading3'
-  | 'lineHeightHeading4'
-  | 'lineHeightHeading5'
-  | 'fontHeight'
-  | 'fontHeightSM'
-  | 'fontHeightLG'
-  | 'sizeXXL'
-  | 'sizeXL'
-  | 'sizeLG'
-  | 'sizeMD'
-  | 'sizeMS'
-  | 'size'
-  | 'sizeSM'
-  | 'sizeXS'
-  | 'sizeXXS'
-  | 'colorPrimaryBg'
-  | 'colorPrimaryBgHover'
-  | 'colorPrimaryBorder'
-  | 'colorPrimaryBorderHover'
-  | 'colorPrimaryHover'
-  | 'colorPrimaryActive'
-  | 'colorPrimaryText'
-  | 'colorPrimaryTextHover'
-  | 'colorPrimaryTextActive'
-  | 'colorText'
-  | 'colorTextSecondary'
-  | 'colorTextTertiary'
-  | 'colorTextQuaternary'
-  | 'colorBgContainer'
-  | 'colorBgElevated'
-  | 'colorBgLayout'
-  | 'colorBgSpotlight'
-  | 'colorBgMask'
-  | 'colorBorder'
-  | 'colorBorderSecondary'
-  | 'colorBorderDisabled'
-  | 'colorFill'
-  | 'colorFillSecondary'
-  | 'colorFillTertiary'
-  | 'colorFillQuaternary'
-  | 'colorSuccessBg'
-  | 'colorSuccessBorder'
-  | 'colorSuccessHover'
-  | 'colorSuccessActive'
-  | 'colorSuccessText'
-  | 'colorWarningBg'
-  | 'colorWarningBorder'
-  | 'colorWarningHover'
-  | 'colorWarningActive'
-  | 'colorWarningText'
-  | 'colorErrorBg'
-  | 'colorErrorBorder'
-  | 'colorErrorHover'
-  | 'colorErrorActive'
-  | 'colorErrorText'
-  | 'colorInfoBg'
-  | 'colorInfoBorder'
-  | 'colorInfoHover'
-  | 'colorInfoActive'
-  | 'colorInfoText'
-  | 'borderRadiusXS'
-  | 'borderRadiusSM'
-  | 'borderRadius'
-  | 'borderRadiusLG'
-  | 'borderRadiusOuter'
-  | 'lineWidthBold'
-  | 'motionDurationFast'
-  | 'motionDurationMid'
-  | 'motionDurationSlow'
-  | 'controlHeightXS'
-  | 'controlHeightSM'
-  | 'controlHeightLG'
-
-type AliasTokenOverrideKey =
-  | 'colorLink'
-  | 'colorTextHeading'
-  | 'colorTextLabel'
-  | 'colorTextDescription'
-  | 'colorIcon'
-  | 'colorBorderBg'
-  | 'colorTextPlaceholder'
-  | 'colorTextDisabled'
-  | 'colorBgContainerDisabled'
-  | 'colorBgTextHover'
-  | 'colorBgTextActive'
-  | 'colorFillAlter'
-  | 'colorFillContent'
-  | 'colorFillContentHover'
-  | 'colorErrorOutline'
-  | 'colorWarningOutline'
-  | 'boxShadow'
-  | 'boxShadowSecondary'
-  | 'boxShadowTertiary'
-  | 'motion'
-
-export type ThemeTokenOverrides = Partial<SeedToken> &
-  Partial<Pick<MapToken, MapTokenOverrideKey>> &
-  Partial<Pick<AliasToken, AliasTokenOverrideKey>>
-
-const MAP_TOKEN_OVERRIDE_KEYS: readonly MapTokenOverrideKey[] = [
-  'fontSizeSM',
-  'fontSizeLG',
-  'fontSizeXL',
-  'fontSizeHeading1',
-  'fontSizeHeading2',
-  'fontSizeHeading3',
-  'fontSizeHeading4',
-  'fontSizeHeading5',
-  'lineHeight',
-  'lineHeightSM',
-  'lineHeightLG',
-  'lineHeightHeading1',
-  'lineHeightHeading2',
-  'lineHeightHeading3',
-  'lineHeightHeading4',
-  'lineHeightHeading5',
-  'fontHeight',
-  'fontHeightSM',
-  'fontHeightLG',
-  'sizeXXL',
-  'sizeXL',
-  'sizeLG',
-  'sizeMD',
-  'sizeMS',
-  'size',
-  'sizeSM',
-  'sizeXS',
-  'sizeXXS',
-  'colorPrimaryBg',
-  'colorPrimaryBgHover',
-  'colorPrimaryBorder',
-  'colorPrimaryBorderHover',
-  'colorPrimaryHover',
-  'colorPrimaryActive',
-  'colorPrimaryText',
-  'colorPrimaryTextHover',
-  'colorPrimaryTextActive',
-  'colorText',
-  'colorTextSecondary',
-  'colorTextTertiary',
-  'colorTextQuaternary',
-  'colorBgContainer',
-  'colorBgElevated',
-  'colorBgLayout',
-  'colorBgSpotlight',
-  'colorBgMask',
-  'colorBorder',
-  'colorBorderSecondary',
-  'colorBorderDisabled',
-  'colorFill',
-  'colorFillSecondary',
-  'colorFillTertiary',
-  'colorFillQuaternary',
-  'colorSuccessBg',
-  'colorSuccessBorder',
-  'colorSuccessHover',
-  'colorSuccessActive',
-  'colorSuccessText',
-  'colorWarningBg',
-  'colorWarningBorder',
-  'colorWarningHover',
-  'colorWarningActive',
-  'colorWarningText',
-  'colorErrorBg',
-  'colorErrorBorder',
-  'colorErrorHover',
-  'colorErrorActive',
-  'colorErrorText',
-  'colorInfoBg',
-  'colorInfoBorder',
-  'colorInfoHover',
-  'colorInfoActive',
-  'colorInfoText',
-  'borderRadiusXS',
-  'borderRadiusSM',
-  'borderRadius',
-  'borderRadiusLG',
-  'borderRadiusOuter',
-  'lineWidthBold',
-  'motionDurationFast',
-  'motionDurationMid',
-  'motionDurationSlow',
-  'controlHeightXS',
-  'controlHeightSM',
-  'controlHeightLG',
-]
-
-const ALIAS_TOKEN_OVERRIDE_KEYS: readonly AliasTokenOverrideKey[] = [
-  'colorLink',
-  'colorTextHeading',
-  'colorTextLabel',
-  'colorTextDescription',
-  'colorIcon',
-  'colorBorderBg',
-  'colorTextPlaceholder',
-  'colorTextDisabled',
-  'colorBgContainerDisabled',
-  'colorBgTextHover',
-  'colorBgTextActive',
-  'colorFillAlter',
-  'colorFillContent',
-  'colorFillContentHover',
-  'colorErrorOutline',
-  'colorWarningOutline',
-  'boxShadow',
-  'boxShadowSecondary',
-  'boxShadowTertiary',
-  'motion',
-]
-
 export interface ThemeConfig {
-  token?: ThemeTokenOverrides
-  algorithm?: MappingAlgorithm | MappingAlgorithm[]
+  token?: Partial<AliasToken>
+  algorithm?: MappingAlgorithm | readonly MappingAlgorithm[]
   components?: ComponentTokenOverrides
   inherit?: boolean
 }
 
-interface UIThemeValue {
+interface ThemeValue {
   seed: SeedToken
   token: AliasToken
-  components: ComponentTokens
-  algorithm: MappingAlgorithm | MappingAlgorithm[]
-  tokenOverrides: ThemeTokenOverrides
+  tokenOverrides: Partial<AliasToken>
+  algorithm: MappingAlgorithm | readonly MappingAlgorithm[]
+  componentOverrides: ComponentTokenOverrides
 }
 
-const UIThemeContext = createContext<UIThemeValue | null>(null)
+const ThemeContext = createContext<ThemeValue | null>(null)
 
-function getMapToken(seed: SeedToken, algorithm?: ThemeConfig['algorithm']) {
-  const resolvedAlgorithm = algorithm ?? defaultAlgorithm
-
-  const map = Array.isArray(resolvedAlgorithm)
-    ? composeAlgorithms(resolvedAlgorithm)(seed)
-    : resolvedAlgorithm(seed)
-
-  return map
+function isSeedKey(key: string): key is keyof SeedToken {
+  return key in defaultSeed
 }
 
-function containsDarkAlgorithm(algorithm: MappingAlgorithm | MappingAlgorithm[]) {
-  const algorithms = Array.isArray(algorithm) ? algorithm : [algorithm]
-  return algorithms.includes(darkAlgorithm)
-}
+function splitSeedOverrides(overrides: Partial<AliasToken>): Partial<SeedToken> {
+  const seedOverrides: Partial<SeedToken> = {}
 
-function pickSeedOverrides(overrides?: ThemeTokenOverrides): Partial<SeedToken> {
-  const result: Partial<SeedToken> = {}
-
-  for (const key of Object.keys(defaultSeed) as Array<keyof SeedToken>) {
-    const value = overrides?.[key]
-    if (value !== undefined) Object.assign(result, { [key]: value })
+  for (const [key, value] of Object.entries(overrides)) {
+    if (isSeedKey(key) && value !== undefined) {
+      Object.assign(seedOverrides, { [key]: value })
+    }
   }
 
-  return result
+  return seedOverrides
 }
 
-function pickMapOverrides(overrides?: ThemeTokenOverrides): Partial<MapToken> {
-  const result: Partial<MapToken> = {}
-
-  for (const key of MAP_TOKEN_OVERRIDE_KEYS) {
-    const value = overrides?.[key]
-    if (value !== undefined) Object.assign(result, { [key]: value })
-  }
-
-  return result
+function isAlgorithmList(
+  algorithm: MappingAlgorithm | readonly MappingAlgorithm[],
+): algorithm is readonly MappingAlgorithm[] {
+  return Array.isArray(algorithm)
 }
 
-function pickAliasOverrides(overrides?: ThemeTokenOverrides): Partial<AliasToken> {
-  const result: Partial<AliasToken> = {}
-
-  for (const key of ALIAS_TOKEN_OVERRIDE_KEYS) {
-    const value = overrides?.[key]
-    if (value !== undefined) Object.assign(result, { [key]: value })
-  }
-
-  return result
+function getMapToken(
+  seed: SeedToken,
+  algorithm: MappingAlgorithm | readonly MappingAlgorithm[],
+): MapToken {
+  return isAlgorithmList(algorithm) ? composeAlgorithms(algorithm)(seed) : algorithm(seed)
 }
 
-function resolveTheme(theme: ThemeConfig = {}, parent?: UIThemeValue | null) {
+function resolveTheme(theme: ThemeConfig = {}, parent?: ThemeValue | null): ThemeValue {
   const inherit = theme.inherit !== false
-  const tokenOverrides = {
+  const tokenOverrides: Partial<AliasToken> = {
     ...(inherit ? parent?.tokenOverrides : undefined),
     ...theme.token,
   }
-  const seed = {
+  const seed: SeedToken = {
     ...defaultSeed,
     ...(inherit ? parent?.seed : undefined),
-    ...pickSeedOverrides(tokenOverrides),
+    ...splitSeedOverrides(tokenOverrides),
   }
-
   const algorithm = theme.algorithm ?? (inherit ? parent?.algorithm : undefined) ?? defaultAlgorithm
-  const isDark = containsDarkAlgorithm(algorithm)
-  const map = {
-    ...getMapToken(seed, algorithm),
-    ...pickMapOverrides(tokenOverrides),
+  const map = { ...getMapToken(seed, algorithm), ...tokenOverrides }
+  const token = createAliasToken(map, tokenOverrides)
+  const componentOverrides = {
+    ...(inherit ? parent?.componentOverrides : undefined),
+    ...theme.components,
   }
-  const aliasOverrides = pickAliasOverrides(tokenOverrides)
-  const token = {
-    ...createAliasToken(map, aliasOverrides.colorLink ?? map.colorLink),
-    ...aliasOverrides,
-  }
-  const inheritedComponents = inherit ? parent?.components : undefined
-  const components = createComponentTokens(
-    token,
-    {
-      ...inheritedComponents,
-      ...theme.components,
-    },
-    isDark,
-  )
 
-  return { seed, token, components, algorithm, tokenOverrides }
+  return {
+    seed,
+    token,
+    tokenOverrides,
+    algorithm,
+    componentOverrides,
+  }
 }
 
-export function UIThemeProvider({
+export function ConfigProvider({
   children,
   theme = {},
 }: PropsWithChildren<{ theme?: ThemeConfig }>) {
-  const parent = useContext(UIThemeContext)
-
+  const parent = useContext(ThemeContext)
   const value = useMemo(() => resolveTheme(theme, parent), [parent, theme])
 
-  return <UIThemeContext.Provider value={value}>{children}</UIThemeContext.Provider>
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
 export function getDesignToken(theme: ThemeConfig = {}) {
   return resolveTheme(theme, null)
 }
 
-export function useToken() {
-  const value = useContext(UIThemeContext)
+export function useToken(): ThemeValue {
+  const value = useContext(ThemeContext)
 
-  if (!value) {
-    throw new Error('useToken must be used inside UIThemeProvider')
-  }
+  if (!value) throw new Error('useToken must be used inside ConfigProvider')
 
   return value
 }
 
-export function useOptionalToken() {
-  return useContext(UIThemeContext)
+export function useOptionalToken(): ThemeValue | null {
+  return useContext(ThemeContext)
 }
 
 export function useComponentToken<Name extends ComponentTokenName>(
   name: Name,
   factory: ComponentTokenFactory<Name>,
-): ComponentTokens[Name] {
-  const { token, components } = useToken()
+): ComponentTokenMap[Name] {
+  const { token, componentOverrides } = useToken()
+  const override = componentOverrides[name] as Partial<ComponentTokenMap[Name]> | undefined
+
   return useMemo(
-    () => components[name] ?? factory(token),
-    [components, factory, name, token],
-  ) as ComponentTokens[Name]
+    () => ({ ...factory(token), ...override }) as ComponentTokenMap[Name],
+    [factory, override, token],
+  )
 }
 
-export const ThemeProvider = UIThemeProvider
-export const ConfigProvider = UIThemeProvider
+export const UIThemeProvider = ConfigProvider

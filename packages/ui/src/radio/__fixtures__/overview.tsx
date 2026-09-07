@@ -1,9 +1,8 @@
-import { ThemeProvider } from '@ftsukic/react-native-ui'
+import { ConfigProvider } from '@ftsukic/react-native-ui'
 import { Text, View } from 'react-native'
 import Disabled from './examples/disabled'
 import Group from './examples/group'
 import Options from './examples/options'
-import Buttons from './examples/buttons'
 import Shapes from './examples/shapes'
 import Standalone from './examples/standalone'
 import Styled from './examples/styled'
@@ -14,7 +13,7 @@ import Theme from './examples/theme'
  */
 export default function RadioOverview() {
   return (
-    <ThemeProvider>
+    <ConfigProvider>
       <View style={{ padding: 20, gap: 32, backgroundColor: '#ffffff' }}>
         <View style={{ gap: 16 }}>
           <Text style={{ color: '#68788d', fontSize: 14 }}>独立 Radio</Text>
@@ -33,10 +32,6 @@ export default function RadioOverview() {
           <Shapes />
         </View>
         <View style={{ gap: 16 }}>
-          <Text style={{ color: '#68788d', fontSize: 14 }}>按钮样式</Text>
-          <Buttons />
-        </View>
-        <View style={{ gap: 16 }}>
           <Text style={{ color: '#68788d', fontSize: 14 }}>禁用状态</Text>
           <Disabled />
         </View>
@@ -49,6 +44,6 @@ export default function RadioOverview() {
           <Theme />
         </View>
       </View>
-    </ThemeProvider>
+    </ConfigProvider>
   )
 }

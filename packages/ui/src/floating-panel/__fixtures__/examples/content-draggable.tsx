@@ -1,4 +1,4 @@
-import { FloatingPanel } from '@ftsukic/react-native-ui'
+import { FloatingPanel, Provider } from '@ftsukic/react-native-ui'
 import { StyleSheet, Text, View } from 'react-native'
 
 /**
@@ -7,18 +7,20 @@ import { StyleSheet, Text, View } from 'react-native'
  */
 export default function FloatingPanelContentDraggableExample() {
   return (
-    <View style={styles.page}>
-      <FloatingPanel contentDraggable={false}>
-        <View style={styles.content}>
-          <Text style={styles.title}>内容区域独立滚动</Text>
-          {Array.from({ length: 12 }, (_, index) => (
-            <Text key={index} style={styles.row}>
-              内容行 {index + 1}
-            </Text>
-          ))}
-        </View>
-      </FloatingPanel>
-    </View>
+    <Provider>
+      <View style={styles.page}>
+        <FloatingPanel contentDraggable={false}>
+          <View style={styles.content}>
+            <Text style={styles.title}>内容区域独立滚动</Text>
+            {Array.from({ length: 12 }, (_, index) => (
+              <Text key={index} style={styles.row}>
+                内容行 {index + 1}
+              </Text>
+            ))}
+          </View>
+        </FloatingPanel>
+      </View>
+    </Provider>
   )
 }
 

@@ -1,42 +1,43 @@
-import type { PopupToken } from '../theme'
 import type { ReactNode } from 'react'
-import type { ColorValue, StyleProp, ViewStyle } from 'react-native'
+import type { GestureResponderEvent, StyleProp, ViewProps, ViewStyle } from 'react-native'
+import type { StyleInfo, StyleResolver } from '../style'
 
-export type PopupPosition = 'top' | 'bottom' | 'right' | 'left' | 'center'
+export type PopupPosition = 'center' | 'top' | 'bottom' | 'left' | 'right'
 
-export interface PopupProps {
-  children?: ReactNode
+export interface PopupStyleState {
   visible: boolean
-  duration?: number
+  position: PopupPosition
+  rendered: boolean
+}
+
+export interface PopupSemanticStyles {
+  root?: StyleProp<ViewStyle>
+  panel?: StyleProp<ViewStyle>
+  overlay?: StyleProp<ViewStyle>
+}
+
+export type PopupStyles = StyleResolver<PopupProps, PopupStyleState, PopupSemanticStyles>
+
+export interface PopupProps extends Omit<ViewProps, 'children' | 'style'> {
+  children?: ReactNode
+  visible?: boolean
+  position?: PopupPosition
   overlay?: boolean
   closeOnPressOverlay?: boolean
-  onPressOverlay?: () => void
+  onPressOverlay?: (event: GestureResponderEvent) => void
+  onRequestClose?: () => void
+  duration?: number
+  round?: boolean
+  lazyRender?: boolean
+  destroyOnClosed?: boolean
+  zIndex?: number
+  style?: StyleProp<ViewStyle>
+  overlayStyle?: StyleProp<ViewStyle>
+  styles?: PopupStyles
   onOpen?: () => void
   onOpened?: () => void
   onClose?: () => void
   onClosed?: () => void
-  onRequestClose?: () => boolean
-  overlayBackgroundColor?: ColorValue
-  position?: PopupPosition
-  round?: boolean
-  safeAreaInsetBottom?: boolean
-  safeAreaInsetTop?: boolean
-  lazyRender?: boolean
-  destroyOnClosed?: boolean
-  style?: StyleProp<ViewStyle>
-  theme?: Partial<PopupToken>
-  testID?: string
 }
 
-export interface PopupPageProps extends Omit<PopupProps, 'position' | 'safeAreaInsetTop'> {
-  safeAreaInsetTop?: number
-}
-
-export interface PopupHeaderProps {
-  children?: ReactNode
-  title?: ReactNode
-  showClose?: boolean
-  onClose?: () => void
-  style?: StyleProp<ViewStyle>
-  theme?: Partial<PopupToken>
-}
+export type PopupStyleInfo = StyleInfo<PopupProps, PopupStyleState>

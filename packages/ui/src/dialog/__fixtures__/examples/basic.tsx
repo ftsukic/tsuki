@@ -1,13 +1,24 @@
-/**
- * @title Dialog · basic
- * @description 展示 Dialog 的真实公开 API 和可交互状态。
- */
-import { Dialog, UIProvider } from '@ftsukic/react-native-ui'
+import { Button, ConfigProvider, PortalHost, showDialog } from '@ftsukic/react-native-ui'
+import { View } from 'react-native'
 
-export default function Example() {
+/**
+ * @title 基础提示
+ * @description showDialog 默认展示一个确认按钮，Promise 在确认后 resolve。
+ */
+export default function DialogBasicExample() {
   return (
-    <UIProvider>
-      <Dialog visible title="提示" message="这是一条可操作的提示。" showCancelButton />
-    </UIProvider>
+    <ConfigProvider>
+      <PortalHost>
+        <View style={{ gap: 12 }}>
+          <Button
+            onPress={() => {
+              void showDialog({ title: '提示', message: '这是一条需要确认的消息。' })
+            }}
+          >
+            显示提示
+          </Button>
+        </View>
+      </PortalHost>
+    </ConfigProvider>
   )
 }

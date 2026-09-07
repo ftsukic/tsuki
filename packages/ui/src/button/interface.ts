@@ -1,36 +1,47 @@
-import type { ButtonToken } from '../theme'
 import type { ReactNode } from 'react'
 import type { ColorValue, PressableProps, StyleProp, TextStyle, ViewStyle } from 'react-native'
+import type { StyleInfo, StyleResolver } from '../style'
 
-export type ButtonType =
-  'primary' | 'default' | 'dashed' | 'text' | 'link' | 'hazy' | 'outline' | 'ghost'
+export type ButtonType = 'default' | 'primary' | 'success' | 'warning' | 'danger'
+export type ButtonSize = 'large' | 'normal' | 'small' | 'mini'
+export type ButtonIconPosition = 'left' | 'right'
+export type ButtonVariant = 'solid' | 'filled' | 'outlined' | 'dashed' | 'text'
 
-export type ButtonSize = 'large' | 'medium' | 'small'
-
-export interface ButtonPadding {
-  horizontal?: number
-  vertical?: number
+export interface ButtonStyleState {
+  pressed: boolean
+  disabled: boolean
+  loading: boolean
 }
 
-export interface ButtonProps extends Omit<PressableProps, 'children' | 'style'> {
+export interface ButtonSemanticStyles {
+  root?: StyleProp<ViewStyle>
+  icon?: StyleProp<ViewStyle>
+  content?: StyleProp<TextStyle>
+}
+
+export type ButtonStyles = StyleResolver<ButtonProps, ButtonStyleState, ButtonSemanticStyles>
+
+export interface ButtonProps extends Omit<PressableProps, 'children' | 'style' | 'disabled'> {
   children?: ReactNode
-  text?: string
-  subtext?: string
-  textStyle?: StyleProp<TextStyle>
-  style?: StyleProp<ViewStyle> | ((state: { pressed: boolean }) => StyleProp<ViewStyle>)
-  padding?: ButtonPadding
   type?: ButtonType
   size?: ButtonSize
-  danger?: boolean
+  color?: ColorValue
+  variant?: ButtonVariant
+  /** @deprecated Use `variant="outlined"` instead. */
+  plain?: boolean
+  block?: boolean
+  round?: boolean
+  square?: boolean
+  circle?: boolean
+  hairline?: boolean
   disabled?: boolean
   loading?: boolean
-  loadingText?: string
-  square?: boolean
-  round?: boolean
-  circle?: boolean
-  renderLeftIcon?: (color: ColorValue, size: number) => ReactNode
-  color?: ColorValue
-  textColor?: ColorValue
+  loadingText?: ReactNode
+  icon?: ReactNode
+  iconPosition?: ButtonIconPosition
+  style?: StyleProp<ViewStyle>
+  styles?: ButtonStyles
   onPressDebounceWait?: number
-  theme?: Partial<ButtonToken>
 }
+
+export type ButtonStyleInfo = StyleInfo<ButtonProps, ButtonStyleState>

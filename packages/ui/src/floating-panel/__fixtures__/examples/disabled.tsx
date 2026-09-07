@@ -1,4 +1,4 @@
-import { FloatingPanel } from '@ftsukic/react-native-ui'
+import { FloatingPanel, Provider } from '@ftsukic/react-native-ui'
 import { StyleSheet, Text, View } from 'react-native'
 
 /**
@@ -7,14 +7,16 @@ import { StyleSheet, Text, View } from 'react-native'
  */
 export default function FloatingPanelDisabledExample() {
   return (
-    <View style={styles.page}>
-      <FloatingPanel draggable={false} defaultHeight={180}>
-        <View style={styles.content}>
-          <Text style={styles.title}>固定面板</Text>
-          <Text style={styles.description}>面板不可拖动，适合展示固定的底部辅助内容。</Text>
-        </View>
-      </FloatingPanel>
-    </View>
+    <Provider>
+      <View style={styles.page}>
+        <FloatingPanel draggable={false} defaultHeight={180}>
+          <View style={styles.content}>
+            <Text style={styles.title}>固定面板</Text>
+            <Text style={styles.description}>面板不可拖动，适合展示固定的底部辅助内容。</Text>
+          </View>
+        </FloatingPanel>
+      </View>
+    </Provider>
   )
 }
 

@@ -1,11 +1,10 @@
-import type { MapToken } from './maps'
-import type { SeedToken } from './seeds'
+import type { MapToken } from './map'
+import type { SeedToken } from './seed'
 
 export * from './alias'
 export * from './components'
-export * from './maps'
-export * from './presetColors'
-export * from './seeds'
+export * from './map'
+export * from './preset-colors'
+export * from './seed'
 
-/** Mirrors antd v6 `MappingAlgorithm` without the CSS-in-JS dependency. */
 export type MappingAlgorithm = (seed: SeedToken, previous?: MapToken) => MapToken

@@ -1,4 +1,4 @@
-import { FloatingPanel } from '@ftsukic/react-native-ui'
+import { FloatingPanel, Provider } from '@ftsukic/react-native-ui'
 import { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
@@ -11,20 +11,22 @@ export default function FloatingPanelAnchorsExample() {
   const [height, setHeight] = useState(anchors[0])
 
   return (
-    <View style={styles.page}>
-      <Text style={styles.caption}>当前高度：{Math.round(height)}px</Text>
-      <FloatingPanel
-        height={height}
-        anchors={anchors}
-        onHeightChange={setHeight}
-        onHeightChangeEnd={setHeight}
-      >
-        <View style={styles.content}>
-          <Text style={styles.title}>三个停靠位置</Text>
-          <Text style={styles.description}>松手后会吸附到 100、280 或 520px。</Text>
-        </View>
-      </FloatingPanel>
-    </View>
+    <Provider>
+      <View style={styles.page}>
+        <Text style={styles.caption}>当前高度：{Math.round(height)}px</Text>
+        <FloatingPanel
+          height={height}
+          anchors={anchors}
+          onHeightChange={setHeight}
+          onHeightChangeEnd={setHeight}
+        >
+          <View style={styles.content}>
+            <Text style={styles.title}>三个停靠位置</Text>
+            <Text style={styles.description}>松手后会吸附到 100、280 或 520px。</Text>
+          </View>
+        </FloatingPanel>
+      </View>
+    </Provider>
   )
 }
 

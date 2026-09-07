@@ -1,4 +1,22 @@
-export * from './interface'
-export { default as Dialog, showDialog } from './dialog'
-export { default as DialogInput } from './dialog-input'
-export { default as DialogKeyboard } from './dialog-keyboard'
+export { Dialog } from './dialog'
+export {
+  closeDialog,
+  resetDialogDefaultOptions,
+  setDialogDefaultOptions,
+  showConfirmDialog,
+  showDialog,
+} from './imperative'
+export { getDialogToken } from './token'
+export type {
+  DialogAction,
+  DialogBeforeClose,
+  DialogMessage,
+  DialogMessageAlign,
+  DialogOptions,
+  DialogProps,
+  DialogSemanticStyles,
+  DialogStyleInfo,
+  DialogStyleState,
+  DialogStyles,
+  DialogTheme,
+} from './interface'

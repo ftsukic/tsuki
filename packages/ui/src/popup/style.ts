@@ -1,82 +1,95 @@
-import type { PopupToken } from '../theme'
-import type { PopupPosition } from './interface'
 import { StyleSheet } from 'react-native'
+import type { ViewStyle } from 'react-native'
+import type { PopupPosition } from './interface'
+import type { PopupToken } from '../theme'
 
-export function createPopupStyles(token: PopupToken) {
-  return StyleSheet.create({
-    root: {
-      alignItems: 'center',
-      flex: 1,
-      justifyContent: 'center',
-    },
-    overlay: {
-      ...StyleSheet.absoluteFillObject,
-    },
-    panel: {
-      backgroundColor: token.backgroundColor,
-      overflow: 'hidden',
-    },
-    panelTop: {
-      left: 0,
-      position: 'absolute',
-      right: 0,
-      top: 0,
-    },
-    panelBottom: {
-      bottom: 0,
-      left: 0,
-      position: 'absolute',
-      right: 0,
-    },
-    panelLeft: {
-      bottom: 0,
-      left: 0,
-      position: 'absolute',
-      top: 0,
-    },
-    panelRight: {
-      bottom: 0,
-      position: 'absolute',
-      right: 0,
-      top: 0,
-    },
-    panelCenter: {
-      flex: 1,
-      backgroundColor: 'transparent',
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    header: {
-      alignItems: 'center',
-      flexDirection: 'row',
-      height: token.headerHeight,
-      justifyContent: 'space-between',
-      paddingHorizontal: token.headerPaddingHorizontal,
-    },
-    headerTitle: {
-      color: token.headerTitleColor,
-      flex: 1,
-      fontSize: token.headerTitleFontSize,
-      fontWeight: '600',
-    },
-    close: {
-      marginLeft: token.headerPaddingHorizontal,
-    },
-  })
+export interface PopupResolvedStyles {
+  root: ViewStyle
+  container: ViewStyle
+  panel: ViewStyle
+  overlay: ViewStyle
 }
 
-export function getPositionStyle(position: PopupPosition) {
+function getRoundStyles(position: PopupPosition, radius: number): ViewStyle {
   switch (position) {
     case 'top':
-      return 'panelTop' as const
+      return {
+        borderBottomLeftRadius: radius,
+        borderBottomRightRadius: radius,
+      }
     case 'bottom':
-      return 'panelBottom' as const
+      return {
+        borderTopLeftRadius: radius,
+        borderTopRightRadius: radius,
+      }
     case 'left':
-      return 'panelLeft' as const
+      return {
+        borderTopRightRadius: radius,
+        borderBottomRightRadius: radius,
+      }
     case 'right':
-      return 'panelRight' as const
+      return {
+        borderTopLeftRadius: radius,
+        borderBottomLeftRadius: radius,
+      }
     case 'center':
     default:
-      return 'panelCenter' as const
+      return { borderRadius: radius }
+  }
+}
+
+export function getPopupStyles(
+  token: PopupToken,
+  position: PopupPosition,
+  round: boolean,
+): PopupResolvedStyles {
+  const positionStyles: ViewStyle = {
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+  const panel: ViewStyle = {
+    backgroundColor: token.backgroundColor,
+    overflow: 'hidden',
+    position: 'relative',
+  }
+
+  switch (position) {
+    case 'top':
+      positionStyles.justifyContent = 'flex-start'
+      panel.width = '100%'
+      break
+    case 'bottom':
+      positionStyles.justifyContent = 'flex-end'
+      panel.width = '100%'
+      break
+    case 'left':
+      positionStyles.alignItems = 'flex-start'
+      panel.height = '100%'
+      break
+    case 'right':
+      positionStyles.alignItems = 'flex-end'
+      panel.height = '100%'
+      break
+    case 'center':
+    default:
+      break
+  }
+
+  if (round) Object.assign(panel, getRoundStyles(position, token.borderRadius))
+
+  return {
+    root: {
+      ...StyleSheet.absoluteFillObject,
+      zIndex: token.zIndex,
+    },
+    container: {
+      ...StyleSheet.absoluteFillObject,
+      ...positionStyles,
+    },
+    panel,
+    overlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: token.overlayColor,
+    },
   }
 }

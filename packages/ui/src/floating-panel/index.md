@@ -89,7 +89,7 @@ H5 文档使用 `react-native-web` 预览；Jest 只验证状态、样式和 res
 
 ## 主题定制
 
-通过 `ThemeProvider` 的 `theme.components.FloatingPanel` 配置：
+通过 `ConfigProvider` 的 `theme.components.FloatingPanel` 配置：
 
 | Token               | 默认值                      | 说明                     |
 | ------------------- | --------------------------- | ------------------------ |

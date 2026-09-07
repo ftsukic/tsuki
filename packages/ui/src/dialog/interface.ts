@@ -1,82 +1,77 @@
-import type { ButtonProps } from '../button'
-import type { NumberInputProps } from '../number-input'
-import type { PasswordInputProps } from '../password-input'
-import type { PopupProps } from '../popup'
-import type { TextInputProps } from '../text-input'
-import type { DialogToken } from '../theme'
 import type { ReactNode } from 'react'
 import type {
   ColorValue,
   DimensionValue,
   StyleProp,
-  TouchableWithoutFeedbackProps,
+  TextStyle,
+  ViewProps,
   ViewStyle,
 } from 'react-native'
+import type { StyleInfo, StyleResolver } from '../style'
 
-export type DialogType = 'alert' | 'confirm'
+export type DialogAction = 'confirm' | 'cancel'
+export type DialogTheme = 'default' | 'round-button'
+export type DialogMessageAlign = 'left' | 'center' | 'right' | 'justify'
+export type DialogMessage = ReactNode
 
-export type DialogButtonProps = Omit<ButtonProps, 'children' | 'text' | 'onPress'>
+export type DialogBeforeClose = (action: DialogAction) => boolean | void | Promise<boolean | void>
 
-export interface DialogProps extends Omit<PopupProps, 'theme' | 'style'> {
-  theme?: Partial<DialogToken>
-  style?: StyleProp<ViewStyle>
+export interface DialogStyleState {
+  show: boolean
+  theme: DialogTheme
+  closingAction: DialogAction | null
+  confirmLoading: boolean
+  cancelLoading: boolean
+}
+
+export interface DialogSemanticStyles {
+  host?: StyleProp<ViewStyle>
+  overlay?: StyleProp<ViewStyle>
+  root?: StyleProp<ViewStyle>
+  header?: StyleProp<TextStyle>
+  content?: StyleProp<ViewStyle>
+  message?: StyleProp<TextStyle>
+  footer?: StyleProp<ViewStyle>
+  cancel?: StyleProp<ViewStyle>
+  confirm?: StyleProp<ViewStyle>
+}
+
+export type DialogStyles = StyleResolver<DialogProps, DialogStyleState, DialogSemanticStyles>
+
+export interface DialogProps extends Omit<ViewProps, 'children' | 'style'> {
+  show?: boolean
   title?: ReactNode
+  message?: DialogMessage
+  children?: ReactNode
+  footer?: ReactNode
   width?: DimensionValue
-  message?: ReactNode
-  messageAlign?: 'center' | 'left' | 'right'
+  theme?: DialogTheme
+  messageAlign?: DialogMessageAlign
   showConfirmButton?: boolean
   showCancelButton?: boolean
-  confirmButtonText?: string
-  confirmButtonColor?: ColorValue
-  confirmButtonTextBold?: boolean
-  cancelButtonText?: string
+  cancelButtonText?: ReactNode
   cancelButtonColor?: ColorValue
-  cancelButtonTextBold?: boolean
-  confirmButtonLoading?: boolean
-  cancelButtonLoading?: boolean
-  showClose?: boolean
-  onPressClose?: TouchableWithoutFeedbackProps['onPress']
-  buttonReverse?: boolean
-  onPressCancel?: () => void
-  onPressConfirm?: () => void
-  footerStyle?: StyleProp<ViewStyle>
-  cancelButtonProps?: DialogButtonProps
-  confirmButtonProps?: DialogButtonProps
+  cancelButtonDisabled?: boolean
+  confirmButtonText?: ReactNode
+  confirmButtonColor?: ColorValue
+  confirmButtonDisabled?: boolean
+  overlay?: boolean
+  overlayStyle?: StyleProp<ViewStyle>
+  closeOnClickOverlay?: boolean
+  zIndex?: number
+  beforeClose?: DialogBeforeClose
+  style?: StyleProp<ViewStyle>
+  styles?: DialogStyles
+  onShowChange?: (show: boolean) => void
+  onConfirm?: () => void
+  onCancel?: () => void
+  onOpened?: () => void
+  onClose?: () => void
 }
 
-/** 命令式 Dialog 的配置，不允许调用方覆盖内部关闭生命周期。 */
-export type DialogShowOptions = Omit<
+export type DialogOptions = Omit<
   DialogProps,
-  'visible' | 'onPressConfirm' | 'onPressCancel' | 'onPressOverlay' | 'onRequestClose' | 'onClosed'
+  'show' | 'onShowChange' | 'onConfirm' | 'onCancel' | 'onOpened' | 'onClose'
 >
 
-export type DialogAction = 'confirm' | 'cancel' | 'overlay'
-
-export interface DialogKeyboardProps extends DialogProps {
-  safeAreaTop?: number
-}
-
-export interface DialogInputProps extends Omit<
-  DialogProps,
-  | 'visible'
-  | 'onPressOverlay'
-  | 'messageAlign'
-  | 'onPressClose'
-  | 'onPressCancel'
-  | 'onPressConfirm'
-> {
-  beforeClose?: (
-    action: Exclude<DialogAction, 'overlay'>,
-    text: string,
-  ) => boolean | Promise<boolean>
-  onPressCancel?: (text: string) => boolean | Promise<boolean> | void | Promise<void>
-  onPressConfirm?: (text: string) => boolean | Promise<boolean> | void | Promise<void>
-  defaultValue?: string
-  placeholder?: string
-  type?: TextInputProps['type'] | NumberInputProps['type'] | 'password'
-  autoFocus?: boolean
-  safeAreaTop?: number
-  textInput?: Omit<TextInputProps, 'defaultValue' | 'placeholder' | 'type' | 'autoFocus'>
-  numberInput?: Omit<NumberInputProps, 'defaultValue' | 'placeholder' | 'type' | 'autoFocus'>
-  passwordInput?: Omit<PasswordInputProps, 'defaultValue' | 'placeholder' | 'type' | 'autoFocus'>
-}
+export type DialogStyleInfo = StyleInfo<DialogProps, DialogStyleState>

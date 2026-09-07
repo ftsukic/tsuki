@@ -1,4 +1,4 @@
-import type { MapToken } from './maps'
+import type { MapToken } from './map'
 
 export interface AliasToken extends MapToken {
   colorTextHeading: string
@@ -22,19 +22,6 @@ export interface AliasToken extends MapToken {
   colorWarningAffix: string
   colorErrorOutline: string
   colorWarningOutline: string
-  boxShadowSecondary: string
-  boxShadowTertiary: string
-  boxShadowPopoverArrow: string
-  dropShadowPopover: string
-  boxShadowCard: string
-  boxShadowDrawerRight: string
-  boxShadowDrawerLeft: string
-  boxShadowDrawerUp: string
-  boxShadowDrawerDown: string
-  boxShadowTabsOverflowLeft: string
-  boxShadowTabsOverflowRight: string
-  boxShadowTabsOverflowTop: string
-  boxShadowTabsOverflowBottom: string
   fontSizeIcon: number
   fontWeightStrong: number
   lineWidthFocus: number
@@ -59,12 +46,6 @@ export interface AliasToken extends MapToken {
   paddingMD: number
   paddingLG: number
   paddingXL: number
-  paddingContentHorizontalLG: number
-  paddingContentVerticalLG: number
-  paddingContentHorizontal: number
-  paddingContentVertical: number
-  paddingContentHorizontalSM: number
-  paddingContentVerticalSM: number
   marginXXS: number
   marginXS: number
   marginSM: number
@@ -73,29 +54,8 @@ export interface AliasToken extends MapToken {
   marginLG: number
   marginXL: number
   marginXXL: number
-  screenXS: number
-  screenXSMin: number
-  screenXSMax: number
-  screenSM: number
-  screenSMMin: number
-  screenSMMax: number
-  screenMD: number
-  screenMDMin: number
-  screenMDMax: number
-  screenLG: number
-  screenLGMin: number
-  screenLGMax: number
-  screenXL: number
-  screenXLMin: number
-  screenXLMax: number
-  screenXXL: number
-  screenXXLMin: number
-  screenXXLMax: number
-  screenXXXL: number
-  screenXXXLMin: number
   boxShadow: string
+  boxShadowSecondary: string
+  boxShadowTertiary: string
   motion: boolean
-  motionDurationFast: number
-  motionDurationMid: number
-  motionDurationSlow: number
 }

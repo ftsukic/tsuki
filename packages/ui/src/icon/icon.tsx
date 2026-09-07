@@ -12,9 +12,7 @@ export type IconProps = IconBaseProps & {
 
 function IconComponent({ name, ...props }: IconProps) {
   const resolvedDefinition = typeof name === 'string' ? iconDefinitions[name] : name
-  if (!resolvedDefinition) {
-    throw new Error('Icon requires a name')
-  }
+  if (!resolvedDefinition) throw new Error('Icon requires a valid name or definition')
 
   return <AntdNativeIcon definition={resolvedDefinition} {...props} />
 }

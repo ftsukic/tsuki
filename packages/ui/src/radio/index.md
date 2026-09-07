@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-单选框用于从一组选项中选择一个值，也可以单独作为可控的布尔选择项使用。支持圆形和方形指示器、Ant Design 风格按钮单选框、子节点分组、`options` 分组、禁用状态和主题定制。
+单选框用于从一组选项中选择一个值，也可以单独作为可控的布尔选择项使用。支持圆形和方形指示器、子节点分组、`options` 分组、禁用状态和主题定制。
 
 </section>
 
@@ -35,9 +35,7 @@ import { Radio } from '@ftsukic/react-native-ui'
 
 <code src="./__fixtures__/examples/options.tsx" title="options 分组" description="使用 options 配置数组快速生成结构一致的选项。"></code>
 
-<code src="./__fixtures__/examples/shapes.tsx" title="指示器形状" description="shape 按 Vant 语义支持 round、square 和 dot，labelPosition 支持左右标签。"></code>
-
-<code src="./__fixtures__/examples/buttons.tsx" title="按钮样式" description="参考 Ant Design Radio.Group，支持 optionType、buttonStyle、size 和 Radio.Button。"></code>
+<code src="./__fixtures__/examples/shapes.tsx" title="指示器形状" description="shape 支持 round 和 square，labelPosition 支持左右标签。"></code>
 
 <code src="./__fixtures__/examples/disabled.tsx" title="禁用状态" description="Radio、options 选项和整个 Radio.Group 都支持禁用。"></code>
 
@@ -53,10 +51,7 @@ import { Radio } from '@ftsukic/react-native-ui'
 
 ```text
 type RadioValue = string | number;
-type RadioShape = 'round' | 'square' | 'dot';
-type RadioOptionType = 'default' | 'button';
-type RadioButtonStyle = 'outline' | 'solid';
-type RadioButtonSize = 'large' | 'middle' | 'small';
+type RadioShape = 'round' | 'square';
 type RadioLabelPosition = 'left' | 'right';
 ```
 
@@ -67,10 +62,7 @@ type RadioLabelPosition = 'left' | 'right';
 | checked | `boolean` | — | 独立 Radio 的受控选中状态 |
 | defaultChecked | `boolean` | `false` | 独立 Radio 的初始选中状态 |
 | disabled | `boolean` | `false` | 禁用点击和状态变化 |
-| shape | `'round' \| 'square' \| 'dot'` | `'round'` | 指示器形状；`dot` 使用描边圆和内点 |
-| optionType | `'default' \| 'button'` | `'default'` | 普通指示器或按钮样式；Group 设置后会传给子 Radio |
-| buttonStyle | `'outline' \| 'solid'` | `'outline'` | 按钮样式的描边或填色方案 |
-| size | `'large' \| 'middle' \| 'small'` | `'middle'` | 按钮样式尺寸 |
+| shape | `'round' \| 'square'` | `'round'` | 指示器形状 |
 | labelPosition | `'left' \| 'right'` | `'right'` | 标签相对于指示器的位置 |
 | checkedColor | `ColorValue` | 主题主色 | 选中指示器颜色 |
 | onChange | `(checked: boolean) => void` | — | 独立 Radio 选中状态改变时触发 |
@@ -83,7 +75,7 @@ type RadioLabelPosition = 'left' | 'right';
 
 ### Radio.Group
 
-通过 `Radio.Group` 或 `RadioGroup` 管理一组选项的单选值。`Radio.Group` 是 `RadioGroup` 的 compound API；`Radio.Button` 是按钮样式的 compound API。
+通过 `Radio.Group` 或 `RadioGroup` 管理一组选项的单选值。`Radio.Group` 是 `RadioGroup` 的 compound API。
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -93,33 +85,13 @@ type RadioLabelPosition = 'left' | 'right';
 | defaultValue | `string \| number` | — | 非受控初始选中值 |
 | onChange | `(value: RadioValue) => void` | — | 选中值改变时触发 |
 | disabled | `boolean` | `false` | 禁用整个 Group，并覆盖子项的启用设置 |
-| direction | `'vertical' \| 'horizontal'` | `'vertical'`（button 类型默认 `'horizontal'`） | 选项排列方向 |
-| optionType | `'default' \| 'button'` | `'default'` | 设置 Group 内选项的呈现类型；`options` 和子 Radio 均支持继承 |
-| buttonStyle | `'outline' \| 'solid'` | `'outline'` | `button` 类型的描边或填色方案 |
-| size | `'large' \| 'middle' \| 'small'` | `'middle'` | `button` 类型尺寸 |
-| gap | `number` | 普通类型为主题间距，button 类型为 `0` | 选项之间的间距；button 类型使用连续分段布局 |
-| block | `boolean` | `false` | Group 撑满父容器；button 类型下各项均分宽度 |
+| direction | `'vertical' \| 'horizontal'` | `'vertical'` | 选项排列方向 |
+| gap | `number` | 主题间距 | 选项之间的间距 |
 | style | `StyleProp<ViewStyle>` | — | Group 根 View 样式 |
 
 `options` 和 `children` 只能选择一种声明方式；同时传入时开发环境会提示错误，并以 `children` 为渲染来源。Group 是单选行为，选中项不能通过再次点击取消。Group 子 Radio 必须提供 `value`，否则不会参与选择并会在开发环境提示配置错误。
 
 受控模式使用 `value` 和 `onChange`；非受控模式使用 `defaultValue`。Group 的选中状态优先于子 Radio 的 `checked` 和 `defaultChecked`。
-
-按钮样式可以直接通过 Group 配置，也可以使用 `Radio.Button`：
-
-button 类型默认按 `Button.Group` 的紧密布局展示：组内横向排列、相邻边框合并、首尾保留圆角。需要分开显示时可以显式传入 `gap`。
-
-```tsx | pure
-<Radio.Group defaultValue="a" optionType="button" buttonStyle="solid" size="small">
-  <Radio value="a">选项 A</Radio>
-  <Radio value="b">选项 B</Radio>
-</Radio.Group>
-
-<Radio.Group defaultValue="a">
-  <Radio.Button value="a">选项 A</Radio.Button>
-  <Radio.Button value="b">选项 B</Radio.Button>
-</Radio.Group>
-```
 
 ## 语义样式
 
@@ -139,10 +111,10 @@ button 类型默认按 `Button.Group` 的紧密布局展示：组内横向排列
 
 ## 主题定制
 
-通过 `ThemeProvider` 的 `theme.components.Radio` 配置组件 token：
+通过 `ConfigProvider` 的 `theme.components.Radio` 配置组件 token：
 
 ```tsx
-<ThemeProvider
+<ConfigProvider
   theme={{
     components: {
       Radio: {
@@ -154,9 +126,9 @@ button 类型默认按 `Button.Group` 的紧密布局展示：组内横向排列
   }}
 >
   <Radio defaultChecked>主题化 Radio</Radio>
-</ThemeProvider>
+</ConfigProvider>
 ```
 
-可覆盖的主要 token 包括 `indicatorSize`、`dotSize`、`borderWidth`、`borderRadius`、`borderColor`、`checkedColor`、`checkmarkColor`、`labelColor`、`disabledColor`、`disabledBackground`、`disabledLabelColor`、`fontSize`、`lineHeight`、`gap`、`buttonBg`、`buttonCheckedBg`、`buttonColor`、`buttonPaddingHorizontal`、`buttonSolidCheckedBg`、`buttonSolidCheckedColor`、`buttonHeight`、`buttonHeightSmall`、`buttonHeightLarge`、`buttonBorderRadius`、`activeOpacity` 和 `disabledOpacity`。
+可覆盖的主要 token 包括 `indicatorSize`、`dotSize`、`borderWidth`、`borderRadius`、`borderColor`、`checkedColor`、`labelColor`、`disabledColor`、`disabledLabelColor`、`fontSize`、`lineHeight`、`gap`、`activeOpacity` 和 `disabledOpacity`。
 
 Radio 暴露 `radio` 无障碍角色和 `selected`、`disabled` 状态；Group 暴露 `radiogroup` 角色。当前不提供多选、取消选中、动画或 options 与 children 混用能力。

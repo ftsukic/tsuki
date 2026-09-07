@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import type {
-  ColorValue,
   ImageErrorEventData,
   ImageProps,
   ImageSourcePropType,
@@ -57,16 +56,6 @@ export interface AvatarGroupSemanticStyles {
   overflow?: StyleProp<ViewStyle>
 }
 
-export interface AvatarGroupMaxStyle {
-  color?: ColorValue
-  backgroundColor?: ColorValue
-}
-
-export interface AvatarGroupMax {
-  count: number
-  style?: AvatarGroupMaxStyle
-}
-
 export type AvatarGroupStyles = StyleResolver<
   AvatarGroupProps,
   AvatarGroupStyleState,
@@ -77,7 +66,6 @@ export interface AvatarGroupProps extends Omit<ViewProps, 'children' | 'style'> 
   children?: ReactNode
   size?: AvatarSize
   shape?: AvatarShape
-  max?: AvatarGroupMax
   maxCount?: number
   onOverflowPress?: PressableProps['onPress']
   style?: StyleProp<ViewStyle>

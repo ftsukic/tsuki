@@ -1,4 +1,3 @@
-import type { InputToken } from '../theme'
 import type { ReactNode } from 'react'
 import type {
   StyleProp,
@@ -7,33 +6,53 @@ import type {
   TextStyle,
   ViewStyle,
 } from 'react-native'
+import type { StyleInfo, StyleResolver } from '../style'
 
 export type TextInputInstance = NativeTextInput
+export type TextInputType = 'text' | 'textarea'
+export type TextInputSize = 'large' | 'normal' | 'small'
+export type TextInputClearTrigger = 'always' | 'focus'
+export type TextInputFormatTrigger = 'onEndEditing' | 'onChangeText'
+
+export interface TextInputStyleState {
+  focused: boolean
+  disabled: boolean
+}
+
+export interface TextInputSemanticStyles {
+  root?: StyleProp<ViewStyle>
+  input?: StyleProp<TextStyle>
+  prefix?: StyleProp<TextStyle>
+  suffix?: StyleProp<TextStyle>
+  clear?: StyleProp<ViewStyle>
+  wordLimit?: StyleProp<TextStyle>
+  addonBefore?: StyleProp<TextStyle>
+  addonAfter?: StyleProp<TextStyle>
+}
+
+export type TextInputStyles = StyleResolver<
+  TextInputProps,
+  TextInputStyleState,
+  TextInputSemanticStyles
+>
 
 export interface TextInputProps extends Omit<NativeTextInputProps, 'onChange' | 'style'> {
-  theme?: Partial<InputToken>
-  style?: StyleProp<TextStyle>
-  containerStyle?: StyleProp<ViewStyle>
-  addonGroupStyle?: StyleProp<ViewStyle>
-  addonBeforeTextStyle?: StyleProp<TextStyle>
-  addonAfterTextStyle?: StyleProp<TextStyle>
-  fixGroupStyle?: StyleProp<ViewStyle>
-  prefixTextStyle?: StyleProp<TextStyle>
-  suffixTextStyle?: StyleProp<TextStyle>
-  type?: 'text' | 'textarea'
-  rows?: number
-  clearable?: boolean
-  clearTrigger?: 'always' | 'focus'
-  formatter?: (value: string) => string
-  formatTrigger?: 'onEndEditing' | 'onChangeText'
-  showWordLimit?: boolean
+  type?: TextInputType
+  size?: TextInputSize
   bordered?: boolean
-  borderRadius?: number
-  addonBefore?: ReactNode
-  addonAfter?: ReactNode
+  clearable?: boolean
+  clearTrigger?: TextInputClearTrigger
+  formatter?: (value: string) => string
+  formatTrigger?: TextInputFormatTrigger
+  showWordLimit?: boolean
+  rows?: number
   prefix?: ReactNode
   suffix?: ReactNode
-  inputWidth?: number
-  size?: 'xl' | 'l' | 'm' | 's'
-  onChange?: (value: string) => void
+  addonBefore?: ReactNode
+  addonAfter?: ReactNode
+  style?: StyleProp<ViewStyle>
+  styles?: TextInputStyles
+  onChange?: NativeTextInputProps['onChange']
 }
+
+export type TextInputStyleInfo = StyleInfo<TextInputProps, TextInputStyleState>

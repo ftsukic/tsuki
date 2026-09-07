@@ -1,13 +1,27 @@
-/**
- * @title Dialog · controlled
- * @description 展示 Dialog 的真实公开 API 和可交互状态。
- */
-import { Dialog, UIProvider } from '@ftsukic/react-native-ui'
+import { Button, ConfigProvider, Dialog, PortalHost } from '@ftsukic/react-native-ui'
+import { useState } from 'react'
+import { View } from 'react-native'
 
-export default function Example() {
+/**
+ * @title 受控组件
+ * @description 直接使用 Dialog，通过 show 和 onShowChange 管理显示状态。
+ */
+export default function DialogControlledExample() {
+  const [show, setShow] = useState(false)
+
   return (
-    <UIProvider>
-      <Dialog visible title="提示" message="这是一条可操作的提示。" showCancelButton />
-    </UIProvider>
+    <ConfigProvider>
+      <PortalHost>
+        <View style={{ gap: 12 }}>
+          <Button onPress={() => setShow(true)}>打开受控 Dialog</Button>
+          <Dialog
+            show={show}
+            title="受控 Dialog"
+            message="关闭动作交由外部状态管理。"
+            onShowChange={setShow}
+          />
+        </View>
+      </PortalHost>
+    </ConfigProvider>
   )
 }

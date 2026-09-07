@@ -1,5 +1,0 @@
-export * from './interface'
-export { TreeMultipleMode } from './multiple-mode'
-export * from './tree'
-export { TreeItem } from './tree-item'
-export { default as Tree } from './tree'
