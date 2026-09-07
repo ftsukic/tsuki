@@ -1,9 +1,17 @@
+const path = require('node:path')
+
 module.exports = {
-  testEnvironment: 'jsdom',
-  roots: ['<rootDir>/packages'],
+  rootDir: __dirname,
+  preset: 'react-native',
+  roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
   transform: {
-    '^.+\\.(ts|tsx)$': ['babel-jest', { configFile: './babel.config.cjs' }],
+    '^.+\\.(js|jsx|ts|tsx)$': [
+      'babel-jest',
+      {
+        configFile: path.resolve(__dirname, 'babel.config.cjs'),
+      },
+    ],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
 }

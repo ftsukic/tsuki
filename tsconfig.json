@@ -9,7 +9,12 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
+    "types": [],
+    "baseUrl": ".",
+    "paths": {
+      "@ftsukic/tsuki": ["src"]
+    },
     "noEmit": true
   },
-  "include": []
+  "include": [".dumirc.ts", ".dumi", "src"]
 }

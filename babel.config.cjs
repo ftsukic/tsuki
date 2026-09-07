@@ -1,7 +1,3 @@
 module.exports = {
-  presets: [
-    ['@babel/preset-env', { targets: { node: 'current' } }],
-    ['@babel/preset-react', { runtime: 'automatic' }],
-    '@babel/preset-typescript',
-  ],
+  presets: ['module:@react-native/babel-preset'],
 }

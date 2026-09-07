@@ -1,19 +1,70 @@
 {
-  "name": "react-native-ui-monorepo",
+  "name": "@ftsukic/tsuki",
   "version": "0.0.1",
-  "private": true,
-  "packageManager": "yarn@4.9.2",
-  "workspaces": [
-    "packages/*",
-    "apps/*"
+  "description": "基础 React Native UI 组件库。",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ftsukic/tsuki.git",
+    "directory": "."
+  },
+  "bugs": {
+    "url": "https://github.com/ftsukic/tsuki/issues"
+  },
+  "homepage": "https://github.com/ftsukic/tsuki#readme",
+  "source": "src/index.ts",
+  "main": "lib/commonjs/index.js",
+  "module": "lib/module/index.js",
+  "react-native": "src/index.ts",
+  "types": "lib/typescript/commonjs/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/typescript/module/index.d.ts",
+        "default": "./lib/module/index.js"
+      },
+      "require": {
+        "types": "./lib/typescript/commonjs/index.d.ts",
+        "default": "./lib/commonjs/index.js"
+      }
+    }
+  },
+  "files": [
+    "src",
+    "lib",
+    "README.md",
+    "LICENSE",
+    "!**/__fixtures__",
+    "!**/*.md"
   ],
+  "sideEffects": false,
+  "packageManager": "yarn@4.9.2",
+  "dependencies": {
+    "@ant-design/colors": "^8.0.1",
+    "@ant-design/fast-color": "^3.0.1",
+    "@ant-design/icons-svg": "^4.6.0"
+  },
+  "peerDependencies": {
+    "react": ">=19.1.1",
+    "react-native": ">=0.82.1",
+    "react-native-safe-area-context": ">=5.9.1",
+    "react-native-svg": ">=15.13.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
-    "build": "yarn workspace @ftsukic/react-native-ui build && yarn workspace @ftsukic/dumi-theme-rn-snack build && yarn workspace @ftsukic/react-native-ui-docs build",
-    "typecheck": "yarn workspace @ftsukic/react-native-ui typecheck && yarn workspace @ftsukic/dumi-theme-rn-snack typecheck && yarn workspace @ftsukic/react-native-ui-docs typecheck",
-    "lint": "eslint packages --ext .ts,.tsx && eslint --no-ignore apps/docs/.dumirc.ts .eslintrc.cjs commitlint.config.mjs lint-staged.config.mjs packages/ui/babel.config.cjs packages/ui/jest.config.cjs scripts/changeset-status.cjs",
-    "test": "yarn workspace @ftsukic/react-native-ui test && jest --runInBand --testPathIgnorePatterns=/packages/ui/",
-    "docs:dev": "yarn workspace @ftsukic/react-native-ui-docs dev",
-    "docs:build": "yarn workspace @ftsukic/react-native-ui-docs build",
+    "build": "bob build",
+    "docs:dev": "dumi dev",
+    "docs:build": "dumi build",
+    "docs:preview": "dumi preview",
+    "typecheck": "tsc -p tsconfig.test.json --noEmit",
+    "lint": "eslint src example --ext .ts,.tsx && eslint --no-ignore .dumirc.ts .eslintrc.cjs babel.config.cjs jest.config.cjs commitlint.config.mjs lint-staged.config.mjs scripts/changeset-status.cjs",
+    "test": "jest --config jest.config.cjs --runInBand",
+    "example:dev": "yarn --cwd example start",
+    "example:typecheck": "yarn --cwd example typecheck",
+    "example:config": "yarn --cwd example run config",
+    "example:export": "yarn --cwd example run export:web",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "commitlint": "commitlint",
@@ -31,11 +82,19 @@
     "@changesets/cli": "^3.0.2",
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
+    "@react-native/babel-preset": "0.82.1",
+    "@testing-library/react-native": "^14.0.1",
     "@types/jest": "^29.5.14",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
     "@typescript-eslint/parser": "^8.42.0",
     "babel-jest": "^29.7.0",
+    "dumi": "^2.4.49",
+    "dumi-theme-mobile": "^2.0.0",
     "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-testing-library": "^7.16.2",
@@ -44,6 +103,34 @@
     "jest-environment-jsdom": "^29.7.0",
     "lint-staged": "^17.4.1",
     "prettier": "^3.6.2",
+    "react": "19.1.1",
+    "react-dom": "19.1.1",
+    "react-native": "0.82.1",
+    "react-native-builder-bob": "0.43.0",
+    "react-native-safe-area-context": "^5.9.1",
+    "react-native-svg": "^15.15.0",
+    "react-native-web": "^0.21.2",
+    "test-renderer": "1.1.0",
     "typescript": "^5.9.2"
+  },
+  "react-native-builder-bob": {
+    "source": "src",
+    "output": "lib",
+    "targets": [
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
+      "commonjs",
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
+    ],
+    "exclude": "**/{__tests__/**,__fixtures__/**,__mocks__/**,*.md}"
   }
 }
