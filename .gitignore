@@ -8,14 +8,36 @@ node_modules/
 
 lib/
 dist/
+docs-dist/
 coverage/
-**/.dumi/
-**/.umi/
+.dumi/*
+.dumi/tmp/
+.dumi/tmp-*/
+.umi/
+.turbopack/
 *.log
 .DS_Store
 .env
 .env.*
 !.env.example
+.expo/
+web-build/
+example/.expo/
+example/web-build/
+example/.yarn/
 
 .idea/
 .vscode/
+!.vscode/
+!.vscode/settings.json
+
+# Keep authored dumi theme overrides, ignore generated runtime files.
+!.dumi/
+!.dumi/app.tsx
+!.dumi/global.less
+!.dumi/variables.less
+!.dumi/theme/
+!.dumi/theme/builtins/
+!.dumi/theme/builtins/Previewer/
+!.dumi/theme/builtins/Previewer.tsx
+!.dumi/theme/builtins/Previewer/index.tsx

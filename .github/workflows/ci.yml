@@ -28,6 +28,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Install example dependencies
+        run: yarn --cwd example install --immutable
+
       - name: Commitlint
         shell: bash
         run: |
@@ -51,8 +54,14 @@ jobs:
       - name: Test
         run: yarn test
 
-      - name: Build packages and documentation
+      - name: Build package
         run: yarn build
+
+      - name: Build documentation
+        run: yarn docs:build
+
+      - name: Validate example
+        run: yarn example:typecheck && yarn example:config && yarn example:export
 
       - name: Validate changesets
         run: yarn changeset:status

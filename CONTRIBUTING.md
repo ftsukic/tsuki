@@ -33,4 +33,4 @@ yarn release:version
 yarn release:publish
 ```
 
-组件源码、文档 demo 和 Snack 示例应保持单一来源，避免在 MDX 中复制维护第二份组件实现。
+组件源码、文档 demo 和 Expo 示例应保持单一来源，避免在 MDX 中复制维护第二份组件实现。
