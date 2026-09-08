@@ -5,7 +5,7 @@ export function getPopupToken(token: AliasToken): PopupToken {
     backgroundColor: token.colorBgContainer,
     overlayColor: token.colorBgMask,
     borderRadius: token.borderRadiusLG,
-    animationDuration: Math.max(0, token.motionDurationMid * 1000),
+    animationDuration: Math.max(0, token.motionDurationMid),
     zIndex: token.zIndexPopupBase,
   }
 }

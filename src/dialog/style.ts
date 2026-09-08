@@ -3,6 +3,7 @@ import type { DialogProps, DialogStyleState } from './interface'
 import type { DialogToken } from '../theme'
 
 export interface DialogResolvedStyles {
+  popupPanel: ViewStyle
   panel: ViewStyle
   header: ViewStyle
   title: TextStyle
@@ -28,11 +29,15 @@ export function getDialogStyles(
   const bodyVisible = isRenderable(body)
   const roundButtons = props.theme === 'round-button'
   const buttonHeight = roundButtons ? token.roundButtonHeight : token.buttonHeight
+  const footerHeight = roundButtons ? buttonHeight + token.footerPaddingVertical * 2 : buttonHeight
 
   return {
-    panel: {
+    popupPanel: {
       width: props.width ?? token.width,
       maxWidth: token.smallScreenWidth,
+    },
+    panel: {
+      width: '100%',
       backgroundColor: token.backgroundColor,
       borderRadius: token.borderRadius,
       overflow: 'hidden',
@@ -49,6 +54,7 @@ export function getDialogStyles(
           : token.headerIsolatedPaddingVertical,
     },
     title: {
+      fontFamily: token.fontFamily,
       color: token.titleColor,
       fontSize: token.titleFontSize,
       fontWeight: token.headerFontWeight,
@@ -62,6 +68,7 @@ export function getDialogStyles(
       paddingBottom: token.messagePaddingBottom,
     },
     message: {
+      fontFamily: token.fontFamily,
       color: token.messageColor,
       fontSize: token.fontSize,
       lineHeight: token.messageLineHeight,
@@ -70,13 +77,14 @@ export function getDialogStyles(
     footer: roundButtons
       ? {
           flexDirection: 'row',
+          height: footerHeight,
           gap: token.buttonGap,
           paddingHorizontal: token.footerPaddingHorizontal,
           paddingVertical: token.footerPaddingVertical,
         }
       : {
           flexDirection: 'row',
-          minHeight: buttonHeight,
+          height: footerHeight,
           borderTopWidth: 1,
           borderTopColor: token.dividerColor,
         },

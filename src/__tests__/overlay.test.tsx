@@ -51,13 +51,13 @@ describe('Overlay', () => {
     const theme = getDesignToken()
 
     expect(rootStyle).toMatchObject({
-      backgroundColor: theme.token.colorBgMask,
+      backgroundColor: theme.colorBgMask,
       bottom: 0,
       left: 0,
       position: 'absolute',
       right: 0,
       top: 0,
-      zIndex: theme.token.zIndexPopupBase,
+      zIndex: theme.zIndexPopupBase,
     })
     expect(screen.getByTestId('content')).toBeTruthy()
     await view.unmount()
@@ -119,7 +119,7 @@ describe('Overlay', () => {
     // The mask is intentionally hidden from accessibility queries.
     // eslint-disable-next-line testing-library/no-container
     const mask = view.container.queryAll(
-      (node) => node.props.accessibilityElementsHidden === true,
+      (node) => typeof node.props.onStartShouldSetResponder === 'function',
     )[0]
     expect(mask).toBeTruthy()
 

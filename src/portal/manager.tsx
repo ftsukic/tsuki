@@ -11,10 +11,6 @@ interface PortalManagerState {
   portals: PortalItem[]
 }
 
-const styles = StyleSheet.create({
-  portal: StyleSheet.absoluteFillObject,
-})
-
 /** Renders the portal entries managed by the nearest PortalHost. */
 export class PortalManager extends PureComponent<Record<string, unknown>, PortalManagerState> {
   static displayName = 'PortalManager'
@@ -43,7 +39,7 @@ export class PortalManager extends PureComponent<Record<string, unknown>, Portal
 
   render() {
     return this.state.portals.map(({ key, children }) => (
-      <View key={key} collapsable={false} pointerEvents="box-none" style={styles.portal}>
+      <View key={key} collapsable={false} pointerEvents="box-none" style={StyleSheet.absoluteFill}>
         {children}
       </View>
     ))

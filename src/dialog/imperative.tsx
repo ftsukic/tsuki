@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Dialog } from './dialog'
+import { DialogContent } from './dialog'
 import type { DialogAction, DialogBeforeClose, DialogOptions } from './interface'
 import { mountPortal, unmountPortal, updatePortal } from '../portal'
 import type { PortalKey } from '../portal'
@@ -94,7 +94,7 @@ function DialogMethod({ record }: { record: DialogRecord }) {
   }
 
   return (
-    <Dialog
+    <DialogContent
       {...record.options}
       show={record.show}
       beforeClose={wrapBeforeClose(record.options.beforeClose, actionRef)}

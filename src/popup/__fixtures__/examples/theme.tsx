@@ -37,7 +37,7 @@ export default function PopupThemeExample() {
         >
           <View style={styles.panel}>
             <Text style={styles.text}>Popup 使用深色主题 token。</Text>
-            <Button color="#9fb3c8" variant="outlined" onPress={() => setVisible(false)}>
+            <Button color="#9fb3c8" variant="outline" onPress={() => setVisible(false)}>
               关闭
             </Button>
           </View>

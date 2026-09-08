@@ -10,27 +10,35 @@ import { StyleSheet, Text, View } from 'react-native'
  * @description position 支持 center、top、bottom、left 和 right，round 会按位置裁剪对应圆角。
  */
 export default function PopupPositionsExample() {
-  const [position, setPosition] = useState<PopupPosition | null>(null)
+  const [visible, setVisible] = useState(false)
+  const [position, setPosition] = useState<PopupPosition>('center')
 
   return (
     <View style={styles.container}>
       <View style={styles.row}>
         {(['center', 'top', 'bottom', 'left', 'right'] as const).map((item) => (
-          <Button key={item} size="small" onPress={() => setPosition(item)}>
+          <Button
+            key={item}
+            size="small"
+            onPress={() => {
+              setPosition(item)
+              setVisible(true)
+            }}
+          >
             {item}
           </Button>
         ))}
       </View>
       <Popup
-        visible={position !== null}
-        position={position ?? 'center'}
+        visible={visible}
+        position={position}
         round
         closeOnPressOverlay
-        onRequestClose={() => setPosition(null)}
+        onRequestClose={() => setVisible(false)}
       >
         <View style={styles.panel}>
           <Text style={styles.title}>{position} Popup</Text>
-          <Button size="small" onPress={() => setPosition(null)}>
+          <Button size="small" onPress={() => setVisible(false)}>
             关闭
           </Button>
         </View>

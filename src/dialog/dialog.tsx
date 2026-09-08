@@ -1,7 +1,8 @@
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 import { ScrollView, Text, useWindowDimensions, View } from 'react-native'
 import { Button } from '../button'
-import { Popup } from '../popup'
+import { PopupContent } from '../popup/popup'
+import { Portal } from '../portal'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import type { DialogAction, DialogProps, DialogStyleState } from './interface'
@@ -16,7 +17,7 @@ function isTextContent(value: unknown): value is string | number {
   return typeof value === 'string' || typeof value === 'number'
 }
 
-export const Dialog = forwardRef<View, DialogProps>(function Dialog(props, ref) {
+export const DialogContent = forwardRef<View, DialogProps>(function DialogContent(props, ref) {
   const { token: themeToken } = useToken()
   const token = useComponentToken('Dialog', getDialogToken)
   const {
@@ -195,6 +196,9 @@ export const Dialog = forwardRef<View, DialogProps>(function Dialog(props, ref) 
         style={[
           confirm ? resolved.confirm : resolved.cancel,
           confirm ? semantic?.confirm : semantic?.cancel,
+          confirm && showCancelButton && showConfirmButton && theme === 'default'
+            ? { borderLeftWidth: 1, borderLeftColor: token.dividerColor }
+            : null,
         ]}
         onPress={() => requestClose(action)}
       >
@@ -207,24 +211,12 @@ export const Dialog = forwardRef<View, DialogProps>(function Dialog(props, ref) 
     showCancelButton || showConfirmButton ? (
       <View style={[resolved.footer, semantic?.footer]}>
         {showCancelButton ? renderButton('cancel') : null}
-        {showConfirmButton ? (
-          <View
-            style={
-              showCancelButton && theme === 'default'
-                ? { flex: 1, minWidth: 0, borderLeftWidth: 1, borderLeftColor: token.dividerColor }
-                : { flex: 1, minWidth: 0 }
-            }
-          >
-            {renderButton('confirm')}
-          </View>
-        ) : null}
+        {showConfirmButton ? renderButton('confirm') : null}
       </View>
     ) : null
 
   return (
-    <Popup
-      ref={ref}
-      {...viewProps}
+    <PopupContent
       visible={show}
       overlay={overlay}
       closeOnPressOverlay={closeOnClickOverlay}
@@ -233,38 +225,54 @@ export const Dialog = forwardRef<View, DialogProps>(function Dialog(props, ref) 
       duration={themeToken.motion ? token.animationDuration : 0}
       zIndex={zIndex}
       overlayStyle={[{ backgroundColor: token.overlayColor }, overlayStyle]}
-      style={[resolved.panel, semantic?.root, style]}
+      style={[resolved.popupPanel, { backgroundColor: 'transparent' }]}
       styles={{ root: semantic?.host, overlay: semantic?.overlay }}
       onOpened={onOpened}
       onClosed={onClose}
-      accessible
-      accessibilityRole="alert"
-      accessibilityViewIsModal
     >
-      {isRenderable(title) ? (
-        <View style={resolved.header}>
-          {isTextContent(title) ? (
-            <Text style={[resolved.title, semantic?.header]}>{title}</Text>
-          ) : (
-            title
-          )}
-        </View>
-      ) : null}
-      {isRenderable(body) ? (
-        <ScrollView
-          style={[resolved.content, semantic?.content]}
-          showsVerticalScrollIndicator={false}
-          accessibilityRole="none"
-        >
-          {bodyNode}
-        </ScrollView>
-      ) : null}
-      {footer !== undefined ? (
-        <View style={[resolved.footer, semantic?.footer]}>{footer}</View>
-      ) : (
-        defaultFooter
-      )}
-    </Popup>
+      <View
+        ref={ref}
+        {...viewProps}
+        accessible
+        accessibilityRole="alert"
+        accessibilityViewIsModal
+        style={[resolved.panel, semantic?.root, style]}
+      >
+        {isRenderable(title) ? (
+          <View style={resolved.header}>
+            {isTextContent(title) ? (
+              <Text style={[resolved.title, semantic?.header]}>{title}</Text>
+            ) : (
+              title
+            )}
+          </View>
+        ) : null}
+        {isRenderable(body) ? (
+          <ScrollView
+            style={[resolved.content, semantic?.content]}
+            showsVerticalScrollIndicator={false}
+            accessibilityRole="none"
+          >
+            {bodyNode}
+          </ScrollView>
+        ) : null}
+        {footer !== undefined ? (
+          <View style={[resolved.footer, semantic?.footer]}>{footer}</View>
+        ) : (
+          defaultFooter
+        )}
+      </View>
+    </PopupContent>
+  )
+})
+
+DialogContent.displayName = 'Dialog.Content'
+
+export const Dialog = forwardRef<View, DialogProps>(function Dialog(props, ref) {
+  return (
+    <Portal>
+      <DialogContent {...props} ref={ref} />
+    </Portal>
   )
 })
 

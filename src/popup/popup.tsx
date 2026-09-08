@@ -1,13 +1,14 @@
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import { forwardRef, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Animated,
   BackHandler,
   Easing,
   Platform,
   StyleSheet,
-  useWindowDimensions,
   View,
+  useWindowDimensions,
 } from 'react-native'
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { OverlaySurface } from '../overlay/surface'
 import { Portal } from '../portal'
 import { resolveStyles } from '../style'
@@ -16,14 +17,16 @@ import type { PopupProps } from './interface'
 import { getPopupStyles } from './style'
 import { getPopupToken } from './token'
 
-export const Popup = forwardRef<View, PopupProps>(function Popup(props, ref) {
+export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(props, ref) {
   const { token: themeToken } = useToken()
   const token = useComponentToken('Popup', getPopupToken)
+  const safeAreaInsets = useContext(SafeAreaInsetsContext)
   const {
     visible = false,
     position = 'center',
     overlay = true,
     closeOnPressOverlay = false,
+    safeAreaInsetBottom = false,
     onPressOverlay,
     onRequestClose,
     duration = token.animationDuration,
@@ -46,9 +49,12 @@ export const Popup = forwardRef<View, PopupProps>(function Popup(props, ref) {
     ? Math.max(0, duration)
     : token.animationDuration
   const animationDuration = themeToken.motion ? normalizedDuration : 0
-  const progress = useRef(new Animated.Value(visible ? 1 : 0)).current
+  const progress = useRef(new Animated.Value(0)).current
   const animation = useRef<Animated.CompositeAnimation | null>(null)
   const previousVisible = useRef<boolean | null>(null)
+  const currentPositionRef = useRef(position)
+  const renderedPositionRef = useRef(position)
+  const [settledPosition, setSettledPosition] = useState(position)
   const renderedRef = useRef(visible || !lazyRender)
   const [rendered, setRendered] = useState(renderedRef.current)
   const visibleRef = useRef(visible)
@@ -65,6 +71,9 @@ export const Popup = forwardRef<View, PopupProps>(function Popup(props, ref) {
   const overlayClosedRef = useRef(!visible || !overlay)
   const closedNotifiedRef = useRef(!visible)
 
+  currentPositionRef.current = position
+  if (visible) renderedPositionRef.current = position
+
   visibleRef.current = visible
   overlayRef.current = overlay
   onPressOverlayRef.current = onPressOverlay
@@ -76,10 +85,22 @@ export const Popup = forwardRef<View, PopupProps>(function Popup(props, ref) {
   animationDurationRef.current = animationDuration
   destroyOnClosedRef.current = destroyOnClosed
 
+  // The overlay child can run its closing effect before this component's effect.
+  // Mark the panel as closing during render so the child cannot finish the
+  // whole popup before onClose has been dispatched.
+  if (!visible && previousVisible.current === true) {
+    panelClosedRef.current = false
+    closedNotifiedRef.current = false
+  }
+
   const finishClose = () => {
+    if (visibleRef.current) return
     if (!panelClosedRef.current || !overlayClosedRef.current || closedNotifiedRef.current) return
 
     closedNotifiedRef.current = true
+    const nextPosition = currentPositionRef.current
+    renderedPositionRef.current = nextPosition
+    setSettledPosition(nextPosition)
     if (destroyOnClosedRef.current) {
       renderedRef.current = false
       setRendered(false)
@@ -93,6 +114,15 @@ export const Popup = forwardRef<View, PopupProps>(function Popup(props, ref) {
       setRendered(true)
     }
   }, [lazyRender])
+
+  const isExiting = !visible && (previousVisible.current === true || animation.current !== null)
+  const effectivePosition = visible
+    ? position
+    : isExiting
+      ? renderedPositionRef.current
+      : settledPosition
+  const bottomInset =
+    effectivePosition === 'bottom' && safeAreaInsetBottom ? (safeAreaInsets?.bottom ?? 0) : 0
 
   useEffect(() => {
     if (Platform.OS !== 'android' || !visible || !rendered) return
@@ -153,8 +183,9 @@ export const Popup = forwardRef<View, PopupProps>(function Popup(props, ref) {
 
     if (wasVisible !== true || !renderedRef.current) return
 
+    const overlayAlreadyClosed = overlayClosedRef.current
     panelClosedRef.current = false
-    overlayClosedRef.current = !overlayRef.current
+    overlayClosedRef.current = overlayAlreadyClosed || !overlayRef.current
     closedNotifiedRef.current = false
     onCloseRef.current?.()
 
@@ -192,12 +223,12 @@ export const Popup = forwardRef<View, PopupProps>(function Popup(props, ref) {
   )
 
   const resolvedStyles = useMemo(
-    () => getPopupStyles(token, position, round),
-    [position, round, token],
+    () => getPopupStyles(token, effectivePosition, round),
+    [effectivePosition, round, token],
   )
   const semantic = resolveStyles(styles, {
     props,
-    state: { visible, position, rendered },
+    state: { visible, position: effectivePosition, rendered },
   })
   const overlayResolvedStyle = StyleSheet.flatten([semantic?.overlay, overlayStyle])
   const overlayOpacity =
@@ -206,7 +237,7 @@ export const Popup = forwardRef<View, PopupProps>(function Popup(props, ref) {
     const viewportWidth = Math.max(width, 1)
     const viewportHeight = Math.max(height, 1)
 
-    switch (position) {
+    switch (effectivePosition) {
       case 'top':
         return {
           transform: [
@@ -265,7 +296,7 @@ export const Popup = forwardRef<View, PopupProps>(function Popup(props, ref) {
           ],
         }
     }
-  }, [height, position, progress, width])
+  }, [effectivePosition, height, progress, width])
 
   const handleOverlayPress = (event: Parameters<NonNullable<PopupProps['onPressOverlay']>>[0]) => {
     onPressOverlayRef.current?.(event)
@@ -275,44 +306,58 @@ export const Popup = forwardRef<View, PopupProps>(function Popup(props, ref) {
   if (!rendered) return null
 
   return (
-    <Portal>
-      <View
-        collapsable={false}
-        pointerEvents={visible ? (overlay ? 'auto' : 'box-none') : 'none'}
-        style={[resolvedStyles.root, { zIndex }, semantic?.root]}
-      >
-        {overlay ? (
-          <OverlaySurface
-            show={visible}
-            duration={animationDuration}
-            backgroundColor={token.overlayColor}
-            zIndex={zIndex}
-            onPress={handleOverlayPress}
-            onClosed={() => {
-              overlayClosedRef.current = true
-              finishClose()
-            }}
-            style={[{ opacity: overlayOpacity }, semantic?.overlay, overlayStyle]}
-            pressableStyle={[semantic?.overlay, overlayStyle]}
-          />
-        ) : null}
-        <View pointerEvents="box-none" style={resolvedStyles.container}>
-          <Animated.View
-            ref={ref}
-            {...viewProps}
-            pointerEvents={visible ? 'auto' : 'none'}
-            style={[
-              resolvedStyles.panel,
-              { zIndex: zIndex + 1 },
-              semantic?.panel,
-              style,
-              animatedPanelStyle,
-            ]}
-          >
-            {children}
-          </Animated.View>
-        </View>
+    <View
+      collapsable={false}
+      pointerEvents={visible ? (overlay ? 'auto' : 'box-none') : 'none'}
+      style={[resolvedStyles.root, { zIndex }, semantic?.root]}
+    >
+      {overlay ? (
+        <OverlaySurface
+          show={visible}
+          duration={animationDuration}
+          backgroundColor={token.overlayColor}
+          zIndex={zIndex}
+          onPress={handleOverlayPress}
+          onClosed={() => {
+            overlayClosedRef.current = true
+            finishClose()
+          }}
+          style={[
+            resolvedStyles.overlay,
+            { opacity: overlayOpacity },
+            semantic?.overlay,
+            overlayStyle,
+          ]}
+          pressableStyle={[semantic?.overlay, overlayStyle]}
+        />
+      ) : null}
+      <View pointerEvents="box-none" style={[resolvedStyles.container, { zIndex: zIndex + 1 }]}>
+        <Animated.View
+          ref={ref}
+          {...viewProps}
+          pointerEvents={visible ? 'auto' : 'none'}
+          style={[
+            resolvedStyles.panel,
+            { zIndex: zIndex + 1 },
+            semantic?.panel,
+            style,
+            bottomInset > 0 ? { paddingBottom: bottomInset } : null,
+            animatedPanelStyle,
+          ]}
+        >
+          {children}
+        </Animated.View>
       </View>
+    </View>
+  )
+})
+
+PopupContent.displayName = 'Popup.Content'
+
+export const Popup = forwardRef<View, PopupProps>(function Popup(props, ref) {
+  return (
+    <Portal>
+      <PopupContent {...props} ref={ref} />
     </Portal>
   )
 })

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Toast } from './toast'
+import { ToastContent } from './toast'
 import type { ToastInstance, ToastMessage, ToastOptions, ToastType } from './interface'
 import { mountPortal, unmountPortal, updatePortal } from '../portal'
 import type { PortalKey } from '../portal'
@@ -83,7 +83,7 @@ function ToastMethod({ record }: { record: ToastRecord }) {
   )
 
   return (
-    <Toast
+    <ToastContent
       {...record.options}
       show={record.show}
       onClose={() => {

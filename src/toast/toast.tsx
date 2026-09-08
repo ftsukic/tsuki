@@ -18,8 +18,8 @@ function isIconDefinition(value: unknown): value is IconDefinition {
 }
 
 function getDefaultIcon(type: ToastType) {
-  if (type === 'success') return 'CheckCircleFilled'
-  if (type === 'fail') return 'CloseCircleFilled'
+  if (type === 'success') return 'CheckOutlined'
+  if (type === 'fail') return 'CloseOutlined'
   return null
 }
 
@@ -33,7 +33,7 @@ function renderMessage(value: ToastProps['message']) {
   return value
 }
 
-const ToastContent = forwardRef<View, ToastProps>(function ToastContent(props, ref) {
+export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(props, ref) {
   const { token: themeToken } = useToken()
   const token = useComponentToken('Toast', getToastToken)
   const {
@@ -59,7 +59,7 @@ const ToastContent = forwardRef<View, ToastProps>(function ToastContent(props, r
     onOpened,
     ...viewProps
   } = props
-  const opacity = useRef(new Animated.Value(show ? 1 : 0)).current
+  const opacity = useRef(new Animated.Value(0)).current
   const animation = useRef<Animated.CompositeAnimation | null>(null)
   const renderedRef = useRef(show)
   const onCloseRef = useRef(onClose)
@@ -72,6 +72,7 @@ const ToastContent = forwardRef<View, ToastProps>(function ToastContent(props, r
   const normalizedDuration = Number.isFinite(duration) ? Math.max(0, duration) : 0
   const normalizedIconSize = Number.isFinite(iconSize) && iconSize > 0 ? iconSize : token.iconSize
   const animationDuration = themeToken.motion ? Math.max(0, token.animationDuration) : 0
+  const scale = useRef(new Animated.Value(0.8)).current
   const hasCustomIcon = isRenderable(icon)
   const hasIcon = hasCustomIcon || type === 'success' || type === 'fail'
   const textMode = type === 'text' && !hasIcon
@@ -96,18 +97,29 @@ const ToastContent = forwardRef<View, ToastProps>(function ToastContent(props, r
       setRendered(true)
       if (animationDuration === 0) {
         opacity.setValue(1)
+        scale.setValue(1)
         onOpenedRef.current?.()
         return
       }
 
       opacity.setValue(0)
-      const nextAnimation = Animated.timing(opacity, {
-        toValue: 1,
-        duration: animationDuration,
-        easing: Easing.out(Easing.cubic),
-        isInteraction: false,
-        useNativeDriver: Platform.OS !== 'web',
-      })
+      scale.setValue(0.8)
+      const nextAnimation = Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: animationDuration,
+          easing: Easing.out(Easing.cubic),
+          isInteraction: false,
+          useNativeDriver: Platform.OS !== 'web',
+        }),
+        Animated.timing(scale, {
+          toValue: 1,
+          duration: animationDuration,
+          easing: Easing.out(Easing.cubic),
+          isInteraction: false,
+          useNativeDriver: Platform.OS !== 'web',
+        }),
+      ])
       animation.current = nextAnimation
       nextAnimation.start(({ finished }) => {
         if (finished) onOpenedRef.current?.()
@@ -117,19 +129,30 @@ const ToastContent = forwardRef<View, ToastProps>(function ToastContent(props, r
 
     if (!renderedRef.current) return
     if (animationDuration === 0) {
+      opacity.setValue(0)
+      scale.setValue(0.9)
       renderedRef.current = false
       setRendered(false)
       onCloseRef.current?.()
       return
     }
 
-    const nextAnimation = Animated.timing(opacity, {
-      toValue: 0,
-      duration: animationDuration,
-      easing: Easing.in(Easing.cubic),
-      isInteraction: false,
-      useNativeDriver: Platform.OS !== 'web',
-    })
+    const nextAnimation = Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: animationDuration,
+        easing: Easing.in(Easing.cubic),
+        isInteraction: false,
+        useNativeDriver: Platform.OS !== 'web',
+      }),
+      Animated.timing(scale, {
+        toValue: 0.9,
+        duration: animationDuration,
+        easing: Easing.in(Easing.cubic),
+        isInteraction: false,
+        useNativeDriver: Platform.OS !== 'web',
+      }),
+    ])
     animation.current = nextAnimation
     nextAnimation.start(({ finished }) => {
       if (finished) {
@@ -139,7 +162,7 @@ const ToastContent = forwardRef<View, ToastProps>(function ToastContent(props, r
       }
     })
     return () => nextAnimation.stop()
-  }, [animationDuration, opacity, show])
+  }, [animationDuration, opacity, scale, show])
 
   useEffect(
     () => () => {
@@ -224,6 +247,7 @@ const ToastContent = forwardRef<View, ToastProps>(function ToastContent(props, r
           justifyContent: 'center',
           maxWidth: token.maxWidth,
           opacity,
+          transform: [{ scale }],
         },
         textMode
           ? {
@@ -233,7 +257,8 @@ const ToastContent = forwardRef<View, ToastProps>(function ToastContent(props, r
             }
           : {
               minHeight: token.defaultMinHeight,
-              padding: token.defaultPadding,
+              paddingHorizontal: token.defaultPaddingHorizontal,
+              paddingVertical: token.defaultPaddingVertical,
               width: token.defaultWidth,
             },
         semantic?.root,
@@ -247,10 +272,11 @@ const ToastContent = forwardRef<View, ToastProps>(function ToastContent(props, r
             style={[
               {
                 color: token.textColor,
+                fontFamily: token.fontFamily,
                 fontSize: token.fontSize,
+                flexShrink: 1,
                 lineHeight: token.lineHeight,
-                marginTop: iconNode ? token.textPaddingVertical : 0,
-                maxWidth: token.maxWidth,
+                marginTop: iconNode ? token.iconTextGap : 0,
                 textAlign: 'center',
               },
               semantic?.message,
@@ -268,7 +294,7 @@ const ToastContent = forwardRef<View, ToastProps>(function ToastContent(props, r
   return (
     <View
       pointerEvents={intercepts ? 'auto' : 'box-none'}
-      style={[StyleSheet.absoluteFillObject, { zIndex }, semantic?.host]}
+      style={[StyleSheet.absoluteFill, { zIndex }, semantic?.host]}
     >
       {overlay ? (
         <Pressable
@@ -284,7 +310,7 @@ const ToastContent = forwardRef<View, ToastProps>(function ToastContent(props, r
       ) : forbidClick ? (
         <View pointerEvents="auto" style={StyleSheet.absoluteFillObject} />
       ) : null}
-      <View pointerEvents="box-none" style={[StyleSheet.absoluteFillObject, positionStyle]}>
+      <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, positionStyle]}>
         {closeOnClick ? (
           <Pressable onPress={() => onShowChange?.(false)}>{bubble}</Pressable>
         ) : (

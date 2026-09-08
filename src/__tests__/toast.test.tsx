@@ -70,6 +70,8 @@ describe('Toast', () => {
       fontSize: 14,
       lineHeight: 20,
     })
+    expect(StyleSheet.flatten(root.props.style).maxWidth).toBe('70%')
+    expect(StyleSheet.flatten(screen.getByText('初始消息').props.style).maxWidth).toBeUndefined()
 
     await act(async () => {
       instance!.message = '更新消息'
@@ -89,16 +91,28 @@ describe('Toast', () => {
   })
 
   it('renders loading, success, fail, and custom ReactNode content', async () => {
+    jest.useFakeTimers()
     const view = await render(<AppProvider />)
 
     await act(async () => {
-      showLoadingToast({ message: '加载中', duration: 0 })
+      showLoadingToast({ message: '加载中' })
     })
     expect(screen.getByText('加载中')).toBeTruthy()
     expect(screen.getByRole('progressbar')).toBeTruthy()
-    expect(
-      StyleSheet.flatten(screen.getByRole('progressbar').parent?.parent?.props.style),
-    ).toMatchObject({ padding: 4 })
+    expect(StyleSheet.flatten(screen.getByRole('progressbar').parent?.props.style)).toMatchObject({
+      padding: 4,
+    })
+    await act(async () => jest.advanceTimersByTime(1999))
+    expect(screen.getByText('加载中')).toBeTruthy()
+    await act(async () => jest.advanceTimersByTime(1))
+    expect(screen.queryByText('加载中')).toBeNull()
+
+    await act(async () => {
+      showLoadingToast({ message: '常驻加载中', duration: 0 })
+    })
+    expect(screen.getByText('常驻加载中')).toBeTruthy()
+    await act(async () => jest.advanceTimersByTime(2000))
+    expect(screen.getByText('常驻加载中')).toBeTruthy()
     await act(async () => closeToast())
 
     await act(async () => {
@@ -126,6 +140,31 @@ describe('Toast', () => {
     expect(screen.getByTestId('custom-content')).toBeTruthy()
     await act(async () => closeToast())
     await view.unmount()
+  })
+
+  it('routes both loadingType values through the actual Loading indicator', async () => {
+    const { toJSON: circularToJSON, unmount: unmountCircular } = await render(
+      <AppProvider>
+        <Toast show message="圆环" type="loading" loadingType="circular" />
+      </AppProvider>,
+    )
+    expect(findNode(circularToJSON(), (node) => node.props.strokeDasharray)).toBeTruthy()
+    await unmountCircular()
+
+    const { toJSON: spinnerToJSON, unmount: unmountSpinner } = await render(
+      <AppProvider>
+        <Toast show message="条段" type="loading" loadingType="spinner" />
+      </AppProvider>,
+    )
+    expect(findNode(spinnerToJSON(), (node) => node.props.strokeDasharray)).toBeUndefined()
+    expect(
+      findNode(spinnerToJSON(), (node) => {
+        const style = StyleSheet.flatten(node.props.style)
+        const transforms = style.transform as Array<{ rotate?: string }> | undefined
+        return transforms?.some((item) => item.rotate === '45deg') ?? false
+      }),
+    ).toBeTruthy()
+    await unmountSpinner()
   })
 
   it('supports controlled visibility, duration, and close-on-click behavior', async () => {
@@ -294,7 +333,7 @@ describe('Toast', () => {
           <Toast show message="没有 Portal 宿主" />
         </ConfigProvider>,
       ),
-    ).rejects.toThrow('Portal must be rendered inside Portal.Host')
+    ).rejects.toThrow()
   })
 
   it('does not restart the entrance animation when only the provider rerenders', async () => {

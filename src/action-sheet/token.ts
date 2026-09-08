@@ -1,0 +1,36 @@
+import type { ActionSheetToken, AliasToken } from '../theme'
+
+export function getActionSheetToken(token: AliasToken): ActionSheetToken {
+  return {
+    backgroundColor: token.colorBgContainer,
+    actionActiveBackgroundColor: token.colorFillSecondary,
+    cancelActiveBackgroundColor: token.colorFillSecondary,
+    titleColor: token.colorTextSecondary,
+    actionColor: token.colorText,
+    descriptionColor: token.colorTextSecondary,
+    dangerColor: token.colorError,
+    disabledColor: token.colorTextDisabled,
+    loadingColor: token.colorIcon,
+    dividerColor: token.colorBorderSecondary,
+    borderRadius: token.borderRadiusLG,
+    titleFontSize: token.fontSizeSM,
+    titleLineHeight: token.lineHeightSM,
+    actionFontSize: token.fontSizeLG,
+    actionLineHeight: token.lineHeightLG,
+    descriptionFontSize: token.fontSizeSM,
+    descriptionLineHeight: token.lineHeightSM,
+    titleHeight: 48,
+    actionHeight: token.lineHeightLG + token.paddingSM * 2,
+    titlePaddingHorizontal: token.padding,
+    titlePaddingVertical: token.paddingSM,
+    actionPaddingHorizontal: token.padding,
+    actionPaddingVertical: token.paddingSM,
+    descriptionMarginTop: token.paddingXXS,
+    cancelGap: token.paddingSM,
+    cancelGapColor: token.colorBgLayout,
+    cancelPaddingVertical: token.paddingSM,
+    animationDuration: Math.max(0, token.motionDurationMid),
+    zIndex: token.zIndexPopupBase,
+    fontFamily: token.fontFamily,
+  }
+}

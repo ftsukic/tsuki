@@ -1,44 +1,29 @@
-import React from 'react'
-
-import { Button, Portal } from '@ftsukic/tsuki'
-import { useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { FixtureOverview } from '../../fixture-overview'
+import PortalBasicExample from './examples/basic'
+import PortalImperativeExample from './examples/imperative'
 
 /**
- * @title 组件预览
+ * @title Portal overview
+ * @description Portal 通过 selector 汇总组件式和命令式挂载示例，每次只挂载一个 Portal 案例。
  */
 export default function PortalOverview() {
-  const [visible, setVisible] = useState(false)
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.caption}>Portal 内容会渲染到宿主层</Text>
-      <Button onPress={() => setVisible((current) => !current)}>
-        {visible ? '隐藏 Portal' : '显示 Portal'}
-      </Button>
-      {visible ? (
-        <Portal>
-          <View style={styles.portal}>
-            <Text style={styles.portalText}>这是 Portal 内容</Text>
-          </View>
-        </Portal>
-      ) : null}
-    </View>
+    <FixtureOverview
+      mode="single"
+      examples={[
+        {
+          Component: PortalBasicExample,
+          description: 'Portal 会将内容渲染到 PortalHost 的宿主层。',
+          id: 'basic',
+          title: '组件式 Portal',
+        },
+        {
+          Component: PortalImperativeExample,
+          description: '使用 PortalKey 更新或卸载由 mountPortal 创建的 entry。',
+          id: 'imperative',
+          title: '命令式挂载',
+        },
+      ]}
+    />
   )
 }
-
-const styles = StyleSheet.create({
-  container: { gap: 12, padding: 20 },
-  caption: { color: '#68788d', fontSize: 14 },
-  portal: {
-    alignItems: 'center',
-    backgroundColor: '#1677ff',
-    borderRadius: 8,
-    left: 20,
-    padding: 12,
-    position: 'absolute',
-    right: 20,
-    top: 100,
-  },
-  portalText: { color: '#ffffff' },
-})

@@ -24,6 +24,7 @@ export interface PopupProps extends Omit<ViewProps, 'children' | 'style'> {
   position?: PopupPosition
   overlay?: boolean
   closeOnPressOverlay?: boolean
+  safeAreaInsetBottom?: boolean
   onPressOverlay?: (event: GestureResponderEvent) => void
   onRequestClose?: () => void
   duration?: number

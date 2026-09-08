@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useRef, useState } from 'react'
-import { Animated, Easing, Platform, Pressable, StyleSheet, View } from 'react-native'
+import { Animated, Easing, Platform, Pressable, StyleSheet } from 'react-native'
+import type { View } from 'react-native'
 import type { StyleProp, ViewStyle } from 'react-native'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
@@ -33,7 +34,7 @@ export const OverlaySurface = forwardRef<View, OverlaySurfaceProps>(
       ? Math.max(0, duration)
       : Math.max(0, token.animationDuration)
     const animationDuration = themeToken.motion ? normalizedDuration : 0
-    const opacity = useRef(new Animated.Value(show ? 1 : 0)).current
+    const opacity = useRef(new Animated.Value(0)).current
     const animation = useRef<Animated.CompositeAnimation | null>(null)
     const previousShow = useRef<boolean | null>(null)
     const renderedRef = useRef(show)
@@ -131,7 +132,7 @@ export const OverlaySurface = forwardRef<View, OverlaySurfaceProps>(
         collapsable={false}
         pointerEvents={show ? 'auto' : 'none'}
         style={[
-          StyleSheet.absoluteFillObject,
+          StyleSheet.absoluteFill,
           { backgroundColor, zIndex },
           staticStyle,
           {
@@ -143,14 +144,13 @@ export const OverlaySurface = forwardRef<View, OverlaySurfaceProps>(
         ]}
       >
         <Pressable
-          accessibilityElementsHidden
-          accessible={false}
+          accessibilityElementsHidden={children == null ? true : undefined}
+          accessible={children == null ? false : undefined}
           onPress={onPress}
-          style={[StyleSheet.absoluteFillObject, pressableStyle]}
-        />
-        <View pointerEvents="box-none" style={[StyleSheet.absoluteFillObject, semantic?.content]}>
+          style={[StyleSheet.absoluteFill, pressableStyle, semantic?.content]}
+        >
           {children}
-        </View>
+        </Pressable>
       </Animated.View>
     )
   },

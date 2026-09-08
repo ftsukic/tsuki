@@ -41,6 +41,8 @@ Popup 推荐挂载在应用根节点的 `Provider` 内：
 
 <code src="../../../src/popup/__fixtures__/examples/positions.tsx" title="五种位置" description="支持 center、top、bottom、left 和 right，并按位置处理 round 圆角。"></code>
 
+<code src="../../../src/popup/__fixtures__/examples/safe-area.tsx" title="底部安全区" description="bottom Popup 可将宿主提供的底部 safe-area inset 加入面板内边距。"></code>
+
 <code src="../../../src/popup/__fixtures__/examples/interactions.tsx" title="遮罩交互" description="通过 overlay、onPressOverlay 和 closeOnPressOverlay 管理遮罩点击。"></code>
 
 <code src="../../../src/popup/__fixtures__/examples/lifecycle.tsx" title="生命周期与销毁" description="观察打开、关闭回调，并使用 destroyOnClosed 销毁内容。"></code>
@@ -57,6 +59,7 @@ Popup 推荐挂载在应用根节点的 `Provider` 内：
 | position | `'center' \| 'top' \| 'bottom' \| 'left' \| 'right'` | `'center'` | 弹出位置 |
 | overlay | `boolean` | `true` | 是否显示全屏遮罩；遮罩默认拦截底层触摸 |
 | closeOnPressOverlay | `boolean` | `false` | 点击遮罩时是否发出 `onRequestClose` 请求 |
+| safeAreaInsetBottom | `boolean` | `false` | `position="bottom"` 时是否把 `SafeAreaInsetsContext` 的 bottom inset 加入面板内边距 |
 | onPressOverlay | `(event) => void` | — | 点击遮罩回调 |
 | onRequestClose | `() => void` | — | 关闭请求回调，也用于 Android 返回键；调用方应更新 `visible` |
 | duration | `number` | 主题 `animationDuration` | 动画毫秒数；非正数按 `0` 处理 |
@@ -82,18 +85,18 @@ Popup 不会自动修改 `visible`。`closeOnPressOverlay` 和 Android 返回键
 
 面板继承调用方传入的无障碍属性。遮罩不进入无障碍元素导航；需要明确语义时，应在 children 上提供 `accessible`、`accessibilityRole` 和 `accessibilityLabel`。
 
-首版不支持 `closeable`、`beforeClose`、`lockScroll`、safe-area props、imperative API、Web `teleport`、HTML 字符串和自定义 transition 名称。
+首版不支持 `closeable`、`beforeClose`、`lockScroll`、safe-area top、imperative API、Web `teleport`、HTML 字符串和自定义 transition 名称。`safeAreaInsetBottom` 只对 `position="bottom"` 生效；没有 `SafeAreaProvider` 或 bottom inset 时按 `0` 处理。
 
 ## 主题定制
 
 通过 `ConfigProvider` 的 `theme.components.Popup` 配置：
 
-| Token             | 默认值                     | 说明               |
-| ----------------- | -------------------------- | ------------------ |
-| backgroundColor   | `colorBgContainer`         | 面板背景色         |
-| overlayColor      | `colorBgMask`              | 遮罩背景色         |
-| borderRadius      | `borderRadiusLG`           | `round` 使用的圆角 |
-| animationDuration | `motionDurationMid * 1000` | 动画时长，单位毫秒 |
-| zIndex            | `zIndexPopupBase`          | Popup 宿主默认层级 |
+| Token             | 默认值              | 说明               |
+| ----------------- | ------------------- | ------------------ |
+| backgroundColor   | `colorBgContainer`  | 面板背景色         |
+| overlayColor      | `colorBgMask`       | 遮罩背景色         |
+| borderRadius      | `borderRadiusLG`    | `round` 使用的圆角 |
+| animationDuration | `motionDurationMid` | 动画时长，单位毫秒 |
+| zIndex            | `zIndexPopupBase`   | Popup 宿主默认层级 |
 
 `theme.token.motion=false` 时动画时长强制为 `0`，但生命周期回调仍按打开/关闭顺序触发。`styles` 支持对象或函数；函数接收 `{ props, state: { visible, position, rendered } }`。

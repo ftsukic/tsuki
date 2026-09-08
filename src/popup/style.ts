@@ -1,13 +1,13 @@
 import { StyleSheet } from 'react-native'
-import type { ViewStyle } from 'react-native'
+import type { StyleProp, ViewStyle } from 'react-native'
 import type { PopupPosition } from './interface'
 import type { PopupToken } from '../theme'
 
 export interface PopupResolvedStyles {
-  root: ViewStyle
-  container: ViewStyle
+  root: StyleProp<ViewStyle>
+  container: StyleProp<ViewStyle>
   panel: ViewStyle
-  overlay: ViewStyle
+  overlay: StyleProp<ViewStyle>
 }
 
 function getRoundStyles(position: PopupPosition, radius: number): ViewStyle {
@@ -78,18 +78,9 @@ export function getPopupStyles(
   if (round) Object.assign(panel, getRoundStyles(position, token.borderRadius))
 
   return {
-    root: {
-      ...StyleSheet.absoluteFillObject,
-      zIndex: token.zIndex,
-    },
-    container: {
-      ...StyleSheet.absoluteFillObject,
-      ...positionStyles,
-    },
+    root: [StyleSheet.absoluteFill, { zIndex: token.zIndex }],
+    container: [StyleSheet.absoluteFill, positionStyles],
     panel,
-    overlay: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: token.overlayColor,
-    },
+    overlay: [StyleSheet.absoluteFill, { backgroundColor: token.overlayColor }],
   }
 }

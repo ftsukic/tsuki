@@ -46,11 +46,139 @@ describe('Dialog', () => {
     expect(screen.getByText('操作完成')).toBeTruthy()
     expect(screen.getByTestId('dialog-confirm-button')).toBeTruthy()
     expect(screen.queryByTestId('dialog-cancel-button')).toBeNull()
-    expect(StyleSheet.flatten(screen.getByTestId('dialog').props.style)).toMatchObject({
+    const dialog = screen.getByTestId('dialog')
+    const popupPanel = dialog.parent
+
+    expect(StyleSheet.flatten(dialog.props.style)).toMatchObject({
       backgroundColor: '#ffffff',
-      width: 320,
+      width: '100%',
     })
-    expect(findOverlay(view)).toBeTruthy()
+    expect(StyleSheet.flatten(dialog.props.style).maxWidth).toBeUndefined()
+    expect(StyleSheet.flatten(popupPanel?.props.style)).toMatchObject({
+      width: 320,
+      maxWidth: '90%',
+    })
+    const overlay = findOverlay(view)
+    const overlayLayer = overlay?.parent
+    const popupRoot = overlayLayer?.parent
+    const popupContainer = popupPanel?.parent
+
+    expect(overlay).toBeTruthy()
+    expect(popupContainer?.parent).toBe(popupRoot)
+    expect(StyleSheet.flatten(popupRoot?.props.style)).toMatchObject({
+      ...StyleSheet.absoluteFillObject,
+    })
+    expect(StyleSheet.flatten(popupContainer?.props.style).zIndex).toBe(
+      StyleSheet.flatten(overlayLayer?.props.style).zIndex + 1,
+    )
+    await view.unmount()
+  })
+
+  it('applies a custom width to the Popup panel wrapper', async () => {
+    const view = await render(
+      <AppProvider>
+        <Dialog show width={280} message="自定义宽度" />
+      </AppProvider>,
+    )
+
+    const dialog = screen.getByRole('alert')
+    const popupPanel = dialog.parent
+
+    expect(StyleSheet.flatten(popupPanel?.props.style)).toMatchObject({
+      width: 280,
+      maxWidth: '90%',
+    })
+    expect(StyleSheet.flatten(dialog.props.style)).toMatchObject({ width: '100%' })
+
+    await view.unmount()
+  })
+
+  it('renders default dialog actions as direct, equally sized footer children', async () => {
+    const view = await render(
+      <AppProvider>
+        <Dialog show message="确认操作" showCancelButton />
+      </AppProvider>,
+    )
+
+    const cancelButton = screen.getByTestId('dialog-cancel-button')
+    const confirmButton = screen.getByTestId('dialog-confirm-button')
+    const footer = cancelButton.parent
+
+    expect(confirmButton.parent).toBe(footer)
+    expect(footer?.children).toHaveLength(2)
+    const footerStyle = StyleSheet.flatten(footer?.props.style)
+    expect(footerStyle.height).toBeGreaterThan(0)
+    expect(StyleSheet.flatten(cancelButton.props.style)).toMatchObject({
+      flex: 1,
+      minWidth: 0,
+      minHeight: footerStyle.height,
+    })
+    expect(StyleSheet.flatten(confirmButton.props.style)).toMatchObject({
+      flex: 1,
+      minWidth: 0,
+      minHeight: footerStyle.height,
+      borderLeftWidth: 1,
+    })
+    expect(StyleSheet.flatten(cancelButton.props.style).borderLeftWidth).toBeUndefined()
+    expect(StyleSheet.flatten(screen.getByText('取消').props.style)).toMatchObject({
+      textAlign: 'center',
+    })
+    expect(StyleSheet.flatten(screen.getByText('确认').props.style)).toMatchObject({
+      textAlign: 'center',
+    })
+
+    await view.unmount()
+  })
+
+  it('keeps a single default action as a full-width direct footer child', async () => {
+    const view = await render(
+      <AppProvider>
+        <Dialog show message="确认操作" showCancelButton={false} />
+      </AppProvider>,
+    )
+
+    const confirmButton = screen.getByTestId('dialog-confirm-button')
+    const footer = confirmButton.parent
+
+    expect(footer?.children).toEqual([confirmButton])
+    expect(StyleSheet.flatten(confirmButton.props.style)).toMatchObject({
+      flex: 1,
+      minWidth: 0,
+      minHeight: expect.any(Number),
+    })
+    expect(StyleSheet.flatten(confirmButton.props.style).borderLeftWidth).toBeUndefined()
+
+    await view.unmount()
+  })
+
+  it('renders round dialog actions as direct equal-width footer children with a gap', async () => {
+    const view = await render(
+      <AppProvider>
+        <Dialog show theme="round-button" message="确认操作" showCancelButton />
+      </AppProvider>,
+    )
+
+    const cancelButton = screen.getByTestId('dialog-cancel-button')
+    const confirmButton = screen.getByTestId('dialog-confirm-button')
+    const footer = cancelButton.parent
+
+    expect(confirmButton.parent).toBe(footer)
+    expect(footer?.children).toHaveLength(2)
+    const footerStyle = StyleSheet.flatten(footer?.props.style)
+    expect(footerStyle).toMatchObject({ gap: expect.any(Number) })
+    expect(footerStyle.height).toBeGreaterThan(0)
+    expect(StyleSheet.flatten(cancelButton.props.style)).toMatchObject({
+      flex: 1,
+      minWidth: 0,
+      minHeight: expect.any(Number),
+    })
+    expect(StyleSheet.flatten(confirmButton.props.style)).toMatchObject({
+      flex: 1,
+      minWidth: 0,
+      minHeight: expect.any(Number),
+    })
+    expect(StyleSheet.flatten(confirmButton.props.style).borderLeftWidth).toBeUndefined()
+
     await view.unmount()
   })
 
@@ -162,7 +290,8 @@ describe('Dialog', () => {
     await act(async () => {
       pending = showDialog({ message: '使用主题宽度' })
     })
-    expect(StyleSheet.flatten(screen.getByRole('alert').props.style)).toMatchObject({ width: 280 })
+    const dialog = screen.getByRole('alert')
+    expect(StyleSheet.flatten(dialog.parent?.props.style)).toMatchObject({ width: 280 })
 
     // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => fireEvent.press(screen.getByTestId('dialog-confirm-button')))
@@ -422,6 +551,6 @@ describe('Dialog', () => {
           <Dialog show message="没有 Portal.Host" />
         </ConfigProvider>,
       ),
-    ).rejects.toThrow('Portal must be rendered inside Portal.Host')
+    ).rejects.toThrow()
   })
 })

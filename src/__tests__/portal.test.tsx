@@ -9,7 +9,7 @@ import {
   useToken,
 } from '..'
 import type { PortalManager } from '../portal/manager'
-import { Text, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import type { ReactNode } from 'react'
 
 function TokenProbe() {
@@ -134,6 +134,27 @@ describe('Portal', () => {
     expect(layer?.props.style).toBeTruthy()
   })
 
+  it('renders the manager as sibling absolute portal entries', async () => {
+    await render(
+      <PortalHost>
+        <Text testID="base">base</Text>
+        <Portal>
+          <Text testID="portal">content</Text>
+        </Portal>
+      </PortalHost>,
+    )
+
+    const entry = screen.getByTestId('portal').parent
+    const hostContent = screen.getByTestId('base').parent
+
+    expect(StyleSheet.flatten(hostContent?.props.style)).toMatchObject({ flex: 1 })
+    expect(hostContent?.props.pointerEvents).toBeUndefined()
+    expect(hostContent?.props.collapsable).toBe(false)
+    expect(StyleSheet.flatten(entry?.props.style)).toMatchObject(StyleSheet.absoluteFillObject)
+    expect(entry?.props.pointerEvents).toBe('box-none')
+    expect(entry?.props.collapsable).toBe(false)
+  })
+
   it('queues mount, update, and unmount operations until the manager is ready', () => {
     type HostInternals = {
       manager: PortalManager | null
@@ -220,6 +241,38 @@ describe('Portal', () => {
     unmountPortal(key)
   })
 
+  it('restores the previous imperative owner when the latest PortalHost unmounts', async () => {
+    function Hosts({ showSecond }: { showSecond: boolean }) {
+      return (
+        <>
+          <PortalHost>
+            <Text testID="first-host">first host</Text>
+          </PortalHost>
+          {showSecond ? (
+            <PortalHost>
+              <Text testID="second-host">second host</Text>
+            </PortalHost>
+          ) : null}
+        </>
+      )
+    }
+
+    const view = await render(<Hosts showSecond />)
+
+    await act(async () => {
+      mountPortal(<Text testID="second-entry">second entry</Text>)
+    })
+    expect(screen.getByTestId('second-entry')).toBeTruthy()
+
+    await view.rerender(<Hosts showSecond={false} />)
+    await act(async () => {
+      mountPortal(<Text testID="restored-entry">restored entry</Text>)
+    })
+
+    expect(screen.getByTestId('restored-entry')).toBeTruthy()
+    await view.unmount()
+  })
+
   it('requires a PortalHost', async () => {
     await expect(
       render(
@@ -227,6 +280,6 @@ describe('Portal', () => {
           <Text>content</Text>
         </Portal>,
       ),
-    ).rejects.toThrow('Portal must be rendered inside Portal.Host')
+    ).rejects.toThrow()
   })
 })

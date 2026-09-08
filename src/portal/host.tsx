@@ -6,6 +6,7 @@ import type { PortalHostProps, PortalKey, PortalMethods } from './interface'
 import type { ReactNode } from 'react'
 
 let activeManager: PortalMethods | null = null
+const hostRegistry: PortalMethods[] = []
 let nextPortalKey = 0
 
 type Operation =
@@ -36,12 +37,15 @@ export class PortalHost extends Component<PortalHostProps> {
   }
 
   componentDidMount() {
+    hostRegistry.push(this.methods)
     activeManager = this.methods
     this.flushQueue()
   }
 
   componentWillUnmount() {
-    if (activeManager === this.methods) activeManager = null
+    const hostIndex = hostRegistry.indexOf(this.methods)
+    if (hostIndex >= 0) hostRegistry.splice(hostIndex, 1)
+    activeManager = hostRegistry[hostRegistry.length - 1] ?? null
     this.queue = []
   }
 
@@ -118,10 +122,12 @@ export class PortalHost extends Component<PortalHostProps> {
   render() {
     return (
       <PortalContext.Provider value={this.methods}>
-        <View collapsable={false} pointerEvents="box-none" style={styles.container}>
-          {this.props.children}
+        <View collapsable={false} style={styles.container}>
+          <View collapsable={false} style={styles.container}>
+            {this.props.children}
+          </View>
+          <PortalManager ref={this.setManager} />
         </View>
-        <PortalManager ref={this.setManager} />
       </PortalContext.Provider>
     )
   }

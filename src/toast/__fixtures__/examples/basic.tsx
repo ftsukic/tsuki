@@ -17,7 +17,7 @@ export default function ToastBasicExample() {
   return (
     <View style={styles.container}>
       <Button onPress={() => showToast('普通提示')}>text</Button>
-      <Button onPress={() => showLoadingToast({ message: '加载中', duration: 0 })}>loading</Button>
+      <Button onPress={() => showLoadingToast({ message: '加载中' })}>loading</Button>
       <Button type="success" onPress={() => showSuccessToast('保存成功')}>
         success
       </Button>

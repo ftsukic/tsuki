@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import type { PortalMethods } from './interface'
 
 interface PortalConsumerProps {
-  manager: PortalMethods
+  manager: PortalMethods | null
   children: ReactNode
 }
 
@@ -13,23 +13,29 @@ export class PortalConsumer extends Component<PortalConsumerProps> {
   private key: number | null = null
 
   componentDidMount() {
-    this.key = this.props.manager.mount(this.props.children)
+    this.key = this.getManager().mount(this.props.children)
   }
 
   componentDidUpdate() {
-    if (this.key !== null) {
-      this.props.manager.update(this.key, this.props.children)
-    }
+    this.getManager().update(this.key as number, this.props.children)
   }
 
   componentWillUnmount() {
-    if (this.key !== null) {
-      this.props.manager.unmount(this.key)
-      this.key = null
-    }
+    this.getManager().unmount(this.key as number)
+    this.key = null
   }
 
   render() {
     return null
+  }
+
+  private getManager(): PortalMethods {
+    const { manager } = this.props
+    if (!manager) {
+      throw new Error(
+        'Looks like you forgot to wrap your root component with `Provider` component from `@ftsukic/tsuki`.',
+      )
+    }
+    return manager
   }
 }

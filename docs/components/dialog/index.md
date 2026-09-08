@@ -112,6 +112,8 @@ Dialog 使用无障碍 `alert` 和 modal 语义，遮罩不会进入无障碍导
 
 `beforeClose` 的 action 只有 `confirm` 和 `cancel`。异步检查期间对应按钮显示 loading，并暂时锁定两个默认操作按钮；返回 `false`、抛出异常或 rejected Promise 都会保持 Dialog 打开。
 
+默认 footer 使用固定高度；显示取消按钮时，取消和确认 Button 直接作为 footer 子项并通过 `flex: 1` 平分宽度，整个半区都可点击。`theme="round-button"` 保留 footer 内边距、间隔和圆角按钮样式。
+
 ### PortalHost 与命令式 API
 
 ```text
