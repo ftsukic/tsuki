@@ -1,6 +1,9 @@
 import type { AliasToken, RadioToken } from '../theme'
+import { getButtonToken } from '../button/token'
 
 export function getRadioToken(token: AliasToken): RadioToken {
+  const buttonToken = getButtonToken(token)
+
   return {
     indicatorSize: token.controlInteractiveSize,
     dotSize: token.controlInteractiveSize / 2,
@@ -9,12 +12,22 @@ export function getRadioToken(token: AliasToken): RadioToken {
     borderColor: token.colorBorder,
     checkedColor: token.colorPrimary,
     labelColor: token.colorText,
-    disabledColor: token.colorTextDisabled,
+    disabledBorderColor: token.colorTextDisabled,
+    disabledBackgroundColor: token.colorBgContainerDisabled,
+    disabledCheckedBackgroundColor: token.controlItemBgActiveDisabled,
+    disabledMarkColor: token.colorTextDisabled,
     disabledLabelColor: token.colorTextDisabled,
-    fontSize: token.fontSize,
+    fontSize: buttonToken.contentFontSize,
     lineHeight: token.lineHeight,
     gap: token.paddingXS,
-    activeOpacity: 0.6,
-    disabledOpacity: 0.4,
+    activeOpacity: buttonToken.activeOpacity,
+    disabledOpacity: buttonToken.disabledOpacity,
+    fontFamily: buttonToken.fontFamily,
+    buttonHeight: buttonToken.height,
+    buttonPaddingHorizontal: buttonToken.paddingHorizontalSM,
+    buttonBorderRadius: buttonToken.borderRadius,
+    buttonBackground: token.colorBgContainer,
+    buttonDisabledBackground: token.colorBgContainerDisabled,
+    buttonCheckedLabelColor: token.colorTextLightSolid,
   }
 }

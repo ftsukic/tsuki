@@ -10,14 +10,26 @@ import { View } from 'react-native'
 export default function Example() {
   return (
     <View style={{ gap: 12 }}>
+      <Radio checked={false} shape="round">
+        round 未选中
+      </Radio>
       <Radio checked shape="round">
-        圆形选中
+        round 圆形 check
+      </Radio>
+      <Radio checked={false} shape="square">
+        square 未选中
       </Radio>
       <Radio checked shape="square">
-        方形选中
+        square 方形 check
       </Radio>
-      <Radio checked shape="square" labelPosition="left">
-        标签在左侧
+      <Radio checked={false} shape="dot">
+        dot 未选中
+      </Radio>
+      <Radio checked shape="dot">
+        dot 中心圆点
+      </Radio>
+      <Radio checked shape="round" labelPosition="left">
+        round 标签在左侧
       </Radio>
     </View>
   )

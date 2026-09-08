@@ -1,7 +1,9 @@
-import { Radio, RadioGroup, ConfigProvider } from '..'
+import { ConfigProvider, getDesignToken, Radio, RadioGroup } from '..'
 import { fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
+import { getRadioStyles } from '../radio/style'
+import { getRadioToken } from '../radio/token'
 
 const styleOf = (id: string) => StyleSheet.flatten(screen.getByTestId(id).props.style)
 
@@ -10,13 +12,17 @@ async function press(target: Parameters<typeof fireEvent.press>[0]) {
   await Promise.resolve()
 }
 
-function findIndicator(node: JsonNode | null): JsonElement | undefined {
+function findIndicator(
+  node: JsonNode | null,
+  width = 30,
+  borderWidth = 2,
+): JsonElement | undefined {
   if (node === null || typeof node === 'string') return undefined
   const style = StyleSheet.flatten(node.props.style)
-  if (style?.borderWidth === 2 && style?.width === 30) return node
+  if (style?.borderWidth === borderWidth && style?.width === width) return node
 
   for (const child of node.children) {
-    const indicator = findIndicator(child)
+    const indicator = findIndicator(child, width, borderWidth)
     if (indicator) return indicator
   }
 
@@ -73,6 +79,34 @@ describe('Radio', () => {
     expect(styles).toHaveBeenCalled()
   })
 
+  it('renders button variants with content-sized roots and no indicator', async () => {
+    const { toJSON } = await render(
+      <ConfigProvider>
+        <Radio testID="button" variant="button">
+          Apple
+        </Radio>
+        <Radio testID="disabled-button" variant="button" disabled>
+          Orange
+        </Radio>
+      </ConfigProvider>,
+    )
+
+    const buttonStyle = styleOf('button')
+    expect(buttonStyle).toMatchObject({
+      height: getRadioToken(getDesignToken()).buttonHeight,
+      minHeight: getRadioToken(getDesignToken()).buttonHeight,
+      paddingHorizontal: getRadioToken(getDesignToken()).buttonPaddingHorizontal,
+    })
+    expect(buttonStyle.width).toBeUndefined()
+    expect(buttonStyle.flex).toBeUndefined()
+    expect(screen.getByText('Apple')).toBeTruthy()
+    expect(screen.getByTestId('disabled-button').props.accessibilityState?.disabled).toBe(true)
+    expect(styleOf('disabled-button').opacity).toBe(getRadioToken(getDesignToken()).disabledOpacity)
+    expect(
+      findIndicator(toJSON(), getRadioToken(getDesignToken()).indicatorSize, 1),
+    ).toBeUndefined()
+  })
+
   it('supports themed indicator tokens', async () => {
     const { toJSON } = await render(
       <ConfigProvider theme={{ components: { Radio: { indicatorSize: 30, borderWidth: 2 } } }}>
@@ -84,6 +118,108 @@ describe('Radio', () => {
 
     const indicator = findIndicator(toJSON())
     expect(indicator).toBeDefined()
+  })
+
+  it('uses the Vant indicator semantics for round, square and dot shapes', () => {
+    const aliasToken = getDesignToken()
+    const token = getRadioToken(aliasToken)
+    const checkedRound = getRadioStyles(
+      token,
+      { shape: 'round', checkedColor: '#ff0000' },
+      { checked: true, disabled: false, pressed: false },
+    )
+    const checkedSquare = getRadioStyles(
+      token,
+      { shape: 'square', checkedColor: '#ff0000' },
+      { checked: true, disabled: false, pressed: false },
+    )
+    const checkedDot = getRadioStyles(
+      token,
+      { shape: 'dot', checkedColor: '#ff0000' },
+      { checked: true, disabled: false, pressed: false },
+    )
+
+    expect(checkedRound.indicator).toMatchObject({
+      backgroundColor: '#ff0000',
+      borderRadius: token.indicatorSize / 2,
+    })
+    expect(checkedSquare.indicator).toMatchObject({
+      backgroundColor: '#ff0000',
+      borderRadius: token.borderRadius,
+    })
+    expect(checkedRound.dot.width).toBe(0)
+    expect(checkedSquare.dot.width).toBe(0)
+    expect(checkedRound.checkColor).toBe('#ffffff')
+    expect(checkedSquare.checkColor).toBe('#ffffff')
+    expect(checkedDot.indicator).toMatchObject({
+      backgroundColor: 'transparent',
+      borderRadius: token.indicatorSize / 2,
+      borderColor: '#ff0000',
+    })
+    expect(checkedDot.dot).toMatchObject({
+      width: token.dotSize,
+      height: token.dotSize,
+      backgroundColor: '#ff0000',
+      borderRadius: token.dotSize / 2,
+    })
+
+    expect(checkedDot.checkSize).toBe(token.indicatorSize * 0.6)
+  })
+
+  it('uses consistent disabled background and internal mark tokens for each shape', () => {
+    const aliasToken = getDesignToken()
+    const token = getRadioToken(aliasToken)
+    const disabledUnchecked = getRadioStyles(
+      token,
+      { shape: 'round' },
+      { checked: false, disabled: true, pressed: false },
+    )
+    const disabledRoundChecked = getRadioStyles(
+      token,
+      { shape: 'round' },
+      { checked: true, disabled: true, pressed: false },
+    )
+    const disabledSquareChecked = getRadioStyles(
+      token,
+      { shape: 'square' },
+      { checked: true, disabled: true, pressed: false },
+    )
+    const disabledDotChecked = getRadioStyles(
+      token,
+      { shape: 'dot' },
+      { checked: true, disabled: true, pressed: false },
+    )
+
+    expect(token.disabledBorderColor).toBe(aliasToken.colorTextDisabled)
+    expect(token.disabledBackgroundColor).toBe(aliasToken.colorBgContainerDisabled)
+    expect(token.disabledCheckedBackgroundColor).toBe(aliasToken.controlItemBgActiveDisabled)
+    expect(token.disabledMarkColor).toBe(aliasToken.colorTextDisabled)
+    expect(token.disabledOpacity).toBe(0.4)
+
+    expect(disabledUnchecked.root.opacity).toBe(1)
+    expect(disabledUnchecked.indicator).toMatchObject({
+      backgroundColor: token.disabledBackgroundColor,
+      borderColor: token.disabledBorderColor,
+    })
+    expect(disabledRoundChecked.indicator).toMatchObject({
+      backgroundColor: token.disabledBackgroundColor,
+      borderColor: token.disabledBorderColor,
+    })
+    expect(disabledSquareChecked.indicator).toMatchObject({
+      backgroundColor: token.disabledBackgroundColor,
+      borderColor: token.disabledBorderColor,
+    })
+    expect(disabledRoundChecked.checkColor).toBe(token.disabledMarkColor)
+    expect(disabledSquareChecked.checkColor).toBe(token.disabledMarkColor)
+    expect(disabledDotChecked.root.opacity).toBe(1)
+    expect(disabledDotChecked.indicator).toMatchObject({
+      backgroundColor: token.disabledBackgroundColor,
+      borderColor: token.disabledBorderColor,
+    })
+    expect(disabledDotChecked.dot.backgroundColor).toBe(token.disabledMarkColor)
+    expect(disabledSquareChecked.checkColor).not.toBe(
+      disabledSquareChecked.indicator.backgroundColor,
+    )
   })
 
   it('provides single selection for child Radio elements', async () => {
@@ -112,6 +248,30 @@ describe('Radio', () => {
 
     await press(screen.getByTestId('second'))
     expect(onChange).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps button variants mutually exclusive in a Radio.Group', async () => {
+    const onChange = jest.fn()
+    await render(
+      <ConfigProvider>
+        <Radio.Group defaultValue="apple" onChange={onChange}>
+          <Radio testID="button-apple" variant="button" value="apple">
+            Apple
+          </Radio>
+          <Radio testID="button-orange" variant="button" value="orange">
+            Orange
+          </Radio>
+        </Radio.Group>
+      </ConfigProvider>,
+    )
+
+    expect(screen.getByTestId('button-apple').props.accessibilityState?.selected).toBe(true)
+    expect(screen.getByTestId('button-orange').props.accessibilityState?.selected).toBe(false)
+
+    await press(screen.getByTestId('button-orange'))
+    expect(screen.getByTestId('button-apple').props.accessibilityState?.selected).toBe(false)
+    expect(screen.getByTestId('button-orange').props.accessibilityState?.selected).toBe(true)
+    expect(onChange).toHaveBeenCalledWith('orange')
   })
 
   it('supports options, direction, gap and group disabled state', async () => {

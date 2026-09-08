@@ -17,4 +17,5 @@ export type {
   RadioStyleState,
   RadioStyles,
   RadioValue,
+  RadioVariant,
 } from './interface'

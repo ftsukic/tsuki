@@ -10,7 +10,8 @@ import type {
 import type { StyleInfo, StyleResolver } from '../style'
 
 export type RadioValue = string | number
-export type RadioShape = 'round' | 'square'
+export type RadioShape = 'round' | 'square' | 'dot'
+export type RadioVariant = 'default' | 'button'
 export type RadioDirection = 'vertical' | 'horizontal'
 export type RadioLabelPosition = 'left' | 'right'
 
@@ -35,6 +36,7 @@ export interface RadioProps extends Omit<PressableProps, 'children' | 'style' | 
   defaultChecked?: boolean
   disabled?: boolean
   shape?: RadioShape
+  variant?: RadioVariant
   labelPosition?: RadioLabelPosition
   checkedColor?: ColorValue
   onChange?: (checked: boolean) => void
