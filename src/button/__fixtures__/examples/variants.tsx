@@ -1,8 +1,8 @@
 import React from 'react'
 
+import { Button, Col, Icon, Row } from '@ftsukic/tsuki'
 import { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
-import { Button, Col, Icon, Row } from '../..'
 
 /**
  * @title Button variants
@@ -13,7 +13,7 @@ export default function ButtonVariantsFixture() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>按钮类型</Text>
+      <Text style={styles.heading}>Semantic colors</Text>
       <Row gap={16}>
         <Col span={8}>
           <Button type="primary" block onPress={() => setPressCount((count) => count + 1)}>
@@ -41,6 +41,30 @@ export default function ButtonVariantsFixture() {
       </Row>
       <Text style={styles.caption}>Pressed {pressCount} times</Text>
 
+      <Text style={styles.heading}>Variants</Text>
+      <Row gap={16}>
+        <Col span={8}>
+          <Button type="primary" variant="outline" block>
+            Outline
+          </Button>
+        </Col>
+        <Col span={8}>
+          <Button type="primary" variant="filled" block>
+            Filled
+          </Button>
+        </Col>
+        <Col span={8}>
+          <Button type="primary" variant="text" block>
+            Text
+          </Button>
+        </Col>
+        <Col span={8}>
+          <Button color="#7232DD" block>
+            Custom color
+          </Button>
+        </Col>
+      </Row>
+
       <Text style={styles.heading}>Sizes and states</Text>
       <View style={styles.row}>
         <Button size="large" round>
@@ -65,7 +89,7 @@ export default function ButtonVariantsFixture() {
         block
         hairline
         icon={<Icon name="CheckOutlined" size={16} color="#ffffff" />}
-        styles={{ content: { fontWeight: '600' } }}
+        styles={{ label: { fontWeight: '600' } }}
       >
         Semantic styles
       </Button>
@@ -76,7 +100,6 @@ export default function ButtonVariantsFixture() {
 const styles = StyleSheet.create({
   container: {
     gap: 16,
-    padding: 16,
   },
   heading: {
     color: '#333333',

@@ -1,11 +1,21 @@
 import type { ReactNode } from 'react'
-import type { ColorValue, PressableProps, StyleProp, TextStyle, ViewStyle } from 'react-native'
+import type {
+  ColorValue,
+  PressableProps,
+  StyleProp,
+  TextStyle,
+  ViewProps,
+  ViewStyle,
+} from 'react-native'
 import type { StyleInfo, StyleResolver } from '../style'
+import type { LoadingType } from '../loading'
 
 export type ButtonType = 'default' | 'primary' | 'success' | 'warning' | 'danger'
 export type ButtonSize = 'large' | 'normal' | 'small' | 'mini'
 export type ButtonIconPosition = 'left' | 'right'
-export type ButtonVariant = 'solid' | 'filled' | 'outlined' | 'dashed' | 'text'
+export type ButtonShape = 'default' | 'round' | 'square' | 'circle'
+export type ButtonGroupShape = Extract<ButtonShape, 'default' | 'round'>
+export type ButtonVariant = 'solid' | 'filled' | 'outline' | 'dashed' | 'text'
 
 export interface ButtonStyleState {
   pressed: boolean
@@ -16,6 +26,9 @@ export interface ButtonStyleState {
 export interface ButtonSemanticStyles {
   root?: StyleProp<ViewStyle>
   icon?: StyleProp<ViewStyle>
+  label?: StyleProp<TextStyle>
+  contentContainer?: StyleProp<ViewStyle>
+  /** @deprecated Use `label` for text content. */
   content?: StyleProp<TextStyle>
 }
 
@@ -27,7 +40,8 @@ export interface ButtonProps extends Omit<PressableProps, 'children' | 'style' |
   size?: ButtonSize
   color?: ColorValue
   variant?: ButtonVariant
-  /** @deprecated Use `variant="outlined"` instead. */
+  shape?: ButtonShape
+  /** @deprecated Use `variant="outline"` instead. */
   plain?: boolean
   block?: boolean
   round?: boolean
@@ -37,6 +51,8 @@ export interface ButtonProps extends Omit<PressableProps, 'children' | 'style' |
   disabled?: boolean
   loading?: boolean
   loadingText?: ReactNode
+  loadingType?: LoadingType
+  loadingSize?: number
   icon?: ReactNode
   iconPosition?: ButtonIconPosition
   style?: StyleProp<ViewStyle>
@@ -45,3 +61,11 @@ export interface ButtonProps extends Omit<PressableProps, 'children' | 'style' |
 }
 
 export type ButtonStyleInfo = StyleInfo<ButtonProps, ButtonStyleState>
+
+export interface ButtonGroupProps extends Omit<ViewProps, 'children' | 'style'> {
+  children?: ReactNode
+  size?: ButtonSize
+  shape?: ButtonGroupShape
+  block?: boolean
+  style?: StyleProp<ViewStyle>
+}
