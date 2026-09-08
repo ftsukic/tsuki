@@ -66,13 +66,19 @@ describe('Provider', () => {
     await view.unmount()
   })
 
-  it('keeps command providers single-instance', async () => {
-    await expect(
-      render(
+  it('supports multiple provider roots', async () => {
+    await render(
+      <>
         <Provider>
-          <Provider />
-        </Provider>,
-      ),
-    ).rejects.toThrow()
+          <Text testID="first-provider">first</Text>
+        </Provider>
+        <Provider>
+          <Text testID="second-provider">second</Text>
+        </Provider>
+      </>,
+    )
+
+    expect(screen.getByTestId('first-provider')).toHaveTextContent('first')
+    expect(screen.getByTestId('second-provider')).toHaveTextContent('second')
   })
 })
