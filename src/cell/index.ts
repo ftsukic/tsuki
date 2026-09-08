@@ -7,6 +7,7 @@ export { CellGroup }
 export { getCellToken } from './token'
 export type {
   CellArrowDirection,
+  CellGroupSemanticStyles,
   CellGroupProps,
   CellProps,
   CellSemanticStyles,

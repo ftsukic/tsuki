@@ -1,8 +1,22 @@
+import { Children } from 'react'
+import { Text, View } from 'react-native'
+import { Divider } from '../divider'
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
-import { getCellToken } from './token'
+import { CellGroupItem } from './context'
+import type { CellGroupPosition } from './context'
 import type { CellGroupProps } from './interface'
-import { View, Text } from 'react-native'
+import { getCellToken } from './token'
+
+function isVisible(value: CellGroupProps['title']): boolean {
+  return value !== null && value !== undefined && value !== false
+}
+
+function getPosition(index: number, count: number): CellGroupPosition {
+  if (count === 1 || index === count - 1) return 'last'
+  if (index === 0) return 'first'
+  return 'middle'
+}
 
 export function CellGroup({
   children,
@@ -19,49 +33,63 @@ export function CellGroup({
     props: { children, testID, title, extra, inset, border, style, styles },
     state: {},
   })
+  const childItems = Children.toArray(children)
+  const hasHeader = isVisible(title) || isVisible(extra)
+  const titlePaddingHorizontal = inset
+    ? token.groupInsetTitlePaddingHorizontal
+    : token.groupTitlePaddingHorizontal
+  const titlePaddingVertical = inset
+    ? token.groupInsetTitlePaddingVertical
+    : token.groupTitlePaddingVertical
+  const renderChildren = () =>
+    childItems.map((child, index) => (
+      <CellGroupItem key={index} position={getPosition(index, childItems.length)}>
+        {child}
+      </CellGroupItem>
+    ))
 
   return (
-    <View
-      testID={testID}
-      style={[
-        {
-          backgroundColor: token.backgroundColor,
-          marginHorizontal: inset ? token.paddingMD : 0,
-          borderRadius: inset ? token.insetRadius : 0,
-          overflow: inset ? 'hidden' : 'visible',
-          borderWidth: border && inset ? 1 : 0,
-          borderColor: token.borderColor,
-        },
-        semantic?.root,
-        style,
-      ]}
-    >
-      {title !== undefined || extra !== undefined ? (
+    <View testID={testID} style={[semantic?.root, style]}>
+      {hasHeader ? (
         <View
           style={{
-            minHeight: token.minHeight,
-            paddingHorizontal: token.paddingHorizontal,
-            paddingVertical: token.paddingVertical,
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            paddingHorizontal: titlePaddingHorizontal,
+            paddingVertical: titlePaddingVertical,
           }}
         >
-          {typeof title === 'string' || typeof title === 'number' ? (
-            <Text
-              style={[
-                { color: token.groupTitleColor, fontSize: token.groupTitleFontSize },
-                semantic?.title,
-              ]}
-            >
-              {title}
-            </Text>
-          ) : (
-            title
-          )}
+          <View style={{ flex: 1, minWidth: 0 }}>
+            {typeof title === 'string' || typeof title === 'number' ? (
+              <Text
+                style={[
+                  {
+                    color: token.groupTitleColor,
+                    fontFamily: token.fontFamily,
+                    fontSize: token.groupTitleFontSize,
+                    lineHeight: token.groupTitleLineHeight,
+                  },
+                  semantic?.title,
+                ]}
+              >
+                {title}
+              </Text>
+            ) : (
+              title
+            )}
+          </View>
           {typeof extra === 'string' || typeof extra === 'number' ? (
             <Text
-              style={[{ color: token.extraColor, fontSize: token.extraFontSize }, semantic?.extra]}
+              style={[
+                {
+                  color: token.extraColor,
+                  fontFamily: token.fontFamily,
+                  fontSize: token.extraFontSize,
+                  lineHeight: token.extraLineHeight,
+                  flexShrink: 1,
+                },
+                semantic?.extra,
+              ]}
             >
               {extra}
             </Text>
@@ -70,7 +98,37 @@ export function CellGroup({
           )}
         </View>
       ) : null}
-      <View style={[semantic?.body]}>{children}</View>
+
+      <View
+        style={[
+          {
+            position: 'relative',
+            backgroundColor: token.groupBackgroundColor,
+            marginHorizontal: inset ? token.groupInsetMarginHorizontal : 0,
+            borderRadius: inset ? token.insetRadius : 0,
+            overflow: inset ? 'hidden' : 'visible',
+          },
+          semantic?.body,
+        ]}
+      >
+        {border && !inset ? (
+          <>
+            <Divider
+              color={token.groupBorderColor}
+              style={{ position: 'absolute', top: 0, left: 0, right: 0 }}
+              thickness={token.groupBorderWidth}
+            />
+            {renderChildren()}
+            <Divider
+              color={token.groupBorderColor}
+              style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}
+              thickness={token.groupBorderWidth}
+            />
+          </>
+        ) : (
+          renderChildren()
+        )}
+      </View>
     </View>
   )
 }
