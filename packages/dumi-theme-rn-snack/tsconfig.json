@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["jest", "react", "react-dom"],
-    "noEmit": true
-  },
-  "include": ["src"]
-}
