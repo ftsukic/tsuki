@@ -65,15 +65,13 @@ describe('NoticeBar', () => {
       minHeight: token.controlHeightSM + token.paddingXXS * 2,
       paddingHorizontal: token.padding,
     })
-    expect(screen.getByText('通知').props.style).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          color: token.colorWarning,
-          fontSize: token.fontSize,
-          lineHeight: token.lineHeightXL,
-        }),
-      ]),
-    )
+    expect(StyleSheet.flatten(screen.getByText('通知').props.style)).toMatchObject({
+      color: token.colorWarning,
+      fontSize: token.fontSize,
+      includeFontPadding: false,
+      lineHeight: token.lineHeightXL,
+      textAlignVertical: 'center',
+    })
     expect(StyleSheet.flatten(screen.getByText('右侧').parent?.props.style)).toMatchObject({
       alignItems: 'center',
       justifyContent: 'center',

@@ -27,10 +27,11 @@ export function NoticeBarItem({
   styles,
   animatedStyle,
 }: NoticeBarItemProps) {
-  const textStyle =
-    mode === 'measure' || mode === 'scroll'
-      ? styles.text
-      : [styles.text, { flex: 1, flexShrink: 1 }]
+  const textStyle = [
+    styles.text,
+    { includeFontPadding: false, textAlignVertical: 'center' as const },
+    mode === 'measure' || mode === 'scroll' ? undefined : { flex: 1, flexShrink: 1 },
+  ]
 
   return (
     <Animated.View
