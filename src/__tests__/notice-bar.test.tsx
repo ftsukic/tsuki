@@ -4,16 +4,16 @@ import { ConfigProvider, getDesignToken, NoticeBar } from '..'
 import { StyleSheet, Text } from 'react-native'
 import type { TestInstance } from 'test-renderer'
 
-function findLayoutNode(root: TestInstance, position: 'absolute' | 'relative') {
+function findLayoutNode(root: TestInstance, position: 'absolute' | 'relative', index = 0) {
   const pending: TestInstance[] = [root]
-  let node: TestInstance | undefined
+  let matchIndex = 0
 
   while (pending.length > 0) {
     const candidate = pending.shift() as TestInstance
     const style = StyleSheet.flatten(candidate.props.style)
     if (typeof candidate.props.onLayout === 'function' && style?.position === position) {
-      node = candidate
-      break
+      if (matchIndex === index) return candidate
+      matchIndex += 1
     }
 
     pending.push(
@@ -21,8 +21,7 @@ function findLayoutNode(root: TestInstance, position: 'absolute' | 'relative') {
     )
   }
 
-  if (!node) throw new Error(`NoticeBar ${position} layout node was not rendered`)
-  return node
+  throw new Error(`NoticeBar ${position} layout node ${index} was not rendered`)
 }
 
 async function layout(node: TestInstance, width: number) {
@@ -78,9 +77,8 @@ describe('NoticeBar', () => {
     })
     expect(StyleSheet.flatten(screen.getByText('通知').parent?.props.style)).toMatchObject({
       alignItems: 'center',
-      bottom: 0,
       flexDirection: 'row',
-      top: 0,
+      position: 'relative',
     })
   })
 
@@ -117,7 +115,7 @@ describe('NoticeBar', () => {
     await render(<NoticeBar scrollable={false} text="单行" />)
     const root = screen.getByRole('alert')
     await layout(findLayoutNode(root, 'relative'), 100)
-    await layout(findLayoutNode(root, 'absolute'), 50)
+    await layout(findLayoutNode(root, 'relative', 1), 50)
     const ellipsized = screen.getByText('单行')
     expect(ellipsized.props.numberOfLines).toBe(1)
   })
@@ -141,7 +139,7 @@ describe('NoticeBar', () => {
 
     const root = screen.getByRole('alert')
     const wrap = findLayoutNode(root, 'relative')
-    const content = findLayoutNode(root, 'absolute')
+    const content = findLayoutNode(root, 'relative', 1)
     await layout(wrap, 50)
     await layout(content, 100)
 
@@ -157,7 +155,7 @@ describe('NoticeBar', () => {
     await render(<NoticeBar scrollable text="短" speed={100} delay={0} />)
     const root = screen.getByRole('alert')
     await layout(findLayoutNode(root, 'relative'), 100)
-    await layout(findLayoutNode(root, 'absolute'), 50)
+    await layout(findLayoutNode(root, 'relative', 1), 50)
     expect(timing).toHaveBeenCalledWith(-50, expect.objectContaining({ duration: 500 }))
   })
 
@@ -171,7 +169,7 @@ describe('NoticeBar', () => {
     )
     const staticRoot = screen.getByRole('alert')
     await layout(findLayoutNode(staticRoot, 'relative'), 100)
-    await layout(findLayoutNode(staticRoot, 'absolute'), 50)
+    await layout(findLayoutNode(staticRoot, 'relative', 1), 50)
     expect(timing).not.toHaveBeenCalled()
   })
 })

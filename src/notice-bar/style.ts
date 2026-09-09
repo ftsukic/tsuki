@@ -66,6 +66,7 @@ export function getNoticeBarStyles(
     wrap: {
       alignItems: 'center',
       flex: 1,
+      flexDirection: 'row',
       minWidth: 0,
       overflow: 'hidden',
       position: 'relative',
@@ -80,14 +81,11 @@ export function getNoticeBarStyles(
     },
     contentMeasured: {
       alignItems: 'center',
-      bottom: 0,
-      flexShrink: 0,
       flexDirection: 'row',
-      justifyContent: 'center',
-      left: 0,
+      flexShrink: 0,
+      justifyContent: 'flex-start',
       minHeight: lineHeight,
-      position: 'absolute',
-      top: 0,
+      position: 'relative',
     },
     contentFlow,
     text: {
