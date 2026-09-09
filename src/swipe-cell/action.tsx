@@ -1,13 +1,13 @@
 import { forwardRef } from 'react'
 import { Text } from 'react-native'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import { useComponentToken } from '../theme'
 import { getSwipeCellActionBackgroundColor, getSwipeCellStyles } from './style'
 import { getSwipeCellToken } from './token'
 import type { SwipeCellActionProps } from './interface'
 
 export const SwipeCellAction = forwardRef<
-  React.ComponentRef<typeof InteractionPressable>,
+  React.ComponentRef<typeof Pressable>,
   SwipeCellActionProps
 >(function SwipeCellAction(
   { children, color, backgroundColor, textColor, width, style, ...pressableProps },
@@ -23,9 +23,10 @@ export const SwipeCellAction = forwardRef<
     )
 
   return (
-    <InteractionPressable
+    <Pressable
       ref={ref}
       {...pressableProps}
+      pressStyle="opacity"
       style={({ pressed }) => [
         styles.action,
         {
@@ -36,7 +37,7 @@ export const SwipeCellAction = forwardRef<
       ]}
     >
       {content}
-    </InteractionPressable>
+    </Pressable>
   )
 })
 

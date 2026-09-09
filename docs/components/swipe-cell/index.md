@@ -76,7 +76,7 @@ import { SwipeCell, SwipeCellAction, SwipeCellGroup, useSwipeCellController } fr
 
 SwipeCell 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`。`open()` 默认展开右侧 action；如果右侧没有可测宽度，会回退到左侧 action。action 宽度由实际布局测量，拖动结束时位移严格超过对应宽度的 50% 才展开，等于或低于 50% 则关闭。
 
-组件使用 Gesture Handler 的 `Gesture.Pan()` 处理水平拖动，主体通过 Reanimated `Animated.View` 的 `translateX` 移动。关闭状态下没有可用 action 时不会响应滑动；`activeOffsetX` 和 `failOffsetY` 用于避免误抢纵向列表手势。展开后点击主体会关闭当前 cell，但不会阻止主体子组件自己的 press 事件。
+组件使用 Gesture Handler 的 `Gesture.Pan()` 处理水平拖动，主体通过 Reanimated `Animated.View` 的 `translateX` 移动；主体和 action 都复用库内置 `Pressable` 的 opacity 点击反馈。关闭状态下没有可用 action 时不会响应滑动；`activeOffsetX` 和 `failOffsetY` 用于避免误抢纵向列表手势。展开后点击主体会关闭当前 cell，但不会阻止主体子组件自己的 press 事件。
 
 `actions` 是 `rightActions` 的简写；每一项可以使用 `text`、`color` 和 `onPress`。`leftActions` 和 `rightActions` 的每一项都会独立渲染为 `SwipeCellAction`，action slot 的测量宽度是所有 action 的总宽度。传入 action 数组时，数组优先于对应的旧 `leftAction` / `rightAction`。旧的 `label` 字段继续兼容，推荐新代码使用 `text`。
 
@@ -111,7 +111,7 @@ interface SwipeCellActionItem {
 
 ### SwipeCellAction
 
-`SwipeCellAction` 是内置的 action 按钮，基于 `InteractionPressable` 渲染，适合直接作为旧版 `leftAction` 或 `rightAction` 使用，也可用于保留高级自定义 Pressable 能力。
+`SwipeCellAction` 是内置的 action 按钮，基于库内置 `Pressable` 渲染，点击时提供 opacity 反馈并接入 interaction coordinator；适合直接作为旧版 `leftAction` 或 `rightAction` 使用，也可用于保留高级自定义 Pressable 能力。
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |

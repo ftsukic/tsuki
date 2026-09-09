@@ -16,9 +16,10 @@ import type { GestureResponderEvent, LayoutChangeEvent, PressableProps } from 'r
 import { GestureDetector, Gesture } from '../gesture'
 import { Animated, useAnimatedStyle, useSharedValue, withSpring } from '../animation'
 import { scheduleOnRN } from 'react-native-worklets'
-import { InteractionPressable, useInteraction } from '../interaction'
+import { useInteraction } from '../interaction'
 import { getCellInteractionStyle } from '../cell/style'
 import { getCellToken } from '../cell/token'
+import { Pressable } from '../pressable'
 import { useComponentToken, useToken } from '../theme'
 import { SwipeCellAction } from './action'
 import { getSwipeCellStyles } from './style'
@@ -426,15 +427,16 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         testID={testID ? `${testID}-content` : undefined}
         style={[resolvedStyles.content, contentStyle, animatedContentStyle]}
       >
-        <InteractionPressable
+        <Pressable
           interactionId={cellId}
           onPressIn={handleContentPressIn}
           onPress={close}
+          pressStyle="opacity"
           testID={testID ? `${testID}-pressable` : undefined}
           style={({ pressed }) => getCellInteractionStyle(cellToken, { pressed, disabled: false })}
         >
           {children}
-        </InteractionPressable>
+        </Pressable>
       </Animated.View>
     </GestureDetector>
   )

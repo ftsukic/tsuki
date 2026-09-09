@@ -1,4 +1,5 @@
 import { SwipeCell } from '../../..'
+import { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 const messages = [
@@ -12,27 +13,73 @@ const messages = [
  * @description 微信消息列表风格的右滑 action、稳定 id 和主体点击态。
  */
 export default function SwipeCellWeChatFixture() {
+  const [pinnedIds, setPinnedIds] = useState<Set<string>>(new Set())
+  const [unreadIds, setUnreadIds] = useState<Set<string>>(new Set())
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
+
+  const visibleMessages = messages.filter((message) => !deletedIds.has(message.id))
+
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>微信消息列表</Text>
-      {messages.map((message) => (
-        <SwipeCell key={message.id} id={message.id} actions={[{ text: '删除', color: 'danger' }]}>
-          <View style={styles.row}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{message.name.slice(0, 1)}</Text>
-            </View>
-            <View style={styles.message}>
-              <View style={styles.titleRow}>
-                <Text style={styles.name}>{message.name}</Text>
-                <Text style={styles.time}>{message.time}</Text>
+      {visibleMessages.map((message) => {
+        const isPinned = pinnedIds.has(message.id)
+        const isUnread = unreadIds.has(message.id)
+
+        return (
+          <SwipeCell
+            key={message.id}
+            id={message.id}
+            actions={[
+              {
+                key: 'pin',
+                text: isPinned ? '取消置顶' : '置顶',
+                backgroundColor: '#969799',
+                onPress: () => {
+                  setPinnedIds((current) => {
+                    const next = new Set(current)
+                    if (next.has(message.id)) next.delete(message.id)
+                    else next.add(message.id)
+                    return next
+                  })
+                },
+              },
+              {
+                key: 'unread',
+                text: '未读',
+                color: 'primary',
+                onPress: () => {
+                  setUnreadIds((current) => new Set(current).add(message.id))
+                },
+              },
+              {
+                key: 'delete',
+                text: '删除',
+                color: 'danger',
+                onPress: () => {
+                  setDeletedIds((current) => new Set(current).add(message.id))
+                },
+              },
+            ]}
+          >
+            <View style={styles.row}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{message.name.slice(0, 1)}</Text>
               </View>
-              <Text numberOfLines={1} style={styles.preview}>
-                {message.preview}
-              </Text>
+              <View style={styles.message}>
+                <View style={styles.titleRow}>
+                  <Text style={styles.name}>{message.name}</Text>
+                  <Text style={styles.time}>{message.time}</Text>
+                </View>
+                <Text numberOfLines={1} style={styles.preview}>
+                  {isUnread ? '未读 · ' : ''}
+                  {message.preview}
+                </Text>
+              </View>
             </View>
-          </View>
-        </SwipeCell>
-      ))}
+          </SwipeCell>
+        )
+      })}
     </View>
   )
 }
