@@ -77,6 +77,9 @@ export const withTiming = (value, _config, callback) => {
   complete(callback)
   return value
 }
+export const withDelay = (_delay, animation) => animation
+export const withRepeat = (animation, _numberOfReps, _reverse) => animation
+export const withSequence = (...animations) => animations[animations.length - 1]
 export const cancelAnimation = () => undefined
 export const runOnJS = (callback) => callback
 

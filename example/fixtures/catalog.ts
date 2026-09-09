@@ -21,24 +21,25 @@ import ComponentOverview16 from '../../src/input/__fixtures__/overview'
 import ComponentOverview17 from '../../src/loading/__fixtures__/overview'
 import ComponentOverview18 from '../../src/motion/__fixtures__/overview'
 import ComponentOverview19 from '../../src/navbar/__fixtures__/overview'
-import ComponentOverview20 from '../../src/overlay/__fixtures__/overview'
-import ComponentOverview21 from '../../src/picker/__fixtures__/overview'
-import ComponentOverview22 from '../../src/popup/__fixtures__/overview'
-import ComponentOverview23 from '../../src/portal/__fixtures__/overview'
-import ComponentOverview24 from '../../src/pressable/__fixtures__/overview'
-import ComponentOverview25 from '../../src/progress/__fixtures__/overview'
-import ComponentOverview26 from '../../src/provider/__fixtures__/overview'
-import ComponentOverview27 from '../../src/radio/__fixtures__/overview'
-import ComponentOverview28 from '../../src/search/__fixtures__/overview'
-import ComponentOverview29 from '../../src/segmented/__fixtures__/overview'
-import ComponentOverview30 from '../../src/surface/__fixtures__/overview'
-import ComponentOverview31 from '../../src/swipe-cell/__fixtures__/overview'
-import ComponentOverview32 from '../../src/switch/__fixtures__/overview'
-import ComponentOverview33 from '../../src/tabs/__fixtures__/overview'
-import ComponentOverview34 from '../../src/text/__fixtures__/overview'
-import ComponentOverview35 from '../../src/text-input/__fixtures__/overview'
-import ComponentOverview36 from '../../src/theme/__fixtures__/overview'
-import ComponentOverview37 from '../../src/toast/__fixtures__/overview'
+import ComponentOverview20 from '../../src/notice-bar/__fixtures__/overview'
+import ComponentOverview21 from '../../src/overlay/__fixtures__/overview'
+import ComponentOverview22 from '../../src/picker/__fixtures__/overview'
+import ComponentOverview23 from '../../src/popup/__fixtures__/overview'
+import ComponentOverview24 from '../../src/portal/__fixtures__/overview'
+import ComponentOverview25 from '../../src/pressable/__fixtures__/overview'
+import ComponentOverview26 from '../../src/progress/__fixtures__/overview'
+import ComponentOverview27 from '../../src/provider/__fixtures__/overview'
+import ComponentOverview28 from '../../src/radio/__fixtures__/overview'
+import ComponentOverview29 from '../../src/search/__fixtures__/overview'
+import ComponentOverview30 from '../../src/segmented/__fixtures__/overview'
+import ComponentOverview31 from '../../src/surface/__fixtures__/overview'
+import ComponentOverview32 from '../../src/swipe-cell/__fixtures__/overview'
+import ComponentOverview33 from '../../src/switch/__fixtures__/overview'
+import ComponentOverview34 from '../../src/tabs/__fixtures__/overview'
+import ComponentOverview35 from '../../src/text/__fixtures__/overview'
+import ComponentOverview36 from '../../src/text-input/__fixtures__/overview'
+import ComponentOverview37 from '../../src/theme/__fixtures__/overview'
+import ComponentOverview38 from '../../src/toast/__fixtures__/overview'
 
 export interface ComponentFixtureEntry {
   Component: ComponentType
@@ -193,125 +194,132 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   },
   {
     Component: ComponentOverview20,
+    component: 'notice-bar',
+    description: 'NoticeBar 汇总基础、组合内容、滚动、换行、交互、禁用和主题示例。',
+    id: 'notice-bar',
+    title: 'NoticeBar',
+  },
+  {
+    Component: ComponentOverview21,
     component: 'overlay',
     description: 'Overlay 通过 selector 汇总遮罩、嵌入内容、交互和主题示例，每次只挂载一个遮罩。',
     id: 'overlay',
     title: 'Overlay',
   },
   {
-    Component: ComponentOverview21,
+    Component: ComponentOverview22,
     component: 'picker',
     description: 'Picker 汇总弹层、Toolbar、单列、多列、级联、Field 联动和纯滚轮示例。',
     id: 'picker',
     title: 'Picker',
   },
   {
-    Component: ComponentOverview22,
+    Component: ComponentOverview23,
     component: 'popup',
     description: 'Popup 通过 selector 汇总位置、交互、生命周期和主题示例，每次只挂载一个弹层。',
     id: 'popup',
     title: 'Popup',
   },
   {
-    Component: ComponentOverview23,
+    Component: ComponentOverview24,
     component: 'portal',
     description: 'Portal 通过 selector 汇总组件式和命令式挂载示例，每次只挂载一个 Portal 案例。',
     id: 'portal',
     title: 'Portal',
   },
   {
-    Component: ComponentOverview24,
+    Component: ComponentOverview25,
     component: 'pressable',
     description: '统一 Pressable 的 opacity、scale 和 none 点击反馈。',
     id: 'pressable',
     title: 'Pressable',
   },
   {
-    Component: ComponentOverview25,
+    Component: ComponentOverview26,
     component: 'progress',
     description: 'Progress supports tokenized line and circle indicators with animated updates.',
     id: 'progress',
     title: 'Progress',
   },
   {
-    Component: ComponentOverview26,
+    Component: ComponentOverview27,
     component: 'provider',
     description: 'Provider 汇总应用级主题和 Portal 上下文入口示例。',
     id: 'provider',
     title: 'Provider',
   },
   {
-    Component: ComponentOverview27,
+    Component: ComponentOverview28,
     component: 'radio',
     description: 'Radio 汇总独立选项、分组、button variant、禁用、形状、样式和主题示例。',
     id: 'radio',
     title: 'Radio',
   },
   {
-    Component: ComponentOverview28,
+    Component: ComponentOverview29,
     component: 'search',
     description: 'Search 汇总基础、布局扩展、尺寸、输入状态和联系人搜索场景。',
     id: 'search',
     title: 'Search',
   },
   {
-    Component: ComponentOverview29,
+    Component: ComponentOverview30,
     component: 'segmented',
     description: 'Segmented 汇总通知、筛选、尺寸、布局、形状和禁用示例。',
     id: 'segmented',
     title: 'Segmented',
   },
   {
-    Component: ComponentOverview30,
+    Component: ComponentOverview31,
     component: 'surface',
     description: 'Surface provides a rounded visual container for related mobile content.',
     id: 'surface',
     title: 'Surface',
   },
   {
-    Component: ComponentOverview31,
+    Component: ComponentOverview32,
     component: 'swipe-cell',
     description: 'SwipeCell 的微信消息列表、多 action、协调、列表、ref、分组和主题示例。',
     id: 'swipe-cell',
     title: 'SwipeCell',
   },
   {
-    Component: ComponentOverview32,
+    Component: ComponentOverview33,
     component: 'switch',
     description: 'Switch supports tokenized sizes, custom values, loading and async confirmation.',
     id: 'switch',
     title: 'Switch',
   },
   {
-    Component: ComponentOverview33,
+    Component: ComponentOverview34,
     component: 'tabs',
     description: 'Tabs 汇总 line、card、禁用、横向滚动和受控切换示例。',
     id: 'tabs',
     title: 'Tabs',
   },
   {
-    Component: ComponentOverview34,
+    Component: ComponentOverview35,
     component: 'text',
     description: 'Text 汇总基础文本、语义、尺寸和字重示例。',
     id: 'text',
     title: 'Text',
   },
   {
-    Component: ComponentOverview35,
+    Component: ComponentOverview36,
     component: 'text-input',
     description: 'TextInput 展示受控文本、可清除文本域和字数限制反馈。',
     id: 'text-input',
     title: 'TextInput',
   },
   {
-    Component: ComponentOverview36,
+    Component: ComponentOverview37,
     component: 'theme',
     description: 'Theme 汇总亮暗算法和组件 token 覆盖示例。',
     id: 'theme',
     title: 'Theme',
   },
   {
-    Component: ComponentOverview37,
+    Component: ComponentOverview38,
     component: 'toast',
     description: 'Toast 通过 selector 汇总类型、位置、交互和主题示例，每次只挂载一个提示案例。',
     id: 'toast',

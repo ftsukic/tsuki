@@ -17,6 +17,7 @@ order: 1
 - [FloatingPanel](/components/floating-panel)、[Grid](/components/grid)
 - [Icon](/components/icon)、[Loading](/components/loading)
 - [Navbar](/components/navbar)
+- [NoticeBar](/components/notice-bar)
 - [Overlay](/components/overlay)、[Popup](/components/popup)、[Portal](/components/portal)
 - [Picker](/components/picker)、[Progress](/components/progress)、[Provider](/components/provider)、[Radio](/components/radio)
 - [Segmented](/components/segmented)、[Surface](/components/surface)
