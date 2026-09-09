@@ -39,7 +39,8 @@ import ComponentOverview34 from '../../src/tabs/__fixtures__/overview'
 import ComponentOverview35 from '../../src/text/__fixtures__/overview'
 import ComponentOverview36 from '../../src/text-input/__fixtures__/overview'
 import ComponentOverview37 from '../../src/theme/__fixtures__/overview'
-import ComponentOverview38 from '../../src/toast/__fixtures__/overview'
+import ComponentOverview38 from '../../src/time-picker/__fixtures__/overview'
+import ComponentOverview39 from '../../src/toast/__fixtures__/overview'
 
 export interface ComponentFixtureEntry {
   Component: ComponentType
@@ -320,6 +321,13 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   },
   {
     Component: ComponentOverview38,
+    component: 'time-picker',
+    description: 'TimePicker 汇总基础时间、秒、范围、filter、formatter 和 Popup 示例。',
+    id: 'time-picker',
+    title: 'TimePicker',
+  },
+  {
+    Component: ComponentOverview39,
     component: 'toast',
     description: 'Toast 通过 selector 汇总类型、位置、交互和主题示例，每次只挂载一个提示案例。',
     id: 'toast',
