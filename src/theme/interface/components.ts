@@ -516,6 +516,29 @@ export interface NotifyToken {
   paddingVertical: number
 }
 
+export interface DropdownToken {
+  menuHeight: number
+  menuBackgroundColor: string
+  titleColor: string
+  activeColor: string
+  disabledColor: string
+  titleFontSize: number
+  titleLineHeight: number
+  titleFontFamily: string
+  arrowSize: number
+  arrowGap: number
+  optionHeight: number
+  optionPaddingHorizontal: number
+  optionFontSize: number
+  optionLineHeight: number
+  optionIconSize: number
+  contentBackgroundColor: string
+  dividerColor: string
+  overlayColor: string
+  animationDuration: number
+  zIndex: number
+}
+
 export interface ComponentTokenOverrides {
   Button?: Partial<ButtonToken>
   Cell?: Partial<CellToken>
@@ -543,6 +566,7 @@ export interface ComponentTokenOverrides {
   Switch?: Partial<SwitchToken>
   Progress?: Partial<ProgressToken>
   Notify?: Partial<NotifyToken>
+  Dropdown?: Partial<DropdownToken>
 }
 
 export interface ComponentTokenMap {
@@ -572,6 +596,7 @@ export interface ComponentTokenMap {
   Switch: SwitchToken
   Progress: ProgressToken
   Notify: NotifyToken
+  Dropdown: DropdownToken
 }
 
 export type ComponentTokenName = keyof ComponentTokenMap
