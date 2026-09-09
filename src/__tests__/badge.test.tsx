@@ -40,6 +40,10 @@ describe('Badge', () => {
     expect(screen.getByTestId('zero')).toBeTruthy()
     expect(screen.getByText('99+')).toBeTruthy()
     expect(screen.getByText('99+').props.numberOfLines).toBe(1)
+    expect(StyleSheet.flatten(screen.getByText('99+').props.style)).toMatchObject({
+      flexShrink: 0,
+      overflow: 'visible',
+    })
     expect(screen.getByText('!')).toBeTruthy()
   })
 

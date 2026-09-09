@@ -246,6 +246,7 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
                   fontFamily: token.fontFamily,
                   fontSize,
                   lineHeight: height,
+                  overflow: 'visible',
                   textAlign: 'center',
                   flexShrink: 0,
                 },
