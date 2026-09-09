@@ -29,6 +29,27 @@ export function useDerivedValue(updater) {
   return useSharedValue(updater())
 }
 
+export function useAnimatedRef() {
+  return useRef(null)
+}
+
+export function measure(ref) {
+  const node = ref?.current
+  if (!node || typeof node.getBoundingClientRect !== 'function') return null
+
+  const rect = node.getBoundingClientRect()
+  return {
+    x: rect.x,
+    y: rect.y,
+    width: rect.width,
+    height: rect.height,
+    pageX: rect.x,
+    pageY: rect.y,
+  }
+}
+
+export const runOnUI = (callback) => callback
+
 export function createAnimatedComponent(Component) {
   return Component
 }

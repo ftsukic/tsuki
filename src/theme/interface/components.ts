@@ -70,6 +70,30 @@ export interface CellToken {
   fontFamily: string
 }
 
+export interface CollapseToken {
+  headerHeight: number
+  paddingHorizontal: number
+  titleColor: string
+  titleFontSize: number
+  titleLineHeight: number
+  iconColor: string
+  iconSize: number
+  iconGap: number
+  activeColor: string
+  disabledColor: string
+  disabledOpacity: number
+  contentPaddingVertical: number
+  contentPaddingHorizontal: number
+  contentFontSize: number
+  contentLineHeight: number
+  contentTextColor: string
+  contentBackgroundColor: string
+  borderColor: string
+  borderWidth: number
+  animationDuration: number
+  fontFamily: string
+}
+
 export interface NavbarToken {
   height: number
   paddingHorizontal: number
@@ -488,6 +512,7 @@ export interface NotifyToken {
 export interface ComponentTokenOverrides {
   Button?: Partial<ButtonToken>
   Cell?: Partial<CellToken>
+  Collapse?: Partial<CollapseToken>
   Navbar?: Partial<NavbarToken>
   SwipeCell?: Partial<SwipeCellToken>
   Input?: Partial<InputToken>
@@ -516,6 +541,7 @@ export interface ComponentTokenOverrides {
 export interface ComponentTokenMap {
   Button: ButtonToken
   Cell: CellToken
+  Collapse: CollapseToken
   Navbar: NavbarToken
   SwipeCell: SwipeCellToken
   Input: InputToken

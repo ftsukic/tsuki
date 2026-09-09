@@ -8,36 +8,37 @@ import ComponentOverview3 from '../../src/bottom-bar/__fixtures__/overview'
 import ComponentOverview4 from '../../src/button/__fixtures__/overview'
 import ComponentOverview5 from '../../src/cell/__fixtures__/overview'
 import ComponentOverview6 from '../../src/checkbox/__fixtures__/overview'
-import ComponentOverview7 from '../../src/dialog/__fixtures__/overview'
-import ComponentOverview8 from '../../src/divider/__fixtures__/overview'
-import ComponentOverview9 from '../../src/empty/__fixtures__/overview'
-import ComponentOverview10 from '../../src/field/__fixtures__/overview'
-import ComponentOverview11 from '../../src/floating-panel/__fixtures__/overview'
-import ComponentOverview12 from '../../src/gesture/__fixtures__/overview'
-import ComponentOverview13 from '../../src/grid/__fixtures__/overview'
-import ComponentOverview14 from '../../src/icon/__fixtures__/overview'
-import ComponentOverview15 from '../../src/input/__fixtures__/overview'
-import ComponentOverview16 from '../../src/loading/__fixtures__/overview'
-import ComponentOverview17 from '../../src/motion/__fixtures__/overview'
-import ComponentOverview18 from '../../src/navbar/__fixtures__/overview'
-import ComponentOverview19 from '../../src/overlay/__fixtures__/overview'
-import ComponentOverview20 from '../../src/picker/__fixtures__/overview'
-import ComponentOverview21 from '../../src/popup/__fixtures__/overview'
-import ComponentOverview22 from '../../src/portal/__fixtures__/overview'
-import ComponentOverview23 from '../../src/pressable/__fixtures__/overview'
-import ComponentOverview24 from '../../src/progress/__fixtures__/overview'
-import ComponentOverview25 from '../../src/provider/__fixtures__/overview'
-import ComponentOverview26 from '../../src/radio/__fixtures__/overview'
-import ComponentOverview27 from '../../src/search/__fixtures__/overview'
-import ComponentOverview28 from '../../src/segmented/__fixtures__/overview'
-import ComponentOverview29 from '../../src/surface/__fixtures__/overview'
-import ComponentOverview30 from '../../src/swipe-cell/__fixtures__/overview'
-import ComponentOverview31 from '../../src/switch/__fixtures__/overview'
-import ComponentOverview32 from '../../src/tabs/__fixtures__/overview'
-import ComponentOverview33 from '../../src/text/__fixtures__/overview'
-import ComponentOverview34 from '../../src/text-input/__fixtures__/overview'
-import ComponentOverview35 from '../../src/theme/__fixtures__/overview'
-import ComponentOverview36 from '../../src/toast/__fixtures__/overview'
+import ComponentOverview7 from '../../src/collapse/__fixtures__/overview'
+import ComponentOverview8 from '../../src/dialog/__fixtures__/overview'
+import ComponentOverview9 from '../../src/divider/__fixtures__/overview'
+import ComponentOverview10 from '../../src/empty/__fixtures__/overview'
+import ComponentOverview11 from '../../src/field/__fixtures__/overview'
+import ComponentOverview12 from '../../src/floating-panel/__fixtures__/overview'
+import ComponentOverview13 from '../../src/gesture/__fixtures__/overview'
+import ComponentOverview14 from '../../src/grid/__fixtures__/overview'
+import ComponentOverview15 from '../../src/icon/__fixtures__/overview'
+import ComponentOverview16 from '../../src/input/__fixtures__/overview'
+import ComponentOverview17 from '../../src/loading/__fixtures__/overview'
+import ComponentOverview18 from '../../src/motion/__fixtures__/overview'
+import ComponentOverview19 from '../../src/navbar/__fixtures__/overview'
+import ComponentOverview20 from '../../src/overlay/__fixtures__/overview'
+import ComponentOverview21 from '../../src/picker/__fixtures__/overview'
+import ComponentOverview22 from '../../src/popup/__fixtures__/overview'
+import ComponentOverview23 from '../../src/portal/__fixtures__/overview'
+import ComponentOverview24 from '../../src/pressable/__fixtures__/overview'
+import ComponentOverview25 from '../../src/progress/__fixtures__/overview'
+import ComponentOverview26 from '../../src/provider/__fixtures__/overview'
+import ComponentOverview27 from '../../src/radio/__fixtures__/overview'
+import ComponentOverview28 from '../../src/search/__fixtures__/overview'
+import ComponentOverview29 from '../../src/segmented/__fixtures__/overview'
+import ComponentOverview30 from '../../src/surface/__fixtures__/overview'
+import ComponentOverview31 from '../../src/swipe-cell/__fixtures__/overview'
+import ComponentOverview32 from '../../src/switch/__fixtures__/overview'
+import ComponentOverview33 from '../../src/tabs/__fixtures__/overview'
+import ComponentOverview34 from '../../src/text/__fixtures__/overview'
+import ComponentOverview35 from '../../src/text-input/__fixtures__/overview'
+import ComponentOverview36 from '../../src/theme/__fixtures__/overview'
+import ComponentOverview37 from '../../src/toast/__fixtures__/overview'
 
 export interface ComponentFixtureEntry {
   Component: ComponentType
@@ -99,34 +100,41 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   },
   {
     Component: ComponentOverview7,
+    component: 'collapse',
+    description: 'Collapse 的基础、手风琴、默认展开、禁用、受控和主题示例。',
+    id: 'collapse',
+    title: 'Collapse',
+  },
+  {
+    Component: ComponentOverview8,
     component: 'dialog',
     description: 'Dialog 通过 selector 汇总各种交互和样式示例，每次只挂载一个浮层。',
     id: 'dialog',
     title: 'Dialog',
   },
   {
-    Component: ComponentOverview8,
+    Component: ComponentOverview9,
     component: 'divider',
     description: 'Divider 的横向 hairline、颜色、厚度和左右 inset 示例。',
     id: 'divider',
     title: 'Divider',
   },
   {
-    Component: ComponentOverview9,
+    Component: ComponentOverview10,
     component: 'empty',
     description: 'Empty 汇总默认空状态、描述、图片、底部操作区域和主题定制示例。',
     id: 'empty',
     title: 'Empty',
   },
   {
-    Component: ComponentOverview10,
+    Component: ComponentOverview11,
     component: 'field',
     description: 'Field 汇总标签、必填标记、描述、错误和警告状态。',
     id: 'field',
     title: 'Field',
   },
   {
-    Component: ComponentOverview11,
+    Component: ComponentOverview12,
     component: 'floating-panel',
     description:
       'FloatingPanel 通过 selector 汇总拖动、锚点、安全区和主题示例，每次只挂载一个面板。',
@@ -134,35 +142,35 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
     title: 'FloatingPanel',
   },
   {
-    Component: ComponentOverview12,
+    Component: ComponentOverview13,
     component: 'gesture',
     description: 'Gesture Handler 与 Reanimated 的基础手势和 UI thread 动画示例。',
     id: 'gesture',
     title: 'Gesture',
   },
   {
-    Component: ComponentOverview13,
+    Component: ComponentOverview14,
     component: 'grid',
     description: 'Grid 提供 Vant Mobile 语义的图标、文字和成员操作网格。',
     id: 'grid',
     title: 'Grid',
   },
   {
-    Component: ComponentOverview14,
+    Component: ComponentOverview15,
     component: 'icon',
     description: 'Icon 展示图标颜色、尺寸和可触摸图标。',
     id: 'icon',
     title: 'Icon',
   },
   {
-    Component: ComponentOverview15,
+    Component: ComponentOverview16,
     component: 'input',
     description: 'Input 汇总基础、密码、数字和多行输入模式。',
     id: 'input',
     title: 'Input',
   },
   {
-    Component: ComponentOverview16,
+    Component: ComponentOverview17,
     component: 'loading',
     description:
       'Loading supports distinct circular and spinner indicators, text, layout, and theme slots.',
@@ -170,140 +178,140 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
     title: 'Loading',
   },
   {
-    Component: ComponentOverview17,
+    Component: ComponentOverview18,
     component: 'motion',
     description: '统一动画 Hook 和 preset 的可视化验证。',
     id: 'motion',
     title: 'Motion',
   },
   {
-    Component: ComponentOverview18,
+    Component: ComponentOverview19,
     component: 'navbar',
     description: 'Vant-style Navbar title, left text and right action examples.',
     id: 'navbar',
     title: 'Navbar',
   },
   {
-    Component: ComponentOverview19,
+    Component: ComponentOverview20,
     component: 'overlay',
     description: 'Overlay 通过 selector 汇总遮罩、嵌入内容、交互和主题示例，每次只挂载一个遮罩。',
     id: 'overlay',
     title: 'Overlay',
   },
   {
-    Component: ComponentOverview20,
+    Component: ComponentOverview21,
     component: 'picker',
     description: 'Picker 汇总弹层、Toolbar、单列、多列、级联、Field 联动和纯滚轮示例。',
     id: 'picker',
     title: 'Picker',
   },
   {
-    Component: ComponentOverview21,
+    Component: ComponentOverview22,
     component: 'popup',
     description: 'Popup 通过 selector 汇总位置、交互、生命周期和主题示例，每次只挂载一个弹层。',
     id: 'popup',
     title: 'Popup',
   },
   {
-    Component: ComponentOverview22,
+    Component: ComponentOverview23,
     component: 'portal',
     description: 'Portal 通过 selector 汇总组件式和命令式挂载示例，每次只挂载一个 Portal 案例。',
     id: 'portal',
     title: 'Portal',
   },
   {
-    Component: ComponentOverview23,
+    Component: ComponentOverview24,
     component: 'pressable',
     description: '统一 Pressable 的 opacity、scale 和 none 点击反馈。',
     id: 'pressable',
     title: 'Pressable',
   },
   {
-    Component: ComponentOverview24,
+    Component: ComponentOverview25,
     component: 'progress',
     description: 'Progress supports tokenized line and circle indicators with animated updates.',
     id: 'progress',
     title: 'Progress',
   },
   {
-    Component: ComponentOverview25,
+    Component: ComponentOverview26,
     component: 'provider',
     description: 'Provider 汇总应用级主题和 Portal 上下文入口示例。',
     id: 'provider',
     title: 'Provider',
   },
   {
-    Component: ComponentOverview26,
+    Component: ComponentOverview27,
     component: 'radio',
     description: 'Radio 汇总独立选项、分组、button variant、禁用、形状、样式和主题示例。',
     id: 'radio',
     title: 'Radio',
   },
   {
-    Component: ComponentOverview27,
+    Component: ComponentOverview28,
     component: 'search',
     description: 'Search 汇总基础、布局扩展、尺寸、输入状态和联系人搜索场景。',
     id: 'search',
     title: 'Search',
   },
   {
-    Component: ComponentOverview28,
+    Component: ComponentOverview29,
     component: 'segmented',
     description: 'Segmented 汇总通知、筛选、尺寸、布局、形状和禁用示例。',
     id: 'segmented',
     title: 'Segmented',
   },
   {
-    Component: ComponentOverview29,
+    Component: ComponentOverview30,
     component: 'surface',
     description: 'Surface provides a rounded visual container for related mobile content.',
     id: 'surface',
     title: 'Surface',
   },
   {
-    Component: ComponentOverview30,
+    Component: ComponentOverview31,
     component: 'swipe-cell',
     description: 'SwipeCell 的基础、多 action、协调、列表、ref、分组和主题示例。',
     id: 'swipe-cell',
     title: 'SwipeCell',
   },
   {
-    Component: ComponentOverview31,
+    Component: ComponentOverview32,
     component: 'switch',
     description: 'Switch supports tokenized sizes, custom values, loading and async confirmation.',
     id: 'switch',
     title: 'Switch',
   },
   {
-    Component: ComponentOverview32,
+    Component: ComponentOverview33,
     component: 'tabs',
     description: 'Tabs 汇总 line、card、禁用、横向滚动和受控切换示例。',
     id: 'tabs',
     title: 'Tabs',
   },
   {
-    Component: ComponentOverview33,
+    Component: ComponentOverview34,
     component: 'text',
     description: 'Text 汇总基础文本、语义、尺寸和字重示例。',
     id: 'text',
     title: 'Text',
   },
   {
-    Component: ComponentOverview34,
+    Component: ComponentOverview35,
     component: 'text-input',
     description: 'TextInput 展示受控文本、可清除文本域和字数限制反馈。',
     id: 'text-input',
     title: 'TextInput',
   },
   {
-    Component: ComponentOverview35,
+    Component: ComponentOverview36,
     component: 'theme',
     description: 'Theme 汇总亮暗算法和组件 token 覆盖示例。',
     id: 'theme',
     title: 'Theme',
   },
   {
-    Component: ComponentOverview36,
+    Component: ComponentOverview37,
     component: 'toast',
     description: 'Toast 通过 selector 汇总类型、位置、交互和主题示例，每次只挂载一个提示案例。',
     id: 'toast',
