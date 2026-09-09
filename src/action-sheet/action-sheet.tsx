@@ -3,7 +3,7 @@ import { Text, View } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import type { ReactNode } from 'react'
 import type { StyleProp, TextStyle } from 'react-native'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import { Loading } from '../loading'
 import { PopupContent } from '../popup/popup'
 import { Portal } from '../portal'
@@ -106,11 +106,12 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
       ]
 
       return (
-        <InteractionPressable
+        <Pressable
           key={index}
           accessibilityRole="button"
           accessibilityState={{ busy: action.loading === true, disabled }}
           disabled={disabled}
+          pressStyle="none"
           onPress={() => {
             try {
               action.onPress?.()
@@ -143,7 +144,7 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
               ? renderContent(action.description, descriptionStyle)
               : null}
           </View>
-        </InteractionPressable>
+        </Pressable>
       )
     }
 
@@ -194,8 +195,9 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
                 style={[resolved.cancelPanel, semantic?.cancelPanel]}
                 testID="action-sheet-cancel-panel"
               >
-                <InteractionPressable
+                <Pressable
                   accessibilityRole="button"
+                  pressStyle="none"
                   onPress={() => {
                     try {
                       onCancelAction?.()
@@ -229,7 +231,7 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
                       />
                     </>
                   )}
-                </InteractionPressable>
+                </Pressable>
               </View>
             </>
           ) : null}

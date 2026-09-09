@@ -1,0 +1,3 @@
+export const MOTION_DEFAULT_DURATION = 200
+export const MOTION_DEFAULT_DISTANCE = 32
+export const MOTION_DEFAULT_SCALE = 0.92

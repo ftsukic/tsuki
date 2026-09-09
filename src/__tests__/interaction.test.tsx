@@ -162,6 +162,7 @@ describe('InteractionPressable', () => {
     expect(StyleSheet.flatten(screen.getByTestId('function-style').props.style)).toMatchObject({
       opacity: 0.5,
     })
+    expect(typeof screen.getByTestId('function-style').props.style).not.toBe('function')
     expect(style).toHaveBeenCalledWith({ pressed: true })
   })
 

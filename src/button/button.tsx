@@ -1,5 +1,5 @@
 import { Loading } from '../loading'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import { ButtonGroupContext } from './context'
@@ -15,7 +15,7 @@ function isTextContent(value: ReactNode): value is string | number {
   return typeof value === 'string' || typeof value === 'number'
 }
 
-const InternalButton = forwardRef<React.ElementRef<typeof InteractionPressable>, ButtonProps>(
+const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonProps>(
   function Button(
     {
       children,
@@ -81,11 +81,12 @@ const InternalButton = forwardRef<React.ElementRef<typeof InteractionPressable>,
     }
 
     return (
-      <InteractionPressable
+      <Pressable
         ref={ref}
         {...pressableProps}
         accessibilityRole={pressableProps.accessibilityRole ?? 'button'}
         disabled={isDisabled}
+        pressStyle="none"
         onPress={onPress}
         onPressDebounceWait={onPressDebounceWait}
         style={({ pressed }) => {
@@ -147,7 +148,7 @@ const InternalButton = forwardRef<React.ElementRef<typeof InteractionPressable>,
             </>
           )
         }}
-      </InteractionPressable>
+      </Pressable>
     )
   },
 )

@@ -13,5 +13,16 @@ module.exports = {
       },
     ],
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!((jest-)?react-native|@react-native|react-native-gesture-handler|react-native-reanimated|react-native-worklets)/)',
+  ],
+  setupFiles: ['<rootDir>/node_modules/react-native-gesture-handler/jestSetup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
+  moduleNameMapper: {
+    '^react$': '<rootDir>/node_modules/react',
+    '^react/jsx-runtime$': '<rootDir>/node_modules/react/jsx-runtime',
+    '^react-native$': '<rootDir>/node_modules/react-native',
+    '^react-native-safe-area-context$': '<rootDir>/node_modules/react-native-safe-area-context',
+  },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
 }

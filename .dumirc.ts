@@ -30,6 +30,11 @@ export default defineConfig({
   alias: {
     '@ftsukic/tsuki$': path.join(sourceRoot, 'index.ts'),
     'react-native$': path.join(__dirname, '.umi-patch/react-native.js'),
+    'react-native-gesture-handler$': path.join(
+      __dirname,
+      '.umi-patch/react-native-gesture-handler.js',
+    ),
+    'react-native-reanimated$': path.join(__dirname, '.umi-patch/react-native-reanimated.js'),
     'react-native-svg$': path.join(__dirname, '.umi-patch/react-native-svg.js'),
     'react-native/Libraries/Utilities/codegenNativeComponent$': path.join(
       __dirname,

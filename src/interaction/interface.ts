@@ -1,4 +1,10 @@
-import type { PressableProps, ViewProps } from 'react-native'
+import type {
+  PressableProps,
+  PressableStateCallbackType,
+  StyleProp,
+  ViewProps,
+  ViewStyle,
+} from 'react-native'
 
 export type InteractionPressHandler = NonNullable<PressableProps['onPress']>
 
@@ -7,16 +13,22 @@ export interface InteractionState {
   disabled: boolean
 }
 
+export interface InteractionPressableState extends PressableStateCallbackType {
+  /** Available on React Native Web; omitted on native platforms. */
+  hovered?: boolean
+}
+
 export interface InteractionPressableProps extends Omit<
   PressableProps,
-  'children' | 'disabled' | 'onPress'
+  'children' | 'disabled' | 'onPress' | 'style'
 > {
-  children?: PressableProps['children']
+  children?: React.ReactNode | ((state: InteractionPressableState) => React.ReactNode)
   disabled?: boolean
   onPress?: PressableProps['onPress']
   onPressDebounceWait?: number
   /** Identifies a press that belongs to the current interaction owner. */
   interactionId?: string
+  style?: StyleProp<ViewStyle> | ((state: InteractionPressableState) => StyleProp<ViewStyle>)
 }
 
 export interface UseInteractionPressOptions {

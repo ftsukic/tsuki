@@ -5,6 +5,7 @@ export type { ActiveSwipeCell, InteractionContextValue } from './context'
 export type { InteractionCoordinatorProps } from './coordinator'
 export type {
   InteractionPressHandler,
+  InteractionPressableState,
   InteractionPressableProps,
   InteractionState,
   PanGestureAxis,
