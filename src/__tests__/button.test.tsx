@@ -65,11 +65,54 @@ function findNodeWithStyle(
   return undefined
 }
 
+function expectNoTextChildrenInsideViews(node: JsonNode | null): void {
+  if (node === null || typeof node === 'string') return
+
+  if (node.type === 'View') {
+    expect(node.children.some((child) => typeof child === 'string')).toBe(false)
+  }
+
+  node.children.forEach((child) => {
+    if (child !== null && typeof child !== 'string') {
+      expectNoTextChildrenInsideViews(child)
+    }
+  })
+}
+
 function getButtonStyle(testID: string) {
   return StyleSheet.flatten(screen.getByTestId(testID).props.style)
 }
 
 describe('Button', () => {
+  it('wraps text nodes from arrays and fragments before rendering them in Views', async () => {
+    const { toJSON } = await render(
+      <ConfigProvider>
+        <Button
+          testID="mixed-content"
+          icon={
+            <>
+              图标前
+              <Text>图标中</Text>
+              图标后
+            </>
+          }
+        >
+          文本前
+          <Text>文本中</Text>
+          文本后
+        </Button>
+      </ConfigProvider>,
+    )
+
+    expect(screen.getByText('文本前')).toBeTruthy()
+    expect(screen.getByText('文本中')).toBeTruthy()
+    expect(screen.getByText('文本后')).toBeTruthy()
+    expect(screen.getByText('图标前')).toBeTruthy()
+    expect(screen.getByText('图标中')).toBeTruthy()
+    expect(screen.getByText('图标后')).toBeTruthy()
+    expectNoTextChildrenInsideViews(toJSON())
+  })
+
   it('renders Vant variants and invokes onPress', async () => {
     const onPress = jest.fn()
     await render(

@@ -7,12 +7,31 @@ import { ButtonGroup, getButtonGroupConnectedStyle } from './group'
 import { getButtonStyles } from './style'
 import { getButtonToken } from './token'
 import type { ButtonProps, ButtonStyleState } from './interface'
-import { forwardRef, useContext } from 'react'
+import { Fragment, forwardRef, isValidElement, useContext } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import type { ReactNode } from 'react'
 
 function isTextContent(value: ReactNode): value is string | number {
   return typeof value === 'string' || typeof value === 'number'
+}
+
+function renderViewContent(
+  value: ReactNode,
+  renderText: (text: string | number) => ReactNode,
+): ReactNode {
+  if (isTextContent(value)) return renderText(value)
+
+  if (Array.isArray(value)) {
+    return value.map((child, index) => (
+      <Fragment key={index}>{renderViewContent(child, renderText)}</Fragment>
+    ))
+  }
+
+  if (isValidElement<{ children?: ReactNode }>(value) && value.type === Fragment) {
+    return renderViewContent(value.props.children, renderText)
+  }
+
+  return value
 }
 
 const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonProps>(
@@ -106,12 +125,19 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
           const resolved = getButtonStyles(themeToken, buttonToken, buttonProps, state)
           const semantic = resolveStyles(styles, { props: buttonProps, state })
           const content = loading ? loadingText : children
+          const renderedContent = renderViewContent(content, (text) => (
+            <Text style={[resolved.label, semantic?.label, semantic?.content]}>{text}</Text>
+          ))
 
           return (
             <>
               <View style={[resolved.contentContainer, semantic?.contentContainer]}>
                 {icon && iconPosition === 'left' ? (
-                  <View style={[resolved.icon, semantic?.icon]}>{icon}</View>
+                  <View style={[resolved.icon, semantic?.icon]}>
+                    {renderViewContent(icon, (text) => (
+                      <Text>{text}</Text>
+                    ))}
+                  </View>
                 ) : null}
                 {loading ? (
                   <View style={[resolved.icon, semantic?.icon]}>
@@ -123,17 +149,13 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
                     />
                   </View>
                 ) : null}
-                {content !== undefined ? (
-                  isTextContent(content) ? (
-                    <Text style={[resolved.label, semantic?.label, semantic?.content]}>
-                      {content}
-                    </Text>
-                  ) : (
-                    content
-                  )
-                ) : null}
+                {content !== undefined ? renderedContent : null}
                 {icon && iconPosition === 'right' ? (
-                  <View style={[resolved.icon, semantic?.icon]}>{icon}</View>
+                  <View style={[resolved.icon, semantic?.icon]}>
+                    {renderViewContent(icon, (text) => (
+                      <Text>{text}</Text>
+                    ))}
+                  </View>
                 ) : null}
               </View>
               {pressed && !isDisabled && resolvedVariant !== 'text' ? (
