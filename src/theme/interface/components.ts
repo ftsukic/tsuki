@@ -10,6 +10,7 @@ export interface ButtonToken {
   borderRadiusSM: number
   borderRadius: number
   borderRadiusLG: number
+  borderRadiusRound: number
   paddingHorizontalXS: number
   paddingHorizontalSM: number
   paddingHorizontal: number
@@ -18,40 +19,25 @@ export interface ButtonToken {
   contentFontSizeSM: number
   contentFontSize: number
   contentFontSizeLG: number
-  primaryColor: string
-  primaryBackgroundColor: string
-  primaryBorderColor: string
-  primaryPlainBackgroundColor: string
-  primaryFilledBackgroundColor: string
-  defaultColor: string
-  defaultBackgroundColor: string
-  defaultBorderColor: string
-  defaultFilledBackgroundColor: string
-  successColor: string
-  successBackgroundColor: string
-  successBorderColor: string
-  successFilledBackgroundColor: string
-  warningColor: string
-  warningBackgroundColor: string
-  warningBorderColor: string
-  warningFilledBackgroundColor: string
-  dangerColor: string
-  dangerBackgroundColor: string
-  dangerBorderColor: string
-  dangerFilledBackgroundColor: string
   borderWidth: number
   activeOpacity: number
+  pressedOverlayColor: string
   disabledOpacity: number
   iconGap: number
+  fontFamily: string
 }
 
 export interface CellToken {
   backgroundColor: string
   activeColor: string
   borderColor: string
+  groupBackgroundColor: string
+  groupBorderColor: string
+  groupBorderWidth: number
+  dividerWidth: number
   paddingHorizontal: number
-  paddingMD: number
   paddingVertical: number
+  largePaddingVertical: number
   minHeight: number
   largeMinHeight: number
   titleColor: string
@@ -62,9 +48,11 @@ export interface CellToken {
   labelFontSize: number
   extraFontSize: number
   extraLineHeight: number
-  valueMinWidth: number
   lineHeight: number
   lineHeightSM: number
+  labelMarginTop: number
+  largeTitleFontSize: number
+  largeLabelFontSize: number
   iconColor: string
   iconSize: number
   iconGap: number
@@ -72,7 +60,37 @@ export interface CellToken {
   requiredWidth: number
   groupTitleColor: string
   groupTitleFontSize: number
+  groupTitleLineHeight: number
+  groupTitlePaddingHorizontal: number
+  groupTitlePaddingVertical: number
+  groupInsetTitlePaddingHorizontal: number
+  groupInsetTitlePaddingVertical: number
+  groupInsetMarginHorizontal: number
   insetRadius: number
+  fontFamily: string
+}
+
+export interface NavbarToken {
+  height: number
+  paddingHorizontal: number
+  titleFontSize: number
+  titleColor: string
+  actionFontSize: number
+  actionColor: string
+  iconSize: number
+  borderColor: string
+}
+
+export interface SwipeCellToken {
+  backgroundColor: string
+  actionBackgroundColor: string
+  actionTextColor: string
+  actionMinWidth: number
+  actionPaddingHorizontal: number
+  actionFontSize: number
+  actionLineHeight: number
+  animationDuration: number
+  fontFamily: string
 }
 
 export interface InputToken {
@@ -115,6 +133,30 @@ export interface FieldToken {
   height: number
 }
 
+export interface SearchToken {
+  search_height_small: number
+  search_height_medium: number
+  search_height_large: number
+  search_background_color: string
+  search_text_color: string
+  search_placeholder_color: string
+  search_icon_color: string
+  search_clear_color: string
+  search_border_radius: number
+  search_padding_horizontal: number
+  search_prefix_spacing: number
+  search_suffix_spacing: number
+  search_icon_size: number
+  search_clear_size: number
+  search_font_size: number
+  search_line_height: number
+  search_font_family: string
+  search_disabled_background_color: string
+  search_disabled_text_color: string
+  search_disabled_opacity: number
+  search_pressed_opacity: number
+}
+
 export interface AvatarToken {
   containerSizeSM: number
   containerSize: number
@@ -132,6 +174,16 @@ export interface AvatarToken {
   groupBorderWidth: number
   groupOverlapping: number
   groupSpace: number
+  fontFamily: string
+}
+
+export interface EmptyToken {
+  empty_image_size: number
+  empty_description_margin_top: number
+  empty_description_padding_horizontal: number
+  empty_description_color: string
+  empty_description_font_size: number
+  empty_footer_margin_top: number
 }
 
 export interface BadgeToken {
@@ -154,6 +206,8 @@ export interface BadgeToken {
   defaultColor: string
   errorColor: string
   warningColor: string
+  statusGap: number
+  fontFamily: string
 }
 
 export interface FloatingPanelToken {
@@ -175,13 +229,81 @@ export interface RadioToken {
   borderColor: string
   checkedColor: string
   labelColor: string
-  disabledColor: string
+  disabledBorderColor: string
+  disabledBackgroundColor: string
+  disabledCheckedBackgroundColor: string
+  disabledMarkColor: string
   disabledLabelColor: string
   fontSize: number
   lineHeight: number
   gap: number
   activeOpacity: number
   disabledOpacity: number
+  fontFamily: string
+  buttonHeight: number
+  buttonPaddingHorizontal: number
+  buttonBorderRadius: number
+  buttonBackground: string
+  buttonDisabledBackground: string
+  buttonCheckedLabelColor: string
+}
+
+export interface CheckboxToken {
+  size: number
+  borderRadius: number
+  borderWidth: number
+  borderColor: string
+  checkedBackground: string
+  checkedIconColor: string
+  disabledColor: string
+  disabledBackground: string
+  labelColor: string
+  gap: number
+  groupGap: number
+  activeOpacity: number
+  disabledOpacity: number
+  fontSize: number
+  lineHeight: number
+  fontFamily: string
+  buttonHeight: number
+  buttonPaddingHorizontal: number
+  buttonBorderRadius: number
+  buttonBackground: string
+  buttonDisabledBackground: string
+}
+
+export interface TabsToken {
+  height: number
+  paddingHorizontal: number
+  fontSize: number
+  activeColor: string
+  inactiveColor: string
+  disabledColor: string
+  indicatorHeight: number
+  indicatorWidth: number
+  borderWidth: number
+  borderColor: string
+  cardRadius: number
+  cardBorderColor: string
+  cardBackgroundColor: string
+  cardActiveBackgroundColor: string
+  cardActiveTextColor: string
+  activeOpacity: number
+  disabledOpacity: number
+  animationDuration: number
+  fontFamily: string
+}
+
+export interface SegmentedToken {
+  activeBackgroundColor: string
+  activeColor: string
+  backgroundColor: string
+  borderColor: string
+  borderWidth: number
+  disabledColor: string
+  animationDuration: number
+  padding: number
+  fontFamily: string
 }
 
 export interface DialogToken {
@@ -215,6 +337,7 @@ export interface DialogToken {
   footerPaddingVertical: number
   animationDuration: number
   zIndex: number
+  fontFamily: string
 }
 
 export interface OverlayToken {
@@ -231,6 +354,61 @@ export interface PopupToken {
   zIndex: number
 }
 
+export interface PickerToken {
+  picker_toolbar_height: number
+  picker_item_height: number
+  picker_visible_item_count: number
+  picker_item_font_size: number
+  picker_item_line_height: number
+  picker_text_color: string
+  picker_active_text_color: string
+  picker_indicator_color: string
+  picker_mask_color: string
+  picker_background_color: string
+  picker_toolbar_button_font_size: number
+  picker_toolbar_button_line_height: number
+  picker_toolbar_padding_horizontal: number
+  picker_border_width: number
+  picker_item_padding_horizontal: number
+  picker_item_inactive_opacity: number
+  picker_item_inactive_scale: number
+  picker_mask_opacities: readonly number[]
+  picker_font_family: string
+}
+
+export interface ActionSheetToken {
+  backgroundColor: string
+  actionActiveBackgroundColor: string
+  cancelActiveBackgroundColor: string
+  titleColor: string
+  actionColor: string
+  descriptionColor: string
+  dangerColor: string
+  disabledColor: string
+  loadingColor: string
+  dividerColor: string
+  borderRadius: number
+  titleFontSize: number
+  titleLineHeight: number
+  actionFontSize: number
+  actionLineHeight: number
+  descriptionFontSize: number
+  descriptionLineHeight: number
+  titleHeight: number
+  actionHeight: number
+  titlePaddingHorizontal: number
+  titlePaddingVertical: number
+  actionPaddingHorizontal: number
+  actionPaddingVertical: number
+  descriptionMarginTop: number
+  cancelGap: number
+  cancelGapColor: string
+  cancelPaddingVertical: number
+  animationDuration: number
+  zIndex: number
+  fontFamily: string
+}
+
 export interface ToastToken {
   maxWidth: DimensionValue
   fontSize: number
@@ -243,45 +421,124 @@ export interface ToastToken {
   textMinWidth: number
   textPaddingVertical: number
   textPaddingHorizontal: number
-  defaultPadding: number
+  defaultPaddingHorizontal: number
+  defaultPaddingVertical: number
   defaultWidth: number
   defaultMinHeight: number
+  iconTextGap: number
   positionTopDistance: DimensionValue
   positionBottomDistance: DimensionValue
   overlayColor: string
   duration: number
   animationDuration: number
   zIndex: number
+  fontFamily: string
+}
+
+export interface LoadingToken {
+  defaultSize: number
+  defaultColor: string
+  textColor: string
+  textFontSize: number
+  textGap: number
+  animationDuration: number
+}
+
+export interface SwitchToken {
+  smallWidth: number
+  smallHeight: number
+  mediumWidth: number
+  mediumHeight: number
+  largeWidth: number
+  largeHeight: number
+  thumbInset: number
+  activeColor: string
+  inactiveColor: string
+  thumbColor: string
+  loadingColor: string
+  disabledOpacity: number
+  activeOpacity: number
+  animationDuration: number
+}
+
+export interface ProgressToken {
+  progress_height: number
+  progress_track_color: string
+  progress_color: string
+  progress_circle_size: number
+  progress_circle_stroke_width: number
+  progress_pivot_font_size: number
+  progress_pivot_color: string
+  progress_animation_duration: number
+}
+
+export interface NotifyToken {
+  primaryBackgroundColor: string
+  successBackgroundColor: string
+  errorBackgroundColor: string
+  warningBackgroundColor: string
+  textColor: string
+  fontFamily: string
+  fontSize: number
+  lineHeight: number
+  paddingHorizontal: number
+  paddingVertical: number
 }
 
 export interface ComponentTokenOverrides {
   Button?: Partial<ButtonToken>
   Cell?: Partial<CellToken>
+  Navbar?: Partial<NavbarToken>
+  SwipeCell?: Partial<SwipeCellToken>
   Input?: Partial<InputToken>
   Field?: Partial<FieldToken>
+  Search?: Partial<SearchToken>
   Radio?: Partial<RadioToken>
+  Checkbox?: Partial<CheckboxToken>
+  Tabs?: Partial<TabsToken>
+  Segmented?: Partial<SegmentedToken>
   Avatar?: Partial<AvatarToken>
+  Empty?: Partial<EmptyToken>
   Badge?: Partial<BadgeToken>
   FloatingPanel?: Partial<FloatingPanelToken>
   Dialog?: Partial<DialogToken>
   Overlay?: Partial<OverlayToken>
   Popup?: Partial<PopupToken>
+  Picker?: Partial<PickerToken>
+  ActionSheet?: Partial<ActionSheetToken>
   Toast?: Partial<ToastToken>
+  Loading?: Partial<LoadingToken>
+  Switch?: Partial<SwitchToken>
+  Progress?: Partial<ProgressToken>
+  Notify?: Partial<NotifyToken>
 }
 
 export interface ComponentTokenMap {
   Button: ButtonToken
   Cell: CellToken
+  Navbar: NavbarToken
+  SwipeCell: SwipeCellToken
   Input: InputToken
   Field: FieldToken
+  Search: SearchToken
   Radio: RadioToken
+  Checkbox: CheckboxToken
+  Tabs: TabsToken
+  Segmented: SegmentedToken
   Avatar: AvatarToken
+  Empty: EmptyToken
   Badge: BadgeToken
   FloatingPanel: FloatingPanelToken
   Dialog: DialogToken
   Overlay: OverlayToken
   Popup: PopupToken
+  Picker: PickerToken
+  ActionSheet: ActionSheetToken
   Toast: ToastToken
+  Loading: LoadingToken
+  Switch: SwitchToken
+  Progress: ProgressToken
+  Notify: NotifyToken
 }
 
 export type ComponentTokenName = keyof ComponentTokenMap

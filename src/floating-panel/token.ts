@@ -9,6 +9,6 @@ export function getFloatingPanelToken(token: AliasToken): FloatingPanelToken {
     barWidth: 20,
     barHeight: 3,
     barColor: token.colorTextQuaternary,
-    animationDuration: Math.max(0, token.motionDurationSlow * 1000),
+    animationDuration: Math.max(0, token.motionDurationSlow),
   }
 }

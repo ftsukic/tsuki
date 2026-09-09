@@ -10,20 +10,13 @@ export interface SeedToken extends PresetColorTokens {
   colorTextBase: string
   colorBgBase: string
   fontFamily: string
-  fontFamilyCode: string
   fontSize: number
   lineWidth: number
   lineType: 'solid' | 'dashed' | 'dotted'
   borderRadius: number
   sizeUnit: number
   sizeStep: number
-  sizePopupArrow: number
   controlHeight: number
-  zIndexBase: number
   zIndexPopupBase: number
-  opacityImage: number
-  motionUnit: number
-  motionBase: number
   motion: boolean
-  wireframe: boolean
 }

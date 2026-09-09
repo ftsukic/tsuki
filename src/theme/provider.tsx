@@ -8,10 +8,12 @@ import type {
 } from './interface/components'
 import type { MapToken } from './interface/map'
 import type { SeedToken } from './interface/seed'
+import { ThemeContext } from './context'
+import type { ThemeValue } from './context'
 import { composeAlgorithms, defaultAlgorithm } from './themes'
 import { defaultSeed } from './themes/seed'
 import { createAliasToken } from './util/alias'
-import { createContext, useContext, useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 import type { PropsWithChildren } from 'react'
 
 export interface ThemeConfig {
@@ -21,15 +23,13 @@ export interface ThemeConfig {
   inherit?: boolean
 }
 
-interface ThemeValue {
-  seed: SeedToken
+export type DesignTokenConfig = Pick<ThemeConfig, 'token' | 'algorithm'>
+
+export interface TokenValue {
   token: AliasToken
-  tokenOverrides: Partial<AliasToken>
-  algorithm: MappingAlgorithm | readonly MappingAlgorithm[]
-  componentOverrides: ComponentTokenOverrides
 }
 
-export const ThemeContext = createContext<ThemeValue | null>(null)
+const EMPTY_THEME: ThemeConfig = {}
 
 function isSeedKey(key: string): key is keyof SeedToken {
   return key in defaultSeed
@@ -60,7 +60,21 @@ function getMapToken(
   return isAlgorithmList(algorithm) ? composeAlgorithms(algorithm)(seed) : algorithm(seed)
 }
 
-function resolveTheme(theme: ThemeConfig = {}, parent?: ThemeValue | null): ThemeValue {
+function mergeComponentOverrides(
+  parent: ComponentTokenOverrides | undefined,
+  overrides: ComponentTokenOverrides | undefined,
+): ComponentTokenOverrides {
+  const merged: Record<string, object | undefined> = { ...parent }
+
+  for (const [name, override] of Object.entries(overrides ?? {})) {
+    if (override === undefined) continue
+    merged[name] = { ...merged[name], ...override }
+  }
+
+  return merged as ComponentTokenOverrides
+}
+
+function resolveTheme(theme: ThemeConfig = EMPTY_THEME, parent?: ThemeValue | null): ThemeValue {
   const inherit = theme.inherit !== false
   const tokenOverrides: Partial<AliasToken> = {
     ...(inherit ? parent?.tokenOverrides : undefined),
@@ -74,10 +88,10 @@ function resolveTheme(theme: ThemeConfig = {}, parent?: ThemeValue | null): Them
   const algorithm = theme.algorithm ?? (inherit ? parent?.algorithm : undefined) ?? defaultAlgorithm
   const map = { ...getMapToken(seed, algorithm), ...tokenOverrides }
   const token = createAliasToken(map, tokenOverrides)
-  const componentOverrides = {
-    ...(inherit ? parent?.componentOverrides : undefined),
-    ...theme.components,
-  }
+  const componentOverrides = mergeComponentOverrides(
+    inherit ? parent?.componentOverrides : undefined,
+    theme.components,
+  )
 
   return {
     seed,
@@ -90,7 +104,7 @@ function resolveTheme(theme: ThemeConfig = {}, parent?: ThemeValue | null): Them
 
 export function ConfigProvider({
   children,
-  theme = {},
+  theme = EMPTY_THEME,
 }: PropsWithChildren<{ theme?: ThemeConfig }>) {
   const parent = useContext(ThemeContext)
   const value = useMemo(() => resolveTheme(theme, parent), [parent, theme])
@@ -98,27 +112,31 @@ export function ConfigProvider({
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }
 
-export function getDesignToken(theme: ThemeConfig = {}) {
-  return resolveTheme(theme, null)
+export function getDesignToken(theme: DesignTokenConfig = {}): AliasToken {
+  return resolveTheme(theme, null).token
 }
 
-export function useToken(): ThemeValue {
+const defaultThemeValue = resolveTheme(EMPTY_THEME, null)
+
+function useThemeValue(): ThemeValue {
+  return useContext(ThemeContext) ?? defaultThemeValue
+}
+
+export function useToken(): TokenValue {
+  const { token } = useThemeValue()
+  return { token }
+}
+
+export function useOptionalToken(): TokenValue | null {
   const value = useContext(ThemeContext)
-
-  if (!value) throw new Error('useToken must be used inside ConfigProvider')
-
-  return value
-}
-
-export function useOptionalToken(): ThemeValue | null {
-  return useContext(ThemeContext)
+  return value ? { token: value.token } : null
 }
 
 export function useComponentToken<Name extends ComponentTokenName>(
   name: Name,
   factory: ComponentTokenFactory<Name>,
 ): ComponentTokenMap[Name] {
-  const { token, componentOverrides } = useToken()
+  const { token, componentOverrides } = useThemeValue()
   const override = componentOverrides[name] as Partial<ComponentTokenMap[Name]> | undefined
 
   return useMemo(

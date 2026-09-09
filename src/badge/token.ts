@@ -21,5 +21,7 @@ export function getBadgeToken(token: AliasToken): BadgeToken {
     defaultColor: token.colorTextTertiary,
     errorColor: token.colorError,
     warningColor: token.colorWarning,
+    statusGap: 4,
+    fontFamily: token.fontFamily,
   }
 }

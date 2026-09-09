@@ -1,61 +1,25 @@
 import type { MapToken } from './map'
 
 export interface AliasToken extends MapToken {
-  colorTextHeading: string
-  colorTextLabel: string
-  colorTextDescription: string
+  interactionActiveColor: string
   colorIcon: string
-  colorIconHover: string
-  colorBorderBg: string
-  colorSplit: string
   colorTextPlaceholder: string
   colorTextDisabled: string
   colorBgContainerDisabled: string
-  colorBgTextHover: string
-  colorBgTextActive: string
-  colorFillAlter: string
-  colorFillContent: string
-  colorFillContentHover: string
   colorTextLightSolid: string
-  colorHighlight: string
-  colorErrorAffix: string
-  colorWarningAffix: string
-  colorErrorOutline: string
-  colorWarningOutline: string
-  fontSizeIcon: number
-  fontWeightStrong: number
-  lineWidthFocus: number
-  controlOutlineWidth: number
   controlInteractiveSize: number
-  controlItemBgHover: string
   controlItemBgActive: string
-  controlItemBgActiveHover: string
   controlItemBgActiveDisabled: string
-  controlTmpOutline: string
-  controlOutline: string
-  opacityLoading: number
-  linkDecoration: 'none'
-  linkHoverDecoration: 'none'
-  linkFocusDecoration: 'none'
-  controlPaddingHorizontal: number
-  controlPaddingHorizontalSM: number
   paddingXXS: number
   paddingXS: number
   paddingSM: number
   padding: number
-  paddingMD: number
   paddingLG: number
   paddingXL: number
   marginXXS: number
   marginXS: number
   marginSM: number
   margin: number
-  marginMD: number
   marginLG: number
   marginXL: number
-  marginXXL: number
-  boxShadow: string
-  boxShadowSecondary: string
-  boxShadowTertiary: string
-  motion: boolean
 }

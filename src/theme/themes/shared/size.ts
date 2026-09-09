@@ -4,11 +4,8 @@ export function genSizeMapToken(seed: SeedToken): SizeMapToken {
   const { sizeUnit, sizeStep } = seed
 
   return {
-    sizeXXL: sizeUnit * (sizeStep + 8),
     sizeXL: sizeUnit * (sizeStep + 4),
     sizeLG: sizeUnit * (sizeStep + 2),
-    sizeMD: sizeUnit * (sizeStep + 1),
-    sizeMS: sizeUnit * sizeStep,
     size: sizeUnit * sizeStep,
     sizeSM: sizeUnit * Math.max(1, sizeStep - 1),
     sizeXS: sizeUnit * Math.max(1, sizeStep - 2),
@@ -29,11 +26,19 @@ export function genControlHeight(seed: SeedToken): HeightMapToken {
 export function genRadius(radius: number) {
   const base = Math.max(0, Math.round(radius))
 
+  if (base === 0) {
+    return {
+      borderRadiusXS: 0,
+      borderRadiusSM: 0,
+      borderRadius: 0,
+      borderRadiusLG: 0,
+    }
+  }
+
   return {
     borderRadiusXS: Math.max(1, base - 3),
     borderRadiusSM: Math.max(1, base - 2),
     borderRadius: base,
     borderRadiusLG: base + 4,
-    borderRadiusOuter: base + 4,
   }
 }
