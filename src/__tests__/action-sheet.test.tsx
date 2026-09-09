@@ -14,6 +14,7 @@ import {
 } from '..'
 import type { ReactNode } from 'react'
 import type { TestInstance } from 'test-renderer'
+import * as Reanimated from 'react-native-reanimated'
 
 function pressableStyle(testID: string, pressed: boolean) {
   const style = screen.getByTestId(testID).props.style
@@ -120,6 +121,25 @@ describe('ActionSheet', () => {
     // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => fireEvent.press(screen.getByTestId('action-sheet-action-0')))
     expect(dangerPress).toHaveBeenCalledTimes(1)
+    await view.unmount()
+  })
+
+  it('uses one Popup transition for the sheet panel and overlay', async () => {
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value, _config, callback) => {
+        callback?.(true)
+        return value
+      })
+    const view = await render(
+      <ConfigProvider theme={{ token: { motion: true } }}>
+        <PortalHost>
+          <ActionSheet visible actions={[{ name: '单一动画' }]} />
+        </PortalHost>
+      </ConfigProvider>,
+    )
+
+    expect(timing.mock.calls.filter(([, config]) => config?.duration === 200)).toHaveLength(1)
     await view.unmount()
   })
 

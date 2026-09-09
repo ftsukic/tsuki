@@ -79,7 +79,7 @@ Popup 推荐挂载在应用根节点的 `Provider` 内：
 
 Popup 不会自动修改 `visible`。`closeOnPressOverlay` 和 Android 返回键都只是发出 `onRequestClose`，需要由父组件设置 `visible={false}`。未提供 `onRequestClose` 时 Android 返回键返回 `false`，继续交给更底层的返回处理器。
 
-`center` 面板按内容尺寸布局；`top` 和 `bottom` 默认占满可用宽度；`left` 和 `right` 默认占满可用高度。显式 `style` 可以覆盖这些尺寸。方向面板使用从对应边缘滑入/滑出的动画，居中面板使用淡入和轻微缩放，遮罩独立淡入淡出。动画运行时快速切换 `visible` 会从当前进度继续。
+`center` 面板按内容尺寸布局；`top` 和 `bottom` 默认占满可用宽度；`left` 和 `right` 默认占满可用高度。显式 `style` 可以覆盖这些尺寸。方向面板使用从对应边缘滑入/滑出的动画，居中面板使用淡入和轻微缩放；遮罩与面板由同一个 transition progress 同步驱动。动画运行时快速切换 `visible` 会从当前进度继续。
 
 `lazyRender` 只控制首次挂载；关闭后默认保留内容状态，`destroyOnClosed` 会在关闭动画完成后卸载内容。若动画被新的 `visible` 状态中断，不会触发被取消的完成回调。
 
@@ -91,12 +91,12 @@ Popup 不会自动修改 `visible`。`closeOnPressOverlay` 和 Android 返回键
 
 通过 `ConfigProvider` 的 `theme.components.Popup` 配置：
 
-| Token             | 默认值              | 说明               |
-| ----------------- | ------------------- | ------------------ |
-| backgroundColor   | `colorBgContainer`  | 面板背景色         |
-| overlayColor      | `colorBgMask`       | 遮罩背景色         |
-| borderRadius      | `borderRadiusLG`    | `round` 使用的圆角 |
-| animationDuration | `motionDurationMid` | 动画时长，单位毫秒 |
-| zIndex            | `zIndexPopupBase`   | Popup 宿主默认层级 |
+| Token             | 默认值               | 说明                                               |
+| ----------------- | -------------------- | -------------------------------------------------- |
+| backgroundColor   | `colorBgContainer`   | 面板背景色                                         |
+| overlayColor      | `colorBgMask`        | 遮罩背景色                                         |
+| borderRadius      | `borderRadiusLG`     | `round` 使用的圆角                                 |
+| animationDuration | `motionDurationSlow` | 动画时长，单位毫秒；默认与 Vant 的 `0.3s` 过渡一致 |
+| zIndex            | `zIndexPopupBase`    | Popup 宿主默认层级                                 |
 
 `theme.token.motion=false` 时动画时长强制为 `0`，但生命周期回调仍按打开/关闭顺序触发。`styles` 支持对象或函数；函数接收 `{ props, state: { visible, position, rendered } }`。

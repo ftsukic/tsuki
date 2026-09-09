@@ -143,4 +143,4 @@ const result = await showActionSheet({
 | zIndex | `zIndexPopupBase` | 浮层层级 |
 | fontFamily | `fontFamily` | 文字字体 |
 
-`theme.token.motion=false` 时 Popup 动画时长强制为 `0`，但打开/关闭生命周期仍然触发。ActionSheet 使用 Popup 的 bottom translateY 动画和 Overlay 的 opacity 动画，并将底部 safe-area 纳入取消 pressable，使取消内容与安全区共享 pressed 背景色；组件不单独提供 transition API。
+`theme.token.motion=false` 时 Popup 动画时长强制为 `0`，但打开/关闭生命周期仍然触发。ActionSheet 使用 Popup 的 bottom translateY 动画，并由同一个 transition progress 驱动 Overlay opacity；底部 safe-area 纳入取消 pressable，使取消内容与安全区共享 pressed 背景色；组件不单独提供 transition API。

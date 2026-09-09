@@ -50,6 +50,6 @@ export default function PopupPositionsExample() {
 const styles = StyleSheet.create({
   container: { gap: 12 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  panel: { minWidth: 180, gap: 16, padding: 20 },
+  panel: { gap: 16, padding: 20 },
   title: { color: '#1f2937', fontSize: 16, fontWeight: '600' },
 })

@@ -1,14 +1,8 @@
 import { forwardRef, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import {
-  Animated,
-  BackHandler,
-  Easing,
-  Platform,
-  StyleSheet,
-  View,
-  useWindowDimensions,
-} from 'react-native'
+import { BackHandler, Platform, StyleSheet, View, useWindowDimensions } from 'react-native'
+import { Easing } from 'react-native-reanimated'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
+import { Animated, motionPresets, useAnimatedStyle, useTransitionProgress } from '../motion'
 import { OverlaySurface } from '../overlay/surface'
 import { Portal } from '../portal'
 import { resolveStyles } from '../style'
@@ -49,8 +43,6 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
     ? Math.max(0, duration)
     : token.animationDuration
   const animationDuration = themeToken.motion ? normalizedDuration : 0
-  const progress = useRef(new Animated.Value(0)).current
-  const animation = useRef<Animated.CompositeAnimation | null>(null)
   const previousVisible = useRef<boolean | null>(null)
   const currentPositionRef = useRef(position)
   const renderedPositionRef = useRef(position)
@@ -58,55 +50,61 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
   const renderedRef = useRef(visible || !lazyRender)
   const [rendered, setRendered] = useState(renderedRef.current)
   const visibleRef = useRef(visible)
-  const overlayRef = useRef(overlay)
   const onPressOverlayRef = useRef(onPressOverlay)
   const onRequestCloseRef = useRef(onRequestClose)
   const onOpenRef = useRef(onOpen)
   const onOpenedRef = useRef(onOpened)
   const onCloseRef = useRef(onClose)
   const onClosedRef = useRef(onClosed)
-  const animationDurationRef = useRef(animationDuration)
   const destroyOnClosedRef = useRef(destroyOnClosed)
-  const panelClosedRef = useRef(!visible)
-  const overlayClosedRef = useRef(!visible || !overlay)
+  const closingRef = useRef(false)
+  const openedNotifiedRef = useRef(false)
   const closedNotifiedRef = useRef(!visible)
 
   currentPositionRef.current = position
   if (visible) renderedPositionRef.current = position
 
   visibleRef.current = visible
-  overlayRef.current = overlay
   onPressOverlayRef.current = onPressOverlay
   onRequestCloseRef.current = onRequestClose
   onOpenRef.current = onOpen
   onOpenedRef.current = onOpened
   onCloseRef.current = onClose
   onClosedRef.current = onClosed
-  animationDurationRef.current = animationDuration
   destroyOnClosedRef.current = destroyOnClosed
 
   // The overlay child can run its closing effect before this component's effect.
   // Mark the panel as closing during render so the child cannot finish the
   // whole popup before onClose has been dispatched.
   if (!visible && previousVisible.current === true) {
-    panelClosedRef.current = false
+    closingRef.current = true
     closedNotifiedRef.current = false
   }
 
-  const finishClose = () => {
-    if (visibleRef.current) return
-    if (!panelClosedRef.current || !overlayClosedRef.current || closedNotifiedRef.current) return
+  const finishClose = useMemo(
+    () => () => {
+      if (
+        visibleRef.current ||
+        !renderedRef.current ||
+        !closingRef.current ||
+        closedNotifiedRef.current
+      ) {
+        return
+      }
 
-    closedNotifiedRef.current = true
-    const nextPosition = currentPositionRef.current
-    renderedPositionRef.current = nextPosition
-    setSettledPosition(nextPosition)
-    if (destroyOnClosedRef.current) {
-      renderedRef.current = false
-      setRendered(false)
-    }
-    onClosedRef.current?.()
-  }
+      closedNotifiedRef.current = true
+      closingRef.current = false
+      const nextPosition = currentPositionRef.current
+      renderedPositionRef.current = nextPosition
+      setSettledPosition(nextPosition)
+      if (destroyOnClosedRef.current) {
+        renderedRef.current = false
+        setRendered(false)
+      }
+      onClosedRef.current?.()
+    },
+    [],
+  )
 
   useEffect(() => {
     if (!lazyRender && !renderedRef.current) {
@@ -115,7 +113,7 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
     }
   }, [lazyRender])
 
-  const isExiting = !visible && (previousVisible.current === true || animation.current !== null)
+  const isExiting = !visible && (previousVisible.current === true || closingRef.current)
   const effectivePosition = visible
     ? position
     : isExiting
@@ -143,83 +141,35 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
 
     if (wasVisible === visible) return
 
-    animation.current?.stop()
-    animation.current = null
-
     if (visible) {
+      closingRef.current = false
       renderedRef.current = true
       setRendered(true)
-      panelClosedRef.current = false
-      overlayClosedRef.current = !overlayRef.current
+      openedNotifiedRef.current = false
       closedNotifiedRef.current = false
-      if (wasVisible === null) progress.setValue(0)
       onOpenRef.current?.()
-
-      if (animationDurationRef.current === 0) {
-        progress.setValue(1)
-        panelClosedRef.current = true
-        onOpenedRef.current?.()
-        return
-      }
-
-      const nextAnimation = Animated.timing(progress, {
-        toValue: 1,
-        duration: animationDurationRef.current,
-        easing: Easing.out(Easing.cubic),
-        isInteraction: false,
-        useNativeDriver: Platform.OS !== 'web',
-      })
-      animation.current = nextAnimation
-      nextAnimation.start(({ finished }) => {
-        if (animation.current === nextAnimation) animation.current = null
-        if (finished) {
-          panelClosedRef.current = true
-          onOpenedRef.current?.()
-        }
-      })
-
-      return () => nextAnimation.stop()
+      return
     }
 
     if (wasVisible !== true || !renderedRef.current) return
 
-    const overlayAlreadyClosed = overlayClosedRef.current
-    panelClosedRef.current = false
-    overlayClosedRef.current = overlayAlreadyClosed || !overlayRef.current
     closedNotifiedRef.current = false
     onCloseRef.current?.()
+  }, [visible])
 
-    if (animationDurationRef.current === 0) {
-      progress.setValue(0)
-      panelClosedRef.current = true
+  const handleTransitionEnd = useMemo(
+    () => (transitionVisible: boolean) => {
+      if (transitionVisible) {
+        if (!visibleRef.current || openedNotifiedRef.current) return
+        openedNotifiedRef.current = true
+        onOpenedRef.current?.()
+        return
+      }
+
+      if (visibleRef.current || !renderedRef.current) return
       finishClose()
-      return
-    }
-
-    const nextAnimation = Animated.timing(progress, {
-      toValue: 0,
-      duration: animationDurationRef.current,
-      easing: Easing.in(Easing.cubic),
-      isInteraction: false,
-      useNativeDriver: Platform.OS !== 'web',
-    })
-    animation.current = nextAnimation
-    nextAnimation.start(({ finished }) => {
-      if (animation.current === nextAnimation) animation.current = null
-      if (!finished) return
-
-      panelClosedRef.current = true
-      finishClose()
-    })
-
-    return () => nextAnimation.stop()
-  }, [animationDuration, overlay, progress, visible])
-
-  useEffect(
-    () => () => {
-      animation.current?.stop()
     },
-    [],
+    [finishClose],
   )
 
   const resolvedStyles = useMemo(
@@ -230,73 +180,64 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
     props,
     state: { visible, position: effectivePosition, rendered },
   })
+  const panelResolvedStyle = StyleSheet.flatten([semantic?.panel, style])
+  const panelOpacity =
+    typeof panelResolvedStyle?.opacity === 'number' ? panelResolvedStyle.opacity : 1
   const overlayResolvedStyle = StyleSheet.flatten([semantic?.overlay, overlayStyle])
   const overlayOpacity =
     typeof overlayResolvedStyle?.opacity === 'number' ? overlayResolvedStyle.opacity : 1
-  const animatedPanelStyle = useMemo(() => {
-    const viewportWidth = Math.max(width, 1)
-    const viewportHeight = Math.max(height, 1)
-
+  const motionPreset = useMemo(() => {
     switch (effectivePosition) {
       case 'top':
-        return {
-          transform: [
-            {
-              translateY: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [-viewportHeight, 0],
-              }),
-            },
-          ],
-        }
+        return motionPresets.popupTop
       case 'bottom':
-        return {
-          transform: [
-            {
-              translateY: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [viewportHeight, 0],
-              }),
-            },
-          ],
-        }
+        return motionPresets.popupBottom
       case 'left':
-        return {
-          transform: [
-            {
-              translateX: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [-viewportWidth, 0],
-              }),
-            },
-          ],
-        }
+        return motionPresets.drawerLeft
       case 'right':
-        return {
-          transform: [
-            {
-              translateX: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [viewportWidth, 0],
-              }),
-            },
-          ],
-        }
+        return motionPresets.drawerRight
       case 'center':
       default:
-        return {
-          opacity: progress,
-          transform: [
-            {
-              scale: progress.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.96, 1],
-              }),
-            },
-          ],
-        }
+        return motionPresets.dialog
     }
-  }, [effectivePosition, height, progress, width])
+  }, [effectivePosition])
+  const transitionDistance =
+    effectivePosition === 'top' || effectivePosition === 'bottom'
+      ? Math.max(height, 1)
+      : Math.max(width, 1)
+  const enteringConfig = useMemo(
+    () =>
+      themeToken.motion && motionPreset.entering
+        ? motionPreset.entering
+        : {
+            duration: animationDuration,
+            easing: Easing.out(Easing.ease),
+            mode: 'timing' as const,
+          },
+    [animationDuration, motionPreset, themeToken.motion],
+  )
+  const leavingConfig = useMemo(
+    () => ({
+      duration: animationDuration,
+      easing: Easing.in(Easing.ease),
+      mode: 'timing' as const,
+    }),
+    [animationDuration],
+  )
+  const { progress, animatedStyle: animatedPanelStyle } = useTransitionProgress({
+    visible,
+    preset: motionPreset,
+    distance: transitionDistance,
+    // Keep the opacity key present when switching from the center scale
+    // transition to a positional slide before the first frame is committed.
+    opacity: panelOpacity,
+    entering: enteringConfig,
+    leaving: leavingConfig,
+    onTransitionEnd: handleTransitionEnd,
+  })
+  const animatedOverlayStyle = useAnimatedStyle(() => ({
+    opacity: progress.value * overlayOpacity,
+  }))
 
   const handleOverlayPress = (event: Parameters<NonNullable<PopupProps['onPressOverlay']>>[0]) => {
     onPressOverlayRef.current?.(event)
@@ -314,20 +255,13 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
       {overlay ? (
         <OverlaySurface
           show={visible}
-          duration={animationDuration}
           backgroundColor={token.overlayColor}
           zIndex={zIndex}
           onPress={handleOverlayPress}
-          onClosed={() => {
-            overlayClosedRef.current = true
-            finishClose()
-          }}
-          style={[
-            resolvedStyles.overlay,
-            { opacity: overlayOpacity },
-            semantic?.overlay,
-            overlayStyle,
-          ]}
+          externallyAnimated
+          forceRendered={rendered}
+          animatedStyle={animatedOverlayStyle}
+          style={[resolvedStyles.overlay, semantic?.overlay, overlayStyle]}
           pressableStyle={[semantic?.overlay, overlayStyle]}
         />
       ) : null}

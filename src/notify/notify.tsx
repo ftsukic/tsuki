@@ -1,16 +1,26 @@
 import { forwardRef, isValidElement, useEffect, useImperativeHandle, useRef, useState } from 'react'
-import { Popup } from '../popup'
+import { PopupContent } from '../popup/popup'
+import { Portal } from '../portal'
+import { useComponentToken } from '../theme'
 import type { NotifyMethods, NotifyProps } from './interface'
+import { getNotifyToken } from './token'
 import { Text, View } from 'react-native'
 
-const backgrounds = {
-  primary: '#1989FA',
-  success: '#07C160',
-  error: '#EE0A24',
-  warning: '#FF976A',
-} as const
+function getBackgroundColor(type: NotifyProps['type'], token: ReturnType<typeof getNotifyToken>) {
+  switch (type) {
+    case 'success':
+      return token.successBackgroundColor
+    case 'error':
+      return token.errorBackgroundColor
+    case 'warning':
+      return token.warningBackgroundColor
+    case 'primary':
+    default:
+      return token.primaryBackgroundColor
+  }
+}
 
-export const Notify = forwardRef<NotifyMethods, NotifyProps>(function Notify(
+export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function NotifyContent(
   {
     children,
     message,
@@ -26,6 +36,7 @@ export const Notify = forwardRef<NotifyMethods, NotifyProps>(function Notify(
   },
   ref,
 ) {
+  const token = useComponentToken('Notify', getNotifyToken)
   const [visible, setVisible] = useState(visibleProp)
   const [currentMessage, setCurrentMessage] = useState(message)
   const onClosedRef = useRef(onClosed)
@@ -53,7 +64,7 @@ export const Notify = forwardRef<NotifyMethods, NotifyProps>(function Notify(
   const content = isValidElement(currentMessage) ? currentMessage : (currentMessage ?? children)
 
   return (
-    <Popup
+    <PopupContent
       {...props}
       visible={visible}
       overlay={false}
@@ -64,22 +75,44 @@ export const Notify = forwardRef<NotifyMethods, NotifyProps>(function Notify(
         style={[
           {
             alignItems: 'center',
-            backgroundColor: backgroundColor ?? backgrounds[type],
+            backgroundColor: backgroundColor ?? getBackgroundColor(type, token),
+            paddingHorizontal: token.paddingHorizontal,
+            paddingVertical: token.paddingVertical,
             justifyContent: 'center',
-            paddingHorizontal: 16,
-            paddingVertical: 10,
             width: '100%',
           },
           style,
         ]}
       >
         {typeof content === 'string' || typeof content === 'number' ? (
-          <Text style={[{ color, fontSize: 14, lineHeight: 20 }, textStyle]}>{content}</Text>
+          <Text
+            style={[
+              {
+                color: color ?? token.textColor,
+                fontFamily: token.fontFamily,
+                fontSize: token.fontSize,
+                lineHeight: token.lineHeight,
+              },
+              textStyle,
+            ]}
+          >
+            {content}
+          </Text>
         ) : (
           content
         )}
       </View>
-    </Popup>
+    </PopupContent>
+  )
+})
+
+NotifyContent.displayName = 'Notify.Content'
+
+export const Notify = forwardRef<NotifyMethods, NotifyProps>(function Notify(props, ref) {
+  return (
+    <Portal>
+      <NotifyContent {...props} ref={ref} />
+    </Portal>
   )
 })
 

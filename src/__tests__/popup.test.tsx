@@ -1,8 +1,10 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { useEffect, useState } from 'react'
-import { ConfigProvider, Popup, PortalHost } from '..'
-import { Animated, BackHandler, Platform, StyleSheet, Text, View } from 'react-native'
+import { Button, ConfigProvider, Popup, PortalHost } from '..'
+import { BackHandler, Platform, StyleSheet, Text, View } from 'react-native'
+import { Easing } from 'react-native-reanimated'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
+import * as Reanimated from 'react-native-reanimated'
 import type { ReactNode } from 'react'
 
 function AppProvider({ children, motion = false }: { children?: ReactNode; motion?: boolean }) {
@@ -24,7 +26,24 @@ function flattenStyle(element: { props: { style?: unknown } } | null | undefined
 describe('Popup', () => {
   afterEach(() => {
     cleanup()
+    jest.clearAllMocks()
     jest.restoreAllMocks()
+  })
+
+  it('hides a centered Popup at the closed animation endpoint', async () => {
+    const view = await render(
+      <AppProvider>
+        <Popup visible={false} lazyRender={false} position="center" testID="closed-center">
+          <Text>closed center</Text>
+        </Popup>
+      </AppProvider>,
+    )
+
+    expect(flattenStyle(screen.getByTestId('closed-center'))).toMatchObject({
+      opacity: 0,
+      transform: [{ scale: 0.8 }],
+    })
+    await view.unmount()
   })
 
   it('renders through PortalHost and supports all positions with round corners', async () => {
@@ -63,6 +82,40 @@ describe('Popup', () => {
     expect(flattenStyle(screen.getByTestId('right')).borderTopLeftRadius).toBe(8)
     expect(flattenStyle(screen.getByTestId('top')).width).toBe('100%')
     expect(flattenStyle(screen.getByTestId('left')).height).toBe('100%')
+    await view.unmount()
+  })
+
+  it('opens when position and visible change in the same press', async () => {
+    function PositionPopup() {
+      const [visible, setVisible] = useState(false)
+      const [position, setPosition] = useState<'center' | 'bottom'>('center')
+
+      return (
+        <>
+          <Button
+            onPress={() => {
+              setPosition('bottom')
+              setVisible(true)
+            }}
+          >
+            open bottom
+          </Button>
+          <Popup testID="same-press-popup" visible={visible} position={position}>
+            <Text>opened bottom</Text>
+          </Popup>
+        </>
+      )
+    }
+
+    const view = await render(
+      <AppProvider>
+        <PositionPopup />
+      </AppProvider>,
+    )
+
+    fireEvent.press(screen.getByText('open bottom'))
+    expect(screen.getByText('opened bottom')).toBeTruthy()
+    expect(flattenStyle(screen.getByTestId('same-press-popup'))).toMatchObject({ opacity: 1 })
     await view.unmount()
   })
 
@@ -238,29 +291,56 @@ describe('Popup', () => {
     await view.unmount()
   })
 
+  it('uses the Vant ease curves and the slow motion token for transitions', async () => {
+    const configs: Array<{ duration?: number; easing?: (value: number) => number }> = []
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value, config, callback) => {
+        configs.push({
+          duration: config?.duration,
+          easing: config?.easing as ((value: number) => number) | undefined,
+        })
+        callback?.(true)
+        return value
+      })
+
+    const view = await render(
+      <AppProvider motion>
+        <Popup visible position="bottom">
+          <Text>timed popup</Text>
+        </Popup>
+      </AppProvider>,
+    )
+
+    expect(timing).toHaveBeenCalledTimes(1)
+    expect(configs.map(({ duration }) => duration)).toEqual([300])
+    expect(configs.map(({ easing }) => easing?.(0.5))).toEqual([Easing.out(Easing.ease)(0.5)])
+
+    await view.rerender(
+      <AppProvider motion>
+        <Popup visible={false} position="bottom">
+          <Text>timed popup</Text>
+        </Popup>
+      </AppProvider>,
+    )
+
+    expect(timing).toHaveBeenCalledTimes(2)
+    expect(configs.slice(1).map(({ easing }) => easing?.(0.5))).toEqual([
+      Easing.in(Easing.ease)(0.5),
+    ])
+    await view.unmount()
+  })
+
   it('keeps the closing position until motion completes and uses the new position on reopen', async () => {
     const animations: Array<{ complete: (finished?: boolean) => void }> = []
-    const timing = jest.spyOn(Animated, 'timing').mockImplementation((value, config) => {
-      let callback: ((result: { finished: boolean }) => void) | undefined
-      const animation = {
-        reset: jest.fn(),
-        start(nextCallback?: (result: { finished: boolean }) => void) {
-          callback = nextCallback
-          animations.push({
-            complete: (finished = true) => {
-              if (finished) {
-                ;(value as unknown as { setValue: (nextValue: number) => void }).setValue(
-                  config.toValue as number,
-                )
-              }
-              callback?.({ finished })
-            },
-          })
-        },
-        stop: jest.fn(),
-      }
-      return animation as unknown as Animated.CompositeAnimation
-    })
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value, _config, callback) => {
+        animations.push({
+          complete: (finished = true) => callback?.(finished),
+        })
+        return value
+      })
     const onClosed = jest.fn()
 
     const view = await render(
@@ -280,10 +360,9 @@ describe('Popup', () => {
       </AppProvider>,
     )
 
-    expect(timing).toHaveBeenCalledTimes(2)
+    expect(timing).toHaveBeenCalledTimes(1)
     await act(async () => {
       animations[0]?.complete()
-      animations[1]?.complete()
     })
 
     await view.rerender(
@@ -303,7 +382,7 @@ describe('Popup', () => {
       </AppProvider>,
     )
 
-    expect(timing).toHaveBeenCalledTimes(4)
+    expect(timing).toHaveBeenCalledTimes(2)
     const closingPanel = screen.getByTestId('motion-panel')
     expect(flattenStyle(closingPanel.parent)).toMatchObject({ justifyContent: 'flex-end' })
     expect(flattenStyle(closingPanel)).toMatchObject({
@@ -315,11 +394,7 @@ describe('Popup', () => {
     )
     expect(onClosed).not.toHaveBeenCalled()
 
-    await act(async () => animations[2]?.complete())
-    expect(screen.getByTestId('motion-panel')).toBeTruthy()
-    expect(onClosed).not.toHaveBeenCalled()
-
-    await act(async () => animations[3]?.complete())
+    await act(async () => animations[1]?.complete())
     expect(onClosed).toHaveBeenCalledTimes(1)
     expect(flattenStyle(screen.getByTestId('motion-panel').parent)).toMatchObject({
       alignItems: 'center',
@@ -349,7 +424,7 @@ describe('Popup', () => {
       alignItems: 'center',
       justifyContent: 'center',
     })
-    expect(timing).toHaveBeenCalledTimes(6)
+    expect(timing).toHaveBeenCalledTimes(3)
 
     await view.unmount()
   })
@@ -358,25 +433,11 @@ describe('Popup', () => {
     'keeps the %s exit layout while its motion is running',
     async (position) => {
       const animations: Array<{ complete: (finished?: boolean) => void }> = []
-      jest.spyOn(Animated, 'timing').mockImplementation((value, config) => {
-        let callback: ((result: { finished: boolean }) => void) | undefined
-        return {
-          reset: jest.fn(),
-          start(nextCallback?: (result: { finished: boolean }) => void) {
-            callback = nextCallback
-            animations.push({
-              complete: (finished = true) => {
-                if (finished) {
-                  ;(value as unknown as { setValue: (nextValue: number) => void }).setValue(
-                    config.toValue as number,
-                  )
-                }
-                callback?.({ finished })
-              },
-            })
-          },
-          stop: jest.fn(),
-        } as unknown as Animated.CompositeAnimation
+      jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, _config, callback) => {
+        animations.push({
+          complete: (finished = true) => callback?.(finished),
+        })
+        return value
       })
 
       const view = await render(
@@ -388,7 +449,6 @@ describe('Popup', () => {
       )
       await act(async () => {
         animations[0]?.complete()
-        animations[1]?.complete()
       })
 
       await view.rerender(
@@ -483,6 +543,138 @@ describe('Popup', () => {
     expect(panel.parent).toBe(container)
     expect(rootChildren.indexOf(overlayLayer!)).toBeLessThan(rootChildren.indexOf(container!))
     expect(flattenStyle(overlay)).toMatchObject({ borderWidth: 2 })
+    expect(flattenStyle(overlay)).toMatchObject({ opacity: 0.2 })
+    await view.unmount()
+  })
+
+  it('ignores stale transition completions when visibility reverses quickly', async () => {
+    const animations: Array<{ complete: (finished?: boolean) => void }> = []
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, _config, callback) => {
+      animations.push({
+        complete: (finished = true) => callback?.(finished),
+      })
+      return value
+    })
+    const onOpened = jest.fn()
+    const onClosed = jest.fn()
+    const view = await render(
+      <AppProvider motion>
+        <Popup
+          visible
+          duration={240}
+          onClosed={onClosed}
+          onOpened={onOpened}
+          testID="reversible-popup"
+        >
+          <Text>reversible popup</Text>
+        </Popup>
+      </AppProvider>,
+    )
+
+    await act(async () => animations[0]?.complete())
+    expect(onOpened).toHaveBeenCalledTimes(1)
+
+    await view.rerender(
+      <AppProvider motion>
+        <Popup
+          visible={false}
+          duration={240}
+          onClosed={onClosed}
+          onOpened={onOpened}
+          testID="reversible-popup"
+        >
+          <Text>reversible popup</Text>
+        </Popup>
+      </AppProvider>,
+    )
+    await view.rerender(
+      <AppProvider motion>
+        <Popup
+          visible
+          duration={240}
+          onClosed={onClosed}
+          onOpened={onOpened}
+          testID="reversible-popup"
+        >
+          <Text>reversible popup</Text>
+        </Popup>
+      </AppProvider>,
+    )
+
+    await act(async () => animations[1]?.complete())
+    expect(onClosed).not.toHaveBeenCalled()
+    await act(async () => animations[2]?.complete())
+    expect(onOpened).toHaveBeenCalledTimes(2)
+    expect(onClosed).not.toHaveBeenCalled()
+    await view.unmount()
+  })
+
+  it('completes open and close synchronously when duration is zero', async () => {
+    const onOpened = jest.fn()
+    const onClosed = jest.fn()
+    const view = await render(
+      <AppProvider motion>
+        <Popup
+          visible
+          duration={0}
+          onClosed={onClosed}
+          onOpened={onOpened}
+          testID="zero-duration-popup"
+        >
+          <Text>zero duration popup</Text>
+        </Popup>
+      </AppProvider>,
+    )
+
+    expect(onOpened).toHaveBeenCalledTimes(1)
+    await view.rerender(
+      <AppProvider motion>
+        <Popup
+          visible={false}
+          duration={0}
+          onClosed={onClosed}
+          onOpened={onOpened}
+          testID="zero-duration-popup"
+        >
+          <Text>zero duration popup</Text>
+        </Popup>
+      </AppProvider>,
+    )
+
+    expect(onClosed).toHaveBeenCalledTimes(1)
+    expect(screen.getByTestId('zero-duration-popup')).toBeTruthy()
+    await view.unmount()
+  })
+
+  it('only notifies onOpened once when motion configuration changes while open', async () => {
+    const animations: Array<{ complete: (finished?: boolean) => void }> = []
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, _config, callback) => {
+      animations.push({
+        complete: (finished = true) => callback?.(finished),
+      })
+      return value
+    })
+    const onOpened = jest.fn()
+    const view = await render(
+      <AppProvider motion>
+        <Popup visible duration={240} onOpened={onOpened}>
+          <Text>configuration popup</Text>
+        </Popup>
+      </AppProvider>,
+    )
+    await act(async () => animations[0]?.complete())
+    expect(onOpened).toHaveBeenCalledTimes(1)
+
+    await view.rerender(
+      <AppProvider motion>
+        <Popup visible duration={120} onOpened={onOpened}>
+          <Text>configuration popup</Text>
+        </Popup>
+      </AppProvider>,
+    )
+    await act(async () => animations[1]?.complete())
+
+    expect(onOpened).toHaveBeenCalledTimes(1)
     await view.unmount()
   })
 

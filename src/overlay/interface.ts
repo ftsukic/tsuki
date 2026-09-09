@@ -21,6 +21,7 @@ export interface OverlayProps extends Omit<ViewProps, 'children' | 'style'> {
   zIndex?: number
   children?: ReactNode
   onPress?: PressableProps['onPress']
+  onClosed?: () => void
   style?: StyleProp<ViewStyle>
   styles?: OverlayStyles
 }

@@ -1,10 +1,12 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { createRef } from 'react'
 import { ConfigProvider, getDesignToken, Overlay, PortalHost } from '..'
+import { OverlaySurface } from '../overlay/surface'
 import type { ReactNode } from 'react'
-import { Animated, Pressable, StyleSheet, Text } from 'react-native'
+import { Pressable, StyleSheet, Text } from 'react-native'
 import type { View } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
+import * as Reanimated from 'react-native-reanimated'
 
 function AppProvider({ children, motion = false }: { children?: ReactNode; motion?: boolean }) {
   return (
@@ -34,6 +36,7 @@ function findNode(
 describe('Overlay', () => {
   afterEach(() => {
     cleanup()
+    jest.clearAllMocks()
     jest.restoreAllMocks()
   })
 
@@ -103,6 +106,29 @@ describe('Overlay', () => {
     await view.unmount()
   })
 
+  it('supports a false to true to false visibility cycle', async () => {
+    const view = await render(
+      <AppProvider>
+        <Overlay show={false} duration={0} testID="visibility-cycle" />
+      </AppProvider>,
+    )
+
+    expect(screen.queryByTestId('visibility-cycle')).toBeNull()
+    await view.rerender(
+      <AppProvider>
+        <Overlay show duration={0} testID="visibility-cycle" />
+      </AppProvider>,
+    )
+    expect(screen.getByTestId('visibility-cycle')).toBeTruthy()
+    await view.rerender(
+      <AppProvider>
+        <Overlay show={false} duration={0} testID="visibility-cycle" />
+      </AppProvider>,
+    )
+    expect(screen.queryByTestId('visibility-cycle')).toBeNull()
+    await view.unmount()
+  })
+
   it('calls onPress for the mask without swallowing embedded content presses', async () => {
     const onPress = jest.fn()
     const childPress = jest.fn()
@@ -153,27 +179,24 @@ describe('Overlay', () => {
   })
 
   it('keeps the mask mounted during fade-out and removes it after animation completion', async () => {
-    const completions: Array<(result: { finished: boolean }) => void> = []
-    const timing = jest.spyOn(Animated, 'timing').mockImplementation(() => {
-      const animation = {
-        reset: jest.fn(),
-        start(callback?: (result: { finished: boolean }) => void) {
-          if (callback) completions.push(callback)
-        },
-        stop: jest.fn(),
-      }
-      return animation as unknown as Animated.CompositeAnimation
-    })
+    const completions: Array<(finished?: boolean) => void> = []
+    const onClosed = jest.fn()
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((_value, _config, callback) => {
+        completions.push((finished = true) => callback?.(finished))
+        return _value
+      })
     const view = await render(
       <AppProvider motion>
-        <Overlay show testID="overlay" duration={240} />
+        <Overlay show testID="overlay" duration={240} onClosed={onClosed} />
       </AppProvider>,
     )
 
     expect(timing).toHaveBeenCalledTimes(1)
     await view.rerender(
       <AppProvider motion>
-        <Overlay show={false} testID="overlay" duration={240} />
+        <Overlay show={false} testID="overlay" duration={240} onClosed={onClosed} />
       </AppProvider>,
     )
 
@@ -181,9 +204,28 @@ describe('Overlay', () => {
     expect(screen.getByTestId('overlay')).toBeTruthy()
 
     await act(async () => {
-      completions.at(-1)?.({ finished: true })
+      completions.at(-1)?.(true)
     })
     expect(screen.queryByTestId('overlay')).toBeNull()
+    expect(onClosed).toHaveBeenCalledTimes(1)
+    await view.unmount()
+  })
+
+  it('does not start a second transition in externally controlled mode', async () => {
+    const timing = jest.spyOn(Reanimated, 'withTiming')
+    const view = await render(
+      <OverlaySurface
+        animatedStyle={{ opacity: 0.25 }}
+        externallyAnimated
+        forceRendered
+        show={false}
+        testID="controlled-overlay"
+      />,
+    )
+
+    expect(timing).not.toHaveBeenCalled()
+    expect(flattenStyle(screen.getByTestId('controlled-overlay'))).toMatchObject({ opacity: 0.25 })
+    expect(screen.getByTestId('controlled-overlay').props.pointerEvents).toBe('none')
     await view.unmount()
   })
 
