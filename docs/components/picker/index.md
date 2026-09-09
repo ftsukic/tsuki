@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-Picker 用于从一个或多个滚轮列中选择值，提供 Vant 风格的 Toolbar、确认/取消操作、吸附和级联列。PickerView 是不包含 Popup 和 Toolbar 的纯滚轮版本。
+Picker 用于从一个或多个滚轮列中选择值，提供 Vant 风格的 Toolbar、确认/取消操作、吸附和级联列。滚动过程只更新滚轮位置，停稳后才提交选中 index 和 `onChange`；PickerView 是不包含 Popup 和 Toolbar 的纯滚轮版本。
 
 </section>
 
@@ -70,13 +70,13 @@ interface PickerOption {
 | `columns` | `PickerColumns` | — | 单列、多列或包含 `children` 的级联数据；也支持由前置选择计算列数据的函数列 |
 | `value` | `readonly (string \| number)[]` | — | 受控选中值，数组顺序对应列顺序 |
 | `defaultValue` | `readonly (string \| number)[]` | — | 非受控初始值；非法值回退到当前列第一项 |
-| `onChange` | `(values, options) => void` | — | 列吸附完成后触发，返回规范化 value 和对应的选中 options |
+| `onChange` | `(values, options) => void` | — | 列完成 momentum 吸附后触发，返回规范化 value 和对应的选中 options |
 | `itemHeight` | `number` | `44` | 单行高度；小于 `1` 会被校正 |
 | `visibleItemCount` | `number` | `5` | 可见行数；偶数会调整为下一个奇数 |
 | `style` | `StyleProp<ViewStyle>` | — | PickerView 根节点样式 |
 | `styles` | `PickerViewStyles` | — | `root`、`columns`、`column`、`item`、`itemLabel`、`mask`、`indicator` 语义样式 |
 
-PickerView 使用原生 `Animated.ScrollView`、`snapToInterval` 和滚动结束事件处理快速滑动及吸附。顶部和底部 padding 会根据 `visibleItemCount` 保证第一项和最后一项能够居中。
+PickerView 使用原生 `Animated.ScrollView`、`snapToInterval` 和 `onMomentumScrollEnd` 处理快速滑动及吸附。顶部和底部 padding 会根据 `visibleItemCount` 保证第一项和最后一项能够居中；中间 indicator、上下渐隐遮罩以及文字的 opacity、scale、translateY 会随滚动位置变化。
 
 函数列接收 `PickerColumnContext`，其中包含前置列的 `selectedValues`、`selectedIndexes`、`selectedOptions`、`values` 和 `indexes`。
 
@@ -131,14 +131,17 @@ const [value, setValue] = useState<readonly (string | number)[]>(['beijing'])
 
 通过 `ConfigProvider` 的 `theme.components.Picker` 覆盖 token：
 
-| Token                       | 默认来源               | 说明                      |
-| --------------------------- | ---------------------- | ------------------------- |
-| `picker_item_height`        | `44`                   | 默认行高                  |
-| `picker_text_color`         | `colorTextSecondary`   | 非选中项文字颜色          |
-| `picker_active_text_color`  | `colorText`            | 选中项和操作按钮文字颜色  |
-| `picker_indicator_color`    | `colorBorderSecondary` | 选中框和 Toolbar 边框颜色 |
-| `picker_mask_color`         | `colorBgContainer`     | 上下渐隐遮罩颜色          |
-| `picker_visible_item_count` | `5`                    | 默认可见行数              |
+| Token                          | 默认来源               | 说明                      |
+| ------------------------------ | ---------------------- | ------------------------- |
+| `picker_item_height`           | `44`                   | 默认行高                  |
+| `picker_text_color`            | `colorTextSecondary`   | 非选中项文字颜色          |
+| `picker_active_text_color`     | `colorText`            | 选中项和操作按钮文字颜色  |
+| `picker_indicator_color`       | `colorBorderSecondary` | 选中框和 Toolbar 边框颜色 |
+| `picker_mask_color`            | `colorBgContainer`     | 上下渐隐遮罩颜色          |
+| `picker_visible_item_count`    | `5`                    | 默认可见行数              |
+| `picker_item_inactive_opacity` | `0.3`                  | 远离中心的文字透明度      |
+| `picker_item_inactive_scale`   | `0.9`                  | 远离中心的文字缩放比例    |
+| `picker_item_translate_y`      | `4`                    | 滚轮层次的最大垂直位移    |
 
 其他字号、字体、背景、内边距和遮罩 stop opacity 也通过 Picker component token 控制；实现中不写死颜色。
 

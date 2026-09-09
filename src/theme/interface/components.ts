@@ -402,6 +402,7 @@ export interface PickerToken {
   picker_item_padding_horizontal: number
   picker_item_inactive_opacity: number
   picker_item_inactive_scale: number
+  picker_item_translate_y: number
   picker_mask_opacities: readonly number[]
   picker_font_family: string
 }

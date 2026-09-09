@@ -90,6 +90,7 @@ export function getPickerStyles(
       right: 0,
       left: 0,
       height: itemHeight,
+      zIndex: 2,
       borderTopColor: token.picker_indicator_color,
       borderTopWidth: token.picker_border_width,
       borderBottomColor: token.picker_indicator_color,

@@ -16,6 +16,14 @@ import type { PickerOption } from './types'
 
 const MIN_OFFSET_EPSILON = 0.5
 
+function clampIndex(index: number, maxIndex: number) {
+  return Math.min(maxIndex, Math.max(0, Number.isFinite(index) ? index : 0))
+}
+
+function getSnapIndex(offset: number, itemHeight: number, maxIndex: number) {
+  return clampIndex(itemHeight > 0 ? Math.round(offset / itemHeight) : 0, maxIndex)
+}
+
 export interface PickerColumnProps {
   items: readonly PickerOption[]
   selectedIndex: number
@@ -48,10 +56,11 @@ export const PickerColumn = forwardRef<View, PickerColumnProps>(function PickerC
   const resolvedVisibleItemCount = Math.max(1, Math.floor(visibleItemCount) || 1)
   const topInset = ((resolvedVisibleItemCount - 1) * itemHeight) / 2
   const maxIndex = Math.max(0, items.length - 1)
-  const offset = useRef(new Animated.Value(Math.max(0, selectedIndex) * itemHeight)).current
-  const offsetRef = useRef(Math.max(0, selectedIndex) * itemHeight)
-  const lastSettledIndexRef = useRef(Math.max(0, selectedIndex))
-  const selectedIndexRef = useRef(Math.max(0, selectedIndex))
+  const initialIndex = clampIndex(selectedIndex, maxIndex)
+  const offset = useRef(new Animated.Value(initialIndex * itemHeight)).current
+  const offsetRef = useRef(initialIndex * itemHeight)
+  const scrollIndexRef = useRef(initialIndex)
+  const selectedIndexRef = useRef(initialIndex)
   const itemHeightRef = useRef(itemHeight)
   const itemCountRef = useRef(items.length)
   const initializedRef = useRef(false)
@@ -65,15 +74,17 @@ export const PickerColumn = forwardRef<View, PickerColumnProps>(function PickerC
   )
 
   const clampOffset = useCallback(
-    (value: number) => Math.min(maxIndex * itemHeight, Math.max(0, value)),
+    (value: number) =>
+      Math.min(maxIndex * itemHeight, Math.max(0, Number.isFinite(value) ? value : 0)),
     [itemHeight, maxIndex],
   )
 
   const scrollToIndex = useCallback(
     (requestedIndex: number, animated: boolean) => {
-      const index = Math.min(maxIndex, Math.max(0, requestedIndex))
+      const index = clampIndex(requestedIndex, maxIndex)
       const nextOffset = index * itemHeight
       offsetRef.current = nextOffset
+      scrollIndexRef.current = index
       if (!animated) offset.setValue(nextOffset)
       scrollRef.current?.scrollTo({ y: nextOffset, animated })
     },
@@ -85,16 +96,16 @@ export const PickerColumn = forwardRef<View, PickerColumnProps>(function PickerC
       if (items.length === 0) return
 
       const clampedOffset = clampOffset(requestedOffset)
-      const index = Math.min(maxIndex, Math.max(0, Math.round(clampedOffset / itemHeight)))
+      const index = getSnapIndex(clampedOffset, itemHeight, maxIndex)
       const targetOffset = index * itemHeight
       const shouldAnimate = animated && Math.abs(clampedOffset - targetOffset) > MIN_OFFSET_EPSILON
 
       offsetRef.current = targetOffset
+      scrollIndexRef.current = index
       if (!shouldAnimate) offset.setValue(targetOffset)
-      if (shouldAnimate) scrollRef.current?.scrollTo({ y: targetOffset, animated: true })
+      scrollRef.current?.scrollTo({ y: targetOffset, animated: shouldAnimate })
 
-      if (lastSettledIndexRef.current === index) return
-      lastSettledIndexRef.current = index
+      if (selectedIndexRef.current === index) return
       selectedIndexRef.current = index
       onIndexChangeRef.current?.(index)
     },
@@ -109,20 +120,24 @@ export const PickerColumn = forwardRef<View, PickerColumnProps>(function PickerC
     const shouldScroll = !initializedRef.current || selectedIndexChanged || geometryChanged
     const shouldAnimate = initializedRef.current && selectedIndexChanged && !geometryChanged
 
-    lastSettledIndexRef.current = nextIndex
     selectedIndexRef.current = nextIndex
     itemHeightRef.current = itemHeight
     itemCountRef.current = items.length
-    if (shouldScroll) scrollToIndex(nextIndex, shouldAnimate)
+    if (shouldScroll) {
+      scrollIndexRef.current = nextIndex
+      scrollToIndex(nextIndex, shouldAnimate)
+    }
     initializedRef.current = true
   }, [itemHeight, items.length, maxIndex, scrollToIndex, selectedIndex])
 
   const handleScroll = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      offsetRef.current = clampOffset(event.nativeEvent.contentOffset.y)
+      const nextOffset = clampOffset(event.nativeEvent.contentOffset.y)
+      offsetRef.current = nextOffset
+      scrollIndexRef.current = itemHeight > 0 ? nextOffset / itemHeight : 0
       offset.setValue(offsetRef.current)
     },
-    [clampOffset, offset],
+    [clampOffset, itemHeight, offset],
   )
 
   const handleScrollEnd = useCallback(() => {
@@ -132,13 +147,13 @@ export const PickerColumn = forwardRef<View, PickerColumnProps>(function PickerC
   const handleItemPress = useCallback(
     (index: number) => {
       scrollToIndex(index, true)
-      if (lastSettledIndexRef.current === index) return
+      const nextIndex = clampIndex(index, maxIndex)
+      if (selectedIndexRef.current === nextIndex) return
 
-      lastSettledIndexRef.current = index
-      selectedIndexRef.current = index
-      onIndexChangeRef.current?.(index)
+      selectedIndexRef.current = nextIndex
+      onIndexChangeRef.current?.(nextIndex)
     },
-    [scrollToIndex],
+    [maxIndex, scrollToIndex],
   )
 
   return (
@@ -151,7 +166,6 @@ export const PickerColumn = forwardRef<View, PickerColumnProps>(function PickerC
         nestedScrollEnabled
         onMomentumScrollEnd={handleScrollEnd}
         onScroll={handleScroll}
-        onScrollEndDrag={handleScrollEnd}
         scrollEventThrottle={16}
         scrollsToTop={false}
         showsVerticalScrollIndicator={false}
@@ -172,9 +186,9 @@ export const PickerColumn = forwardRef<View, PickerColumnProps>(function PickerC
             inputRange,
             outputRange: [
               token.picker_item_inactive_opacity,
-              Math.min(1, token.picker_item_inactive_opacity + 0.25),
+              Math.min(1, token.picker_item_inactive_opacity + 0.35),
               1,
-              Math.min(1, token.picker_item_inactive_opacity + 0.25),
+              Math.min(1, token.picker_item_inactive_opacity + 0.35),
               token.picker_item_inactive_opacity,
             ],
             extrapolate: 'clamp',
@@ -183,10 +197,21 @@ export const PickerColumn = forwardRef<View, PickerColumnProps>(function PickerC
             inputRange,
             outputRange: [
               token.picker_item_inactive_scale,
-              Math.min(1, token.picker_item_inactive_scale + 0.04),
+              Math.min(1, token.picker_item_inactive_scale + 0.05),
               1,
-              Math.min(1, token.picker_item_inactive_scale + 0.04),
+              Math.min(1, token.picker_item_inactive_scale + 0.05),
               token.picker_item_inactive_scale,
+            ],
+            extrapolate: 'clamp',
+          })
+          const translateY = offset.interpolate({
+            inputRange,
+            outputRange: [
+              token.picker_item_translate_y,
+              token.picker_item_translate_y / 2,
+              0,
+              -token.picker_item_translate_y / 2,
+              -token.picker_item_translate_y,
             ],
             extrapolate: 'clamp',
           })
@@ -211,7 +236,7 @@ export const PickerColumn = forwardRef<View, PickerColumnProps>(function PickerC
                         ? token.picker_active_text_color
                         : token.picker_text_color,
                     opacity,
-                    transform: [{ scale }],
+                    transform: [{ translateY }, { scale }],
                   },
                 ]}
               >

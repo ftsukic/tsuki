@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { InteractionPressable } from '../interaction'
-import { Picker, PickerView, showPicker } from '../picker'
+import { Picker, PickerView } from '../picker'
 import { Provider } from '../provider'
 import { useState } from 'react'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
@@ -27,7 +27,10 @@ describe('PickerView', () => {
     expect(screen.getByTestId('picker-item-0-1').props.accessibilityState).toMatchObject({
       selected: true,
     })
-    expect(screen.getByTestId('picker-indicator')).toBeTruthy()
+    expect(StyleSheet.flatten(screen.getByTestId('picker-indicator').props.style)).toMatchObject({
+      height: 44,
+      top: 44,
+    })
     expect(screen.getByTestId('picker-mask')).toBeTruthy()
   })
 
@@ -94,6 +97,36 @@ describe('PickerView', () => {
     expect(screen.getByTestId('picker-item-0-0').props.accessibilityState).toMatchObject({
       selected: true,
     })
+  })
+
+  it('waits for momentum to settle a fast scroll before reporting the value', async () => {
+    const longOptions = Array.from({ length: 21 }, (_, index) => ({
+      text: `选项 ${index}`,
+      value: index,
+    }))
+    const onChange = jest.fn()
+
+    await render(<PickerView columns={longOptions} onChange={onChange} />)
+
+    const scroll = screen.getByTestId('picker-column-0-scroll')
+    expect(scroll.props.decelerationRate).toBe('fast')
+    expect(scroll.props.snapToInterval).toBe(44)
+
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {
+      fireEvent.scroll(scroll, {
+        nativeEvent: { contentOffset: { x: 0, y: 20 * 44 + 10 } },
+      })
+    })
+    expect(onChange).not.toHaveBeenCalled()
+
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {
+      fireEvent(scroll, 'momentumScrollEnd')
+    })
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenCalledWith([20], [longOptions[20]])
   })
 })
 
@@ -201,10 +234,10 @@ describe('Picker', () => {
 
   it('supports imperative confirmation through Provider', async () => {
     const view = await render(<Provider theme={{ token: { motion: false } }} />)
-    let resultPromise!: ReturnType<typeof showPicker>
+    let resultPromise!: ReturnType<typeof Picker.open>
 
     await act(async () => {
-      resultPromise = showPicker({ columns: options })
+      resultPromise = Picker.open({ columns: options })
     })
     expect(screen.getByTestId('picker-toolbar')).toBeTruthy()
 
@@ -220,9 +253,9 @@ describe('Picker', () => {
     })
     expect(screen.queryByTestId('picker-toolbar')).toBeNull()
 
-    let cancelPromise!: ReturnType<typeof showPicker>
+    let cancelPromise!: ReturnType<typeof Picker.open>
     await act(async () => {
-      cancelPromise = showPicker({ columns: options })
+      cancelPromise = Picker.open({ columns: options })
     })
     // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => {

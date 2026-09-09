@@ -17,8 +17,9 @@ export function getPickerToken(token: AliasToken): PickerToken {
     picker_toolbar_padding_horizontal: token.padding,
     picker_border_width: token.lineWidth,
     picker_item_padding_horizontal: token.paddingSM,
-    picker_item_inactive_opacity: 0.45,
-    picker_item_inactive_scale: 0.92,
+    picker_item_inactive_opacity: 0.3,
+    picker_item_inactive_scale: 0.9,
+    picker_item_translate_y: 4,
     picker_mask_opacities: [0.76, 0.56, 0.34, 0.16],
     picker_font_family: token.fontFamily,
   }
