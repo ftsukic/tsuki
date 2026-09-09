@@ -51,7 +51,7 @@ import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 | value | `string \| number \| (string \| number)[]` | — | 受控展开值；accordion 模式使用单值，普通模式使用数组 |
 | defaultValue | `string \| number \| (string \| number)[]` | — | 非受控初始展开值 |
 | accordion | `boolean` | `false` | 是否只允许展开一个面板 |
-| border | `boolean` | `true` | 是否显示根部上下边框和各面板之间的内缩 hairline 分隔线 |
+| border | `boolean` | `true` | 是否显示根部上下边框、各面板之间及展开标题下的内缩 hairline 分隔线 |
 | onChange | `(value: CollapseValue) => void` | — | 展开值变化时触发 |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
 
@@ -91,7 +91,7 @@ import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 | contentPaddingVertical / contentPaddingHorizontal | `paddingSM` / `padding` | 内容区域内边距 |
 | contentTextColor | `colorTextSecondary` | 内容文字颜色 |
 | contentBackgroundColor | `colorBgContainer` | 内容背景 |
-| borderColor / borderWidth | `colorBorder` / `lineWidthHairline` | 外层边框和内部分隔线 |
+| borderColor / borderWidth | `colorBorder` / `lineWidthHairline` | 外层边框、面板间和展开标题下的内部分隔线 |
 | animationDuration | `motionDurationSlow`（默认 `300ms`） | 高度和箭头动画时长；缓动为 `ease-in-out` |
 
 ```tsx | pure

@@ -28,6 +28,17 @@ export function getCollapseDividerStyle(token: CollapseToken): ViewStyle {
   }
 }
 
+export function getCollapseHeaderDividerStyle(token: CollapseToken): ViewStyle {
+  return {
+    backgroundColor: token.borderColor,
+    bottom: 0,
+    height: token.borderWidth,
+    left: token.paddingHorizontal,
+    position: 'absolute',
+    right: token.paddingHorizontal,
+  }
+}
+
 export function getCollapseRootStyle(token: CollapseToken, border: boolean): ViewStyle {
   return {
     alignSelf: 'stretch',
@@ -51,6 +62,7 @@ export function getCollapseStyles(
       opacity: state.disabled ? token.disabledOpacity : 1,
       overflow: 'hidden',
       paddingHorizontal: token.paddingHorizontal,
+      position: 'relative',
     },
     title: {
       color: state.disabled ? token.disabledColor : token.titleColor,

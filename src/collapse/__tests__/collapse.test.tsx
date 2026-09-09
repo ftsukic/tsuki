@@ -10,7 +10,7 @@ import {
   getCollapseToken,
   getDesignToken,
 } from '../..'
-import { getCollapseDividerStyle, getCollapseStyles } from '../style'
+import { getCollapseDividerStyle, getCollapseHeaderDividerStyle, getCollapseStyles } from '../style'
 
 function findLayoutNode(root: TestInstance) {
   const pending: TestInstance[] = [root]
@@ -189,6 +189,7 @@ describe('Collapse', () => {
       minHeight: cellToken.minHeight,
       overflow: 'hidden',
       paddingHorizontal: cellToken.paddingHorizontal,
+      position: 'relative',
     })
     expect(styles.title).toMatchObject({
       flexShrink: 1,
@@ -209,6 +210,13 @@ describe('Collapse', () => {
       right: collapseToken.paddingHorizontal,
       top: 0,
     })
+    expect(getCollapseHeaderDividerStyle(collapseToken)).toMatchObject({
+      bottom: 0,
+      height: collapseToken.borderWidth,
+      left: collapseToken.paddingHorizontal,
+      position: 'absolute',
+      right: collapseToken.paddingHorizontal,
+    })
 
     await render(
       <Collapse testID="collapse-with-separators">
@@ -228,6 +236,21 @@ describe('Collapse', () => {
         StyleSheet.flatten(node.props.style)?.right === collapseToken.paddingHorizontal,
     ).length
     expect(dividerCount).toBe(2)
+
+    await render(
+      <Collapse defaultValue="second" testID="collapse-with-expanded-divider">
+        <CollapseItem name="first" title="第一项" />
+        <CollapseItem name="second" title="第二项" />
+        <CollapseItem name="third" title="第三项" />
+      </Collapse>,
+    )
+
+    const expandedRoot = screen.getByTestId('collapse-with-expanded-divider')
+    const expandedDividerCount = findNodes(
+      expandedRoot,
+      (node) => StyleSheet.flatten(node.props.style)?.bottom === 0,
+    ).length
+    expect(expandedDividerCount).toBe(1)
   })
 
   it('uses Vant arrow orientation and animates height and arrow with the theme duration', async () => {

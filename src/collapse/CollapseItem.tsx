@@ -16,7 +16,7 @@ import { Pressable } from '../pressable'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
 import { CollapseContext } from './context'
-import { getCollapseStyles } from './style'
+import { getCollapseHeaderDividerStyle, getCollapseStyles } from './style'
 import { getCollapseToken } from './token'
 import type { CollapseItemProps } from './types'
 
@@ -175,6 +175,9 @@ export const CollapseItem = forwardRef<ViewComponent, CollapseItemProps>(functio
             color={disabled ? token.disabledColor : token.iconColor}
           />
         </Animated.View>
+        {context.border && active ? (
+          <View pointerEvents="none" style={getCollapseHeaderDividerStyle(token)} />
+        ) : null}
       </Pressable>
       <Animated.View style={[resolvedStyles.contentWrapper, animatedHeightStyle]}>
         <View

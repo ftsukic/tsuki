@@ -78,7 +78,7 @@ const CollapseComponent = forwardRef<ViewComponent, CollapseProps>(function Coll
     [accordion, activeValue, isControlled, onChange],
   )
 
-  const contextValue = useMemo(() => ({ isActive, toggle }), [isActive, toggle])
+  const contextValue = useMemo(() => ({ border, isActive, toggle }), [border, isActive, toggle])
 
   return (
     <CollapseContext.Provider value={contextValue}>
