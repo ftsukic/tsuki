@@ -255,11 +255,10 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
       {overlay ? (
         <OverlaySurface
           show={visible}
+          rendered={rendered}
           backgroundColor={token.overlayColor}
           zIndex={zIndex}
           onPress={handleOverlayPress}
-          externallyAnimated
-          forceRendered={rendered}
           animatedStyle={animatedOverlayStyle}
           style={[resolvedStyles.overlay, semantic?.overlay, overlayStyle]}
           pressableStyle={[semantic?.overlay, overlayStyle]}

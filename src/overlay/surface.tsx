@@ -1,24 +1,20 @@
-import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { forwardRef } from 'react'
 import { Pressable, StyleSheet } from 'react-native'
 import type { ForwardedRef } from 'react'
 import type { View } from 'react-native'
-import type { StyleProp, ViewStyle } from 'react-native'
+import type { ColorValue, StyleProp, ViewStyle } from 'react-native'
 import type { AnimatedStyle } from 'react-native-reanimated'
-import { Easing } from 'react-native-reanimated'
-import { Animated, useAnimatedTransition } from '../motion'
+import { Animated } from '../motion'
 import { resolveStyles } from '../style'
-import { useComponentToken, useToken } from '../theme'
+import { useComponentToken } from '../theme'
 import type { OverlayProps } from './interface'
 import { getOverlayToken } from './token'
 
-export interface OverlaySurfaceProps extends OverlayProps {
-  onClosed?: () => void
+export interface OverlaySurfaceProps extends Omit<OverlayProps, 'duration' | 'onClosed'> {
+  /** Internal mount state owned by the component that controls this surface. */
+  rendered?: boolean
   pressableStyle?: StyleProp<ViewStyle>
-
-  /** Internal mode used when Popup owns the transition and rendered lifecycle. */
   animatedStyle?: AnimatedStyle<ViewStyle>
-  externallyAnimated?: boolean
-  forceRendered?: boolean
 }
 
 function resolveSurfacePresentation(props: OverlaySurfaceProps, rendered: boolean) {
@@ -35,18 +31,11 @@ function resolveSurfacePresentation(props: OverlaySurfaceProps, rendered: boolea
 function renderSurface(
   props: OverlaySurfaceProps,
   ref: ForwardedRef<View>,
-  token: ReturnType<typeof getOverlayToken>,
   rendered: boolean,
-  animatedStyle?: AnimatedStyle<ViewStyle>,
+  backgroundColor: ColorValue,
+  zIndex: number,
 ) {
-  const {
-    show = false,
-    backgroundColor = token.backgroundColor,
-    zIndex = token.zIndex,
-    children,
-    onPress,
-    pressableStyle,
-  } = props
+  const { show = false, children, onPress, pressableStyle, animatedStyle } = props
   const viewProps = { ...props }
   delete viewProps.show
   delete viewProps.backgroundColor
@@ -56,11 +45,8 @@ function renderSurface(
   delete viewProps.style
   delete viewProps.styles
   delete viewProps.pressableStyle
-  delete viewProps.onClosed
   delete viewProps.animatedStyle
-  delete viewProps.externallyAnimated
-  delete viewProps.forceRendered
-  delete viewProps.duration
+  delete viewProps.rendered
   const { resolvedStyle, semantic } = resolveSurfacePresentation(props, rendered)
   const staticStyle = { ...resolvedStyle }
   delete staticStyle.opacity
@@ -87,86 +73,18 @@ function renderSurface(
   )
 }
 
-const StandaloneOverlaySurface = forwardRef<View, OverlaySurfaceProps>(
-  function StandaloneOverlaySurface(props, ref) {
-    const { token: themeToken } = useToken()
-    const token = useComponentToken('Overlay', getOverlayToken)
-    const { show = false, duration = token.animationDuration, onClosed } = props
-    const normalizedDuration = Number.isFinite(duration)
-      ? Math.max(0, duration as number)
-      : Math.max(0, token.animationDuration)
-    const animationDuration = themeToken.motion ? normalizedDuration : 0
-    const showRef = useRef(show)
-    const renderedRef = useRef(show)
-    const onClosedRef = useRef(onClosed)
-    const [rendered, setRendered] = useState(show)
-
-    showRef.current = show
-    onClosedRef.current = onClosed
-
-    useEffect(() => {
-      if (!show) return
-
-      renderedRef.current = true
-      setRendered(true)
-    }, [show])
-
-    const { resolvedStyle } = resolveSurfacePresentation(props, rendered)
-    const targetOpacity = typeof resolvedStyle.opacity === 'number' ? resolvedStyle.opacity : 1
-
-    const handleTransitionEnd = useCallback((transitionShow: boolean) => {
-      if (transitionShow || showRef.current || !renderedRef.current) return
-
-      renderedRef.current = false
-      setRendered(false)
-      onClosedRef.current?.()
-    }, [])
-    const enteringConfig = useMemo(
-      () => ({
-        duration: animationDuration,
-        easing: Easing.out(Easing.ease),
-        mode: 'timing' as const,
-      }),
-      [animationDuration],
-    )
-    const leavingConfig = useMemo(
-      () => ({
-        duration: animationDuration,
-        easing: Easing.in(Easing.ease),
-        mode: 'timing' as const,
-      }),
-      [animationDuration],
-    )
-    const animatedStyle = useAnimatedTransition({
-      visible: show,
-      type: 'fade',
-      opacity: targetOpacity,
-      entering: enteringConfig,
-      leaving: leavingConfig,
-      onTransitionEnd: handleTransitionEnd,
-    })
-
-    return renderSurface(props, ref, token, rendered, animatedStyle)
-  },
-)
-
-const ControlledOverlaySurface = forwardRef<View, OverlaySurfaceProps>(
-  function ControlledOverlaySurface(props, ref) {
-    const token = useComponentToken('Overlay', getOverlayToken)
-    const { show = false, forceRendered = show, animatedStyle } = props
-
-    return renderSurface(props, ref, token, forceRendered, animatedStyle)
-  },
-)
-
-/** Renders an overlay without creating another Portal entry. */
+/** Renders an overlay surface without owning visibility or animation lifecycle. */
 export const OverlaySurface = forwardRef<View, OverlaySurfaceProps>(
   function OverlaySurface(props, ref) {
-    if (props.externallyAnimated) {
-      return <ControlledOverlaySurface {...props} ref={ref} />
-    }
+    const token = useComponentToken('Overlay', getOverlayToken)
+    const {
+      backgroundColor = token.backgroundColor,
+      show = false,
+      rendered = show,
+      zIndex = token.zIndex,
+    } = props
 
-    return <StandaloneOverlaySurface {...props} ref={ref} />
+    return renderSurface(props, ref, rendered, backgroundColor, zIndex)
   },
 )
 

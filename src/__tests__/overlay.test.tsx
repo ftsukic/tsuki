@@ -211,13 +211,12 @@ describe('Overlay', () => {
     await view.unmount()
   })
 
-  it('does not start a second transition in externally controlled mode', async () => {
+  it('consumes a caller-owned animated style without starting a transition', async () => {
     const timing = jest.spyOn(Reanimated, 'withTiming')
     const view = await render(
       <OverlaySurface
         animatedStyle={{ opacity: 0.25 }}
-        externallyAnimated
-        forceRendered
+        rendered
         show={false}
         testID="controlled-overlay"
       />,

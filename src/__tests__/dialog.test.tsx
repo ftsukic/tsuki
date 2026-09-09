@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import { useState } from 'react'
 import { StyleSheet, Text } from 'react-native'
+import * as Reanimated from 'react-native-reanimated'
 import {
   closeDialog,
   ConfigProvider,
@@ -459,6 +460,52 @@ describe('Dialog', () => {
     expect(onCancel).toHaveBeenCalledTimes(1)
     expect(onClose).toHaveBeenCalledTimes(1)
     expect(screen.queryByText('左对齐正文')).toBeNull()
+    await view.unmount()
+  })
+
+  it('keeps dialog close lifecycle behind the shared Popup transition', async () => {
+    const animations: Array<{ complete: (finished?: boolean) => void }> = []
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, config, callback) => {
+      if (config?.duration !== 200) return value
+      animations.push({
+        complete: (finished = true) => callback?.(finished),
+      })
+      return value
+    })
+    const onOpened = jest.fn()
+    const onClose = jest.fn()
+
+    function StatefulDialog() {
+      const [show, setShow] = useState(true)
+      return (
+        <Dialog
+          show={show}
+          message="动画生命周期"
+          onOpened={onOpened}
+          onClose={onClose}
+          onShowChange={setShow}
+        />
+      )
+    }
+
+    const view = await render(
+      <ConfigProvider theme={{ token: { motion: true } }}>
+        <PortalHost>
+          <StatefulDialog />
+        </PortalHost>
+      </ConfigProvider>,
+    )
+
+    await act(async () => animations[0]?.complete())
+    expect(onOpened).toHaveBeenCalledTimes(1)
+
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => fireEvent.press(screen.getByTestId('dialog-confirm-button')))
+    expect(onClose).not.toHaveBeenCalled()
+    expect(animations).toHaveLength(2)
+
+    await act(async () => animations[1]?.complete())
+    expect(onClose).toHaveBeenCalledTimes(1)
     await view.unmount()
   })
 

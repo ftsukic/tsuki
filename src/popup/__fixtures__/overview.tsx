@@ -1,5 +1,6 @@
 import { FixtureOverview } from '../../fixture-overview'
 import PopupBasicExample from './examples/basic'
+import PopupAnimationPlayground from './examples/animation-playground'
 import PopupInteractionsExample from './examples/interactions'
 import PopupLifecycleExample from './examples/lifecycle'
 import PopupPositionsExample from './examples/positions'
@@ -15,6 +16,12 @@ export default function PopupOverview() {
     <FixtureOverview
       mode="single"
       examples={[
+        {
+          Component: PopupAnimationPlayground,
+          description: '验证打开、关闭、快速反转、销毁和 Android 返回键等动画生命周期。',
+          id: 'animation-playground',
+          title: '动画 Playground',
+        },
         {
           Component: PopupBasicExample,
           description: 'Popup 通过 visible 受控显示，默认居中并使用 PortalHost 承载浮层。',

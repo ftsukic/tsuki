@@ -143,6 +143,53 @@ describe('ActionSheet', () => {
     await view.unmount()
   })
 
+  it('finishes the sheet close callback after the shared transition', async () => {
+    const animations: Array<{ complete: (finished?: boolean) => void }> = []
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, config, callback) => {
+      if (config?.duration !== 200) return value
+      animations.push({
+        complete: (finished = true) => callback?.(finished),
+      })
+      return value
+    })
+    const onClose = jest.fn()
+    const onClosed = jest.fn()
+
+    function StatefulActionSheet() {
+      const [visible, setVisible] = useState(true)
+      return (
+        <ActionSheet
+          visible={visible}
+          actions={[{ name: '关闭面板' }]}
+          onClose={() => {
+            onClose()
+            setVisible(false)
+          }}
+          onClosed={onClosed}
+        />
+      )
+    }
+
+    const view = await render(
+      <ConfigProvider theme={{ token: { motion: true } }}>
+        <PortalHost>
+          <StatefulActionSheet />
+        </PortalHost>
+      </ConfigProvider>,
+    )
+
+    await act(async () => animations[0]?.complete())
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => fireEvent.press(screen.getByTestId('action-sheet-action-0')))
+    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(onClosed).not.toHaveBeenCalled()
+    expect(animations).toHaveLength(2)
+
+    await act(async () => animations[1]?.complete())
+    expect(onClosed).toHaveBeenCalledTimes(1)
+    await view.unmount()
+  })
+
   it('uses dedicated active backgrounds without changing action height or dividers', async () => {
     const view = await render(
       <ConfigProvider

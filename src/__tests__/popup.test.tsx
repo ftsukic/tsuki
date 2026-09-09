@@ -611,6 +611,83 @@ describe('Popup', () => {
     await view.unmount()
   })
 
+  it('keeps destroyable content mounted through a reversed close', async () => {
+    const animations: Array<{ complete: (finished?: boolean) => void }> = []
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, _config, callback) => {
+      animations.push({
+        complete: (finished = true) => callback?.(finished),
+      })
+      return value
+    })
+    const onClosed = jest.fn()
+    const view = await render(
+      <AppProvider motion>
+        <Popup
+          visible
+          destroyOnClosed
+          duration={240}
+          onClosed={onClosed}
+          testID="reversible-destroy-popup"
+        >
+          <Text testID="reversible-destroy-content">reversible destroy content</Text>
+        </Popup>
+      </AppProvider>,
+    )
+
+    await act(async () => animations[0]?.complete())
+    await view.rerender(
+      <AppProvider motion>
+        <Popup
+          visible={false}
+          destroyOnClosed
+          duration={240}
+          onClosed={onClosed}
+          testID="reversible-destroy-popup"
+        >
+          <Text testID="reversible-destroy-content">reversible destroy content</Text>
+        </Popup>
+      </AppProvider>,
+    )
+    expect(screen.getByTestId('reversible-destroy-content')).toBeTruthy()
+
+    await view.rerender(
+      <AppProvider motion>
+        <Popup
+          visible
+          destroyOnClosed
+          duration={240}
+          onClosed={onClosed}
+          testID="reversible-destroy-popup"
+        >
+          <Text testID="reversible-destroy-content">reversible destroy content</Text>
+        </Popup>
+      </AppProvider>,
+    )
+    await act(async () => animations[1]?.complete())
+    expect(onClosed).not.toHaveBeenCalled()
+    expect(screen.getByTestId('reversible-destroy-content')).toBeTruthy()
+
+    await act(async () => animations[2]?.complete())
+    await view.rerender(
+      <AppProvider motion>
+        <Popup
+          visible={false}
+          destroyOnClosed
+          duration={240}
+          onClosed={onClosed}
+          testID="reversible-destroy-popup"
+        >
+          <Text testID="reversible-destroy-content">reversible destroy content</Text>
+        </Popup>
+      </AppProvider>,
+    )
+    await act(async () => animations[3]?.complete())
+
+    expect(onClosed).toHaveBeenCalledTimes(1)
+    expect(screen.queryByTestId('reversible-destroy-content')).toBeNull()
+    await view.unmount()
+  })
+
   it('completes open and close synchronously when duration is zero', async () => {
     const onOpened = jest.fn()
     const onClosed = jest.fn()
