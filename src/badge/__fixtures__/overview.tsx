@@ -1,36 +1,35 @@
-import React from 'react'
+import { FixtureOverview } from '../../fixture-overview'
+import BadgeStatusExample from './examples/status'
+import BadgeThemeExample from './examples/theme'
+import BadgeTypesExample from './examples/types'
 
 /**
- * @title 组件预览
+ * @title Badge overview
+ * @description Badge 汇总数字、红点、状态和主题样式示例。
  */
-import { Avatar, Badge } from '@ftsukic/tsuki'
-import { Text, View } from 'react-native'
-
 export default function BadgeOverview() {
   return (
-    <View style={{ gap: 24, padding: 20, backgroundColor: '#ffffff' }}>
-      <View style={{ gap: 12 }}>
-        <Text style={{ color: '#68788d', fontSize: 14 }}>数字和红点</Text>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 28 }}>
-          <Badge count={5}>
-            <Avatar style={{ backgroundColor: '#1989FA' }}>A</Avatar>
-          </Badge>
-          <Badge count={100}>
-            <Avatar style={{ backgroundColor: '#07C160' }}>B</Avatar>
-          </Badge>
-          <Badge dot>
-            <Avatar style={{ backgroundColor: '#FF976A' }}>C</Avatar>
-          </Badge>
-        </View>
-      </View>
-      <View style={{ gap: 12 }}>
-        <Text style={{ color: '#68788d', fontSize: 14 }}>状态</Text>
-        <View style={{ gap: 8 }}>
-          <Badge status="success" text="在线" />
-          <Badge status="processing" text="处理中" />
-          <Badge status="error" text="离线" />
-        </View>
-      </View>
-    </View>
+    <FixtureOverview
+      examples={[
+        {
+          Component: BadgeTypesExample,
+          description: 'count 支持数字和自定义节点，数字超过 overflowCount 时显示封顶值。',
+          id: 'types',
+          title: '数字、红点和溢出',
+        },
+        {
+          Component: BadgeStatusExample,
+          description: 'status 用于展示成功、处理中、默认、错误和警告状态，也可以附带文字。',
+          id: 'status',
+          title: '状态点',
+        },
+        {
+          Component: BadgeThemeExample,
+          description: 'Badge 支持组件 token 和 root、indicator、dot、text 语义样式。',
+          id: 'theme',
+          title: '主题和语义样式',
+        },
+      ]}
+    />
   )
 }

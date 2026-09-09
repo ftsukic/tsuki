@@ -9,13 +9,18 @@ import { View } from 'react-native'
 
 export default function Example() {
   return (
-    <View style={{ gap: 16 }}>
+    <View style={{ gap: 20 }}>
+      <Avatar.Group size="small">
+        <Avatar style={{ backgroundColor: '#1989FA' }}>A</Avatar>
+        <Avatar style={{ backgroundColor: '#07C160' }}>B</Avatar>
+        <Avatar style={{ backgroundColor: '#FF976A' }}>C</Avatar>
+      </Avatar.Group>
       <Avatar.Group size="large" shape="circle">
         <Avatar style={{ backgroundColor: '#1989FA' }}>A</Avatar>
         <Avatar style={{ backgroundColor: '#07C160' }}>B</Avatar>
         <Avatar style={{ backgroundColor: '#FF976A' }}>C</Avatar>
       </Avatar.Group>
-      <Avatar.Group maxCount={2} onOverflowPress={() => undefined}>
+      <Avatar.Group maxCount={3} onOverflowPress={() => undefined}>
         <Avatar style={{ backgroundColor: '#1989FA' }}>A</Avatar>
         <Avatar style={{ backgroundColor: '#07C160' }}>B</Avatar>
         <Avatar style={{ backgroundColor: '#FF976A' }}>C</Avatar>

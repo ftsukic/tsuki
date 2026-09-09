@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-import { Icon } from '../..'
+import { Icon } from '../../..'
 
 /**
  * @title Icon gallery
@@ -33,7 +33,6 @@ export default function IconBasicFixture() {
 const styles = StyleSheet.create({
   container: {
     gap: 16,
-    padding: 16,
   },
   heading: {
     color: '#333333',

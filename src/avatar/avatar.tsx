@@ -1,5 +1,6 @@
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
+import { IconSizeProvider } from '../icon/context'
 import { getAvatarToken } from './token'
 import type { AvatarProps, AvatarSize } from './interface'
 import { forwardRef, useEffect, useMemo, useState } from 'react'
@@ -23,10 +24,21 @@ function resolveSize(size: AvatarSize | undefined, token: ReturnType<typeof getA
 }
 
 function resolveFontSize(size: AvatarSize | undefined, token: ReturnType<typeof getAvatarToken>) {
-  if (typeof size === 'number') return Math.max(1, Math.min(size * 0.44, token.textFontSizeLG))
+  if (typeof size === 'number') return Math.max(1, size * 0.5)
   if (size === 'small') return token.textFontSizeSM
   if (size === 'large') return token.textFontSizeLG
   return token.textFontSize
+}
+
+function resolveIconSize(
+  size: AvatarSize | undefined,
+  resolvedSize: number,
+  token: ReturnType<typeof getAvatarToken>,
+) {
+  if (size === 'small') return token.iconFontSizeSM
+  if (size === 'large') return token.iconFontSizeLG
+  if (size === 'medium' || size === undefined) return token.iconFontSize
+  return Math.max(1, resolvedSize * 0.6)
 }
 
 export const Avatar = forwardRef<ViewComponent, AvatarProps>(function Avatar(
@@ -50,6 +62,7 @@ export const Avatar = forwardRef<ViewComponent, AvatarProps>(function Avatar(
   const [imageError, setImageError] = useState(false)
   const resolvedSize = resolveSize(size, token)
   const fontSize = resolveFontSize(size, token)
+  const iconSize = resolveIconSize(size, resolvedSize, token)
   const source = useMemo(() => (src === undefined ? undefined : normalizeSource(src)), [src])
   const semantic = resolveStyles(styles, {
     props: {
@@ -115,18 +128,17 @@ export const Avatar = forwardRef<ViewComponent, AvatarProps>(function Avatar(
         />
       ) : hasIcon ? (
         <View style={[{ alignItems: 'center', justifyContent: 'center' }, semantic?.icon]}>
-          {icon}
+          <IconSizeProvider size={iconSize}>{icon}</IconSizeProvider>
         </View>
       ) : hasText ? (
         typeof children === 'string' || typeof children === 'number' ? (
           <Text
             numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.5}
             style={[
               {
                 maxWidth: Math.max(0, resolvedSize - gap * 2),
                 color: token.textColor,
+                fontFamily: token.fontFamily,
                 fontSize,
                 lineHeight: resolvedSize,
                 textAlign: 'center',

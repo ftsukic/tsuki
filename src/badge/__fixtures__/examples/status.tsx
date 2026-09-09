@@ -10,6 +10,7 @@ import { View } from 'react-native'
 export default function Example() {
   return (
     <View style={{ gap: 10 }}>
+      <Badge status="success" />
       <Badge status="success" text="成功" />
       <Badge status="processing" text="处理中" />
       <Badge status="default" text="默认" />

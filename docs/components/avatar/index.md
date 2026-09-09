@@ -55,7 +55,7 @@ import { Avatar, Badge, Icon } from '@ftsukic/tsuki'
 
 Avatar 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`。头像默认暴露 `accessibilityRole="image"`；可通过 `accessibilityLabel` 覆盖 `alt`。
 
-图片失败时回退顺序为 `icon`、`children`；两者都不存在时只保留头像容器。字符串和数字字符会单行显示并自动缩小，自定义节点需要自行控制尺寸。
+图片失败时回退顺序为 `icon`、`children`；两者都不存在时只保留头像容器。字符串和数字字符会单行显示，`gap` 负责字符内容左右的安全区域；自定义节点需要自行控制尺寸。未显式设置 `size` 的库 `Icon` 会按 Avatar 尺寸缩放，显式 Icon 尺寸和其他自定义节点保持调用方控制。
 
 ### Avatar.Group
 

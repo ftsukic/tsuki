@@ -1,5 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
-import { Avatar, ConfigProvider } from '..'
+import { Avatar, ConfigProvider, Icon } from '..'
 import { StyleSheet, Text } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
 
@@ -13,6 +13,14 @@ function findNode(node: JsonNode | null, type: string): JsonElement | undefined 
   }
 
   return undefined
+}
+
+function findNodes(node: JsonNode | null, type: string, result: JsonElement[] = []) {
+  if (node === null || typeof node === 'string') return result
+  if (node.type === type) result.push(node)
+
+  for (const child of node.children) findNodes(child, type, result)
+  return result
 }
 
 describe('Avatar', () => {
@@ -31,6 +39,21 @@ describe('Avatar', () => {
         <Avatar testID="style-radius" size={48} borderRadius={6} style={{ borderRadius: 10 }}>
           S
         </Avatar>
+        <Avatar testID="numeric-small" size={24}>
+          1
+        </Avatar>
+        <Avatar testID="preset-small" size="small">
+          small
+        </Avatar>
+        <Avatar testID="preset-medium" size="medium">
+          medium
+        </Avatar>
+        <Avatar testID="preset-large" size="large">
+          large
+        </Avatar>
+        <Avatar testID="numeric-large" size={56}>
+          numeric
+        </Avatar>
         <Avatar testID="image" src="https://example.com/avatar.png" alt="用户头像" />
       </ConfigProvider>,
     )
@@ -45,6 +68,12 @@ describe('Avatar', () => {
     expect(squareStyle.borderRadius).toBeGreaterThan(0)
     expect(StyleSheet.flatten(screen.getByTestId('custom-radius').props.style).borderRadius).toBe(6)
     expect(StyleSheet.flatten(screen.getByTestId('style-radius').props.style).borderRadius).toBe(10)
+    expect(StyleSheet.flatten(screen.getByText('1').props.style).fontSize).toBe(12)
+    expect(StyleSheet.flatten(screen.getByText('small').props.style).fontSize).toBe(14)
+    expect(StyleSheet.flatten(screen.getByText('medium').props.style).fontSize).toBe(18)
+    expect(StyleSheet.flatten(screen.getByText('large').props.style).fontSize).toBe(24)
+    expect(StyleSheet.flatten(screen.getByText('numeric').props.style).fontSize).toBe(28)
+    expect(screen.getByText('small').props.adjustsFontSizeToFit).toBeUndefined()
     expect(screen.getByTestId('image').props.accessibilityRole).toBe('image')
     expect(screen.getByTestId('image').props.accessibilityLabel).toBe('用户头像')
     expect(findNode(view.toJSON(), 'Image')).toBeTruthy()
@@ -105,6 +134,24 @@ describe('Avatar', () => {
     expect(onError).toHaveBeenCalledWith(event)
     expect(styles.mock.calls.some(([info]) => info.state.imageError)).toBe(true)
   })
+
+  it('derives library Icon size from Avatar size while preserving explicit Icon size', async () => {
+    const view = await render(
+      <ConfigProvider>
+        <Avatar size="small" icon={<Icon name="UserOutlined" />} />
+        <Avatar icon={<Icon name="UserOutlined" />} />
+        <Avatar size="large" icon={<Icon name="UserOutlined" />} />
+        <Avatar size={56} icon={<Icon name="UserOutlined" />} />
+        <Avatar size="small" icon={<Icon name="UserOutlined" size={6} />} />
+      </ConfigProvider>,
+    )
+
+    expect(
+      findNodes(view.toJSON(), 'RNSVGSvgView').map(
+        (node) => node.props.bbWidth ?? node.props.width,
+      ),
+    ).toEqual([14, 18, 24, 33.6, 6])
+  })
 })
 
 describe('Avatar.Group', () => {
@@ -130,7 +177,7 @@ describe('Avatar.Group', () => {
     )
 
     const firstStyle = StyleSheet.flatten(screen.getByTestId('first').props.style)
-    expect(firstStyle).toMatchObject({ width: 40, height: 40 })
+    expect(firstStyle).toMatchObject({ width: 40, height: 40, borderWidth: 1 })
     expect(firstStyle.borderRadius).toBeGreaterThan(0)
     expect(StyleSheet.flatten(screen.getByTestId('second').props.style)).toMatchObject({
       width: 24,

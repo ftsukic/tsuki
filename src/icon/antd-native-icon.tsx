@@ -1,9 +1,11 @@
-import { useOptionalToken } from '../theme'
+import { useToken } from '../theme'
+import { useIconSize } from './context'
+import { InteractionPressable } from '../interaction'
 import type { AntdNativeIconProps } from './interface'
 import type { AbstractNode, IconDefinition } from '@ant-design/icons-svg/lib/types'
 import { memo, type ReactNode } from 'react'
 import type { ColorValue, PressableProps, StyleProp, ViewStyle } from 'react-native'
-import { Pressable, View } from 'react-native'
+import { View } from 'react-native'
 import {
   Circle,
   ClipPath,
@@ -171,7 +173,7 @@ function getIconHitSlop(size: number, touchableSize: number, hitSlop: PressableP
 
 export function AntdNativeIcon({
   definition,
-  size = 24,
+  size,
   rotation,
   color,
   style,
@@ -183,15 +185,24 @@ export function AntdNativeIcon({
   twoToneColor,
   ...svgProps
 }: AntdNativeIconProps) {
-  const theme = useOptionalToken()
-  const resolvedColor = toColorString(color ?? theme?.token.colorIcon ?? '#5A6068')
+  const { token } = useToken()
+  const contextSize = useIconSize()
+  const resolvedSize = size ?? contextSize ?? 24
+  const resolvedColor = toColorString(color ?? token.colorIcon)
   const [primaryColor, secondaryColor] = resolveTwoToneColors(
     resolvedColor,
     twoToneColor,
-    theme?.token.colorFillSecondary ?? '#E6E6E6',
+    token.colorFillSecondary,
   )
   const iconNode = getIconNode(definition, primaryColor, secondaryColor)
-  const renderedIcon = renderNode(iconNode, definition.name, size, primaryColor, svgStyle, svgProps)
+  const renderedIcon = renderNode(
+    iconNode,
+    definition.name,
+    resolvedSize,
+    primaryColor,
+    svgStyle,
+    svgProps,
+  )
   const iconContent =
     rotation === undefined ? (
       renderedIcon
@@ -203,14 +214,14 @@ export function AntdNativeIcon({
   if (!onPress) return <View style={resolvedStyle}>{iconContent}</View>
 
   return (
-    <Pressable
+    <InteractionPressable
       disabled={disabled}
       onPress={onPress}
-      hitSlop={getIconHitSlop(size, touchableSize, hitSlop)}
+      hitSlop={getIconHitSlop(resolvedSize, touchableSize, hitSlop)}
       style={({ pressed }) => [resolvedStyle, pressed && { opacity: 0.6 }]}
     >
       {iconContent}
-    </Pressable>
+    </InteractionPressable>
   )
 }
 

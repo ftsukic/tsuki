@@ -11,7 +11,7 @@ function isTextContent(value: ReactNode): value is string | number {
 }
 
 export const NavbarAction = forwardRef<
-  React.ElementRef<typeof InteractionPressable>,
+  React.ComponentRef<typeof InteractionPressable>,
   NavbarActionProps
 >(function NavbarAction({ children, style, ...pressableProps }, ref) {
   const navbarToken = useComponentToken('Navbar', getNavbarToken)

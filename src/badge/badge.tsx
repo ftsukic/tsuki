@@ -2,9 +2,15 @@ import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import { getBadgeToken } from './token'
 import type { BadgeProps, BadgeStatus } from './interface'
-import { forwardRef } from 'react'
+import { forwardRef, useState } from 'react'
 import { Text, View } from 'react-native'
-import type { StyleProp, TextStyle, View as ViewComponent, ViewStyle } from 'react-native'
+import type {
+  LayoutChangeEvent,
+  StyleProp,
+  TextStyle,
+  View as ViewComponent,
+  ViewStyle,
+} from 'react-native'
 
 function isRenderable(value: BadgeProps['children'] | BadgeProps['count']): boolean {
   return value !== undefined && value !== null && value !== false
@@ -30,11 +36,33 @@ function resolveStatusColor(status: BadgeStatus, token: ReturnType<typeof getBad
   }
 }
 
-function renderValue(value: BadgeProps['count'] | BadgeProps['text'], style: StyleProp<TextStyle>) {
+function renderValue(
+  value: BadgeProps['count'] | BadgeProps['text'],
+  style: StyleProp<TextStyle>,
+  preventEllipsis = false,
+) {
   if (typeof value === 'string' || typeof value === 'number') {
-    return <Text style={style}>{value}</Text>
+    return (
+      <Text numberOfLines={preventEllipsis ? 0 : undefined} style={style}>
+        {value}
+      </Text>
+    )
   }
   return value
+}
+
+function getIndicatorTransform(
+  anchorWidth: number | undefined,
+  anchorHeight: number | undefined,
+  offset: BadgeProps['offset'],
+): ViewStyle['transform'] | undefined {
+  if (anchorWidth === undefined && anchorHeight === undefined && offset === undefined)
+    return undefined
+
+  return [
+    { translateX: (anchorWidth ?? 0) + (offset?.[0] ?? 0) },
+    { translateY: (anchorHeight ?? 0) + (offset?.[1] ?? 0) },
+  ]
 }
 
 export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
@@ -58,6 +86,7 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
   const token = useComponentToken('Badge', getBadgeToken)
   const hasChildren = isRenderable(children)
   const hasCount = isRenderable(count)
+  const hasStatusText = Boolean(status && isRenderable(text))
   const normalizedOverflowCount =
     Number.isFinite(overflowCount) && overflowCount > 0 ? overflowCount : 99
   const showCount = !status && !dot && hasCount && (!isZero(count) || showZero)
@@ -67,6 +96,9 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
   const paddingHorizontal = size === 'small' ? token.paddingHorizontalSM : token.paddingHorizontal
   const fontSize = size === 'small' ? token.fontSizeSM : token.fontSize
   const indicatorColor = color ?? (status ? resolveStatusColor(status, token) : token.color)
+  const [indicatorLayout, setIndicatorLayout] = useState<
+    { width: number; height: number } | undefined
+  >()
   const semantic = resolveStyles(styles, {
     props: {
       ...viewProps,
@@ -86,25 +118,64 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
     state: { visible, hasChildren },
   })
 
-  const indicatorBase: ViewStyle = hasChildren
-    ? {
-        position: 'absolute',
-        top: -(dot ? token.dotSize / 2 : height / 2),
-        right: -(dot ? token.dotSize / 2 : height / 2),
-        minHeight: dot ? token.dotSize : height,
-        minWidth: dot ? token.dotSize : minWidth,
-      }
-    : {
-        minHeight: height,
-        minWidth,
-      }
-  const indicatorOffset = offset
-    ? { transform: [{ translateX: offset[0] }, { translateY: offset[1] }] }
-    : undefined
   const countValue =
     typeof count === 'number' && count > normalizedOverflowCount
       ? `${normalizedOverflowCount}+`
       : count
+
+  const defaultAnchorWidth = dot || (status && !hasStatusText) ? token.dotSize : height
+  const defaultAnchorHeight = dot
+    ? token.dotSize
+    : status
+      ? hasStatusText
+        ? token.fontSize + 4
+        : token.dotSize
+      : height
+  const indicatorTransform = getIndicatorTransform(
+    hasChildren ? (indicatorLayout?.width ?? defaultAnchorWidth) / 2 : undefined,
+    hasChildren ? -(indicatorLayout?.height ?? defaultAnchorHeight) / 2 : undefined,
+    offset,
+  )
+  const indicatorPosition: ViewStyle = hasChildren
+    ? { position: 'absolute', top: 0, right: 0 }
+    : { alignSelf: 'flex-start' }
+
+  const handleIndicatorLayout = (event: LayoutChangeEvent) => {
+    const { width, height: measuredHeight } = event.nativeEvent.layout
+    if (!Number.isFinite(width) || !Number.isFinite(measuredHeight)) return
+    setIndicatorLayout((current) =>
+      current?.width === width && current.height === measuredHeight
+        ? current
+        : { width, height: measuredHeight },
+    )
+  }
+
+  const countIndicatorStyle: ViewStyle = {
+    ...indicatorPosition,
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    borderCurve: 'circular',
+    boxSizing: 'border-box',
+    flexShrink: 0,
+    height: dot ? token.dotSize : height,
+    justifyContent: 'center',
+    minHeight: dot ? token.dotSize : height,
+    minWidth: dot ? token.dotSize : minWidth,
+    transform: indicatorTransform,
+  }
+  const statusIndicatorStyle: ViewStyle = {
+    ...indicatorPosition,
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+    flexDirection: 'row',
+    flexShrink: 0,
+    gap: token.statusGap,
+    justifyContent: 'flex-start',
+    paddingHorizontal: 0,
+    transform: indicatorTransform,
+  }
 
   if (!hasChildren && !visible) return null
 
@@ -118,28 +189,26 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
       {visible ? (
         <View
           pointerEvents="none"
+          onLayout={hasChildren && !dot ? handleIndicatorLayout : undefined}
           style={[
-            indicatorBase,
-            {
-              alignItems: 'center',
-              flexDirection: status && isRenderable(text) ? 'row' : undefined,
-              gap: status && isRenderable(text) ? 4 : undefined,
-              justifyContent: 'center',
-              borderRadius: dot || status ? token.dotSize / 2 : token.borderRadius,
-              borderWidth: dot || status ? 0 : hasChildren ? token.borderWidth : 0,
-              borderColor: token.borderColor,
-              backgroundColor: dot ? indicatorColor : status ? 'transparent' : indicatorColor,
-              paddingHorizontal: showCount ? paddingHorizontal : 0,
-              ...(dot
-                ? {
-                    width: token.dotSize,
-                    height: token.dotSize,
-                    minWidth: token.dotSize,
-                    minHeight: token.dotSize,
-                  }
-                : undefined),
-            },
-            indicatorOffset,
+            status
+              ? statusIndicatorStyle
+              : {
+                  ...countIndicatorStyle,
+                  borderRadius: dot ? token.dotSize / 2 : Math.min(token.borderRadius, height / 2),
+                  borderWidth: dot || !hasChildren ? 0 : token.borderWidth,
+                  borderColor: token.borderColor,
+                  backgroundColor: indicatorColor,
+                  paddingHorizontal: showCount ? paddingHorizontal : 0,
+                  ...(dot
+                    ? {
+                        width: token.dotSize,
+                        height: token.dotSize,
+                        minWidth: token.dotSize,
+                        minHeight: token.dotSize,
+                      }
+                    : undefined),
+                },
             semantic?.indicator,
           ]}
         >
@@ -160,23 +229,30 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
                 ? renderValue(text, [
                     {
                       color: token.textColor,
-                      fontSize,
-                      lineHeight: height,
+                      fontFamily: token.fontFamily,
+                      fontSize: token.fontSize,
+                      flexShrink: 0,
                     },
                     semantic?.text,
                   ])
                 : null}
             </>
           ) : dot ? null : (
-            renderValue(countValue, [
-              {
-                color: token.textColor,
-                fontSize,
-                lineHeight: height,
-                textAlign: 'center',
-              },
-              semantic?.text,
-            ])
+            renderValue(
+              countValue,
+              [
+                {
+                  color: token.textColor,
+                  fontFamily: token.fontFamily,
+                  fontSize,
+                  lineHeight: height,
+                  textAlign: 'center',
+                  flexShrink: 0,
+                },
+                semantic?.text,
+              ],
+              true,
+            )
           )}
         </View>
       ) : null}

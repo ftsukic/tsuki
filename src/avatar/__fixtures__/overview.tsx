@@ -1,41 +1,37 @@
-import React from 'react'
-
-import { Avatar, Badge, Icon } from '@ftsukic/tsuki'
-import { Text, View } from 'react-native'
+import { FixtureOverview } from '../../fixture-overview'
+import AvatarBasicExample from './examples/basic'
+import AvatarGroupExample from './examples/group'
+import AvatarSourcesExample from './examples/sources'
 
 /**
- * @title 组件预览
+ * @title Avatar overview
+ * @description Avatar 汇总尺寸、形状、来源、分组和角标组合示例。
  */
 export default function AvatarOverview() {
   return (
-    <View style={{ gap: 12 }}>
-      <View style={{ gap: 12 }}>
-        <Text style={{ color: '#68788d', fontSize: 14 }}>基础头像</Text>
-        <View style={{ alignItems: 'center', flexDirection: 'row', gap: 12 }}>
-          <Avatar style={{ backgroundColor: '#1989FA' }}>A</Avatar>
-          <Avatar size="large" style={{ backgroundColor: '#07C160' }}>
-            User
-          </Avatar>
-          <Avatar shape="square" style={{ backgroundColor: '#FF976A' }}>
-            <Icon name="UserOutlined" color="#ffffff" size={20} />
-          </Avatar>
-        </View>
-      </View>
-
-      <View style={{ gap: 12 }}>
-        <Text style={{ color: '#68788d', fontSize: 14 }}>分组和角标</Text>
-        <View style={{ alignItems: 'center', flexDirection: 'row', gap: 24 }}>
-          <Avatar.Group maxCount={3} onOverflowPress={() => undefined}>
-            <Avatar style={{ backgroundColor: '#1989FA' }}>A</Avatar>
-            <Avatar style={{ backgroundColor: '#07C160' }}>B</Avatar>
-            <Avatar style={{ backgroundColor: '#FF976A' }}>C</Avatar>
-            <Avatar style={{ backgroundColor: '#7232DD' }}>D</Avatar>
-          </Avatar.Group>
-          <Badge count={5}>
-            <Avatar style={{ backgroundColor: '#1989FA' }}>A</Avatar>
-          </Badge>
-        </View>
-      </View>
-    </View>
+    <FixtureOverview
+      examples={[
+        {
+          Component: AvatarBasicExample,
+          description:
+            'Avatar 支持 small、medium、large 和自定义数值尺寸，并可切换圆形、方形或自定义圆角。',
+          id: 'basic',
+          title: '尺寸和形状',
+        },
+        {
+          Component: AvatarSourcesExample,
+          description:
+            '图片加载失败时按 icon、children 的顺序回退；图片地址支持字符串或 RN Image source。',
+          id: 'sources',
+          title: '图片、图标和字符',
+        },
+        {
+          Component: AvatarGroupExample,
+          description: 'Group 会叠放直接子级 Avatar，maxCount 超出后显示可点击的 +N 头像。',
+          id: 'group',
+          title: 'Avatar.Group',
+        },
+      ]}
+    />
   )
 }

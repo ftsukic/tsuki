@@ -7,7 +7,7 @@ import { getSwipeCellToken } from './token'
 import type { SwipeCellActionProps } from './interface'
 
 export const SwipeCellAction = forwardRef<
-  React.ElementRef<typeof InteractionPressable>,
+  React.ComponentRef<typeof InteractionPressable>,
   SwipeCellActionProps
 >(function SwipeCellAction(
   { children, backgroundColor, textColor, width, style, ...pressableProps },

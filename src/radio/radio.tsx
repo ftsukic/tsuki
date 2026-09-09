@@ -20,7 +20,7 @@ function warnMissingValue() {
   }
 }
 
-export const Radio = forwardRef<React.ElementRef<typeof InteractionPressable>, RadioProps>(
+export const Radio = forwardRef<React.ComponentRef<typeof InteractionPressable>, RadioProps>(
   function Radio(
     {
       children,

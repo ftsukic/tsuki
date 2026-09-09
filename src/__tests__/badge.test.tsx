@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native'
+import { act, render, screen } from '@testing-library/react-native'
 import { Avatar, Badge, ConfigProvider } from '..'
 import { StyleSheet, Text } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
@@ -26,7 +26,7 @@ describe('Badge', () => {
         <Badge testID="zero" count={0} showZero>
           <Text>零</Text>
         </Badge>
-        <Badge testID="overflow" count={100} overflowCount={9}>
+        <Badge testID="overflow" count={100} overflowCount={99}>
           <Avatar>A</Avatar>
         </Badge>
         <Badge testID="custom" count={<Text>!</Text>}>
@@ -38,7 +38,8 @@ describe('Badge', () => {
     expect(screen.getByTestId('hidden')).toBeTruthy()
     expect(screen.getAllByText('0')).toHaveLength(1)
     expect(screen.getByTestId('zero')).toBeTruthy()
-    expect(screen.getByText('9+')).toBeTruthy()
+    expect(screen.getByText('99+')).toBeTruthy()
+    expect(screen.getByText('99+').props.numberOfLines).toBe(0)
     expect(screen.getByText('!')).toBeTruthy()
   })
 
@@ -53,15 +54,20 @@ describe('Badge', () => {
     )
 
     expect(screen.getByText('在线')).toBeTruthy()
+    expect(screen.getByText('在线').props.numberOfLines).toBeUndefined()
     const dot = findViewWithBackground(toJSON(), '#7232DD')
     const status = findViewWithBackground(toJSON(), '#07C160')
     expect(dot).toBeTruthy()
     expect(status).toBeTruthy()
     expect(StyleSheet.flatten(dot?.props.style)).toMatchObject({
-      top: -4,
-      right: -4,
+      top: 0,
+      right: 0,
       borderWidth: 0,
     })
+    expect(StyleSheet.flatten(dot?.props.style).transform).toEqual([
+      { translateX: 4 },
+      { translateY: -4 },
+    ])
 
     const view = await render(
       <ConfigProvider>
@@ -72,6 +78,13 @@ describe('Badge', () => {
     )
     const count = findViewWithBackground(view.toJSON(), '#EE0A24')
     expect(StyleSheet.flatten(count?.props.style).borderWidth).toBe(1)
+    expect(StyleSheet.flatten(count?.props.style)).toMatchObject({
+      alignSelf: 'flex-start',
+      borderCurve: 'circular',
+      boxSizing: 'border-box',
+      height: 20,
+      borderRadius: 10,
+    })
   })
 
   it('supports offset and semantic styles', async () => {
@@ -87,6 +100,72 @@ describe('Badge', () => {
     )
 
     expect(styles).toHaveBeenCalled()
-    expect(findViewWithBackground(toJSON(), '#EE0A24')).toBeTruthy()
+    const indicator = findViewWithBackground(toJSON(), '#EE0A24')
+    expect(indicator).toBeTruthy()
+    expect(StyleSheet.flatten(indicator?.props.style).transform).toEqual([
+      { translateX: 13 },
+      { translateY: -12 },
+    ])
+  })
+
+  it('centers variable-width count indicators on the host corner', async () => {
+    await render(
+      <ConfigProvider>
+        <Badge count={100} overflowCount={99}>
+          <Text>内容</Text>
+        </Badge>
+      </ConfigProvider>,
+    )
+
+    const text = screen.getByText('99+')
+    const indicator = text.parent
+    if (!indicator) throw new Error('Badge indicator was not rendered')
+
+    expect(StyleSheet.flatten(indicator.props.style)).toMatchObject({
+      position: 'absolute',
+      top: 0,
+      right: 0,
+    })
+    expect(StyleSheet.flatten(indicator.props.style).transform).toEqual([
+      { translateX: 10 },
+      { translateY: -10 },
+    ])
+
+    await act(async () => {
+      indicator.props.onLayout({ nativeEvent: { layout: { width: 40, height: 20 } } })
+    })
+
+    const updatedIndicator = screen.getByText('99+').parent
+    if (!updatedIndicator) throw new Error('Badge indicator was not rendered after layout')
+    expect(StyleSheet.flatten(updatedIndicator.props.style).transform).toEqual([
+      { translateX: 20 },
+      { translateY: -10 },
+    ])
+  })
+
+  it('keeps status indicators independent from count sizing', async () => {
+    const view = await render(
+      <ConfigProvider>
+        <Badge testID="status-only" status="success" />
+        <Badge testID="status-text" size="small" status="processing" text="处理中" />
+      </ConfigProvider>,
+    )
+
+    const statusText = screen.getByText('处理中')
+    const statusIndicator = statusText.parent
+    if (!statusIndicator) throw new Error('Status indicator was not rendered')
+    const statusStyle = StyleSheet.flatten(statusIndicator.props.style)
+    expect(statusStyle).toMatchObject({ flexDirection: 'row', gap: 4 })
+    expect(statusStyle.minWidth).toBeUndefined()
+    expect(statusStyle.minHeight).toBeUndefined()
+    expect(statusStyle.height).toBeUndefined()
+
+    const statusDot = findViewWithBackground(view.toJSON(), '#07C160')
+    expect(StyleSheet.flatten(statusDot?.props.style)).toMatchObject({
+      width: 8,
+      height: 8,
+    })
+    expect(StyleSheet.flatten(statusDot?.props.style).minWidth).toBeUndefined()
+    expect(StyleSheet.flatten(statusDot?.props.style).minHeight).toBeUndefined()
   })
 })

@@ -21,7 +21,7 @@ function warnMissingName() {
   }
 }
 
-export const Checkbox = forwardRef<React.ElementRef<typeof InteractionPressable>, CheckboxProps>(
+export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressable>, CheckboxProps>(
   function Checkbox(
     {
       children,
