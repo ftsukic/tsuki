@@ -3,27 +3,30 @@ import { memo } from 'react'
 import { Portal } from '../portal'
 import { InteractionCoordinator } from '../interaction'
 import { ConfigProvider } from '../theme'
-import { GestureProvider } from './capabilities'
+import { GestureProvider, SafeAreaProvider } from './capabilities'
 import type { ProviderProps } from './interface'
 
 export const Provider = memo(function Provider({
   children,
   gesture = false,
+  safeArea = false,
   theme,
 }: ProviderProps) {
   return (
-    <GestureProvider enabled={gesture}>
-      <ConfigProvider theme={theme}>
-        <InteractionCoordinator>
-          <Portal.Host>{children}</Portal.Host>
-        </InteractionCoordinator>
-      </ConfigProvider>
-    </GestureProvider>
+    <SafeAreaProvider enabled={safeArea}>
+      <GestureProvider enabled={gesture}>
+        <ConfigProvider theme={theme}>
+          <InteractionCoordinator>
+            <Portal.Host>{children}</Portal.Host>
+          </InteractionCoordinator>
+        </ConfigProvider>
+      </GestureProvider>
+    </SafeAreaProvider>
   )
 })
 
 Provider.displayName = 'Provider'
 
 export type { ProviderProps } from './interface'
-export { GestureProvider } from './capabilities'
-export type { GestureProviderProps } from './capabilities'
+export { GestureProvider, SafeAreaProvider } from './capabilities'
+export type { GestureProviderProps, SafeAreaProviderProps } from './capabilities'

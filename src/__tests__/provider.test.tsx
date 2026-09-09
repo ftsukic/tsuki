@@ -1,4 +1,5 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
+import type { ReactNode } from 'react'
 import { Text } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import {
@@ -10,11 +11,24 @@ import {
   resetDialogDefaultOptions,
   resetNotifyDefaultOptions,
   resetToastDefaultOptions,
+  SafeAreaProvider,
   showDialog,
   showNotify,
   showToast,
   useToken,
 } from '..'
+
+jest.mock('react-native-safe-area-context', () => {
+  const React = jest.requireActual('react')
+  const { View } = jest.requireActual('react-native')
+  const actual = jest.requireActual('react-native-safe-area-context')
+
+  return {
+    ...actual,
+    SafeAreaProvider: ({ children }: { children?: ReactNode }) =>
+      React.createElement(View, { style: { flex: 1 } }, children),
+  }
+})
 
 function ThemeProbe() {
   const { token } = useToken()
@@ -110,6 +124,20 @@ describe('Provider', () => {
     await view.unmount()
   })
 
+  it('optionally wraps content with SafeAreaProvider', async () => {
+    const view = await render(
+      <Provider safeArea>
+        <Text testID="safe-area-provider-child">child</Text>
+      </Provider>,
+    )
+
+    expect(screen.getByTestId('safe-area-provider-child')).toHaveTextContent('child')
+    expect(view.root?.type).toBe('View')
+    expect(view.root?.props).toMatchObject({ style: { flex: 1 } })
+    expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(2)
+    await view.unmount()
+  })
+
   it('works inside an externally provided gesture root', async () => {
     const view = await render(
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -137,6 +165,18 @@ describe('Provider', () => {
     await view.unmount()
   })
 
+  it('passes through children when SafeAreaProvider is disabled', async () => {
+    const view = await render(
+      <SafeAreaProvider>
+        <Text testID="disabled-safe-area-child">child</Text>
+      </SafeAreaProvider>,
+    )
+
+    expect(view.root?.type).toBe('Text')
+    expect(view.root?.props).toMatchObject({ testID: 'disabled-safe-area-child' })
+    await view.unmount()
+  })
+
   it('uses a flex root when GestureProvider is enabled', async () => {
     const view = await render(
       <GestureProvider enabled>
@@ -147,6 +187,19 @@ describe('Provider', () => {
     expect(view.root?.type).toBe('View')
     expect(view.root?.props).toMatchObject({ style: { flex: 1 } })
     expect(screen.getByTestId('enabled-gesture-child')).toHaveTextContent('child')
+    await view.unmount()
+  })
+
+  it('uses a flex root when SafeAreaProvider is enabled', async () => {
+    const view = await render(
+      <SafeAreaProvider enabled>
+        <Text testID="enabled-safe-area-child">child</Text>
+      </SafeAreaProvider>,
+    )
+
+    expect(view.root?.type).toBe('View')
+    expect(view.root?.props).toMatchObject({ style: { flex: 1 } })
+    expect(screen.getByTestId('enabled-safe-area-child')).toHaveTextContent('child')
     await view.unmount()
   })
 })
