@@ -19,9 +19,10 @@ export default function ProviderOverview() {
         },
         {
           Component: ProviderGestureExample,
-          description: 'Enable the shared GestureHandlerRootView for gesture-enabled content.',
+          description:
+            'Provider enables the shared GestureHandlerRootView by default for gesture content.',
           id: 'gesture',
-          title: 'Optional gesture root',
+          title: 'Default gesture root',
         },
         {
           Component: ProviderSafeAreaExample,

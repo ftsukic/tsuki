@@ -108,7 +108,13 @@ export interface NavbarToken {
 export interface SwipeCellToken {
   backgroundColor: string
   actionBackgroundColor: string
+  actionDefaultBackgroundColor: string
+  actionPrimaryBackgroundColor: string
+  actionSuccessBackgroundColor: string
+  actionWarningBackgroundColor: string
+  actionDangerBackgroundColor: string
   actionTextColor: string
+  actionHeight: number
   actionMinWidth: number
   actionPaddingHorizontal: number
   actionFontSize: number

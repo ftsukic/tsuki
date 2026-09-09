@@ -1,6 +1,8 @@
 import React from 'react'
 import { act, cleanup, render, screen, userEvent } from '@testing-library/react-native'
-import { Pressable, StyleSheet, Text } from 'react-native'
+import { Pressable, Text } from 'react-native'
+import { State } from 'react-native-gesture-handler'
+import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils'
 import {
   Cell,
   ConfigProvider,
@@ -9,43 +11,13 @@ import {
   SwipeCell,
   SwipeCellAction,
   SwipeCellGroup,
+  SwipeCellManager,
   useInteraction,
   useSwipeCellController,
 } from '..'
 import { getCellInteractionStyle } from '../cell/style'
 import { getCellToken } from '../cell/token'
 import type { SwipeCellRef } from '../swipe-cell'
-
-function touchEvent(currentPageX: number, currentPageY = 0, timestamp = 1) {
-  return {
-    nativeEvent: { touches: [{}] },
-    touchHistory: {
-      touchBank: [
-        {
-          touchActive: true,
-          currentPageX,
-          currentPageY,
-          previousPageX: 0,
-          previousPageY: 0,
-          currentTimeStamp: timestamp,
-        },
-      ],
-      numberActiveTouches: 1,
-      indexOfSingleActiveTouch: 0,
-      mostRecentTimeStamp: timestamp,
-    },
-  }
-}
-
-function getContentProps(testID: string) {
-  return screen.getByTestId(`${testID}-content`).props as {
-    onMoveShouldSetResponderCapture: (event: ReturnType<typeof touchEvent>) => boolean
-    onMoveShouldSetResponder: (event: ReturnType<typeof touchEvent>) => boolean
-    onResponderGrant: (event: ReturnType<typeof touchEvent>) => void
-    onResponderMove: (event: ReturnType<typeof touchEvent>) => void
-    onResponderRelease: (event: ReturnType<typeof touchEvent>) => void
-  }
-}
 
 async function layoutAction(testID: string, side: 'left' | 'right', width: number) {
   await act(async () => {
@@ -55,28 +27,13 @@ async function layoutAction(testID: string, side: 'left' | 'right', width: numbe
   })
 }
 
-function getTranslateX(testID: string) {
-  const style = StyleSheet.flatten(screen.getByTestId(`${testID}-content`).props.style) as {
-    transform?: Array<{ translateX?: number | { __getValue?: () => number } }>
-  }
-  const value = style.transform?.[0]?.translateX
-  if (typeof value === 'number') return value
-  return value?.__getValue?.()
-}
-
-async function drag(testID: string, distance: number) {
-  const props = getContentProps(testID)
-  const start = touchEvent(0, 0, 0)
-  const claim = touchEvent(distance, 0, 1)
-  const end = touchEvent(distance, 0, 2)
-
+async function drag(testID: string, distance: number, velocityX = 0) {
   await act(async () => {
-    props.onMoveShouldSetResponderCapture(start)
-    props.onMoveShouldSetResponderCapture(claim)
-    props.onMoveShouldSetResponder(claim)
-    props.onResponderGrant(claim)
-    props.onResponderMove(end)
-    props.onResponderRelease(end)
+    fireGestureHandler(getByGestureTestId(`${testID}-gesture`), [
+      { state: State.BEGAN },
+      { state: State.ACTIVE, translationX: distance, velocityX },
+      { state: State.END, translationX: distance, velocityX },
+    ])
   })
 }
 
@@ -97,15 +54,44 @@ function CloseCurrentButton() {
   )
 }
 
+describe('SwipeCellManager', () => {
+  it('keeps ownership isolated and ignores stale releases', () => {
+    const manager = new SwipeCellManager()
+    const firstClose = jest.fn()
+    const secondClose = jest.fn()
+
+    manager.claim({ id: 'first', close: firstClose })
+    manager.claim({ id: 'second', close: secondClose })
+    manager.release('first')
+    manager.closeActive()
+
+    expect(firstClose).toHaveBeenCalledTimes(1)
+    expect(secondClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('closes only other cells and supports explicit active closing', () => {
+    const manager = new SwipeCellManager()
+    const close = jest.fn()
+
+    manager.claim({ id: 'cell', close })
+    manager.closeOthers('cell')
+    expect(close).not.toHaveBeenCalled()
+
+    manager.closeOthers('other')
+    expect(close).toHaveBeenCalledTimes(1)
+  })
+})
+
 describe('SwipeCell', () => {
   afterEach(() => {
     cleanup()
   })
 
   it('opens the right action when swiped left beyond half its width', async () => {
+    const onOpen = jest.fn()
     await render(
       <TestProvider>
-        <SwipeCell testID="left-swipe" rightAction="删除">
+        <SwipeCell testID="left-swipe" rightAction="删除" onOpen={onOpen}>
           <Text>内容</Text>
         </SwipeCell>
       </TestProvider>,
@@ -114,13 +100,14 @@ describe('SwipeCell', () => {
     await layoutAction('left-swipe', 'right', 100)
     await drag('left-swipe', -60)
 
-    expect(getTranslateX('left-swipe')).toBe(-100)
+    expect(onOpen).toHaveBeenCalledTimes(1)
   })
 
   it('opens the left action when swiped right beyond half its width', async () => {
+    const onOpen = jest.fn()
     await render(
       <TestProvider>
-        <SwipeCell testID="right-swipe" leftAction="置顶">
+        <SwipeCell testID="right-swipe" leftAction="置顶" onOpen={onOpen}>
           <Text>内容</Text>
         </SwipeCell>
       </TestProvider>,
@@ -129,13 +116,15 @@ describe('SwipeCell', () => {
     await layoutAction('right-swipe', 'left', 80)
     await drag('right-swipe', 50)
 
-    expect(getTranslateX('right-swipe')).toBe(80)
+    expect(onOpen).toHaveBeenCalledTimes(1)
   })
 
   it('closes when the swipe does not pass the 50 percent threshold', async () => {
+    const onOpen = jest.fn()
+    const onClose = jest.fn()
     await render(
       <TestProvider>
-        <SwipeCell testID="threshold" rightAction="删除">
+        <SwipeCell testID="threshold" rightAction="删除" onOpen={onOpen} onClose={onClose}>
           <Text>内容</Text>
         </SwipeCell>
       </TestProvider>,
@@ -144,7 +133,24 @@ describe('SwipeCell', () => {
     await layoutAction('threshold', 'right', 100)
     await drag('threshold', -50)
 
-    expect(getTranslateX('threshold')).toBe(0)
+    expect(onOpen).not.toHaveBeenCalled()
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('opens on a fast fling before reaching half the action width', async () => {
+    const onOpen = jest.fn()
+    await render(
+      <TestProvider>
+        <SwipeCell testID="velocity" rightAction="删除" onOpen={onOpen}>
+          <Text>内容</Text>
+        </SwipeCell>
+      </TestProvider>,
+    )
+
+    await layoutAction('velocity', 'right', 100)
+    await drag('velocity', -20, -700)
+
+    expect(onOpen).toHaveBeenCalledTimes(1)
   })
 
   it('invokes action press handlers through SwipeCellAction', async () => {
@@ -170,11 +176,13 @@ describe('SwipeCell', () => {
 
   it('renders multiple right actions and opens by their total width', async () => {
     const ref = React.createRef<SwipeCellRef>()
+    const onOpen = jest.fn()
     await render(
       <TestProvider>
         <SwipeCell
           ref={ref}
           testID="multiple-right"
+          onOpen={onOpen}
           rightActions={[
             { label: '更多', width: 70 },
             { label: '删除', width: 90, backgroundColor: '#ee0a24' },
@@ -190,7 +198,24 @@ describe('SwipeCell', () => {
 
     expect(screen.getByText('更多')).toBeTruthy()
     expect(screen.getByText('删除')).toBeTruthy()
-    expect(getTranslateX('multiple-right')).toBe(-160)
+    expect(onOpen).toHaveBeenCalledTimes(1)
+  })
+
+  it('supports the WeChat-style actions shorthand and semantic action fields', async () => {
+    await render(
+      <TestProvider>
+        <SwipeCell
+          id="message-1"
+          testID="actions-shorthand"
+          actions={[{ text: '删除', color: 'danger' }]}
+        >
+          <Text>消息</Text>
+        </SwipeCell>
+      </TestProvider>,
+    )
+
+    expect(screen.getByText('删除')).toBeTruthy()
+    expect(screen.getByText('消息')).toBeTruthy()
   })
 
   it('renders multiple left actions and invokes each item handler', async () => {
@@ -223,12 +248,15 @@ describe('SwipeCell', () => {
     const firstRef = React.createRef<SwipeCellRef>()
     const secondRef = React.createRef<SwipeCellRef>()
     const onDelete = jest.fn()
+    const firstClose = jest.fn()
+    const secondOpen = jest.fn()
     const user = userEvent.setup()
     await render(
       <TestProvider>
         <SwipeCell
           ref={firstRef}
           testID="action-closes"
+          onClose={firstClose}
           rightActions={[{ label: '删除', width: 100, onPress: onDelete }]}
         >
           <Text>第一项</Text>
@@ -237,6 +265,7 @@ describe('SwipeCell', () => {
           ref={secondRef}
           testID="action-keeps-open"
           closeOnActionPress={false}
+          onOpen={secondOpen}
           rightActions={[{ label: '更多', width: 100 }]}
         >
           <Text>第二项</Text>
@@ -252,17 +281,19 @@ describe('SwipeCell', () => {
     })
 
     await user.press(screen.getByText('删除'))
-    expect(getTranslateX('action-closes')).toBe(0)
+    expect(firstClose).toHaveBeenCalledTimes(1)
 
     await user.press(screen.getByText('更多'))
-    expect(getTranslateX('action-keeps-open')).toBe(-100)
+    expect(secondOpen).toHaveBeenCalledTimes(1)
   })
 
   it('opens and closes through its ref', async () => {
     const ref = React.createRef<SwipeCellRef>()
+    const onOpen = jest.fn()
+    const onClose = jest.fn()
     await render(
       <TestProvider>
-        <SwipeCell ref={ref} testID="ref-cell" rightAction="删除">
+        <SwipeCell ref={ref} testID="ref-cell" rightAction="删除" onOpen={onOpen} onClose={onClose}>
           <Text>内容</Text>
         </SwipeCell>
       </TestProvider>,
@@ -270,22 +301,24 @@ describe('SwipeCell', () => {
 
     await layoutAction('ref-cell', 'right', 100)
     await act(async () => ref.current?.open())
-    expect(getTranslateX('ref-cell')).toBe(-100)
+    expect(onOpen).toHaveBeenCalledTimes(1)
 
     await act(async () => ref.current?.close())
-    expect(getTranslateX('ref-cell')).toBe(0)
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('keeps only one cell open inside SwipeCellGroup', async () => {
     const firstRef = React.createRef<SwipeCellRef>()
     const secondRef = React.createRef<SwipeCellRef>()
+    const firstClose = jest.fn()
+    const secondOpen = jest.fn()
     await render(
       <TestProvider>
         <SwipeCellGroup>
-          <SwipeCell ref={firstRef} testID="first" rightAction="删除">
+          <SwipeCell ref={firstRef} testID="first" rightAction="删除" onClose={firstClose}>
             <Text>第一项</Text>
           </SwipeCell>
-          <SwipeCell ref={secondRef} testID="second" rightAction="删除">
+          <SwipeCell ref={secondRef} testID="second" rightAction="删除" onOpen={secondOpen}>
             <Text>第二项</Text>
           </SwipeCell>
         </SwipeCellGroup>
@@ -295,22 +328,33 @@ describe('SwipeCell', () => {
     await layoutAction('first', 'right', 100)
     await layoutAction('second', 'right', 100)
     await act(async () => firstRef.current?.open())
-    expect(getTranslateX('first')).toBe(-100)
 
     await act(async () => secondRef.current?.open())
-    expect(getTranslateX('first')).toBe(0)
-    expect(getTranslateX('second')).toBe(-100)
+    expect(firstClose).toHaveBeenCalledTimes(1)
+    expect(secondOpen).toHaveBeenCalledTimes(1)
   })
 
   it('keeps only one cell open through the Provider coordinator without a Group', async () => {
     const firstRef = React.createRef<SwipeCellRef>()
     const secondRef = React.createRef<SwipeCellRef>()
+    const firstClose = jest.fn()
+    const secondOpen = jest.fn()
     await render(
       <InteractionProvider>
-        <SwipeCell ref={firstRef} testID="provider-first" rightActions={[{ label: '删除' }]}>
+        <SwipeCell
+          ref={firstRef}
+          testID="provider-first"
+          onClose={firstClose}
+          rightActions={[{ label: '删除' }]}
+        >
           <Text>第一项</Text>
         </SwipeCell>
-        <SwipeCell ref={secondRef} testID="provider-second" rightActions={[{ label: '删除' }]}>
+        <SwipeCell
+          ref={secondRef}
+          testID="provider-second"
+          onOpen={secondOpen}
+          rightActions={[{ label: '删除' }]}
+        >
           <Text>第二项</Text>
         </SwipeCell>
       </InteractionProvider>,
@@ -321,17 +365,23 @@ describe('SwipeCell', () => {
     await act(async () => firstRef.current?.open())
     await act(async () => secondRef.current?.open())
 
-    expect(getTranslateX('provider-first')).toBe(0)
-    expect(getTranslateX('provider-second')).toBe(-100)
+    expect(firstClose).toHaveBeenCalledTimes(1)
+    expect(secondOpen).toHaveBeenCalledTimes(1)
   })
 
   it('closes an expanded cell from content touch without blocking its own press', async () => {
     const ref = React.createRef<SwipeCellRef>()
     const onPress = jest.fn()
+    const onClose = jest.fn()
     const user = userEvent.setup()
     await render(
       <TestProvider>
-        <SwipeCell ref={ref} testID="content-close" rightActions={[{ label: '删除', width: 100 }]}>
+        <SwipeCell
+          ref={ref}
+          testID="content-close"
+          onClose={onClose}
+          rightActions={[{ label: '删除', width: 100 }]}
+        >
           <Pressable testID="content-button" onPress={onPress}>
             <Text>打开详情</Text>
           </Pressable>
@@ -346,7 +396,7 @@ describe('SwipeCell', () => {
     await user.press(screen.getByTestId('content-button'))
 
     expect(onPress).toHaveBeenCalledTimes(1)
-    expect(getTranslateX('content-close')).toBe(0)
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('uses the Cell active background for the content press feedback', async () => {
@@ -368,10 +418,11 @@ describe('SwipeCell', () => {
 
   it('closes the active cell when another library pressable is touched', async () => {
     const ref = React.createRef<SwipeCellRef>()
+    const onClose = jest.fn()
     const user = userEvent.setup()
     await render(
       <Provider theme={{ token: { motion: false } }}>
-        <SwipeCell ref={ref} testID="outside-close" rightAction="删除">
+        <SwipeCell ref={ref} testID="outside-close" rightAction="删除" onClose={onClose}>
           <Text>内容</Text>
         </SwipeCell>
         <Cell testID="outside-cell" title="外部区域" />
@@ -382,16 +433,22 @@ describe('SwipeCell', () => {
     await act(async () => ref.current?.open())
     await user.press(screen.getByTestId('outside-cell'))
 
-    expect(getTranslateX('outside-close')).toBe(0)
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('closes the current cell through the public controller hook', async () => {
     const ref = React.createRef<SwipeCellRef>()
+    const onClose = jest.fn()
     const user = userEvent.setup()
     await render(
       <InteractionProvider>
         <CloseCurrentButton />
-        <SwipeCell ref={ref} testID="controller" rightActions={[{ label: '删除', width: 100 }]}>
+        <SwipeCell
+          ref={ref}
+          testID="controller"
+          onClose={onClose}
+          rightActions={[{ label: '删除', width: 100 }]}
+        >
           <Text>内容</Text>
         </SwipeCell>
       </InteractionProvider>,
@@ -401,7 +458,7 @@ describe('SwipeCell', () => {
     await act(async () => ref.current?.open())
     await user.press(screen.getByTestId('close-current'))
 
-    expect(getTranslateX('controller')).toBe(0)
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('clears an unmounted cell from the coordinator', async () => {

@@ -1,5 +1,6 @@
 import type { TextStyle, ViewStyle } from 'react-native'
 import type { SwipeCellToken } from '../theme'
+import type { SwipeCellActionColor } from './interface'
 
 export interface SwipeCellResolvedStyles {
   root: ViewStyle
@@ -8,6 +9,26 @@ export interface SwipeCellResolvedStyles {
   content: ViewStyle
   action: ViewStyle
   actionLabel: TextStyle
+}
+
+export function getSwipeCellActionBackgroundColor(
+  token: SwipeCellToken,
+  color: SwipeCellActionColor | undefined,
+) {
+  switch (color) {
+    case 'primary':
+      return token.actionPrimaryBackgroundColor
+    case 'success':
+      return token.actionSuccessBackgroundColor
+    case 'warning':
+      return token.actionWarningBackgroundColor
+    case 'danger':
+      return token.actionDangerBackgroundColor
+    case 'default':
+      return token.actionDefaultBackgroundColor
+    default:
+      return token.actionBackgroundColor
+  }
 }
 
 export function getSwipeCellStyles(token: SwipeCellToken): SwipeCellResolvedStyles {
@@ -34,6 +55,7 @@ export function getSwipeCellStyles(token: SwipeCellToken): SwipeCellResolvedStyl
       backgroundColor: token.backgroundColor,
     },
     action: {
+      minHeight: token.actionHeight,
       minWidth: token.actionMinWidth,
       alignSelf: 'stretch',
       alignItems: 'center',

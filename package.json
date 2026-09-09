@@ -88,6 +88,7 @@
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
     "@react-native/babel-preset": "0.82.1",
+    "@shopify/flash-list": "2.3.2",
     "@testing-library/react-native": "^14.0.1",
     "@types/jest": "^29.5.14",
     "@types/react": "^19.1.10",

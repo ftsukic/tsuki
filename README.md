@@ -4,7 +4,7 @@
 
 当前版本：`0.0.1`
 
-兼容基线：React `19.1.1`、React Native `0.82.1+`；Harmony 使用 React Native `0.82.1` 基线。手势能力以可选 peer dependency 提供，安全区能力使用 `react-native-safe-area-context` peer dependency；需要时可通过 `Provider gesture` 和 `Provider safeArea` 提供对应根节点。
+兼容基线：React `19.1.1`、React Native `0.82.1+`；Harmony 使用 React Native `0.82.1` 基线。手势能力以可选 peer dependency 提供，安全区能力使用 `react-native-safe-area-context` peer dependency；Provider 默认提供手势根节点，也可通过 `gesture={false}` 关闭，并通过 `Provider safeArea` 提供安全区根节点。
 
 ## 当前状态
 

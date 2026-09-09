@@ -9,18 +9,22 @@ import {
   useImperativeHandle,
   useMemo,
   useRef,
-  useState,
   type ReactNode,
 } from 'react'
-import { Animated, Platform, View } from 'react-native'
+import { View } from 'react-native'
 import type { GestureResponderEvent, LayoutChangeEvent, PressableProps } from 'react-native'
-import { InteractionPressable, useInteraction, usePanGesture } from '../interaction'
+import { GestureDetector, Gesture } from '../gesture'
+import { Animated, useAnimatedStyle, useSharedValue, withSpring } from '../animation'
+import { scheduleOnRN } from 'react-native-worklets'
+import { InteractionPressable, useInteraction } from '../interaction'
 import { getCellInteractionStyle } from '../cell/style'
 import { getCellToken } from '../cell/token'
 import { useComponentToken, useToken } from '../theme'
 import { SwipeCellAction } from './action'
 import { getSwipeCellStyles } from './style'
 import { getSwipeCellToken } from './token'
+import { useSwipeCellManager } from './context'
+import type { SwipeCellHandle } from './manager'
 import type {
   SwipeCellActionItem,
   SwipeCellActionProps,
@@ -37,20 +41,14 @@ interface SwipeCellGroupContextValue {
 
 const SwipeCellGroupContext = createContext<SwipeCellGroupContextValue | null>(null)
 
-interface ActionWidths {
-  left: number
-  right: number
-}
+const SWIPE_DISTANCE = 4
+const SWIPE_VELOCITY = 500
 
 function isVisibleAction(action: ReactNode) {
   return action !== null && action !== undefined && action !== false
 }
 
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value))
-}
-
-function getActionWidth(side: SwipeCellSide, widths: ActionWidths) {
+function getActionWidth(side: SwipeCellSide, widths: { left: number; right: number }) {
   return side === 'left' ? widths.left : widths.right
 }
 
@@ -114,20 +112,23 @@ function renderActionItems(
     <SwipeCellAction
       key={action.key ?? index}
       interactionId={interactionId}
+      color={action.color}
       backgroundColor={action.backgroundColor}
       textColor={action.textColor}
       width={action.width}
       disabled={action.disabled}
       onPress={wrapActionPress(action.onPress, close, closeOnActionPress)}
     >
-      {action.label}
+      {action.text ?? action.label}
     </SwipeCellAction>
   ))
 }
 
 export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function SwipeCell(
   {
+    id: explicitId,
     children,
+    actions,
     leftActions,
     rightActions,
     leftAction,
@@ -138,72 +139,111 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     style,
     contentStyle,
     actionStyle,
+    onOpen,
+    onClose,
     testID,
     ...viewProps
   },
   ref,
 ) {
-  const { token: themeToken } = useToken()
   const token = useComponentToken('SwipeCell', getSwipeCellToken)
   const cellToken = useComponentToken('Cell', getCellToken)
+  const { token: themeToken } = useToken()
   const resolvedStyles = useMemo(() => getSwipeCellStyles(token), [token])
   const group = useContext(SwipeCellGroupContext)
+  const manager = useSwipeCellManager()
   const interaction = useInteraction()
-  const id = useId()
-  const translation = useRef(new Animated.Value(0)).current
-  const animationRef = useRef<Animated.CompositeAnimation | null>(null)
+  const generatedId = useId()
+  const cellId = explicitId ?? generatedId
+  const translation = useSharedValue(0)
+  const gestureStartX = useSharedValue(0)
+  const leftActionWidth = useSharedValue(0)
+  const rightActionWidth = useSharedValue(0)
+  const animationToken = useSharedValue(0)
+  const animationTokenRef = useRef(0)
   const currentOffsetRef = useRef(0)
-  const gestureStartOffsetRef = useRef(0)
+  const actionWidthsRef = useRef({ left: 0, right: 0 })
   const pendingOpenRef = useRef<SwipeCellSide | null>(null)
   const openSideRef = useRef<SwipeCellSide | null>(null)
-  const actionWidthsRef = useRef<ActionWidths>({ left: 0, right: 0 })
-  const [actionWidths, setActionWidths] = useState<ActionWidths>({ left: 0, right: 0 })
+  const phaseRef = useRef<'closed' | 'opening' | 'open' | 'closing'>('closed')
   const hasLeftAction =
     leftActions !== undefined ? leftActions.length > 0 : isVisibleAction(leftAction)
+  const resolvedRightActions = actions ?? rightActions
   const hasRightAction =
-    rightActions !== undefined ? rightActions.length > 0 : isVisibleAction(rightAction)
-  const animationDuration = themeToken.motion ? token.animationDuration : 0
+    resolvedRightActions !== undefined
+      ? resolvedRightActions.length > 0
+      : isVisibleAction(rightAction)
+  const animationEnabled = themeToken.motion && token.animationDuration > 0
 
-  const animateTo = useCallback(
-    (offset: number) => {
-      animationRef.current?.stop()
-      animationRef.current = null
+  const completeOpen = useCallback(
+    (side: SwipeCellSide, offset: number) => {
       currentOffsetRef.current = offset
+      openSideRef.current = side
+      phaseRef.current = 'open'
+      onOpen?.()
+    },
+    [onOpen],
+  )
 
-      if (animationDuration === 0) {
-        translation.setValue(offset)
+  const completeClose = useCallback(() => {
+    currentOffsetRef.current = 0
+    openSideRef.current = null
+    const wasOpen = phaseRef.current !== 'closed'
+    phaseRef.current = 'closed'
+    manager?.release(cellId)
+    interaction.clear(cellId)
+    if (wasOpen) onClose?.()
+  }, [cellId, interaction, manager, onClose])
+
+  const settleTo = useCallback(
+    (offset: number, side: SwipeCellSide | null) => {
+      const nextToken = animationTokenRef.current + 1
+      animationTokenRef.current = nextToken
+      animationToken.value = nextToken
+
+      if (!animationEnabled) {
+        translation.value = offset
+        if (side) completeOpen(side, offset)
+        else completeClose()
         return
       }
 
-      const animation = Animated.timing(translation, {
-        toValue: offset,
-        duration: animationDuration,
-        isInteraction: false,
-        useNativeDriver: Platform.OS !== 'web',
-      })
-      animationRef.current = animation
-      animation.start(({ finished }) => {
-        if (animationRef.current === animation) animationRef.current = null
-        if (finished) translation.setValue(offset)
+      if (side) phaseRef.current = 'opening'
+      else phaseRef.current = 'closing'
+
+      translation.value = withSpring(offset, undefined, (finished) => {
+        'worklet'
+        if (!finished || animationToken.value !== nextToken) return
+        if (side) scheduleOnRN(completeOpen, side, offset)
+        else scheduleOnRN(completeClose)
       })
     },
-    [animationDuration, translation],
+    [animationEnabled, animationToken, completeClose, completeOpen, translation],
   )
+
+  const releaseOrClear = useCallback(() => {
+    manager?.release(cellId)
+    interaction.clear(cellId)
+  }, [cellId, interaction, manager])
 
   const close = useCallback(() => {
     pendingOpenRef.current = null
     openSideRef.current = null
-    animateTo(0)
-    interaction.clear(id)
-  }, [animateTo, id, interaction])
+    settleTo(0, null)
+  }, [settleTo])
 
   const resolveOpenSide = useCallback((side: SwipeCellSide) => {
-    const requestedWidth = getActionWidth(side, actionWidthsRef.current)
-    if (requestedWidth > 0) return side
-
-    const fallback: SwipeCellSide = side === 'left' ? 'right' : 'left'
+    if (getActionWidth(side, actionWidthsRef.current) > 0) return side
+    const fallback = side === 'left' ? 'right' : 'left'
     return getActionWidth(fallback, actionWidthsRef.current) > 0 ? fallback : null
   }, [])
+
+  const handle = useMemo<SwipeCellHandle>(() => ({ id: cellId, close }), [cellId, close])
+
+  const claim = useCallback(() => {
+    if (manager) manager.claim(handle)
+    else interaction.requestOpen(cellId, close)
+  }, [cellId, close, handle, interaction, manager])
 
   const open = useCallback(
     (side: SwipeCellSide = 'right') => {
@@ -212,172 +252,191 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         return
       }
 
-      interaction.requestOpen(id, close)
-      group?.requestOpen(id)
+      claim()
+      group?.requestOpen(cellId)
       const resolvedSide = resolveOpenSide(side)
       if (!resolvedSide) {
         pendingOpenRef.current = side
-        openSideRef.current = side
         return
       }
 
-      pendingOpenRef.current = resolvedSide
+      pendingOpenRef.current = null
       openSideRef.current = resolvedSide
-      const width = getActionWidth(resolvedSide, actionWidthsRef.current)
-      if (width > 0) {
-        pendingOpenRef.current = null
-        animateTo(getOffset(resolvedSide, width))
-      }
+      settleTo(
+        getOffset(resolvedSide, getActionWidth(resolvedSide, actionWidthsRef.current)),
+        resolvedSide,
+      )
     },
-    [animateTo, close, group, hasLeftAction, hasRightAction, id, interaction, resolveOpenSide],
+    [cellId, claim, close, group, hasLeftAction, hasRightAction, resolveOpenSide, settleTo],
   )
 
-  const handleActionLayout = useCallback((side: SwipeCellSide, event: LayoutChangeEvent) => {
-    const width = Number.isFinite(event.nativeEvent.layout.width)
-      ? Math.max(0, event.nativeEvent.layout.width)
-      : 0
-    actionWidthsRef.current[side] = width
-    setActionWidths((previous) =>
-      previous[side] === width ? previous : { ...previous, [side]: width },
-    )
-  }, [])
+  const handleActionLayout = useCallback(
+    (side: SwipeCellSide, event: LayoutChangeEvent) => {
+      const width = Number.isFinite(event.nativeEvent.layout.width)
+        ? Math.max(0, event.nativeEvent.layout.width)
+        : 0
+      actionWidthsRef.current[side] = width
+      if (side === 'left') leftActionWidth.value = width
+      else rightActionWidth.value = width
+
+      if (pendingOpenRef.current === side && width > 0) {
+        pendingOpenRef.current = null
+        openSideRef.current = side
+        settleTo(getOffset(side, width), side)
+      }
+    },
+    [leftActionWidth, rightActionWidth, settleTo],
+  )
+
+  const pan = useMemo(() => {
+    const gesture = Gesture.Pan()
+      .enabled(hasLeftAction || hasRightAction)
+      .activeOffsetX([-SWIPE_DISTANCE, SWIPE_DISTANCE])
+      .failOffsetY([-SWIPE_DISTANCE, SWIPE_DISTANCE])
+      .onStart(() => {
+        'worklet'
+        animationToken.value += 1
+        gestureStartX.value = translation.value
+        scheduleOnRN(claim)
+      })
+      .onUpdate((event) => {
+        'worklet'
+        const minimum = -rightActionWidth.value
+        const maximum = leftActionWidth.value
+        translation.value = Math.min(
+          maximum,
+          Math.max(minimum, gestureStartX.value + event.translationX),
+        )
+      })
+      .onEnd((event, success) => {
+        'worklet'
+        const minimum = -rightActionWidth.value
+        const maximum = leftActionWidth.value
+        const offset = Math.min(
+          maximum,
+          Math.max(minimum, gestureStartX.value + event.translationX),
+        )
+        const openingLeft =
+          offset > 0 && (offset > leftActionWidth.value / 2 || event.velocityX >= SWIPE_VELOCITY)
+        const openingRight =
+          offset < 0 &&
+          (Math.abs(offset) > rightActionWidth.value / 2 || event.velocityX <= -SWIPE_VELOCITY)
+
+        if (!success || (!openingLeft && !openingRight)) {
+          animationToken.value += 1
+          const nextToken = animationToken.value
+          if (!animationEnabled) {
+            translation.value = 0
+            scheduleOnRN(completeClose)
+          } else {
+            translation.value = withSpring(0, undefined, (finished) => {
+              'worklet'
+              if (finished && animationToken.value === nextToken) scheduleOnRN(completeClose)
+            })
+          }
+          return
+        }
+
+        const side: SwipeCellSide = openingLeft ? 'left' : 'right'
+        const target = side === 'left' ? leftActionWidth.value : -rightActionWidth.value
+        animationToken.value += 1
+        const nextToken = animationToken.value
+        if (!animationEnabled) {
+          translation.value = target
+          scheduleOnRN(completeOpen, side, target)
+        } else {
+          translation.value = withSpring(target, undefined, (finished) => {
+            'worklet'
+            if (finished && animationToken.value === nextToken) {
+              scheduleOnRN(completeOpen, side, target)
+            }
+          })
+        }
+      })
+
+    if (testID) gesture.withTestId(`${testID}-gesture`)
+
+    return gesture
+  }, [
+    animationEnabled,
+    animationToken,
+    claim,
+    completeClose,
+    completeOpen,
+    gestureStartX,
+    hasLeftAction,
+    hasRightAction,
+    leftActionWidth,
+    rightActionWidth,
+    testID,
+    translation,
+  ])
+
+  const animatedContentStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translation.value }],
+  }))
+
+  const handleContentPressIn = useCallback(() => {
+    if (phaseRef.current !== 'closed') {
+      close()
+      return
+    }
+    if (manager) manager.closeOthers(cellId)
+    else interaction.notifyPress(cellId)
+  }, [cellId, close, interaction, manager])
 
   useEffect(() => {
-    const nextWidths = { ...actionWidthsRef.current }
-    let changed = false
-    if (!hasLeftAction && nextWidths.left !== 0) {
-      nextWidths.left = 0
-      changed = true
+    if (!hasLeftAction && actionWidthsRef.current.left !== 0) {
+      actionWidthsRef.current.left = 0
+      leftActionWidth.value = 0
     }
-    if (!hasRightAction && nextWidths.right !== 0) {
-      nextWidths.right = 0
-      changed = true
+    if (!hasRightAction && actionWidthsRef.current.right !== 0) {
+      actionWidthsRef.current.right = 0
+      rightActionWidth.value = 0
     }
-    if (changed) {
-      actionWidthsRef.current = nextWidths
-      setActionWidths(nextWidths)
-    }
-  }, [hasLeftAction, hasRightAction])
-
-  useEffect(() => {
-    const pendingSide = pendingOpenRef.current
-    if (!pendingSide) return
-
-    const width = getActionWidth(pendingSide, actionWidths)
-    if (width <= 0) return
-
-    pendingOpenRef.current = null
-    animateTo(getOffset(pendingSide, width))
-  }, [actionWidths, animateTo])
-
-  useEffect(() => {
-    const openSide = openSideRef.current
-    if (!openSide || pendingOpenRef.current) return
-
-    const width = getActionWidth(openSide, actionWidths)
-    if (width > 0 && Math.abs(currentOffsetRef.current) !== width) {
-      animateTo(getOffset(openSide, width))
-    }
-  }, [actionWidths, animateTo])
+  }, [hasLeftAction, hasRightAction, leftActionWidth, rightActionWidth])
 
   useEffect(() => {
     if (!group) return undefined
-    return group.register(id, close)
-  }, [close, group, id])
+    return group.register(cellId, close)
+  }, [cellId, close, group])
 
-  useEffect(
-    () => () => {
-      animationRef.current?.stop()
-      interaction.clear(id)
-    },
-    [id, interaction],
-  )
+  useEffect(() => {
+    return () => {
+      animationToken.value += 1
+      releaseOrClear()
+    }
+  }, [animationToken, releaseOrClear])
 
   useImperativeHandle(ref, () => ({ open, close }), [close, open])
 
-  const onStart = useCallback(() => {
-    animationRef.current?.stop()
-    animationRef.current = null
-    translation.stopAnimation((value) => {
-      currentOffsetRef.current = value
-      gestureStartOffsetRef.current = value
-    })
-    gestureStartOffsetRef.current = currentOffsetRef.current
-  }, [translation])
-
-  const onChange = useCallback(
-    ({ distance }: { distance: number }) => {
-      const nextOffset = clamp(
-        gestureStartOffsetRef.current + distance,
-        -actionWidthsRef.current.right,
-        actionWidthsRef.current.left,
-      )
-      currentOffsetRef.current = nextOffset
-      translation.setValue(nextOffset)
-    },
-    [translation],
-  )
-
-  const onEnd = useCallback(
-    ({ distance }: { distance: number }) => {
-      const offset = clamp(
-        gestureStartOffsetRef.current + distance,
-        -actionWidthsRef.current.right,
-        actionWidthsRef.current.left,
-      )
-      currentOffsetRef.current = offset
-
-      if (offset > 0 && offset > actionWidthsRef.current.left / 2) {
-        open('left')
-      } else if (offset < 0 && Math.abs(offset) > actionWidthsRef.current.right / 2) {
-        open('right')
-      } else {
-        close()
-      }
-    },
-    [close, open],
-  )
-
-  const responder = usePanGesture({
-    axis: 'horizontal',
-    shouldActivate: ({ distance }) =>
-      distance > 0
-        ? actionWidthsRef.current.left > 0 || currentOffsetRef.current < 0
-        : actionWidthsRef.current.right > 0 || currentOffsetRef.current > 0,
-    onStart,
-    onChange,
-    onEnd,
-  })
-
-  const handleContentTouchStart = useCallback(() => {
-    interaction.notifyPress(id)
-    if (Math.abs(currentOffsetRef.current) > 0) close()
-  }, [close, id, interaction])
-
   const renderedLeftActions =
     leftActions !== undefined
-      ? renderActionItems(leftActions, close, closeOnActionPress, id)
-      : mergeActionPress(leftAction, onLeftActionPress, close, closeOnActionPress, id)
+      ? renderActionItems(leftActions, close, closeOnActionPress, cellId)
+      : mergeActionPress(leftAction, onLeftActionPress, close, closeOnActionPress, cellId)
   const renderedRightActions =
-    rightActions !== undefined
-      ? renderActionItems(rightActions, close, closeOnActionPress, id)
-      : mergeActionPress(rightAction, onRightActionPress, close, closeOnActionPress, id)
+    resolvedRightActions !== undefined
+      ? renderActionItems(resolvedRightActions, close, closeOnActionPress, cellId)
+      : mergeActionPress(rightAction, onRightActionPress, close, closeOnActionPress, cellId)
+
   const renderedContent = (
-    <Animated.View
-      {...responder.panHandlers}
-      onTouchStart={handleContentTouchStart}
-      testID={testID ? `${testID}-content` : undefined}
-      style={[resolvedStyles.content, contentStyle, { transform: [{ translateX: translation }] }]}
-    >
-      <InteractionPressable
-        interactionId={id}
-        onPress={close}
-        testID={testID ? `${testID}-pressable` : undefined}
-        style={({ pressed }) => getCellInteractionStyle(cellToken, { pressed, disabled: false })}
+    <GestureDetector gesture={pan}>
+      <Animated.View
+        onTouchStart={handleContentPressIn}
+        testID={testID ? `${testID}-content` : undefined}
+        style={[resolvedStyles.content, contentStyle, animatedContentStyle]}
       >
-        {children}
-      </InteractionPressable>
-    </Animated.View>
+        <InteractionPressable
+          interactionId={cellId}
+          onPressIn={handleContentPressIn}
+          onPress={close}
+          testID={testID ? `${testID}-pressable` : undefined}
+          style={({ pressed }) => getCellInteractionStyle(cellToken, { pressed, disabled: false })}
+        >
+          {children}
+        </InteractionPressable>
+      </Animated.View>
+    </GestureDetector>
   )
 
   return (
@@ -403,7 +462,7 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
           </View>
         ) : null}
       </View>
-      <View>{renderedContent}</View>
+      {renderedContent}
     </View>
   )
 })
@@ -419,8 +478,8 @@ export function SwipeCellGroup({ children, style, ...viewProps }: SwipeCellGroup
     }
   }, [])
   const requestOpen = useCallback((id: string) => {
-    cellsRef.current.forEach((close, cellId) => {
-      if (cellId !== id) close()
+    cellsRef.current.forEach((closeCell, cellId) => {
+      if (cellId !== id) closeCell()
     })
   }, [])
   const contextValue = useMemo<SwipeCellGroupContextValue>(
@@ -440,7 +499,12 @@ export function SwipeCellGroup({ children, style, ...viewProps }: SwipeCellGroup
 SwipeCellGroup.displayName = 'SwipeCellGroup'
 
 export function useSwipeCellController() {
-  const { closeCurrent } = useInteraction()
+  const manager = useSwipeCellManager()
+  const interaction = useInteraction()
+  const closeCurrent = useCallback(() => {
+    if (manager) manager.closeActive()
+    else interaction.closeCurrent()
+  }, [interaction, manager])
   return useMemo(
     () => ({
       closeCurrent,

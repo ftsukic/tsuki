@@ -3,15 +3,17 @@ import SwipeCellBasicExample from './examples/basic'
 import SwipeCellBothSidesExample from './examples/both-sides'
 import SwipeCellContentCloseExample from './examples/content-close'
 import SwipeCellCoordinationExample from './examples/coordination'
+import SwipeCellFlashListExample from './examples/flash-list'
 import SwipeCellGroupExample from './examples/group'
 import SwipeCellListExample from './examples/list'
 import SwipeCellMultipleActionsExample from './examples/multiple-actions'
 import SwipeCellRefExample from './examples/ref'
 import SwipeCellThemeExample from './examples/theme'
+import SwipeCellWeChatExample from './examples/wechat'
 
 /**
  * @title SwipeCell overview
- * @description SwipeCell 的基础、多 action、协调、列表、ref、分组和主题示例。
+ * @description SwipeCell 的微信消息列表、多 action、协调、列表、ref、分组和主题示例。
  */
 export default function SwipeCellOverview() {
   return (
@@ -42,6 +44,12 @@ export default function SwipeCellOverview() {
           title: 'Provider coordination',
         },
         {
+          Component: SwipeCellWeChatExample,
+          description: '展示微信消息列表风格的稳定 id、右侧 action 和主体布局。',
+          id: 'wechat',
+          title: 'WeChat message list',
+        },
+        {
           Component: SwipeCellContentCloseExample,
           description: '展示展开后点击主体关闭，同时保留主体自己的 onPress。',
           id: 'content-close',
@@ -52,6 +60,12 @@ export default function SwipeCellOverview() {
           description: '展示列表开始滚动时通过 useSwipeCellController 关闭当前 cell。',
           id: 'list',
           title: 'List usage',
+        },
+        {
+          Component: SwipeCellFlashListExample,
+          description: '展示 FlashList 回收 1000 条 SwipeCell 时的稳定 id 和滚动关闭。',
+          id: 'flash-list',
+          title: 'FlashList 1000 items',
         },
         {
           Component: SwipeCellRefExample,

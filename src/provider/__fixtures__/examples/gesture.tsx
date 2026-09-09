@@ -3,12 +3,12 @@ import { Text } from 'react-native'
 import { Provider } from '../../..'
 
 /**
- * @title Optional gesture root
- * @description Enable the shared GestureHandlerRootView for an application that uses gestures.
+ * @title Default gesture root
+ * @description Provider enables the shared GestureHandlerRootView by default for gesture content.
  */
 export default function ProviderGestureFixture() {
   return (
-    <Provider gesture>
+    <Provider>
       <Text>Gesture-enabled application</Text>
     </Provider>
   )

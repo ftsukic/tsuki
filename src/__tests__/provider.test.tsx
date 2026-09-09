@@ -98,7 +98,7 @@ describe('Provider', () => {
     expect(screen.getByTestId('second-provider')).toHaveTextContent('second')
   })
 
-  it('does not add a gesture root by default', async () => {
+  it('adds a gesture root by default for gesture-enabled components', async () => {
     const view = await render(
       <Provider>
         <Text testID="default-provider-child">child</Text>
@@ -106,8 +106,8 @@ describe('Provider', () => {
     )
 
     expect(screen.getByTestId('default-provider-child')).toHaveTextContent('child')
-    // The tree shape verifies that the disabled capability does not add a wrapper.
-    expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(1)
+    // The tree shape verifies that Provider supplies the root required by GestureDetector.
+    expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(2)
     await view.unmount()
   })
 
@@ -134,7 +134,7 @@ describe('Provider', () => {
     expect(screen.getByTestId('safe-area-provider-child')).toHaveTextContent('child')
     expect(view.root?.type).toBe('View')
     expect(view.root?.props).toMatchObject({ style: { flex: 1 } })
-    expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(2)
+    expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(3)
     await view.unmount()
   })
 
@@ -148,8 +148,8 @@ describe('Provider', () => {
     )
 
     expect(screen.getByTestId('external-gesture-provider-child')).toHaveTextContent('child')
-    // The tree shape verifies that Provider does not add a second root inside the external one.
-    expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(2)
+    // Provider owns its root so bare Provider usage is gesture-ready even in a nested tree.
+    expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(3)
     await view.unmount()
   })
 

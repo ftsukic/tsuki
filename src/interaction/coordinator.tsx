@@ -1,39 +1,42 @@
 import { useCallback, useMemo, useRef, type ReactNode } from 'react'
 import { InteractionContext } from './context'
-import type { ActiveSwipeCell, InteractionContextValue } from './context'
+import type { InteractionContextValue } from './context'
+import { SwipeCellManager } from '../swipe-cell/manager'
 
 export interface InteractionCoordinatorProps {
   children?: ReactNode
+  manager?: SwipeCellManager
 }
 
-export function InteractionCoordinator({ children }: InteractionCoordinatorProps) {
-  const activeRef = useRef<ActiveSwipeCell | null>(null)
+export function InteractionCoordinator({ children, manager }: InteractionCoordinatorProps) {
+  const localManager = useRef(new SwipeCellManager()).current
+  const coordinator = manager ?? localManager
 
-  const requestOpen = useCallback((id: string, close: () => void) => {
-    const current = activeRef.current
-    if (current && current.id !== id) {
-      current.close()
-    }
+  const requestOpen = useCallback(
+    (id: string, close: () => void) => {
+      coordinator.claim({ id, close })
+    },
+    [coordinator],
+  )
 
-    activeRef.current = { id, close }
-  }, [])
+  const clear = useCallback(
+    (id: string) => {
+      coordinator.release(id)
+    },
+    [coordinator],
+  )
 
-  const clear = useCallback((id: string) => {
-    if (activeRef.current?.id === id) {
-      activeRef.current = null
-    }
-  }, [])
-
-  const notifyPress = useCallback((id?: string) => {
-    const current = activeRef.current
-    if (current && current.id !== id) {
-      current.close()
-    }
-  }, [])
+  const notifyPress = useCallback(
+    (id?: string) => {
+      if (id === undefined) coordinator.closeActive()
+      else coordinator.closeOthers(id)
+    },
+    [coordinator],
+  )
 
   const closeCurrent = useCallback(() => {
-    activeRef.current?.close()
-  }, [])
+    coordinator.closeActive()
+  }, [coordinator])
 
   const value = useMemo<InteractionContextValue>(
     () => ({

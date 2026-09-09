@@ -52,7 +52,7 @@ export default function App() {
 }
 ```
 
-默认情况下 Tsuki 只消费 Gesture Handler 能力，不会自动包裹 `GestureHandlerRootView`；使用 `Provider gesture` 时才会由 Provider 提供这个根节点。
+Provider 默认提供 `GestureHandlerRootView`，因此 SwipeCell 等手势组件可以直接放在 `<Provider>` 下；已有外部 root 时可使用 `Provider gesture={false}` 避免增加内部 wrapper。
 
 如果应用已经使用 `Provider`，也可以开启它的可选 gesture capability：
 
@@ -62,7 +62,7 @@ export default function App() {
 </Provider>
 ```
 
-`Provider gesture` 与外部 `GestureHandlerRootView` 二选一即可；默认 `gesture={false}`，不会增加 wrapper。
+`Provider gesture={false}` 与外部 `GestureHandlerRootView` 可以组合使用；默认 `gesture={true}`，会增加一个内部 root。
 
 如果应用需要安全区 inset，可以同样开启 `Provider` 的 `safeArea` capability：
 
