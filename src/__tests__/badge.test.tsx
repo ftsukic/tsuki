@@ -39,11 +39,14 @@ describe('Badge', () => {
     expect(screen.getAllByText('0')).toHaveLength(1)
     expect(screen.getByTestId('zero')).toBeTruthy()
     expect(screen.getByText('99+')).toBeTruthy()
-    expect(screen.getByText('99+').props.numberOfLines).toBe(1)
+    expect(screen.getByText('99+').props.numberOfLines).toBeUndefined()
     expect(StyleSheet.flatten(screen.getByText('99+').props.style)).toMatchObject({
       flexShrink: 0,
       overflow: 'visible',
     })
+    const overflowIndicator = screen.getByText('99+').parent
+    if (!overflowIndicator) throw new Error('Overflow Badge indicator was not rendered')
+    expect(StyleSheet.flatten(overflowIndicator.props.style).minWidth).toBeGreaterThan(20)
     expect(screen.getByText('!')).toBeTruthy()
   })
 

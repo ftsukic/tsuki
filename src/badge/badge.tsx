@@ -36,17 +36,9 @@ function resolveStatusColor(status: BadgeStatus, token: ReturnType<typeof getBad
   }
 }
 
-function renderValue(
-  value: BadgeProps['count'] | BadgeProps['text'],
-  style: StyleProp<TextStyle>,
-  singleLine = false,
-) {
+function renderValue(value: BadgeProps['count'] | BadgeProps['text'], style: StyleProp<TextStyle>) {
   if (typeof value === 'string' || typeof value === 'number') {
-    return (
-      <Text numberOfLines={singleLine ? 1 : undefined} style={style}>
-        {value}
-      </Text>
-    )
+    return <Text style={style}>{value}</Text>
   }
   return value
 }
@@ -122,6 +114,13 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
     typeof count === 'number' && count > normalizedOverflowCount
       ? `${normalizedOverflowCount}+`
       : count
+  const countValueText =
+    typeof countValue === 'string' || typeof countValue === 'number'
+      ? String(countValue)
+      : undefined
+  const countMinWidth = countValueText
+    ? Math.max(minWidth, countValueText.length * fontSize)
+    : minWidth
 
   const defaultAnchorWidth = dot || (status && !hasStatusText) ? token.dotSize : height
   const defaultAnchorHeight = dot
@@ -160,7 +159,7 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
     height: dot ? token.dotSize : height,
     justifyContent: 'center',
     minHeight: dot ? token.dotSize : height,
-    minWidth: dot ? token.dotSize : minWidth,
+    minWidth: dot ? token.dotSize : countMinWidth,
     transform: indicatorTransform,
   }
   const statusIndicatorStyle: ViewStyle = {
@@ -238,22 +237,18 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
                 : null}
             </>
           ) : dot ? null : (
-            renderValue(
-              countValue,
-              [
-                {
-                  color: token.textColor,
-                  fontFamily: token.fontFamily,
-                  fontSize,
-                  lineHeight: height,
-                  overflow: 'visible',
-                  textAlign: 'center',
-                  flexShrink: 0,
-                },
-                semantic?.text,
-              ],
-              true,
-            )
+            renderValue(countValue, [
+              {
+                color: token.textColor,
+                fontFamily: token.fontFamily,
+                fontSize,
+                lineHeight: height,
+                overflow: 'visible',
+                textAlign: 'center',
+                flexShrink: 0,
+              },
+              semantic?.text,
+            ])
           )}
         </View>
       ) : null}
