@@ -240,7 +240,7 @@ describe('Dialog', () => {
     await utils.unmount()
   })
 
-  it('resolves and rejects the imperative dialog promises', async () => {
+  it('resolves the imperative dialog promises for confirm and cancel', async () => {
     const view = await render(<AppProvider />)
 
     let alertPromise!: Promise<unknown>
@@ -257,7 +257,7 @@ describe('Dialog', () => {
     await act(async () => {
       confirmPromise = showConfirmDialog({ message: '需要确认' })
     })
-    const cancelExpectation = expect(confirmPromise).rejects.toBe('cancel')
+    const cancelExpectation = expect(confirmPromise).resolves.toBe('cancel')
     // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => fireEvent.press(screen.getByTestId('dialog-cancel-button')))
     await cancelExpectation
@@ -300,7 +300,7 @@ describe('Dialog', () => {
     await view.unmount()
   })
 
-  it('supports defaults and closes the current imperative dialog without settling it', async () => {
+  it('supports defaults and resolves undefined when closing the current imperative dialog', async () => {
     setDialogDefaultOptions({
       message: '默认消息',
       showCancelButton: true,
@@ -317,8 +317,46 @@ describe('Dialog', () => {
 
     // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => closeDialog())
+    await expect(pending).resolves.toBeUndefined()
     expect(screen.queryByText('默认消息')).toBeNull()
-    void pending
+    await view.unmount()
+  })
+
+  it('resolves closeDialog only after the shared close animation completes', async () => {
+    const animations: Array<{ complete: (finished?: boolean) => void }> = []
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, config, callback) => {
+      if (config?.duration !== 200) return value
+      animations.push({
+        complete: (finished = true) => callback?.(finished),
+      })
+      return value
+    })
+
+    const view = await render(
+      <ConfigProvider theme={{ token: { motion: true } }}>
+        <PortalHost />
+      </ConfigProvider>,
+    )
+    let pending!: Promise<unknown>
+
+    await act(async () => {
+      pending = showDialog({ message: '动画关闭' })
+    })
+    await act(async () => animations[0]?.complete())
+
+    await act(async () => closeDialog())
+    expect(animations).toHaveLength(2)
+
+    let settled = false
+    void pending.then(() => {
+      settled = true
+    })
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {})
+    expect(settled).toBe(false)
+
+    await act(async () => animations[1]?.complete())
+    await expect(pending).resolves.toBeUndefined()
     await view.unmount()
   })
 
@@ -591,13 +629,14 @@ describe('Dialog', () => {
     void pending
   })
 
-  it('requires Portal.Host for controlled rendering', async () => {
-    await expect(
-      render(
-        <ConfigProvider theme={{ token: { motion: false } }}>
-          <Dialog show message="没有 Portal.Host" />
-        </ConfigProvider>,
-      ),
-    ).rejects.toThrow()
+  it('renders controlled Dialog inline without a PortalHost', async () => {
+    const view = await render(
+      <ConfigProvider theme={{ token: { motion: false } }}>
+        <Dialog show message="不需要 Portal.Host" />
+      </ConfigProvider>,
+    )
+
+    expect(screen.getByText('不需要 Portal.Host')).toBeTruthy()
+    await view.unmount()
   })
 })

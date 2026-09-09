@@ -34,7 +34,7 @@ import {
 } from '@ftsukic/tsuki'
 ```
 
-命令式 API 和受控 Dialog 需要 `PortalHost`。可以直接组合 `ConfigProvider` 和 `PortalHost`：
+命令式 API 需要 `PortalHost`；受控 `Dialog` 本身以内联方式渲染，如需脱离当前布局可显式包裹 `Portal`。可以直接组合 `ConfigProvider` 和 `PortalHost`：
 
 ```tsx | pure
 <ConfigProvider>
@@ -124,7 +124,7 @@ setDialogDefaultOptions(options: DialogOptions): void
 resetDialogDefaultOptions(): void
 ```
 
-`showDialog` 默认只有确认按钮，确认后 Promise resolve `'confirm'`。`showConfirmDialog` 默认增加取消按钮，确认 resolve `'confirm'`，取消 reject `'cancel'`。两个函数共用一个当前实例；新调用会更新当前内容。`closeDialog` 只关闭当前实例，不主动结算未完成 Promise。
+`showDialog` 默认只有确认按钮，确认后 Promise resolve `'confirm'`。`showConfirmDialog` 默认增加取消按钮，确认 resolve `'confirm'`，取消 resolve `'cancel'`。两个函数共用一个当前实例；新调用会更新当前内容。`closeDialog` 会在关闭动画完成后 resolve `undefined`。
 
 命令式 options 不包含 `show` 和生命周期回调，显式 options 优先于 `setDialogDefaultOptions`。未挂载 `PortalHost` 时，命令式调用会抛出错误；`closeDialog()` 在没有当前实例时安全无效。`ConfigProvider` 只负责主题，不会替代 `PortalHost`。
 

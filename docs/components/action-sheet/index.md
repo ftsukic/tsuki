@@ -27,7 +27,7 @@ ActionSheet 用于从底部展示一组操作。它复用 Popup 的 bottom 定�
 import { ActionSheet, ConfigProvider, PortalHost, Provider, showActionSheet } from '@ftsukic/tsuki'
 ```
 
-受控组件和命令式 API 都需要当前应用存在 `PortalHost`。应用通常直接使用同时提供主题和 Portal 宿主的 `Provider`：
+命令式 API 需要当前应用存在 `PortalHost`；受控 ActionSheet 本身以内联方式渲染，如需脱离当前布局可显式包裹 `Portal`。应用通常直接使用同时提供主题和 Portal 宿主的 `Provider`：
 
 ```tsx | pure
 <Provider>

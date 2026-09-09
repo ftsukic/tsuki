@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { createRef } from 'react'
-import { ConfigProvider, getDesignToken, Overlay, PortalHost } from '..'
+import { ConfigProvider, getDesignToken, Overlay, Portal, PortalHost } from '..'
 import { OverlaySurface } from '../overlay/surface'
 import type { ReactNode } from 'react'
 import { Pressable, StyleSheet, Text } from 'react-native'
@@ -40,7 +40,7 @@ describe('Overlay', () => {
     jest.restoreAllMocks()
   })
 
-  it('renders a full-screen mask through PortalHost with embedded content', async () => {
+  it('renders a full-screen mask inline with embedded content', async () => {
     const view = await render(
       <AppProvider>
         <Overlay show testID="overlay">
@@ -64,6 +64,38 @@ describe('Overlay', () => {
     })
     expect(screen.getByTestId('content')).toBeTruthy()
     await view.unmount()
+  })
+
+  it('can be explicitly mounted through Portal when it must leave the layout', async () => {
+    const view = await render(
+      <ConfigProvider>
+        <Overlay show testID="inline-overlay" />
+      </ConfigProvider>,
+    )
+    expect(screen.getByTestId('inline-overlay')).toBeTruthy()
+    await view.unmount()
+
+    const utils = await render(
+      <AppProvider>
+        <Portal>
+          <Overlay show testID="portal-overlay" />
+        </Portal>
+      </AppProvider>,
+    )
+    const root = screen.getByTestId('portal-overlay')
+    let entry = root.parent
+    while (
+      entry &&
+      !(
+        entry.props.collapsable === false &&
+        entry.props.pointerEvents === 'box-none' &&
+        StyleSheet.flatten(entry.props.style)?.position === 'absolute'
+      )
+    ) {
+      entry = entry.parent
+    }
+    expect(entry).toBeTruthy()
+    await utils.unmount()
   })
 
   it('applies background, z-index, style, and semantic style overrides', async () => {

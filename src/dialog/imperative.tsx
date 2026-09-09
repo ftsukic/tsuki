@@ -8,8 +8,8 @@ interface DialogRecord {
   key: PortalKey | null
   options: DialogOptions
   resolve: (action: DialogAction | undefined) => void
-  reject: (action: DialogAction | undefined) => void
   show: boolean
+  settled: boolean
 }
 
 let currentRecord: DialogRecord | null = null
@@ -38,8 +38,10 @@ function replaceRecord(record: DialogRecord, next: Partial<DialogRecord>) {
 }
 
 function settleRecord(record: DialogRecord, action: DialogAction | undefined) {
-  if (action === 'confirm') record.resolve(action)
-  else if (action === 'cancel') record.reject(action)
+  if (record.settled) return
+
+  record.settled = true
+  record.resolve(action)
 }
 
 function wrapBeforeClose(
@@ -83,12 +85,13 @@ function DialogMethod({ record }: { record: DialogRecord }) {
     const current = recordRef.current
     const action = actionRef.current
     actionRef.current = null
-    replaceRecord(current, { show: false })
     settleRecord(current, action ?? undefined)
+    replaceRecord(current, { show: false })
   }
 
   const handleClose = () => {
     const current = recordRef.current
+    settleRecord(current, undefined)
     if (currentRecord === current) currentRecord = null
     if (current.key !== null) unmountPortal(current.key)
   }
@@ -113,18 +116,16 @@ function DialogMethod({ record }: { record: DialogRecord }) {
 /** Displays a Dialog through the active PortalHost. */
 export function showDialog(options: DialogOptions = {}): Promise<DialogAction | undefined> {
   let resolvePromise!: (action: DialogAction | undefined) => void
-  let rejectPromise!: (action: DialogAction | undefined) => void
-  const promise = new Promise<DialogAction | undefined>((resolve, reject) => {
+  const promise = new Promise<DialogAction | undefined>((resolve) => {
     resolvePromise = resolve
-    rejectPromise = reject
   })
 
   if (currentRecord?.key !== null && currentRecord) {
     replaceRecord(currentRecord, {
       options: { ...currentOptions, ...options },
       resolve: resolvePromise,
-      reject: rejectPromise,
       show: true,
+      settled: false,
     })
     return promise
   }
@@ -133,8 +134,8 @@ export function showDialog(options: DialogOptions = {}): Promise<DialogAction | 
     key: null,
     options: { ...currentOptions, ...options },
     resolve: resolvePromise,
-    reject: rejectPromise,
     show: true,
+    settled: false,
   }
   currentRecord = record
   try {
@@ -151,7 +152,7 @@ export function showConfirmDialog(options: DialogOptions = {}) {
   return showDialog({ showCancelButton: true, ...options })
 }
 
-/** Closes the current imperative Dialog without settling its Promise. */
+/** Closes the current imperative Dialog and resolves its Promise with undefined. */
 export function closeDialog(): void {
   const current = currentRecord
   if (!current || current.key === null) return

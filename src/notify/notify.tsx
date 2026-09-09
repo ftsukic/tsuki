@@ -1,10 +1,20 @@
-import { forwardRef, isValidElement, useEffect, useImperativeHandle, useRef, useState } from 'react'
-import { PopupContent } from '../popup/popup'
+import {
+  forwardRef,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { StyleSheet, Text, View } from 'react-native'
+import { Easing } from 'react-native-reanimated'
+import { Animated, motionPresets, useTransitionProgress } from '../motion'
 import { Portal } from '../portal'
-import { useComponentToken } from '../theme'
+import { useComponentToken, useToken } from '../theme'
 import type { NotifyMethods, NotifyProps } from './interface'
 import { getNotifyToken } from './token'
-import { Text, View } from 'react-native'
 
 function getBackgroundColor(type: NotifyProps['type'], token: ReturnType<typeof getNotifyToken>) {
   switch (type) {
@@ -36,21 +46,44 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
   },
   ref,
 ) {
+  const { token: themeToken } = useToken()
   const token = useComponentToken('Notify', getNotifyToken)
   const [visible, setVisible] = useState(visibleProp)
   const [currentMessage, setCurrentMessage] = useState(message)
+  const renderedRef = useRef(visibleProp)
+  const visibleRef = useRef(visibleProp)
+  const closingRef = useRef(false)
+  const closedNotifiedRef = useRef(!visibleProp)
+  const [rendered, setRendered] = useState(visibleProp)
   const onClosedRef = useRef(onClosed)
   onClosedRef.current = onClosed
 
   useEffect(() => setVisible(visibleProp), [visibleProp])
   useEffect(() => {
+    const wasVisible = visibleRef.current
+    visibleRef.current = visible
+
+    if (visible) {
+      renderedRef.current = true
+      setRendered(true)
+      closingRef.current = false
+      closedNotifiedRef.current = false
+      return
+    }
+
+    if (wasVisible && renderedRef.current) {
+      closingRef.current = true
+      closedNotifiedRef.current = false
+    }
+  }, [visible])
+  useEffect(() => {
     setCurrentMessage(message)
   }, [message])
   useEffect(() => {
-    if (duration <= 0) return
+    if (!visible || duration <= 0) return
     const timer = setTimeout(() => setVisible(false), duration)
     return () => clearTimeout(timer)
-  }, [duration])
+  }, [duration, currentMessage, visible])
 
   useImperativeHandle(
     ref,
@@ -63,46 +96,95 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
 
   const content = isValidElement(currentMessage) ? currentMessage : (currentMessage ?? children)
 
+  const animationDuration = themeToken.motion ? themeToken.motionDurationSlow : 0
+  const enteringConfig = useMemo(
+    () => ({
+      duration: animationDuration,
+      easing: Easing.out(Easing.ease),
+      mode: 'timing' as const,
+    }),
+    [animationDuration],
+  )
+  const leavingConfig = useMemo(
+    () => ({
+      duration: animationDuration,
+      easing: Easing.in(Easing.ease),
+      mode: 'timing' as const,
+    }),
+    [animationDuration],
+  )
+  const handleTransitionEnd = useCallback((transitionVisible: boolean) => {
+    if (
+      transitionVisible ||
+      visibleRef.current ||
+      !renderedRef.current ||
+      !closingRef.current ||
+      closedNotifiedRef.current
+    ) {
+      return
+    }
+
+    closedNotifiedRef.current = true
+    closingRef.current = false
+    renderedRef.current = false
+    setRendered(false)
+    onClosedRef.current?.()
+  }, [])
+  const { animatedStyle } = useTransitionProgress({
+    visible,
+    preset: motionPresets.popupTop,
+    distance: 100,
+    opacity: 1,
+    entering: enteringConfig,
+    leaving: leavingConfig,
+    onTransitionEnd: handleTransitionEnd,
+  })
+
+  if (!rendered) return null
+
   return (
-    <PopupContent
-      {...props}
-      visible={visible}
-      overlay={false}
-      position="top"
-      onClosed={onClosedRef.current}
+    <View
+      pointerEvents="box-none"
+      style={[StyleSheet.absoluteFill, { zIndex: themeToken.zIndexPopupBase }]}
     >
-      <View
-        style={[
-          {
-            alignItems: 'center',
-            backgroundColor: backgroundColor ?? getBackgroundColor(type, token),
-            paddingHorizontal: token.paddingHorizontal,
-            paddingVertical: token.paddingVertical,
-            justifyContent: 'center',
-            width: '100%',
-          },
-          style,
-        ]}
+      <Animated.View
+        {...props}
+        pointerEvents={visible ? 'auto' : 'none'}
+        style={[{ width: '100%' }, animatedStyle]}
       >
-        {typeof content === 'string' || typeof content === 'number' ? (
-          <Text
-            style={[
-              {
-                color: color ?? token.textColor,
-                fontFamily: token.fontFamily,
-                fontSize: token.fontSize,
-                lineHeight: token.lineHeight,
-              },
-              textStyle,
-            ]}
-          >
-            {content}
-          </Text>
-        ) : (
-          content
-        )}
-      </View>
-    </PopupContent>
+        <View
+          style={[
+            {
+              alignItems: 'center',
+              backgroundColor: backgroundColor ?? getBackgroundColor(type, token),
+              justifyContent: 'center',
+              paddingHorizontal: token.paddingHorizontal,
+              paddingVertical: token.paddingVertical,
+              width: '100%',
+            },
+            style,
+          ]}
+        >
+          {typeof content === 'string' || typeof content === 'number' ? (
+            <Text
+              style={[
+                {
+                  color: color ?? token.textColor,
+                  fontFamily: token.fontFamily,
+                  fontSize: token.fontSize,
+                  lineHeight: token.lineHeight,
+                },
+                textStyle,
+              ]}
+            >
+              {content}
+            </Text>
+          ) : (
+            content
+          )}
+        </View>
+      </Animated.View>
+    </View>
   )
 })
 

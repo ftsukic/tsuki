@@ -84,6 +84,17 @@ describe('ActionSheet', () => {
     await view.unmount()
   })
 
+  it('renders the controlled sheet inline without creating a Portal entry', async () => {
+    const view = await render(
+      <ConfigProvider theme={{ token: { motion: false } }}>
+        <ActionSheet visible actions={[{ name: '内联操作' }]} />
+      </ConfigProvider>,
+    )
+
+    expect(screen.getByText('内联操作')).toBeTruthy()
+    await view.unmount()
+  })
+
   it('uses danger, disabled, and loading action states', async () => {
     const dangerPress = jest.fn()
     const disabledPress = jest.fn()

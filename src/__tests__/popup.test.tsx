@@ -85,6 +85,26 @@ describe('Popup', () => {
     await view.unmount()
   })
 
+  it('creates exactly one Portal entry for one Popup', async () => {
+    const view = await render(
+      <AppProvider>
+        <Popup visible testID="single-entry-popup">
+          <Text>single entry</Text>
+        </Popup>
+      </AppProvider>,
+    )
+
+    // eslint-disable-next-line testing-library/no-container
+    const entries = view.container.queryAll(
+      (node) =>
+        node.props.collapsable === false &&
+        node.props.pointerEvents === 'box-none' &&
+        StyleSheet.flatten(node.props.style)?.position === 'absolute',
+    )
+    expect(entries).toHaveLength(1)
+    await view.unmount()
+  })
+
   it('opens when position and visible change in the same press', async () => {
     function PositionPopup() {
       const [visible, setVisible] = useState(false)
