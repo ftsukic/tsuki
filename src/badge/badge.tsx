@@ -39,11 +39,11 @@ function resolveStatusColor(status: BadgeStatus, token: ReturnType<typeof getBad
 function renderValue(
   value: BadgeProps['count'] | BadgeProps['text'],
   style: StyleProp<TextStyle>,
-  preventEllipsis = false,
+  singleLine = false,
 ) {
   if (typeof value === 'string' || typeof value === 'number') {
     return (
-      <Text numberOfLines={preventEllipsis ? 0 : undefined} style={style}>
+      <Text numberOfLines={singleLine ? 1 : undefined} style={style}>
         {value}
       </Text>
     )

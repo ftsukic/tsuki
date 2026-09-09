@@ -39,7 +39,7 @@ describe('Badge', () => {
     expect(screen.getAllByText('0')).toHaveLength(1)
     expect(screen.getByTestId('zero')).toBeTruthy()
     expect(screen.getByText('99+')).toBeTruthy()
-    expect(screen.getByText('99+').props.numberOfLines).toBe(0)
+    expect(screen.getByText('99+').props.numberOfLines).toBe(1)
     expect(screen.getByText('!')).toBeTruthy()
   })
 
