@@ -78,6 +78,10 @@ describe('NoticeBar', () => {
       alignItems: 'center',
       justifyContent: 'center',
     })
+    expect(StyleSheet.flatten(screen.getByText('通知').parent?.props.style)).toMatchObject({
+      alignItems: 'center',
+      flexDirection: 'row',
+    })
   })
 
   it('handles bar presses, close presses, and disabled state through interaction', async () => {

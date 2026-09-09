@@ -30,6 +30,7 @@ export function getNoticeBarStyles(
   const contentFlow: ViewStyle = {
     alignItems: 'center',
     flexShrink: 1,
+    flexDirection: 'row',
     minHeight: lineHeight,
     minWidth: 0,
     position: 'relative',
@@ -80,6 +81,7 @@ export function getNoticeBarStyles(
     contentMeasured: {
       alignItems: 'center',
       flexShrink: 0,
+      flexDirection: 'row',
       height: '100%',
       justifyContent: 'center',
       left: 0,
