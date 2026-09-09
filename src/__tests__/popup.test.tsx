@@ -113,7 +113,9 @@ describe('Popup', () => {
       </AppProvider>,
     )
 
-    fireEvent.press(screen.getByText('open bottom'))
+    // React 19 flushes the state update from this Pressable asynchronously.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.press(screen.getByText('open bottom'))
     expect(screen.getByText('opened bottom')).toBeTruthy()
     expect(flattenStyle(screen.getByTestId('same-press-popup'))).toMatchObject({ opacity: 1 })
     await view.unmount()
