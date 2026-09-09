@@ -13,6 +13,7 @@ import CollapseThemeExample from './examples/theme'
 export default function CollapseOverview() {
   return (
     <FixtureOverview
+      fullBleedExamples
       examples={[
         {
           Component: CollapseBasicExample,

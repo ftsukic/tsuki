@@ -79,8 +79,12 @@ export function getCollapseStyles(
     },
     content: {
       backgroundColor: token.contentBackgroundColor,
+      left: 0,
       paddingHorizontal: token.contentPaddingHorizontal,
       paddingVertical: token.contentPaddingVertical,
+      position: 'absolute',
+      right: 0,
+      top: 0,
     },
     contentText: {
       color: token.contentTextColor,

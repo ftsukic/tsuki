@@ -194,6 +194,12 @@ describe('Collapse', () => {
       flexShrink: 1,
       lineHeight: cellToken.lineHeight,
     })
+    expect(styles.content).toMatchObject({
+      left: 0,
+      position: 'absolute',
+      right: 0,
+      top: 0,
+    })
     expect(disabledStyles.header.opacity).toBe(1)
     expect(disabledStyles.title.color).toBe(collapseToken.disabledColor)
     expect(getCollapseDividerStyle(collapseToken)).toMatchObject({
