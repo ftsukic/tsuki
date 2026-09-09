@@ -80,7 +80,9 @@ describe('NoticeBar', () => {
     })
     expect(StyleSheet.flatten(screen.getByText('通知').parent?.props.style)).toMatchObject({
       alignItems: 'center',
+      bottom: 0,
       flexDirection: 'row',
+      top: 0,
     })
   })
 

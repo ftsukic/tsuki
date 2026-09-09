@@ -80,13 +80,14 @@ export function getNoticeBarStyles(
     },
     contentMeasured: {
       alignItems: 'center',
+      bottom: 0,
       flexShrink: 0,
       flexDirection: 'row',
-      height: '100%',
       justifyContent: 'center',
       left: 0,
       minHeight: lineHeight,
       position: 'absolute',
+      top: 0,
     },
     contentFlow,
     text: {
