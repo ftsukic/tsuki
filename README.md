@@ -4,7 +4,7 @@
 
 当前版本：`0.0.1`
 
-兼容基线：React `19.1.1`、React Native `0.82.1+`；Harmony 使用 React Native `0.82.1` 基线。组件库不直接依赖 RNOH、Expo 或其他 Native Module。
+兼容基线：React `19.1.1`、React Native `0.82.1+`；Harmony 使用 React Native `0.82.1` 基线。手势能力以可选 peer dependency 提供，安全区能力使用 `react-native-safe-area-context` peer dependency；需要时可通过 `Provider gesture` 和 `Provider safeArea` 提供对应根节点。
 
 ## 当前状态
 
@@ -41,6 +41,8 @@ yarn docs:dev
 ```
 
 `example` 是独立的传统 Expo 原生预览应用，直接引用根目录 `src`。运行 `yarn example:dev` 后可在 Expo Go 或 development build 中检查原生行为；Dumi H5 文档使用 `react-native-web` 渲染源码旁的同一批 fixtures。
+
+使用手势组件或 UI thread 动画时，请参考 [快速开始](docs/guide/index.md) 安装 `react-native-gesture-handler`、`react-native-reanimated` 和 `react-native-worklets`。业务 App 可以自行提供对应 root，也可以在应用入口使用 `Provider` 的 `gesture` / `safeArea` capability；已有外部 root 时保持对应选项默认值即可。
 
 ## License
 

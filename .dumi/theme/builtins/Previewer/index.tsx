@@ -10,7 +10,6 @@ import {
 import Device from 'dumi/theme/slots/Device'
 import PreviewerActions from 'dumi-theme-mobile/dist/slots/PreviewerActions'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Provider } from '@ftsukic/tsuki'
 
 import 'dumi/theme-default/builtins/Previewer/index.less'
 import 'dumi-theme-mobile/dist/builtins/Previewer/index.less'
@@ -54,7 +53,7 @@ function LivePreviewer(props: IPreviewerProps) {
             src={props.demoUrl}
           />
         ) : (
-          <Provider>{previewNode}</Provider>
+          previewNode
         )}
       </div>
       {error ? <div className="dumi-default-previewer-demo-error">{error.toString()}</div> : null}

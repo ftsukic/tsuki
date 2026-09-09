@@ -1,21 +1,21 @@
 import { useState } from 'react'
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { Provider } from '@ftsukic/tsuki'
-import { fixtureCatalog } from '../fixtures/catalog'
-import type { FixtureEntry } from '../fixtures/catalog'
+import { componentCatalog } from '../fixtures/catalog'
+import type { ComponentFixtureEntry } from '../fixtures/catalog'
 
 export default function FixtureExplorer() {
   return (
-    <SafeAreaProvider>
+    <Provider safeArea>
       <Explorer />
-    </SafeAreaProvider>
+    </Provider>
   )
 }
 
 function Explorer() {
-  const [selected, setSelected] = useState<FixtureEntry | null>(null)
+  const [selected, setSelected] = useState<ComponentFixtureEntry | null>(null)
 
   if (selected) {
     return <PreviewScreen fixture={selected} onBack={() => setSelected(null)} />
@@ -24,18 +24,18 @@ function Explorer() {
   return <FixtureCatalog onSelect={setSelected} />
 }
 
-function FixtureCatalog({ onSelect }: { onSelect: (fixture: FixtureEntry) => void }) {
+function FixtureCatalog({ onSelect }: { onSelect: (component: ComponentFixtureEntry) => void }) {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
       <View style={styles.header}>
         <Text style={styles.eyebrow}>@ftsukic/tsuki</Text>
-        <Text style={styles.title}>Fixture Explorer</Text>
+        <Text style={styles.title}>Components / 组件预览</Text>
         <Text style={styles.description} selectable>
-          从 src/**/__fixtures__ 生成的原生组件预览目录。
+          每个组件进入自己的 overview，examples 在 overview 内组织。
         </Text>
       </View>
       <FlatList
-        data={fixtureCatalog}
+        data={componentCatalog}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
@@ -46,7 +46,6 @@ function FixtureCatalog({ onSelect }: { onSelect: (fixture: FixtureEntry) => voi
           >
             <View style={styles.cardText}>
               <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardMeta}>{item.component}</Text>
               <Text style={styles.cardDescription} selectable>
                 {item.description}
               </Text>
@@ -56,20 +55,26 @@ function FixtureCatalog({ onSelect }: { onSelect: (fixture: FixtureEntry) => voi
             </Text>
           </Pressable>
         )}
-        ListEmptyComponent={<Text style={styles.empty}>没有找到 fixture。</Text>}
+        ListEmptyComponent={<Text style={styles.empty}>没有找到组件。</Text>}
       />
     </SafeAreaView>
   )
 }
 
-function PreviewScreen({ fixture, onBack }: { fixture: FixtureEntry; onBack: () => void }) {
+function PreviewScreen({
+  fixture,
+  onBack,
+}: {
+  fixture: ComponentFixtureEntry
+  onBack: () => void
+}) {
   const SelectedFixture = fixture.Component
 
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
       <View style={styles.previewHeader}>
         <Pressable
-          accessibilityLabel="返回 fixture 列表"
+          accessibilityLabel="返回组件列表"
           accessibilityRole="button"
           hitSlop={8}
           onPress={onBack}
@@ -82,17 +87,15 @@ function PreviewScreen({ fixture, onBack }: { fixture: FixtureEntry; onBack: () 
             {fixture.title}
           </Text>
           <Text style={styles.previewMeta} numberOfLines={1} selectable>
-            {fixture.id}
+            {fixture.component}
           </Text>
         </View>
       </View>
 
       <View style={styles.previewViewport}>
-        <Provider key={fixture.id}>
-          <View style={styles.fixtureViewport}>
-            <SelectedFixture />
-          </View>
-        </Provider>
+        <View style={styles.fixtureViewport}>
+          <SelectedFixture key={fixture.id} />
+        </View>
       </View>
     </SafeAreaView>
   )
@@ -147,11 +150,6 @@ const styles = StyleSheet.create({
   cardTitle: {
     color: '#101828',
     fontSize: 16,
-    fontWeight: '600',
-  },
-  cardMeta: {
-    color: '#1677ff',
-    fontSize: 12,
     fontWeight: '600',
   },
   cardDescription: {
