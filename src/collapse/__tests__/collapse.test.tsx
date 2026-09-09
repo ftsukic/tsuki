@@ -1,11 +1,78 @@
-import { Collapse, CollapseItem, ConfigProvider } from '../..'
-import { fireEvent, render, screen } from '@testing-library/react-native'
+import * as Reanimated from 'react-native-reanimated'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
+import type { TestInstance } from 'test-renderer'
 import { StyleSheet } from 'react-native'
+import {
+  Collapse,
+  CollapseItem,
+  ConfigProvider,
+  getCellToken,
+  getCollapseToken,
+  getDesignToken,
+} from '../..'
+import { getCollapseDividerStyle, getCollapseStyles } from '../style'
+
+function findLayoutNode(root: TestInstance) {
+  const pending: TestInstance[] = [root]
+
+  while (pending.length > 0) {
+    const candidate = pending.shift() as TestInstance
+    if (typeof candidate.props.onLayout === 'function') return candidate
+
+    pending.push(
+      ...candidate.children.filter((child): child is TestInstance => typeof child !== 'string'),
+    )
+  }
+
+  throw new Error('Collapse content layout node was not rendered')
+}
+
+function findNode(root: TestInstance, predicate: (node: TestInstance) => boolean) {
+  const pending: TestInstance[] = [root]
+
+  while (pending.length > 0) {
+    const candidate = pending.shift() as TestInstance
+    if (predicate(candidate)) return candidate
+
+    pending.push(
+      ...candidate.children.filter((child): child is TestInstance => typeof child !== 'string'),
+    )
+  }
+
+  throw new Error('Collapse node was not rendered')
+}
+
+function findNodes(root: TestInstance, predicate: (node: TestInstance) => boolean) {
+  const matches: TestInstance[] = []
+  const pending: TestInstance[] = [root]
+
+  while (pending.length > 0) {
+    const candidate = pending.shift() as TestInstance
+    if (predicate(candidate)) matches.push(candidate)
+
+    pending.push(
+      ...candidate.children.filter((child): child is TestInstance => typeof child !== 'string'),
+    )
+  }
+
+  return matches
+}
+
+async function flushUI() {
+  await act(async () => {
+    await new Promise<void>((resolve) => setTimeout(resolve, 0))
+  })
+}
 
 async function press(target: Parameters<typeof fireEvent.press>[0]) {
   fireEvent.press(target)
   await Promise.resolve()
 }
+
+afterEach(() => {
+  cleanup()
+  jest.restoreAllMocks()
+})
 
 describe('Collapse', () => {
   it('supports defaultValue and multiple expanded items', async () => {
@@ -100,5 +167,142 @@ describe('Collapse', () => {
     })
     expect(screen.getByTestId('collapse')).toBeTruthy()
     void view
+  })
+
+  it('derives Vant Cell geometry and adds inset item separators', async () => {
+    const designToken = getDesignToken()
+    const collapseToken = getCollapseToken(designToken)
+    const cellToken = getCellToken(designToken)
+    const styles = getCollapseStyles(collapseToken, {
+      active: false,
+      disabled: false,
+      pressed: false,
+    })
+    const disabledStyles = getCollapseStyles(collapseToken, {
+      active: false,
+      disabled: true,
+      pressed: false,
+    })
+
+    expect(collapseToken.headerHeight).toBe(cellToken.minHeight)
+    expect(styles.header).toMatchObject({
+      minHeight: cellToken.minHeight,
+      overflow: 'hidden',
+      paddingHorizontal: cellToken.paddingHorizontal,
+    })
+    expect(styles.title).toMatchObject({
+      flexShrink: 1,
+      lineHeight: cellToken.lineHeight,
+    })
+    expect(disabledStyles.header.opacity).toBe(1)
+    expect(disabledStyles.title.color).toBe(collapseToken.disabledColor)
+    expect(getCollapseDividerStyle(collapseToken)).toMatchObject({
+      height: collapseToken.borderWidth,
+      left: collapseToken.paddingHorizontal,
+      position: 'absolute',
+      right: collapseToken.paddingHorizontal,
+      top: 0,
+    })
+
+    await render(
+      <Collapse testID="collapse-with-separators">
+        <CollapseItem name="first" title="第一项" />
+        <CollapseItem name="second" title="第二项" />
+        <CollapseItem name="third" title="第三项" />
+      </Collapse>,
+    )
+
+    const root = screen.getByTestId('collapse-with-separators')
+    const dividerCount = findNodes(
+      root,
+      (node) =>
+        node !== root &&
+        StyleSheet.flatten(node.props.style)?.height === collapseToken.borderWidth &&
+        StyleSheet.flatten(node.props.style)?.left === collapseToken.paddingHorizontal &&
+        StyleSheet.flatten(node.props.style)?.right === collapseToken.paddingHorizontal,
+    ).length
+    expect(dividerCount).toBe(2)
+  })
+
+  it('uses Vant arrow orientation and animates height and arrow with the theme duration', async () => {
+    jest.spyOn(Reanimated, 'measure').mockReturnValue(null)
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value, _config, callback) => {
+        callback?.(true)
+        return value
+      })
+
+    const view = await render(
+      <Collapse testID="animated-collapse">
+        <CollapseItem name="first" testID="animated-first" title="第一项">
+          内容
+        </CollapseItem>
+      </Collapse>,
+    )
+
+    const root = screen.getByTestId('animated-collapse')
+    const arrow = findNode(root, (node) => node.props.pointerEvents === 'none')
+    expect(StyleSheet.flatten(arrow.props.style)?.transform).toEqual([{ rotate: '90deg' }])
+
+    const content = findLayoutNode(root)
+    await act(async () => {
+      content.props.onLayout({ nativeEvent: { layout: { height: 40 } } })
+    })
+    await flushUI()
+    timing.mockClear()
+
+    await press(screen.getByTestId('animated-first'))
+    await flushUI()
+
+    expect(timing).toHaveBeenCalledTimes(2)
+    expect(timing).toHaveBeenNthCalledWith(
+      1,
+      40,
+      expect.objectContaining({ duration: 300, easing: expect.any(Function) }),
+      expect.any(Function),
+    )
+    expect(timing).toHaveBeenNthCalledWith(
+      2,
+      1,
+      expect.objectContaining({ duration: 300, easing: expect.any(Function) }),
+    )
+
+    timing.mockClear()
+    await act(async () => {
+      content.props.onLayout({ nativeEvent: { layout: { height: 40 } } })
+    })
+    await flushUI()
+    expect(timing).not.toHaveBeenCalled()
+
+    await view.unmount()
+  })
+
+  it('resolves Collapse motion to zero when the theme disables motion', async () => {
+    jest.spyOn(Reanimated, 'measure').mockReturnValue(null)
+    const timing = jest.spyOn(Reanimated, 'withTiming').mockImplementation((value) => value)
+    await render(
+      <ConfigProvider theme={{ token: { motion: false } }}>
+        <Collapse testID="motionless-collapse">
+          <CollapseItem name="first" testID="motionless-first" title="第一项">
+            内容
+          </CollapseItem>
+        </Collapse>
+      </ConfigProvider>,
+    )
+
+    const content = findLayoutNode(screen.getByTestId('motionless-collapse'))
+    await act(async () => {
+      content.props.onLayout({ nativeEvent: { layout: { height: 40 } } })
+    })
+    await flushUI()
+    timing.mockClear()
+    await press(screen.getByTestId('motionless-first'))
+    await flushUI()
+
+    expect(timing).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ duration: 0, easing: expect.any(Function) }),
+    )
   })
 })

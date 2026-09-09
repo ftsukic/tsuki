@@ -1,18 +1,21 @@
 import type { AliasToken, CollapseToken } from '../theme'
+import { getCellToken } from '../cell/token'
 
 export function getCollapseToken(token: AliasToken): CollapseToken {
+  const cellToken = getCellToken(token)
+
   return {
-    headerHeight: 48,
-    paddingHorizontal: token.padding,
-    titleColor: token.colorText,
-    titleFontSize: token.fontSize,
-    titleLineHeight: token.lineHeight,
-    iconColor: token.colorIcon,
-    iconSize: token.fontSizeLG,
-    iconGap: token.paddingXXS,
+    headerHeight: cellToken.minHeight,
+    paddingHorizontal: cellToken.paddingHorizontal,
+    titleColor: cellToken.titleColor,
+    titleFontSize: cellToken.fontSize,
+    titleLineHeight: cellToken.lineHeight,
+    iconColor: cellToken.iconColor,
+    iconSize: cellToken.iconSize,
+    iconGap: cellToken.iconGap,
     activeColor: token.interactionActiveColor,
     disabledColor: token.colorTextDisabled,
-    disabledOpacity: 0.4,
+    disabledOpacity: 1,
     contentPaddingVertical: token.paddingSM,
     contentPaddingHorizontal: token.padding,
     contentFontSize: token.fontSize,

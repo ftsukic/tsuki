@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { View } from 'react-native'
 import type { LayoutChangeEvent, View as ViewComponent } from 'react-native'
 import Animated, {
+  Easing,
   measure,
   runOnUI,
   useAnimatedRef,
@@ -13,7 +14,7 @@ import Animated, {
 import { Icon } from '../icon'
 import { Pressable } from '../pressable'
 import { Text } from '../text'
-import { useComponentToken } from '../theme'
+import { useComponentToken, useToken } from '../theme'
 import { CollapseContext } from './context'
 import { getCollapseStyles } from './style'
 import { getCollapseToken } from './token'
@@ -32,13 +33,17 @@ export const CollapseItem = forwardRef<ViewComponent, CollapseItemProps>(functio
 ) {
   const context = useContext(CollapseContext)
   const token = useComponentToken('Collapse', getCollapseToken)
+  const { token: themeToken } = useToken()
   const active = context?.isActive(name) ?? false
   const contentRef = useAnimatedRef<ViewComponent>()
   const height = useSharedValue(0)
   const contentHeight = useSharedValue(0)
+  const isAnimating = useSharedValue(false)
+  const pendingExpansion = useSharedValue(false)
   const expandedProgress = useSharedValue(active ? 1 : 0)
+  const hasMeasured = useSharedValue(false)
   const didMount = useRef(false)
-  const duration = Math.max(0, token.animationDuration)
+  const duration = themeToken.motion ? Math.max(0, token.animationDuration) : 0
 
   const measureContent = useCallback(
     (event: LayoutChangeEvent) => {
@@ -50,16 +55,38 @@ export const CollapseItem = forwardRef<ViewComponent, CollapseItemProps>(functio
         const nextHeight = measured?.height || fallback
         if (!nextHeight) return
 
-        const isFirstMeasurement = contentHeight.value === 0
+        const isFirstMeasurement = !hasMeasured.value
+        const shouldAnimateOpening = isFirstMeasurement && pendingExpansion.value && shouldExpand
         contentHeight.value = nextHeight
-        if (isFirstMeasurement) {
+        hasMeasured.value = true
+
+        if (shouldAnimateOpening) {
+          pendingExpansion.value = false
+          isAnimating.value = true
+          height.value = withTiming(
+            nextHeight,
+            { duration, easing: Easing.inOut(Easing.ease) },
+            (finished) => {
+              if (finished) isAnimating.value = false
+            },
+          )
+        } else if (isFirstMeasurement) {
           height.value = shouldExpand ? nextHeight : 0
-        } else if (shouldExpand && height.value !== nextHeight) {
-          height.value = withTiming(nextHeight, { duration })
+        } else if (shouldExpand && !isAnimating.value && height.value !== nextHeight) {
+          height.value = nextHeight
         }
       })(active, fallbackHeight)
     },
-    [active, contentHeight, contentRef, duration, height],
+    [
+      active,
+      contentHeight,
+      contentRef,
+      duration,
+      hasMeasured,
+      height,
+      isAnimating,
+      pendingExpansion,
+    ],
   )
 
   useEffect(() => {
@@ -70,18 +97,43 @@ export const CollapseItem = forwardRef<ViewComponent, CollapseItemProps>(functio
       'worklet'
 
       const targetHeight = shouldExpand ? contentHeight.value : 0
-      height.value = setImmediately ? targetHeight : withTiming(targetHeight, { duration })
-      expandedProgress.value = setImmediately
-        ? shouldExpand
-          ? 1
-          : 0
-        : withTiming(shouldExpand ? 1 : 0, { duration })
+      const timingConfig = { duration, easing: Easing.inOut(Easing.ease) }
+
+      if (setImmediately) {
+        pendingExpansion.value = false
+        isAnimating.value = false
+        height.value = targetHeight
+        expandedProgress.value = shouldExpand ? 1 : 0
+        return
+      }
+
+      if (!hasMeasured.value && shouldExpand) {
+        pendingExpansion.value = true
+        height.value = 0
+      } else {
+        pendingExpansion.value = false
+        isAnimating.value = true
+        height.value = withTiming(targetHeight, timingConfig, (finished) => {
+          if (finished) isAnimating.value = false
+        })
+      }
+
+      expandedProgress.value = withTiming(shouldExpand ? 1 : 0, timingConfig)
     })(active, immediate)
-  }, [active, contentHeight, duration, expandedProgress, height])
+  }, [
+    active,
+    contentHeight,
+    duration,
+    expandedProgress,
+    hasMeasured,
+    height,
+    isAnimating,
+    pendingExpansion,
+  ])
 
   const animatedHeightStyle = useAnimatedStyle(() => ({ height: height.value }))
   const animatedArrowStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${expandedProgress.value * 90}deg` }],
+    transform: [{ rotate: `${90 - expandedProgress.value * 180}deg` }],
   }))
 
   if (!context) return null
@@ -117,7 +169,11 @@ export const CollapseItem = forwardRef<ViewComponent, CollapseItemProps>(functio
           title
         )}
         <Animated.View pointerEvents="none" style={[resolvedStyles.arrow, animatedArrowStyle]}>
-          <Icon name="RightOutlined" size={token.iconSize} color={token.iconColor} />
+          <Icon
+            name="RightOutlined"
+            size={token.iconSize}
+            color={disabled ? token.disabledColor : token.iconColor}
+          />
         </Animated.View>
       </Pressable>
       <Animated.View style={[resolvedStyles.contentWrapper, animatedHeightStyle]}>

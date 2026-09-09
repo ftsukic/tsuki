@@ -59,6 +59,7 @@ const linear = (value) => value
 export const Easing = {
   ease: linear,
   in: (easing) => easing,
+  inOut: () => (value) => value * value * (3 - 2 * value),
   linear,
   out: (easing) => easing,
 }

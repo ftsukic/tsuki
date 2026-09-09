@@ -51,7 +51,7 @@ import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 | value | `string \| number \| (string \| number)[]` | — | 受控展开值；accordion 模式使用单值，普通模式使用数组 |
 | defaultValue | `string \| number \| (string \| number)[]` | — | 非受控初始展开值 |
 | accordion | `boolean` | `false` | 是否只允许展开一个面板 |
-| border | `boolean` | `true` | 是否显示外层上下 hairline 边框 |
+| border | `boolean` | `true` | 是否显示根部上下边框和各面板之间的内缩 hairline 分隔线 |
 | onChange | `(value: CollapseValue) => void` | — | 展开值变化时触发 |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
 
@@ -65,13 +65,13 @@ import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 | --- | --- | --- | --- |
 | name | `string \| number` | — | 当前面板的唯一名称 |
 | title | `ReactNode` | — | Header 标题；字符串和数字使用组件标题样式 |
-| disabled | `boolean` | `false` | 禁止点击展开，并降低 Header opacity |
+| disabled | `boolean` | `false` | 禁止点击展开，标题和箭头使用禁用颜色 |
 | icon | `ReactNode` | — | Header 左侧图标或自定义内容 |
 | children | `ReactNode` | — | 内容区域；字符串和数字使用内容文本样式 |
 | style | `StyleProp<ViewStyle>` | — | 当前 Header 的 Pressable 样式 |
 | 其他 PressableProps | React Native `PressableProps` | — | 例如 `testID`、`accessibilityLabel`、`hitSlop` 和 `onPressIn` |
 
-右侧箭头由组件管理，关闭时为 `0deg`，展开时动画到 `90deg`。Header 默认无障碍角色为 `button`，并同步 `expanded` 与 `disabled` 状态。`onPress` 不作为公开覆盖点，面板切换统一由 Collapse 管理。
+右侧箭头由组件管理，关闭时为 `90deg`，展开时动画到 `-90deg`，与 Vant 的右箭头方向保持一致。Header 默认无障碍角色为 `button`，并同步 `expanded` 与 `disabled` 状态。`onPress` 不作为公开覆盖点，面板切换统一由 Collapse 管理。
 
 内容区域始终保持挂载，通过 Reanimated 的高度动画进行裁剪；组件当前不提供 Vant 的 `lazyRender`、`readonly`、`toggleAll`、`value`、`label` 和 Web DOM 属性。
 
@@ -81,18 +81,18 @@ import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 
 | Token | 默认来源 | 说明 |
 | --- | --- | --- |
-| headerHeight | `48` | Header 高度 |
+| headerHeight | Cell normal 行高（默认 `44`） | Header 最小高度 |
 | paddingHorizontal | `padding` | Header 水平内边距 |
-| titleFontSize | `fontSize` | 标题字号 |
+| titleFontSize / titleLineHeight | Cell 字体 token | 标题字号和行高 |
 | titleColor | `colorText` | 标题颜色 |
 | iconColor / iconSize | `colorIcon` / `fontSizeLG` | 图标颜色和尺寸 |
 | activeColor | `interactionActiveColor` | Header 按压背景 |
-| disabledColor / disabledOpacity | `colorTextDisabled` / `0.4` | 禁用状态 |
+| disabledColor / disabledOpacity | `colorTextDisabled` / `1` | 禁用标题/箭头颜色；可用 `disabledOpacity` 自定义整行透明度 |
 | contentPaddingVertical / contentPaddingHorizontal | `paddingSM` / `padding` | 内容区域内边距 |
 | contentTextColor | `colorTextSecondary` | 内容文字颜色 |
 | contentBackgroundColor | `colorBgContainer` | 内容背景 |
-| borderColor / borderWidth | `colorBorder` / `lineWidthHairline` | 外层边框 |
-| animationDuration | `motionDurationSlow` | 高度和箭头动画时长 |
+| borderColor / borderWidth | `colorBorder` / `lineWidthHairline` | 外层边框和内部分隔线 |
+| animationDuration | `motionDurationSlow`（默认 `300ms`） | 高度和箭头动画时长；缓动为 `ease-in-out` |
 
 ```tsx | pure
 <ConfigProvider
@@ -113,4 +113,4 @@ import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 </ConfigProvider>
 ```
 
-Collapse 不继承 Cell，也不提供 Cell 的 `value`、`label`、`isLink` 等 API；Header 仅复用现有 Pressable、Icon、Text 和主题 token 体系。
+Collapse 的 Header 参照 Cell 的行高、内边距、字体和图标间距，但不继承 Cell，也不提供 Cell 的 `value`、`label`、`isLink` 等 API；Header 仅复用现有 Pressable、Icon、Text 和主题 token 体系。

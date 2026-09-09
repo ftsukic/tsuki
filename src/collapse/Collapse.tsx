@@ -5,7 +5,7 @@ import type { View as ViewComponent } from 'react-native'
 import { useComponentToken } from '../theme'
 import { CollapseContext } from './context'
 import { CollapseItem } from './CollapseItem'
-import { getCollapseRootStyle } from './style'
+import { getCollapseDividerStyle, getCollapseRootStyle } from './style'
 import { getCollapseToken } from './token'
 import type { CollapseItemProps, CollapseName, CollapseProps, CollapseValue } from './types'
 
@@ -83,7 +83,14 @@ const CollapseComponent = forwardRef<ViewComponent, CollapseProps>(function Coll
   return (
     <CollapseContext.Provider value={contextValue}>
       <View ref={ref} {...viewProps} style={[getCollapseRootStyle(token, border), style]}>
-        {items}
+        {items.map((item, index) => (
+          <View key={item.key ?? index} style={{ position: 'relative' }}>
+            {item}
+            {border && index > 0 ? (
+              <View pointerEvents="none" style={getCollapseDividerStyle(token)} />
+            ) : null}
+          </View>
+        ))}
       </View>
     </CollapseContext.Provider>
   )

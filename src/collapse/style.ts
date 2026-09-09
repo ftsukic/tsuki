@@ -17,6 +17,17 @@ export interface CollapseResolvedStyles {
   contentText: TextStyle
 }
 
+export function getCollapseDividerStyle(token: CollapseToken): ViewStyle {
+  return {
+    backgroundColor: token.borderColor,
+    height: token.borderWidth,
+    left: token.paddingHorizontal,
+    position: 'absolute',
+    right: token.paddingHorizontal,
+    top: 0,
+  }
+}
+
 export function getCollapseRootStyle(token: CollapseToken, border: boolean): ViewStyle {
   return {
     alignSelf: 'stretch',
@@ -36,13 +47,15 @@ export function getCollapseStyles(
       alignItems: 'center',
       backgroundColor: state.pressed ? token.activeColor : token.contentBackgroundColor,
       flexDirection: 'row',
-      height: token.headerHeight,
+      minHeight: token.headerHeight,
       opacity: state.disabled ? token.disabledOpacity : 1,
+      overflow: 'hidden',
       paddingHorizontal: token.paddingHorizontal,
     },
     title: {
       color: state.disabled ? token.disabledColor : token.titleColor,
       flex: 1,
+      flexShrink: 1,
       fontFamily: token.fontFamily,
       fontSize: token.titleFontSize,
       lineHeight: token.titleLineHeight,
