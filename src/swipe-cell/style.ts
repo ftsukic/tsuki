@@ -36,7 +36,7 @@ export function getSwipeCellStyles(token: SwipeCellToken): SwipeCellResolvedStyl
     root: {
       position: 'relative',
       overflow: 'hidden',
-      backgroundColor: token.actionBackgroundColor,
+      backgroundColor: token.backgroundColor,
     },
     actions: {
       position: 'absolute',
