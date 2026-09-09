@@ -29,7 +29,7 @@ import { Avatar, Badge } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-<code src="../../../src/badge/__fixtures__/examples/types.tsx" title="数字、红点和溢出" description="支持数字、红点、零值和 overflowCount。"></code>
+<code src="../../../src/badge/__fixtures__/examples/types.tsx" title="数字、红点和溢出" description="支持数字、多字符胶囊、红点、零值和 overflowCount。"></code>
 
 <code src="../../../src/badge/__fixtures__/examples/status.tsx" title="状态点" description="使用 status 和 text 展示状态。"></code>
 
@@ -55,6 +55,8 @@ import { Avatar, Badge } from '@ftsukic/tsuki'
 Badge 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`。当 `status`、`dot`、`count` 都没有可展示内容时，如果存在 children 仍会渲染 children，否则不渲染节点。
 
 角标包裹 children 时使用绝对定位在右上角；独立使用时按普通内容排列。`Badge` 不提供 Web tooltip、动画或 `Badge.Ribbon`。
+
+数字 count 为单字符时保持圆形；多字符 count（包括 `99+`）会按内容自动撑开为胶囊，不使用固定宽度，也不会省略或截断。
 
 ## 主题定制
 

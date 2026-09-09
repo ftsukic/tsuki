@@ -2,7 +2,7 @@ import React from 'react'
 
 /**
  * @title 数字、红点和溢出
- * @description count 支持数字和自定义节点，数字超过 overflowCount 时显示封顶值。
+ * @description count 支持数字、多字符胶囊、99+ / 999+ 溢出值和自定义节点。
  */
 import { Avatar, Badge } from '@ftsukic/tsuki'
 import { Text, View } from 'react-native'
@@ -29,6 +29,12 @@ export default function Example() {
         <Badge count={10} />
         <Badge count={99} />
         <Badge count={<Text style={{ color: '#ffffff' }}>!</Text>}>{avatar}</Badge>
+      </View>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+        <Badge count={1000} overflowCount={999}>
+          {avatar}
+        </Badge>
+        <Badge count={<Text style={{ color: '#ffffff' }}>New</Text>}>{avatar}</Badge>
       </View>
     </View>
   )

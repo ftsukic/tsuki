@@ -2,7 +2,7 @@ import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import { getBadgeToken } from './token'
 import type { BadgeProps, BadgeStatus } from './interface'
-import { forwardRef, useState } from 'react'
+import { forwardRef, isValidElement, useState } from 'react'
 import { Text, View } from 'react-native'
 import type {
   LayoutChangeEvent,
@@ -18,6 +18,18 @@ function isRenderable(value: BadgeProps['children'] | BadgeProps['count']): bool
 
 function isZero(value: BadgeProps['count']): boolean {
   return typeof value === 'number' && value === 0
+}
+
+function getTextContent(value: BadgeProps['count']): string | undefined {
+  if (typeof value === 'string' || typeof value === 'number') return String(value)
+  if (Array.isArray(value)) {
+    const parts = value.map(getTextContent)
+    return parts.every((part) => part !== undefined) ? parts.join('') : undefined
+  }
+  if (isValidElement<{ children?: BadgeProps['count'] }>(value)) {
+    return getTextContent(value.props.children)
+  }
+  return undefined
 }
 
 function resolveStatusColor(status: BadgeStatus, token: ReturnType<typeof getBadgeToken>) {
@@ -36,9 +48,27 @@ function resolveStatusColor(status: BadgeStatus, token: ReturnType<typeof getBad
   }
 }
 
-function renderValue(value: BadgeProps['count'] | BadgeProps['text'], style: StyleProp<TextStyle>) {
+function renderValue(
+  value: BadgeProps['count'] | BadgeProps['text'],
+  style: StyleProp<TextStyle>,
+  singleLine = false,
+  wrapCustom = false,
+) {
   if (typeof value === 'string' || typeof value === 'number') {
-    return <Text style={style}>{value}</Text>
+    return (
+      <Text
+        ellipsizeMode={singleLine ? 'clip' : undefined}
+        numberOfLines={singleLine ? 1 : undefined}
+        style={style}
+      >
+        {value}
+      </Text>
+    )
+  }
+  if (wrapCustom) {
+    return (
+      <View style={{ alignSelf: 'flex-start', flexShrink: 0, overflow: 'visible' }}>{value}</View>
+    )
   }
   return value
 }
@@ -114,10 +144,7 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
     typeof count === 'number' && count > normalizedOverflowCount
       ? `${normalizedOverflowCount}+`
       : count
-  const countValueText =
-    typeof countValue === 'string' || typeof countValue === 'number'
-      ? String(countValue)
-      : undefined
+  const countValueText = getTextContent(countValue)
   const countMinWidth = countValueText
     ? Math.max(minWidth, countValueText.length * fontSize)
     : minWidth
@@ -155,6 +182,7 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
     alignSelf: 'flex-start',
     borderCurve: 'circular',
     boxSizing: 'border-box',
+    flexDirection: 'row',
     flexShrink: 0,
     height: dot ? token.dotSize : height,
     justifyContent: 'center',
@@ -237,18 +265,24 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
                 : null}
             </>
           ) : dot ? null : (
-            renderValue(countValue, [
-              {
-                color: token.textColor,
-                fontFamily: token.fontFamily,
-                fontSize,
-                lineHeight: height,
-                overflow: 'visible',
-                textAlign: 'center',
-                flexShrink: 0,
-              },
-              semantic?.text,
-            ])
+            renderValue(
+              countValue,
+              [
+                {
+                  color: token.textColor,
+                  fontFamily: token.fontFamily,
+                  fontSize,
+                  includeFontPadding: false,
+                  lineHeight: height,
+                  overflow: 'visible',
+                  textAlign: 'center',
+                  flexShrink: 0,
+                },
+                semantic?.text,
+              ],
+              true,
+              true,
+            )
           )}
         </View>
       ) : null}

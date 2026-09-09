@@ -12,6 +12,7 @@ export default function Example() {
     <View style={{ gap: 10 }}>
       <Badge status="success" />
       <Badge status="success" text="成功" />
+      <Badge status="success" text="New" />
       <Badge status="processing" text="处理中" />
       <Badge status="default" text="默认" />
       <Badge status="error" text="错误" />

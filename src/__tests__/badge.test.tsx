@@ -29,7 +29,10 @@ describe('Badge', () => {
         <Badge testID="overflow" count={100} overflowCount={99}>
           <Avatar>A</Avatar>
         </Badge>
-        <Badge testID="custom" count={<Text>!</Text>}>
+        <Badge testID="long-overflow" count={1000} overflowCount={999}>
+          <Avatar>A</Avatar>
+        </Badge>
+        <Badge testID="custom" count={<Text>New</Text>}>
           <Text>自定义</Text>
         </Badge>
       </ConfigProvider>,
@@ -39,15 +42,26 @@ describe('Badge', () => {
     expect(screen.getAllByText('0')).toHaveLength(1)
     expect(screen.getByTestId('zero')).toBeTruthy()
     expect(screen.getByText('99+')).toBeTruthy()
-    expect(screen.getByText('99+').props.numberOfLines).toBeUndefined()
+    expect(screen.getByText('999+')).toBeTruthy()
+    expect(screen.getByText('99+').props.numberOfLines).toBe(1)
+    expect(screen.getByText('99+').props.ellipsizeMode).toBe('clip')
     expect(StyleSheet.flatten(screen.getByText('99+').props.style)).toMatchObject({
       flexShrink: 0,
+      includeFontPadding: false,
       overflow: 'visible',
     })
     const overflowIndicator = screen.getByText('99+').parent
     if (!overflowIndicator) throw new Error('Overflow Badge indicator was not rendered')
-    expect(StyleSheet.flatten(overflowIndicator.props.style).minWidth).toBeGreaterThan(20)
-    expect(screen.getByText('!')).toBeTruthy()
+    const overflowIndicatorStyle = StyleSheet.flatten(overflowIndicator.props.style)
+    expect(overflowIndicatorStyle.width).toBeUndefined()
+    expect(overflowIndicatorStyle.minWidth).toBeGreaterThan(20)
+    expect(screen.getByText('999+').props.numberOfLines).toBe(1)
+    const longOverflowIndicator = screen.getByText('999+').parent
+    if (!longOverflowIndicator) throw new Error('Long overflow Badge indicator was not rendered')
+    expect(StyleSheet.flatten(longOverflowIndicator.props.style).minWidth).toBeGreaterThan(
+      overflowIndicatorStyle.minWidth,
+    )
+    expect(screen.getByText('New')).toBeTruthy()
   })
 
   it('renders dot and status modes with theme colors', async () => {

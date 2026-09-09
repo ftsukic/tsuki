@@ -13,7 +13,7 @@ export default function BadgeOverview() {
       examples={[
         {
           Component: BadgeTypesExample,
-          description: 'count 支持数字和自定义节点，数字超过 overflowCount 时显示封顶值。',
+          description: 'count 支持数字、多字符胶囊、99+ / 999+ 溢出值和自定义节点。',
           id: 'types',
           title: '数字、红点和溢出',
         },
