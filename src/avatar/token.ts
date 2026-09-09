@@ -5,7 +5,7 @@ export function getAvatarToken(token: AliasToken): AvatarToken {
     containerSizeSM: 24,
     containerSize: 32,
     containerSizeLG: 40,
-    borderRadius: token.borderRadiusSM,
+    borderRadius: token.borderRadius,
     backgroundColor: token.colorFillSecondary,
     textColor: token.colorText,
     textFontSizeSM: 14,

@@ -45,8 +45,8 @@ import { Avatar, Badge, Icon } from '@ftsukic/tsuki'
 | icon | `ReactNode` | — | 图片失败或没有图片时的图标，优先级高于 `children` |
 | children | `ReactNode` | — | 字符或自定义 fallback 内容 |
 | alt | `string` | — | 图片和头像的无障碍描述 |
-| size | `'small' \| 'medium' \| 'large' \| number` | `'medium'` | 头像尺寸，单位为 RN 逻辑像素 |
-| shape | `'circle' \| 'square'` | `'circle'` | 头像形状；`square` 使用主题圆角 |
+| size | `'small' \| 'medium' \| 'large' \| number` | `'large'`（40） | 头像尺寸，单位为 RN 逻辑像素；`medium` 为 32，`large` 为 40 |
+| shape | `'circle' \| 'square'` | `'square'` | 头像形状；`square` 使用主题圆角（默认 4） |
 | borderRadius | `number` | — | 根容器圆角；设置后覆盖 `shape` 的默认圆角，`style.borderRadius` 仍具有更高优先级 |
 | gap | `number` | `4` | 字符内容左右预留的单位间距 |
 | onError | `ImageProps['onError']` | — | 图片加载失败回调，组件仍会显示 fallback |

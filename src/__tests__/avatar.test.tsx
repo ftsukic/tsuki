@@ -60,12 +60,16 @@ describe('Avatar', () => {
 
     const textStyle = StyleSheet.flatten(screen.getByTestId('text').props.style)
     const squareStyle = StyleSheet.flatten(screen.getByTestId('square').props.style)
-    expect(textStyle.width).toBe(32)
-    expect(textStyle.height).toBe(32)
-    expect(textStyle.borderRadius).toBe(16)
+    expect(textStyle.width).toBe(40)
+    expect(textStyle.height).toBe(40)
+    expect(textStyle.borderRadius).toBe(4)
     expect(squareStyle.width).toBe(40)
     expect(squareStyle.height).toBe(40)
-    expect(squareStyle.borderRadius).toBeGreaterThan(0)
+    expect(squareStyle.borderRadius).toBe(4)
+    expect(StyleSheet.flatten(screen.getByTestId('preset-medium').props.style)).toMatchObject({
+      width: 32,
+      height: 32,
+    })
     expect(StyleSheet.flatten(screen.getByTestId('custom-radius').props.style).borderRadius).toBe(6)
     expect(StyleSheet.flatten(screen.getByTestId('style-radius').props.style).borderRadius).toBe(10)
     expect(StyleSheet.flatten(screen.getByText('1').props.style).fontSize).toBe(12)
@@ -150,7 +154,7 @@ describe('Avatar', () => {
       findNodes(view.toJSON(), 'RNSVGSvgView').map(
         (node) => node.props.bbWidth ?? node.props.width,
       ),
-    ).toEqual([14, 18, 24, 33.6, 6])
+    ).toEqual([14, 24, 24, 33.6, 6])
   })
 })
 
