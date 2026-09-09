@@ -56,7 +56,7 @@ describe('NoticeBar', () => {
 
   it('derives the Vant notice geometry from existing theme tokens', async () => {
     const token = getDesignToken()
-    await render(<NoticeBar text="通知" />)
+    await render(<NoticeBar rightIcon={<Text>右侧</Text>} text="通知" />)
 
     const rootStyle = StyleSheet.flatten(screen.getByRole('alert').parent?.props.style)
     expect(rootStyle).toMatchObject({
@@ -74,6 +74,10 @@ describe('NoticeBar', () => {
         }),
       ]),
     )
+    expect(StyleSheet.flatten(screen.getByText('右侧').parent?.props.style)).toMatchObject({
+      alignItems: 'center',
+      justifyContent: 'center',
+    })
   })
 
   it('handles bar presses, close presses, and disabled state through interaction', async () => {

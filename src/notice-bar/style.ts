@@ -73,7 +73,7 @@ export function getNoticeBarStyles(
     rightIcon: {
       alignItems: 'center',
       flexShrink: 0,
-      justifyContent: 'flex-end',
+      justifyContent: 'center',
       minWidth: token.controlHeightXS,
       ...(wrapable ? { minHeight: lineHeight } : { height }),
     },
