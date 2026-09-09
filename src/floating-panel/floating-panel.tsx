@@ -1,18 +1,8 @@
 import { forwardRef, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import {
-  Animated,
-  Easing,
-  PanResponder,
-  Platform,
-  ScrollView,
-  useWindowDimensions,
-  View,
-} from 'react-native'
-import type {
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  PanResponderGestureState,
-} from 'react-native'
+import { Animated, Easing, Platform, ScrollView, useWindowDimensions, View } from 'react-native'
+import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
+import { usePanGesture } from '../interaction'
+import type { PanGestureState } from '../interaction'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { Portal } from '../portal'
 import { resolveStyles } from '../style'
@@ -81,12 +71,8 @@ function getDampedHeight(height: number, deltaY: number, min: number, max: numbe
   return rawHeight
 }
 
-function isVerticalGesture(gestureState: PanResponderGestureState) {
-  return Math.abs(gestureState.dy) > Math.abs(gestureState.dx) && Math.abs(gestureState.dy) > 2
-}
-
-export const FloatingPanel = forwardRef<View, FloatingPanelProps>(
-  function FloatingPanel(props, ref) {
+export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
+  function FloatingPanelContent(props, ref) {
     const { token: themeToken } = useToken()
     const token = useComponentToken('FloatingPanel', getFloatingPanelToken)
     const safeAreaInsets = useContext(SafeAreaInsetsContext)
@@ -208,29 +194,26 @@ export const FloatingPanel = forwardRef<View, FloatingPanelProps>(
       setDragging(true)
     }, [])
 
-    const shouldClaimGesture = useCallback(
-      (source: DragSource, gestureState: PanResponderGestureState) => {
-        const config = configRef.current
-        if (!config.draggable || !isVerticalGesture(gestureState)) return false
-        if (source === 'header') return true
-        if (!config.contentDraggable) return false
+    const shouldClaimGesture = useCallback((source: DragSource, gestureState: PanGestureState) => {
+      const config = configRef.current
+      if (!config.draggable) return false
+      if (source === 'header') return true
+      if (!config.contentDraggable) return false
 
-        return (
-          currentHeightRef.current < config.maxHeight ||
-          (scrollOffsetRef.current <= 0 && gestureState.dy > 0 && maxScrollRef.current <= 0)
-        )
-      },
-      [],
-    )
+      return (
+        currentHeightRef.current < config.maxHeight ||
+        (scrollOffsetRef.current <= 0 && gestureState.distance > 0 && maxScrollRef.current <= 0)
+      )
+    }, [])
 
     const updateDrag = useCallback(
-      (gestureState: PanResponderGestureState) => {
+      (distance: number) => {
         if (!draggingRef.current) return
 
         const config = configRef.current
         const nextHeight = getDampedHeight(
           startHeightRef.current,
-          gestureState.dy,
+          distance,
           config.minHeight,
           config.maxHeight,
         )
@@ -263,41 +246,21 @@ export const FloatingPanel = forwardRef<View, FloatingPanelProps>(
       }
     }, [animateToHeight, setVisualHeight])
 
-    const headerResponder = useMemo(
-      () =>
-        PanResponder.create({
-          onStartShouldSetPanResponder: () => false,
-          onStartShouldSetPanResponderCapture: () => false,
-          onMoveShouldSetPanResponder: (_, gestureState) =>
-            shouldClaimGesture('header', gestureState),
-          onMoveShouldSetPanResponderCapture: (_, gestureState) =>
-            shouldClaimGesture('header', gestureState),
-          onPanResponderGrant: beginDrag,
-          onPanResponderMove: (_, gestureState) => updateDrag(gestureState),
-          onPanResponderRelease: finishDrag,
-          onPanResponderTerminate: finishDrag,
-          onPanResponderTerminationRequest: () => false,
-        }),
-      [beginDrag, finishDrag, shouldClaimGesture, updateDrag],
-    )
+    const headerResponder = usePanGesture({
+      axis: 'vertical',
+      shouldActivate: (gestureState) => shouldClaimGesture('header', gestureState),
+      onStart: beginDrag,
+      onChange: ({ distance }) => updateDrag(distance),
+      onEnd: finishDrag,
+    })
 
-    const contentResponder = useMemo(
-      () =>
-        PanResponder.create({
-          onStartShouldSetPanResponder: () => false,
-          onStartShouldSetPanResponderCapture: () => false,
-          onMoveShouldSetPanResponder: (_, gestureState) =>
-            shouldClaimGesture('content', gestureState),
-          onMoveShouldSetPanResponderCapture: (_, gestureState) =>
-            shouldClaimGesture('content', gestureState),
-          onPanResponderGrant: beginDrag,
-          onPanResponderMove: (_, gestureState) => updateDrag(gestureState),
-          onPanResponderRelease: finishDrag,
-          onPanResponderTerminate: finishDrag,
-          onPanResponderTerminationRequest: () => false,
-        }),
-      [beginDrag, finishDrag, shouldClaimGesture, updateDrag],
-    )
+    const contentResponder = usePanGesture({
+      axis: 'vertical',
+      shouldActivate: (gestureState) => shouldClaimGesture('content', gestureState),
+      onStart: beginDrag,
+      onChange: ({ distance }) => updateDrag(distance),
+      onEnd: finishDrag,
+    })
 
     const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
       const offset = Math.max(0, event.nativeEvent.contentOffset.y)
@@ -343,41 +306,48 @@ export const FloatingPanel = forwardRef<View, FloatingPanelProps>(
     const contentPaddingBottom = Math.max(0, maxHeight - currentHeight) + bottomInset
 
     return (
-      <Portal>
-        <Animated.View
-          ref={ref}
-          {...viewProps}
-          collapsable={false}
-          style={[
-            resolvedStyles.root,
-            { height: maxHeight },
-            semantic?.root,
-            style,
-            { transform: [{ translateY: translation }] },
-          ]}
-        >
-          {header !== undefined || draggable ? (
-            <View
-              {...headerResponder.panHandlers}
-              style={[resolvedStyles.header, semantic?.header]}
-            >
-              {header ?? <View style={[resolvedStyles.bar, semantic?.bar]} />}
-            </View>
-          ) : null}
-          <View {...contentResponder.panHandlers} style={{ flex: 1 }}>
-            <ScrollView
-              style={[resolvedStyles.content, semantic?.content]}
-              contentContainerStyle={[
-                { paddingBottom: contentPaddingBottom },
-                semantic?.contentContainer,
-              ]}
-              onScroll={handleScroll}
-              scrollEventThrottle={16}
-            >
-              {children}
-            </ScrollView>
+      <Animated.View
+        ref={ref}
+        {...viewProps}
+        collapsable={false}
+        style={[
+          resolvedStyles.root,
+          { height: maxHeight },
+          semantic?.root,
+          style,
+          { transform: [{ translateY: translation }] },
+        ]}
+      >
+        {header !== undefined || draggable ? (
+          <View {...headerResponder.panHandlers} style={[resolvedStyles.header, semantic?.header]}>
+            {header ?? <View style={[resolvedStyles.bar, semantic?.bar]} />}
           </View>
-        </Animated.View>
+        ) : null}
+        <View {...contentResponder.panHandlers} style={{ flex: 1 }}>
+          <ScrollView
+            style={[resolvedStyles.content, semantic?.content]}
+            contentContainerStyle={[
+              { paddingBottom: contentPaddingBottom },
+              semantic?.contentContainer,
+            ]}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
+          >
+            {children}
+          </ScrollView>
+        </View>
+      </Animated.View>
+    )
+  },
+)
+
+FloatingPanelContent.displayName = 'FloatingPanel.Content'
+
+export const FloatingPanel = forwardRef<View, FloatingPanelProps>(
+  function FloatingPanel(props, ref) {
+    return (
+      <Portal>
+        <FloatingPanelContent {...props} ref={ref} />
       </Portal>
     )
   },

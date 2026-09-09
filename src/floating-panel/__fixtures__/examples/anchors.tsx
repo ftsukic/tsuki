@@ -31,7 +31,7 @@ export default function FloatingPanelAnchorsExample() {
 }
 
 const styles = StyleSheet.create({
-  page: { minHeight: 360, gap: 12, padding: 16, backgroundColor: '#f7f8fa' },
+  page: { minHeight: 360, gap: 12, backgroundColor: '#f7f8fa' },
   caption: { color: '#68788d', fontSize: 13 },
   content: { gap: 8, padding: 20 },
   title: { color: '#1f2937', fontSize: 16, fontWeight: '600' },

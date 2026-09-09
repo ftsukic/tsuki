@@ -23,7 +23,7 @@ export default function FloatingPanelBasicExample() {
 }
 
 const styles = StyleSheet.create({
-  page: { minHeight: 360, gap: 12, padding: 16, backgroundColor: '#f7f8fa' },
+  page: { minHeight: 360, gap: 12, backgroundColor: '#f7f8fa' },
   title: { color: '#1f2937', fontSize: 18, fontWeight: '600' },
   description: { color: '#68788d', lineHeight: 22 },
   panelContent: { gap: 8, padding: 20 },

@@ -272,8 +272,8 @@ describe('FloatingPanel', () => {
 
   it('adds the bottom safe-area inset to content padding and resolves semantic styles', async () => {
     const view = await render(
-      <AppProvider>
-        <SafeAreaInsetsContext.Provider value={{ bottom: 12, left: 0, right: 0, top: 0 }}>
+      <SafeAreaInsetsContext.Provider value={{ bottom: 12, left: 0, right: 0, top: 0 }}>
+        <AppProvider>
           <FloatingPanel
             anchors={[100, 300]}
             styles={({ state }) => ({
@@ -282,8 +282,8 @@ describe('FloatingPanel', () => {
           >
             <Text>safe area content</Text>
           </FloatingPanel>
-        </SafeAreaInsetsContext.Provider>
-      </AppProvider>,
+        </AppProvider>
+      </SafeAreaInsetsContext.Provider>,
     )
 
     const scrollView = getScrollView(view)
@@ -294,13 +294,13 @@ describe('FloatingPanel', () => {
     await view.unmount()
 
     const utils = await render(
-      <AppProvider>
-        <SafeAreaInsetsContext.Provider value={{ bottom: 12, left: 0, right: 0, top: 0 }}>
+      <SafeAreaInsetsContext.Provider value={{ bottom: 12, left: 0, right: 0, top: 0 }}>
+        <AppProvider>
           <FloatingPanel anchors={[100, 300]} safeAreaInsetBottom={false}>
             <Text>safe area disabled</Text>
           </FloatingPanel>
-        </SafeAreaInsetsContext.Provider>
-      </AppProvider>,
+        </AppProvider>
+      </SafeAreaInsetsContext.Provider>,
     )
 
     expect(StyleSheet.flatten(getScrollView(utils).props.contentContainerStyle)).toMatchObject({

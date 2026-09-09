@@ -83,7 +83,7 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `Provider` 内�
 
 ### 无障碍与平台说明
 
-FloatingPanel 不替换 children 的无障碍语义；交互内容应自行提供 `accessible`、`accessibilityRole` 和 `accessibilityLabel`。默认拖拽条是视觉手柄，拖拽能力通过触摸手势提供。组件直接读取 `react-native-safe-area-context` 的 inset；宿主应用需要安装该 peer dependency，并在 `Provider` 外层或应用根节点挂载 `SafeAreaProvider`。
+FloatingPanel 不替换 children 的无障碍语义；交互内容应自行提供 `accessible`、`accessibilityRole` 和 `accessibilityLabel`。默认拖拽条是视觉手柄，拖拽能力通过触摸手势提供。组件直接读取 `react-native-safe-area-context` 的 inset；宿主应用需要安装该 peer dependency，并在应用根节点按需挂载 `SafeAreaProvider`。推荐的 `Provider` 不会重复创建 Safe Area context。
 
 H5 文档使用 `react-native-web` 预览；Jest 只验证状态、样式和 responder 逻辑，不代表 iOS、Android 或 HarmonyOS 的真实设备触摸表现。
 
@@ -91,13 +91,13 @@ H5 文档使用 `react-native-web` 预览；Jest 只验证状态、样式和 res
 
 通过 `ConfigProvider` 的 `theme.components.FloatingPanel` 配置：
 
-| Token               | 默认值                      | 说明                     |
-| ------------------- | --------------------------- | ------------------------ |
-| `borderRadius`      | `16`                        | 顶部左右圆角             |
-| `headerHeight`      | `30`                        | 默认 header 高度         |
-| `zIndex`            | `zIndexPopupBase - 1`       | Portal 层级              |
-| `backgroundColor`   | `colorBgElevated`           | 面板背景                 |
-| `barWidth`          | `20`                        | 拖拽条宽度               |
-| `barHeight`         | `3`                         | 拖拽条高度               |
-| `barColor`          | `colorTextQuaternary`       | 拖拽条颜色               |
-| `animationDuration` | `motionDurationSlow * 1000` | 吸附动画时长，单位为毫秒 |
+| Token               | 默认值                | 说明                     |
+| ------------------- | --------------------- | ------------------------ |
+| `borderRadius`      | `16`                  | 顶部左右圆角             |
+| `headerHeight`      | `30`                  | 默认 header 高度         |
+| `zIndex`            | `zIndexPopupBase - 1` | Portal 层级              |
+| `backgroundColor`   | `colorBgElevated`     | 面板背景                 |
+| `barWidth`          | `20`                  | 拖拽条宽度               |
+| `barHeight`         | `3`                   | 拖拽条高度               |
+| `barColor`          | `colorTextQuaternary` | 拖拽条颜色               |
+| `animationDuration` | `motionDurationSlow`  | 吸附动画时长，单位为毫秒 |
