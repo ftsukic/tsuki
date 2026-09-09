@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-Portal 将内容渲染到当前 `PortalHost` 的宿主层，适合 Popup、Toast、Notify 以及显式包裹的 Overlay 等需要脱离页面布局的浮层。除了组件式 `Portal`，还提供用于命令式浮层的 `mountPortal`、`updatePortal` 和 `unmountPortal`。
+Portal 将内容渲染到当前 `PortalHost` 的宿主层，适合 Popup、Overlay、Dialog、Toast 等需要脱离页面布局的浮层。除了组件式 `Portal`，还提供用于命令式浮层的 `mountPortal`、`updatePortal` 和 `unmountPortal`。
 
 </section>
 

@@ -27,7 +27,7 @@ Overlay 用于创建全屏遮罩，强调当前操作并阻止用户操作底层
 import { Overlay, Provider } from '@ftsukic/tsuki'
 ```
 
-Overlay 默认以内联方式渲染，不会自动创建 `Portal`。需要脱离当前布局时，显式使用 `<Portal><Overlay /></Portal>`；应用通常将 `PortalHost` 放在根节点的 `Provider` 中：
+Overlay 内部使用 `Portal`，推荐放在应用根节点的 `Provider` 中：
 
 ```tsx | pure
 <Provider>
@@ -60,7 +60,7 @@ Overlay 默认以内联方式渲染，不会自动创建 `Portal`。需要脱离
 | `style` | `StyleProp<ViewStyle>` | — | 遮罩根节点样式，优先于默认样式 |
 | `styles` | `OverlayStyles` | — | `root / content` 语义样式，可传对象或函数 |
 
-组件继承 React Native `ViewProps`，除 `children` 和 `style` 外透传到遮罩根节点。`style` 与 `styles.root` 作用于完整遮罩，`styles.content` 作用于嵌入内容容器。Overlay 不负责脱离布局；需要全屏宿主层时由调用方显式包裹 `Portal`。
+组件继承 React Native `ViewProps`，除 `children` 和 `style` 外透传到遮罩根节点。`style` 与 `styles.root` 作用于完整遮罩，`styles.content` 作用于嵌入内容容器。
 
 遮罩显示时会拦截底层触摸；嵌入内容通过 `children` 放置在遮罩上方，交互组件可以继续响应自己的 `onPress`。Overlay 不提供 Vant Web 专用的 `lockScroll`、`lazyRender`、`customStyle`、`teleport` 和 class API。
 

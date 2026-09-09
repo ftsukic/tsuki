@@ -34,7 +34,7 @@ import {
 } from '@ftsukic/tsuki'
 ```
 
-命令式 API 需要 `PortalHost`；受控 `Dialog` 本身以内联方式渲染，如需脱离当前布局可显式包裹 `Portal`。可以直接组合 `ConfigProvider` 和 `PortalHost`：
+命令式 API 和受控 Dialog 需要 `PortalHost`。可以直接组合 `ConfigProvider` 和 `PortalHost`：
 
 ```tsx | pure
 <ConfigProvider>

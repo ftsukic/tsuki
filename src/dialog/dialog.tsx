@@ -2,6 +2,7 @@ import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 import { ScrollView, Text, useWindowDimensions, View } from 'react-native'
 import { Button } from '../button'
 import { PopupContent } from '../popup/popup'
+import { Portal } from '../portal'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import type { DialogAction, DialogProps, DialogStyleState } from './interface'
@@ -268,7 +269,11 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
 DialogContent.displayName = 'Dialog.Content'
 
 export const Dialog = forwardRef<View, DialogProps>(function Dialog(props, ref) {
-  return <DialogContent {...props} ref={ref} />
+  return (
+    <Portal>
+      <DialogContent {...props} ref={ref} />
+    </Portal>
+  )
 })
 
 Dialog.displayName = 'Dialog'

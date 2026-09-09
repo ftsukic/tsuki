@@ -6,6 +6,7 @@ import type { StyleProp, TextStyle } from 'react-native'
 import { Pressable } from '../pressable'
 import { Loading } from '../loading'
 import { PopupContent } from '../popup/popup'
+import { Portal } from '../portal'
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import type { ActionSheetAction, ActionSheetProps } from './interface'
@@ -249,7 +250,11 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
 ActionSheetContent.displayName = 'ActionSheet.Content'
 
 export const ActionSheet = forwardRef<View, ActionSheetProps>(function ActionSheet(props, ref) {
-  return <ActionSheetContent {...props} ref={ref} />
+  return (
+    <Portal>
+      <ActionSheetContent {...props} ref={ref} />
+    </Portal>
+  )
 })
 
 ActionSheet.displayName = 'ActionSheet'

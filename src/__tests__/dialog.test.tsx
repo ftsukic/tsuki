@@ -629,14 +629,13 @@ describe('Dialog', () => {
     void pending
   })
 
-  it('renders controlled Dialog inline without a PortalHost', async () => {
-    const view = await render(
-      <ConfigProvider theme={{ token: { motion: false } }}>
-        <Dialog show message="不需要 Portal.Host" />
-      </ConfigProvider>,
-    )
-
-    expect(screen.getByText('不需要 Portal.Host')).toBeTruthy()
-    await view.unmount()
+  it('requires PortalHost for controlled rendering', async () => {
+    await expect(
+      render(
+        <ConfigProvider theme={{ token: { motion: false } }}>
+          <Dialog show message="没有 Portal.Host" />
+        </ConfigProvider>,
+      ),
+    ).rejects.toThrow()
   })
 })
