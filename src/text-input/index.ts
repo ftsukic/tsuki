@@ -1,4 +1,4 @@
-export { TextInput } from './text-input'
+export { TextInput } from './legacy'
 export { getInputToken } from './token'
 export type {
   TextInputClearTrigger,

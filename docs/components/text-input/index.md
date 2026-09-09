@@ -1,5 +1,7 @@
 ---
-title: TextInput
+title: TextInput 输入
+componentDoc: true
+toc: false
 nav:
   title: 组件
 group:
@@ -7,43 +9,63 @@ group:
   order: 2
 ---
 
-# TextInput
+# TextInput 输入
 
-<code src="../../../src/text-input/__fixtures__/basic.tsx"></code>
+<section className="component-doc-intro">
 
-`TextInput` 保留 React Native 的组件名称和输入事件，同时使用 Vant Mobile 的 token 和布局。
+## 介绍
 
-```text
-import { TextInput } from '@ftsukic/tsuki';
+`TextInput` 是兼容旧调用的输入组件；新代码推荐使用 `Input`。它保留原生 `onChange` 事件和字符串 `onChangeText` 回调，并使用当前项目的输入 token。
 
-<TextInput
-  type="textarea"
-  size="normal"
-  rows={4}
-  bordered
-  clearable
-  showWordLimit
-  maxLength={200}
-  placeholder="请输入内容"
-  onChangeText={setValue}
-/>;
+</section>
+
+<code src="../../../src/text-input/__fixtures__/overview.tsx" title="组件预览" description="TextInput 展示文本、多行、清除和字数限制。"></code>
+
+## 引入
+
+```tsx | pure
+import { TextInput } from '@ftsukic/tsuki'
 ```
 
-支持 `type: text | textarea`、`size: large | normal | small`、`bordered`、`clearable`、`clearTrigger`、`formatter`、`formatTrigger`、`showWordLimit`、`rows`、`prefix`、`suffix`、`addonBefore` 和 `addonAfter`。
+## 代码演示
 
-组件继承原生 `TextInputProps`，使用原生 `onChange` 和 `onChangeText`。`formatter` 在 `formatTrigger="onChangeText"` 时把格式化后的值传给 `onChangeText`；设置为 `onEndEditing` 时在结束编辑时格式化。
+<code src="../../../src/text-input/__fixtures__/examples/basic.tsx" title="文本和多行输入" description="展示受控值、textarea、清除和字数限制。"></code>
 
-Semantic slots：
+## API
 
-```text
-<TextInput
-  styles={{
-    root: { marginHorizontal: 16 },
-    input: { fontSize: 16 },
-    clear: { backgroundColor: '#eee' },
-    wordLimit: { color: '#999' },
-  }}
-/>
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| type | `'text' \| 'password' \| 'number' \| 'tel' \| 'textarea'` | `'text'` | 输入模式；`number`/`tel` 只选择原生键盘，值保持字符串 |
+| value | `string` | — | 受控值 |
+| defaultValue | `string` | `''` | 非受控初始值 |
+| onChangeText | `(value: string) => void` | — | 格式化后的字符串变化回调 |
+| onChange | React Native `TextInputProps['onChange']` | — | 原生 change 事件 |
+| disabled | `boolean` | `false` | 禁止编辑并使用 disabled token |
+| readOnly | `boolean` | `false` | 禁止编辑但保留普通展示样式 |
+| size | `'large' \| 'normal' \| 'small'` | `'normal'` | 输入高度和字号 |
+| bordered | `boolean` | `false` | 是否显示边框 |
+| clearable | `boolean` | `false` | 有值时显示清除按钮 |
+| clearTrigger | `'always' \| 'focus'` | `'focus'` | 清除按钮出现时机 |
+| onClear | `() => void` | — | 清空后调用一次 |
+| formatter | `(value: string) => string` | — | 格式化输入值 |
+| formatTrigger | `'onChangeText' \| 'onEndEditing'` | `'onChangeText'` | 格式化触发时机 |
+| showWordLimit | `boolean` | `false` | 显示当前值和 `maxLength` |
+| rows | `number` | `2` | textarea 的最小行数 |
+| `prefix` / `suffix` | `ReactNode` | — | 输入前后内容；password 模式的 suffix 由可见性按钮占用 |
+| `addonBefore` / `addonAfter` | `ReactNode` | — | 输入框外侧内容 |
+| style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
+| styles | `TextInputStyles` | — | root、input、prefix、suffix、clear、wordLimit 等语义插槽 |
+
+TextInput 继承 React Native `TextInputProps` 的键盘、光标、提交、无障碍和 `testID` 等属性。组件管理 `value`、`editable`、`multiline`、`onChange`、`onChangeText` 和 `style`；不要传入 Web 专属 HTML 属性。组件默认不额外设置 `accessibilityLabel` 或 `allowFontScaling`。
+
+## 主题定制
+
+TextInput 与 Input 共用 `theme.components.Input`，可覆盖高度、边框、圆角、占位文本色、禁用色和清除按钮 token：
+
+```tsx | pure
+import { ConfigProvider, TextInput } from '@ftsukic/tsuki'
+
+;<ConfigProvider theme={{ components: { Input: { height: 48, borderRadius: 8 } } }}>
+  <TextInput bordered placeholder="请输入内容" />
+</ConfigProvider>
 ```
-
-`style` 只覆盖 root；输入框自身使用 `styles.input`。不再提供旧的 `theme`、`textStyle`、`containerStyle` 等分散覆盖入口。组件不主动设置 `allowFontScaling`，保留 React Native 原生默认行为。

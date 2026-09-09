@@ -84,6 +84,7 @@ export interface InputToken {
   fontSizeLG: number
   lineHeightSM: number
   lineHeight: number
+  lineHeightLG: number
   borderRadius: number
   paddingHorizontal: number
   paddingVertical: number
@@ -103,6 +104,15 @@ export interface InputToken {
   addonColor: string
   wordLimitColor: string
   wordLimitFontSize: number
+  fontFamily: string
+}
+
+export interface FieldToken {
+  labelColor: string
+  errorColor: string
+  warningColor: string
+  padding: number
+  height: number
 }
 
 export interface AvatarToken {
@@ -248,6 +258,7 @@ export interface ComponentTokenOverrides {
   Button?: Partial<ButtonToken>
   Cell?: Partial<CellToken>
   Input?: Partial<InputToken>
+  Field?: Partial<FieldToken>
   Radio?: Partial<RadioToken>
   Avatar?: Partial<AvatarToken>
   Badge?: Partial<BadgeToken>
@@ -262,6 +273,7 @@ export interface ComponentTokenMap {
   Button: ButtonToken
   Cell: CellToken
   Input: InputToken
+  Field: FieldToken
   Radio: RadioToken
   Avatar: AvatarToken
   Badge: BadgeToken

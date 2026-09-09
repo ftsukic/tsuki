@@ -35,7 +35,7 @@ export function getTextInputStyles(
   state: TextInputStyleState,
 ): TextInputResolvedStyles {
   const height = getInputHeight(token, props.size ?? 'normal')
-  const textarea = props.type === 'textarea'
+  const textarea = props.type === 'textarea' || props.multiline === true
 
   return {
     root: {
@@ -49,9 +49,10 @@ export function getTextInputStyles(
       alignItems: 'center',
     },
     addon: {
+      fontFamily: token.fontFamily,
       color: token.addonColor,
       fontSize: token.fontSize,
-      lineHeight: token.lineHeight * token.fontSize,
+      lineHeight: token.lineHeight,
     },
     addonBefore: {
       marginRight: token.paddingHorizontal,
@@ -78,6 +79,7 @@ export function getTextInputStyles(
       alignItems: textarea ? 'flex-start' : 'center',
     },
     input: {
+      fontFamily: token.fontFamily,
       flex: 1,
       minWidth: 0,
       paddingHorizontal: 0,
@@ -91,16 +93,18 @@ export function getTextInputStyles(
             : token.fontSize,
       lineHeight:
         props.size === 'small'
-          ? token.lineHeightSM * token.fontSizeSM
+          ? token.lineHeightSM
           : props.size === 'large'
-            ? token.lineHeight * token.fontSizeLG
-            : token.lineHeight * token.fontSize,
+            ? token.lineHeightLG
+            : token.lineHeight,
     },
     prefix: {
+      fontFamily: token.fontFamily,
       color: token.prefixColor,
       marginRight: token.paddingHorizontal,
     },
     suffix: {
+      fontFamily: token.fontFamily,
       color: token.prefixColor,
       marginLeft: token.paddingHorizontal,
     },
@@ -115,6 +119,7 @@ export function getTextInputStyles(
       backgroundColor: token.clearButtonBackgroundColor,
     },
     wordLimit: {
+      fontFamily: token.fontFamily,
       color: token.wordLimitColor,
       fontSize: token.wordLimitFontSize,
       marginLeft: token.paddingHorizontal,

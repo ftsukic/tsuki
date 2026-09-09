@@ -10,8 +10,9 @@ export function getInputToken(token: AliasToken): InputToken {
     fontSizeLG: token.fontSizeLG,
     lineHeightSM: token.lineHeightSM,
     lineHeight: token.lineHeight,
+    lineHeightLG: token.lineHeightLG,
     borderRadius: token.borderRadius,
-    paddingHorizontal: token.paddingMD,
+    paddingHorizontal: token.padding,
     paddingVertical: token.paddingXS,
     backgroundColor: token.colorBgContainer,
     borderColor: token.colorBorder,
@@ -29,5 +30,6 @@ export function getInputToken(token: AliasToken): InputToken {
     addonColor: token.colorTextSecondary,
     wordLimitColor: token.colorTextTertiary,
     wordLimitFontSize: token.fontSizeSM,
+    fontFamily: token.fontFamily,
   }
 }

@@ -55,4 +55,18 @@ describe('TextInput', () => {
     expect(styles).toHaveBeenCalled()
     expect(screen.getByTestId('styled-input')).toBeTruthy()
   })
+
+  it('supports password, number and tel compatibility modes', async () => {
+    await render(
+      <ConfigProvider>
+        <TextInput testID="password" type="password" />
+        <TextInput testID="number" type="number" />
+        <TextInput testID="tel" type="tel" />
+      </ConfigProvider>,
+    )
+
+    expect(screen.getByTestId('password').props.secureTextEntry).toBe(true)
+    expect(screen.getByTestId('number').props.keyboardType).toBe('numeric')
+    expect(screen.getByTestId('tel').props.keyboardType).toBe('phone-pad')
+  })
 })
