@@ -12,12 +12,17 @@ export interface CellStyleState {
 
 export interface CellSemanticStyles {
   root?: StyleProp<ViewStyle>
+  row?: StyleProp<ViewStyle>
+  content?: StyleProp<ViewStyle>
+  valueContainer?: StyleProp<ViewStyle>
   icon?: StyleProp<ViewStyle>
   title?: StyleProp<TextStyle>
   label?: StyleProp<TextStyle>
   value?: StyleProp<TextStyle>
   extra?: StyleProp<TextStyle>
   suffix?: StyleProp<ViewStyle>
+  required?: StyleProp<TextStyle>
+  divider?: StyleProp<ViewStyle>
 }
 
 export type CellStyles = StyleResolver<CellProps, CellStyleState, CellSemanticStyles>

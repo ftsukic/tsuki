@@ -1,5 +1,7 @@
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
+import { Cell } from '../cell'
+import type { CellStyles } from '../cell'
 import { Input } from '../input'
 import type { InputProps, InputStyleState, InputStyles } from '../input'
 import { getFieldStyles, getFieldToken } from './style'
@@ -16,32 +18,31 @@ function isVisible(value: ReactNode): boolean {
 function renderLabel(
   label: ReactNode,
   colon: boolean,
-  required: boolean,
   styles: ReturnType<typeof getFieldStyles>,
   semantic: FieldSemanticStyles | undefined,
 ) {
   if (!isVisible(label)) return null
 
-  const labelStyle: StyleProp<TextStyle> = [styles.label, semantic?.label]
-  const labelContent =
-    typeof label === 'string' || typeof label === 'number' ? (
-      <Text style={labelStyle}>
-        {label}
-        {colon ? ':' : null}
-      </Text>
-    ) : (
-      <View style={styles.customLabel}>
-        {label}
-        {colon ? <Text style={labelStyle}>:</Text> : null}
+  if (typeof label === 'string' || typeof label === 'number') {
+    return (
+      <View style={[styles.labelContainer, semantic?.labelContainer]}>
+        <Text style={[styles.label, semantic?.label]}>
+          {label}
+          {colon ? ':' : null}
+        </Text>
       </View>
     )
+  }
 
-  return (
-    <View style={[styles.labelContainer, semantic?.labelContainer]}>
-      {required ? <Text style={[styles.required, semantic?.required]}>*</Text> : null}
-      {labelContent}
+  const labelStyle: StyleProp<TextStyle> = [styles.label, semantic?.label]
+  const labelContent = (
+    <View style={styles.customLabel}>
+      {label}
+      {colon ? <Text style={labelStyle}>:</Text> : null}
     </View>
   )
+
+  return <View style={[styles.labelContainer, semantic?.labelContainer]}>{labelContent}</View>
 }
 
 function renderFeedback(value: ReactNode, style: StyleProp<TextStyle>) {
@@ -117,11 +118,32 @@ export const Field = forwardRef<TextInputInstance, FieldProps>(function Field(
   const semantic = resolveStyles(styles, { props: fieldProps, state })
   const embeddedInputStyles = useMemo(() => createEmbeddedInputStyles(inputStyles), [inputStyles])
   const hasCustomControl = children !== undefined
+  const title = renderLabel(label, colon, resolved, semantic)
+  const cellStyles: CellStyles = () => ({
+    row: [resolved.row, semantic?.row],
+    content: {
+      flex: 0,
+      flexShrink: 0,
+      justifyContent: inputProps.multiline ? 'flex-start' : 'center',
+      marginRight: token.paddingSM,
+      width: labelWidth,
+    },
+    required: [resolved.required, semantic?.required],
+    valueContainer: {
+      justifyContent: inputProps.multiline ? 'flex-start' : 'center',
+    },
+    divider: {
+      left: fieldToken.padding,
+      right: fieldToken.padding,
+    },
+  })
 
   return (
-    <View style={[resolved.root, semantic?.root, style]}>
-      <View style={[resolved.row, semantic?.row]}>
-        {renderLabel(label, colon, required, resolved, semantic)}
+    <Cell
+      title={title}
+      required={required && isVisible(label)}
+      size={inputProps.size === 'large' ? 'large' : 'normal'}
+      value={
         <View style={[resolved.content, semantic?.content, semantic?.control]}>
           {hasCustomControl ? (
             children
@@ -137,8 +159,11 @@ export const Field = forwardRef<TextInputInstance, FieldProps>(function Field(
           {renderFeedback(description, [resolved.description, semantic?.description])}
           {renderFeedback(errorMessage, [resolved.error, semantic?.error])}
         </View>
-      </View>
-    </View>
+      }
+      border
+      style={[resolved.root, semantic?.root, style]}
+      styles={cellStyles}
+    />
   )
 })
 

@@ -2,7 +2,32 @@ import { ConfigProvider, Field, getDesignToken } from '..'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { createRef } from 'react'
 import { StyleSheet, View } from 'react-native'
+import type { StyleProp, ViewStyle } from 'react-native'
 import type { TextInputInstance } from '../text-input'
+
+interface JsonNode {
+  children?: JsonNode[] | null
+  props: Record<string, unknown>
+  type: string
+}
+
+function findFirstRow(value: unknown): JsonNode | null {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const match = findFirstRow(item)
+      if (match) return match
+    }
+    return null
+  }
+
+  if (!value || typeof value !== 'object' || !('props' in value)) return null
+
+  const node = value as JsonNode
+  const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>) ?? {}
+  if (style.flexDirection === 'row') return node
+
+  return findFirstRow(node.children)
+}
 
 describe('Field', () => {
   it('creates a default Input and forwards input props', async () => {
@@ -25,6 +50,19 @@ describe('Field', () => {
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent.changeText(input, '139')
     expect(onChangeText).toHaveBeenLastCalledWith('139')
+  })
+
+  it('uses Cell geometry for the field row and keeps the input in the value column', async () => {
+    const view = await render(<Field label="姓名" placeholder="请输入姓名" />)
+
+    const row = findFirstRow(view.toJSON())
+    expect(row).not.toBeNull()
+    expect(StyleSheet.flatten(row?.props.style as StyleProp<ViewStyle>)).toMatchObject({
+      flexDirection: 'row',
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+    })
+    expect(screen.getByPlaceholderText('请输入姓名')).toBeTruthy()
   })
 
   it('forwards disabled and clearable behavior to the default Input', async () => {

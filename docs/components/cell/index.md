@@ -81,7 +81,7 @@ import { Cell, Icon } from '@ftsukic/tsuki'
 | size | `'normal' \| 'large'` | `'normal'` | large 使用更大的垂直 padding、title 字号和 label 字号 |
 | disabled | `boolean` | `false` | 本库 extension；禁用 press 并应用禁用透明度 |
 | style | `StyleProp<ViewStyle>` | — | 根 Pressable 样式，优先级高于默认样式和 `styles.root` |
-| styles | `CellStyles` | — | `root`、`icon`、`title`、`label`、`value`、`extra`、`suffix` 语义样式 |
+| styles | `CellStyles` | — | `root`、`row`、`content`、`valueContainer`、`icon`、`title`、`label`、`value`、`extra`、`suffix`、`required`、`divider` 语义样式 |
 | onPressDebounceWait | `number` | — | 两次 `onPress` 之间的最小间隔，单位为毫秒 |
 
 Cell 继承 React Native `PressableProps`，但由组件管理 `children`、`style` 和 `disabled`。交互 Cell 的默认无障碍语义为 `accessibilityRole="button"`；`isLink` 默认带 active feedback，显式 `clickable={false}` 会关闭反馈。`onPress` 仍由调用方提供，`disabled` 时不会触发。
@@ -108,7 +108,7 @@ normal 的基线为横向 16、纵向 10、title/value 14、label 12、label 上
 
 ## 语义样式
 
-`styles.root` 和 `style` 作用于根 Pressable，`style` 优先级更高。其余 Cell slots 只覆盖对应内部节点；自定义 `ReactNode` 的内部样式由调用方控制。Group 的 `styles.body` 只覆盖 cells body，适合调整 body 的背景或容器样式。
+`styles.root` 和 `style` 作用于根 Pressable，`style` 优先级更高。`row`、`content`、`valueContainer`、`required` 和 `divider` 可覆盖 Cell 的内部布局节点，其余 slots 覆盖对应内容节点；自定义 `ReactNode` 的内部样式由调用方控制。Group 的 `styles.body` 只覆盖 cells body，适合调整 body 的背景或容器样式。
 
 ## 主题定制
 

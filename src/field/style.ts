@@ -50,14 +50,13 @@ export function getFieldStyles(
   return {
     root: {
       width: '100%',
-      paddingHorizontal: fieldToken.padding,
-      paddingVertical: token.paddingXS,
     },
     row: {
       minHeight: rowMinHeight,
       minWidth: 0,
+      paddingHorizontal: fieldToken.padding,
       flexDirection: 'row',
-      alignItems: 'flex-start',
+      alignItems: 'stretch',
     },
     labelContainer: {
       width: props.labelWidth,
@@ -65,16 +64,15 @@ export function getFieldStyles(
       flexShrink: 0,
       flexDirection: 'row',
       alignItems: labelVerticalAlignment,
-      marginRight: token.paddingSM,
     },
     customLabel: {
-      flex: 1,
+      flex: props.labelWidth === undefined ? undefined : 1,
       flexDirection: 'row',
       alignItems: labelVerticalAlignment,
       flexShrink: 1,
     },
     label: {
-      flex: 1,
+      flex: props.labelWidth === undefined ? undefined : 1,
       flexShrink: 1,
       color: fieldToken.labelColor,
       fontFamily: token.fontFamily,
@@ -92,7 +90,6 @@ export function getFieldStyles(
     content: {
       flex: 1,
       minWidth: 0,
-      minHeight: rowMinHeight,
       justifyContent: props.multiline ? 'flex-start' : 'center',
     },
     description: {

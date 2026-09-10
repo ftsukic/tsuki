@@ -107,11 +107,11 @@ export const Cell = forwardRef<React.ComponentRef<typeof Pressable>, CellProps>(
 
         return (
           <>
-            <View style={resolved.row}>
+            <View style={[resolved.row, semantic?.row]}>
               {icon ? <View style={[resolved.icon, semantic?.icon]}>{icon}</View> : null}
-              {required ? <Text style={resolved.required}>*</Text> : null}
+              {required ? <Text style={[resolved.required, semantic?.required]}>*</Text> : null}
               {hasTitle || hasLabel ? (
-                <View style={resolved.content}>
+                <View style={[resolved.content, semantic?.content]}>
                   {hasTitle
                     ? renderText(
                         title,
@@ -127,7 +127,7 @@ export const Cell = forwardRef<React.ComponentRef<typeof Pressable>, CellProps>(
                 </View>
               ) : null}
               {hasValue ? (
-                <View style={resolved.valueContainer}>
+                <View style={[resolved.valueContainer, semantic?.valueContainer]}>
                   {renderText(
                     value,
                     semantic?.value ? [resolved.value, semantic.value] : resolved.value,
@@ -155,7 +155,7 @@ export const Cell = forwardRef<React.ComponentRef<typeof Pressable>, CellProps>(
             {showDivider ? (
               <Divider
                 color={cellToken.borderColor}
-                style={resolved.divider}
+                style={[resolved.divider, semantic?.divider]}
                 thickness={cellToken.dividerWidth}
               />
             ) : null}

@@ -11,7 +11,7 @@ import FieldWarningFixture from './examples/warning'
 
 /**
  * @title Field overview
- * @description Field 汇总标签、必填标记、描述、错误和警告状态。
+ * @description Field 使用 Cell 行布局汇总标签、必填标记、描述、错误和警告状态。
  */
 export default function FieldOverview() {
   return (
@@ -20,7 +20,7 @@ export default function FieldOverview() {
       examples={[
         {
           Component: FieldBasicFixture,
-          description: 'Field 默认创建 Input，直接使用输入相关 Props。',
+          description: 'Field 使用 Cell 行布局，默认创建 Input，直接使用输入相关 Props。',
           id: 'basic',
           title: '基础输入',
         },
