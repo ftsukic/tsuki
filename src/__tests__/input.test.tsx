@@ -1,5 +1,6 @@
 import { ConfigProvider, Input } from '..'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
+import { useState } from 'react'
 import { StyleSheet } from 'react-native'
 
 describe('Input', () => {
@@ -164,6 +165,46 @@ describe('Input', () => {
     })
     await waitFor(() => expect(getInputStyle('shrinking-auto-size').height).toBe(36))
     expect(screen.getByTestId('shrinking-auto-size').props.scrollEnabled).toBe(false)
+  })
+
+  it('clears the measured height before retyping after a long value is cleared', async () => {
+    function ControlledAutoSizeInput() {
+      const [value, setValue] = useState('long value')
+
+      return (
+        <Input
+          testID="clear-and-retype-auto-size"
+          multiline
+          autoSize={{ minRows: 1, maxRows: 5 }}
+          onChangeText={setValue}
+          value={value}
+        />
+      )
+    }
+
+    await render(<ControlledAutoSizeInput />)
+
+    const input = screen.getByTestId('clear-and-retype-auto-size')
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(input, 'contentSizeChange', {
+      nativeEvent: { contentSize: { width: 200, height: 200 } },
+    })
+    await waitFor(() => expect(getInputStyle('clear-and-retype-auto-size').height).toBe(116))
+
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.changeText(input, '')
+    await waitFor(() => expect(getInputStyle('clear-and-retype-auto-size').height).toBe(36))
+
+    // Retyping must wait for a fresh native measurement instead of restoring 116.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.changeText(input, 'x')
+    expect(getInputStyle('clear-and-retype-auto-size').height).toBe(36)
+
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(input, 'contentSizeChange', {
+      nativeEvent: { contentSize: { width: 200, height: 40 } },
+    })
+    await waitFor(() => expect(getInputStyle('clear-and-retype-auto-size').height).toBe(40))
   })
 
   it('reserves word limit space and hides clear for multiline input', async () => {

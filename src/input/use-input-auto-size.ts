@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useState } from 'react'
 
 interface UseInputAutoSizeOptions {
   enabled: boolean
@@ -29,15 +29,23 @@ export function useInputAutoSize({
   const scrollEnabled =
     enabled && effectiveContentHeight !== undefined && effectiveContentHeight > maxHeight
 
+  useLayoutEffect(() => {
+    if (value.length === 0 && contentHeight !== undefined) setContentHeight(undefined)
+  }, [contentHeight, value])
+
   const onContentSizeChange = useCallback(
     (nextHeight: number) => {
       if (!enabled) return
+      if (value.length === 0) {
+        setContentHeight(undefined)
+        return
+      }
       const normalizedHeight = Math.ceil(nextHeight)
       setContentHeight((previousHeight) =>
         previousHeight === normalizedHeight ? previousHeight : normalizedHeight,
       )
     },
-    [enabled],
+    [enabled, value],
   )
 
   const inputStyle = useMemo(
