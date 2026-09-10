@@ -20,7 +20,7 @@ export default function FloatingPanelTopExample() {
         <Text style={styles.pageCardText}>14:00 设计同步</Text>
       </View>
 
-      <FloatingPanel placement="top" anchors={[160, 360]} defaultHeight={160}>
+      <FloatingPanel placement="top" anchors={[180, 420]} defaultHeight={180}>
         <View style={styles.calendar}>
           <Text style={styles.calendarTitle}>2026 年 9 月</Text>
           <View style={styles.weekRow}>

@@ -63,7 +63,8 @@ export default function FloatingPanelOverview() {
         },
         {
           Component: TopExample,
-          description: 'placement="top" 从顶部展开，拖拽条位于底部并使用底部圆角和阴影。',
+          description:
+            'placement="top" 从顶部展开，默认适配顶部 safe-area，拖拽条位于底部并使用底部圆角和阴影。',
           id: 'top',
           title: '顶部下拉',
         },

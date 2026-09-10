@@ -97,6 +97,10 @@ function getTranslation(testID: string) {
   return getAnimatedValue(transform?.find((item) => 'translateY' in item)?.translateY)
 }
 
+function getPanelHeight(testID: string) {
+  return getAnimatedValue(StyleSheet.flatten(getPanelContainer(testID).props.style).height)
+}
+
 function shouldClaim(responder: TestInstance, dy: number, timestamp: number) {
   const props = getResponderProps(responder)
   props.onStartShouldSetResponderCapture(touchEvent(0, 0, 0))
@@ -269,13 +273,15 @@ describe('FloatingPanel', () => {
     await view.unmount()
   })
 
-  it('supports top placement geometry and direction-aware translation', async () => {
+  it('keeps top placement anchored at the viewport top while changing visible height', async () => {
     const view = await render(
-      <AppProvider>
-        <FloatingPanel placement="top" height={100} anchors={[100, 300]} testID="top-panel">
-          <Text>top panel</Text>
-        </FloatingPanel>
-      </AppProvider>,
+      <SafeAreaInsetsContext.Provider value={{ bottom: 12, left: 0, right: 0, top: 24 }}>
+        <AppProvider>
+          <FloatingPanel placement="top" height={100} anchors={[100, 300]} testID="top-panel">
+            <Text>top panel</Text>
+          </FloatingPanel>
+        </AppProvider>
+      </SafeAreaInsetsContext.Provider>,
     )
 
     expect(StyleSheet.flatten(screen.getByTestId('top-panel').props.style)).toMatchObject({
@@ -288,7 +294,28 @@ describe('FloatingPanel', () => {
     })
     expect(StyleSheet.flatten(getPanelContainer('top-panel').props.style)).toMatchObject({ top: 0 })
     expect(StyleSheet.flatten(getPanelContainer('top-panel').props.style).bottom).toBeUndefined()
-    expect(getTranslation('top-panel')).toBe(-200)
+    expect(getPanelHeight('top-panel')).toBe(100)
+    expect(getTranslation('top-panel')).toBeUndefined()
+    expect(StyleSheet.flatten(getScrollView(view).props.contentContainerStyle)).toMatchObject({
+      paddingTop: 24,
+    })
+
+    await view.rerender(
+      <SafeAreaInsetsContext.Provider value={{ bottom: 12, left: 0, right: 0, top: 24 }}>
+        <AppProvider>
+          <FloatingPanel placement="top" height={300} anchors={[100, 300]} testID="top-panel">
+            <Text>top panel</Text>
+          </FloatingPanel>
+        </AppProvider>
+      </SafeAreaInsetsContext.Provider>,
+    )
+
+    expect(StyleSheet.flatten(getPanelContainer('top-panel').props.style)).toMatchObject({ top: 0 })
+    expect(getPanelHeight('top-panel')).toBe(300)
+    expect(getTranslation('top-panel')).toBeUndefined()
+    expect(StyleSheet.flatten(getScrollView(view).props.contentContainerStyle)).toMatchObject({
+      paddingTop: 24,
+    })
     await view.unmount()
   })
 
@@ -578,7 +605,7 @@ describe('FloatingPanel', () => {
     )
 
     expect(StyleSheet.flatten(getScrollView(view).props.contentContainerStyle)).toMatchObject({
-      paddingTop: 200,
+      paddingTop: 24,
     })
     expect(
       StyleSheet.flatten(getScrollView(view).props.contentContainerStyle).paddingBottom,
@@ -595,9 +622,25 @@ describe('FloatingPanel', () => {
       </SafeAreaInsetsContext.Provider>,
     )
     expect(StyleSheet.flatten(getScrollView(utils).props.contentContainerStyle)).toMatchObject({
-      paddingTop: 224,
+      paddingTop: 24,
     })
     await utils.unmount()
+
+    {
+      const view = await render(
+        <SafeAreaInsetsContext.Provider value={{ bottom: 12, left: 0, right: 0, top: 24 }}>
+          <AppProvider>
+            <FloatingPanel placement="top" anchors={[100, 300]} safeAreaInsetTop={false}>
+              <Text>top safe area disabled</Text>
+            </FloatingPanel>
+          </AppProvider>
+        </SafeAreaInsetsContext.Provider>,
+      )
+      expect(StyleSheet.flatten(getScrollView(view).props.contentContainerStyle)).toMatchObject({
+        paddingTop: 0,
+      })
+      await view.unmount()
+    }
   })
 
   it('fires the end event after a settling animation completes', async () => {

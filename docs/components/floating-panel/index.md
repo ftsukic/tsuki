@@ -52,7 +52,7 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `Provider` 内�
 <code src="../../../src/floating-panel/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 FloatingPanel token 和 semantic styles 定制外观。"></code>
 
 <!-- prettier-ignore -->
-<code src="../../../src/floating-panel/__fixtures__/examples/top.tsx" title="顶部下拉" description="placement=\"top\" 从顶部展开，拖拽条位于面板底部。"></code>
+<code src="../../../src/floating-panel/__fixtures__/examples/top.tsx" title="顶部下拉" description="placement=\"top\" 从顶部展开，默认适配顶部 safe-area，拖拽条位于面板底部。"></code>
 
 ## API
 
@@ -69,7 +69,7 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `Provider` 内�
 | `draggable` | `boolean` | `true` | 是否允许拖动；关闭时隐藏默认拖拽条 |
 | `contentDraggable` | `boolean` | `true` | 是否允许从内容区域拖动面板 |
 | `safeAreaInsetBottom` | `boolean` | `true` | 是否把底部 safe-area inset 加入内容 padding |
-| `safeAreaInsetTop` | `boolean` | `false` | `placement="top"` 时是否把顶部 safe-area inset 加入内容 padding |
+| `safeAreaInsetTop` | `boolean` | top placement 为 `true`，bottom placement 为 `false` | `placement="top"` 时是否把顶部 safe-area inset 加入固定内容 padding |
 | `header` | `ReactNode` | 默认拖拽条 | 自定义面板头部 |
 | `onHeightChange` | `(height: number) => void` | — | 拖动过程和最终收敛时持续同步高度 |
 | `onHeightChangeEnd` | `(height: number) => void` | — | 松手完成吸附或边界收敛后触发 |
