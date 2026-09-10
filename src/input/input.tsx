@@ -245,6 +245,7 @@ export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
             scrollEnabled={autoSizeState.scrollEnabled}
             onChangeText={handleChangeText}
             onContentSizeChange={handleContentSizeChange}
+            onMeasureContentSize={autoSizeState.onContentSizeChange}
           />
         ) : (
           <InputSingle
@@ -257,6 +258,7 @@ export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
             value={currentValue}
             prefix={prefix}
             suffix={suffix}
+            clearable={clearable}
             showClear={showClear}
             isPassword={isPassword}
             passwordVisible={currentPasswordVisible}
