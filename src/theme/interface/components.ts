@@ -123,6 +123,20 @@ export interface SwipeCellToken {
   fontFamily: string
 }
 
+export interface ImagePreviewToken {
+  zIndex: number
+  overlayColor: string
+  indexColor: string
+  indexFontSize: number
+  indexLineHeight: number
+  indexTop: number
+  closeIconColor: string
+  closeIconSize: number
+  closeIconTop: number
+  closeIconRight: number
+  animationDuration: number
+}
+
 export interface InputToken {
   heightSM: number
   height: number
@@ -561,6 +575,7 @@ export interface ComponentTokenOverrides {
   Collapse?: Partial<CollapseToken>
   Navbar?: Partial<NavbarToken>
   SwipeCell?: Partial<SwipeCellToken>
+  ImagePreview?: Partial<ImagePreviewToken>
   Input?: Partial<InputToken>
   Field?: Partial<FieldToken>
   Search?: Partial<SearchToken>
@@ -592,6 +607,7 @@ export interface ComponentTokenMap {
   Collapse: CollapseToken
   Navbar: NavbarToken
   SwipeCell: SwipeCellToken
+  ImagePreview: ImagePreviewToken
   Input: InputToken
   Field: FieldToken
   Search: SearchToken

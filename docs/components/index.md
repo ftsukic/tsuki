@@ -17,6 +17,7 @@ order: 1
 - [Field](/components/field)、[Input](/components/input)
 - [FloatingPanel](/components/floating-panel)、[Grid](/components/grid)
 - [Icon](/components/icon)、[Loading](/components/loading)
+- [ImagePreview](/components/image-preview)
 - [Skeleton](/components/skeleton)
 - [Navbar](/components/navbar)
 - [NoticeBar](/components/notice-bar)

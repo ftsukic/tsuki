@@ -25,6 +25,11 @@ export function useAnimatedStyle(updater) {
   return updater()
 }
 
+export function useAnimatedReaction(prepare, react) {
+  const value = prepare()
+  react(value, null)
+}
+
 export function useDerivedValue(updater) {
   return useSharedValue(updater())
 }
