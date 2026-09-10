@@ -126,7 +126,7 @@ export function getInputStyles(
           : props.size === 'large'
             ? token.fontSizeLG
             : token.fontSize,
-      lineHeight,
+      lineHeight: textarea ? lineHeight : undefined,
       textAlignVertical: textarea ? 'top' : 'center',
     },
     prefix: {
@@ -154,22 +154,27 @@ export function getInputStyles(
       color: token.wordLimitColor,
       fontSize: token.wordLimitFontSize,
       position: 'absolute',
-      right: 0,
-      bottom: 0,
+      right: token.paddingHorizontal,
+      bottom: token.paddingVertical,
     },
     passwordToggle: getInputPasswordStyles(token).passwordToggle,
     singleShell: {
       height,
       minHeight: height,
       alignItems: 'center',
+      alignContent: 'center',
     },
     singleContent: {
       alignItems: 'center',
+      alignContent: 'center',
     },
     singleInput: {
-      height,
-      minHeight: height,
+      flex: undefined,
+      flexGrow: 1,
+      flexShrink: 1,
+      alignSelf: 'stretch',
       paddingVertical: 0,
+      lineHeight: undefined,
     },
     textareaShell: {
       minHeight: props.autoSize ? undefined : height * Math.max(1, props.rows ?? 2),

@@ -26,8 +26,12 @@ describe('Input', () => {
 
     for (const testID of ['small-input', 'normal-input', 'large-input']) {
       const style = getInputStyle(testID)
-      expect(style.height).toBeGreaterThan(0)
-      expect(style.minHeight).toBe(style.height)
+      expect(style).not.toEqual(
+        expect.objectContaining({
+          height: expect.anything(),
+          minHeight: expect.anything(),
+        }),
+      )
     }
   })
 
@@ -183,9 +187,11 @@ describe('Input', () => {
     expect(screen.queryByLabelText('清除输入')).toBeNull()
     expect(StyleSheet.flatten(screen.getByText('5/500').props.style)).toMatchObject({
       position: 'absolute',
-      right: 0,
-      bottom: 0,
+      right: expect.any(Number),
+      bottom: expect.any(Number),
     })
+    expect(StyleSheet.flatten(screen.getByText('5/500').props.style).right).toBeGreaterThan(0)
+    expect(StyleSheet.flatten(screen.getByText('5/500').props.style).bottom).toBeGreaterThan(0)
 
     // The native measurement is clamped to the bound that already includes the
     // word-limit area; the reserve is not added a second time.
