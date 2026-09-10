@@ -1,5 +1,6 @@
 export { Input } from './input'
 export type {
+  InputAutoSizeConfig,
   InputClearTrigger,
   InputFormatTrigger,
   InputInstance,

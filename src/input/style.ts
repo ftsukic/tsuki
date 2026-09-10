@@ -15,6 +15,12 @@ export interface InputResolvedStyles {
   suffix: TextStyle
   clear: ViewStyle
   wordLimit: TextStyle
+  passwordToggle: ViewStyle
+  singleShell: ViewStyle
+  singleContent: ViewStyle
+  singleInput: TextStyle
+  textareaShell: ViewStyle
+  textareaInput: TextStyle
 }
 
 export interface InputPasswordStyles {
@@ -53,6 +59,12 @@ export function getInputStyles(
 ): InputResolvedStyles {
   const height = getInputHeight(token, props.size ?? 'normal')
   const textarea = props.multiline === true
+  const lineHeight =
+    props.size === 'small'
+      ? token.lineHeightSM
+      : props.size === 'large'
+        ? token.lineHeightLG
+        : token.lineHeight
 
   return {
     root: {
@@ -80,9 +92,8 @@ export function getInputStyles(
     shell: {
       flex: 1,
       minWidth: 0,
-      minHeight: textarea ? height * Math.max(1, props.rows ?? 2) : height,
       flexDirection: 'row',
-      alignItems: textarea ? 'flex-start' : 'center',
+      position: 'relative',
       paddingHorizontal: token.paddingHorizontal,
       borderWidth: props.bordered ? token.borderWidth : 0,
       borderColor: state.focused ? token.activeBorderColor : token.borderColor,
@@ -93,14 +104,21 @@ export function getInputStyles(
       flex: 1,
       minWidth: 0,
       flexDirection: 'row',
-      alignItems: textarea ? 'flex-start' : 'center',
+      alignItems: 'center',
+      position: textarea ? 'relative' : undefined,
     },
     input: {
       fontFamily: token.fontFamily,
       flex: 1,
       minWidth: 0,
       paddingHorizontal: 0,
-      paddingVertical: textarea ? token.paddingVertical : 0,
+      paddingTop: textarea ? token.paddingVertical : 0,
+      paddingBottom:
+        textarea && props.showWordLimit && props.maxLength !== undefined
+          ? token.paddingVertical + token.lineHeightSM + token.paddingVertical
+          : textarea
+            ? token.paddingVertical
+            : 0,
       color: state.disabled ? token.disabledColor : token.textColor,
       fontSize:
         props.size === 'small'
@@ -108,12 +126,8 @@ export function getInputStyles(
           : props.size === 'large'
             ? token.fontSizeLG
             : token.fontSize,
-      lineHeight:
-        props.size === 'small'
-          ? token.lineHeightSM
-          : props.size === 'large'
-            ? token.lineHeightLG
-            : token.lineHeight,
+      lineHeight,
+      textAlignVertical: textarea ? 'top' : 'center',
     },
     prefix: {
       fontFamily: token.fontFamily,
@@ -139,7 +153,31 @@ export function getInputStyles(
       fontFamily: token.fontFamily,
       color: token.wordLimitColor,
       fontSize: token.wordLimitFontSize,
-      marginLeft: token.paddingHorizontal,
+      position: 'absolute',
+      right: 0,
+      bottom: 0,
+    },
+    passwordToggle: getInputPasswordStyles(token).passwordToggle,
+    singleShell: {
+      height,
+      minHeight: height,
+      alignItems: 'center',
+    },
+    singleContent: {
+      alignItems: 'center',
+    },
+    singleInput: {
+      height,
+      minHeight: height,
+      paddingVertical: 0,
+    },
+    textareaShell: {
+      minHeight: props.autoSize ? undefined : height * Math.max(1, props.rows ?? 2),
+      alignItems: 'stretch',
+    },
+    textareaInput: {
+      alignSelf: 'stretch',
+      minHeight: props.autoSize ? undefined : height * Math.max(1, props.rows ?? 2),
     },
   }
 }

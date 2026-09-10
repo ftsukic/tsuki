@@ -3,6 +3,200 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react-nativ
 import { StyleSheet } from 'react-native'
 
 describe('Input', () => {
+  function getInputStyle(testID: string) {
+    return StyleSheet.flatten(screen.getByTestId(testID).props.style)
+  }
+
+  it('does not enable multiline implicitly for autoSize', async () => {
+    await render(<Input testID="single-line-auto-size" autoSize />)
+
+    const input = screen.getByTestId('single-line-auto-size')
+    expect(input.props.multiline).not.toBe(true)
+    expect(input.props.scrollEnabled).toBeUndefined()
+  })
+
+  it('keeps single-line controls at a stable token height', async () => {
+    await render(
+      <>
+        <Input testID="small-input" size="small" prefix="$" suffix="USD" />
+        <Input testID="normal-input" />
+        <Input testID="large-input" size="large" clearable defaultValue="value" />
+      </>,
+    )
+
+    for (const testID of ['small-input', 'normal-input', 'large-input']) {
+      const style = getInputStyle(testID)
+      expect(style.height).toBeGreaterThan(0)
+      expect(style.minHeight).toBe(style.height)
+    }
+  })
+
+  it('does not use maxRows as native numberOfLines or accumulate padding', async () => {
+    await render(
+      <Input
+        testID="stable-auto-size"
+        multiline
+        autoSize={{ minRows: 1, maxRows: 5 }}
+        defaultValue="x"
+      />,
+    )
+
+    const input = screen.getByTestId('stable-auto-size')
+    expect(input.props.numberOfLines).toBeUndefined()
+
+    for (const height of [40, 40, 40]) {
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent(input, 'contentSizeChange', {
+        nativeEvent: { contentSize: { width: 200, height } },
+      })
+    }
+
+    await waitFor(() => expect(getInputStyle('stable-auto-size').height).toBe(40))
+    expect(getInputStyle('stable-auto-size')).toMatchObject({ minHeight: 36, maxHeight: 116 })
+  })
+
+  it('keeps an empty autoSize input at minHeight', async () => {
+    await render(<Input testID="empty-auto-size" multiline autoSize={{ minRows: 1, maxRows: 5 }} />)
+
+    const input = screen.getByTestId('empty-auto-size')
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(input, 'contentSizeChange', {
+      nativeEvent: { contentSize: { width: 200, height: 200 } },
+    })
+
+    // Empty values ignore placeholder/native noise and return to the one-line bound.
+    expect(getInputStyle('empty-auto-size')).toMatchObject({ height: 36, minHeight: 36 })
+  })
+
+  it('clamps measured content to minHeight and grows without re-adding padding', async () => {
+    await render(
+      <Input
+        testID="growing-auto-size"
+        multiline
+        autoSize={{ minRows: 1, maxRows: 5 }}
+        defaultValue="x"
+      />,
+    )
+
+    const input = screen.getByTestId('growing-auto-size')
+    for (const [height, expected] of [
+      [20, 36],
+      [40, 40],
+      [60, 60],
+    ]) {
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent(input, 'contentSizeChange', {
+        nativeEvent: { contentSize: { width: 200, height } },
+      })
+      await waitFor(() => expect(getInputStyle('growing-auto-size').height).toBe(expected))
+    }
+  })
+
+  it('uses content size to grow and proxies the native callback', async () => {
+    const onContentSizeChange = jest.fn()
+
+    await render(
+      <Input
+        testID="auto-size-input"
+        multiline
+        autoSize={{ minRows: 1, maxRows: 5 }}
+        defaultValue="x"
+        onContentSizeChange={onContentSizeChange}
+      />,
+    )
+
+    const input = screen.getByTestId('auto-size-input')
+    const event = {
+      nativeEvent: { contentSize: { width: 200, height: 40 } },
+    }
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(input, 'contentSizeChange', event)
+
+    expect(onContentSizeChange).toHaveBeenCalledWith(event)
+    await waitFor(() => expect(getInputStyle('auto-size-input').height).toBe(40))
+    expect(screen.getByTestId('auto-size-input').props.scrollEnabled).toBe(false)
+  })
+
+  it('clamps autoSize to maxRows and enables native scrolling', async () => {
+    await render(
+      <Input
+        testID="clamped-auto-size"
+        multiline
+        autoSize={{ minRows: 1, maxRows: 3 }}
+        defaultValue="x"
+      />,
+    )
+
+    const input = screen.getByTestId('clamped-auto-size')
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(input, 'contentSizeChange', {
+      nativeEvent: { contentSize: { width: 200, height: 100 } },
+    })
+
+    await waitFor(() => expect(getInputStyle('clamped-auto-size').height).toBe(76))
+    expect(screen.getByTestId('clamped-auto-size').props.scrollEnabled).toBe(true)
+  })
+
+  it('shrinks when content size decreases', async () => {
+    await render(
+      <Input
+        testID="shrinking-auto-size"
+        multiline
+        autoSize={{ minRows: 1, maxRows: 5 }}
+        defaultValue="x"
+      />,
+    )
+
+    const input = screen.getByTestId('shrinking-auto-size')
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(input, 'contentSizeChange', {
+      nativeEvent: { contentSize: { width: 200, height: 200 } },
+    })
+    await waitFor(() => expect(getInputStyle('shrinking-auto-size').height).toBe(116))
+
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(input, 'contentSizeChange', {
+      nativeEvent: { contentSize: { width: 200, height: 20 } },
+    })
+    await waitFor(() => expect(getInputStyle('shrinking-auto-size').height).toBe(36))
+    expect(screen.getByTestId('shrinking-auto-size').props.scrollEnabled).toBe(false)
+  })
+
+  it('reserves word limit space and hides clear for multiline input', async () => {
+    await render(
+      <Input
+        testID="word-limit-auto-size"
+        multiline
+        autoSize
+        clearable
+        defaultValue="hello"
+        showWordLimit
+        maxLength={500}
+      />,
+    )
+
+    const input = screen.getByTestId('word-limit-auto-size')
+    const inputStyle = StyleSheet.flatten(input.props.style)
+    expect(inputStyle.paddingBottom).toBeGreaterThan(inputStyle.paddingTop)
+    expect(inputStyle.paddingBottom).toBe(34)
+    expect(screen.getByText('5/500')).toBeTruthy()
+    expect(screen.queryByLabelText('清除输入')).toBeNull()
+    expect(StyleSheet.flatten(screen.getByText('5/500').props.style)).toMatchObject({
+      position: 'absolute',
+      right: 0,
+      bottom: 0,
+    })
+
+    // The native measurement is clamped to the bound that already includes the
+    // word-limit area; the reserve is not added a second time.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(input, 'contentSizeChange', {
+      nativeEvent: { contentSize: { width: 200, height: 200 } },
+    })
+    await waitFor(() => expect(getInputStyle('word-limit-auto-size').height).toBe(142))
+    expect(input.props.scrollEnabled).toBe(true)
+  })
+
   it('supports uncontrolled values and preserves native and string change handlers', async () => {
     const onChange = jest.fn()
     const onChangeText = jest.fn()

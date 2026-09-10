@@ -1,4 +1,5 @@
 import { FixtureOverview } from '../../fixture-overview'
+import InputAutoSizeFixture from './examples/auto-size'
 import InputBasicFixture from './examples/basic'
 import InputLayoutFixture from './examples/layout'
 import InputNumberFixture from './examples/number'
@@ -13,6 +14,12 @@ export default function InputOverview() {
   return (
     <FixtureOverview
       examples={[
+        {
+          Component: InputAutoSizeFixture,
+          description: '内容增长到 maxRows 后内部滚动，删除内容时自动缩回。',
+          id: 'auto-size',
+          title: 'AutoSize',
+        },
         {
           Component: InputBasicFixture,
           description: '受控输入、清除操作和 disabled/readOnly 状态。',

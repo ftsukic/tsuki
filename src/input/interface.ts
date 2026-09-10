@@ -9,6 +9,11 @@ export type InputSize = 'large' | 'normal' | 'small'
 export type InputClearTrigger = 'always' | 'focus'
 export type InputFormatTrigger = 'onEndEditing' | 'onChangeText'
 
+export interface InputAutoSizeConfig {
+  minRows?: number
+  maxRows?: number
+}
+
 export interface InputStyleState {
   focused: boolean
   disabled: boolean
@@ -23,6 +28,8 @@ export interface InputSemanticStyles {
   wordLimit?: StyleProp<TextStyle>
   addonBefore?: StyleProp<TextStyle>
   addonAfter?: StyleProp<TextStyle>
+  shell?: StyleProp<ViewStyle>
+  content?: StyleProp<ViewStyle>
 }
 
 export type InputStyles = StyleResolver<InputProps, InputStyleState, InputSemanticStyles>
@@ -39,6 +46,7 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
   formatTrigger?: InputFormatTrigger
   showWordLimit?: boolean
   rows?: number
+  autoSize?: boolean | InputAutoSizeConfig
   prefix?: ReactNode
   suffix?: ReactNode
   addonBefore?: ReactNode

@@ -1,35 +1,18 @@
-import { Icon } from '../icon'
-import { InteractionPressable } from '../interaction'
-import { resolveStyles } from '../style'
-import { TextInput } from '../text-input'
-import { getInputPasswordStyles, getInputStyles } from './style'
-import { getInputToken } from './token'
 import { useComponentToken } from '../theme'
+import { resolveStyles } from '../style'
+import type { TextInputInstance, TextInputProps } from '../text-input'
+import { forwardRef, useCallback, useMemo, useState } from 'react'
+import { View } from 'react-native'
 import type { InputProps, InputStyleState } from './interface'
-import {
-  forwardRef,
-  useCallback,
-  useImperativeHandle,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react'
-import { Text, View } from 'react-native'
-import type { TextInput as NativeTextInputInstance } from 'react-native'
-import type { StyleProp, TextStyle } from 'react-native'
+import { getInputStyles } from './style'
+import { getInputToken } from './token'
+import { InputSingle } from './input-single'
+import { InputTextarea } from './input-textarea'
+import { renderInputAffix } from './input-affix'
+import { useInputAutoSize } from './use-input-auto-size'
+import { useInputValue } from './use-input-value'
 
-function isVisible(value: ReactNode): boolean {
-  return value !== null && value !== undefined && value !== false
-}
-
-function renderAddon(value: ReactNode, style: StyleProp<TextStyle>) {
-  if (!isVisible(value)) return null
-  if (typeof value === 'string' || typeof value === 'number')
-    return <Text style={style}>{value}</Text>
-  return value
-}
-
-export const Input = forwardRef<NativeTextInputInstance, InputProps>(function Input(
+export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
   {
     type = 'text',
     size = 'normal',
@@ -40,6 +23,7 @@ export const Input = forwardRef<NativeTextInputInstance, InputProps>(function In
     formatTrigger = 'onChangeText',
     showWordLimit = false,
     rows = 2,
+    autoSize = false,
     disabled = false,
     readOnly = false,
     prefix,
@@ -61,89 +45,127 @@ export const Input = forwardRef<NativeTextInputInstance, InputProps>(function In
     onFocus,
     onBlur,
     onEndEditing,
+    onContentSizeChange,
     ...nativeProps
   },
   ref,
 ) {
-  const inputToken = useComponentToken('Input', getInputToken)
-  const inputStyles = getInputPasswordStyles(inputToken)
-  const inputRef = useRef<NativeTextInputInstance>(null)
-  const [internalValue, setInternalValue] = useState(defaultValue ?? '')
+  const token = useComponentToken('Input', getInputToken)
   const [focused, setFocused] = useState(false)
   const [internalPasswordVisible, setInternalPasswordVisible] = useState(defaultPasswordVisible)
-  const currentValue = value ?? internalValue
-  const isPassword = type === 'password'
-  const isPasswordVisible = passwordVisible ?? internalPasswordVisible
   const isTextarea = nativeProps.multiline === true
+  const isAutoSize = isTextarea && Boolean(autoSize)
+  const autoSizeConfig = typeof autoSize === 'object' ? autoSize : undefined
+  const minRows = Math.max(1, Math.floor(autoSizeConfig?.minRows ?? 1))
+  const maxRows = Math.max(minRows, Math.floor(autoSizeConfig?.maxRows ?? 5))
+  const isPassword = type === 'password'
   const isDisabled = disabled || (editable === false && !readOnly)
   const isEditable = !disabled && !readOnly && editable !== false
+  const currentPasswordVisible = passwordVisible ?? internalPasswordVisible
   const keyboardType =
     type === 'number' ? 'numeric' : type === 'tel' ? 'phone-pad' : nativeProps.keyboardType
-  const secureTextEntry = isPassword ? !isPasswordVisible : nativeProps.secureTextEntry
+  const secureTextEntry = isPassword ? !currentPasswordVisible : nativeProps.secureTextEntry
   const state: InputStyleState = { focused, disabled: isDisabled }
-  const inputProps: InputProps = {
-    type,
-    size,
-    bordered,
-    clearable,
-    clearTrigger,
-    formatter,
-    formatTrigger,
-    showWordLimit,
-    rows,
-    disabled,
-    readOnly,
-    prefix,
-    suffix,
-    addonBefore,
-    addonAfter,
-    passwordVisible,
-    defaultPasswordVisible,
-    onPasswordVisibleChange,
-    onClear,
-    style,
-    styles,
+  const inputProps = useMemo<InputProps>(
+    () => ({
+      ...nativeProps,
+      type,
+      size,
+      bordered,
+      clearable,
+      clearTrigger,
+      formatter,
+      formatTrigger,
+      showWordLimit,
+      rows,
+      autoSize,
+      disabled,
+      readOnly,
+      prefix,
+      suffix,
+      addonBefore,
+      addonAfter,
+      passwordVisible,
+      defaultPasswordVisible,
+      onPasswordVisibleChange,
+      onClear,
+      value,
+      defaultValue,
+      editable,
+      maxLength,
+      onChange,
+      onChangeText,
+      onFocus,
+      onBlur,
+      onEndEditing,
+      multiline: nativeProps.multiline,
+    }),
+    [
+      addonAfter,
+      addonBefore,
+      autoSize,
+      bordered,
+      clearTrigger,
+      clearable,
+      defaultPasswordVisible,
+      defaultValue,
+      disabled,
+      editable,
+      formatter,
+      formatTrigger,
+      maxLength,
+      nativeProps,
+      onBlur,
+      onChange,
+      onChangeText,
+      onClear,
+      onEndEditing,
+      onFocus,
+      onPasswordVisibleChange,
+      passwordVisible,
+      prefix,
+      readOnly,
+      rows,
+      showWordLimit,
+      size,
+      suffix,
+      type,
+      value,
+    ],
+  )
+  const resolved = getInputStyles(token, inputProps, state)
+  const semantic = resolveStyles(styles, { props: inputProps, state })
+  const {
+    value: currentValue,
+    handleChangeText,
+    handleEndEditing,
+    setValue,
+  } = useInputValue({
     value,
     defaultValue,
-    editable,
-    maxLength,
-    onChange,
+    formatter,
+    formatTrigger,
     onChangeText,
-    onFocus,
-    onBlur,
-    onEndEditing,
-    multiline: nativeProps.multiline,
-  }
-  const semantic = resolveStyles(styles, { props: inputProps, state })
-  const resolved = getInputStyles(inputToken, inputProps, state)
+  })
   const showClear =
-    clearable && isEditable && currentValue.length > 0 && (clearTrigger === 'always' || focused)
-  const showLimit = showWordLimit && maxLength !== undefined
-
-  useImperativeHandle(ref, () => {
-    const input = inputRef.current
-    if (!input) throw new Error('Input ref is not ready')
-    return input
-  }, [])
-
-  const updateValue = useCallback(
-    (nextValue: string) => {
-      const nextValueWithFormat =
-        formatter && formatTrigger === 'onChangeText' ? formatter(nextValue) : nextValue
-      if (value === undefined) setInternalValue(nextValueWithFormat)
-      onChangeText?.(nextValueWithFormat)
-    },
-    [formatTrigger, formatter, onChangeText, value],
-  )
-
-  const handleEndEditing = useCallback(
-    (event: Parameters<NonNullable<InputProps['onEndEditing']>>[0]) => {
-      if (formatter && formatTrigger === 'onEndEditing')
-        updateValue(formatter(event.nativeEvent.text))
-      onEndEditing?.(event)
-    },
-    [formatTrigger, formatter, onEndEditing, updateValue],
-  )
+    !isTextarea &&
+    clearable &&
+    isEditable &&
+    currentValue.length > 0 &&
+    (clearTrigger === 'always' || focused)
+  const lineHeight =
+    size === 'small' ? token.lineHeightSM : size === 'large' ? token.lineHeightLG : token.lineHeight
+  const wordLimitPadding =
+    showWordLimit && maxLength !== undefined ? token.lineHeightSM + token.paddingVertical : 0
+  const autoSizeState = useInputAutoSize({
+    enabled: isAutoSize,
+    value: currentValue,
+    minRows,
+    maxRows,
+    lineHeight,
+    verticalPadding: token.paddingVertical * 2,
+    wordLimitPadding,
+  })
 
   const handleFocus = useCallback(
     (event: Parameters<NonNullable<InputProps['onFocus']>>[0]) => {
@@ -152,7 +174,6 @@ export const Input = forwardRef<NativeTextInputInstance, InputProps>(function In
     },
     [onFocus],
   )
-
   const handleBlur = useCallback(
     (event: Parameters<NonNullable<InputProps['onBlur']>>[0]) => {
       setFocused(false)
@@ -160,91 +181,91 @@ export const Input = forwardRef<NativeTextInputInstance, InputProps>(function In
     },
     [onBlur],
   )
-
+  const handleEndEditingEvent = useCallback(
+    (event: Parameters<NonNullable<InputProps['onEndEditing']>>[0]) => {
+      const formattedValue = handleEndEditing(event.nativeEvent.text)
+      if (formattedValue !== event.nativeEvent.text) event.nativeEvent.text = formattedValue
+      onEndEditing?.(event)
+    },
+    [handleEndEditing, onEndEditing],
+  )
+  const handleContentSizeChange = useCallback(
+    (event: Parameters<NonNullable<InputProps['onContentSizeChange']>>[0]) => {
+      autoSizeState.onContentSizeChange(event.nativeEvent.contentSize.height)
+      onContentSizeChange?.(event)
+    },
+    [autoSizeState, onContentSizeChange],
+  )
   const handleClear = useCallback(() => {
-    inputRef.current?.clear()
-    updateValue('')
+    setValue('')
+    onChangeText?.('')
     onClear?.()
-    inputRef.current?.focus()
-  }, [onClear, updateValue])
-
+  }, [onChangeText, onClear, setValue])
   const handlePasswordVisibleChange = useCallback(() => {
-    const nextVisible = !isPasswordVisible
+    const nextVisible = !currentPasswordVisible
     if (passwordVisible === undefined) setInternalPasswordVisible(nextVisible)
     onPasswordVisibleChange?.(nextVisible)
-  }, [isPasswordVisible, onPasswordVisibleChange, passwordVisible])
+  }, [currentPasswordVisible, onPasswordVisibleChange, passwordVisible])
 
-  const renderedSuffix = isPassword ? (
-    <InteractionPressable
-      accessibilityRole="button"
-      accessibilityLabel={isPasswordVisible ? '隐藏密码' : '显示密码'}
-      disabled={disabled}
-      onPress={handlePasswordVisibleChange}
-      style={inputStyles.passwordToggle}
-    >
-      <Icon
-        name={isPasswordVisible ? 'EyeOutlined' : 'EyeInvisibleOutlined'}
-        size={inputToken.fontSizeLG}
-        color={inputToken.prefixColor}
-      />
-    </InteractionPressable>
-  ) : (
-    suffix
-  )
+  const coreProps: TextInputProps = {
+    ...nativeProps,
+    editable: isEditable,
+    keyboardType,
+    secureTextEntry,
+    maxLength,
+    placeholderTextColor: nativeProps.placeholderTextColor ?? token.placeholderColor,
+    selectionColor: nativeProps.selectionColor ?? token.selectionColor,
+    returnKeyType: isTextarea ? nativeProps.returnKeyType : (nativeProps.returnKeyType ?? 'done'),
+    onChange,
+    onFocus: handleFocus,
+    onBlur: handleBlur,
+    onEndEditing: handleEndEditingEvent,
+    onContentSizeChange: handleContentSizeChange,
+  }
 
   return (
     <View style={[resolved.root, semantic?.root, style]}>
       <View style={resolved.addonGroup}>
-        {renderAddon(addonBefore, [resolved.addon, resolved.addonBefore, semantic?.addonBefore])}
-        <View style={resolved.shell}>
-          <View style={resolved.content}>
-            {renderAddon(prefix, [resolved.prefix, semantic?.prefix])}
-            <TextInput
-              {...nativeProps}
-              ref={inputRef}
-              value={currentValue}
-              editable={isEditable}
-              multiline={isTextarea ? true : nativeProps.multiline}
-              numberOfLines={isTextarea ? rows : nativeProps.numberOfLines}
-              keyboardType={keyboardType}
-              secureTextEntry={secureTextEntry}
-              maxLength={maxLength}
-              placeholderTextColor={nativeProps.placeholderTextColor ?? inputToken.placeholderColor}
-              selectionColor={nativeProps.selectionColor ?? inputToken.selectionColor}
-              returnKeyType={
-                isTextarea ? nativeProps.returnKeyType : (nativeProps.returnKeyType ?? 'done')
-              }
-              style={[resolved.input, semantic?.input]}
-              onChange={onChange}
-              onChangeText={updateValue}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              onEndEditing={handleEndEditing}
-            />
-            {clearable && showClear ? (
-              <InteractionPressable
-                accessibilityRole="button"
-                accessibilityLabel="清除输入"
-                disabled={!isEditable}
-                onPress={handleClear}
-                style={[resolved.clear, semantic?.clear]}
-              >
-                <Icon
-                  name="CloseOutlined"
-                  size={inputToken.clearButtonSize * 0.7}
-                  color={inputToken.clearButtonColor}
-                />
-              </InteractionPressable>
-            ) : null}
-            {renderAddon(renderedSuffix, [resolved.suffix, semantic?.suffix])}
-            {showLimit ? (
-              <Text style={[resolved.wordLimit, semantic?.wordLimit]}>
-                {currentValue.length}/{maxLength}
-              </Text>
-            ) : null}
-          </View>
-        </View>
-        {renderAddon(addonAfter, [resolved.addon, resolved.addonAfter, semantic?.addonAfter])}
+        {renderInputAffix(addonBefore, [
+          resolved.addon,
+          resolved.addonBefore,
+          semantic?.addonBefore,
+        ])}
+        {isTextarea ? (
+          <InputTextarea
+            ref={ref}
+            coreProps={coreProps}
+            autoSize={isAutoSize}
+            rows={Math.max(1, rows)}
+            styles={resolved}
+            semantic={semantic}
+            value={currentValue}
+            wordLimit={showWordLimit && maxLength !== undefined ? maxLength : undefined}
+            inputStyle={autoSizeState.inputStyle}
+            scrollEnabled={autoSizeState.scrollEnabled}
+            onChangeText={handleChangeText}
+            onContentSizeChange={handleContentSizeChange}
+          />
+        ) : (
+          <InputSingle
+            ref={ref}
+            coreProps={coreProps}
+            disabled={isDisabled}
+            token={token}
+            styles={resolved}
+            semantic={semantic}
+            value={currentValue}
+            prefix={prefix}
+            suffix={suffix}
+            showClear={showClear}
+            isPassword={isPassword}
+            passwordVisible={currentPasswordVisible}
+            onClear={handleClear}
+            onPasswordVisibleChange={handlePasswordVisibleChange}
+            onChangeText={handleChangeText}
+          />
+        )}
+        {renderInputAffix(addonAfter, [resolved.addon, resolved.addonAfter, semantic?.addonAfter])}
       </View>
     </View>
   )
