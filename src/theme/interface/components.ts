@@ -475,6 +475,22 @@ export interface LoadingToken {
   animationDuration: number
 }
 
+export interface SkeletonToken {
+  backgroundColor: string
+  titleHeight: number
+  titleWidth: DimensionValue
+  rowHeight: number
+  rowWidth: DimensionValue
+  rowGap: number
+  titleRowGap: number
+  avatarSize: number
+  avatarGap: number
+  borderRadius: number
+  roundBorderRadius: number
+  animationDuration: number
+  animationMinOpacity: number
+}
+
 export interface SwitchToken {
   smallWidth: number
   smallHeight: number
@@ -563,6 +579,7 @@ export interface ComponentTokenOverrides {
   ActionSheet?: Partial<ActionSheetToken>
   Toast?: Partial<ToastToken>
   Loading?: Partial<LoadingToken>
+  Skeleton?: Partial<SkeletonToken>
   Switch?: Partial<SwitchToken>
   Progress?: Partial<ProgressToken>
   Notify?: Partial<NotifyToken>
@@ -593,6 +610,7 @@ export interface ComponentTokenMap {
   ActionSheet: ActionSheetToken
   Toast: ToastToken
   Loading: LoadingToken
+  Skeleton: SkeletonToken
   Switch: SwitchToken
   Progress: ProgressToken
   Notify: NotifyToken
