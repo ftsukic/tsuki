@@ -15,11 +15,11 @@ group:
 
 ## 介绍
 
-`TextInput` 是兼容旧调用的输入组件；新代码推荐使用 `Input`。它保留原生 `onChange` 事件和字符串 `onChangeText` 回调，并使用当前项目的输入 token。
+`TextInput` 是 React Native `TextInput` 的稳定基础封装，保留原生语义和事件契约。组件视觉和清除、密码、格式化等高级能力请使用 `Input`。
 
 </section>
 
-<code src="../../../src/text-input/__fixtures__/overview.tsx" title="组件预览" description="TextInput 展示文本、多行、清除和字数限制。"></code>
+<code src="../../../src/text-input/__fixtures__/overview.tsx" title="组件预览" description="TextInput 展示原生基础输入能力。"></code>
 
 ## 引入
 
@@ -29,43 +29,33 @@ import { TextInput } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-<code src="../../../src/text-input/__fixtures__/examples/basic.tsx" title="文本和多行输入" description="展示受控值、textarea、清除和字数限制。"></code>
+<code src="../../../src/text-input/__fixtures__/examples/basic.tsx" title="基础输入能力" description="展示受控、非受控、原生事件和常用原生属性。"></code>
 
 ## API
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| type | `'text' \| 'password' \| 'number' \| 'tel' \| 'textarea'` | `'text'` | 输入模式；`number`/`tel` 只选择原生键盘，值保持字符串 |
 | value | `string` | — | 受控值 |
 | defaultValue | `string` | `''` | 非受控初始值 |
-| onChangeText | `(value: string) => void` | — | 格式化后的字符串变化回调 |
+| onChangeText | `(value: string) => void` | — | 原生字符串变化回调 |
 | onChange | React Native `TextInputProps['onChange']` | — | 原生 change 事件 |
-| disabled | `boolean` | `false` | 禁止编辑并使用 disabled token |
-| readOnly | `boolean` | `false` | 禁止编辑但保留普通展示样式 |
-| size | `'large' \| 'normal' \| 'small'` | `'normal'` | 输入高度和字号 |
-| bordered | `boolean` | `false` | 是否显示边框 |
-| clearable | `boolean` | `false` | 有值时显示清除按钮 |
-| clearTrigger | `'always' \| 'focus'` | `'focus'` | 清除按钮出现时机 |
-| onClear | `() => void` | — | 清空后调用一次 |
-| formatter | `(value: string) => string` | — | 格式化输入值 |
-| formatTrigger | `'onChangeText' \| 'onEndEditing'` | `'onChangeText'` | 格式化触发时机 |
-| showWordLimit | `boolean` | `false` | 显示当前值和 `maxLength` |
-| rows | `number` | `2` | textarea 的最小行数 |
-| `prefix` / `suffix` | `ReactNode` | — | 输入前后内容；password 模式的 suffix 由可见性按钮占用 |
-| `addonBefore` / `addonAfter` | `ReactNode` | — | 输入框外侧内容 |
-| style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
-| styles | `TextInputStyles` | — | root、input、prefix、suffix、clear、wordLimit 等语义插槽 |
+| placeholder / placeholderTextColor | `string` / `ColorValue` | — | 原生占位内容及颜色 |
+| keyboardType / inputMode | React Native 类型 | — | 原生键盘配置 |
+| secureTextEntry | `boolean` | `false` | 原生安全输入 |
+| multiline / numberOfLines | React Native 类型 | — | 原生多行输入 |
+| editable | `boolean` | `true` | 是否允许编辑 |
+| style | `StyleProp<TextStyle>` | — | 原生输入文本样式 |
 
-TextInput 继承 React Native `TextInputProps` 的键盘、光标、提交、无障碍和 `testID` 等属性。组件管理 `value`、`editable`、`multiline`、`onChange`、`onChangeText` 和 `style`；不要传入 Web 专属 HTML 属性。组件默认不额外设置 `accessibilityLabel` 或 `allowFontScaling`。
+TextInput 继承 React Native `TextInputProps` 的键盘、光标、提交、无障碍和 `testID` 等属性，不改写 `onChange` 的事件参数，也不改写 `onChangeText` 的字符串参数。组件默认不额外设置 `accessibilityLabel` 或 `allowFontScaling`。
 
 ## 主题定制
 
-TextInput 与 Input 共用 `theme.components.Input`，可覆盖高度、边框、圆角、占位文本色、禁用色和清除按钮 token：
+TextInput 不使用组件库 token；需要主题化外观时使用 `Input`：
 
 ```tsx | pure
-import { ConfigProvider, TextInput } from '@ftsukic/tsuki'
+import { ConfigProvider, Input } from '@ftsukic/tsuki'
 
 ;<ConfigProvider theme={{ components: { Input: { height: 48, borderRadius: 8 } } }}>
-  <TextInput bordered placeholder="请输入内容" />
+  <Input bordered placeholder="请输入内容" />
 </ConfigProvider>
 ```

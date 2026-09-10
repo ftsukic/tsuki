@@ -2,7 +2,14 @@ import React from 'react'
 
 import { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
-import { Button, Cell, ConfigProvider, darkAlgorithm, defaultAlgorithm, TextInput } from '../../..'
+import {
+  Button,
+  Cell,
+  ConfigProvider,
+  darkAlgorithm,
+  defaultAlgorithm,
+  Input as TextInput,
+} from '../../..'
 
 /**
  * @title Theme algorithms and overrides

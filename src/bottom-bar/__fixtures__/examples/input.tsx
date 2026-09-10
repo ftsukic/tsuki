@@ -1,4 +1,4 @@
-import { BottomBar, Button, TextInput } from '../../..'
+import { BottomBar, Button, Input as TextInput } from '../../..'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 /**

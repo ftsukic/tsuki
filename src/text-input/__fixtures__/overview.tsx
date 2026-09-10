@@ -3,7 +3,7 @@ import TextInputBasicExample from './examples/basic'
 
 /**
  * @title TextInput overview
- * @description TextInput 展示受控文本、可清除文本域和字数限制反馈。
+ * @description TextInput 展示 React Native 基础输入能力。
  */
 export default function TextInputOverview() {
   return (
@@ -11,7 +11,7 @@ export default function TextInputOverview() {
       examples={[
         {
           Component: TextInputBasicExample,
-          description: 'Try controlled text input, clearable textarea and word-limit feedback.',
+          description: '受控、非受控、原生事件、键盘、密码、多行和不可编辑输入。',
           id: 'basic',
           title: 'TextInput states',
         },

@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-Search 是面向列表过滤、联系人搜索和 IM 搜索入口的高频输入组件。它复用共享的 `InputCore` 输入能力，默认使用 round 背景、搜索图标和有值时的清除按钮，并提供 Vant 风格的 `prefix`/`suffix` 布局区域。
+Search 是面向列表过滤、联系人搜索和 IM 搜索入口的高频输入组件。它复用共享的 `TextInput` 基础能力，默认使用 round 背景、搜索图标和有值时的清除按钮，并提供 Vant 风格的 `prefix`/`suffix` 布局区域。
 
 </section>
 
@@ -70,7 +70,7 @@ import { Search } from '@ftsukic/tsuki'
 | style | `StyleProp<ViewStyle>` | — | Search root 节点样式 |
 | styles | `SearchStyles` | — | `root`、`container`、`prefix`、`suffix`、`input`、`clear` 语义样式；`leftIcon` 保留为兼容别名 |
 
-Search 继承 React Native `TextInputProps` 的键盘、选择、可访问性和提交事件属性，但由组件管理 `value`、`defaultValue`、`onChange`、`onChangeText`、`style`、`editable` 和 `multiline`。单行模式会同步固定输入区域高度并关闭 Android font padding；`multiline` 模式不固定 `InputCore` 高度，`height` 只作为初始最小高度，适合 IM 输入自动增长。通过 ref 可以调用原生输入框的 `focus`、`blur` 和 `clear`。
+Search 继承 React Native `TextInputProps` 的键盘、选择、可访问性和提交事件属性，但由组件管理 `value`、`defaultValue`、`onChange`、`onChangeText`、`style`、`editable` 和 `multiline`。单行模式会同步固定输入区域高度并关闭 Android font padding；`multiline` 模式不固定 `TextInput` 高度，`height` 只作为初始最小高度，适合 IM 输入自动增长。通过 ref 可以调用原生输入框的 `focus`、`blur` 和 `clear`。
 
 清除按钮使用 `InteractionPressable` 和 `CloseCircleFilled`，视觉尺寸为 clear token，点击区域至少为 32px，提供统一 pressed feedback，并按顺序触发 `onChange('')`、`onChangeText('')` 和 `onClear()`。传入 `suffix` 后由调用方接管后置区域，不再显示默认清除按钮。
 

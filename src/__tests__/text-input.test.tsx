@@ -1,16 +1,15 @@
 import { ConfigProvider, TextInput } from '..'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
+import { fireEvent, render, screen } from '@testing-library/react-native'
 
 describe('TextInput', () => {
-  it('supports uncontrolled formatting and native change handlers', async () => {
+  it('keeps the native value and callback contracts', async () => {
     const onChangeText = jest.fn()
     const onChange = jest.fn()
     await render(
       <ConfigProvider>
         <TextInput
           testID="input"
-          defaultValue=""
-          formatter={(value) => value.toUpperCase()}
+          defaultValue="default"
           onChangeText={onChangeText}
           onChange={onChange}
         />
@@ -18,55 +17,34 @@ describe('TextInput', () => {
     )
 
     const input = screen.getByTestId('input')
-    fireEvent.changeText(input, 'abc')
-    expect(onChangeText).toHaveBeenLastCalledWith('ABC')
-    await waitFor(() => expect(screen.getByTestId('input').props.value).toBe('ABC'))
+    expect(input.props.defaultValue).toBe('default')
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.changeText(input, 'abc')
+    expect(onChangeText).toHaveBeenLastCalledWith('abc')
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(input, 'change', { nativeEvent: { text: 'abc' } })
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ nativeEvent: { text: 'abc' } }))
   })
 
-  it('supports textarea word limits and clearable behavior', async () => {
+  it('passes through placeholder, keyboard, secure, multiline and editable props', async () => {
     await render(
       <ConfigProvider>
         <TextInput
-          testID="textarea"
-          type="textarea"
-          value="hello"
-          maxLength={10}
-          showWordLimit
-          clearable
-          clearTrigger="always"
-          styles={{ wordLimit: { color: 'red' } }}
+          testID="native"
+          placeholder="请输入"
+          keyboardType="numeric"
+          secureTextEntry
+          multiline
+          editable={false}
         />
       </ConfigProvider>,
     )
 
-    expect(screen.getByTestId('textarea')).toBeTruthy()
-    expect(screen.getByText('5/10')).toBeTruthy()
-    expect(screen.getByLabelText('清除输入')).toBeTruthy()
-  })
-
-  it('applies root semantic styles without replacing the native input style contract', async () => {
-    const styles = jest.fn(() => ({ root: { padding: 4 }, input: { fontSize: 18 } }))
-    await render(
-      <ConfigProvider>
-        <TextInput testID="styled-input" styles={styles} />
-      </ConfigProvider>,
-    )
-
-    expect(styles).toHaveBeenCalled()
-    expect(screen.getByTestId('styled-input')).toBeTruthy()
-  })
-
-  it('supports password, number and tel compatibility modes', async () => {
-    await render(
-      <ConfigProvider>
-        <TextInput testID="password" type="password" />
-        <TextInput testID="number" type="number" />
-        <TextInput testID="tel" type="tel" />
-      </ConfigProvider>,
-    )
-
-    expect(screen.getByTestId('password').props.secureTextEntry).toBe(true)
-    expect(screen.getByTestId('number').props.keyboardType).toBe('numeric')
-    expect(screen.getByTestId('tel').props.keyboardType).toBe('phone-pad')
+    const input = screen.getByTestId('native')
+    expect(input.props.placeholder).toBe('请输入')
+    expect(input.props.keyboardType).toBe('numeric')
+    expect(input.props.secureTextEntry).toBe(true)
+    expect(input.props.multiline).toBe(true)
+    expect(input.props.editable).toBe(false)
   })
 })

@@ -1,4 +1,4 @@
-import { InputCore } from '../input/InputCore'
+import { TextInput } from '../text-input'
 import { Icon } from '../icon'
 import { InteractionPressable } from '../interaction'
 import { resolveStyles } from '../style'
@@ -168,7 +168,7 @@ export const Search = forwardRef<NativeTextInput, SearchProps>(function Search(
             {renderedPrefix}
           </View>
         ) : null}
-        <InputCore
+        <TextInput
           {...nativeProps}
           ref={inputRef}
           testID={testID}

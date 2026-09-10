@@ -1,46 +1,34 @@
-import React from 'react'
-
 import { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import { TextInput } from '../../..'
 
 /**
  * @title TextInput states
- * @description Try controlled text input, clearable textarea and word-limit feedback.
+ * @description 展示 TextInput 的受控、非受控和原生输入能力。
  */
 export default function TextInputBasicFixture() {
   const [value, setValue] = useState('')
+  const [eventText, setEventText] = useState('')
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Text</Text>
+      <Text style={styles.heading}>Controlled</Text>
       <TextInput
         value={value}
-        size="large"
-        bordered
-        clearable
-        clearTrigger="always"
-        prefix={<Text style={styles.prefix}>@</Text>}
-        placeholder="Your username"
+        placeholder="请输入"
         onChangeText={setValue}
+        onChange={(event) => setEventText(event.nativeEvent.text)}
       />
 
-      <Text style={styles.heading}>Textarea</Text>
-      <TextInput
-        value={value}
-        type="textarea"
-        rows={4}
-        bordered
-        clearable
-        clearTrigger="always"
-        showWordLimit
-        maxLength={80}
-        placeholder="Write a short introduction"
-        onChangeText={setValue}
-        formatter={(text) => text.replace(/\s+/g, ' ')}
-      />
+      <Text style={styles.heading}>Uncontrolled and native props</Text>
+      <TextInput defaultValue="default" keyboardType="numeric" placeholder="数字键盘" />
 
-      <Text style={styles.value}>Current value: {value || '—'}</Text>
+      <TextInput secureTextEntry placeholder="密码" />
+      <TextInput multiline placeholder="多行输入" />
+      <TextInput editable={false} defaultValue="不可编辑" />
+
+      <Text style={styles.value}>onChangeText: {value || '—'}</Text>
+      <Text style={styles.value}>onChange event text: {eventText || '—'}</Text>
     </View>
   )
 }
@@ -53,10 +41,6 @@ const styles = StyleSheet.create({
     color: '#333333',
     fontSize: 16,
     fontWeight: '600',
-  },
-  prefix: {
-    color: '#1989fa',
-    fontSize: 16,
   },
   value: {
     color: '#666666',

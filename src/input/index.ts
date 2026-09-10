@@ -3,6 +3,7 @@ export type {
   InputClearTrigger,
   InputFormatTrigger,
   InputInstance,
+  InputSize,
   InputProps,
   InputSemanticStyles,
   InputStyleInfo,

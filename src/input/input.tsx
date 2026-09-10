@@ -1,12 +1,11 @@
 import { Icon } from '../icon'
 import { InteractionPressable } from '../interaction'
 import { resolveStyles } from '../style'
-import { TextInput as NativeTextInput } from '../text-input/text-input'
-import { getTextInputStyles } from '../text-input/style'
-import { getInputToken } from '../text-input/token'
+import { TextInput } from '../text-input'
+import { getInputPasswordStyles, getInputStyles } from './style'
+import { getInputToken } from './token'
 import { useComponentToken } from '../theme'
 import type { InputProps, InputStyleState } from './interface'
-import { getInputStyles } from './style'
 import {
   forwardRef,
   useCallback,
@@ -67,7 +66,7 @@ export const Input = forwardRef<NativeTextInputInstance, InputProps>(function In
   ref,
 ) {
   const inputToken = useComponentToken('Input', getInputToken)
-  const inputStyles = getInputStyles(inputToken)
+  const inputStyles = getInputPasswordStyles(inputToken)
   const inputRef = useRef<NativeTextInputInstance>(null)
   const [internalValue, setInternalValue] = useState(defaultValue ?? '')
   const [focused, setFocused] = useState(false)
@@ -75,7 +74,7 @@ export const Input = forwardRef<NativeTextInputInstance, InputProps>(function In
   const currentValue = value ?? internalValue
   const isPassword = type === 'password'
   const isPasswordVisible = passwordVisible ?? internalPasswordVisible
-  const isTextarea = type === 'textarea' || nativeProps.multiline === true
+  const isTextarea = nativeProps.multiline === true
   const isDisabled = disabled || (editable === false && !readOnly)
   const isEditable = !disabled && !readOnly && editable !== false
   const keyboardType =
@@ -116,7 +115,7 @@ export const Input = forwardRef<NativeTextInputInstance, InputProps>(function In
     multiline: nativeProps.multiline,
   }
   const semantic = resolveStyles(styles, { props: inputProps, state })
-  const resolved = getTextInputStyles(inputToken, inputProps, state)
+  const resolved = getInputStyles(inputToken, inputProps, state)
   const showClear =
     clearable && isEditable && currentValue.length > 0 && (clearTrigger === 'always' || focused)
   const showLimit = showWordLimit && maxLength !== undefined
@@ -200,7 +199,7 @@ export const Input = forwardRef<NativeTextInputInstance, InputProps>(function In
         <View style={resolved.shell}>
           <View style={resolved.content}>
             {renderAddon(prefix, [resolved.prefix, semantic?.prefix])}
-            <NativeTextInput
+            <TextInput
               {...nativeProps}
               ref={inputRef}
               value={currentValue}

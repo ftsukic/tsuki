@@ -43,7 +43,7 @@ import { Input } from '@ftsukic/tsuki'
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| type | `'text' \| 'password' \| 'number' \| 'tel' \| 'textarea'` | `'text'` | 输入模式；`number` 和 `tel` 只改变原生键盘，值始终是字符串 |
+| type | `'text' \| 'password' \| 'number' \| 'tel'` | `'text'` | 输入模式；`number` 和 `tel` 只改变原生键盘，值始终是字符串 |
 | value | `string` | — | 受控输入值 |
 | defaultValue | `string` | `''` | 非受控初始值 |
 | onChangeText | `(value: string) => void` | — | 文本变化回调，参数始终是字符串 |
@@ -62,12 +62,12 @@ import { Input } from '@ftsukic/tsuki'
 | passwordVisible | `boolean` | — | password 模式的受控可见状态 |
 | defaultPasswordVisible | `boolean` | `false` | password 模式的非受控初始可见状态 |
 | onPasswordVisibleChange | `(visible: boolean) => void` | — | 密码可见状态变化回调 |
-| multiline | `boolean` | `false` | 启用多行输入；`type="textarea"` 会自动启用 |
+| multiline | `boolean` | `false` | 启用多行输入 |
 | rows | `number` | `2` | textarea 的最小行数 |
 | `prefix` / `suffix` | `ReactNode` | — | 输入前后内容；password 模式由可见性按钮占用 suffix |
 | `addonBefore` / `addonAfter` | `ReactNode` | — | 输入框外侧内容 |
 | style | `StyleProp<ViewStyle>` | — | Input 根节点样式 |
-| styles | `TextInputStyles` | — | root、input、prefix、suffix、clear、wordLimit、addonBefore、addonAfter 语义插槽 |
+| styles | `InputStyles` | — | root、input、prefix、suffix、clear、wordLimit、addonBefore、addonAfter 语义插槽 |
 
 Input 继承 React Native `TextInputProps` 的键盘、光标、选择、提交和无障碍属性；组件管理 `value`、`editable`、`multiline`、`onChange`、`onChangeText` 和 `style`。默认 accessibility role 由原生 TextInput 提供，不额外生成 label；调用方应提供 `accessibilityLabel` 或关联的可见 label。`type="number"` 不会执行 number conversion，因此 `0`、`001` 等输入保持原样。password 模式保留 `suffix` 位置给可见性切换按钮，不支持同时注入另一个 password suffix。
 
@@ -82,7 +82,3 @@ import { ConfigProvider, Input } from '@ftsukic/tsuki'
   <Input bordered placeholder="请输入内容" />
 </ConfigProvider>
 ```
-
-## TextInput 兼容层
-
-`TextInput` 继续保留旧的 `bordered`、`clearable`、`formatter`、`rows`、`showWordLimit` 和 `type="textarea"` 用法。新代码推荐使用 `Input`；现有 Search 和 TextInput 调用无需迁移。
