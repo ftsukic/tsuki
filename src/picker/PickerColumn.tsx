@@ -1,5 +1,19 @@
-import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react'
-import { Animated, View } from 'react-native'
+import { forwardRef, memo, useCallback, useLayoutEffect, useMemo, useRef } from 'react'
+import { View } from 'react-native'
+import Animated, {
+  Extrapolation,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated'
+import { InteractionPressable } from '../interaction'
+import { Text } from '../text'
+import { useComponentToken } from '../theme'
+import { getPickerStyles } from './styles'
+import { getPickerToken } from './token'
+import { findNearestEnabledIndex } from './usePicker'
+import type { PickerOption } from './types'
 import type {
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -8,21 +22,116 @@ import type {
   TextStyle,
   ViewStyle,
 } from 'react-native'
-import { InteractionPressable } from '../interaction'
-import { useComponentToken } from '../theme'
-import { getPickerStyles } from './styles'
-import { getPickerToken } from './token'
-import type { PickerOption } from './types'
 
-const MIN_OFFSET_EPSILON = 0.5
+const AnimatedText = Animated.createAnimatedComponent(Text)
 
-function clampIndex(index: number, maxIndex: number) {
-  return Math.min(maxIndex, Math.max(0, Number.isFinite(index) ? index : 0))
+function getPickerOptionKey(value: PickerOption['value']) {
+  return `${typeof value}:${String(value)}`
 }
 
-function getSnapIndex(offset: number, itemHeight: number, maxIndex: number) {
-  return clampIndex(itemHeight > 0 ? Math.round(offset / itemHeight) : 0, maxIndex)
+const PICKER_MOMENTUM_VELOCITY_EPSILON = 0.05
+
+interface PickerColumnItemProps {
+  item: PickerOption
+  index: number
+  itemStyle?: StyleProp<ViewStyle>
+  itemLabelStyle?: StyleProp<TextStyle>
+  columnIndex: number
+  selectedIndex: number
+  scrollOffset: ReturnType<typeof useSharedValue<number>>
+  itemHeight: number
+  inactiveOpacity: number
+  inactiveScale: number
+  translateY: number
+  token: ReturnType<typeof getPickerToken>
+  resolvedStyles: ReturnType<typeof getPickerStyles>
+  onPress: (index: number) => void
 }
+
+const PickerColumnItem = memo(function PickerColumnItem({
+  item,
+  index,
+  itemStyle,
+  itemLabelStyle,
+  columnIndex,
+  selectedIndex,
+  scrollOffset,
+  itemHeight,
+  inactiveOpacity,
+  inactiveScale,
+  translateY,
+  token,
+  resolvedStyles,
+  onPress,
+}: PickerColumnItemProps) {
+  const animatedLabelStyle = useAnimatedStyle(() => {
+    const inputRange = [
+      (index - 2) * itemHeight,
+      (index - 1) * itemHeight,
+      index * itemHeight,
+      (index + 1) * itemHeight,
+      (index + 2) * itemHeight,
+    ]
+    const adjacentOpacity = Math.min(1, inactiveOpacity + 0.35)
+    const adjacentScale = Math.min(1, inactiveScale + 0.05)
+
+    return {
+      opacity: interpolate(
+        scrollOffset.value,
+        inputRange,
+        [inactiveOpacity, adjacentOpacity, 1, adjacentOpacity, inactiveOpacity],
+        Extrapolation.CLAMP,
+      ),
+      transform: [
+        {
+          translateY: interpolate(
+            scrollOffset.value,
+            inputRange,
+            [translateY, translateY / 2, 0, -translateY / 2, -translateY],
+            Extrapolation.CLAMP,
+          ),
+        },
+        {
+          scale: interpolate(
+            scrollOffset.value,
+            inputRange,
+            [inactiveScale, adjacentScale, 1, adjacentScale, inactiveScale],
+            Extrapolation.CLAMP,
+          ),
+        },
+      ],
+    }
+  }, [index, inactiveOpacity, inactiveScale, itemHeight, scrollOffset, translateY])
+
+  return (
+    <InteractionPressable
+      accessibilityRole="radio"
+      accessibilityState={{ disabled: item.disabled, selected: index === selectedIndex }}
+      disabled={item.disabled}
+      onPress={() => onPress(index)}
+      style={[resolvedStyles.item, itemStyle]}
+      testID={`picker-item-${columnIndex}-${index}`}
+    >
+      <AnimatedText
+        numberOfLines={1}
+        style={[
+          resolvedStyles.itemLabel,
+          itemLabelStyle,
+          {
+            color: item.disabled
+              ? token.picker_disabled_text_color
+              : index === selectedIndex
+                ? token.picker_active_text_color
+                : token.picker_text_color,
+          },
+          animatedLabelStyle,
+        ]}
+      >
+        {item.text}
+      </AnimatedText>
+    </InteractionPressable>
+  )
+})
 
 export interface PickerColumnProps {
   items: readonly PickerOption[]
@@ -55,16 +164,14 @@ export const PickerColumn = forwardRef<View, PickerColumnProps>(function PickerC
   const token = useComponentToken('Picker', getPickerToken)
   const resolvedVisibleItemCount = Math.max(1, Math.floor(visibleItemCount) || 1)
   const topInset = ((resolvedVisibleItemCount - 1) * itemHeight) / 2
+  const bottomInset = topInset
   const maxIndex = Math.max(0, items.length - 1)
-  const initialIndex = clampIndex(selectedIndex, maxIndex)
-  const offset = useRef(new Animated.Value(initialIndex * itemHeight)).current
-  const offsetRef = useRef(initialIndex * itemHeight)
-  const scrollIndexRef = useRef(initialIndex)
-  const selectedIndexRef = useRef(initialIndex)
-  const itemHeightRef = useRef(itemHeight)
-  const itemCountRef = useRef(items.length)
-  const initializedRef = useRef(false)
+  const nextIndex = selectedIndex < 0 ? -1 : findNearestEnabledIndex(items, selectedIndex)
+  const initialIndex = Math.max(0, nextIndex)
   const scrollRef = useRef<ScrollViewType>(null)
+  const scrollOffset = useSharedValue(initialIndex * itemHeight)
+  const currentIndexRef = useRef(initialIndex)
+  const programmaticSettleRef = useRef<number | null>(null)
   const onIndexChangeRef = useRef(onIndexChange)
   onIndexChangeRef.current = onIndexChange
 
@@ -72,179 +179,126 @@ export const PickerColumn = forwardRef<View, PickerColumnProps>(function PickerC
     () => getPickerStyles(token, itemHeight, resolvedVisibleItemCount),
     [itemHeight, resolvedVisibleItemCount, token],
   )
-
-  const clampOffset = useCallback(
-    (value: number) =>
-      Math.min(maxIndex * itemHeight, Math.max(0, Number.isFinite(value) ? value : 0)),
-    [itemHeight, maxIndex],
-  )
+  const optionKeys = useMemo(() => {
+    const occurrences = new Map<string, number>()
+    return items.map((item) => {
+      const baseKey = getPickerOptionKey(item.value)
+      const occurrence = occurrences.get(baseKey) ?? 0
+      occurrences.set(baseKey, occurrence + 1)
+      return `${baseKey}:${occurrence}`
+    })
+  }, [items])
 
   const scrollToIndex = useCallback(
-    (requestedIndex: number, animated: boolean) => {
-      const index = clampIndex(requestedIndex, maxIndex)
-      const nextOffset = index * itemHeight
-      offsetRef.current = nextOffset
-      scrollIndexRef.current = index
-      if (!animated) offset.setValue(nextOffset)
-      scrollRef.current?.scrollTo({ y: nextOffset, animated })
+    (index: number, animated: boolean) => {
+      scrollRef.current?.scrollTo({ y: Math.max(0, index * itemHeight), animated })
     },
-    [itemHeight, maxIndex, offset],
+    [itemHeight],
   )
 
   const settle = useCallback(
-    (requestedOffset: number, animated: boolean) => {
-      if (items.length === 0) return
+    (offset: number, animated: boolean) => {
+      const snapped = Math.min(maxIndex, Math.max(0, Math.round(offset / itemHeight)))
+      const target = findNearestEnabledIndex(items, snapped)
+      if (target < 0) return
+      const targetOffset = target * itemHeight
+      const needsCorrection = Math.abs(offset - targetOffset) > 0.5
+      if (target !== currentIndexRef.current) {
+        currentIndexRef.current = target
+        if (needsCorrection) {
+          programmaticSettleRef.current = target
+          scrollToIndex(target, animated)
+        }
+        onIndexChangeRef.current?.(target)
+      } else if (needsCorrection) {
+        programmaticSettleRef.current = target
+        scrollToIndex(target, animated)
+      }
+    },
+    [itemHeight, items, maxIndex, scrollToIndex],
+  )
 
-      const clampedOffset = clampOffset(requestedOffset)
-      const index = getSnapIndex(clampedOffset, itemHeight, maxIndex)
-      const targetOffset = index * itemHeight
-      const shouldAnimate = animated && Math.abs(clampedOffset - targetOffset) > MIN_OFFSET_EPSILON
+  useLayoutEffect(() => {
+    if (nextIndex < 0 || currentIndexRef.current === nextIndex) return
+    currentIndexRef.current = nextIndex
+    scrollOffset.value = nextIndex * itemHeight
+    scrollToIndex(nextIndex, false)
+  }, [itemHeight, items.length, nextIndex, scrollOffset, scrollToIndex])
 
-      offsetRef.current = targetOffset
-      scrollIndexRef.current = index
-      if (!shouldAnimate) offset.setValue(targetOffset)
-      scrollRef.current?.scrollTo({ y: targetOffset, animated: shouldAnimate })
-
-      if (selectedIndexRef.current === index) return
-      selectedIndexRef.current = index
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollOffset.value = event.contentOffset.y
+    },
+  })
+  const handleScrollEndDrag = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      programmaticSettleRef.current = null
+      const velocityY = Math.abs(event.nativeEvent.velocity?.y ?? 0)
+      if (velocityY <= PICKER_MOMENTUM_VELOCITY_EPSILON) {
+        settle(event.nativeEvent.contentOffset.y, true)
+      }
+    },
+    [settle],
+  )
+  const handleMomentumEnd = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (programmaticSettleRef.current !== null) {
+        programmaticSettleRef.current = null
+        return
+      }
+      settle(event.nativeEvent.contentOffset.y, true)
+    },
+    [settle],
+  )
+  const handlePress = useCallback(
+    (index: number) => {
+      if (items[index]?.disabled) return
+      if (index === currentIndexRef.current) return
+      currentIndexRef.current = index
+      programmaticSettleRef.current = index
+      scrollToIndex(index, true)
       onIndexChangeRef.current?.(index)
     },
-    [clampOffset, itemHeight, items.length, maxIndex, offset],
-  )
-
-  useEffect(() => {
-    const nextIndex = items.length === 0 ? 0 : Math.min(maxIndex, Math.max(0, selectedIndex))
-    const selectedIndexChanged = selectedIndexRef.current !== nextIndex
-    const geometryChanged =
-      itemHeightRef.current !== itemHeight || itemCountRef.current !== items.length
-    const shouldScroll = !initializedRef.current || selectedIndexChanged || geometryChanged
-    const shouldAnimate = initializedRef.current && selectedIndexChanged && !geometryChanged
-
-    selectedIndexRef.current = nextIndex
-    itemHeightRef.current = itemHeight
-    itemCountRef.current = items.length
-    if (shouldScroll) {
-      scrollIndexRef.current = nextIndex
-      scrollToIndex(nextIndex, shouldAnimate)
-    }
-    initializedRef.current = true
-  }, [itemHeight, items.length, maxIndex, scrollToIndex, selectedIndex])
-
-  const handleScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const nextOffset = clampOffset(event.nativeEvent.contentOffset.y)
-      offsetRef.current = nextOffset
-      scrollIndexRef.current = itemHeight > 0 ? nextOffset / itemHeight : 0
-      offset.setValue(offsetRef.current)
-    },
-    [clampOffset, itemHeight, offset],
-  )
-
-  const handleScrollEnd = useCallback(() => {
-    settle(offsetRef.current, true)
-  }, [settle])
-
-  const handleItemPress = useCallback(
-    (index: number) => {
-      scrollToIndex(index, true)
-      const nextIndex = clampIndex(index, maxIndex)
-      if (selectedIndexRef.current === nextIndex) return
-
-      selectedIndexRef.current = nextIndex
-      onIndexChangeRef.current?.(nextIndex)
-    },
-    [maxIndex, scrollToIndex],
+    [items, scrollToIndex],
   )
 
   return (
     <View ref={ref} style={[resolvedStyles.column, style]} testID={testID}>
       <Animated.ScrollView
         ref={scrollRef}
-        contentContainerStyle={{ paddingTop: topInset, paddingBottom: topInset }}
+        contentOffset={{ x: 0, y: initialIndex * itemHeight }}
+        contentContainerStyle={{ paddingBottom: bottomInset, paddingTop: topInset }}
         decelerationRate="fast"
         keyboardShouldPersistTaps="handled"
         nestedScrollEnabled
-        onMomentumScrollEnd={handleScrollEnd}
-        onScroll={handleScroll}
+        onMomentumScrollEnd={handleMomentumEnd}
+        onScroll={scrollHandler}
+        onScrollEndDrag={handleScrollEndDrag}
         scrollEventThrottle={16}
-        scrollsToTop={false}
         showsVerticalScrollIndicator={false}
         snapToAlignment="start"
         snapToInterval={itemHeight}
-        style={{ height: resolvedStyles.view.height } as ViewStyle}
-        testID={testID ? `${testID}-scroll` : `picker-column-${columnIndex}-scroll`}
+        testID={testID ? `${testID}-viewport` : undefined}
       >
-        {items.map((item, index) => {
-          const inputRange = [
-            (index - 2) * itemHeight,
-            (index - 1) * itemHeight,
-            index * itemHeight,
-            (index + 1) * itemHeight,
-            (index + 2) * itemHeight,
-          ]
-          const opacity = offset.interpolate({
-            inputRange,
-            outputRange: [
-              token.picker_item_inactive_opacity,
-              Math.min(1, token.picker_item_inactive_opacity + 0.35),
-              1,
-              Math.min(1, token.picker_item_inactive_opacity + 0.35),
-              token.picker_item_inactive_opacity,
-            ],
-            extrapolate: 'clamp',
-          })
-          const scale = offset.interpolate({
-            inputRange,
-            outputRange: [
-              token.picker_item_inactive_scale,
-              Math.min(1, token.picker_item_inactive_scale + 0.05),
-              1,
-              Math.min(1, token.picker_item_inactive_scale + 0.05),
-              token.picker_item_inactive_scale,
-            ],
-            extrapolate: 'clamp',
-          })
-          const translateY = offset.interpolate({
-            inputRange,
-            outputRange: [
-              token.picker_item_translate_y,
-              token.picker_item_translate_y / 2,
-              0,
-              -token.picker_item_translate_y / 2,
-              -token.picker_item_translate_y,
-            ],
-            extrapolate: 'clamp',
-          })
-
-          return (
-            <InteractionPressable
-              accessibilityRole="radio"
-              accessibilityState={{ selected: index === selectedIndex }}
-              key={`${String(item.value)}-${index}`}
-              onPress={() => handleItemPress(index)}
-              style={[resolvedStyles.item, itemStyle]}
-              testID={`picker-item-${columnIndex}-${index}`}
-            >
-              <Animated.Text
-                numberOfLines={1}
-                style={[
-                  resolvedStyles.itemLabel,
-                  itemLabelStyle,
-                  {
-                    color:
-                      index === selectedIndex
-                        ? token.picker_active_text_color
-                        : token.picker_text_color,
-                    opacity,
-                    transform: [{ translateY }, { scale }],
-                  },
-                ]}
-              >
-                {item.text}
-              </Animated.Text>
-            </InteractionPressable>
-          )
-        })}
+        {items.map((item, index) => (
+          <PickerColumnItem
+            columnIndex={columnIndex}
+            index={index}
+            item={item}
+            itemLabelStyle={itemLabelStyle}
+            itemHeight={itemHeight}
+            itemStyle={itemStyle}
+            inactiveOpacity={token.picker_item_inactive_opacity}
+            inactiveScale={token.picker_item_inactive_scale}
+            key={optionKeys[index]}
+            onPress={handlePress}
+            resolvedStyles={resolvedStyles}
+            scrollOffset={scrollOffset}
+            selectedIndex={nextIndex}
+            token={token}
+            translateY={token.picker_item_translate_y}
+          />
+        ))}
       </Animated.ScrollView>
     </View>
   )
