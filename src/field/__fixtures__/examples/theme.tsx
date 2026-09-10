@@ -1,4 +1,4 @@
-import { ConfigProvider, Field, Input } from '../../..'
+import { ConfigProvider, Field } from '../../..'
 
 /**
  * @title Field semantic theme
@@ -12,10 +12,9 @@ export default function FieldThemeFixture() {
       <Field
         label="邮箱"
         errorMessage="请输入有效邮箱"
+        placeholder="name@example.com"
         styles={{ description: { fontStyle: 'italic' } }}
-      >
-        <Input placeholder="name@example.com" bordered />
-      </Field>
+      />
     </ConfigProvider>
   )
 }

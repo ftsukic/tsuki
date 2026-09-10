@@ -1,4 +1,4 @@
-import { Field, Input } from '../../..'
+import { Field } from '../../..'
 
 /**
  * @title Field layout
@@ -6,8 +6,6 @@ import { Field, Input } from '../../..'
  */
 export default function FieldLayoutFixture() {
   return (
-    <Field label="联系人" labelWidth={88} labelAlign="right" colon>
-      <Input placeholder="请输入联系人" bordered />
-    </Field>
+    <Field label="联系人" labelWidth={88} labelAlign="right" colon placeholder="请输入联系人" />
   )
 }

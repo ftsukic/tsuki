@@ -10,7 +10,7 @@ const options = [
 
 /**
  * @title Field 联动
- * @description Field 只负责布局，Cell 负责触发 Picker，确认后更新字段展示值。
+ * @description Field 默认使用 Input，也可以用 children 放入 Cell 等自定义控件；这里由 Cell 负责触发 Picker。
  */
 export default function PickerFieldExample() {
   const [visible, setVisible] = useState(false)

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import type { DimensionValue, StyleProp, TextStyle, ViewProps, ViewStyle } from 'react-native'
+import type { DimensionValue, StyleProp, TextStyle, ViewStyle } from 'react-native'
+import type { InputProps, InputStyles } from '../input'
 import type { StyleInfo, StyleResolver } from '../style'
 
 export type FieldStatus = 'default' | 'error' | 'warning'
@@ -16,13 +17,14 @@ export interface FieldSemanticStyles {
   label?: StyleProp<TextStyle>
   required?: StyleProp<TextStyle>
   content?: StyleProp<ViewStyle>
+  control?: StyleProp<ViewStyle>
   description?: StyleProp<TextStyle>
   error?: StyleProp<TextStyle>
 }
 
 export type FieldStyles = StyleResolver<FieldProps, FieldStyleState, FieldSemanticStyles>
 
-export interface FieldProps extends Omit<ViewProps, 'children' | 'style'> {
+export interface FieldProps extends Omit<InputProps, 'style' | 'styles'> {
   children?: ReactNode
   label?: ReactNode
   required?: boolean
@@ -32,6 +34,10 @@ export interface FieldProps extends Omit<ViewProps, 'children' | 'style'> {
   labelWidth?: DimensionValue
   labelAlign?: FieldLabelAlign
   colon?: boolean
+  /** Style applied to the internal Input root in the default input mode. */
+  inputStyle?: InputProps['style']
+  /** Semantic styles forwarded to the internal Input in the default input mode. */
+  inputStyles?: InputStyles
   style?: StyleProp<ViewStyle>
   styles?: FieldStyles
 }

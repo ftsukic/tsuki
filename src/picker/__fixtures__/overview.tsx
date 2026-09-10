@@ -33,7 +33,7 @@ export default function PickerOverview() {
         },
         {
           Component: FieldExample,
-          description: 'Field 负责布局，Picker 负责 Popup，确认后回写字段展示值。',
+          description: 'Field 可承载自定义 Cell 控件，Picker 负责 Popup，确认后回写字段展示值。',
           id: 'field',
           title: 'Field 联动',
         },

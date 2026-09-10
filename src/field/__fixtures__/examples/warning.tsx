@@ -1,4 +1,4 @@
-import { Field, Input } from '../../..'
+import { Field } from '../../..'
 
 /**
  * @title Field warning
@@ -6,8 +6,11 @@ import { Field, Input } from '../../..'
  */
 export default function FieldWarningFixture() {
   return (
-    <Field label="昵称" status="warning" description="昵称将展示给联系人">
-      <Input placeholder="请输入昵称" bordered />
-    </Field>
+    <Field
+      label="昵称"
+      status="warning"
+      description="昵称将展示给联系人"
+      placeholder="请输入昵称"
+    />
   )
 }
