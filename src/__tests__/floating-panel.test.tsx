@@ -78,6 +78,25 @@ function getScrollViewProps(scrollView: TestInstance) {
   return scrollView.props as unknown as ScrollViewProps
 }
 
+function getPanelContainer(testID: string) {
+  return screen.getByTestId(testID).parent as TestInstance
+}
+
+function getAnimatedValue(value: unknown) {
+  if (typeof value === 'number') return value
+  if (value && typeof value === 'object' && '__getValue' in value) {
+    const getValue = (value as { __getValue?: () => number }).__getValue
+    return getValue?.()
+  }
+  return value
+}
+
+function getTranslation(testID: string) {
+  const style = StyleSheet.flatten(getPanelContainer(testID).props.style)
+  const transform = style.transform as Array<Record<string, unknown>> | undefined
+  return getAnimatedValue(transform?.find((item) => 'translateY' in item)?.translateY)
+}
+
 function shouldClaim(responder: TestInstance, dy: number, timestamp: number) {
   const props = getResponderProps(responder)
   props.onStartShouldSetResponderCapture(touchEvent(0, 0, 0))
@@ -117,8 +136,12 @@ describe('FloatingPanel', () => {
     expect(StyleSheet.flatten(screen.getByTestId('panel').props.style)).toMatchObject({
       borderTopLeftRadius: 16,
       borderTopRightRadius: 16,
+    })
+    expect(StyleSheet.flatten(getPanelContainer('panel').props.style)).toMatchObject({
+      bottom: 0,
       zIndex: 999,
     })
+    expect(StyleSheet.flatten(getPanelContainer('panel').props.style).top).toBeUndefined()
     await view.unmount()
   })
 
@@ -246,6 +269,140 @@ describe('FloatingPanel', () => {
     await view.unmount()
   })
 
+  it('supports top placement geometry and direction-aware translation', async () => {
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel placement="top" height={100} anchors={[100, 300]} testID="top-panel">
+          <Text>top panel</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+
+    expect(StyleSheet.flatten(screen.getByTestId('top-panel').props.style)).toMatchObject({
+      borderBottomLeftRadius: 16,
+      borderBottomRightRadius: 16,
+    })
+    expect(StyleSheet.flatten(screen.getByTestId('top-panel').props.style)).toMatchObject({
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 0,
+    })
+    expect(StyleSheet.flatten(getPanelContainer('top-panel').props.style)).toMatchObject({ top: 0 })
+    expect(StyleSheet.flatten(getPanelContainer('top-panel').props.style).bottom).toBeUndefined()
+    expect(getTranslation('top-panel')).toBe(-200)
+    await view.unmount()
+  })
+
+  it('places the drag area at the edge selected by placement', async () => {
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel anchors={[100, 300]}>
+          <Text>bottom content</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+    const bottomResponders = getResponders(view)
+    expect(StyleSheet.flatten(bottomResponders[0].props.style)).toMatchObject({ height: 30 })
+    expect(StyleSheet.flatten(bottomResponders[1].props.style)).toMatchObject({ flex: 1 })
+    await view.unmount()
+
+    const utils = await render(
+      <AppProvider>
+        <FloatingPanel placement="top" anchors={[100, 300]}>
+          <Text>top content</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+    const topResponders = getResponders(utils)
+    expect(StyleSheet.flatten(topResponders[0].props.style)).toMatchObject({ flex: 1 })
+    expect(StyleSheet.flatten(topResponders[1].props.style)).toMatchObject({ height: 30 })
+    await utils.unmount()
+  })
+
+  it('uses the same magnetic drag and damping algorithm for top placement', async () => {
+    const onHeightChange = jest.fn()
+    const onHeightChangeEnd = jest.fn()
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel
+          placement="top"
+          height={100}
+          anchors={[100, 300]}
+          onHeightChange={onHeightChange}
+          onHeightChangeEnd={onHeightChangeEnd}
+        >
+          <Text>top drag</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+
+    await drag(getResponders(view)[1], 120)
+    expect(onHeightChange).toHaveBeenNthCalledWith(1, 220)
+    expect(onHeightChange).toHaveBeenLastCalledWith(300)
+    expect(onHeightChangeEnd).toHaveBeenCalledWith(300)
+    await view.unmount()
+
+    const dampedChange = jest.fn()
+    const dampedEnd = jest.fn()
+    const utils = await render(
+      <AppProvider>
+        <FloatingPanel
+          placement="top"
+          height={100}
+          anchors={[100, 300]}
+          onHeightChange={dampedChange}
+          onHeightChangeEnd={dampedEnd}
+        >
+          <Text>top damped drag</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+    await act(async () => {
+      const props = getResponderProps(getResponders(utils)[1])
+      const start = touchEvent(0, 0, 1)
+      props.onStartShouldSetResponderCapture(start)
+      props.onResponderGrant(start)
+      props.onResponderMove(gesture(500, 2))
+      props.onResponderRelease(gesture(500, 3))
+    })
+    expect(dampedChange).toHaveBeenNthCalledWith(1, 360)
+    expect(dampedEnd).toHaveBeenCalledWith(300)
+    await utils.unmount()
+
+    const collapseEnd = jest.fn()
+    {
+      const view = await render(
+        <AppProvider>
+          <FloatingPanel
+            placement="top"
+            height={300}
+            anchors={[100, 300]}
+            onHeightChangeEnd={collapseEnd}
+          >
+            <Text>top collapse</Text>
+          </FloatingPanel>
+        </AppProvider>,
+      )
+      await drag(getResponders(view)[1], -220)
+      expect(collapseEnd).toHaveBeenCalledWith(100)
+      await view.unmount()
+    }
+  })
+
+  it('keeps top content gestures available to ScrollView when fully expanded', async () => {
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel placement="top" height={300} anchors={[100, 300]}>
+          <Text>top scrollable content</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+
+    const [content] = getResponders(view)
+    expect(shouldClaim(content, -20, 1)).toBe(false)
+    expect(shouldClaim(content, 20, 2)).toBe(false)
+    await view.unmount()
+  })
+
   it('supports disabling panel and content dragging', async () => {
     const utils = await render(
       <AppProvider>
@@ -342,6 +499,10 @@ describe('FloatingPanel', () => {
               backgroundColor: '#123456',
               borderRadius: 20,
               barColor: '#abcdef',
+              shadowOpacity: 0.3,
+              shadowRadius: 12,
+              shadowOffset: 6,
+              elevation: 8,
               zIndex: 1800,
             },
           },
@@ -356,6 +517,12 @@ describe('FloatingPanel', () => {
     expect(StyleSheet.flatten(screen.getByTestId('themed-panel').props.style)).toMatchObject({
       backgroundColor: '#123456',
       borderTopLeftRadius: 20,
+    })
+    expect(StyleSheet.flatten(getPanelContainer('themed-panel').props.style)).toMatchObject({
+      elevation: 8,
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: -6 },
       zIndex: 1800,
     })
 
@@ -378,6 +545,59 @@ describe('FloatingPanel', () => {
       expect.objectContaining({ duration: 120, useNativeDriver: true }),
     )
     await view.unmount()
+  })
+
+  it('separates the clipping surface from the shadow container', async () => {
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel placement="top" anchors={[100, 300]} testID="shadow-panel">
+          <Text>shadow panel</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+
+    expect(StyleSheet.flatten(screen.getByTestId('shadow-panel').props.style).overflow).toBe(
+      'hidden',
+    )
+    expect(StyleSheet.flatten(getPanelContainer('shadow-panel').props.style)).toMatchObject({
+      overflow: 'visible',
+      shadowOffset: { height: 2, width: 0 },
+    })
+    await view.unmount()
+  })
+
+  it('supports placement-specific safe-area content insets', async () => {
+    const view = await render(
+      <SafeAreaInsetsContext.Provider value={{ bottom: 12, left: 0, right: 0, top: 24 }}>
+        <AppProvider>
+          <FloatingPanel placement="top" anchors={[100, 300]}>
+            <Text>top safe area content</Text>
+          </FloatingPanel>
+        </AppProvider>
+      </SafeAreaInsetsContext.Provider>,
+    )
+
+    expect(StyleSheet.flatten(getScrollView(view).props.contentContainerStyle)).toMatchObject({
+      paddingTop: 200,
+    })
+    expect(
+      StyleSheet.flatten(getScrollView(view).props.contentContainerStyle).paddingBottom,
+    ).toBeUndefined()
+    await view.unmount()
+
+    const utils = await render(
+      <SafeAreaInsetsContext.Provider value={{ bottom: 12, left: 0, right: 0, top: 24 }}>
+        <AppProvider>
+          <FloatingPanel placement="top" anchors={[100, 300]} safeAreaInsetTop>
+            <Text>top safe area enabled</Text>
+          </FloatingPanel>
+        </AppProvider>
+      </SafeAreaInsetsContext.Provider>,
+    )
+    expect(StyleSheet.flatten(getScrollView(utils).props.contentContainerStyle)).toMatchObject({
+      paddingTop: 224,
+    })
+    await utils.unmount()
   })
 
   it('fires the end event after a settling animation completes', async () => {

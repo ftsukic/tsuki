@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-FloatingPanel 用于在视口底部展示可拖动面板，支持多个高度锚点、磁吸停靠、内容滚动和底部安全区适配。
+FloatingPanel 用于在视口顶部或底部展示可拖动面板，支持多个高度锚点、磁吸停靠、内容滚动、方向匹配的圆角和阴影。
 
 </section>
 
@@ -51,6 +51,9 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `Provider` 内�
 
 <code src="../../../src/floating-panel/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 FloatingPanel token 和 semantic styles 定制外观。"></code>
 
+<!-- prettier-ignore -->
+<code src="../../../src/floating-panel/__fixtures__/examples/top.tsx" title="顶部下拉" description="placement=\"top\" 从顶部展开，拖拽条位于面板底部。"></code>
+
 ## API
 
 ### FloatingPanelProps
@@ -60,24 +63,28 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `Provider` 内�
 | `height` | `number` | — | 受控当前高度，单位为 RN 逻辑像素 |
 | `defaultHeight` | `number` | 第一个锚点 | 非受控初始高度 |
 | `anchors` | `readonly number[]` | `[100, windowHeight * 0.6]` | 高度锚点；无效值会被过滤并按升序处理 |
+| `placement` | `'top' \| 'bottom'` | `'bottom'` | 面板固定在顶部或底部；顶部模式向下展开，底部模式向上展开 |
 | `duration` | `number` | 主题 `animationDuration` | 吸附动画时长，单位为毫秒 |
 | `magnetic` | `boolean` | `true` | 松手后是否吸附到最近锚点 |
 | `draggable` | `boolean` | `true` | 是否允许拖动；关闭时隐藏默认拖拽条 |
 | `contentDraggable` | `boolean` | `true` | 是否允许从内容区域拖动面板 |
 | `safeAreaInsetBottom` | `boolean` | `true` | 是否把底部 safe-area inset 加入内容 padding |
+| `safeAreaInsetTop` | `boolean` | `false` | `placement="top"` 时是否把顶部 safe-area inset 加入内容 padding |
 | `header` | `ReactNode` | 默认拖拽条 | 自定义面板头部 |
 | `onHeightChange` | `(height: number) => void` | — | 拖动过程和最终收敛时持续同步高度 |
 | `onHeightChangeEnd` | `(height: number) => void` | — | 松手完成吸附或边界收敛后触发 |
-| `style` | `StyleProp<ViewStyle>` | — | 面板 root 样式 |
-| `styles` | `FloatingPanelStyles` | — | `root / header / bar / content / contentContainer` 语义样式 |
+| `style` | `StyleProp<ViewStyle>` | — | 面板可见 surface/root 样式 |
+| `styles` | `FloatingPanelStyles` | — | `container / root / header / bar / content / contentContainer` 语义样式 |
 
 组件继承 React Native `ViewProps`，除 `children` 和 `style` 外透传到面板 root；ref 指向面板 root。所有高度使用 RN 逻辑像素，`duration` 使用毫秒。
 
 `height` 存在时为受控模式，父组件应在 `onHeightChange` 中回写高度；未传入时使用 `defaultHeight` 作为非受控初始值。拖动越过边界时会按 Vant 的阻尼规则暂时显示越界高度，松手后的吸附或边界收敛高度始终位于最小和最大锚点之间。`onHeightChangeEnd` 在收敛动画完成后触发；`duration={0}` 或主题关闭 motion 时立即触发。`anchors` 少于两个有效值时，会补充默认最大高度。
 
-面板内部使用 `ScrollView`。当面板尚未达到最大高度时，内容垂直手势优先拖动面板；面板达到最大高度后，内容向上滚动交给 `ScrollView`，内容位于顶部并向下拖动时重新接管面板。`contentDraggable={false}` 时只有 header 拖动，内容仍可滚动。
+面板内部使用 `ScrollView`。`placement="bottom"` 时 header/drag area 位于面板顶部，上拉展开、下拉收起，圆角在顶部，阴影主要向上。`placement="top"` 时内容区域位于 drag area 之前，drag area 位于面板底部，下拉展开、上拉收起，圆角在底部，阴影主要向下。
 
-`styles` 支持对象或函数，函数接收 `{ props, state: { height, minHeight, maxHeight, dragging } }`。`style` 与 `styles.root` 作用于面板 root，`styles.contentContainer` 作用于内部 `ScrollView` 内容容器。
+当面板尚未达到最大高度时，内容垂直手势优先拖动面板。bottom 面板达到最大高度后，内容向上滚动交给 `ScrollView`，内容位于顶部并向下拖动时重新接管面板。top 面板达到最大高度后，内容区域始终优先交给 `ScrollView`，建议从底部 drag area 发起收起操作，避免列表无法正常向上滚动。`contentDraggable={false}` 时只有 drag area 拖动，内容仍可滚动。
+
+`styles` 支持对象或函数，函数接收 `{ props, state: { height, minHeight, maxHeight, dragging } }`。`styles.container` 作用于不负责裁剪的 absolute/shadow wrapper；`style` 与 `styles.root` 作用于负责背景、圆角和 `overflow: hidden` 的可见面板 surface；`styles.contentContainer` 作用于内部 `ScrollView` 内容容器。
 
 组件没有遮罩，不会阻止面板外部页面交互；不提供 Web 专用的 `lockScroll`、`teleport` 或 imperative API。
 
@@ -91,13 +98,18 @@ H5 文档使用 `react-native-web` 预览；Jest 只验证状态、样式和 res
 
 通过 `ConfigProvider` 的 `theme.components.FloatingPanel` 配置：
 
-| Token               | 默认值                | 说明                     |
-| ------------------- | --------------------- | ------------------------ |
-| `borderRadius`      | `16`                  | 顶部左右圆角             |
-| `headerHeight`      | `30`                  | 默认 header 高度         |
-| `zIndex`            | `zIndexPopupBase - 1` | Portal 层级              |
-| `backgroundColor`   | `colorBgElevated`     | 面板背景                 |
-| `barWidth`          | `20`                  | 拖拽条宽度               |
-| `barHeight`         | `3`                   | 拖拽条高度               |
-| `barColor`          | `colorTextQuaternary` | 拖拽条颜色               |
-| `animationDuration` | `motionDurationSlow`  | 吸附动画时长，单位为毫秒 |
+| Token               | 默认值                | 说明                                      |
+| ------------------- | --------------------- | ----------------------------------------- |
+| `borderRadius`      | `16`                  | 根据 `placement` 应用于顶部或底部左右圆角 |
+| `headerHeight`      | `30`                  | 默认 header 高度                          |
+| `zIndex`            | `zIndexPopupBase - 1` | Portal 层级                               |
+| `backgroundColor`   | `colorBgElevated`     | 面板背景                                  |
+| `barWidth`          | `20`                  | 拖拽条宽度                                |
+| `barHeight`         | `3`                   | 拖拽条高度                                |
+| `barColor`          | `colorTextQuaternary` | 拖拽条颜色                                |
+| `shadowColor`       | `colorShadow`         | 面板阴影颜色                              |
+| `shadowOpacity`     | `0.12`                | 面板阴影透明度                            |
+| `shadowRadius`      | `8`                   | 面板阴影模糊半径                          |
+| `shadowOffset`      | `2`                   | 面板阴影偏移量；top 向下、bottom 向上     |
+| `elevation`         | `4`                   | Android/Harmony 阴影层级                  |
+| `animationDuration` | `motionDurationSlow`  | 吸附动画时长，单位为毫秒                  |

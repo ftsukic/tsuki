@@ -6,6 +6,7 @@ import DisabledExample from './examples/disabled'
 import MagneticExample from './examples/magnetic'
 import SafeAreaExample from './examples/safe-area'
 import ThemeExample from './examples/theme'
+import TopExample from './examples/top'
 
 /**
  * @title FloatingPanel overview
@@ -59,6 +60,12 @@ export default function FloatingPanelOverview() {
           description: '通过 FloatingPanel token 和 semantic styles 定制面板背景、圆角和拖拽条。',
           id: 'theme',
           title: '主题定制',
+        },
+        {
+          Component: TopExample,
+          description: 'placement="top" 从顶部展开，拖拽条位于底部并使用底部圆角和阴影。',
+          id: 'top',
+          title: '顶部下拉',
         },
       ]}
     />

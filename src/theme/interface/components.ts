@@ -262,6 +262,11 @@ export interface FloatingPanelToken {
   barWidth: number
   barHeight: number
   barColor: string
+  shadowColor: string
+  shadowOpacity: number
+  shadowRadius: number
+  shadowOffset: number
+  elevation: number
   animationDuration: number
 }
 

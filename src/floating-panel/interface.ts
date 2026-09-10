@@ -10,6 +10,7 @@ export interface FloatingPanelStyleState {
 }
 
 export interface FloatingPanelSemanticStyles {
+  container?: StyleProp<ViewStyle>
   root?: StyleProp<ViewStyle>
   header?: StyleProp<ViewStyle>
   bar?: StyleProp<ViewStyle>
@@ -26,6 +27,7 @@ export type FloatingPanelStyles = StyleResolver<
 export interface FloatingPanelProps extends Omit<ViewProps, 'children' | 'style'> {
   children?: ReactNode
   header?: ReactNode
+  placement?: 'top' | 'bottom'
   height?: number
   defaultHeight?: number
   anchors?: readonly number[]
@@ -34,6 +36,7 @@ export interface FloatingPanelProps extends Omit<ViewProps, 'children' | 'style'
   draggable?: boolean
   contentDraggable?: boolean
   safeAreaInsetBottom?: boolean
+  safeAreaInsetTop?: boolean
   onHeightChange?: (height: number) => void
   onHeightChangeEnd?: (height: number) => void
   style?: StyleProp<ViewStyle>

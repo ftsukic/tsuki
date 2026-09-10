@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native'
 
 /**
  * @title 主题定制
- * @description 通过 FloatingPanel token 和 semantic styles 定制面板背景、圆角和拖拽条。
+ * @description 通过 FloatingPanel token 和 semantic styles 定制面板背景、圆角、拖拽条和阴影。
  */
 export default function FloatingPanelThemeExample() {
   return (
@@ -16,6 +16,10 @@ export default function FloatingPanelThemeExample() {
             backgroundColor: '#102a43',
             borderRadius: 20,
             barColor: '#9fb3c8',
+            shadowOpacity: 0.3,
+            shadowRadius: 12,
+            shadowOffset: 6,
+            elevation: 8,
           },
         },
       }}
@@ -30,7 +34,7 @@ export default function FloatingPanelThemeExample() {
           <View style={styles.content}>
             <Text style={styles.title}>主题化 FloatingPanel</Text>
             <Text style={styles.description}>
-              token 控制默认外观，semantic styles 负责局部覆盖。
+              token 控制默认外观、圆角和阴影，semantic styles 负责局部覆盖。
             </Text>
           </View>
         </FloatingPanel>

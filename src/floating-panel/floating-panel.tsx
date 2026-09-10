@@ -21,6 +21,7 @@ interface PanelConfig {
   anchors: number[]
   minHeight: number
   maxHeight: number
+  placement: 'top' | 'bottom'
   magnetic: boolean
   draggable: boolean
   contentDraggable: boolean
@@ -63,8 +64,20 @@ function getClosestAnchor(anchors: readonly number[], target: number) {
   )
 }
 
-function getDampedHeight(height: number, deltaY: number, min: number, max: number) {
-  const rawHeight = height - deltaY
+function getTranslation(height: number, maxHeight: number, placement: 'top' | 'bottom') {
+  const hidden = maxHeight - height
+  return placement === 'top' ? -hidden : hidden
+}
+
+function getDampedHeight(
+  height: number,
+  distance: number,
+  min: number,
+  max: number,
+  placement: 'top' | 'bottom',
+) {
+  const direction = placement === 'top' ? 1 : -1
+  const rawHeight = height + distance * direction
 
   if (rawHeight > max) return max + (rawHeight - max) * DAMP
   if (rawHeight < min) return min - (min - rawHeight) * DAMP
@@ -82,11 +95,13 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       height,
       defaultHeight,
       anchors,
+      placement = 'bottom',
       duration = token.animationDuration,
       magnetic = true,
       draggable = true,
       contentDraggable = true,
       safeAreaInsetBottom = true,
+      safeAreaInsetTop = false,
       onHeightChange,
       onHeightChangeEnd,
       style,
@@ -110,15 +125,19 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
     const maxScrollRef = useRef(-1)
     const previousHeightPropRef = useRef(height)
     const previousMaxHeightRef = useRef(maxHeight)
+    const previousPlacementRef = useRef(placement)
     const initializedRef = useRef(false)
     const animationRef = useRef<Animated.CompositeAnimation | null>(null)
-    const translation = useRef(new Animated.Value(maxHeight - initialHeight)).current
+    const translation = useRef(
+      new Animated.Value(getTranslation(initialHeight, maxHeight, placement)),
+    ).current
     const onHeightChangeRef = useRef(onHeightChange)
     const onHeightChangeEndRef = useRef(onHeightChangeEnd)
     const configRef = useRef<PanelConfig>({
       anchors: resolvedAnchors,
       minHeight,
       maxHeight,
+      placement,
       magnetic,
       draggable,
       contentDraggable,
@@ -136,6 +155,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       anchors: resolvedAnchors,
       minHeight,
       maxHeight,
+      placement,
       magnetic,
       draggable,
       contentDraggable,
@@ -154,7 +174,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
     const animateToHeight = useCallback(
       (nextHeight: number, onComplete?: () => void) => {
         const config = configRef.current
-        const nextTranslation = config.maxHeight - nextHeight
+        const nextTranslation = getTranslation(nextHeight, config.maxHeight, config.placement)
         animationRef.current?.stop()
         animationRef.current = null
 
@@ -200,6 +220,10 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       if (source === 'header') return true
       if (!config.contentDraggable) return false
 
+      if (config.placement === 'top' && currentHeightRef.current >= config.maxHeight) {
+        return false
+      }
+
       return (
         currentHeightRef.current < config.maxHeight ||
         (scrollOffsetRef.current <= 0 && gestureState.distance > 0 && maxScrollRef.current <= 0)
@@ -216,9 +240,10 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
           distance,
           config.minHeight,
           config.maxHeight,
+          config.placement,
         )
         setVisualHeight(nextHeight, true)
-        translation.setValue(config.maxHeight - nextHeight)
+        translation.setValue(getTranslation(nextHeight, config.maxHeight, config.placement))
       },
       [setVisualHeight, translation],
     )
@@ -271,24 +296,32 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
     useEffect(() => {
       const previousHeightProp = previousHeightPropRef.current
       const previousMaxHeight = previousMaxHeightRef.current
+      const previousPlacement = previousPlacementRef.current
       const boundsChanged = previousMaxHeight !== maxHeight
+      const placementChanged = previousPlacement !== placement
       previousHeightPropRef.current = height
       previousMaxHeightRef.current = maxHeight
+      previousPlacementRef.current = placement
 
       if (draggingRef.current) return
 
       const nextHeight = resolveHeight(height, currentHeightRef.current, minHeight, maxHeight)
       setVisualHeight(nextHeight, false)
 
-      if (initializedRef.current && !boundsChanged && !Object.is(previousHeightProp, height)) {
+      if (
+        initializedRef.current &&
+        !boundsChanged &&
+        !placementChanged &&
+        !Object.is(previousHeightProp, height)
+      ) {
         animateToHeight(nextHeight)
       } else {
         animationRef.current?.stop()
         animationRef.current = null
-        translation.setValue(maxHeight - nextHeight)
+        translation.setValue(getTranslation(nextHeight, maxHeight, placement))
       }
       initializedRef.current = true
-    }, [animateToHeight, height, maxHeight, minHeight, setVisualHeight, translation])
+    }, [animateToHeight, height, maxHeight, minHeight, placement, setVisualHeight, translation])
 
     useEffect(
       () => () => {
@@ -297,44 +330,68 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       [],
     )
 
-    const resolvedStyles = useMemo(() => getFloatingPanelStyles(token), [token])
+    const resolvedStyles = useMemo(
+      () => getFloatingPanelStyles(token, placement),
+      [placement, token],
+    )
     const semantic = resolveStyles(styles, {
       props,
       state: { height: currentHeight, minHeight, maxHeight, dragging },
     })
-    const bottomInset = safeAreaInsetBottom ? (safeAreaInsets?.bottom ?? 0) : 0
-    const contentPaddingBottom = Math.max(0, maxHeight - currentHeight) + bottomInset
+    const hiddenHeight = Math.max(0, maxHeight - currentHeight)
+    const bottomInset =
+      placement === 'bottom' && safeAreaInsetBottom ? (safeAreaInsets?.bottom ?? 0) : 0
+    const topInset = placement === 'top' && safeAreaInsetTop ? (safeAreaInsets?.top ?? 0) : 0
+    const contentPadding =
+      placement === 'top'
+        ? { paddingTop: hiddenHeight + topInset }
+        : { paddingBottom: hiddenHeight + bottomInset }
+    const dragArea = header ?? <View style={[resolvedStyles.bar, semantic?.bar]} />
+    const headerView =
+      header !== undefined || draggable ? (
+        <View {...headerResponder.panHandlers} style={[resolvedStyles.header, semantic?.header]}>
+          {dragArea}
+        </View>
+      ) : null
+    const contentView = (
+      <View {...contentResponder.panHandlers} style={{ flex: 1 }}>
+        <ScrollView
+          style={[resolvedStyles.content, semantic?.content]}
+          contentContainerStyle={[contentPadding, semantic?.contentContainer]}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+        >
+          {children}
+        </ScrollView>
+      </View>
+    )
 
     return (
       <Animated.View
-        ref={ref}
-        {...viewProps}
-        collapsable={false}
         style={[
-          resolvedStyles.root,
+          resolvedStyles.container,
           { height: maxHeight },
-          semantic?.root,
-          style,
+          semantic?.container,
           { transform: [{ translateY: translation }] },
         ]}
       >
-        {header !== undefined || draggable ? (
-          <View {...headerResponder.panHandlers} style={[resolvedStyles.header, semantic?.header]}>
-            {header ?? <View style={[resolvedStyles.bar, semantic?.bar]} />}
-          </View>
-        ) : null}
-        <View {...contentResponder.panHandlers} style={{ flex: 1 }}>
-          <ScrollView
-            style={[resolvedStyles.content, semantic?.content]}
-            contentContainerStyle={[
-              { paddingBottom: contentPaddingBottom },
-              semantic?.contentContainer,
-            ]}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-          >
-            {children}
-          </ScrollView>
+        <View
+          ref={ref}
+          {...viewProps}
+          collapsable={false}
+          style={[resolvedStyles.root, semantic?.root, style]}
+        >
+          {placement === 'bottom' ? (
+            <>
+              {headerView}
+              {contentView}
+            </>
+          ) : (
+            <>
+              {contentView}
+              {headerView}
+            </>
+          )}
         </View>
       </Animated.View>
     )
