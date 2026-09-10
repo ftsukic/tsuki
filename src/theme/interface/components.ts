@@ -564,8 +564,8 @@ export interface DropdownToken {
   titleFontSize: number
   titleLineHeight: number
   titleFontFamily: string
-  arrowSize: number
-  arrowGap: number
+  caretSize: number
+  caretGap: number
   optionHeight: number
   optionPaddingHorizontal: number
   optionFontSize: number

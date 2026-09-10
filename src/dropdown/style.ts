@@ -44,7 +44,7 @@ export function getDropdownMenuStyles(token: DropdownToken): DropdownMenuResolve
       lineHeight: token.titleLineHeight,
     },
     arrow: {
-      marginLeft: token.arrowGap,
+      marginLeft: token.caretGap,
     },
   }
 }
@@ -65,7 +65,7 @@ export function getDropdownItemStyles(
       alignItems: 'center',
       flexDirection: 'row',
       justifyContent: 'center',
-      opacity: disabled ? 0.6 : 1,
+      opacity: 1,
     },
     title: {
       color: disabled ? token.disabledColor : active ? activeColor : token.titleColor,
@@ -74,7 +74,7 @@ export function getDropdownItemStyles(
       lineHeight: token.titleLineHeight,
     },
     arrow: {
-      marginLeft: token.arrowGap,
+      marginLeft: token.caretGap,
     },
     content: {
       backgroundColor: token.contentBackgroundColor,

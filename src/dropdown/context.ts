@@ -11,6 +11,8 @@ export interface DropdownItemRegistration {
   contentStyle?: StyleProp<ViewStyle>
   overlayStyle?: StyleProp<ViewStyle>
   estimatedHeight?: number
+  onOpen?: () => void
+  onClose?: () => void
   onOpened?: () => void
   onClosed?: () => void
 }

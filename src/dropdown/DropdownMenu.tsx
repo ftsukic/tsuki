@@ -52,7 +52,6 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
   const registrationsRef = useRef<DropdownItemRegistration[]>([])
   const activeIndexRef = useRef<number | null>(null)
   const onChangeRef = useRef(onChange)
-  const layoutReadyRef = useRef(false)
   const openRequestRef = useRef(0)
   const [itemVersion, notifyItemUpdate] = useReducer((value: number) => value + 1, 0)
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
@@ -70,7 +69,6 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
     (onMeasured?: () => void) => {
       const node = menuRef.current
       if (!node || typeof node.measureInWindow !== 'function') {
-        layoutReadyRef.current = true
         onMeasured?.()
         return
       }
@@ -92,7 +90,6 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
             ? current
             : nextLayout,
         )
-        layoutReadyRef.current = true
         onMeasured?.()
       })
 
@@ -100,7 +97,6 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
       // Keep the fallback local to that shape; native measureInWindow resolves
       // through its callback before an open is committed.
       if (!measured && node.measureInWindow.length === 0) {
-        layoutReadyRef.current = true
         onMeasured?.()
       }
     },
@@ -178,12 +174,11 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
         onChangeRef.current?.(index)
       }
 
-      if (layoutReadyRef.current) {
-        commit()
-        measureMenu()
-      } else {
-        measureMenu(commit)
-      }
+      // A closed menu must resolve its anchor before committing the active item.
+      // Switching between already-open items reuses the current anchor and only
+      // changes the panel content after the popup transition has settled.
+      if (activeIndexRef.current === null) measureMenu(commit)
+      else commit()
     },
     [measureMenu],
   )
@@ -308,7 +303,6 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
     onLayout?.(event)
     const nextHeight = event.nativeEvent.layout.height
     if (nextHeight > 0) {
-      layoutReadyRef.current = true
       setLayout((current) =>
         current.height === nextHeight ? current : { ...current, height: nextHeight },
       )

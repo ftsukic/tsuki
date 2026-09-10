@@ -125,15 +125,6 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
     })
   }, [active, arrowProgress, duration])
 
-  const activeRef = useRef(active)
-  useEffect(() => {
-    const previousActive = activeRef.current
-    activeRef.current = active
-    if (previousActive === active) return
-    if (active) onOpen?.()
-    else onClose?.()
-  }, [active, onClose, onOpen])
-
   useEffect(() => {
     if (options && value === undefined) notifyItemUpdate()
   }, [internalValue, notifyItemUpdate, options, value])
@@ -191,7 +182,6 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
             style={({ pressed }) => [
               resolvedStyles.option,
               itemSemantic?.option,
-              option.disabled ? { opacity: 0.6 } : null,
               pressed && !option.disabled ? { backgroundColor: token.optionPressedColor } : null,
             ]}
           >
@@ -200,7 +190,7 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
                 <View
                   style={[
                     resolvedStyles.optionIcon,
-                    { marginRight: token.arrowGap },
+                    { marginRight: token.caretGap },
                     itemSemantic?.optionIcon,
                   ]}
                 >
@@ -221,7 +211,7 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
                 testID={`dropdown-option-${index}-${optionIndex}-check`}
                 style={[
                   resolvedStyles.optionIcon,
-                  { marginLeft: token.arrowGap },
+                  { marginLeft: token.caretGap },
                   itemSemantic?.optionIcon,
                 ]}
               />
@@ -242,7 +232,9 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
       children == null && options
         ? Math.min(options.length * token.optionHeight, context.panelMaxHeight ?? Infinity)
         : undefined,
+    onClose,
     onClosed,
+    onOpen,
     onOpened,
     overlayStyle: itemSemantic?.overlay,
   })
@@ -256,12 +248,7 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
       disabled={disabled}
       onPress={toggle}
       pressStyle="none"
-      style={({ pressed }) => [
-        resolvedStyles.item,
-        menuSemantic?.item,
-        style,
-        pressed && !disabled ? { backgroundColor: themeToken.colorFillTertiary } : null,
-      ]}
+      style={() => [resolvedStyles.item, menuSemantic?.item, style]}
     >
       {renderText(
         resolvedTitle,
@@ -277,15 +264,15 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
           testID={`dropdown-caret-${index}`}
           style={{
             borderLeftColor: 'transparent',
-            borderLeftWidth: token.arrowSize,
+            borderLeftWidth: token.caretSize,
             borderRightColor: 'transparent',
-            borderRightWidth: token.arrowSize,
+            borderRightWidth: token.caretSize,
             borderTopColor: disabled
               ? token.disabledColor
               : active
                 ? context.activeColor
                 : token.titleColor,
-            borderTopWidth: token.arrowSize,
+            borderTopWidth: token.caretSize,
             height: 0,
             width: 0,
           }}

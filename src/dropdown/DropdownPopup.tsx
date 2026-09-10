@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { Easing } from 'react-native-reanimated'
-import { scheduleOnRN } from 'react-native-worklets'
 import {
   cancelAnimation,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 import { Animated } from '../motion'
 import { OverlaySurface } from '../overlay/surface'
 import { Portal } from '../portal'
@@ -30,6 +30,21 @@ interface DropdownPopupProps {
   onRequestClose: () => void
 }
 
+type TransitionState =
+  'closed' | 'opening' | 'opened' | 'switching-out' | 'switching-in' | 'reopening' | 'closing'
+
+type AnimationChannel = 'overlay' | 'panel'
+type TransitionKind = Exclude<TransitionState, 'closed' | 'opened'>
+
+interface TransitionCycle {
+  id: number
+  kind: TransitionKind
+  overlayStarted: boolean
+  panelStarted: boolean
+  overlayFinished: boolean
+  panelFinished: boolean
+}
+
 export function DropdownPopup({
   visible,
   direction,
@@ -49,32 +64,235 @@ export function DropdownPopup({
     ? Math.max(0, duration as number)
     : token.animationDuration
   const animationDuration = themeToken.motion ? normalizedDuration : 0
-  const [renderedItem, setRenderedItem] = useState<DropdownItemRegistration | undefined>(activeItem)
+  const [displayItem, setDisplayItem] = useState<DropdownItemRegistration | undefined>(activeItem)
+  const [transitionState, setTransitionState] = useState<TransitionState>(
+    activeItem ? 'opening' : 'closed',
+  )
   const [measuredItemId, setMeasuredItemId] = useState<symbol | undefined>(undefined)
   const [measuredHeight, setMeasuredHeight] = useState<number | undefined>(undefined)
-  const renderedItemRef = useRef(renderedItem)
+  const displayItemRef = useRef(displayItem)
   const activeItemRef = useRef(activeItem)
-  const previousRenderedItemRef = useRef<DropdownItemRegistration | undefined>(undefined)
-  const openedItemIdRef = useRef<symbol | undefined>(undefined)
-  const openSettledRef = useRef(false)
-  const initialMeasurementPendingRef = useRef(false)
-  const visibleRef = useRef(visible)
+  const pendingItemRef = useRef<DropdownItemRegistration | undefined>(undefined)
+  const transitionStateRef = useRef<TransitionState>(transitionState)
   const transitionIdRef = useRef(0)
-  const progress = useSharedValue(0)
+  const transitionCycleRef = useRef<TransitionCycle | undefined>(undefined)
+  const openedItemIdRef = useRef<symbol | undefined>(undefined)
+  const openItemsRef = useRef(new Set<symbol>())
+  const visibleRef = useRef(visible)
+  const panelProgress = useSharedValue(0)
+  const overlayProgress = useSharedValue(0)
 
-  renderedItemRef.current = renderedItem
-  activeItemRef.current = activeItem
+  displayItemRef.current = displayItem
   visibleRef.current = visible
 
-  useLayoutEffect(() => {
-    if (activeItem && renderedItemRef.current?.id !== activeItem.id) {
-      initialMeasurementPendingRef.current = renderedItemRef.current === undefined
-      setRenderedItem(activeItem)
-    }
-  }, [activeItem])
+  const updateTransitionState = useCallback((next: TransitionState) => {
+    transitionStateRef.current = next
+    setTransitionState(next)
+  }, [])
+
+  const signalOpen = useCallback((item: DropdownItemRegistration | undefined) => {
+    if (!item || openItemsRef.current.has(item.id)) return
+    openItemsRef.current.add(item.id)
+    item.onOpen?.()
+  }, [])
+
+  const signalClose = useCallback((item: DropdownItemRegistration | undefined) => {
+    if (!item || !openItemsRef.current.delete(item.id)) return
+    item.onClose?.()
+  }, [])
+
+  const signalOpened = useCallback((item: DropdownItemRegistration | undefined) => {
+    if (!item || openedItemIdRef.current === item.id) return
+    openedItemIdRef.current = item.id
+    item.onOpened?.()
+  }, [])
+
+  const signalClosed = useCallback((item: DropdownItemRegistration | undefined) => {
+    if (!item) return
+    if (openedItemIdRef.current === item.id) openedItemIdRef.current = undefined
+    item.onClosed?.()
+  }, [])
+
+  const startTransitionCycle = useCallback(
+    (kind: TransitionKind) => {
+      cancelAnimation(panelProgress)
+      if (kind !== 'switching-out' && kind !== 'switching-in' && kind !== 'reopening') {
+        cancelAnimation(overlayProgress)
+      } else if (kind === 'switching-out' && overlayProgress.value < 1) {
+        cancelAnimation(overlayProgress)
+      }
+
+      const cycle: TransitionCycle = {
+        id: ++transitionIdRef.current,
+        kind,
+        overlayFinished: false,
+        overlayStarted: false,
+        panelFinished: false,
+        panelStarted: false,
+      }
+      transitionCycleRef.current = cycle
+      return cycle
+    },
+    [overlayProgress, panelProgress],
+  )
+
+  const finishAnimation = useCallback(
+    (id: number, channel: AnimationChannel, finished: boolean) => {
+      if (!finished) return
+      const cycle = transitionCycleRef.current
+      if (!cycle || cycle.id !== id) return
+
+      if (channel === 'panel') {
+        if (cycle.panelFinished) return
+        cycle.panelFinished = true
+      } else {
+        if (cycle.overlayFinished) return
+        cycle.overlayFinished = true
+      }
+
+      const display = displayItemRef.current
+      if (cycle.kind === 'opening' && cycle.panelFinished && cycle.overlayFinished) {
+        if (!display || !visibleRef.current || activeItemRef.current?.id !== display.id) return
+        updateTransitionState('opened')
+        signalOpened(display)
+        return
+      }
+
+      if (cycle.kind === 'reopening' && cycle.panelFinished) {
+        if (!display || !visibleRef.current || activeItemRef.current?.id !== display.id) return
+        updateTransitionState('opened')
+        return
+      }
+
+      if (cycle.kind === 'switching-out' && cycle.panelFinished) {
+        const nextItem = pendingItemRef.current ?? activeItemRef.current
+        if (!display || !nextItem || nextItem.id === display.id || !visibleRef.current) return
+
+        signalClosed(display)
+        pendingItemRef.current = undefined
+        displayItemRef.current = nextItem
+        setDisplayItem(nextItem)
+        panelProgress.value = 0
+        startTransitionCycle('switching-in')
+        updateTransitionState('switching-in')
+        return
+      }
+
+      if (cycle.kind === 'switching-in' && cycle.panelFinished) {
+        if (!display || !visibleRef.current || activeItemRef.current?.id !== display.id) return
+        updateTransitionState('opened')
+        signalOpened(display)
+        return
+      }
+
+      if (
+        cycle.kind === 'closing' &&
+        cycle.panelFinished &&
+        cycle.overlayFinished &&
+        !visibleRef.current
+      ) {
+        signalClosed(display)
+        displayItemRef.current = undefined
+        setDisplayItem(undefined)
+        pendingItemRef.current = undefined
+        updateTransitionState('closed')
+      }
+    },
+    [panelProgress, signalClosed, signalOpened, startTransitionCycle, updateTransitionState],
+  )
+
+  const animateChannel = useCallback(
+    (channel: AnimationChannel, target: number, id: number) => {
+      const cycle = transitionCycleRef.current
+      if (!cycle || cycle.id !== id) return
+
+      const progress = channel === 'panel' ? panelProgress : overlayProgress
+      if (channel === 'panel') cycle.panelStarted = true
+      else cycle.overlayStarted = true
+
+      cancelAnimation(progress)
+      if (!themeToken.motion || animationDuration === 0 || progress.value === target) {
+        progress.value = target
+        finishAnimation(id, channel, true)
+        return
+      }
+
+      const easing = target === 1 ? Easing.out(Easing.ease) : Easing.in(Easing.ease)
+      progress.value = withTiming(target, { duration: animationDuration, easing }, (finished) => {
+        'worklet'
+        if (finished) scheduleOnRN(finishAnimation, id, channel, true)
+      })
+    },
+    [animationDuration, finishAnimation, overlayProgress, panelProgress, themeToken.motion],
+  )
 
   useLayoutEffect(() => {
-    if (!renderedItem) {
+    activeItemRef.current = activeItem
+    const display = displayItemRef.current
+    const state = transitionStateRef.current
+
+    if (!activeItem) {
+      pendingItemRef.current = undefined
+      if (!display) {
+        updateTransitionState('closed')
+        return
+      }
+      if (state === 'closing') return
+
+      signalClose(display)
+      startTransitionCycle('closing')
+      updateTransitionState('closing')
+      return
+    }
+
+    if (!display) {
+      pendingItemRef.current = undefined
+      displayItemRef.current = activeItem
+      setDisplayItem(activeItem)
+      panelProgress.value = 0
+      overlayProgress.value = 0
+      signalOpen(activeItem)
+      startTransitionCycle('opening')
+      updateTransitionState('opening')
+      return
+    }
+
+    if (display.id === activeItem.id) {
+      if (state === 'switching-out' || state === 'closing') {
+        const pending = pendingItemRef.current
+        pendingItemRef.current = undefined
+        signalClose(pending)
+        signalOpen(display)
+        startTransitionCycle('reopening')
+        updateTransitionState('reopening')
+      } else {
+        pendingItemRef.current = undefined
+      }
+      return
+    }
+
+    const previousPending = pendingItemRef.current
+    pendingItemRef.current = activeItem
+    if (previousPending && previousPending.id !== activeItem.id) signalClose(previousPending)
+    signalOpen(activeItem)
+
+    if (state === 'switching-out') return
+
+    signalClose(display)
+    startTransitionCycle('switching-out')
+    updateTransitionState('switching-out')
+  }, [
+    activeItem,
+    overlayProgress,
+    panelProgress,
+    signalClose,
+    signalOpen,
+    startTransitionCycle,
+    updateTransitionState,
+  ])
+
+  useLayoutEffect(() => {
+    if (!displayItem) {
       setMeasuredItemId(undefined)
       setMeasuredHeight(undefined)
       return
@@ -82,102 +300,54 @@ export function DropdownPopup({
 
     setMeasuredItemId(undefined)
     setMeasuredHeight(undefined)
-  }, [renderedItem, renderedItem?.estimatedHeight, renderedItem?.id])
+  }, [displayItem, displayItem?.estimatedHeight, displayItem?.id])
 
-  useEffect(() => {
-    const previousItem = previousRenderedItemRef.current
-    previousRenderedItemRef.current = renderedItem
-
-    if (!renderedItem || !previousItem || previousItem.id === renderedItem.id) return
-
-    if (openedItemIdRef.current === previousItem.id) {
-      openedItemIdRef.current = undefined
-    }
-    previousItem.onClosed?.()
-
-    if (
-      visibleRef.current &&
-      activeItemRef.current?.id === renderedItem.id &&
-      openSettledRef.current
-    ) {
-      openedItemIdRef.current = renderedItem.id
-      renderedItem.onOpened?.()
-    }
-  }, [renderedItem])
-
-  const renderedItemId = renderedItem?.id
-  const estimatedHeight = renderedItem?.estimatedHeight
-  const isMeasured = renderedItemId !== undefined && measuredItemId === renderedItemId
+  const displayItemId = displayItem?.id
+  const estimatedHeight = displayItem?.estimatedHeight
+  const isMeasured = displayItemId !== undefined && measuredItemId === displayItemId
   const panelHeight = isMeasured ? (measuredHeight ?? 0) : (estimatedHeight ?? 0)
-  const firstRenderNeedsMeasurement =
-    visible &&
-    renderedItem !== undefined &&
-    initialMeasurementPendingRef.current &&
-    estimatedHeight === undefined &&
-    !isMeasured
-  const transitionVisible = visible && renderedItem !== undefined && !firstRenderNeedsMeasurement
-  const transitionTargetRef = useRef(transitionVisible ? 1 : 0)
-  transitionTargetRef.current = transitionVisible ? 1 : 0
-
-  const notifyOpened = useCallback((item: DropdownItemRegistration | undefined) => {
-    if (!item || !visibleRef.current) return
-    if (openedItemIdRef.current === item.id) return
-    openedItemIdRef.current = item.id
-    openSettledRef.current = true
-    item.onOpened?.()
-  }, [])
-
-  const finishTransition = useCallback(
-    (target: number, transitionId: number) => {
-      if (transitionIdRef.current !== transitionId || transitionTargetRef.current !== target) return
-
-      if (target === 1) {
-        notifyOpened(renderedItemRef.current)
-        return
-      }
-
-      if (visibleRef.current || !renderedItemRef.current) return
-      openSettledRef.current = false
-      const item = renderedItemRef.current
-      openedItemIdRef.current = undefined
-      initialMeasurementPendingRef.current = false
-      item.onClosed?.()
-      setRenderedItem(undefined)
-    },
-    [notifyOpened],
-  )
+  const needsMeasurement = displayItem !== undefined && estimatedHeight === undefined && !isMeasured
+  const panelReady = !needsMeasurement
 
   useEffect(() => {
-    const target = transitionVisible ? 1 : 0
-    const transitionId = transitionIdRef.current + 1
-    transitionIdRef.current = transitionId
-    cancelAnimation(progress)
+    const cycle = transitionCycleRef.current
+    if (!cycle || !displayItem) return
 
-    if (!transitionVisible && visibleRef.current) {
-      progress.value = 0
-      return () => cancelAnimation(progress)
+    if (transitionState === 'opening' && cycle.kind === 'opening') {
+      if (!cycle.overlayStarted) animateChannel('overlay', 1, cycle.id)
+      if (panelReady && !cycle.panelStarted) animateChannel('panel', 1, cycle.id)
+      return
     }
 
-    if (!themeToken.motion || animationDuration === 0 || progress.value === target) {
-      progress.value = target
-      finishTransition(target, transitionId)
-      return () => cancelAnimation(progress)
+    if (transitionState === 'switching-out' && cycle.kind === 'switching-out') {
+      if (overlayProgress.value < 1 && !cycle.overlayStarted) {
+        animateChannel('overlay', 1, cycle.id)
+      }
+      if (!cycle.panelStarted) animateChannel('panel', 0, cycle.id)
+      return
     }
 
-    const easing = target === 1 ? Easing.out(Easing.ease) : Easing.in(Easing.ease)
-    progress.value = withTiming(target, { duration: animationDuration, easing }, (finished) => {
-      'worklet'
-      if (finished) scheduleOnRN(finishTransition, target, transitionId)
-    })
+    if (transitionState === 'switching-in' && cycle.kind === 'switching-in') {
+      if (panelReady && !cycle.panelStarted) animateChannel('panel', 1, cycle.id)
+      return
+    }
 
-    return () => cancelAnimation(progress)
-  }, [animationDuration, finishTransition, progress, themeToken.motion, transitionVisible])
+    if (transitionState === 'reopening' && cycle.kind === 'reopening') {
+      if (panelReady && !cycle.panelStarted) animateChannel('panel', 1, cycle.id)
+      return
+    }
+
+    if (transitionState === 'closing' && cycle.kind === 'closing') {
+      if (!cycle.overlayStarted) animateChannel('overlay', 0, cycle.id)
+      if (!cycle.panelStarted) animateChannel('panel', 0, cycle.id)
+    }
+  }, [animateChannel, displayItem, overlayProgress, panelReady, transitionState])
 
   const animatedPanelStyle = useAnimatedStyle(
     () => ({
       transform: [
         {
-          translateY: (direction === 'down' ? -1 : 1) * panelHeight * (1 - progress.value),
+          translateY: (direction === 'down' ? -1 : 1) * panelHeight * (1 - panelProgress.value),
         },
       ],
     }),
@@ -185,7 +355,7 @@ export function DropdownPopup({
   )
 
   const animatedOverlayStyle = useAnimatedStyle(() => ({
-    opacity: progress.value,
+    opacity: overlayProgress.value,
   }))
 
   const rootStyle =
@@ -203,7 +373,7 @@ export function DropdownPopup({
           top: 0,
         }
 
-  const portalContent = renderedItem ? (
+  const portalContent = displayItem ? (
     <View
       collapsable={false}
       pointerEvents={visible ? 'auto' : 'none'}
@@ -218,8 +388,8 @@ export function DropdownPopup({
           zIndex={zIndex}
           onPress={closeOnPressOverlay ? onRequestClose : undefined}
           animatedStyle={animatedOverlayStyle}
-          style={renderedItem.overlayStyle}
-          pressableStyle={renderedItem.overlayStyle}
+          style={displayItem.overlayStyle}
+          pressableStyle={displayItem.overlayStyle}
         />
       ) : null}
       <View
@@ -237,25 +407,26 @@ export function DropdownPopup({
         <Animated.View
           testID="dropdown-panel"
           onLayout={(event) => {
-            if (renderedItemRef.current?.id !== renderedItem.id) return
+            if (displayItemRef.current?.id !== displayItem.id) return
+            if (displayItem.estimatedHeight !== undefined) return
             const nextHeight = event.nativeEvent.layout.height
             if (nextHeight <= 0) return
-            setMeasuredItemId(renderedItem.id)
+            setMeasuredItemId(displayItem.id)
             setMeasuredHeight(nextHeight)
           }}
-          pointerEvents={visible ? 'auto' : 'none'}
+          pointerEvents={visible && transitionState !== 'closing' ? 'auto' : 'none'}
           style={[
             {
               backgroundColor: token.contentBackgroundColor,
               width: '100%',
               zIndex: (zIndex ?? token.zIndex) + 1,
             },
-            renderedItem.contentStyle,
-            firstRenderNeedsMeasurement ? { opacity: 0 } : null,
+            displayItem.contentStyle,
+            needsMeasurement ? { opacity: 0 } : null,
             animatedPanelStyle,
           ]}
         >
-          {renderedItem.content}
+          {displayItem.content}
         </Animated.View>
       </View>
     </View>
