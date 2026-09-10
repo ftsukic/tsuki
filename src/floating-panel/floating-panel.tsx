@@ -79,8 +79,7 @@ function getDampedHeight(
   const rawHeight = height + distance * direction
 
   if (rawHeight > max) return max + (rawHeight - max) * DAMP
-  if (rawHeight < min) return min - (min - rawHeight) * DAMP
-  return rawHeight
+  return Math.max(min, rawHeight)
 }
 
 export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(

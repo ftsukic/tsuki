@@ -98,7 +98,10 @@ function getTranslation(testID: string) {
 }
 
 function getPanelHeight(testID: string) {
-  return getAnimatedValue(StyleSheet.flatten(getPanelContainer(testID).props.style).height)
+  const style = StyleSheet.flatten(getPanelContainer(testID).props.style)
+  const height = getAnimatedValue(style.height) as number
+  const translation = getTranslation(testID)
+  return translation === undefined ? height : height - (translation as number)
 }
 
 function shouldClaim(responder: TestInstance, dy: number, timestamp: number) {
@@ -247,6 +250,49 @@ describe('FloatingPanel', () => {
     })
 
     expect(onHeightChange).toHaveBeenLastCalledWith(360)
+    await view.unmount()
+  })
+
+  it('does not drag bottom panel below the minimum anchor', async () => {
+    const onHeightChange = jest.fn()
+    const onHeightChangeEnd = jest.fn()
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel
+          height={100}
+          anchors={[100, 300]}
+          testID="panel"
+          onHeightChange={onHeightChange}
+          onHeightChangeEnd={onHeightChangeEnd}
+        >
+          <Text>bottom minimum</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+
+    await act(async () => {
+      const props = getResponderProps(getResponders(view)[0])
+      const start = touchEvent(0, 0, 1)
+      props.onStartShouldSetResponderCapture(start)
+      props.onResponderGrant(start)
+      props.onResponderMove(gesture(200, 2))
+    })
+
+    expect(getTranslation('panel')).toBe(200)
+    expect(getPanelHeight('panel')).toBe(100)
+    expect(onHeightChange).not.toHaveBeenCalled()
+
+    await act(async () => {
+      getResponderProps(getResponders(view)[0]).onResponderRelease(gesture(200, 3))
+    })
+
+    expect(getTranslation('panel')).toBe(200)
+    expect(getPanelHeight('panel')).toBe(100)
+    expect(StyleSheet.flatten(getScrollView(view).props.contentContainerStyle).paddingBottom).toBe(
+      200,
+    )
+    expect(onHeightChange).not.toHaveBeenCalled()
+    expect(onHeightChangeEnd).not.toHaveBeenCalled()
     await view.unmount()
   })
 
@@ -413,6 +459,42 @@ describe('FloatingPanel', () => {
       expect(collapseEnd).toHaveBeenCalledWith(100)
       await view.unmount()
     }
+  })
+
+  it('does not drag top panel below the minimum anchor', async () => {
+    const onHeightChange = jest.fn()
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel
+          placement="top"
+          height={100}
+          anchors={[100, 300]}
+          testID="top-panel"
+          onHeightChange={onHeightChange}
+        >
+          <Text>top minimum</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+
+    await act(async () => {
+      const props = getResponderProps(getResponders(view)[1])
+      const start = touchEvent(0, 0, 1)
+      props.onStartShouldSetResponderCapture(start)
+      props.onResponderGrant(start)
+      props.onResponderMove(gesture(-200, 2))
+    })
+
+    expect(getPanelHeight('top-panel')).toBe(100)
+    expect(onHeightChange).not.toHaveBeenCalled()
+
+    await act(async () => {
+      getResponderProps(getResponders(view)[1]).onResponderRelease(gesture(-200, 3))
+    })
+
+    expect(getPanelHeight('top-panel')).toBe(100)
+    expect(onHeightChange).not.toHaveBeenCalled()
+    await view.unmount()
   })
 
   it('keeps top content gestures available to ScrollView when fully expanded', async () => {
