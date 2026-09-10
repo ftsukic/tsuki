@@ -17,23 +17,24 @@ export interface DropdownItemRegistration {
 
 export interface DropdownMenuContextValue {
   activeIndex: number | null
+  activeItem?: DropdownItemRegistration
   activeColor: string
   direction: NonNullable<DropdownMenuProps['direction']>
   overlay: boolean
   closeOnPressOverlay: boolean
   duration?: number
+  panelMaxHeight?: number
+  scrollable: boolean
+  scrollableItemWidth: `${number}%`
   zIndex?: number
   menuProps: DropdownMenuProps
   menuStyles?: DropdownMenuStyles
   registerItem: (id: symbol, disabled: boolean) => number
   updateItem: (id: symbol, item: Partial<DropdownItemRegistration>) => void
   unregisterItem: (id: symbol) => void
-  getItem: (index: number | null) => DropdownItemRegistration | undefined
   open: (index: number) => void
   close: () => void
   toggle: (index: number) => void
-  notifyPopupOpened: () => void
-  notifyPopupClosed: () => void
   notifyItemUpdate: () => void
   itemVersion: number
 }

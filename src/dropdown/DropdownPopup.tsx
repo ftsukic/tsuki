@@ -1,8 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
-import type { StyleProp, ViewStyle } from 'react-native'
 import { Easing } from 'react-native-reanimated'
-import { Animated, useAnimatedStyle, useTransitionProgress } from '../motion'
+import { scheduleOnRN } from 'react-native-worklets'
+import {
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated'
+import { Animated } from '../motion'
 import { OverlaySurface } from '../overlay/surface'
 import { Portal } from '../portal'
 import { useComponentToken, useToken } from '../theme'
@@ -20,14 +26,8 @@ interface DropdownPopupProps {
   menuTop: number
   menuBottom: number
   windowHeight: number
-  item?: DropdownItemRegistration
-  panelStyle?: StyleProp<ViewStyle>
-  overlayStyle?: StyleProp<ViewStyle>
-  panelContent?: React.ReactNode
-  panelContentKey?: string | number
+  activeItem?: DropdownItemRegistration
   onRequestClose: () => void
-  onOpened: () => void
-  onClosed: () => void
 }
 
 export function DropdownPopup({
@@ -40,14 +40,8 @@ export function DropdownPopup({
   menuTop,
   menuBottom,
   windowHeight,
-  item,
-  panelStyle,
-  overlayStyle,
-  panelContent,
-  panelContentKey,
+  activeItem,
   onRequestClose,
-  onOpened,
-  onClosed,
 }: DropdownPopupProps) {
   const { token: themeToken } = useToken()
   const token = useComponentToken('Dropdown', getDropdownToken)
@@ -55,98 +49,140 @@ export function DropdownPopup({
     ? Math.max(0, duration as number)
     : token.animationDuration
   const animationDuration = themeToken.motion ? normalizedDuration : 0
-  const itemRef = useRef(item)
-  if (item) itemRef.current = item
-  const effectiveItem = itemRef.current
-  const effectivePanelContent = panelContent === undefined ? effectiveItem?.content : panelContent
-  const effectivePanelStyle = panelStyle === undefined ? effectiveItem?.contentStyle : panelStyle
-  const effectiveOverlayStyle =
-    overlayStyle === undefined ? effectiveItem?.overlayStyle : overlayStyle
-  const estimatedHeight = effectiveItem?.estimatedHeight
-  const [panelHeight, setPanelHeight] = useState(estimatedHeight ?? 0)
-  const [panelMeasured, setPanelMeasured] = useState(estimatedHeight !== undefined)
-  const [rendered, setRendered] = useState(visible)
+  const [renderedItem, setRenderedItem] = useState<DropdownItemRegistration | undefined>(activeItem)
+  const [measuredItemId, setMeasuredItemId] = useState<symbol | undefined>(undefined)
+  const [measuredHeight, setMeasuredHeight] = useState<number | undefined>(undefined)
+  const renderedItemRef = useRef(renderedItem)
+  const activeItemRef = useRef(activeItem)
+  const previousRenderedItemRef = useRef<DropdownItemRegistration | undefined>(undefined)
+  const openedItemIdRef = useRef<symbol | undefined>(undefined)
+  const openSettledRef = useRef(false)
+  const initialMeasurementPendingRef = useRef(false)
   const visibleRef = useRef(visible)
-  const previousVisibleRef = useRef(visible)
-  const openedRef = useRef(false)
-  const closedRef = useRef(!visible)
-  const previousContentKeyRef = useRef(panelContentKey)
+  const transitionIdRef = useRef(0)
+  const progress = useSharedValue(0)
 
+  renderedItemRef.current = renderedItem
+  activeItemRef.current = activeItem
   visibleRef.current = visible
 
-  useEffect(() => {
-    const contentChanged = previousContentKeyRef.current !== panelContentKey
-    previousContentKeyRef.current = panelContentKey
-    if (!contentChanged) return
+  useLayoutEffect(() => {
+    if (activeItem && renderedItemRef.current?.id !== activeItem.id) {
+      initialMeasurementPendingRef.current = renderedItemRef.current === undefined
+      setRenderedItem(activeItem)
+    }
+  }, [activeItem])
 
-    setPanelHeight(estimatedHeight ?? 0)
-    setPanelMeasured(estimatedHeight !== undefined)
-  }, [estimatedHeight, panelContentKey])
-
-  useEffect(() => {
-    const wasVisible = previousVisibleRef.current
-    previousVisibleRef.current = visible
-
-    if (visible) {
-      setRendered(true)
-      if (!wasVisible) {
-        openedRef.current = false
-        closedRef.current = false
-      }
+  useLayoutEffect(() => {
+    if (!renderedItem) {
+      setMeasuredItemId(undefined)
+      setMeasuredHeight(undefined)
       return
     }
 
-    if (wasVisible) {
-      closedRef.current = false
-    }
-  }, [visible])
+    setMeasuredItemId(undefined)
+    setMeasuredHeight(undefined)
+  }, [renderedItem, renderedItem?.estimatedHeight, renderedItem?.id])
 
-  const waitingForFirstMeasurement =
+  useEffect(() => {
+    const previousItem = previousRenderedItemRef.current
+    previousRenderedItemRef.current = renderedItem
+
+    if (!renderedItem || !previousItem || previousItem.id === renderedItem.id) return
+
+    if (openedItemIdRef.current === previousItem.id) {
+      openedItemIdRef.current = undefined
+    }
+    previousItem.onClosed?.()
+
+    if (
+      visibleRef.current &&
+      activeItemRef.current?.id === renderedItem.id &&
+      openSettledRef.current
+    ) {
+      openedItemIdRef.current = renderedItem.id
+      renderedItem.onOpened?.()
+    }
+  }, [renderedItem])
+
+  const renderedItemId = renderedItem?.id
+  const estimatedHeight = renderedItem?.estimatedHeight
+  const isMeasured = renderedItemId !== undefined && measuredItemId === renderedItemId
+  const panelHeight = isMeasured ? (measuredHeight ?? 0) : (estimatedHeight ?? 0)
+  const firstRenderNeedsMeasurement =
     visible &&
-    previousVisibleRef.current !== true &&
-    !panelMeasured &&
-    estimatedHeight === undefined
-  const transitionVisible = visible && !waitingForFirstMeasurement
-  const handleTransitionEnd = (transitionVisibleValue: boolean) => {
-    if (transitionVisibleValue) {
-      if (!visibleRef.current || openedRef.current) return
-      openedRef.current = true
-      onOpened()
-      return
+    renderedItem !== undefined &&
+    initialMeasurementPendingRef.current &&
+    estimatedHeight === undefined &&
+    !isMeasured
+  const transitionVisible = visible && renderedItem !== undefined && !firstRenderNeedsMeasurement
+  const transitionTargetRef = useRef(transitionVisible ? 1 : 0)
+  transitionTargetRef.current = transitionVisible ? 1 : 0
+
+  const notifyOpened = useCallback((item: DropdownItemRegistration | undefined) => {
+    if (!item || !visibleRef.current) return
+    if (openedItemIdRef.current === item.id) return
+    openedItemIdRef.current = item.id
+    openSettledRef.current = true
+    item.onOpened?.()
+  }, [])
+
+  const finishTransition = useCallback(
+    (target: number, transitionId: number) => {
+      if (transitionIdRef.current !== transitionId || transitionTargetRef.current !== target) return
+
+      if (target === 1) {
+        notifyOpened(renderedItemRef.current)
+        return
+      }
+
+      if (visibleRef.current || !renderedItemRef.current) return
+      openSettledRef.current = false
+      const item = renderedItemRef.current
+      openedItemIdRef.current = undefined
+      initialMeasurementPendingRef.current = false
+      item.onClosed?.()
+      setRenderedItem(undefined)
+    },
+    [notifyOpened],
+  )
+
+  useEffect(() => {
+    const target = transitionVisible ? 1 : 0
+    const transitionId = transitionIdRef.current + 1
+    transitionIdRef.current = transitionId
+    cancelAnimation(progress)
+
+    if (!transitionVisible && visibleRef.current) {
+      progress.value = 0
+      return () => cancelAnimation(progress)
     }
 
-    if (visibleRef.current || !rendered || closedRef.current) return
-    closedRef.current = true
-    setRendered(false)
-    onClosed()
-  }
+    if (!themeToken.motion || animationDuration === 0 || progress.value === target) {
+      progress.value = target
+      finishTransition(target, transitionId)
+      return () => cancelAnimation(progress)
+    }
 
-  const entering = useMemo(
-    () => ({
-      duration: animationDuration,
-      easing: Easing.out(Easing.ease),
-      mode: 'timing' as const,
-    }),
-    [animationDuration],
-  )
-  const leaving = useMemo(
-    () => ({
-      duration: animationDuration,
-      easing: Easing.in(Easing.ease),
-      mode: 'timing' as const,
-    }),
-    [animationDuration],
-  )
+    const easing = target === 1 ? Easing.out(Easing.ease) : Easing.in(Easing.ease)
+    progress.value = withTiming(target, { duration: animationDuration, easing }, (finished) => {
+      'worklet'
+      if (finished) scheduleOnRN(finishTransition, target, transitionId)
+    })
 
-  const { progress, animatedStyle: animatedPanelStyle } = useTransitionProgress({
-    visible: transitionVisible,
-    type: direction === 'down' ? 'slide-down' : 'slide-up',
-    distance: Math.max(panelHeight, 1),
-    opacity: 1,
-    entering,
-    leaving,
-    onTransitionEnd: handleTransitionEnd,
-  })
+    return () => cancelAnimation(progress)
+  }, [animationDuration, finishTransition, progress, themeToken.motion, transitionVisible])
+
+  const animatedPanelStyle = useAnimatedStyle(
+    () => ({
+      transform: [
+        {
+          translateY: (direction === 'down' ? -1 : 1) * panelHeight * (1 - progress.value),
+        },
+      ],
+    }),
+    [direction, panelHeight],
+  )
 
   const animatedOverlayStyle = useAnimatedStyle(() => ({
     opacity: progress.value,
@@ -167,62 +203,64 @@ export function DropdownPopup({
           top: 0,
         }
 
-  const portalContent =
-    !rendered && !visible ? null : (
+  const portalContent = renderedItem ? (
+    <View
+      collapsable={false}
+      pointerEvents={visible ? 'auto' : 'none'}
+      style={[StyleSheet.absoluteFill, rootStyle, { zIndex }]}
+    >
+      {overlay ? (
+        <OverlaySurface
+          testID="dropdown-overlay"
+          show={visible}
+          rendered
+          backgroundColor={token.overlayColor}
+          zIndex={zIndex}
+          onPress={closeOnPressOverlay ? onRequestClose : undefined}
+          animatedStyle={animatedOverlayStyle}
+          style={renderedItem.overlayStyle}
+          pressableStyle={renderedItem.overlayStyle}
+        />
+      ) : null}
       <View
-        collapsable={false}
-        pointerEvents={visible ? 'auto' : 'none'}
-        style={[StyleSheet.absoluteFill, rootStyle, { zIndex }]}
+        testID="dropdown-panel-viewport"
+        pointerEvents="box-none"
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            justifyContent: direction === 'up' ? 'flex-end' : 'flex-start',
+            overflow: 'hidden',
+            zIndex: (zIndex ?? token.zIndex) + 1,
+          },
+        ]}
       >
-        {overlay ? (
-          <OverlaySurface
-            testID="dropdown-overlay"
-            show={visible}
-            rendered={rendered}
-            backgroundColor={token.overlayColor}
-            zIndex={zIndex}
-            onPress={closeOnPressOverlay ? onRequestClose : undefined}
-            animatedStyle={animatedOverlayStyle}
-            style={effectiveOverlayStyle}
-            pressableStyle={effectiveOverlayStyle}
-          />
-        ) : null}
-        <View
-          pointerEvents="box-none"
+        <Animated.View
+          testID="dropdown-panel"
+          onLayout={(event) => {
+            if (renderedItemRef.current?.id !== renderedItem.id) return
+            const nextHeight = event.nativeEvent.layout.height
+            if (nextHeight <= 0) return
+            setMeasuredItemId(renderedItem.id)
+            setMeasuredHeight(nextHeight)
+          }}
+          pointerEvents={visible ? 'auto' : 'none'}
           style={[
-            StyleSheet.absoluteFill,
             {
-              justifyContent: direction === 'up' ? 'flex-end' : 'flex-start',
+              backgroundColor: token.contentBackgroundColor,
+              width: '100%',
               zIndex: (zIndex ?? token.zIndex) + 1,
             },
+            renderedItem.contentStyle,
+            firstRenderNeedsMeasurement ? { opacity: 0 } : null,
+            animatedPanelStyle,
           ]}
         >
-          <Animated.View
-            key={panelContentKey}
-            testID="dropdown-panel"
-            onLayout={(event) => {
-              const nextHeight = event.nativeEvent.layout.height
-              if (nextHeight <= 0) return
-              setPanelHeight(nextHeight)
-              setPanelMeasured(true)
-            }}
-            pointerEvents={visible ? 'auto' : 'none'}
-            style={[
-              {
-                backgroundColor: token.contentBackgroundColor,
-                width: '100%',
-                zIndex: (zIndex ?? token.zIndex) + 1,
-              },
-              effectivePanelStyle,
-              panelHeight <= 0 ? { opacity: 0 } : null,
-              animatedPanelStyle,
-            ]}
-          >
-            {effectivePanelContent}
-          </Animated.View>
-        </View>
+          {renderedItem.content}
+        </Animated.View>
       </View>
-    )
+    </View>
+  ) : null
+
   return <Portal>{portalContent}</Portal>
 }
 

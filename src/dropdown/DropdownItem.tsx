@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { useSharedValue, withTiming } from 'react-native-reanimated'
 import { Icon } from '../icon'
 import { Animated, useAnimatedStyle } from '../motion'
@@ -20,9 +20,17 @@ import { getDropdownItemStyles } from './style'
 import { getDropdownToken } from './token'
 import type { DropdownItemProps, DropdownItemRef, DropdownOption } from './types'
 
-function renderText(value: React.ReactNode, style: Parameters<typeof Text>[0]['style']) {
+function renderText(
+  value: React.ReactNode,
+  style: Parameters<typeof Text>[0]['style'],
+  testID?: string,
+) {
   if (typeof value === 'string' || typeof value === 'number') {
-    return <Text style={style}>{value}</Text>
+    return (
+      <Text testID={testID} style={style}>
+        {value}
+      </Text>
+    )
   }
   return value
 }
@@ -92,10 +100,16 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
       active,
       disabled,
       index,
-      selected: activeOption !== undefined,
     },
   })
-  const resolvedStyles = getDropdownItemStyles(token, active, disabled)
+  const resolvedStyles = getDropdownItemStyles(
+    token,
+    active,
+    disabled,
+    context.activeColor,
+    context.scrollable,
+    context.scrollableItemWidth,
+  )
   const duration = themeToken.motion ? Math.max(0, context.duration ?? token.animationDuration) : 0
   const arrowProgress = useSharedValue(active ? 1 : 0)
   const animatedArrowStyle = useAnimatedStyle(() => {
@@ -149,9 +163,22 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
   const content = hasCustomContent ? (
     children
   ) : options ? (
-    <View testID={`${testID ?? `dropdown-item-${index}`}-options`} style={resolvedStyles.content}>
+    <ScrollView
+      testID={`${testID ?? `dropdown-item-${index}`}-options`}
+      nestedScrollEnabled
+      showsVerticalScrollIndicator={false}
+      style={[
+        resolvedStyles.content,
+        context.panelMaxHeight ? { maxHeight: context.panelMaxHeight } : null,
+      ]}
+    >
       {options.map((option, optionIndex) => {
         const selected = sameDropdownValue(currentValue, option.value)
+        const optionTextColor = option.disabled
+          ? token.optionDisabledColor
+          : selected
+            ? context.activeColor
+            : token.optionTextColor
         return (
           <Pressable
             key={`${String(option.value)}-${optionIndex}`}
@@ -160,40 +187,61 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
             accessibilityState={{ disabled: option.disabled, selected }}
             disabled={option.disabled}
             onPress={() => handleOptionPress(option)}
-            pressStyle="opacity"
+            pressStyle="none"
             style={({ pressed }) => [
               resolvedStyles.option,
               itemSemantic?.option,
               option.disabled ? { opacity: 0.6 } : null,
-              pressed ? { backgroundColor: themeToken.colorFillTertiary } : null,
+              pressed && !option.disabled ? { backgroundColor: token.optionPressedColor } : null,
             ]}
           >
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-              {option.icon ? <View style={itemSemantic?.optionIcon}>{option.icon}</View> : null}
-              {renderText(option.text, [
-                resolvedStyles.optionText,
-                itemSemantic?.optionText,
-                selected ? { color: context.activeColor } : null,
-              ])}
+              {option.icon ? (
+                <View
+                  style={[
+                    resolvedStyles.optionIcon,
+                    { marginRight: token.arrowGap },
+                    itemSemantic?.optionIcon,
+                  ]}
+                >
+                  {option.icon}
+                </View>
+              ) : null}
+              {renderText(
+                option.text,
+                [resolvedStyles.optionText, { color: optionTextColor }, itemSemantic?.optionText],
+                `dropdown-option-${index}-${optionIndex}-text`,
+              )}
             </View>
             {selected ? (
               <Icon
                 name="CheckOutlined"
                 size={token.optionIconSize}
-                color={context.activeColor}
-                style={itemSemantic?.optionIcon}
+                color={option.disabled ? token.optionDisabledColor : context.activeColor}
+                testID={`dropdown-option-${index}-${optionIndex}-check`}
+                style={[
+                  resolvedStyles.optionIcon,
+                  { marginLeft: token.arrowGap },
+                  itemSemantic?.optionIcon,
+                ]}
               />
+            ) : null}
+            {optionIndex < options.length - 1 ? (
+              <View style={resolvedStyles.optionDivider} />
             ) : null}
           </Pressable>
         )
       })}
-    </View>
+    </ScrollView>
   ) : null
 
   context.updateItem(idRef.current, {
     content,
     contentStyle: [itemSemantic?.content, contentStyle],
-    estimatedHeight: children == null && options ? options.length * token.optionHeight : undefined,
+    estimatedHeight:
+      children == null && options
+        ? Math.min(options.length * token.optionHeight, context.panelMaxHeight ?? Infinity)
+        : undefined,
     onClosed,
     onOpened,
     overlayStyle: itemSemantic?.overlay,
@@ -207,7 +255,7 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
       accessibilityState={{ disabled, expanded: active }}
       disabled={disabled}
       onPress={toggle}
-      pressStyle="opacity"
+      pressStyle="none"
       style={({ pressed }) => [
         resolvedStyles.item,
         menuSemantic?.item,
@@ -215,15 +263,32 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
         pressed && !disabled ? { backgroundColor: themeToken.colorFillTertiary } : null,
       ]}
     >
-      {renderText(resolvedTitle, [resolvedStyles.title, menuSemantic?.title])}
+      {renderText(
+        resolvedTitle,
+        [resolvedStyles.title, menuSemantic?.title],
+        `dropdown-title-${index}`,
+      )}
       <Animated.View
+        testID={`dropdown-arrow-${index}`}
         pointerEvents="none"
         style={[resolvedStyles.arrow, menuSemantic?.arrow, animatedArrowStyle]}
       >
-        <Icon
-          name="DownOutlined"
-          size={token.arrowSize}
-          color={disabled ? token.disabledColor : active ? context.activeColor : token.titleColor}
+        <View
+          testID={`dropdown-caret-${index}`}
+          style={{
+            borderLeftColor: 'transparent',
+            borderLeftWidth: token.arrowSize,
+            borderRightColor: 'transparent',
+            borderRightWidth: token.arrowSize,
+            borderTopColor: disabled
+              ? token.disabledColor
+              : active
+                ? context.activeColor
+                : token.titleColor,
+            borderTopWidth: token.arrowSize,
+            height: 0,
+            width: 0,
+          }}
         />
       </Animated.View>
     </Pressable>

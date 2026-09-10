@@ -47,12 +47,13 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
   ref,
 ) {
   const token = useComponentToken('Dropdown', getDropdownToken)
-  const { height: windowHeight } = useWindowDimensions()
+  const { height: windowHeight, width: windowWidth } = useWindowDimensions()
   const menuRef = useRef<ViewComponent>(null)
   const registrationsRef = useRef<DropdownItemRegistration[]>([])
   const activeIndexRef = useRef<number | null>(null)
-  const closingIndexRef = useRef<number | null>(null)
   const onChangeRef = useRef(onChange)
+  const layoutReadyRef = useRef(false)
+  const openRequestRef = useRef(0)
   const [itemVersion, notifyItemUpdate] = useReducer((value: number) => value + 1, 0)
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [layout, setLayout] = useState<MenuLayout>({
@@ -65,31 +66,50 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
   onChangeRef.current = onChange
   activeIndexRef.current = activeIndex
 
-  const measureMenu = useCallback(() => {
-    const node = menuRef.current
-    if (!node || typeof node.measureInWindow !== 'function') return
-
-    node.measureInWindow((x, y, width, measuredHeight) => {
-      const nextLayout = {
-        height: measuredHeight || token.menuHeight,
-        width,
-        x,
-        y,
+  const measureMenu = useCallback(
+    (onMeasured?: () => void) => {
+      const node = menuRef.current
+      if (!node || typeof node.measureInWindow !== 'function') {
+        layoutReadyRef.current = true
+        onMeasured?.()
+        return
       }
-      setLayout((current) =>
-        current.height === nextLayout.height &&
-        current.width === nextLayout.width &&
-        current.x === nextLayout.x &&
-        current.y === nextLayout.y
-          ? current
-          : nextLayout,
-      )
-    })
-  }, [token.menuHeight])
+
+      let measured = false
+      node.measureInWindow((x, y, width, measuredHeight) => {
+        measured = true
+        const nextLayout = {
+          height: measuredHeight || token.menuHeight,
+          width,
+          x,
+          y,
+        }
+        setLayout((current) =>
+          current.height === nextLayout.height &&
+          current.width === nextLayout.width &&
+          current.x === nextLayout.x &&
+          current.y === nextLayout.y
+            ? current
+            : nextLayout,
+        )
+        layoutReadyRef.current = true
+        onMeasured?.()
+      })
+
+      // React Native's Jest host method is a no-op with a zero-argument mock.
+      // Keep the fallback local to that shape; native measureInWindow resolves
+      // through its callback before an open is committed.
+      if (!measured && node.measureInWindow.length === 0) {
+        layoutReadyRef.current = true
+        onMeasured?.()
+      }
+    },
+    [token.menuHeight],
+  )
 
   useEffect(() => {
     measureMenu()
-  }, [activeIndex, direction, measureMenu, windowHeight])
+  }, [direction, measureMenu, windowHeight, windowWidth])
 
   const registerItem = useCallback((id: symbol, disabled: boolean) => {
     const existing = registrationsRef.current.find((item) => item.id === id)
@@ -123,8 +143,8 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
 
     const currentIndex = activeIndexRef.current
     if (currentIndex === removedIndex) {
+      openRequestRef.current += 1
       activeIndexRef.current = null
-      closingIndexRef.current = currentIndex
       setActiveIndex(null)
       onChangeRef.current?.(null)
     } else if (currentIndex !== null && currentIndex > removedIndex) {
@@ -133,39 +153,46 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
     }
   }, [])
 
-  const getItem = useCallback((index: number | null) => {
-    if (index === null) return undefined
-    return registrationsRef.current[index]
-  }, [])
-
   const open = useCallback(
     (index: number) => {
       const registration = registrationsRef.current[index]
       if (!registration || registration.disabled) return
 
-      measureMenu()
-
       if (activeIndexRef.current === index) {
-        closingIndexRef.current = index
+        openRequestRef.current += 1
         activeIndexRef.current = null
         setActiveIndex(null)
         onChangeRef.current?.(null)
         return
       }
 
-      closingIndexRef.current = null
-      activeIndexRef.current = index
-      setActiveIndex(index)
-      onChangeRef.current?.(index)
+      const requestId = ++openRequestRef.current
+      const commit = () => {
+        if (
+          openRequestRef.current !== requestId ||
+          registrationsRef.current[index] !== registration
+        )
+          return
+        activeIndexRef.current = index
+        setActiveIndex(index)
+        onChangeRef.current?.(index)
+      }
+
+      if (layoutReadyRef.current) {
+        commit()
+        measureMenu()
+      } else {
+        measureMenu(commit)
+      }
     },
     [measureMenu],
   )
 
   const close = useCallback(() => {
     const currentIndex = activeIndexRef.current
+    openRequestRef.current += 1
     if (currentIndex === null) return
 
-    closingIndexRef.current = currentIndex
     activeIndexRef.current = null
     setActiveIndex(null)
     onChangeRef.current?.(null)
@@ -177,17 +204,6 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
     },
     [open],
   )
-
-  const notifyPopupOpened = useCallback(() => {
-    const registration = registrationsRef.current[activeIndexRef.current ?? -1]
-    registration?.onOpened?.()
-  }, [])
-
-  const notifyPopupClosed = useCallback(() => {
-    const registration = registrationsRef.current[closingIndexRef.current ?? -1]
-    closingIndexRef.current = null
-    registration?.onClosed?.()
-  }, [])
 
   const menuProps = useMemo<DropdownMenuProps>(
     () => ({
@@ -216,23 +232,34 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
     ],
   )
 
+  const itemCount = Children.count(children)
+  const threshold = Number.isFinite(swipeThreshold) ? Math.max(1, swipeThreshold) : itemCount
+  const isScrollable = Number.isFinite(swipeThreshold) && itemCount > Math.max(0, swipeThreshold)
+  const scrollableItemWidth = `${100 / Math.max(1, threshold)}%` as `${number}%`
+  const panelMaxHeight =
+    direction === 'down'
+      ? Math.max(0, windowHeight - layout.y - layout.height)
+      : Math.max(0, layout.y)
+  const resolvedPanelMaxHeight = panelMaxHeight > 0 ? panelMaxHeight : undefined
+
   const contextValue = useMemo<DropdownMenuContextValue>(
     () => ({
       activeColor: activeColor ?? token.activeColor,
       activeIndex,
+      activeItem: activeIndex === null ? undefined : registrationsRef.current[activeIndex],
       close,
       closeOnPressOverlay,
       direction,
       duration: duration ?? token.animationDuration,
-      getItem,
       menuProps,
       menuStyles: styles,
       notifyItemUpdate,
-      notifyPopupClosed,
-      notifyPopupOpened,
       open,
+      panelMaxHeight: resolvedPanelMaxHeight,
       overlay,
       registerItem,
+      scrollable: isScrollable,
+      scrollableItemWidth,
       toggle,
       unregisterItem,
       updateItem,
@@ -246,14 +273,14 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
       closeOnPressOverlay,
       direction,
       duration,
-      getItem,
       menuProps,
       notifyItemUpdate,
-      notifyPopupClosed,
-      notifyPopupOpened,
       open,
       overlay,
+      resolvedPanelMaxHeight,
       registerItem,
+      isScrollable,
+      scrollableItemWidth,
       toggle,
       unregisterItem,
       updateItem,
@@ -277,12 +304,11 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
       index: activeIndex ?? -1,
     },
   })
-  const itemCount = Children.count(children)
-  const isScrollable = Number.isFinite(swipeThreshold) && itemCount > Math.max(0, swipeThreshold)
   const handleLayout = (event: LayoutChangeEvent) => {
     onLayout?.(event)
     const nextHeight = event.nativeEvent.layout.height
     if (nextHeight > 0) {
+      layoutReadyRef.current = true
       setLayout((current) =>
         current.height === nextHeight ? current : { ...current, height: nextHeight },
       )
@@ -333,10 +359,9 @@ function DropdownPopupBridge({
   const context = useContext(DropdownMenuContext)
   if (!context) return null
 
-  const item = context.getItem(context.activeIndex)
   return (
     <DropdownPopup
-      visible={context.activeIndex !== null}
+      visible={context.activeItem !== undefined}
       direction={context.direction}
       overlay={context.overlay}
       closeOnPressOverlay={context.closeOnPressOverlay}
@@ -345,14 +370,8 @@ function DropdownPopupBridge({
       menuTop={layout.y}
       menuBottom={layout.y + layout.height}
       windowHeight={windowHeight}
-      item={item}
-      panelStyle={item?.contentStyle}
-      overlayStyle={item?.overlayStyle}
-      panelContent={item?.content}
-      panelContentKey={item?.index}
+      activeItem={context.activeItem}
       onRequestClose={context.close}
-      onOpened={context.notifyPopupOpened}
-      onClosed={context.notifyPopupClosed}
     />
   )
 }

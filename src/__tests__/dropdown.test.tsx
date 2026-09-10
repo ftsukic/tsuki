@@ -1,5 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet, Text, View } from 'react-native'
+import * as Reanimated from 'react-native-reanimated'
 import { createRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { ConfigProvider, DropdownItem, DropdownMenu, PortalHost } from '..'
@@ -22,6 +23,11 @@ function AppProvider({
 async function press(target: Parameters<typeof fireEvent.press>[0]) {
   fireEvent.press(target)
   await Promise.resolve()
+}
+
+function getIconFill(testID: string) {
+  const icon = screen.getByTestId(testID)
+  return icon.props.children?.props.children?.[0]?.props.fill
 }
 
 describe('Dropdown', () => {
@@ -64,6 +70,120 @@ describe('Dropdown', () => {
     expect(screen.queryByTestId('dropdown-panel')).toBeNull()
   })
 
+  it('keeps trigger active state separate from the selected option state', async () => {
+    await render(
+      <AppProvider>
+        <DropdownMenu activeColor="#722ed1">
+          <DropdownItem
+            defaultValue="default"
+            options={[
+              { text: '默认排序', value: 'default' },
+              { text: '销量优先', value: 'sales' },
+              { text: '价格优先', value: 'price' },
+            ]}
+          />
+        </DropdownMenu>
+      </AppProvider>,
+    )
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId('dropdown-title-0').props.style),
+    ).not.toMatchObject({
+      color: '#722ed1',
+    })
+
+    await press(screen.getByTestId('dropdown-item-0'))
+
+    expect(StyleSheet.flatten(screen.getByTestId('dropdown-title-0').props.style)).toMatchObject({
+      color: '#722ed1',
+    })
+    expect(screen.getByTestId('dropdown-arrow-0').props.style).toEqual(
+      expect.arrayContaining([expect.objectContaining({ transform: expect.anything() })]),
+    )
+    expect(screen.getByTestId('dropdown-caret-0').props.style).toMatchObject({
+      borderTopColor: '#722ed1',
+    })
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId('dropdown-option-0-0-text').props.style),
+    ).toMatchObject({ color: '#722ed1' })
+    expect(
+      StyleSheet.flatten(screen.getByTestId('dropdown-option-0-1-text').props.style),
+    ).not.toMatchObject({ color: '#722ed1' })
+    expect(screen.getByTestId('dropdown-option-0-0').props.accessibilityState).toMatchObject({
+      selected: true,
+    })
+    expect(screen.getByTestId('dropdown-option-0-1').props.accessibilityState).toMatchObject({
+      selected: false,
+    })
+    expect(getIconFill('dropdown-option-0-0-check')).toBe('#722ed1')
+    expect(screen.queryByTestId('dropdown-option-0-1-check')).toBeNull()
+  })
+
+  it('moves selected styles and the trigger title after selecting an option', async () => {
+    const onChange = jest.fn()
+    await render(
+      <AppProvider>
+        <DropdownMenu activeColor="#722ed1">
+          <DropdownItem
+            defaultValue="default"
+            onChange={onChange}
+            options={[
+              { text: '默认排序', value: 'default' },
+              { text: '销量优先', value: 'sales' },
+            ]}
+          />
+        </DropdownMenu>
+      </AppProvider>,
+    )
+
+    await press(screen.getByTestId('dropdown-item-0'))
+    await press(screen.getByTestId('dropdown-option-0-1'))
+
+    expect(onChange).toHaveBeenCalledWith('sales')
+    expect(screen.getByTestId('dropdown-title-0')).toHaveTextContent('销量优先')
+    expect(screen.queryByTestId('dropdown-panel')).toBeNull()
+
+    await press(screen.getByTestId('dropdown-item-0'))
+    expect(
+      StyleSheet.flatten(screen.getByTestId('dropdown-option-0-0-text').props.style),
+    ).not.toMatchObject({ color: '#722ed1' })
+    expect(
+      StyleSheet.flatten(screen.getByTestId('dropdown-option-0-1-text').props.style),
+    ).toMatchObject({ color: '#722ed1' })
+    expect(screen.queryByTestId('dropdown-option-0-0-check')).toBeNull()
+    expect(getIconFill('dropdown-option-0-1-check')).toBe('#722ed1')
+  })
+
+  it('uses disabled colors for a selected disabled option', async () => {
+    await render(
+      <AppProvider
+        theme={{
+          components: {
+            Dropdown: { activeColor: '#722ed1', optionDisabledColor: '#999999' },
+          },
+        }}
+      >
+        <DropdownMenu>
+          <DropdownItem
+            defaultValue="locked"
+            options={[
+              { text: '锁定选项', value: 'locked', disabled: true },
+              { text: '可选选项', value: 'available' },
+            ]}
+          />
+        </DropdownMenu>
+      </AppProvider>,
+    )
+
+    await press(screen.getByTestId('dropdown-item-0'))
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId('dropdown-option-0-0-text').props.style),
+    ).toMatchObject({ color: '#999999' })
+    expect(getIconFill('dropdown-option-0-0-check')).toBe('#999999')
+  })
+
   it('switches items without unmounting the shared overlay', async () => {
     const onChange = jest.fn()
     await render(
@@ -87,6 +207,86 @@ describe('Dropdown', () => {
     expect(screen.getByTestId('dropdown-overlay')).toBe(overlay)
     expect(onChange).toHaveBeenNthCalledWith(1, 0)
     expect(onChange).toHaveBeenNthCalledWith(2, 1)
+  })
+
+  it('keeps the rendered item through motion close and aligns switch lifecycle callbacks', async () => {
+    const animations: Array<{ complete: (finished?: boolean) => void }> = []
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, _config, callback) => {
+      if (callback) {
+        animations.push({ complete: (finished = true) => callback(finished) })
+      }
+      return value
+    })
+    const lifecycle = {
+      aClosed: jest.fn(),
+      aOpened: jest.fn(),
+      bClosed: jest.fn(),
+      bOpened: jest.fn(),
+    }
+
+    await render(
+      <AppProvider theme={{ token: { motion: true } }}>
+        <DropdownMenu duration={240}>
+          <DropdownItem
+            defaultValue="a"
+            onClosed={lifecycle.aClosed}
+            onOpened={lifecycle.aOpened}
+            options={[{ text: 'A', value: 'a' }]}
+          />
+          <DropdownItem
+            defaultValue="b"
+            onClosed={lifecycle.bClosed}
+            onOpened={lifecycle.bOpened}
+            options={[{ text: 'B', value: 'b' }]}
+          />
+        </DropdownMenu>
+      </AppProvider>,
+    )
+
+    await press(screen.getByTestId('dropdown-item-0'))
+    expect(animations).toHaveLength(1)
+    await act(async () => animations[0]?.complete())
+    expect(lifecycle.aOpened).toHaveBeenCalledTimes(1)
+
+    const panel = screen.getByTestId('dropdown-panel')
+    await press(screen.getByTestId('dropdown-item-0'))
+    expect(screen.getByTestId('dropdown-panel')).toBe(panel)
+    expect(screen.getByTestId('dropdown-option-0-0')).toBeTruthy()
+    expect(lifecycle.aClosed).not.toHaveBeenCalled()
+    expect(animations).toHaveLength(2)
+
+    await act(async () => animations[1]?.complete())
+    expect(lifecycle.aClosed).toHaveBeenCalledTimes(1)
+    expect(screen.queryByTestId('dropdown-panel')).toBeNull()
+
+    await press(screen.getByTestId('dropdown-item-0'))
+    await act(async () => animations[2]?.complete())
+    const switchedPanel = screen.getByTestId('dropdown-panel')
+    await press(screen.getByTestId('dropdown-item-1'))
+
+    expect(screen.getByTestId('dropdown-panel')).toBe(switchedPanel)
+    expect(screen.getByTestId('dropdown-option-1-0')).toBeTruthy()
+    expect(lifecycle.aClosed).toHaveBeenCalledTimes(2)
+    expect(lifecycle.bOpened).toHaveBeenCalledTimes(1)
+    expect(lifecycle.bClosed).not.toHaveBeenCalled()
+  })
+
+  it('uses non-shrinking trigger widths when swipeThreshold enables scrolling', async () => {
+    await render(
+      <AppProvider>
+        <DropdownMenu swipeThreshold={2}>
+          <DropdownItem title="一" />
+          <DropdownItem title="二" />
+          <DropdownItem title="三" />
+        </DropdownMenu>
+      </AppProvider>,
+    )
+
+    expect(StyleSheet.flatten(screen.getByTestId('dropdown-item-0').props.style)).toMatchObject({
+      flexGrow: 0,
+      flexShrink: 0,
+      width: '50%',
+    })
   })
 
   it('honors overlay behavior, disabled items, disabled options, and closeOnSelect', async () => {
@@ -239,4 +439,32 @@ describe('Dropdown', () => {
     expect(lifecycle.closed).toHaveBeenCalledTimes(1)
     expect(screen.queryByTestId('dropdown-panel')).toBeNull()
   })
+
+  it.each(['down', 'up'] as const)(
+    'clips the %s panel reveal to its viewport',
+    async (direction) => {
+      await render(
+        <AppProvider>
+          <DropdownMenu direction={direction}>
+            <DropdownItem title="面板">
+              <View style={{ height: 80 }}>
+                <Text>面板内容</Text>
+              </View>
+            </DropdownItem>
+          </DropdownMenu>
+        </AppProvider>,
+      )
+
+      await press(screen.getByTestId('dropdown-item-0'))
+
+      expect(
+        StyleSheet.flatten(screen.getByTestId('dropdown-panel-viewport').props.style),
+      ).toMatchObject({
+        justifyContent: direction === 'up' ? 'flex-end' : 'flex-start',
+        overflow: 'hidden',
+      })
+      expect(screen.getByTestId('dropdown-overlay')).toBeTruthy()
+      expect(screen.getByTestId('dropdown-panel')).toBeTruthy()
+    },
+  )
 })

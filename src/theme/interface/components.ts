@@ -558,6 +558,9 @@ export interface DropdownToken {
   titleColor: string
   activeColor: string
   disabledColor: string
+  optionTextColor: string
+  optionDisabledColor: string
+  optionPressedColor: string
   titleFontSize: number
   titleLineHeight: number
   titleFontFamily: string
@@ -570,6 +573,12 @@ export interface DropdownToken {
   optionIconSize: number
   contentBackgroundColor: string
   dividerColor: string
+  dividerWidth: number
+  shadowColor: string
+  shadowOpacity: number
+  shadowRadius: number
+  shadowOffset: number
+  elevation: number
   overlayColor: string
   animationDuration: number
   zIndex: number

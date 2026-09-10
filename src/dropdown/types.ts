@@ -18,9 +18,7 @@ export interface DropdownMenuStyleState {
   index: number
 }
 
-export interface DropdownItemStyleState extends DropdownMenuStyleState {
-  selected: boolean
-}
+export type DropdownItemStyleState = DropdownMenuStyleState
 
 export interface DropdownMenuSemanticStyles {
   root?: StyleProp<ViewStyle>

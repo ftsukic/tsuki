@@ -48,13 +48,13 @@ import { DropdownItem, DropdownMenu } from '@ftsukic/tsuki'
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | children | `ReactNode` | — | 一个或多个 `DropdownItem`；菜单项等宽排列 |
-| activeColor | `string` | `Dropdown.activeColor` | 当前展开菜单项和选中选项的颜色 |
+| activeColor | `string` | `Dropdown.activeColor` | 当前展开菜单项的 title/caret、选中 option 文字和 selected check 的颜色 |
 | overlay | `boolean` | `true` | 是否渲染菜单区域之外的遮罩 |
 | closeOnPressOverlay | `boolean` | `true` | 点击遮罩时关闭当前面板 |
 | duration | `number` | `Dropdown.animationDuration` | 面板和箭头动画时长，单位为毫秒；主题关闭 motion 时为 0 |
 | zIndex | `number` | `Dropdown.zIndex` | Portal 锚定层的基础层级；面板使用基础层级加 1 |
 | direction | `'down' \| 'up'` | `'down'` | 面板相对菜单的展开方向，箭头方向同步变化 |
-| swipeThreshold | `number` | `4` | 菜单项超过该数量时启用横向滚动容器 |
+| swipeThreshold | `number` | `4` | 菜单项超过该数量时启用横向滚动容器；触发器保持非收缩宽度 |
 | style | `StyleProp<ViewStyle>` | — | 菜单栏根节点样式 |
 | styles | `DropdownMenuStyles` | — | `root`、`item`、`title`、`arrow` 语义样式；resolver state 包含 `active`、`disabled`、`index` |
 | onChange | `(index: number \| null) => void` | — | 展开、切换或关闭时通知当前菜单项索引 |
@@ -68,14 +68,14 @@ import { DropdownItem, DropdownMenu } from '@ftsukic/tsuki'
 | title | `ReactNode` | — | 显式标题；优先级高于当前选项文本 |
 | value | `string \| number` | — | 受控选项值；传入后内部不会覆盖 |
 | defaultValue | `string \| number` | — | 非受控模式的初始选项值 |
-| options | `DropdownOption[]` | — | options 面板；当前值对应的 `text` 会作为默认标题 |
+| options | `DropdownOption[]` | — | options 面板；当前值对应的 `text` 会作为默认标题；选项过多时限制在可用高度内并纵向滚动 |
 | disabled | `boolean` | `false` | 禁用触发器和展开行为 |
 | children | `ReactNode` | — | 自定义面板内容；同时传入 `children` 与 `options` 时 `children` 优先 |
 | onChange | `(value: string \| number) => void` | — | 选择选项时回调；重复选择当前项也会回调，但不会重复写入非受控值 |
 | onOpen | `() => void` | — | 该项开始展开时回调 |
 | onOpened | `() => void` | — | 面板展开动画完成时回调 |
 | onClose | `() => void` | — | 该项开始关闭时回调 |
-| onClosed | `() => void` | — | 面板关闭动画完成并卸载后回调 |
+| onClosed | `() => void` | — | 面板关闭动画完成并卸载后回调；切换到其他 item 时，在旧 item 不再作为面板内容后回调 |
 | closeOnSelect | `boolean` | `true` | 选择 option 后是否关闭面板；自定义内容需要自行调用 ref 关闭 |
 | style | `StyleProp<ViewStyle>` | — | 触发器根节点样式 |
 | contentStyle | `StyleProp<ViewStyle>` | — | 当前面板根节点样式 |
@@ -94,6 +94,8 @@ interface DropdownOption {
 ```
 
 禁用 option 不会触发 `onChange` 或关闭面板。`DropdownItem` 的触发器和 option 都使用 `accessibilityRole="button"`；触发器暴露 `expanded`/`disabled`，option 暴露 `selected`/`disabled`。
+
+DropdownItem 的 styles resolver 只描述触发器自身的 `active`、`disabled`、`index` 状态。option 的 `selected`、`pressed` 和 `disabled` 按每一行独立计算；`styles.option` 与 `styles.optionText` 是静态样式覆盖，不会把所有 option 误判为 selected。
 
 ## Ref API
 
@@ -131,6 +133,6 @@ ref 方法复用同一套 `DropdownMenu` 状态，不会创建第二套 visible 
 </ConfigProvider>
 ```
 
-公开 token 包含 `menuHeight`、`menuBackgroundColor`、`titleColor`、`activeColor`、`disabledColor`、`titleFontSize`、`titleLineHeight`、`titleFontFamily`、`arrowSize`、`arrowGap`、`optionHeight`、`optionPaddingHorizontal`、`optionFontSize`、`optionLineHeight`、`optionIconSize`、`contentBackgroundColor`、`dividerColor`、`overlayColor`、`animationDuration` 和 `zIndex`。
+公开 token 包含 `menuHeight`、`menuBackgroundColor`、`titleColor`、`activeColor`、`disabledColor`、`optionTextColor`、`optionDisabledColor`、`optionPressedColor`、`titleFontSize`、`titleLineHeight`、`titleFontFamily`、`arrowSize`、`arrowGap`、`optionHeight`、`optionPaddingHorizontal`、`optionFontSize`、`optionLineHeight`、`optionIconSize`、`contentBackgroundColor`、`dividerColor`、`dividerWidth`、`shadowColor`、`shadowOpacity`、`shadowRadius`、`shadowOffset`、`elevation`、`overlayColor`、`animationDuration` 和 `zIndex`。
 
 组件不提供 Web DOM、`openIndex`、`defaultOpenIndex` 或第三方 popover/dropdown API；需要外部打开状态时使用 `DropdownMenuRef` 或由上层响应 `onChange`。

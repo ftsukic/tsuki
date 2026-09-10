@@ -11,7 +11,7 @@ export default function BasicDropdownExample() {
 
   return (
     <View style={styles.container}>
-      <DropdownMenu>
+      <DropdownMenu activeColor="#1677ff">
         <DropdownItem
           value={sort}
           options={[
@@ -21,12 +21,22 @@ export default function BasicDropdownExample() {
           ]}
           onChange={(value) => setSort(String(value))}
         />
-        <DropdownItem title="筛选">
-          <View style={styles.panel}>
-            <Text style={styles.panelTitle}>筛选条件</Text>
-            <Text style={styles.panelText}>自定义内容可以组合任意 React Native 布局。</Text>
-          </View>
-        </DropdownItem>
+        <DropdownItem
+          defaultValue="all"
+          options={[
+            { text: '全部商品', value: 'all' },
+            { text: '仅看有库存', value: 'in-stock' },
+            { text: '预售商品', value: 'preorder', disabled: true },
+          ]}
+        />
+        <DropdownItem
+          defaultValue="all"
+          options={[
+            { text: '全部区域', value: 'all' },
+            { text: '附近门店', value: 'nearby' },
+            { text: '跨区配送', value: 'cross-region' },
+          ]}
+        />
       </DropdownMenu>
       <Text style={styles.result}>当前排序：{sort}</Text>
     </View>
@@ -35,8 +45,5 @@ export default function BasicDropdownExample() {
 
 const styles = StyleSheet.create({
   container: { gap: 12 },
-  panel: { gap: 8, padding: 16 },
-  panelText: { color: '#667085', fontSize: 13 },
-  panelTitle: { color: '#1d2939', fontSize: 15, fontWeight: '600' },
   result: { color: '#667085', fontSize: 13, paddingHorizontal: 12 },
 })

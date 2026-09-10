@@ -16,6 +16,7 @@ export interface DropdownItemResolvedStyles {
   option: ViewStyle
   optionText: TextStyle
   optionIcon: ViewStyle
+  optionDivider: ViewStyle
 }
 
 export function getDropdownMenuStyles(token: DropdownToken): DropdownMenuResolvedStyles {
@@ -24,6 +25,11 @@ export function getDropdownMenuStyles(token: DropdownToken): DropdownMenuResolve
       height: token.menuHeight,
       backgroundColor: token.menuBackgroundColor,
       flexDirection: 'row',
+      elevation: token.elevation,
+      shadowColor: token.shadowColor,
+      shadowOffset: { height: token.shadowOffset, width: 0 },
+      shadowOpacity: token.shadowOpacity,
+      shadowRadius: token.shadowRadius,
     },
     item: {
       flex: 1,
@@ -47,18 +53,22 @@ export function getDropdownItemStyles(
   token: DropdownToken,
   active: boolean,
   disabled: boolean,
+  activeColor = token.activeColor,
+  scrollable = false,
+  scrollableItemWidth: `${number}%` = '25%',
 ): DropdownItemResolvedStyles {
   return {
     item: {
-      flex: 1,
-      minWidth: 0,
+      ...(scrollable
+        ? { flexGrow: 0, flexShrink: 0, width: scrollableItemWidth }
+        : { flex: 1, minWidth: 0 }),
       alignItems: 'center',
       flexDirection: 'row',
       justifyContent: 'center',
       opacity: disabled ? 0.6 : 1,
     },
     title: {
-      color: disabled ? token.disabledColor : active ? token.activeColor : token.titleColor,
+      color: disabled ? token.disabledColor : active ? activeColor : token.titleColor,
       fontFamily: token.titleFontFamily,
       fontSize: token.titleFontSize,
       lineHeight: token.titleLineHeight,
@@ -71,20 +81,31 @@ export function getDropdownItemStyles(
     },
     option: {
       alignItems: 'center',
-      borderBottomColor: token.dividerColor,
-      borderBottomWidth: 1,
       flexDirection: 'row',
       minHeight: token.optionHeight,
       paddingHorizontal: token.optionPaddingHorizontal,
+      position: 'relative',
     },
     optionText: {
-      color: active ? token.activeColor : token.titleColor,
+      color: token.optionTextColor,
       fontFamily: token.titleFontFamily,
       fontSize: token.optionFontSize,
       lineHeight: token.optionLineHeight,
+      flexShrink: 1,
     },
     optionIcon: {
-      marginLeft: token.arrowGap,
+      alignItems: 'center',
+      height: token.optionLineHeight,
+      justifyContent: 'center',
+      width: token.optionIconSize,
+    },
+    optionDivider: {
+      backgroundColor: token.dividerColor,
+      bottom: 0,
+      height: token.dividerWidth,
+      left: token.optionPaddingHorizontal,
+      position: 'absolute',
+      right: token.optionPaddingHorizontal,
     },
   }
 }
