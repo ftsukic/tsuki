@@ -99,9 +99,7 @@ function getTranslation(testID: string) {
 
 function getPanelHeight(testID: string) {
   const style = StyleSheet.flatten(getPanelContainer(testID).props.style)
-  const height = getAnimatedValue(style.height) as number
-  const translation = getTranslation(testID)
-  return translation === undefined ? height : height - (translation as number)
+  return getAnimatedValue(style.height) as number
 }
 
 function shouldClaim(responder: TestInstance, dy: number, timestamp: number) {
@@ -278,21 +276,45 @@ describe('FloatingPanel', () => {
       props.onResponderMove(gesture(200, 2))
     })
 
-    expect(getTranslation('panel')).toBe(200)
+    expect(getTranslation('panel')).toBeUndefined()
     expect(getPanelHeight('panel')).toBe(100)
+    expect(StyleSheet.flatten(getPanelContainer('panel').props.style)).toMatchObject({ bottom: 0 })
     expect(onHeightChange).not.toHaveBeenCalled()
 
     await act(async () => {
       getResponderProps(getResponders(view)[0]).onResponderRelease(gesture(200, 3))
     })
 
-    expect(getTranslation('panel')).toBe(200)
+    expect(getTranslation('panel')).toBeUndefined()
     expect(getPanelHeight('panel')).toBe(100)
     expect(StyleSheet.flatten(getScrollView(view).props.contentContainerStyle).paddingBottom).toBe(
-      200,
+      0,
     )
     expect(onHeightChange).not.toHaveBeenCalled()
     expect(onHeightChangeEnd).not.toHaveBeenCalled()
+    await view.unmount()
+  })
+
+  it('changes the bottom panel height without translating its container', async () => {
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel height={300} anchors={[100, 300]} testID="panel">
+          <Text>bottom intermediate height</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+
+    await act(async () => {
+      const props = getResponderProps(getResponders(view)[0])
+      const start = touchEvent(0, 0, 1)
+      props.onStartShouldSetResponderCapture(start)
+      props.onResponderGrant(start)
+      props.onResponderMove(gesture(100, 2))
+    })
+
+    expect(getPanelHeight('panel')).toBe(200)
+    expect(StyleSheet.flatten(getPanelContainer('panel').props.style)).toMatchObject({ bottom: 0 })
+    expect(getTranslation('panel')).toBeUndefined()
     await view.unmount()
   })
 
@@ -554,7 +576,7 @@ describe('FloatingPanel', () => {
 
     const scrollView = getScrollView(view)
     expect(StyleSheet.flatten(scrollView.props.contentContainerStyle)).toMatchObject({
-      paddingBottom: 212,
+      paddingBottom: 12,
       paddingTop: 100,
     })
     await view.unmount()
@@ -570,7 +592,7 @@ describe('FloatingPanel', () => {
     )
 
     expect(StyleSheet.flatten(getScrollView(utils).props.contentContainerStyle)).toMatchObject({
-      paddingBottom: 200,
+      paddingBottom: 0,
     })
     await utils.unmount()
   })
@@ -651,7 +673,7 @@ describe('FloatingPanel', () => {
     )
     expect(timing).toHaveBeenCalledWith(
       expect.anything(),
-      expect.objectContaining({ duration: 120, useNativeDriver: true }),
+      expect.objectContaining({ duration: 120, toValue: 200, useNativeDriver: false }),
     )
     await view.unmount()
   })

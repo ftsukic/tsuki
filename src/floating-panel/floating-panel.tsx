@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { Animated, Easing, Platform, ScrollView, useWindowDimensions, View } from 'react-native'
+import { Animated, Easing, ScrollView, useWindowDimensions, View } from 'react-native'
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { usePanGesture } from '../interaction'
 import type { PanGestureState } from '../interaction'
@@ -64,10 +64,6 @@ function getClosestAnchor(anchors: readonly number[], target: number) {
   )
 }
 
-function getBottomTranslation(height: number, maxHeight: number) {
-  return maxHeight - height
-}
-
 function getDampedHeight(
   height: number,
   distance: number,
@@ -126,9 +122,6 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
     const previousPlacementRef = useRef(placement)
     const initializedRef = useRef(false)
     const animationRef = useRef<Animated.CompositeAnimation | null>(null)
-    const translation = useRef(
-      new Animated.Value(getBottomTranslation(initialHeight, maxHeight)),
-    ).current
     const panelHeight = useRef(new Animated.Value(initialHeight)).current
     const onHeightChangeRef = useRef(onHeightChange)
     const onHeightChangeEndRef = useRef(onHeightChangeEnd)
@@ -173,11 +166,8 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
     const animateToHeight = useCallback(
       (nextHeight: number, onComplete?: () => void) => {
         const config = configRef.current
-        const animatedValue = config.placement === 'top' ? panelHeight : translation
-        const nextValue =
-          config.placement === 'top'
-            ? nextHeight
-            : getBottomTranslation(nextHeight, config.maxHeight)
+        const animatedValue = panelHeight
+        const nextValue = nextHeight
         animationRef.current?.stop()
         animationRef.current = null
 
@@ -192,7 +182,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
           duration: config.duration,
           easing: Easing.bezier(0.18, 0.89, 0.32, 1.28),
           isInteraction: false,
-          useNativeDriver: config.placement === 'bottom' && Platform.OS !== 'web',
+          useNativeDriver: false,
         })
         animationRef.current = nextAnimation
         nextAnimation.start(({ finished }) => {
@@ -203,7 +193,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
           }
         })
       },
-      [panelHeight, translation],
+      [panelHeight],
     )
 
     const beginDrag = useCallback(() => {
@@ -246,13 +236,9 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
           config.placement,
         )
         setVisualHeight(nextHeight, true)
-        if (config.placement === 'top') {
-          panelHeight.setValue(nextHeight)
-        } else {
-          translation.setValue(getBottomTranslation(nextHeight, config.maxHeight))
-        }
+        panelHeight.setValue(nextHeight)
       },
-      [panelHeight, setVisualHeight, translation],
+      [panelHeight, setVisualHeight],
     )
 
     const finishDrag = useCallback(() => {
@@ -326,19 +312,9 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
         animationRef.current?.stop()
         animationRef.current = null
         panelHeight.setValue(nextHeight)
-        translation.setValue(getBottomTranslation(nextHeight, maxHeight))
       }
       initializedRef.current = true
-    }, [
-      animateToHeight,
-      height,
-      maxHeight,
-      minHeight,
-      panelHeight,
-      placement,
-      setVisualHeight,
-      translation,
-    ])
+    }, [animateToHeight, height, maxHeight, minHeight, panelHeight, placement, setVisualHeight])
 
     useEffect(
       () => () => {
@@ -360,9 +336,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
     const useTopSafeArea = safeAreaInsetTop ?? placement === 'top'
     const topInset = placement === 'top' && useTopSafeArea ? (safeAreaInsets?.top ?? 0) : 0
     const contentPadding =
-      placement === 'top'
-        ? { paddingTop: topInset }
-        : { paddingBottom: Math.max(0, maxHeight - currentHeight) + bottomInset }
+      placement === 'top' ? { paddingTop: topInset } : { paddingBottom: bottomInset }
     const dragArea = header ?? <View style={[resolvedStyles.bar, semantic?.bar]} />
     const headerView =
       header !== undefined || draggable ? (
@@ -385,12 +359,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
 
     return (
       <Animated.View
-        style={[
-          resolvedStyles.container,
-          { height: placement === 'top' ? panelHeight : maxHeight },
-          semantic?.container,
-          placement === 'bottom' ? { transform: [{ translateY: translation }] } : null,
-        ]}
+        style={[resolvedStyles.container, { height: panelHeight }, semantic?.container]}
       >
         <View
           ref={ref}
