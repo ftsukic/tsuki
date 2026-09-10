@@ -20,7 +20,8 @@ export function getFieldToken(token: AliasToken): FieldToken {
     errorColor: token.colorError,
     warningColor: token.colorWarning,
     padding: token.padding,
-    height: token.controlHeight,
+    labelWidth: token.fontSize * 6.2,
+    labelGap: token.paddingSM,
   }
 }
 
@@ -38,13 +39,7 @@ export function getFieldStyles(
 ): FieldResolvedStyles {
   const labelAlign: FieldLabelAlign = props.labelAlign ?? 'left'
   const statusColor = getFieldStatusColor(fieldToken, state.status)
-  const inputHeight =
-    props.size === 'small'
-      ? token.controlHeightSM
-      : props.size === 'large'
-        ? token.controlHeightLG
-        : token.controlHeight
-  const rowMinHeight = Math.max(fieldToken.height, inputHeight)
+  const labelWidth = props.labelWidth ?? fieldToken.labelWidth
   const labelVerticalAlignment = props.multiline ? 'flex-start' : 'center'
 
   return {
@@ -52,27 +47,25 @@ export function getFieldStyles(
       width: '100%',
     },
     row: {
-      minHeight: rowMinHeight,
       minWidth: 0,
       paddingHorizontal: fieldToken.padding,
       flexDirection: 'row',
       alignItems: 'stretch',
     },
     labelContainer: {
-      width: props.labelWidth,
-      minHeight: rowMinHeight,
+      width: labelWidth,
       flexShrink: 0,
       flexDirection: 'row',
       alignItems: labelVerticalAlignment,
     },
     customLabel: {
-      flex: props.labelWidth === undefined ? undefined : 1,
+      flex: 1,
       flexDirection: 'row',
       alignItems: labelVerticalAlignment,
       flexShrink: 1,
     },
     label: {
-      flex: props.labelWidth === undefined ? undefined : 1,
+      flex: 1,
       flexShrink: 1,
       color: fieldToken.labelColor,
       fontFamily: token.fontFamily,

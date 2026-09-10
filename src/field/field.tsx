@@ -53,14 +53,33 @@ function renderFeedback(value: ReactNode, style: StyleProp<TextStyle>) {
 }
 
 function createEmbeddedInputStyles(inputStyles: InputStyles | undefined): InputStyles {
-  if (inputStyles === undefined) return { shell: { paddingHorizontal: 0 } }
-
   return ({ props, state }: { props: InputProps; state: InputStyleState }) => {
     const semantic = resolveStyles(inputStyles, { props, state })
+    const isTextarea = props.multiline === true
 
     return {
       ...semantic,
-      shell: [semantic?.shell, { paddingHorizontal: 0 }],
+      root: [semantic?.root, { width: '100%' }],
+      shell: [
+        semantic?.shell,
+        {
+          paddingHorizontal: 0,
+          borderWidth: 0,
+          borderRadius: 0,
+          backgroundColor: 'transparent',
+        },
+        isTextarea ? undefined : { height: undefined, minHeight: undefined },
+      ],
+      content: [semantic?.content, isTextarea ? undefined : { alignItems: 'center' }],
+      input: [
+        semantic?.input,
+        isTextarea
+          ? undefined
+          : {
+              paddingVertical: 0,
+              textAlignVertical: 'center',
+            },
+      ],
     }
   }
 }
@@ -119,18 +138,22 @@ export const Field = forwardRef<TextInputInstance, FieldProps>(function Field(
   const embeddedInputStyles = useMemo(() => createEmbeddedInputStyles(inputStyles), [inputStyles])
   const hasCustomControl = children !== undefined
   const title = renderLabel(label, colon, resolved, semantic)
+  const effectiveLabelWidth = labelWidth ?? fieldToken.labelWidth
   const cellStyles: CellStyles = () => ({
     row: [resolved.row, semantic?.row],
     content: {
       flex: 0,
       flexShrink: 0,
       justifyContent: inputProps.multiline ? 'flex-start' : 'center',
-      marginRight: token.paddingSM,
-      width: labelWidth,
+      marginRight: fieldToken.labelGap,
+      width: effectiveLabelWidth,
     },
     required: [resolved.required, semantic?.required],
     valueContainer: {
+      flex: 1,
+      minWidth: 0,
       justifyContent: inputProps.multiline ? 'flex-start' : 'center',
+      overflow: 'visible',
     },
     divider: {
       left: fieldToken.padding,

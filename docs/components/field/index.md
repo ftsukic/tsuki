@@ -59,7 +59,7 @@ import { Field } from '@ftsukic/tsuki'
 | description | `ReactNode` | — | 内容下方的辅助描述 |
 | errorMessage | `ReactNode` | — | 内容下方的错误消息；未传 status 时自动使用 error 状态 |
 | status | `'default' \| 'error' \| 'warning'` | `'default'` | 反馈消息的语义状态；传入 errorMessage 且未明确传 status 时自动使用 error |
-| labelWidth | `DimensionValue` | — | 标签区域宽度 |
+| labelWidth | `DimensionValue` | `fontSize * 6.2`（默认字号 14 时约 87px） | 标签区域宽度 |
 | labelAlign | `'left' \| 'center' \| 'right'` | `'left'` | 标签文字对齐方式 |
 | colon | `boolean` | `false` | 是否在标签后显示冒号 |
 | inputStyle | `InputProps['style']` | — | 默认输入模式下透传给内部 Input 根节点的样式 |
@@ -73,7 +73,7 @@ Field 的输入相关 Props 继承并复用 `InputProps`，包括 `value/default
 
 ## 主题定制
 
-Field 使用 Cell 的背景、分割线和行布局，同时通过 `theme.components.Field` 覆盖标签、错误、警告颜色以及 Field 的最小行高和水平内边距：
+Field 使用 Cell 的背景、分割线和行布局，同时通过 `theme.components.Field` 覆盖标签、错误、警告颜色、标签宽度/间距和水平内边距：
 
 ```tsx | pure
 import { ConfigProvider, Field } from '@ftsukic/tsuki'

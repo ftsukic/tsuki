@@ -1,4 +1,4 @@
-import { ConfigProvider, Field, getDesignToken } from '..'
+import { ConfigProvider, Field, getDesignToken, getFieldToken } from '..'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { createRef } from 'react'
 import { StyleSheet, View } from 'react-native'
@@ -63,6 +63,51 @@ describe('Field', () => {
       paddingVertical: 10,
     })
     expect(screen.getByPlaceholderText('请输入姓名')).toBeTruthy()
+  })
+
+  it('uses a stable default label width and gap', async () => {
+    const theme = getDesignToken()
+    const fieldToken = getFieldToken(theme)
+
+    expect(fieldToken.labelWidth).toBeCloseTo(theme.fontSize * 6.2)
+    expect(fieldToken.labelGap).toBe(theme.paddingSM)
+
+    await render(<Field label="姓名" />)
+
+    const label = screen.getByText('姓名')
+    expect(StyleSheet.flatten(label.parent?.props.style)).toMatchObject({
+      width: fieldToken.labelWidth,
+      flexShrink: 0,
+    })
+  })
+
+  it('removes standalone Input surface styles inside Field', async () => {
+    await render(<Field label="禁用" disabled testID="embedded-input" />)
+
+    let current = screen.getByTestId('embedded-input').parent
+    let shellStyle: ViewStyle | undefined
+    while (current) {
+      const style = StyleSheet.flatten(current.props.style as StyleProp<ViewStyle>)
+      if (
+        style?.backgroundColor === 'transparent' &&
+        style?.borderRadius === 0 &&
+        style?.borderWidth === 0
+      ) {
+        shellStyle = style
+        break
+      }
+      current = current.parent
+    }
+
+    expect(shellStyle).toEqual(
+      expect.objectContaining({
+        backgroundColor: 'transparent',
+        borderRadius: 0,
+        borderWidth: 0,
+      }),
+    )
+    expect(shellStyle?.height).toBeUndefined()
+    expect(shellStyle?.minHeight).toBeUndefined()
   })
 
   it('forwards disabled and clearable behavior to the default Input', async () => {
@@ -136,7 +181,7 @@ describe('Field', () => {
       <ConfigProvider
         theme={{
           components: {
-            Field: { errorColor: '#123456', height: 56 },
+            Field: { errorColor: '#123456' },
           },
         }}
       >

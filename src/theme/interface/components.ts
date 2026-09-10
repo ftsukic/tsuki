@@ -174,7 +174,8 @@ export interface FieldToken {
   errorColor: string
   warningColor: string
   padding: number
-  height: number
+  labelWidth: number
+  labelGap: number
 }
 
 export interface SearchToken {
