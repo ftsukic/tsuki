@@ -12,7 +12,7 @@ import ToolbarExample from './examples/toolbar'
 
 /**
  * @title Picker overview
- * @description Picker 汇总弹层、Toolbar、单列、多列、级联、Field 联动和纯滚轮示例。
+ * @description Picker 汇总弹层、Toolbar、单列、多列、级联、FieldPicker 联动和纯滚轮示例。
  */
 export default function PickerOverview() {
   return (
@@ -33,9 +33,9 @@ export default function PickerOverview() {
         },
         {
           Component: FieldExample,
-          description: 'Field 可承载自定义 Cell 控件，Picker 负责 Popup，确认后回写字段展示值。',
+          description: 'FieldPicker 直接组合 Cell 与 Picker，确认后回写字段展示值。',
           id: 'field',
-          title: 'Field 联动',
+          title: 'FieldPicker 联动',
         },
         {
           Component: LongListExample,

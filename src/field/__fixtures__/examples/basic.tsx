@@ -1,24 +1,20 @@
 import { useState } from 'react'
-import { Field, Text } from '../../..'
+import { Cell, Text } from '../../..'
 
 /**
- * @title Basic custom Field
- * @description Field 只负责 Cell-based Form Item shell，children 自己渲染 control。
+ * @title Custom form item
+ * @description 自定义表单项直接组合 Cell 和 control，不依赖通用 Field。
  */
 export default function FieldBasicFixture() {
   const [city, setCity] = useState('上海')
 
   return (
-    <Field
-      label="城市"
-      value={city}
-      onChange={setCity}
+    <Cell
+      title="自定义项"
+      value={<Text>{city}</Text>}
       valueExtra={<Text type="secondary">必填</Text>}
       isLink
       onPress={() => setCity(city === '上海' ? '北京' : '上海')}
-      description="点击整行切换自定义 control 的值"
-    >
-      {({ value }) => <Text>{value}</Text>}
-    </Field>
+    />
   )
 }

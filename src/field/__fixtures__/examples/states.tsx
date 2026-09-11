@@ -2,7 +2,7 @@ import { FieldInput, FieldRadio } from '../../..'
 
 /**
  * @title Layout and states
- * @description 覆盖 vertical、error、readOnly 和 disabled 的 Field adapter 用法。
+ * @description 覆盖 vertical、error、readOnly 和 disabled 的具体表单组合用法。
  */
 export default function FieldStatesFixture() {
   return (

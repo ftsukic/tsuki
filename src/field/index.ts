@@ -1,14 +1,10 @@
-export { Field } from './field'
 export { FieldInput } from './field-input'
 export { FieldRadio } from './field-radio'
 export { FieldCheckbox } from './field-checkbox'
 export { FieldPicker } from './field-picker'
 export { getFieldStatusColor, getFieldStyles, getFieldToken } from './style'
 export type {
-  FieldBaseProps,
-  FieldControlContext,
   FieldLabelAlign,
-  FieldProps,
   FieldSemanticStyles,
   FieldStatus,
   FieldStyleInfo,

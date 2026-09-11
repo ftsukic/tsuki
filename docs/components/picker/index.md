@@ -19,7 +19,7 @@ Picker 用于从一个或多个滚轮列中选择值，提供 Vant 风格的 Too
 
 </section>
 
-<code src="../../../src/picker/__fixtures__/overview.tsx" title="组件预览" description="Picker 汇总弹层、Toolbar、单列、多列、级联、Field 联动和纯滚轮示例。"></code>
+<code src="../../../src/picker/__fixtures__/overview.tsx" title="组件预览" description="Picker 汇总弹层、Toolbar、单列、多列、级联、FieldPicker 联动和纯滚轮示例。"></code>
 
 ## 引入
 
@@ -43,7 +43,7 @@ import { Picker, PickerToolbar, PickerView, showPicker } from '@ftsukic/tsuki'
 
 <code src="../../../src/picker/__fixtures__/examples/linked.tsx" title="级联 Picker" description="父级变化后自动刷新并校正子级列。"></code>
 
-<code src="../../../src/picker/__fixtures__/examples/field.tsx" title="Field 联动" description="Field 负责布局，Cell 触发 Picker，确认后回写字段展示值。"></code>
+<code src="../../../src/picker/__fixtures__/examples/field.tsx" title="FieldPicker 联动" description="FieldPicker 直接组合 Cell 与 Picker，确认后回写字段展示值。"></code>
 
 <code src="../../../src/picker/__fixtures__/examples/item-height.tsx" title="自定义行高" description="PickerView 支持自定义 itemHeight 和 visibleItemCount。"></code>
 

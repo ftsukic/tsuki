@@ -1,30 +1,73 @@
 import { forwardRef, useMemo } from 'react'
+import { View } from 'react-native'
+import type { ReactNode } from 'react'
+import type { DimensionValue } from 'react-native'
+import type { CellProps, CellStyles } from '../cell'
+import { Cell } from '../cell'
 import type { InputProps, InputStyleState, InputStyles } from '../input'
 import { Input } from '../input'
 import { resolveStyles } from '../style'
+import { useComponentToken, useToken } from '../theme'
 import type { TextInputInstance } from '../text-input'
-import { Field } from './field'
-import type { FieldBaseProps } from './types'
+import { renderFieldFeedback, resolveFieldStatus } from './feedback'
+import { createFieldCellStyles, getFieldStyles, getFieldToken } from './style'
+import type { FieldLabelAlign, FieldStatus, FieldStyles } from './types'
+import { useFieldValue } from './use-field-value'
+
+type FieldInputCellProps = Pick<
+  CellProps,
+  | 'icon'
+  | 'titleExtra'
+  | 'valueExtra'
+  | 'extra'
+  | 'vertical'
+  | 'center'
+  | 'valueAlign'
+  | 'required'
+  | 'border'
+  | 'isLink'
+  | 'clickable'
+  | 'arrowDirection'
+  | 'onPress'
+  | 'onPressDebounceWait'
+>
 
 type InputAdapterProps = Omit<
   InputProps,
-  | keyof FieldBaseProps<string>
   | 'value'
   | 'defaultValue'
   | 'onChange'
   | 'onChangeText'
+  | 'onPress'
+  | 'disabled'
+  | 'readOnly'
   | 'style'
   | 'styles'
 >
 
-export interface FieldInputProps extends FieldBaseProps<string>, InputAdapterProps {
+export interface FieldInputProps extends FieldInputCellProps, InputAdapterProps {
+  label?: ReactNode
+  labelExtra?: ReactNode
+  value?: string
+  defaultValue?: string
+  onChange?: (value: string) => void
+  disabled?: boolean
+  readOnly?: boolean
+  labelWidth?: DimensionValue
+  labelAlign?: FieldLabelAlign
+  description?: ReactNode
+  errorMessage?: ReactNode
+  status?: FieldStatus
+  style?: CellProps['style']
+  cellStyles?: CellStyles
+  styles?: FieldStyles<FieldInputProps>
   inputStyle?: InputProps['style']
   inputStyles?: InputStyles
 }
 
 function createEmbeddedInputStyles(
   inputStyles: InputStyles | undefined,
-  valueAlign: NonNullable<FieldBaseProps<string>['valueAlign']>,
+  valueAlign: NonNullable<FieldInputProps['valueAlign']>,
 ): InputStyles {
   return ({ props, state }: { props: InputProps; state: InputStyleState }) => {
     const custom = resolveStyles(inputStyles, { props, state })
@@ -93,33 +136,56 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
       styles,
       inputStyle,
       inputStyles,
+      cellStyles,
       ...inputControlProps
     } = props
-    const resolvedValueAlign = valueAlign ?? 'right'
+    const { token } = useToken()
+    const fieldToken = useComponentToken('Field', getFieldToken)
+    const effectiveStatus = resolveFieldStatus(status, errorMessage)
+    const state = { status: effectiveStatus }
+    const semantic = resolveStyles(styles, { props, state })
+    const resolved = getFieldStyles(fieldToken, token, state)
+    const resolvedValueAlign = valueAlign ?? (vertical ? 'left' : 'right')
+    const { currentValue, setValue } = useFieldValue({ value, defaultValue, onChange })
     const embeddedInputStyles = useMemo(
       () => createEmbeddedInputStyles(inputStyles, resolvedValueAlign),
       [inputStyles, resolvedValueAlign],
     )
+    const resolvedCellStyles = createFieldCellStyles(fieldToken, {
+      labelWidth,
+      labelAlign,
+      vertical,
+      cellStyles,
+    })
 
     return (
-      <Field
-        label={label}
-        labelExtra={labelExtra}
-        value={value}
-        defaultValue={defaultValue}
-        onChange={onChange}
+      <Cell
+        title={label}
+        titleExtra={labelExtra}
+        value={
+          <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.control]}>
+            <Input
+              {...inputControlProps}
+              value={currentValue ?? ''}
+              onChangeText={setValue}
+              bordered={false}
+              disabled={disabled}
+              readOnly={readOnly}
+              textAlign={inputControlProps.textAlign ?? resolvedValueAlign}
+              ref={ref}
+              style={inputStyle}
+              styles={embeddedInputStyles}
+            />
+            {renderFieldFeedback(description, errorMessage, resolved, semantic)}
+          </View>
+        }
         valueExtra={valueExtra}
         extra={extra}
         required={required}
         disabled={disabled}
-        readOnly={readOnly}
         vertical={vertical}
-        labelWidth={labelWidth}
-        labelAlign={labelAlign}
-        valueAlign={valueAlign}
-        description={description}
-        errorMessage={errorMessage}
-        status={status}
+        valueAlign={resolvedValueAlign}
+        center={props.center}
         icon={icon}
         isLink={isLink}
         clickable={clickable}
@@ -127,28 +193,9 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
         onPress={onPress}
         border={border}
         style={style}
-        styles={styles}
-      >
-        {({
-          value: currentValue,
-          onChange: handleChange,
-          disabled: fieldDisabled,
-          readOnly: fieldReadOnly,
-        }) => (
-          <Input
-            {...inputControlProps}
-            value={currentValue ?? ''}
-            onChangeText={handleChange}
-            bordered={false}
-            disabled={fieldDisabled}
-            readOnly={fieldReadOnly}
-            textAlign={inputControlProps.textAlign ?? resolvedValueAlign}
-            ref={ref}
-            style={inputStyle}
-            styles={embeddedInputStyles}
-          />
-        )}
-      </Field>
+        onPressDebounceWait={props.onPressDebounceWait}
+        styles={resolvedCellStyles}
+      />
     )
   },
 )

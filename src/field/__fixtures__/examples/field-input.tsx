@@ -4,7 +4,7 @@ import { Text, View } from 'react-native'
 
 /**
  * @title FieldInput
- * @description FieldInput 将 Input props 扁平暴露，并统一使用 Field 的 value/onChange contract。
+ * @description FieldInput 直接组合 Cell 和 Input，并统一使用字段的 value/onChange contract。
  */
 export default function FieldInputFixture() {
   const [name, setName] = useState('')

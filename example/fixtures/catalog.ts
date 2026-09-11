@@ -131,7 +131,8 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview11,
     component: 'field',
-    description: 'Field 汇总标签、必填标记、描述、错误和警告状态。',
+    description:
+      'FieldInput、FieldRadio、FieldCheckbox 和 FieldPicker 都是直接组合 Cell 的表单场景。',
     id: 'field',
     title: 'Field',
   },
@@ -210,7 +211,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview22,
     component: 'picker',
-    description: 'Picker 汇总弹层、Toolbar、单列、多列、级联、Field 联动和纯滚轮示例。',
+    description: 'Picker 汇总弹层、Toolbar、单列、多列、级联、FieldPicker 联动和纯滚轮示例。',
     id: 'picker',
     title: 'Picker',
   },

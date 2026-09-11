@@ -10,7 +10,7 @@ const cities: readonly PickerOption[] = [
 
 /**
  * @title FieldPicker
- * @description FieldPicker 用 Field 展示已确认的文本，用 Picker 弹层维护 draft 并在确认后提交。
+ * @description FieldPicker 用 Cell 展示已确认的文本，用 Picker 弹层维护 draft 并在确认后提交。
  */
 export default function FieldPickerFixture() {
   const [value, setValue] = useState<readonly PickerValue[]>(['shanghai'])

@@ -9,7 +9,7 @@ import FieldThemeFixture from './examples/theme'
 
 /**
  * @title Field overview
- * @description Field 是基于 Cell 的 Form Item shell，control 通过独立 adapter 或 children 接入。
+ * @description FieldInput、FieldRadio、FieldCheckbox 和 FieldPicker 都是直接组合 Cell 的表单场景。
  */
 export default function FieldOverview() {
   return (
@@ -18,13 +18,13 @@ export default function FieldOverview() {
       examples={[
         {
           Component: FieldBasicFixture,
-          description: 'Field 只负责布局和反馈，children 作为自定义 control。',
+          description: '自定义表单项直接组合 Cell 和 control。',
           id: 'basic',
-          title: '基础 custom Field',
+          title: '自定义表单项',
         },
         {
           Component: FieldInputFixture,
-          description: 'FieldInput 扁平暴露 Input props，并保持 Field value contract。',
+          description: 'FieldInput 直接组合 Cell 和 Input，并保持字段 value contract。',
           id: 'field-input',
           title: 'FieldInput',
         },
