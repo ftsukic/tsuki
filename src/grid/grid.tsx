@@ -1,5 +1,5 @@
 import { Children, useMemo } from 'react'
-import { Col, Row } from '../layout'
+import { View } from 'react-native'
 import { GridContext, getGridContextValue } from './context'
 import { GridItem } from './grid-item'
 import type { GridProps } from './interface'
@@ -9,8 +9,9 @@ export function normalizeColumnNum(columnNum: number): number {
   return Math.min(24, Math.max(1, Math.floor(columnNum)))
 }
 
-export function getGridItemSpan(columnNum = 4): number {
-  return 24 / normalizeColumnNum(columnNum)
+function normalizeGutter(gutter: number): number {
+  if (!Number.isFinite(gutter)) return 0
+  return Math.max(0, gutter)
 }
 
 export function GridComponent({
@@ -24,29 +25,49 @@ export function GridComponent({
   ...viewProps
 }: GridProps) {
   const resolvedColumnNum = normalizeColumnNum(columnNum)
+  const resolvedGutter = normalizeGutter(gutter)
+  const halfGutter = resolvedGutter / 2
   const context = useMemo(
     () =>
       getGridContextValue({
         border,
         center,
         columnNum: resolvedColumnNum,
-        gutter,
+        gutter: resolvedGutter,
         square,
       }),
-    [border, center, gutter, resolvedColumnNum, square],
+    [border, center, resolvedGutter, resolvedColumnNum, square],
   )
   const items = Children.toArray(children)
 
   return (
-    <GridContext.Provider value={context}>
-      <Row {...viewProps} gap={gutter} style={[{ marginHorizontal: 0, marginVertical: 0 }, style]}>
-        {items.map((item, index) => (
-          <Col key={index} span={context.span}>
-            {item}
-          </Col>
-        ))}
-      </Row>
-    </GridContext.Provider>
+    <View {...viewProps} style={style}>
+      <GridContext.Provider value={context}>
+        <View
+          style={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            marginHorizontal: -halfGutter,
+            marginVertical: -halfGutter,
+          }}
+        >
+          {items.map((item, index) => (
+            <View
+              key={index}
+              style={{
+                flexBasis: `${100 / resolvedColumnNum}%`,
+                flexGrow: 0,
+                flexShrink: 0,
+                paddingHorizontal: halfGutter,
+                paddingVertical: halfGutter,
+              }}
+            >
+              {item}
+            </View>
+          ))}
+        </View>
+      </GridContext.Provider>
+    </View>
   )
 }
 

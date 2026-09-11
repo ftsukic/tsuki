@@ -1,44 +1,43 @@
 import { Grid } from '..'
 import { fireEvent, render, screen } from '@testing-library/react-native'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { getDesignToken } from '../theme'
 
 const press = (instance: Parameters<typeof fireEvent.press>[0]) => fireEvent.press(instance)
-import { getGridItemSpan } from '../grid/grid'
 
 describe('Grid', () => {
-  it('maps the column count to the 24-column layout span', async () => {
-    expect(getGridItemSpan(4)).toBe(6)
-    expect(getGridItemSpan(5)).toBe(4.8)
-
+  it('uses the column count directly for item width', async () => {
     await render(
       <Grid columnNum={5}>
         <Grid.Item testID="item" text="成员" />
       </Grid>,
     )
 
-    const columnStyle = StyleSheet.flatten(screen.getByTestId('item').parent!.props.style)
+    const wrapperStyle = StyleSheet.flatten(screen.getByTestId('item').parent!.props.style)
 
-    expect(columnStyle.flexBasis).toBe('20%')
+    expect(wrapperStyle).toMatchObject({
+      flexBasis: '20%',
+      flexGrow: 0,
+      flexShrink: 0,
+    })
   })
 
-  it('passes gutter through Layout Row and Col', async () => {
+  it('keeps gutter spacing private to the item wrapper', async () => {
     await render(
-      <Grid gutter={12}>
+      <Grid testID="grid" gutter={12}>
         <Grid.Item testID="item" text="成员" />
       </Grid>,
     )
 
-    const colStyle = StyleSheet.flatten(screen.getByTestId('item').parent!.props.style)
+    const wrapperStyle = StyleSheet.flatten(screen.getByTestId('item').parent!.props.style)
+    const gridStyle = StyleSheet.flatten(screen.getByTestId('grid').props.style)
 
-    expect(colStyle).toMatchObject({
+    expect(wrapperStyle).toMatchObject({
       flexBasis: '25%',
-      flexGrow: 0,
-      flexShrink: 0,
-      marginLeft: '0%',
       paddingHorizontal: 6,
       paddingVertical: 6,
     })
+    expect(gridStyle).toBeUndefined()
   })
 
   it('supports square, border and center item semantics', async () => {
@@ -100,5 +99,15 @@ describe('Grid', () => {
 
     const style = StyleSheet.flatten(screen.getByTestId('pressed').props.style)
     expect(style.backgroundColor).toBe(getDesignToken().interactionActiveColor)
+  })
+
+  it('keeps arbitrary children as item content without layout coupling', async () => {
+    await render(
+      <Grid columnNum={2}>
+        <View testID="custom-content" />
+      </Grid>,
+    )
+
+    expect(screen.getByTestId('custom-content')).toBeTruthy()
   })
 })

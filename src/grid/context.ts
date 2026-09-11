@@ -6,7 +6,6 @@ export const defaultGridContext: GridContextValue = {
   center: true,
   columnNum: 4,
   gutter: 0,
-  span: 6,
   square: false,
 }
 
@@ -20,10 +19,8 @@ export function getGridContextValue({
   columnNum,
   gutter,
   square,
-}: Omit<GridContextValue, 'span'>): GridContextValue {
-  return { border, center, columnNum, gutter, span: 24 / columnNum, square }
+}: GridContextValue): GridContextValue {
+  return { border, center, columnNum, gutter, square }
 }
 
 export { GridContext }
-export { useRow } from '../layout/context'
-export { default } from '../layout/context'

@@ -14,7 +14,7 @@ export default function ButtonVariantsFixture() {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Semantic colors</Text>
-      <Row gap={16}>
+      <Row gutter={16}>
         <Col span={8}>
           <Button type="primary" block onPress={() => setPressCount((count) => count + 1)}>
             主要按钮
@@ -42,7 +42,7 @@ export default function ButtonVariantsFixture() {
       <Text style={styles.caption}>Pressed {pressCount} times</Text>
 
       <Text style={styles.heading}>Variants</Text>
-      <Row gap={16}>
+      <Row gutter={16}>
         <Col span={8}>
           <Button type="primary" variant="outline" block>
             Outline

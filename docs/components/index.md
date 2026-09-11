@@ -15,7 +15,7 @@ order: 1
 - [Dropdown](/components/dropdown)
 - [Empty](/components/empty)
 - [Field](/components/field)、[Input](/components/input)
-- [FloatingPanel](/components/floating-panel)、[Grid](/components/grid)
+- [Flex](/components/flex)、[FloatingPanel](/components/floating-panel)、[Grid](/components/grid)、[Layout](/components/layout)、[Space](/components/space)
 - [Icon](/components/icon)、[Loading](/components/loading)
 - [ImagePreview](/components/image-preview)
 - [Skeleton](/components/skeleton)

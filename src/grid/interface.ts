@@ -26,8 +26,5 @@ export interface GridContextValue {
   center: boolean
   columnNum: number
   gutter: number
-  span: number
   square: boolean
 }
-
-export type { ColProps, RowProps } from '../layout/interface'
