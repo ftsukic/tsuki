@@ -32,7 +32,7 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
       iconSize,
       shape = 'round',
       labelPosition = 'right',
-      variant = 'default',
+      variant,
       style,
       styles,
       onPress,
@@ -52,6 +52,8 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
       disabled: effectiveDisabled,
     })
     const isGrouped = group !== undefined
+    const resolvedVariant = variant ?? group?.variant ?? 'default'
+    const buttonLayout = group?.buttonLayout ?? 'intrinsic'
     const isChecked = isGrouped
       ? group.value.some((item) => Object.is(item, name))
       : standaloneState.checked
@@ -91,7 +93,7 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
       iconSize,
       shape,
       labelPosition,
-      variant,
+      variant: resolvedVariant,
       style,
       styles,
       onChange,
@@ -118,7 +120,7 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
             disabled: effectiveDisabled,
             pressed,
           }
-          const resolved = getCheckboxStyles(checkboxToken, checkboxProps, state)
+          const resolved = getCheckboxStyles(checkboxToken, checkboxProps, state, buttonLayout)
           const semantic = resolveStyles(styles, { props: checkboxProps, state })
           return [resolved.root, semantic?.root, style]
         }}
@@ -129,15 +131,22 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
             disabled: effectiveDisabled,
             pressed,
           }
-          const resolved = getCheckboxStyles(checkboxToken, checkboxProps, state)
+          const resolved = getCheckboxStyles(checkboxToken, checkboxProps, state, buttonLayout)
           const semantic = resolveStyles(styles, { props: checkboxProps, state })
           const label = isTextContent(children) ? (
-            <Text style={[resolved.label, semantic?.label]}>{children}</Text>
+            <Text
+              numberOfLines={
+                resolvedVariant === 'button' && buttonLayout === 'equal' ? 1 : undefined
+              }
+              style={[resolved.label, semantic?.label]}
+            >
+              {children}
+            </Text>
           ) : children !== undefined && children !== null && typeof children !== 'boolean' ? (
             <View style={semantic?.label}>{children}</View>
           ) : null
 
-          if (variant === 'button') return label
+          if (resolvedVariant === 'button') return label
 
           return (
             <>

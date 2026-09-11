@@ -157,6 +157,38 @@ describe('FieldRadio', () => {
     expect(screen.getByTestId('radio-large').props.accessibilityState.selected).toBe(true)
   })
 
+  it('uses equal-width button options by default and wraps them through Grid', async () => {
+    const view = await render(
+      <FieldRadio
+        label="尺寸"
+        variant="button"
+        direction="horizontal"
+        buttonColumns={5}
+        testID="field-radio-grid"
+      >
+        {Array.from({ length: 8 }, (_, index) => (
+          <Radio key={index} testID={`field-radio-${index}`} value={index}>
+            {index === 0 ? '一个很长的选项' : `选项 ${index}`}
+          </Radio>
+        ))}
+      </FieldRadio>,
+    )
+
+    expect(StyleSheet.flatten(screen.getByTestId('field-radio-0').props.style)).toMatchObject({
+      alignSelf: 'stretch',
+      flexGrow: 0,
+      flexShrink: 0,
+      width: '100%',
+    })
+    expect(screen.getByText('一个很长的选项').props.numberOfLines).toBe(1)
+    expect(
+      findNodes(view.toJSON(), (node) => {
+        const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
+        return style?.flexBasis === '20%'
+      }),
+    ).toHaveLength(8)
+  })
+
   it('delegates value alignment to Cell without an extra control wrapper', async () => {
     await render(
       <>
@@ -277,6 +309,36 @@ describe('FieldCheckbox', () => {
     await press(screen.getByTestId('read-only-checkbox'))
     expect(onChange).not.toHaveBeenCalled()
     expect(screen.getByTestId('read-only-checkbox').props.accessibilityState.disabled).toBe(false)
+  })
+
+  it('uses equal-width button options and wraps them through the existing Grid', async () => {
+    const view = await render(
+      <FieldCheckbox
+        label="通知方式"
+        variant="button"
+        direction="horizontal"
+        buttonColumns={5}
+        testID="field-checkbox-grid"
+      >
+        {Array.from({ length: 8 }, (_, index) => (
+          <Checkbox key={index} testID={`field-checkbox-${index}`} name={index}>
+            {index === 0 ? '一个很长的选项' : `选项 ${index}`}
+          </Checkbox>
+        ))}
+      </FieldCheckbox>,
+    )
+
+    expect(StyleSheet.flatten(screen.getByTestId('field-checkbox-0').props.style)).toMatchObject({
+      width: '100%',
+      flexGrow: 0,
+      flexShrink: 0,
+    })
+    expect(
+      findNodes(view.toJSON(), (node) => {
+        const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
+        return style?.flexBasis === '20%'
+      }),
+    ).toHaveLength(8)
   })
 })
 

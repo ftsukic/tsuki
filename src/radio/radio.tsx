@@ -29,7 +29,7 @@ export const Radio = forwardRef<React.ComponentRef<typeof InteractionPressable>,
       defaultChecked = false,
       disabled = false,
       shape = 'round',
-      variant = 'default',
+      variant,
       labelPosition = 'right',
       checkedColor,
       style,
@@ -46,6 +46,8 @@ export const Radio = forwardRef<React.ComponentRef<typeof InteractionPressable>,
     const warnedMissingValue = useRef(false)
     const isControlled = checked !== undefined
     const effectiveDisabled = disabled || !!group?.disabled
+    const resolvedVariant = variant ?? group?.variant ?? 'default'
+    const buttonLayout = group?.buttonLayout ?? 'intrinsic'
     const isChecked = group
       ? value !== undefined && Object.is(group.value, value)
       : isControlled
@@ -86,7 +88,7 @@ export const Radio = forwardRef<React.ComponentRef<typeof InteractionPressable>,
       defaultChecked,
       disabled: effectiveDisabled,
       shape,
-      variant,
+      variant: resolvedVariant,
       labelPosition,
       checkedColor,
       style,
@@ -112,7 +114,7 @@ export const Radio = forwardRef<React.ComponentRef<typeof InteractionPressable>,
             disabled: effectiveDisabled,
             pressed,
           }
-          const resolved = getRadioStyles(token, radioProps, state)
+          const resolved = getRadioStyles(token, radioProps, state, buttonLayout)
           const semantic = resolveStyles(styles, { props: radioProps, state })
           return [resolved.root, semantic?.root, style]
         }}
@@ -123,15 +125,22 @@ export const Radio = forwardRef<React.ComponentRef<typeof InteractionPressable>,
             disabled: effectiveDisabled,
             pressed,
           }
-          const resolved = getRadioStyles(token, radioProps, state)
+          const resolved = getRadioStyles(token, radioProps, state, buttonLayout)
           const semantic = resolveStyles(styles, { props: radioProps, state })
           const label = isTextContent(children) ? (
-            <Text style={[resolved.label, semantic?.label]}>{children}</Text>
+            <Text
+              numberOfLines={
+                resolvedVariant === 'button' && buttonLayout === 'equal' ? 1 : undefined
+              }
+              style={[resolved.label, semantic?.label]}
+            >
+              {children}
+            </Text>
           ) : children !== undefined && children !== null && typeof children !== 'boolean' ? (
             <View style={semantic?.label}>{children}</View>
           ) : null
 
-          if (variant === 'button') return label
+          if (resolvedVariant === 'button') return label
 
           return (
             <>

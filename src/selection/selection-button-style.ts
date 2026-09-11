@@ -1,5 +1,12 @@
 import type { ColorValue, TextStyle, ViewStyle } from 'react-native'
 
+export type SelectionButtonLayout = 'intrinsic' | 'equal'
+
+export function normalizeSelectionButtonColumns(value: number | undefined): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return 5
+  return Math.min(24, Math.max(1, Math.floor(value)))
+}
+
 export interface SelectionButtonStyleToken {
   height: number
   paddingHorizontal: number
@@ -34,6 +41,7 @@ export interface SelectionButtonResolvedStyles {
 export function getSelectionButtonStyles(
   token: SelectionButtonStyleToken,
   state: SelectionButtonStyleState,
+  buttonLayout: SelectionButtonLayout = 'intrinsic',
 ): SelectionButtonResolvedStyles {
   const backgroundColor = state.disabled
     ? token.disabledBackgroundColor
@@ -54,12 +62,19 @@ export function getSelectionButtonStyles(
   return {
     root: {
       alignItems: 'center',
-      alignSelf: 'flex-start',
+      alignSelf: buttonLayout === 'equal' ? 'stretch' : 'flex-start',
       backgroundColor,
       borderColor,
       borderRadius: token.borderRadius,
       borderWidth: token.borderWidth,
       flexDirection: 'row',
+      ...(buttonLayout === 'equal'
+        ? {
+            flexGrow: 0,
+            flexShrink: 0,
+            width: '100%' as const,
+          }
+        : {}),
       height: token.height,
       justifyContent: 'center',
       minHeight: token.height,

@@ -1,6 +1,7 @@
 import { Checkbox, CheckboxGroup, ConfigProvider, getDesignToken } from '..'
 import { fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet } from 'react-native'
+import type { JsonElement } from 'test-renderer'
 import { getCheckboxStyles } from '../checkbox/style'
 import { getCheckboxToken } from '../checkbox/token'
 
@@ -10,6 +11,18 @@ async function press(target: Parameters<typeof fireEvent.press>[0]) {
 }
 
 const styleOf = (testID: string) => StyleSheet.flatten(screen.getByTestId(testID).props.style)
+
+function findNodes(
+  node: JsonElement | null,
+  predicate: (node: JsonElement) => boolean,
+): JsonElement[] {
+  if (node === null || typeof node === 'string') return []
+  return (predicate(node) ? [node] : []).concat(
+    node.children.flatMap((child) =>
+      child === null || typeof child === 'string' ? [] : findNodes(child, predicate),
+    ),
+  )
+}
 
 describe('Checkbox', () => {
   it('toggles uncontrolled and controlled values', async () => {
@@ -217,5 +230,40 @@ describe('CheckboxGroup', () => {
     )
 
     expect(styleOf('horizontal')).toMatchObject({ flexDirection: 'row', gap: 16 })
+  })
+
+  it('inherits button variants and wraps equal-width options through Grid', async () => {
+    const view = await render(
+      <ConfigProvider>
+        <Checkbox.Group
+          testID="equal-grid"
+          variant="button"
+          buttonLayout="equal"
+          buttonColumns={5}
+          direction="horizontal"
+          gap={8}
+        >
+          {Array.from({ length: 8 }, (_, index) => (
+            <Checkbox key={index} testID={`grid-${index}`} name={index}>
+              {index === 0 ? '一个很长的选项' : `选项 ${index}`}
+            </Checkbox>
+          ))}
+        </Checkbox.Group>
+      </ConfigProvider>,
+    )
+
+    expect(styleOf('grid-0')).toMatchObject({
+      alignSelf: 'stretch',
+      flexGrow: 0,
+      flexShrink: 0,
+      width: '100%',
+    })
+    expect(screen.getByText('一个很长的选项').props.numberOfLines).toBe(1)
+    expect(
+      findNodes(view.toJSON(), (node) => {
+        const style = StyleSheet.flatten(node.props.style)
+        return style?.flexBasis === '20%'
+      }),
+    ).toHaveLength(8)
   })
 })

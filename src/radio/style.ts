@@ -1,7 +1,10 @@
 import type { ColorValue, TextStyle, ViewStyle } from 'react-native'
 import type { RadioProps, RadioStyleState } from './interface'
 import type { RadioToken } from '../theme'
-import { getSelectionButtonStyles } from '../selection/selection-button-style'
+import {
+  getSelectionButtonStyles,
+  type SelectionButtonLayout,
+} from '../selection/selection-button-style'
 
 export interface RadioResolvedStyles {
   root: ViewStyle
@@ -16,6 +19,7 @@ export function getRadioStyles(
   token: RadioToken,
   props: RadioProps,
   state: RadioStyleState,
+  buttonLayout: SelectionButtonLayout = 'intrinsic',
 ): RadioResolvedStyles {
   const labelOnLeft = props.labelPosition === 'left'
   const checkedColor = props.checkedColor ?? token.checkedColor
@@ -44,6 +48,7 @@ export function getRadioStyles(
             fontFamily: token.fontFamily,
           },
           state,
+          buttonLayout,
         )
       : undefined
 

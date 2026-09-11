@@ -1,7 +1,10 @@
 import type { ColorValue, TextStyle, ViewStyle } from 'react-native'
 import type { CheckboxProps, CheckboxStyleState } from './interface'
 import type { CheckboxToken } from '../theme'
-import { getSelectionButtonStyles } from '../selection/selection-button-style'
+import {
+  getSelectionButtonStyles,
+  type SelectionButtonLayout,
+} from '../selection/selection-button-style'
 
 export interface CheckboxResolvedStyles {
   root: ViewStyle
@@ -19,6 +22,7 @@ export function getCheckboxStyles(
   token: CheckboxToken,
   props: CheckboxProps,
   state: CheckboxStyleState,
+  buttonLayout: SelectionButtonLayout = 'intrinsic',
 ): CheckboxResolvedStyles {
   const isButton = props.variant === 'button'
   const size = props.iconSize ?? token.size
@@ -51,6 +55,7 @@ export function getCheckboxStyles(
           fontFamily: token.fontFamily,
         },
         state,
+        buttonLayout,
       )
     : undefined
 

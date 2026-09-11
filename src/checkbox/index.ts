@@ -8,6 +8,7 @@ export { getCheckboxToken } from './token'
 export { useCheckboxGroup, useCheckboxState } from './state'
 export type {
   CheckboxGroupProps,
+  CheckboxDirection,
   CheckboxLabelPosition,
   CheckboxProps,
   CheckboxSemanticStyles,

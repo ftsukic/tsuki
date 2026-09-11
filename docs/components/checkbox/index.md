@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-Checkbox 用于多选，使用边框、主题色背景和 `CheckOutlined` 图标表达选中状态。组件支持独立受控/非受控状态、`Checkbox.Group` 多选，以及不包装 `Button` 的 `variant="button"` 样式。button variant 隐藏 indicator，使用内容自适应宽度，并保留 Checkbox 的多选切换行为。
+Checkbox 用于多选，使用边框、主题色背景和 `CheckOutlined` 图标表达选中状态。组件支持独立受控/非受控状态、`Checkbox.Group` 多选，以及不包装 `Button` 的 `variant="button"` 样式。button variant 隐藏 indicator，默认使用内容自适应宽度；在 Field 或显式等宽 Group 中可使用 Grid 等宽换行，并保留 Checkbox 的多选切换行为。
 
 </section>
 
@@ -70,11 +70,16 @@ import { Checkbox } from '@ftsukic/tsuki'
 | defaultValue | `readonly (string \| number)[]` | `[]` | 非受控初始选中名称数组 |
 | onChange | `(value: (string \| number)[]) => void` | — | 数组改变后回调；添加和移除都返回新的数组 |
 | disabled | `boolean` | `false` | 禁用整个 Group，并覆盖子 Checkbox 的启用设置 |
+| variant | `'default' \| 'button'` | `'default'` | 统一设置子 Checkbox 的显示模式；子 Checkbox 显式设置时优先 |
 | direction | `'vertical' \| 'horizontal'` | `'vertical'` | 子项排列方向 |
 | gap | `number` | Checkbox token.groupGap | 子项间距 |
+| buttonLayout | `'intrinsic' \| 'equal'` | `'intrinsic'` | `equal` 使用 Grid 等宽布局；仅当所有直接子项都是 button variant 时生效 |
+| buttonColumns | `number` | `5` | `equal` 横向布局时每行最多的列数；超出后自动换行 |
 | style | `StyleProp<ViewStyle>` | — | Group 根 View 样式 |
 
 Group 不提供 `options`、`multiple` 或 `max` 兼容层；RN API 直接使用 children + name 的多选模型。Group 子项缺少 `name` 时不会参与选择，并在开发环境提示配置错误。
+
+`variant="button"` 配合 `buttonLayout="equal"` 时，Group 使用 Grid 作为纯布局容器。横向 `buttonColumns={5}` 时，8 个按钮会按 5+3 换行，并保持两行按钮宽度一致；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；默认 `buttonLayout="intrinsic"` 仍是内容自适应宽度。
 
 ### Checkbox token
 

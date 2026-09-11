@@ -7,6 +7,18 @@ import { getRadioToken } from '../radio/token'
 
 const styleOf = (id: string) => StyleSheet.flatten(screen.getByTestId(id).props.style)
 
+function findNodes(
+  node: JsonElement | null,
+  predicate: (node: JsonElement) => boolean,
+): JsonElement[] {
+  if (node === null || typeof node === 'string') return []
+  return (predicate(node) ? [node] : []).concat(
+    node.children.flatMap((child) =>
+      child === null || typeof child === 'string' ? [] : findNodes(child, predicate),
+    ),
+  )
+}
+
 async function press(target: Parameters<typeof fireEvent.press>[0]) {
   fireEvent.press(target)
   await Promise.resolve()
@@ -272,6 +284,103 @@ describe('Radio', () => {
     expect(screen.getByTestId('button-apple').props.accessibilityState?.selected).toBe(false)
     expect(screen.getByTestId('button-orange').props.accessibilityState?.selected).toBe(true)
     expect(onChange).toHaveBeenCalledWith('orange')
+  })
+
+  it('inherits the group variant for child Radio elements', async () => {
+    const { toJSON } = await render(
+      <ConfigProvider>
+        <Radio.Group testID="button-group" variant="button" defaultValue="apple">
+          <Radio testID="button-apple" value="apple">
+            Apple
+          </Radio>
+          <Radio testID="button-orange" value="orange">
+            Orange
+          </Radio>
+        </Radio.Group>
+      </ConfigProvider>,
+    )
+
+    expect(styleOf('button-apple')).toMatchObject({
+      height: getRadioToken(getDesignToken()).buttonHeight,
+      paddingHorizontal: getRadioToken(getDesignToken()).buttonPaddingHorizontal,
+    })
+    expect(
+      findIndicator(toJSON(), getRadioToken(getDesignToken()).indicatorSize, 1),
+    ).toBeUndefined()
+  })
+
+  it('inherits the group variant for options and preserves explicit child variants', async () => {
+    const { toJSON } = await render(
+      <ConfigProvider>
+        <Radio.Group
+          testID="button-options"
+          variant="button"
+          options={[
+            { value: 'apple', label: 'Apple' },
+            { value: 'orange', label: 'Orange' },
+          ]}
+        />
+        <Radio.Group testID="mixed-group" variant="button">
+          <Radio testID="default-child" value="default" variant="default">
+            Default
+          </Radio>
+          <Radio testID="button-child" value="button">
+            Button
+          </Radio>
+        </Radio.Group>
+      </ConfigProvider>,
+    )
+
+    expect(styleOf('button-options')).toMatchObject({ flexDirection: 'column' })
+    expect(screen.getByText('Apple')).toBeTruthy()
+    expect(screen.getByText('Orange')).toBeTruthy()
+    expect(styleOf('default-child').flexDirection).toBe('row')
+    expect(styleOf('button-child')).toMatchObject({
+      height: getRadioToken(getDesignToken()).buttonHeight,
+      paddingHorizontal: getRadioToken(getDesignToken()).buttonPaddingHorizontal,
+    })
+    expect(findIndicator(toJSON(), getRadioToken(getDesignToken()).indicatorSize, 1)).toBeDefined()
+  })
+
+  it('uses equal Grid columns and wraps button options without stretching the last row', async () => {
+    const { toJSON } = await render(
+      <ConfigProvider>
+        <Radio.Group
+          testID="equal-grid"
+          variant="button"
+          buttonLayout="equal"
+          buttonColumns={5}
+          direction="horizontal"
+          gap={8}
+        >
+          {Array.from({ length: 8 }, (_, index) => (
+            <Radio key={index} testID={`grid-${index}`} value={index}>
+              {index === 0 ? '一个很长的选项' : `选项 ${index}`}
+            </Radio>
+          ))}
+        </Radio.Group>
+      </ConfigProvider>,
+    )
+
+    const wrappedColumns = findNodes(toJSON(), (node) => {
+      const style = StyleSheet.flatten(node.props.style)
+      return style?.flexBasis === '20%'
+    })
+
+    expect(wrappedColumns).toHaveLength(8)
+    expect(
+      findNodes(toJSON(), (node) => {
+        const style = StyleSheet.flatten(node.props.style)
+        return style?.flexWrap === 'wrap'
+      }),
+    ).toHaveLength(1)
+    expect(styleOf('grid-0')).toMatchObject({
+      alignSelf: 'stretch',
+      flexGrow: 0,
+      flexShrink: 0,
+      width: '100%',
+    })
+    expect(screen.getByText('一个很长的选项').props.numberOfLines).toBe(1)
   })
 
   it('supports options, direction, gap and group disabled state', async () => {

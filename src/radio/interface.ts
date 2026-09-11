@@ -58,7 +58,10 @@ export interface RadioGroupProps extends ViewProps {
   value?: RadioValue
   defaultValue?: RadioValue
   disabled?: boolean
+  variant?: RadioVariant
   direction?: RadioDirection
   gap?: number
+  buttonLayout?: 'intrinsic' | 'equal'
+  buttonColumns?: number
   onChange?: (value: RadioValue) => void
 }

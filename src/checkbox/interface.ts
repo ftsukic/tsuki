@@ -6,6 +6,7 @@ export type CheckboxValue = string | number
 export type CheckboxShape = 'round' | 'square'
 export type CheckboxLabelPosition = 'left' | 'right'
 export type CheckboxVariant = 'default' | 'button'
+export type CheckboxDirection = 'vertical' | 'horizontal'
 
 export interface CheckboxStyleState {
   checked: boolean
@@ -52,8 +53,11 @@ export interface CheckboxGroupProps extends Omit<ViewProps, 'children' | 'style'
   value?: readonly CheckboxValue[]
   defaultValue?: readonly CheckboxValue[]
   disabled?: boolean
-  direction?: 'vertical' | 'horizontal'
+  variant?: CheckboxVariant
+  direction?: CheckboxDirection
   gap?: number
+  buttonLayout?: 'intrinsic' | 'equal'
+  buttonColumns?: number
   onChange?: (value: CheckboxValue[]) => void
   style?: StyleProp<ViewStyle>
 }

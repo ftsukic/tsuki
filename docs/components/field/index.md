@@ -100,7 +100,7 @@ import { Cell, FieldCheckbox, FieldInput, FieldPicker, FieldRadio } from '@ftsuk
 
 ## FieldRadio
 
-`FieldRadio` 直接将 `Radio.Group` 放入 Cell 的 value 区域，值类型为 `RadioValue`。它暴露 `options`、`children`、`direction`、`gap` 及 Radio.Group 的其他 View props（`style` 由 Cell 保留）。`readOnly` 会阻止 group 交互，但不会给 Radio 套用 disabled 视觉。
+`FieldRadio` 直接将 `Radio.Group` 放入 Cell 的 value 区域，值类型为 `RadioValue`。它暴露 `options`、`children`、`variant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Radio.Group 的其他 View props（`style` 由 Cell 保留）。当选项为 `button` variant 时默认使用 Grid 等宽布局，每行默认最多 5 个，超出后换行；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonLayout="intrinsic"` 可恢复内容宽度。`readOnly` 会阻止 group 交互，但不会给 Radio 套用 disabled 视觉。
 
 `FieldRadio` 不支持 `description`、`errorMessage`、`status` 或 Field 语义 `styles`；需要反馈内容时，应组合 `Cell` 与自定义 control。
 
@@ -117,9 +117,11 @@ import { Cell, FieldCheckbox, FieldInput, FieldPicker, FieldRadio } from '@ftsuk
 />
 ```
 
+button 选项可以设置每行列数；例如文档中的 FieldRadio fixture 使用 8 个选项，在 `buttonColumns={5}` 下按 5+3 换行，第二行不会被拉伸。
+
 ## FieldCheckbox
 
-`FieldCheckbox` 直接将 `Checkbox.Group` 放入 Cell 的 value 区域，值类型为 `readonly CheckboxValue[]`。它暴露 `children`、`direction`、`gap` 及 Checkbox.Group 的其他 View props。`disabled` 会同时下传到 Cell 与 group；`readOnly` 只阻止交互。
+`FieldCheckbox` 直接将 `Checkbox.Group` 放入 Cell 的 value 区域，值类型为 `readonly CheckboxValue[]`。它暴露 `children`、`variant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Checkbox.Group 的其他 View props。`variant="button"` 时默认使用 Grid 等宽布局，每行默认最多 5 个，超出后换行；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonLayout="intrinsic"` 可恢复内容宽度。`disabled` 会同时下传到 Cell 与 group；`readOnly` 只阻止交互。
 
 `FieldCheckbox` 不支持 `description`、`errorMessage`、`status` 或 Field 语义 `styles`；需要反馈内容时，应组合 `Cell` 与自定义 control。
 

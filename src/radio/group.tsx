@@ -1,10 +1,13 @@
-import { Children, useCallback, useMemo, useRef, useState } from 'react'
+import { Children, isValidElement, useCallback, useMemo, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 import { View } from 'react-native'
+import { Grid } from '../grid'
+import { normalizeSelectionButtonColumns } from '../selection/selection-button-style'
 import { useComponentToken } from '../theme'
 import { RadioGroupContext } from './context'
 import { Radio } from './radio'
 import { getRadioToken } from './token'
-import type { RadioGroupProps, RadioOption, RadioValue } from './interface'
+import type { RadioGroupProps, RadioOption, RadioProps, RadioValue } from './interface'
 
 function warnOptionsAndChildren() {
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
@@ -16,14 +19,22 @@ function getOptionKey(option: RadioOption, index: number) {
   return `${String(option.value)}-${index}`
 }
 
+function isButtonRadio(child: ReactNode, groupVariant?: RadioGroupProps['variant']) {
+  if (!isValidElement<RadioProps>(child) || child.type !== Radio) return false
+  return (child.props.variant ?? groupVariant ?? 'default') === 'button'
+}
+
 export function RadioGroup({
   children,
   options,
   value,
   defaultValue,
   disabled = false,
+  variant,
   direction = 'vertical',
   gap,
+  buttonLayout = 'intrinsic',
+  buttonColumns = 5,
   onChange,
   style,
   ...viewProps
@@ -51,36 +62,64 @@ export function RadioGroup({
     [isControlled, onChange, selectedValue],
   )
 
-  const contextValue = useMemo(
-    () => ({ value: selectedValue, disabled, select }),
-    [disabled, select, selectedValue],
-  )
-
   const optionChildren = options?.map((option, index) => (
     <Radio key={getOptionKey(option, index)} value={option.value} disabled={option.disabled}>
       {option.label}
     </Radio>
   ))
   const content = hasChildren ? children : optionChildren
+  const items = Children.toArray(content)
   const resolvedGap = gap ?? token.gap
+  const normalizedButtonColumns = normalizeSelectionButtonColumns(buttonColumns)
+  const useEqualButtonGrid =
+    buttonLayout === 'equal' &&
+    items.length > 0 &&
+    items.every((item) => isButtonRadio(item, variant))
+  const resolvedColumns =
+    direction === 'horizontal' ? Math.min(items.length || 1, normalizedButtonColumns) : 1
+  const contextValue = useMemo(
+    () => ({
+      value: selectedValue,
+      disabled,
+      variant,
+      buttonLayout: useEqualButtonGrid ? ('equal' as const) : ('intrinsic' as const),
+      select,
+    }),
+    [disabled, select, selectedValue, useEqualButtonGrid, variant],
+  )
 
   return (
     <RadioGroupContext.Provider value={contextValue}>
-      <View
-        {...viewProps}
-        accessibilityRole="radiogroup"
-        accessibilityState={{ ...viewProps.accessibilityState, disabled }}
-        style={[
-          {
-            flexDirection: direction === 'horizontal' ? 'row' : 'column',
-            alignItems: direction === 'horizontal' ? 'center' : 'flex-start',
-            gap: resolvedGap,
-          },
-          style,
-        ]}
-      >
-        {content}
-      </View>
+      {useEqualButtonGrid ? (
+        <Grid
+          {...viewProps}
+          accessibilityRole="radiogroup"
+          accessibilityState={{ ...viewProps.accessibilityState, disabled }}
+          border={false}
+          center={false}
+          columnNum={resolvedColumns}
+          gutter={resolvedGap}
+          style={[{ width: '100%' }, style]}
+        >
+          {content}
+        </Grid>
+      ) : (
+        <View
+          {...viewProps}
+          accessibilityRole="radiogroup"
+          accessibilityState={{ ...viewProps.accessibilityState, disabled }}
+          style={[
+            {
+              flexDirection: direction === 'horizontal' ? 'row' : 'column',
+              alignItems: direction === 'horizontal' ? 'center' : 'flex-start',
+              gap: resolvedGap,
+            },
+            style,
+          ]}
+        >
+          {content}
+        </View>
+      )}
     </RadioGroupContext.Provider>
   )
 }

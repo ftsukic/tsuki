@@ -33,7 +33,7 @@ import { Radio } from '@ftsukic/tsuki'
 
 <code src="../../../src/radio/__fixtures__/examples/group.tsx" title="Radio.Group 子节点" description="使用子 Radio 自定义选项，支持受控值、默认值、横向布局和间距。"></code>
 
-<code src="../../../src/radio/__fixtures__/examples/button.tsx" title="Button Radio" description="button 变体隐藏指示器，使用内容自适应宽度并保留 Group 单选行为。"></code>
+<code src="../../../src/radio/__fixtures__/examples/button.tsx" title="Button Radio" description="button 变体隐藏指示器，默认使用内容自适应宽度，并保留 Group 单选行为。"></code>
 
 <code src="../../../src/radio/__fixtures__/examples/options.tsx" title="options 分组" description="使用 options 配置数组快速生成结构一致的选项。"></code>
 
@@ -77,7 +77,7 @@ type RadioLabelPosition = 'left' | 'right';
 
 独立 Radio 只有在从未选中变为选中时触发 `onChange(true)`；再次点击已选中项不会取消选中。需要取消选中时，由上层通过受控 `checked` 改变状态。
 
-`variant="button"` 隐藏 indicator，使用内容加水平 padding 的自适应宽度容器。选中状态改变背景、边框和文字颜色，但不显示 check icon；Group 仍保持互斥选择，已选项不能通过再次点击取消。
+`variant="button"` 隐藏 indicator，默认使用内容加水平 padding 的自适应宽度容器。选中状态改变背景、边框和文字颜色，但不显示 check icon；Group 仍保持互斥选择，已选项不能通过再次点击取消。需要等宽按钮时，在 Group 上设置 `buttonLayout="equal"`；FieldRadio 的 button 选项默认使用该布局。
 
 `shape="round"` 是默认形状，选中后显示白色 check；`shape="square"` 使用方形 checked indicator 并显示白色 check；`shape="dot"` 保持透明圆形外圈，仅在内部显示 `dotSize` 大小的 checkedColor 圆点。
 
@@ -93,13 +93,20 @@ type RadioLabelPosition = 'left' | 'right';
 | defaultValue | `string \| number` | — | 非受控初始选中值 |
 | onChange | `(value: RadioValue) => void` | — | 选中值改变时触发 |
 | disabled | `boolean` | `false` | 禁用整个 Group，并覆盖子项的启用设置 |
+| variant | `'default' \| 'button'` | `'default'` | 统一设置子 Radio 的显示模式；`button` 同时适用于 `children` 和 `options` |
 | direction | `'vertical' \| 'horizontal'` | `'vertical'` | 选项排列方向 |
 | gap | `number` | 主题间距 | 选项之间的间距 |
+| buttonLayout | `'intrinsic' \| 'equal'` | `'intrinsic'` | `equal` 使用 Grid 等宽布局；仅当所有直接子项都是 button variant 时生效 |
+| buttonColumns | `number` | `5` | `equal` 横向布局时每行最多的列数；超出后自动换行 |
 | style | `StyleProp<ViewStyle>` | — | Group 根 View 样式 |
 
 `options` 和 `children` 只能选择一种声明方式；同时传入时开发环境会提示错误，并以 `children` 为渲染来源。Group 是单选行为，选中项不能通过再次点击取消。Group 子 Radio 必须提供 `value`，否则不会参与选择并会在开发环境提示配置错误。
 
 受控模式使用 `value` 和 `onChange`；非受控模式使用 `defaultValue`。Group 的选中状态优先于子 Radio 的 `checked` 和 `defaultChecked`。
+
+`Radio.Group variant` 会透传给子 Radio 和 `options` 自动生成的 Radio。子 Radio 显式设置 `variant` 时，以子 Radio 的设置为准；可运行的 children、options 和等宽换行示例见上方 Button Radio fixture。
+
+`buttonLayout="equal"` 会使用 Grid 作为纯布局容器。横向 `buttonColumns={5}` 时，8 个 button option 会按 5+3 换行，并保持两行按钮宽度一致；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；普通 Group 默认仍是内容自适应宽度。
 
 ## 语义样式
 
