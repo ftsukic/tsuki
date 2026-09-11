@@ -1,7 +1,9 @@
-import { ConfigProvider, Input } from '..'
+import { ConfigProvider, Input, getDesignToken } from '..'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { useState } from 'react'
 import { StyleSheet } from 'react-native'
+import { getInputStyles } from '../input/style'
+import { getInputToken } from '../input/token'
 
 describe('Input', () => {
   function getInputStyle(testID: string) {
@@ -34,6 +36,26 @@ describe('Input', () => {
         }),
       )
     }
+  })
+
+  it('can keep a bordered textarea on its normal border color while focused', async () => {
+    const token = getInputToken(getDesignToken())
+    const defaultFocusedStyle = getInputStyles(
+      token,
+      { bordered: true, multiline: true },
+      { focused: true, disabled: false },
+    )
+    const focusedStyle = getInputStyles(
+      token,
+      { bordered: true, activeBordered: false, multiline: true },
+      { focused: true, disabled: false },
+    )
+
+    expect(defaultFocusedStyle.shell.borderColor).toBe(token.activeBorderColor)
+    expect(focusedStyle.shell).toMatchObject({
+      borderColor: token.borderColor,
+      borderWidth: token.borderWidth,
+    })
   })
 
   it('does not use maxRows as native numberOfLines or accumulate padding', async () => {

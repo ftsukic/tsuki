@@ -17,6 +17,7 @@ export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
     type = 'text',
     size = 'normal',
     bordered = false,
+    activeBordered = true,
     clearable = false,
     clearTrigger = 'focus',
     formatter,
@@ -72,6 +73,7 @@ export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
       type,
       size,
       bordered,
+      activeBordered,
       clearable,
       clearTrigger,
       formatter,
@@ -103,6 +105,7 @@ export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
     [
       addonAfter,
       addonBefore,
+      activeBordered,
       autoSize,
       bordered,
       clearTrigger,

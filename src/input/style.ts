@@ -97,7 +97,10 @@ export function getInputStyles(
       position: 'relative',
       paddingHorizontal: token.paddingHorizontal,
       borderWidth: props.bordered ? token.borderWidth : 0,
-      borderColor: state.focused ? token.activeBorderColor : token.borderColor,
+      borderColor:
+        state.focused && props.activeBordered !== false
+          ? token.activeBorderColor
+          : token.borderColor,
       borderRadius: token.borderRadius,
       backgroundColor: state.disabled ? token.disabledBackgroundColor : token.backgroundColor,
     },
