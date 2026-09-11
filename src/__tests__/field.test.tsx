@@ -46,9 +46,6 @@ describe('FieldInput', () => {
         value="138"
         onChange={onChange}
         placeholder="请输入手机号"
-        description="请输入 11 位手机号"
-        errorMessage="手机号格式不正确"
-        status="error"
         testID="field-input"
         valueAlign="left"
       />,
@@ -59,8 +56,6 @@ describe('FieldInput', () => {
     expect(input.props.value).toBe('138')
     expect(input.props.textAlign).toBe('left')
     expect(screen.getByText('手机号')).toBeTruthy()
-    expect(screen.getByText('请输入 11 位手机号')).toBeTruthy()
-    expect(screen.getByText('手机号格式不正确')).toBeTruthy()
 
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent.changeText(input, '139')
@@ -96,15 +91,7 @@ describe('FieldInput', () => {
     const theme = getDesignToken()
     const fieldToken = getFieldToken(theme)
 
-    const view = await render(
-      <FieldInput
-        label="手机号"
-        labelWidth={180}
-        labelAlign="right"
-        errorMessage="请输入手机号"
-        styles={{ error: { fontStyle: 'italic' } }}
-      />,
-    )
+    const view = await render(<FieldInput label="手机号" labelWidth={180} labelAlign="right" />)
 
     const labelAreas = findNodes(view.toJSON(), (node) => {
       const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
@@ -113,10 +100,6 @@ describe('FieldInput', () => {
     expect(labelAreas.length).toBeGreaterThan(0)
     expect(StyleSheet.flatten(screen.getByText('手机号').props.style)).toMatchObject({
       textAlign: 'right',
-    })
-    expect(StyleSheet.flatten(screen.getByText('请输入手机号').props.style)).toMatchObject({
-      color: theme.colorError,
-      fontStyle: 'italic',
     })
     expect(fieldToken.defaultLabelWidth).toBeCloseTo(theme.fontSize * 6.2)
   })

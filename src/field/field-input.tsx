@@ -1,5 +1,4 @@
 import { forwardRef, useMemo } from 'react'
-import { View } from 'react-native'
 import type { ReactNode } from 'react'
 import type { DimensionValue } from 'react-native'
 import type { CellProps, CellStyles } from '../cell'
@@ -7,11 +6,10 @@ import { Cell } from '../cell'
 import type { InputProps, InputStyleState, InputStyles } from '../input'
 import { Input } from '../input'
 import { resolveStyles } from '../style'
-import { useComponentToken, useToken } from '../theme'
+import { useComponentToken } from '../theme'
 import type { TextInputInstance } from '../text-input'
-import { renderFieldFeedback, resolveFieldStatus } from './feedback'
-import { createFieldCellStyles, getFieldStyles, getFieldToken } from './style'
-import type { FieldLabelAlign, FieldStatus, FieldStyles } from './types'
+import { createFieldCellStyles, getFieldToken } from './style'
+import type { FieldLabelAlign } from './types'
 import { useFieldValue } from './use-field-value'
 
 type FieldInputCellProps = Pick<
@@ -55,12 +53,8 @@ export interface FieldInputProps extends FieldInputCellProps, InputAdapterProps 
   readOnly?: boolean
   labelWidth?: DimensionValue
   labelAlign?: FieldLabelAlign
-  description?: ReactNode
-  errorMessage?: ReactNode
-  status?: FieldStatus
   style?: CellProps['style']
   cellStyles?: CellStyles
-  styles?: FieldStyles<FieldInputProps>
   inputStyle?: InputProps['style']
   inputStyles?: InputStyles
 }
@@ -123,9 +117,6 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
       labelWidth,
       labelAlign,
       valueAlign,
-      description,
-      errorMessage,
-      status,
       icon,
       isLink,
       clickable,
@@ -133,18 +124,12 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
       onPress,
       border,
       style,
-      styles,
       inputStyle,
       inputStyles,
       cellStyles,
       ...inputControlProps
     } = props
-    const { token } = useToken()
     const fieldToken = useComponentToken('Field', getFieldToken)
-    const effectiveStatus = resolveFieldStatus(status, errorMessage)
-    const state = { status: effectiveStatus }
-    const semantic = resolveStyles(styles, { props, state })
-    const resolved = getFieldStyles(fieldToken, token, state)
     const resolvedValueAlign = valueAlign ?? (vertical ? 'left' : 'right')
     const { currentValue, setValue } = useFieldValue({ value, defaultValue, onChange })
     const embeddedInputStyles = useMemo(
@@ -163,21 +148,18 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
         title={label}
         titleExtra={labelExtra}
         value={
-          <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.control]}>
-            <Input
-              {...inputControlProps}
-              value={currentValue ?? ''}
-              onChangeText={setValue}
-              bordered={false}
-              disabled={disabled}
-              readOnly={readOnly}
-              textAlign={inputControlProps.textAlign ?? resolvedValueAlign}
-              ref={ref}
-              style={inputStyle}
-              styles={embeddedInputStyles}
-            />
-            {renderFieldFeedback(description, errorMessage, resolved, semantic)}
-          </View>
+          <Input
+            {...inputControlProps}
+            value={currentValue ?? ''}
+            onChangeText={setValue}
+            bordered={false}
+            disabled={disabled}
+            readOnly={readOnly}
+            textAlign={inputControlProps.textAlign ?? resolvedValueAlign}
+            ref={ref}
+            style={inputStyle}
+            styles={embeddedInputStyles}
+          />
         }
         valueExtra={valueExtra}
         extra={extra}

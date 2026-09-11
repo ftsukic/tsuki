@@ -19,7 +19,7 @@ Field 系列不是独立的基础 UI 容器，而是表单场景适配器：`Fie
 
 </section>
 
-<code src="../../../src/field/__fixtures__/overview.tsx" title="组件预览" description="自定义 Cell 表单项、四种具体适配器、反馈状态和主题用法。"></code>
+<code src="../../../src/field/__fixtures__/overview.tsx" title="组件预览" description="自定义 Cell 表单项、四种具体适配器、布局状态和主题用法。"></code>
 
 ## 引入
 
@@ -45,9 +45,9 @@ import { Cell, FieldCheckbox, FieldInput, FieldPicker, FieldRadio } from '@ftsuk
 
 <code src="../../../src/field/__fixtures__/examples/field-picker.tsx" title="FieldPicker" description="Cell 选择入口与 Picker 弹层的组合。"></code>
 
-<code src="../../../src/field/__fixtures__/examples/states.tsx" title="布局和状态" description="vertical、error、readOnly 和 disabled。"></code>
+<code src="../../../src/field/__fixtures__/examples/states.tsx" title="布局和状态" description="vertical、readOnly 和 disabled。"></code>
 
-<code src="../../../src/field/__fixtures__/examples/theme.tsx" title="主题和语义样式" description="Field token 与 feedback 语义样式。"></code>
+<code src="../../../src/field/__fixtures__/examples/theme.tsx" title="主题和语义样式" description="Field token 与 FieldPicker feedback 语义样式。"></code>
 
 ## 共同表单属性
 
@@ -96,7 +96,7 @@ import { Cell, FieldCheckbox, FieldInput, FieldPicker, FieldRadio } from '@ftsuk
 />
 ```
 
-`inputStyle` 和 `inputStyles` 只作用于 embedded Input；FieldInput 的 `styles` 只作用于 `control`、`feedback`、`description` 和 `error`；`cellStyles` 作用于 Cell。ref 为 Input 的 `TextInputInstance`。
+`inputStyle` 和 `inputStyles` 只作用于 embedded Input；`cellStyles` 作用于 Cell。FieldInput 不支持 `description`、`errorMessage`、`status` 或 Field 语义 `styles`；需要反馈内容时，应组合 `Cell` 与自定义 control。ref 为 Input 的 `TextInputInstance`。
 
 ## FieldRadio
 
@@ -150,7 +150,7 @@ import { Cell, FieldCheckbox, FieldInput, FieldPicker, FieldRadio } from '@ftsuk
 
 ## 语义样式与主题
 
-FieldInput 和 FieldPicker 的 `styles` 提供表单区域语义插槽：`control`、`feedback`、`description` 和 `error`。FieldRadio、FieldCheckbox 不渲染反馈，也不提供 Field 语义 `styles`。Cell 区域使用 `cellStyles`，Input 使用 `inputStyle`/`inputStyles`，Picker 使用 `pickerStyle`/`pickerStyles`，三者边界互不重叠。
+只有 FieldPicker 的 `styles` 提供表单区域语义插槽：`control`、`feedback`、`description` 和 `error`。FieldInput、FieldRadio、FieldCheckbox 不渲染反馈，也不提供 Field 语义 `styles`。Cell 区域使用 `cellStyles`，Input 使用 `inputStyle`/`inputStyles`，Picker 使用 `pickerStyle`/`pickerStyles`，三者边界互不重叠。
 
 `theme.components.Field` 仍表示 Field 系列表单 Cell 组合的主题 token，支持 `defaultLabelWidth`、`labelGap`、`descriptionGap`、`errorGap`、`descriptionColor`、`warningColor` 和 `errorColor`。它不产生运行时 `Field` 组件。
 

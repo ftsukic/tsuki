@@ -2,18 +2,12 @@ import { FieldInput, FieldRadio } from '../../..'
 
 /**
  * @title Layout and states
- * @description 覆盖 vertical、error、readOnly 和 disabled 的具体表单组合用法。
+ * @description 覆盖 vertical、readOnly 和 disabled 的具体表单组合用法。
  */
 export default function FieldStatesFixture() {
   return (
     <>
       <FieldInput label="备注" vertical multiline rows={3} placeholder="请输入备注" />
-      <FieldInput
-        label="邮箱"
-        defaultValue="invalid"
-        errorMessage="请输入有效邮箱"
-        status="error"
-      />
       <FieldRadio
         label="只读状态"
         value="yes"

@@ -1,8 +1,14 @@
-import { ConfigProvider, FieldInput } from '../../..'
+import { ConfigProvider, FieldPicker } from '../../..'
+import type { PickerOption } from '../../..'
+
+const cities: readonly PickerOption[] = [
+  { text: '上海', value: 'shanghai' },
+  { text: '北京', value: 'beijing' },
+]
 
 /**
  * @title Field theme and semantic styles
- * @description Field 系列组合使用 Field token，表单语义样式只作用于 feedback。
+ * @description FieldPicker 使用 Field token 和 feedback 语义样式。
  */
 export default function FieldThemeFixture() {
   return (
@@ -11,10 +17,11 @@ export default function FieldThemeFixture() {
         components: { Field: { errorColor: '#d4380d', warningColor: '#d89614' } },
       }}
     >
-      <FieldInput
-        label="邮箱"
-        defaultValue="name@example.com"
-        errorMessage="请输入有效邮箱"
+      <FieldPicker
+        label="城市"
+        defaultValue={['shanghai']}
+        columns={cities}
+        errorMessage="请选择城市"
         styles={{ description: { fontStyle: 'italic' } }}
       />
     </ConfigProvider>
