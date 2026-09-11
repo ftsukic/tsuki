@@ -194,10 +194,9 @@ export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
   )
   const handleContentSizeChange = useCallback(
     (event: Parameters<NonNullable<InputProps['onContentSizeChange']>>[0]) => {
-      autoSizeState.onContentSizeChange(event.nativeEvent.contentSize.height)
       onContentSizeChange?.(event)
     },
-    [autoSizeState, onContentSizeChange],
+    [onContentSizeChange],
   )
   const handleClear = useCallback(() => {
     setValue('')
@@ -247,8 +246,7 @@ export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
             inputStyle={autoSizeState.inputStyle}
             scrollEnabled={autoSizeState.scrollEnabled}
             onChangeText={handleChangeText}
-            onContentSizeChange={handleContentSizeChange}
-            onMeasureContentSize={autoSizeState.onContentSizeChange}
+            onAutoSizeMeasure={autoSizeState.onMeasure}
           />
         ) : (
           <InputSingle

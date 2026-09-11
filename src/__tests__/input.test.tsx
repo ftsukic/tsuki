@@ -10,6 +10,10 @@ describe('Input', () => {
     return StyleSheet.flatten(screen.getByTestId(testID).props.style)
   }
 
+  function getMeasurementInput(testID: string) {
+    return screen.getByTestId(`${testID}__measure`, { includeHiddenElements: true })
+  }
+
   it('does not enable multiline implicitly for autoSize', async () => {
     await render(<Input testID="single-line-auto-size" autoSize />)
 
@@ -58,7 +62,7 @@ describe('Input', () => {
     })
   })
 
-  it('does not use maxRows as native numberOfLines or accumulate padding', async () => {
+  it('uses a separate unconstrained InputCore for autoSize measurement', async () => {
     await render(
       <Input
         testID="stable-auto-size"
@@ -69,11 +73,27 @@ describe('Input', () => {
     )
 
     const input = screen.getByTestId('stable-auto-size')
+    const measurementInput = getMeasurementInput('stable-auto-size')
+    const measurementStyle = StyleSheet.flatten(measurementInput.props.style)
     expect(input.props.numberOfLines).toBeUndefined()
+    expect(measurementInput.props.multiline).toBe(true)
+    expect(measurementInput.props.editable).toBe(false)
+    expect(measurementInput.props.scrollEnabled).toBe(false)
+    expect(measurementInput.props.pointerEvents).toBe('none')
+    expect(measurementInput.props.accessible).toBe(false)
+    expect(measurementInput.props.importantForAccessibility).toBe('no-hide-descendants')
+    expect(getInputStyle('stable-auto-size')).toMatchObject({ height: 36 })
+    expect(measurementStyle).toMatchObject({
+      opacity: 0,
+      position: 'absolute',
+    })
+    expect(measurementStyle.height).toBeUndefined()
+    expect(measurementStyle.minHeight).toBeUndefined()
+    expect(measurementStyle.maxHeight).toBeUndefined()
 
     for (const height of [40, 40, 40]) {
       // eslint-disable-next-line testing-library/no-await-sync-events
-      await fireEvent(input, 'contentSizeChange', {
+      await fireEvent(measurementInput, 'contentSizeChange', {
         nativeEvent: { contentSize: { width: 200, height } },
       })
     }
@@ -85,9 +105,9 @@ describe('Input', () => {
   it('keeps an empty autoSize input at minHeight', async () => {
     await render(<Input testID="empty-auto-size" multiline autoSize={{ minRows: 1, maxRows: 5 }} />)
 
-    const input = screen.getByTestId('empty-auto-size')
+    const measurementInput = getMeasurementInput('empty-auto-size')
     // eslint-disable-next-line testing-library/no-await-sync-events
-    await fireEvent(input, 'contentSizeChange', {
+    await fireEvent(measurementInput, 'contentSizeChange', {
       nativeEvent: { contentSize: { width: 200, height: 200 } },
     })
 
@@ -105,21 +125,21 @@ describe('Input', () => {
       />,
     )
 
-    const input = screen.getByTestId('growing-auto-size')
+    const measurementInput = getMeasurementInput('growing-auto-size')
     for (const [height, expected] of [
       [20, 36],
       [40, 40],
       [60, 60],
     ]) {
       // eslint-disable-next-line testing-library/no-await-sync-events
-      await fireEvent(input, 'contentSizeChange', {
+      await fireEvent(measurementInput, 'contentSizeChange', {
         nativeEvent: { contentSize: { width: 200, height } },
       })
       await waitFor(() => expect(getInputStyle('growing-auto-size').height).toBe(expected))
     }
   })
 
-  it('uses content size to grow and proxies the native callback', async () => {
+  it('keeps visible contentSizeChange as a public callback only', async () => {
     const onContentSizeChange = jest.fn()
 
     await render(
@@ -133,6 +153,7 @@ describe('Input', () => {
     )
 
     const input = screen.getByTestId('auto-size-input')
+    const measurementInput = getMeasurementInput('auto-size-input')
     const event = {
       nativeEvent: { contentSize: { width: 200, height: 40 } },
     }
@@ -140,8 +161,13 @@ describe('Input', () => {
     await fireEvent(input, 'contentSizeChange', event)
 
     expect(onContentSizeChange).toHaveBeenCalledWith(event)
-    await waitFor(() => expect(getInputStyle('auto-size-input').height).toBe(40))
+    expect(getInputStyle('auto-size-input').height).toBe(36)
     expect(screen.getByTestId('auto-size-input').props.scrollEnabled).toBe(false)
+
+    // Only the hidden measurement node is allowed to update autoSize height.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(measurementInput, 'contentSizeChange', event)
+    await waitFor(() => expect(getInputStyle('auto-size-input').height).toBe(40))
   })
 
   it('clamps autoSize to maxRows and enables native scrolling', async () => {
@@ -154,9 +180,9 @@ describe('Input', () => {
       />,
     )
 
-    const input = screen.getByTestId('clamped-auto-size')
+    const measurementInput = getMeasurementInput('clamped-auto-size')
     // eslint-disable-next-line testing-library/no-await-sync-events
-    await fireEvent(input, 'contentSizeChange', {
+    await fireEvent(measurementInput, 'contentSizeChange', {
       nativeEvent: { contentSize: { width: 200, height: 100 } },
     })
 
@@ -174,15 +200,15 @@ describe('Input', () => {
       />,
     )
 
-    const input = screen.getByTestId('shrinking-auto-size')
+    const measurementInput = getMeasurementInput('shrinking-auto-size')
     // eslint-disable-next-line testing-library/no-await-sync-events
-    await fireEvent(input, 'contentSizeChange', {
+    await fireEvent(measurementInput, 'contentSizeChange', {
       nativeEvent: { contentSize: { width: 200, height: 200 } },
     })
     await waitFor(() => expect(getInputStyle('shrinking-auto-size').height).toBe(116))
 
     // eslint-disable-next-line testing-library/no-await-sync-events
-    await fireEvent(input, 'contentSizeChange', {
+    await fireEvent(measurementInput, 'contentSizeChange', {
       nativeEvent: { contentSize: { width: 200, height: 20 } },
     })
     await waitFor(() => expect(getInputStyle('shrinking-auto-size').height).toBe(36))
@@ -207,8 +233,9 @@ describe('Input', () => {
     await render(<ControlledAutoSizeInput />)
 
     const input = screen.getByTestId('clear-and-retype-auto-size')
+    const measurementInput = getMeasurementInput('clear-and-retype-auto-size')
     // eslint-disable-next-line testing-library/no-await-sync-events
-    await fireEvent(input, 'contentSizeChange', {
+    await fireEvent(measurementInput, 'contentSizeChange', {
       nativeEvent: { contentSize: { width: 200, height: 200 } },
     })
     await waitFor(() => expect(getInputStyle('clear-and-retype-auto-size').height).toBe(116))
@@ -223,7 +250,7 @@ describe('Input', () => {
     expect(getInputStyle('clear-and-retype-auto-size').height).toBe(36)
 
     // eslint-disable-next-line testing-library/no-await-sync-events
-    await fireEvent(input, 'contentSizeChange', {
+    await fireEvent(measurementInput, 'contentSizeChange', {
       nativeEvent: { contentSize: { width: 200, height: 40 } },
     })
     await waitFor(() => expect(getInputStyle('clear-and-retype-auto-size').height).toBe(40))
@@ -243,6 +270,7 @@ describe('Input', () => {
     )
 
     const input = screen.getByTestId('word-limit-auto-size')
+    const measurementInput = getMeasurementInput('word-limit-auto-size')
     const inputStyle = StyleSheet.flatten(input.props.style)
     expect(inputStyle.paddingBottom).toBeGreaterThan(inputStyle.paddingTop)
     expect(inputStyle.paddingBottom).toBe(34)
@@ -259,11 +287,40 @@ describe('Input', () => {
     // The native measurement is clamped to the bound that already includes the
     // word-limit area; the reserve is not added a second time.
     // eslint-disable-next-line testing-library/no-await-sync-events
-    await fireEvent(input, 'contentSizeChange', {
+    await fireEvent(measurementInput, 'contentSizeChange', {
       nativeEvent: { contentSize: { width: 200, height: 200 } },
     })
     await waitFor(() => expect(getInputStyle('word-limit-auto-size').height).toBe(142))
     expect(input.props.scrollEnabled).toBe(true)
+  })
+
+  it('does not let visible content-size feedback change autoSize height', async () => {
+    await render(
+      <Input
+        testID="feedback-loop-auto-size"
+        multiline
+        autoSize={{ minRows: 1, maxRows: 5 }}
+        defaultValue="x"
+      />,
+    )
+
+    const input = screen.getByTestId('feedback-loop-auto-size')
+    const measurementInput = getMeasurementInput('feedback-loop-auto-size')
+
+    for (const height of [44, 45, 44, 45]) {
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent(input, 'contentSizeChange', {
+        nativeEvent: { contentSize: { width: 200, height } },
+      })
+    }
+    expect(getInputStyle('feedback-loop-auto-size').height).toBe(36)
+
+    // The same value from the measurement node is the only event that updates it.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(measurementInput, 'contentSizeChange', {
+      nativeEvent: { contentSize: { width: 200, height: 44 } },
+    })
+    await waitFor(() => expect(getInputStyle('feedback-loop-auto-size').height).toBe(44))
   })
 
   it('supports uncontrolled values and preserves native and string change handlers', async () => {

@@ -33,7 +33,7 @@ export function useInputAutoSize({
     if (value.length === 0 && contentHeight !== undefined) setContentHeight(undefined)
   }, [contentHeight, value])
 
-  const onContentSizeChange = useCallback(
+  const onMeasure = useCallback(
     (nextHeight: number) => {
       if (!enabled) return
       if (value.length === 0) {
@@ -53,5 +53,5 @@ export function useInputAutoSize({
     [enabled, height, maxHeight, minHeight],
   )
 
-  return { inputStyle, scrollEnabled, onContentSizeChange }
+  return { inputStyle, scrollEnabled, onMeasure }
 }

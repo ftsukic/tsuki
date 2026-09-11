@@ -1,9 +1,10 @@
-import { forwardRef, useCallback } from 'react'
-import { StyleSheet, Text, View, type LayoutChangeEvent } from 'react-native'
+import { forwardRef } from 'react'
+import { StyleSheet, View } from 'react-native'
 import type { TextInputInstance } from '../text-input'
 import type { TextInputProps } from '../text-input'
+import { Text } from '../text'
 import { InputCore } from './input-core'
-import type { InputProps, InputSemanticStyles } from './interface'
+import type { InputSemanticStyles } from './interface'
 import type { InputResolvedStyles } from './style'
 import type { StyleProp, TextStyle } from 'react-native'
 
@@ -18,10 +19,7 @@ export interface InputTextareaProps {
   inputStyle?: StyleProp<TextStyle>
   scrollEnabled?: boolean
   onChangeText: (value: string) => void
-  onContentSizeChange: (
-    event: Parameters<NonNullable<InputProps['onContentSizeChange']>>[0],
-  ) => void
-  onMeasureContentSize?: (height: number) => void
+  onAutoSizeMeasure?: (height: number) => void
 }
 
 export const InputTextarea = forwardRef<TextInputInstance, InputTextareaProps>(
@@ -37,20 +35,20 @@ export const InputTextarea = forwardRef<TextInputInstance, InputTextareaProps>(
       inputStyle,
       scrollEnabled,
       onChangeText,
-      onContentSizeChange,
-      onMeasureContentSize,
+      onAutoSizeMeasure,
     },
     ref,
   ) {
-    const handleMeasureLayout = useCallback(
-      (event: LayoutChangeEvent) => {
-        onMeasureContentSize?.(event.nativeEvent.layout.height)
-      },
-      [onMeasureContentSize],
-    )
     const shellStyle = StyleSheet.flatten([styles.shell, styles.textareaShell, semantic?.shell])
     const shellHorizontalPadding =
       typeof shellStyle.paddingHorizontal === 'number' ? shellStyle.paddingHorizontal : 0
+    const {
+      allowFontScaling,
+      maxFontSizeMultiplier,
+      textBreakStrategy,
+      lineBreakStrategyIOS,
+      textAlign,
+    } = coreProps
 
     return (
       <View style={[styles.shell, styles.textareaShell, semantic?.shell]}>
@@ -70,14 +68,23 @@ export const InputTextarea = forwardRef<TextInputInstance, InputTextareaProps>(
             semantic?.input,
           ]}
           onChangeText={onChangeText}
-          onContentSizeChange={onContentSizeChange}
         />
         {autoSize ? (
-          <Text
+          <InputCore
+            value={value.length > 0 ? value : ' '}
+            multiline
+            editable={false}
+            scrollEnabled={false}
             accessible={false}
-            importantForAccessibility="no"
-            onLayout={handleMeasureLayout}
+            importantForAccessibility="no-hide-descendants"
             pointerEvents="none"
+            textAlignVertical="top"
+            allowFontScaling={allowFontScaling}
+            maxFontSizeMultiplier={maxFontSizeMultiplier}
+            textBreakStrategy={textBreakStrategy}
+            lineBreakStrategyIOS={lineBreakStrategyIOS}
+            textAlign={textAlign}
+            testID={coreProps.testID ? `${coreProps.testID}__measure` : undefined}
             style={[
               styles.input,
               styles.textareaInput,
@@ -95,9 +102,10 @@ export const InputTextarea = forwardRef<TextInputInstance, InputTextareaProps>(
                 right: shellHorizontalPadding,
               },
             ]}
-          >
-            {value.length > 0 ? value : ' '}
-          </Text>
+            onContentSizeChange={(event) => {
+              onAutoSizeMeasure?.(event.nativeEvent.contentSize.height)
+            }}
+          />
         ) : null}
         {wordLimit !== undefined ? (
           <Text style={[styles.wordLimit, semantic?.wordLimit]}>
