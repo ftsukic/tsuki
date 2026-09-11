@@ -211,6 +211,35 @@ describe('Cell', () => {
     expect(screen.getByTestId('vertical-extra')).toBeTruthy()
   })
 
+  it('keeps extra at the top of a vertical row by default and centers it with center', async () => {
+    const view = await render(
+      <ConfigProvider>
+        <Cell testID="default-extra" vertical title="标题" value="这是一段多行值" extra="操作" />
+        <Cell
+          testID="centered-extra"
+          vertical
+          center
+          title="标题"
+          value="这是一段多行值"
+          extra={<Text testID="centered-extra-node">操作</Text>}
+        />
+      </ConfigProvider>,
+    )
+
+    const defaultExtraContainer = findNode(
+      cellNode(view.toJSON(), 'default-extra'),
+      (node) => nodeStyle(node).flexShrink === 1 && nodeStyle(node).marginLeft !== undefined,
+    )
+    const centeredExtraContainer = findNode(
+      cellNode(view.toJSON(), 'centered-extra'),
+      (node) => nodeStyle(node).flexShrink === 1 && nodeStyle(node).marginLeft !== undefined,
+    )
+
+    expect(nodeStyle(defaultExtraContainer).justifyContent).toBe('flex-start')
+    expect(nodeStyle(centeredExtraContainer).justifyContent).toBe('center')
+    expect(screen.getByTestId('centered-extra-node')).toBeTruthy()
+  })
+
   it('defaults vertical values to left alignment and horizontal values to right alignment', async () => {
     const view = await render(
       <ConfigProvider>
