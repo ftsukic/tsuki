@@ -1,61 +1,72 @@
 import type { ReactNode } from 'react'
-import type {
-  ColorValue,
-  StyleProp,
-  TextInput as NativeTextInput,
-  TextInputProps as NativeTextInputProps,
-  TextStyle,
-  ViewProps,
-  ViewStyle,
-} from 'react-native'
+import type { ColorValue, StyleProp, TextStyle, ViewStyle } from 'react-native'
 import type { StyleInfo, StyleResolver } from '../style'
+import type { InputInstance, InputProps } from '../input'
 
-export type SearchInstance = NativeTextInput
-export type SearchSize = 'small' | 'medium' | 'large'
+export type SearchInstance = InputInstance
 export type SearchShape = 'square' | 'round'
 
 export interface SearchStyleState {
-  focused: boolean
   disabled: boolean
 }
 
 export interface SearchSemanticStyles {
   root?: StyleProp<ViewStyle>
-  container?: StyleProp<ViewStyle>
+  left?: StyleProp<ViewStyle>
+  content?: StyleProp<ViewStyle>
   prefix?: StyleProp<ViewStyle>
-  suffix?: StyleProp<ViewStyle>
-  /** @deprecated Use prefix for the leading layout region. */
-  leftIcon?: StyleProp<ViewStyle>
+  label?: StyleProp<TextStyle>
   input?: StyleProp<TextStyle>
+  suffix?: StyleProp<TextStyle>
   clear?: StyleProp<ViewStyle>
+  action?: StyleProp<ViewStyle>
 }
 
 export type SearchStyles = StyleResolver<SearchProps, SearchStyleState, SearchSemanticStyles>
 
 export interface SearchProps extends Omit<
-  NativeTextInputProps,
-  'defaultValue' | 'editable' | 'multiline' | 'onChange' | 'onChangeText' | 'style' | 'value'
+  InputProps,
+  | 'autoSize'
+  | 'addonAfter'
+  | 'addonBefore'
+  | 'bordered'
+  | 'defaultPasswordVisible'
+  | 'defaultValue'
+  | 'formatTrigger'
+  | 'formatter'
+  | 'multiline'
+  | 'onChange'
+  | 'onChangeText'
+  | 'onPasswordVisibleChange'
+  | 'passwordVisible'
+  | 'prefix'
+  | 'rows'
+  | 'size'
+  | 'showWordLimit'
+  | 'style'
+  | 'styles'
+  | 'suffix'
+  | 'type'
+  | 'value'
 > {
   value?: string
   defaultValue?: string
   onChange?: (value: string) => void
-  onChangeText?: NativeTextInputProps['onChangeText']
-  placeholder?: string
-  disabled?: boolean
-  readOnly?: boolean
-  size?: SearchSize
+  onChangeText?: InputProps['onChangeText']
+  onClear?: InputProps['onClear']
+  onSearch?: (value: string) => void
+  autoSearch?: boolean
+  debounce?: number
   shape?: SearchShape
   background?: ColorValue
-  prefix?: ReactNode
-  leftIcon?: ReactNode
+  inputAlign?: 'left' | 'center' | 'right'
+  searchIcon?: ReactNode
+  label?: ReactNode
   suffix?: ReactNode
-  height?: number
-  showClear?: boolean
-  onClear?: () => void
-  multiline?: boolean
+  left?: ReactNode
+  action?: ReactNode
   style?: StyleProp<ViewStyle>
   styles?: SearchStyles
-  testID?: ViewProps['testID']
 }
 
 export type SearchStyleInfo = StyleInfo<SearchProps, SearchStyleState>

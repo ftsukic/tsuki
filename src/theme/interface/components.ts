@@ -183,27 +183,20 @@ export interface FieldToken {
 }
 
 export interface SearchToken {
-  search_height_small: number
-  search_height_medium: number
-  search_height_large: number
+  search_height: number
   search_background_color: string
+  search_content_background_color: string
   search_text_color: string
   search_placeholder_color: string
   search_icon_color: string
-  search_clear_color: string
   search_border_radius: number
+  search_round_border_radius: number
   search_padding_horizontal: number
-  search_prefix_spacing: number
-  search_suffix_spacing: number
+  search_padding_vertical: number
+  search_gap: number
+  search_label_spacing: number
   search_icon_size: number
-  search_clear_size: number
-  search_font_size: number
-  search_line_height: number
-  search_font_family: string
-  search_disabled_background_color: string
   search_disabled_text_color: string
-  search_disabled_opacity: number
-  search_pressed_opacity: number
 }
 
 export interface AvatarToken {

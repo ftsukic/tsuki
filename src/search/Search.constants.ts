@@ -1,5 +1,7 @@
-import type { SearchShape, SearchSize } from './Search.types'
+import type { InputClearTrigger } from '../input'
+import type { SearchShape } from './Search.types'
 
-export const SEARCH_DEFAULT_SIZE: SearchSize = 'medium'
-export const SEARCH_DEFAULT_SHAPE: SearchShape = 'round'
-export const SEARCH_DEFAULT_SHOW_CLEAR = true
+export const SEARCH_DEFAULT_SHAPE: SearchShape = 'square'
+export const SEARCH_DEFAULT_CLEARABLE = true
+export const SEARCH_DEFAULT_CLEAR_TRIGGER: InputClearTrigger = 'always'
+export const SEARCH_DEFAULT_DEBOUNCE = 300

@@ -5,7 +5,6 @@ export type {
   SearchProps,
   SearchSemanticStyles,
   SearchShape,
-  SearchSize,
   SearchStyleInfo,
   SearchStyleState,
   SearchStyles,

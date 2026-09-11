@@ -4,31 +4,13 @@ import type { SearchProps, SearchStyleState } from './Search.types'
 
 export interface SearchResolvedStyles {
   root: ViewStyle
-  container: ViewStyle
+  left: ViewStyle
+  content: ViewStyle
+  inputShell: ViewStyle
   prefix: ViewStyle
-  suffix: ViewStyle
-  /** @deprecated Use prefix. */
-  leftIcon: ViewStyle
+  label: TextStyle
   input: TextStyle
-  clear: ViewStyle
-}
-
-function getSearchHeight(
-  token: SearchToken,
-  size: NonNullable<SearchProps['size']>,
-  height?: SearchProps['height'],
-) {
-  if (height !== undefined) return height
-
-  switch (size) {
-    case 'small':
-      return token.search_height_small
-    case 'large':
-      return token.search_height_large
-    case 'medium':
-    default:
-      return token.search_height_medium
-  }
+  action: ViewStyle
 }
 
 export function getSearchStyles(
@@ -36,76 +18,57 @@ export function getSearchStyles(
   props: SearchProps,
   state: SearchStyleState,
 ): SearchResolvedStyles {
-  const height = getSearchHeight(token, props.size ?? 'medium', props.height)
-  const multiline = props.multiline === true
+  const contentRadius =
+    props.shape === 'round' ? token.search_round_border_radius : token.search_border_radius
 
   return {
     root: {
       width: '100%',
       minWidth: 0,
-      opacity: state.disabled ? token.search_disabled_opacity : 1,
-    },
-    container: {
-      width: '100%',
-      minWidth: 0,
-      ...(multiline ? { minHeight: height } : { height }),
       flexDirection: 'row',
-      alignItems: multiline ? 'stretch' : 'center',
+      alignItems: 'center',
       paddingHorizontal: token.search_padding_horizontal,
-      borderRadius: props.shape === 'square' ? 0 : token.search_border_radius,
-      backgroundColor: state.disabled
-        ? token.search_disabled_background_color
-        : (props.background ?? token.search_background_color),
+      paddingVertical: token.search_padding_vertical,
+      backgroundColor: props.background ?? token.search_background_color,
     },
-    prefix: {
-      minWidth: token.search_icon_size,
-      height: '100%',
+    left: {
       flexShrink: 0,
-      marginRight: token.search_prefix_spacing,
       alignItems: 'center',
       justifyContent: 'center',
+      marginRight: token.search_gap,
     },
-    leftIcon: {
-      minWidth: token.search_icon_size,
-      height: '100%',
-      flexShrink: 0,
-      marginRight: token.search_prefix_spacing,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    input: {
+    content: {
       flex: 1,
       minWidth: 0,
-      paddingHorizontal: 0,
-      ...(multiline
-        ? {}
-        : {
-            height,
-            paddingVertical: 0,
-            includeFontPadding: false,
-            textAlignVertical: 'center',
-          }),
+      height: token.search_height,
+      borderRadius: contentRadius,
+      backgroundColor: token.search_content_background_color,
+    },
+    inputShell: {
+      height: token.search_height,
+      minHeight: token.search_height,
+      borderRadius: contentRadius,
+      ...(state.disabled ? {} : { backgroundColor: token.search_content_background_color }),
+    },
+    prefix: {
+      flexShrink: 0,
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    label: {
+      marginLeft: token.search_label_spacing,
       color: state.disabled ? token.search_disabled_text_color : token.search_text_color,
-      fontFamily: token.search_font_family,
-      fontSize: token.search_font_size,
-      lineHeight: token.search_line_height,
     },
-    suffix: {
-      minWidth: token.search_clear_size,
-      height: '100%',
+    input: {
+      textAlign: props.inputAlign ?? 'left',
+    },
+    action: {
       flexShrink: 0,
-      marginLeft: token.search_suffix_spacing,
+      flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-    },
-    clear: {
-      width: Math.max(32, token.search_clear_size + token.search_suffix_spacing * 2),
-      height: '100%',
-      flexShrink: 0,
-      minHeight: 32,
-      borderRadius: 16,
-      alignItems: 'center',
-      justifyContent: 'center',
+      marginLeft: token.search_gap,
+      gap: token.search_gap,
     },
   }
 }
