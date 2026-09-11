@@ -114,6 +114,7 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
       disabled,
       readOnly,
       vertical,
+      center = true,
       labelWidth,
       labelAlign,
       valueAlign,
@@ -167,7 +168,7 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
         disabled={disabled}
         vertical={vertical}
         valueAlign={resolvedValueAlign}
-        center={props.center}
+        center={center}
         icon={icon}
         isLink={isLink}
         clickable={clickable}

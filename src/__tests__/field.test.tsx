@@ -37,6 +37,24 @@ async function press(target: Parameters<typeof fireEvent.press>[0]) {
 }
 
 describe('FieldInput', () => {
+  it('centers the Cell row by default', async () => {
+    const view = await render(<FieldInput label="用户名" defaultValue="张三" />)
+    const cellRows = findNodes(view.toJSON(), (node) => {
+      const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
+      return (
+        style?.flexDirection === 'row' &&
+        style?.paddingHorizontal === 16 &&
+        style?.paddingVertical === 10 &&
+        style?.minHeight === 44
+      )
+    })
+
+    expect(cellRows).toHaveLength(1)
+    expect(StyleSheet.flatten(cellRows[0].props.style as StyleProp<ViewStyle>)).toMatchObject({
+      alignItems: 'center',
+    })
+  })
+
   it('composes Cell and Input while keeping the value contract', async () => {
     const onChange = jest.fn()
 

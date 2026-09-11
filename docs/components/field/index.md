@@ -66,7 +66,7 @@ import { Cell, FieldCheckbox, FieldInput, FieldPicker, FieldRadio } from '@ftsuk
 | disabled | `boolean` | `false` | 同时禁用 Cell 和对应控件。 |
 | readOnly | `boolean` | `false` | 阻止控件交互，但保留正常视觉；`FieldPicker` 也不会打开。 |
 | vertical | `boolean` | `false` | 映射到 `Cell.vertical`。 |
-| center | `boolean` | `false` | 映射到 `Cell.center`，由 Cell 决定垂直居中行为。 |
+| center | `boolean` | `FieldInput` 为 `true`，其余适配器为 `false` | 映射到 `Cell.center`，由 Cell 决定垂直居中行为。 |
 | labelWidth | `DimensionValue` | Field token | horizontal 时覆盖 Cell 的 label 区宽度。 |
 | labelAlign | `'left' \| 'center' \| 'right'` | `'left'` | 通过 `Cell.styles.title` 设置 label 文本对齐。 |
 | valueAlign | `'left' \| 'center' \| 'right'` | horizontal 为 `'right'`，vertical 为 `'left'` | 映射到 Cell value 区域的水平对齐；`FieldInput` 同时映射到 Input 文本。 |
@@ -83,7 +83,7 @@ import { Cell, FieldCheckbox, FieldInput, FieldPicker, FieldRadio } from '@ftsuk
 
 ## FieldInput
 
-`FieldInput` 直接渲染 `Cell`，并把扁平的 Input props 传给嵌入的 `Input`。`value`、`defaultValue` 和字符串 `onChange` 属于 FieldInput；Input 的原生 `onChangeText` 不单独暴露。适配器会自动使用 `bordered={false}`、透明输入 surface，并保留 `password`、formatter、clearable、textarea、prefix/suffix 和 autoSize 能力。
+`FieldInput` 直接渲染 `Cell`，并把扁平的 Input props 传给嵌入的 `Input`。`value`、`defaultValue` 和字符串 `onChange` 属于 FieldInput；Input 的原生 `onChangeText` 不单独暴露。适配器会自动使用 `bordered={false}`、透明输入 surface，并保留 `password`、formatter、clearable、textarea、prefix/suffix 和 autoSize 能力。`FieldInput` 的 `center` 默认值为 `true`；传入 `center={false}` 可恢复非居中的 Cell 对齐行为。
 
 ```tsx | pure
 <FieldInput
