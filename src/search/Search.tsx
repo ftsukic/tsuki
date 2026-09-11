@@ -1,21 +1,20 @@
 import { Input } from '../input'
-import type { InputStyles } from '../input'
+import type { InputClearTrigger, InputStyles } from '../input'
 import { Icon } from '../icon'
 import { resolveStyles } from '../style'
-import { useComponentToken } from '../theme'
-import { getSearchToken } from '../theme/components/search'
-import { getSearchStyles } from './Search.styles'
-import {
-  SEARCH_DEFAULT_CLEARABLE,
-  SEARCH_DEFAULT_CLEAR_TRIGGER,
-  SEARCH_DEFAULT_DEBOUNCE,
-  SEARCH_DEFAULT_SHAPE,
-} from './Search.constants'
-import type { SearchProps, SearchStyleState } from './Search.types'
+import { useComponentToken, useToken } from '../theme'
+import { getSearchStyles } from './style'
+import { getSearchToken } from './token'
+import type { SearchInstance, SearchProps, SearchShape, SearchStyleState } from './interface'
 import { forwardRef, useCallback, useEffect, useRef } from 'react'
 import { Text, View } from 'react-native'
 
-export const Search = forwardRef<React.ElementRef<typeof Input>, SearchProps>(function Search(
+const SEARCH_DEFAULT_SHAPE: SearchShape = 'square'
+const SEARCH_DEFAULT_CLEARABLE = true
+const SEARCH_DEFAULT_CLEAR_TRIGGER: InputClearTrigger = 'always'
+const SEARCH_DEFAULT_DEBOUNCE = 300
+
+export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
   {
     value,
     defaultValue,
@@ -47,6 +46,7 @@ export const Search = forwardRef<React.ElementRef<typeof Input>, SearchProps>(fu
   ref,
 ) {
   const token = useComponentToken('Search', getSearchToken)
+  const { token: aliasToken } = useToken()
   const currentValueRef = useRef(value ?? defaultValue ?? '')
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isDisabled = disabled === true
@@ -77,7 +77,7 @@ export const Search = forwardRef<React.ElementRef<typeof Input>, SearchProps>(fu
     placeholder,
     testID,
   } as SearchProps
-  const resolved = getSearchStyles(token, searchProps, state)
+  const resolved = getSearchStyles(token, aliasToken, searchProps, state)
   const semantic = resolveStyles(styles, { props: searchProps, state })
 
   if (value !== undefined) currentValueRef.current = value
@@ -123,7 +123,7 @@ export const Search = forwardRef<React.ElementRef<typeof Input>, SearchProps>(fu
       <Icon
         name="SearchOutlined"
         size={token.search_icon_size}
-        color={isDisabled ? token.search_disabled_text_color : token.search_icon_color}
+        color={isDisabled ? aliasToken.colorTextDisabled : token.search_icon_color}
       />
     ) : (
       searchIcon
@@ -147,8 +147,18 @@ export const Search = forwardRef<React.ElementRef<typeof Input>, SearchProps>(fu
     </View>
   ) : undefined
   const inputStyles: InputStyles = {
-    shell: [resolved.inputShell, semantic?.content],
-    input: [resolved.input, semantic?.input],
+    root: {
+      flex: 1,
+    },
+    shell: {
+      height: token.search_height,
+      minHeight: token.search_height,
+      paddingVertical: 0,
+      borderRadius:
+        shape === 'round' ? token.search_round_border_radius : token.search_border_radius,
+      ...(isDisabled ? {} : { backgroundColor: token.search_content_background_color }),
+    },
+    input: [{ textAlign: inputAlign }, semantic?.input],
     suffix: semantic?.suffix,
     clear: semantic?.clear,
   }
@@ -179,7 +189,6 @@ export const Search = forwardRef<React.ElementRef<typeof Input>, SearchProps>(fu
           disabled={disabled}
           readOnly={readOnly}
           placeholder={placeholder}
-          placeholderTextColor={nativeProps.placeholderTextColor ?? token.search_placeholder_color}
           clearable={clearable}
           clearTrigger={clearTrigger}
           bordered={false}

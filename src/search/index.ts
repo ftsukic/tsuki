@@ -1,5 +1,4 @@
-export { Search } from './Search'
-export { getSearchToken } from '../theme/components/search'
+export { Search } from './search'
 export type {
   SearchInstance,
   SearchProps,
@@ -8,4 +7,4 @@ export type {
   SearchStyleInfo,
   SearchStyleState,
   SearchStyles,
-} from './Search.types'
+} from './interface'

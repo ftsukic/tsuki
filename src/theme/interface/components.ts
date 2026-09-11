@@ -186,8 +186,6 @@ export interface SearchToken {
   search_height: number
   search_background_color: string
   search_content_background_color: string
-  search_text_color: string
-  search_placeholder_color: string
   search_icon_color: string
   search_border_radius: number
   search_round_border_radius: number
@@ -196,7 +194,6 @@ export interface SearchToken {
   search_gap: number
   search_label_spacing: number
   search_icon_size: number
-  search_disabled_text_color: string
 }
 
 export interface AvatarToken {

@@ -4,6 +4,10 @@ import { createRef } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import type { TextInput as NativeTextInput } from 'react-native'
 
+function getInputShell(testID: string) {
+  return screen.getByTestId(testID).parent?.parent
+}
+
 describe('Search', () => {
   it('renders the placeholder and default search icon', async () => {
     await render(
@@ -123,9 +127,27 @@ describe('Search', () => {
 
     const rootStyle = StyleSheet.flatten(screen.getByTestId('search-root').props.style)
     const contentStyle = StyleSheet.flatten(screen.getByTestId('search-content').props.style)
+    const inputShellStyle = StyleSheet.flatten(getInputShell('search')?.props.style)
 
     expect(rootStyle.backgroundColor).toBe('#ffffff')
-    expect(contentStyle.backgroundColor).not.toBe(rootStyle.backgroundColor)
+    expect(contentStyle.backgroundColor).toBeUndefined()
+    expect(inputShellStyle.backgroundColor).not.toBe(rootStyle.backgroundColor)
+  })
+
+  it('applies Search content styles only to the Search content layer', async () => {
+    await render(
+      <Search
+        testID="search"
+        styles={{ content: { backgroundColor: '#123456', paddingVertical: 7 } }}
+      />,
+    )
+
+    const contentStyle = StyleSheet.flatten(screen.getByTestId('search-content').props.style)
+    const inputShellStyle = StyleSheet.flatten(getInputShell('search')?.props.style)
+
+    expect(contentStyle).toMatchObject({ backgroundColor: '#123456', paddingVertical: 7 })
+    expect(inputShellStyle.backgroundColor).not.toBe('#123456')
+    expect(inputShellStyle.paddingVertical).toBe(0)
   })
 
   it('uses a small square radius and a pill radius for round shape', async () => {
@@ -137,11 +159,9 @@ describe('Search', () => {
     )
 
     const squareRadius = StyleSheet.flatten(
-      screen.getByTestId('square-search-content').props.style,
+      getInputShell('square-search')?.props.style,
     ).borderRadius
-    const roundRadius = StyleSheet.flatten(
-      screen.getByTestId('round-search-content').props.style,
-    ).borderRadius
+    const roundRadius = StyleSheet.flatten(getInputShell('round-search')?.props.style).borderRadius
 
     expect(squareRadius).toBeGreaterThan(0)
     expect(roundRadius).toBeGreaterThan(squareRadius)

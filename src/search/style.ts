@@ -1,26 +1,22 @@
 import type { TextStyle, ViewStyle } from 'react-native'
-import type { SearchToken } from '../theme'
-import type { SearchProps, SearchStyleState } from './Search.types'
+import type { AliasToken, SearchToken } from '../theme'
+import type { SearchProps, SearchStyleState } from './interface'
 
 export interface SearchResolvedStyles {
   root: ViewStyle
   left: ViewStyle
   content: ViewStyle
-  inputShell: ViewStyle
   prefix: ViewStyle
   label: TextStyle
-  input: TextStyle
   action: ViewStyle
 }
 
 export function getSearchStyles(
   token: SearchToken,
+  aliasToken: AliasToken,
   props: SearchProps,
   state: SearchStyleState,
 ): SearchResolvedStyles {
-  const contentRadius =
-    props.shape === 'round' ? token.search_round_border_radius : token.search_border_radius
-
   return {
     root: {
       width: '100%',
@@ -40,15 +36,6 @@ export function getSearchStyles(
     content: {
       flex: 1,
       minWidth: 0,
-      height: token.search_height,
-      borderRadius: contentRadius,
-      backgroundColor: token.search_content_background_color,
-    },
-    inputShell: {
-      height: token.search_height,
-      minHeight: token.search_height,
-      borderRadius: contentRadius,
-      ...(state.disabled ? {} : { backgroundColor: token.search_content_background_color }),
     },
     prefix: {
       flexShrink: 0,
@@ -57,10 +44,7 @@ export function getSearchStyles(
     },
     label: {
       marginLeft: token.search_label_spacing,
-      color: state.disabled ? token.search_disabled_text_color : token.search_text_color,
-    },
-    input: {
-      textAlign: props.inputAlign ?? 'left',
+      color: state.disabled ? aliasToken.colorTextDisabled : aliasToken.colorText,
     },
     action: {
       flexShrink: 0,
