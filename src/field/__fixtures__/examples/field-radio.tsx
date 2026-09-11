@@ -21,8 +21,6 @@ export default function FieldRadioFixture() {
       ]}
       direction="horizontal"
       gap={16}
-      status="warning"
-      description="请选择一个尺寸"
     />
   )
 }

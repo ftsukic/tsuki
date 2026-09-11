@@ -174,6 +174,33 @@ describe('FieldRadio', () => {
     expect(screen.getByTestId('radio-large').props.accessibilityState.selected).toBe(true)
   })
 
+  it('delegates value alignment to Cell without an extra control wrapper', async () => {
+    await render(
+      <>
+        <FieldRadio
+          label="横向"
+          testID="horizontal-radio-group"
+          direction="horizontal"
+          options={[{ value: 'one', label: '一' }]}
+        />
+        <FieldRadio
+          label="纵向"
+          vertical
+          testID="vertical-radio-group"
+          direction="horizontal"
+          options={[{ value: 'one', label: '一' }]}
+        />
+      </>,
+    )
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId('horizontal-radio-group').parent?.props.style),
+    ).toMatchObject({ justifyContent: 'flex-end' })
+    expect(
+      StyleSheet.flatten(screen.getByTestId('vertical-radio-group').parent?.props.style),
+    ).toMatchObject({ justifyContent: 'flex-start' })
+  })
+
   it('blocks readOnly changes without applying disabled visuals', async () => {
     const onChange = jest.fn()
 
