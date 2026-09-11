@@ -164,6 +164,84 @@ describe('Checkbox', () => {
 })
 
 describe('CheckboxGroup', () => {
+  it('supports options and reports the next array value', async () => {
+    const onChange = jest.fn()
+
+    await render(
+      <ConfigProvider>
+        <CheckboxGroup
+          testID="options"
+          defaultValue={['email']}
+          onChange={onChange}
+          options={[
+            { value: 'email', label: '邮件' },
+            { value: 'sms', label: '短信' },
+            { value: 'locked', label: '锁定', disabled: true },
+          ]}
+        />
+      </ConfigProvider>,
+    )
+
+    expect(screen.getByText('邮件').parent?.props.accessibilityState?.checked).toBe(true)
+    expect(screen.getByText('短信').parent?.props.accessibilityState?.checked).toBe(false)
+    await press(screen.getByText('短信'))
+    expect(onChange).toHaveBeenCalledWith(['email', 'sms'])
+    expect(screen.getByText('短信').parent?.props.accessibilityState?.checked).toBe(true)
+
+    await press(screen.getByText('邮件'))
+    expect(onChange).toHaveBeenLastCalledWith(['sms'])
+
+    await press(screen.getByText('锁定'))
+    expect(onChange).toHaveBeenCalledTimes(2)
+  })
+
+  it('uses button options in the equal-width Grid layout', async () => {
+    const view = await render(
+      <ConfigProvider>
+        <CheckboxGroup
+          variant="button"
+          buttonLayout="equal"
+          direction="horizontal"
+          buttonColumns={2}
+          options={[
+            { value: 'one', label: '选项一' },
+            { value: 'two', label: '选项二' },
+            { value: 'three', label: '选项三' },
+          ]}
+        />
+      </ConfigProvider>,
+    )
+
+    expect(screen.getByText('选项一')).toBeTruthy()
+    expect(screen.getByText('选项二')).toBeTruthy()
+    expect(screen.getByText('选项三')).toBeTruthy()
+    expect(
+      findNodes(view.toJSON(), (node) => {
+        const style = StyleSheet.flatten(node.props.style)
+        return style?.flexBasis === '50%'
+      }),
+    ).toHaveLength(3)
+  })
+
+  it('warns and prefers children when options and children are both provided', async () => {
+    const error = jest.spyOn(console, 'error').mockImplementation(() => undefined)
+
+    await render(
+      <ConfigProvider>
+        <CheckboxGroup options={[{ value: 'option', label: '配置项' }]}>
+          <Checkbox name="child">子项</Checkbox>
+        </CheckboxGroup>
+      </ConfigProvider>,
+    )
+
+    expect(error).toHaveBeenCalledWith(
+      'Checkbox.Group accepts either options or children, not both.',
+    )
+    expect(screen.getByText('子项')).toBeTruthy()
+    expect(screen.queryByText('配置项')).toBeNull()
+    error.mockRestore()
+  })
+
   it('supports multiple selection and reports the next value', async () => {
     const onChange = jest.fn()
 

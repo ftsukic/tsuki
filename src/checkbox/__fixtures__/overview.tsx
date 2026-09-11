@@ -2,11 +2,12 @@ import { FixtureOverview } from '../../fixture-overview'
 import BasicExample from './examples/basic'
 import ButtonExample from './examples/button'
 import GroupExample from './examples/group'
+import OptionsExample from './examples/options'
 import ThemeExample from './examples/theme'
 
 /**
  * @title Checkbox overview
- * @description Checkbox 汇总基础状态、多选分组、button variant 和主题定制示例。
+ * @description Checkbox 汇总基础状态、多选分组、options、button variant 和主题定制示例。
  */
 export default function CheckboxOverview() {
   return (
@@ -23,6 +24,12 @@ export default function CheckboxOverview() {
           description: '使用 Checkbox.Group 管理多个 name，并演示横向布局和 group disabled。',
           id: 'group',
           title: 'Checkbox.Group',
+        },
+        {
+          Component: OptionsExample,
+          description: '使用 options 快速生成结构一致的多选项，并展示禁用项。',
+          id: 'options',
+          title: 'options 分组',
         },
         {
           Component: ButtonExample,

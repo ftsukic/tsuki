@@ -264,6 +264,29 @@ describe('FieldCheckbox', () => {
     expect(screen.getByTestId('sms').props.accessibilityState.checked).toBe(true)
   })
 
+  it('passes options to Checkbox.Group and preserves option disabled state', async () => {
+    const onChange = jest.fn()
+
+    await render(
+      <FieldCheckbox
+        label="通知方式"
+        defaultValue={['email']}
+        onChange={onChange}
+        options={[
+          { value: 'email', label: '邮件' },
+          { value: 'sms', label: '短信' },
+          { value: 'locked', label: '锁定', disabled: true },
+        ]}
+      />,
+    )
+
+    expect(screen.getByText('邮件').parent?.props.accessibilityState?.checked).toBe(true)
+    await press(screen.getByText('短信'))
+    expect(onChange).toHaveBeenCalledWith(['email', 'sms'])
+    await press(screen.getByText('锁定'))
+    expect(onChange).toHaveBeenCalledTimes(1)
+  })
+
   it('delegates value alignment to Cell without an extra control wrapper', async () => {
     await render(
       <>

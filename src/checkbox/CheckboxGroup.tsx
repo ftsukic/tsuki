@@ -1,4 +1,4 @@
-import { Children, isValidElement, useMemo } from 'react'
+import { Children, isValidElement, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 import { View } from 'react-native'
 import { Grid } from '../grid'
@@ -8,7 +8,17 @@ import { Checkbox } from './Checkbox'
 import { CheckboxGroupContext } from './context'
 import { useCheckboxGroup } from './state'
 import { getCheckboxToken } from './token'
-import type { CheckboxGroupProps, CheckboxProps } from './interface'
+import type { CheckboxGroupProps, CheckboxOption, CheckboxProps } from './interface'
+
+function warnOptionsAndChildren() {
+  if (typeof __DEV__ !== 'undefined' && __DEV__) {
+    console.error('Checkbox.Group accepts either options or children, not both.')
+  }
+}
+
+function getOptionKey(option: CheckboxOption, index: number) {
+  return `${String(option.value)}-${index}`
+}
 
 function isButtonCheckbox(child: ReactNode, groupVariant?: CheckboxGroupProps['variant']) {
   if (!isValidElement<CheckboxProps>(child) || child.type !== Checkbox) return false
@@ -17,6 +27,7 @@ function isButtonCheckbox(child: ReactNode, groupVariant?: CheckboxGroupProps['v
 
 export function CheckboxGroup({
   children,
+  options,
   value,
   defaultValue,
   disabled = false,
@@ -30,6 +41,9 @@ export function CheckboxGroup({
   ...viewProps
 }: CheckboxGroupProps) {
   const token = useComponentToken('Checkbox', getCheckboxToken)
+  const warnedConflict = useRef(false)
+  const hasChildren = Children.toArray(children).length > 0
+  const hasOptions = options !== undefined
   const { selectedValue, toggle } = useCheckboxGroup({
     value,
     defaultValue,
@@ -37,7 +51,18 @@ export function CheckboxGroup({
     onChange,
   })
 
-  const items = Children.toArray(children)
+  if (hasChildren && hasOptions && !warnedConflict.current) {
+    warnedConflict.current = true
+    warnOptionsAndChildren()
+  }
+
+  const optionChildren = options?.map((option, index) => (
+    <Checkbox key={getOptionKey(option, index)} name={option.value} disabled={option.disabled}>
+      {option.label}
+    </Checkbox>
+  ))
+  const content = hasChildren ? children : optionChildren
+  const items = Children.toArray(content)
   const resolvedGap = gap ?? token.groupGap
   const normalizedButtonColumns = normalizeSelectionButtonColumns(buttonColumns)
   const useEqualButtonGrid =
@@ -70,7 +95,7 @@ export function CheckboxGroup({
           gutter={resolvedGap}
           style={[{ width: '100%' }, style]}
         >
-          {children}
+          {content}
         </Grid>
       ) : (
         <View
@@ -85,7 +110,7 @@ export function CheckboxGroup({
             style,
           ]}
         >
-          {children}
+          {content}
         </View>
       )}
     </CheckboxGroupContext.Provider>

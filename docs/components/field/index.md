@@ -121,7 +121,7 @@ button 选项可以设置每行列数；例如文档中的 FieldRadio fixture �
 
 ## FieldCheckbox
 
-`FieldCheckbox` 直接将 `Checkbox.Group` 放入 Cell 的 value 区域，值类型为 `readonly CheckboxValue[]`。它暴露 `children`、`variant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Checkbox.Group 的其他 View props。`variant="button"` 时默认使用 Grid 等宽布局，每行默认最多 5 个，超出后换行；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonLayout="intrinsic"` 可恢复内容宽度。`disabled` 会同时下传到 Cell 与 group；`readOnly` 只阻止交互。
+`FieldCheckbox` 直接将 `Checkbox.Group` 放入 Cell 的 value 区域，值类型为 `readonly CheckboxValue[]`。它暴露 `options`、`children`、`variant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Checkbox.Group 的其他 View props。`variant="button"` 时默认使用 Grid 等宽布局，每行默认最多 5 个，超出后换行；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonLayout="intrinsic"` 可恢复内容宽度。`disabled` 会同时下传到 Cell 与 group；`readOnly` 只阻止交互。
 
 `FieldCheckbox` 不支持 `description`、`errorMessage`、`status` 或 Field 语义 `styles`；需要反馈内容时，应组合 `Cell` 与自定义 control。
 
@@ -131,6 +131,8 @@ button 选项可以设置每行列数；例如文档中的 FieldRadio fixture �
   <Checkbox name="sms">短信</Checkbox>
 </FieldCheckbox>
 ```
+
+也可以使用与 `Checkbox.Group` 相同的 `options` 配置式选项，完整可运行示例见上方 `FieldCheckbox` fixture。
 
 ## FieldPicker
 

@@ -10,6 +10,7 @@ export type {
   CheckboxGroupProps,
   CheckboxDirection,
   CheckboxLabelPosition,
+  CheckboxOption,
   CheckboxProps,
   CheckboxSemanticStyles,
   CheckboxShape,

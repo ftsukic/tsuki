@@ -46,10 +46,17 @@ export interface CheckboxProps extends Omit<
   onPressDebounceWait?: number
 }
 
+export interface CheckboxOption {
+  value: CheckboxValue
+  label: ReactNode
+  disabled?: boolean
+}
+
 export type CheckboxStyleInfo = StyleInfo<CheckboxProps, CheckboxStyleState>
 
 export interface CheckboxGroupProps extends Omit<ViewProps, 'children' | 'style'> {
   children?: ReactNode
+  options?: readonly CheckboxOption[]
   value?: readonly CheckboxValue[]
   defaultValue?: readonly CheckboxValue[]
   disabled?: boolean
