@@ -31,7 +31,7 @@ import { Cell } from '@ftsukic/tsuki'
 
 <code src="../../../src/cell/__fixtures__/examples/basic.tsx" title="基础用法" description="只有 title 的普通 Cell。"></code>
 
-<code src="../../../src/cell/__fixtures__/examples/horizontal.tsx" title="Horizontal" description="title/value 的横向 Main 布局。"></code>
+<code src="../../../src/cell/__fixtures__/examples/horizontal.tsx" title="Horizontal" description="title 按内容占位，value 使用剩余空间并支持省略。"></code>
 
 <code src="../../../src/cell/__fixtures__/examples/vertical.tsx" title="Vertical" description="只改变 Main 内部排列，extra 和 arrow 保持 trailing。"></code>
 
@@ -98,7 +98,7 @@ import { Cell } from '@ftsukic/tsuki'
 
 Cell 继承 React Native `PressableProps`，但由 Cell 管理 `children`、`style` 和 `disabled`；`onPress`、`testID`、无障碍和其他 Pressable 属性仍可使用。交互 Cell 默认 `accessibilityRole="button"`。`disabled` 时不触发 `onPress`。
 
-Cell 的内部结构固定为 `row -> icon + main + extra + suffix`。horizontal 时 Main 内部是 `titleArea | valueArea`，vertical 时只改变 Main 为 `titleArea` 换行到 `valueArea` 上方。`titleExtra`、`valueExtra` 和 `extra` 的外层 wrapper 负责默认垂直位置；自定义 ReactNode 不会被 `cloneElement`，也不会被注入任何 props。
+Cell 的内部结构固定为 `row -> icon + main + extra + suffix`。horizontal 时 Main 内部是 `titleArea | valueArea`：`titleArea` 按内容宽度占位，`valueArea` 使用剩余宽度；vertical 时只改变 Main 为 `titleArea` 换行到 `valueArea` 上方。`titleExtra`、`valueExtra` 和 `extra` 的外层 wrapper 负责默认垂直位置；自定义 ReactNode 不会被 `cloneElement`，也不会被注入任何 props。
 
 ### CellStyles
 

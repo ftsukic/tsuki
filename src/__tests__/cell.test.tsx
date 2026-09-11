@@ -95,7 +95,7 @@ describe('Cell', () => {
     })
   })
 
-  it('gives title and value areas equal flexible columns without a value minimum width', async () => {
+  it('sizes the title to content and gives value the remaining width', async () => {
     const view = await render(
       <ConfigProvider>
         <Cell testID="title-only" title="A very long title that should be allowed to shrink" />
@@ -116,11 +116,13 @@ describe('Cell', () => {
       cellNode(view.toJSON(), 'value-only'),
       (node) => nodeStyle(node).flex === 1 && nodeStyle(node).flexDirection === 'row',
     )
-    const titleValueFlexChildren = (titleValueMain.children ?? []).filter(
-      (child) => nodeStyle(child).flex === 1,
+    const titleArea = findNode(
+      cellNode(view.toJSON(), 'title-value'),
+      (node) => nodeStyle(node).flexBasis === 'auto' && nodeStyle(node).flexShrink === 1,
     )
-    const valueOnlyFlexChildren = (valueOnlyMain.children ?? []).filter(
-      (child) => nodeStyle(child).flex === 1,
+    const valueArea = findNode(
+      cellNode(view.toJSON(), 'title-value'),
+      (node) => nodeStyle(node).flex === 1 && nodeStyle(node).flexDirection === 'row',
     )
 
     const titleOnlyMain = findNode(
@@ -128,13 +130,23 @@ describe('Cell', () => {
       (node) => nodeStyle(node).flex === 1 && nodeStyle(node).flexDirection === 'row',
     )
 
+    expect(nodeStyle(titleArea)).toMatchObject({
+      flexGrow: 0,
+      flexShrink: 1,
+      flexBasis: 'auto',
+      minWidth: 0,
+      marginRight: 4,
+    })
+    expect(nodeStyle(valueArea)).toMatchObject({ flex: 1, minWidth: 0 })
+    expect(
+      (titleValueMain.children ?? []).filter((child) => nodeStyle(child).flex === 1),
+    ).toHaveLength(1)
+    expect(
+      (valueOnlyMain.children ?? []).filter((child) => nodeStyle(child).flex === 1),
+    ).toHaveLength(1)
     expect(
       (titleOnlyMain.children ?? []).filter((child) => nodeStyle(child).flex === 1),
-    ).toHaveLength(1)
-    expect(valueOnlyFlexChildren).toHaveLength(1)
-    expect(titleValueFlexChildren).toHaveLength(2)
-    expect(nodeStyle(valueOnlyFlexChildren[0])).toMatchObject({ flex: 1, minWidth: 0 })
-    expect(nodeStyle(valueOnlyFlexChildren[0]).minWidth).toBe(0)
+    ).toHaveLength(0)
   })
 
   it('keeps the label spacing in title and label combinations', async () => {

@@ -75,9 +75,12 @@ export function getCellStyles(
       flexDirection: props.vertical ? 'column' : 'row',
     },
     titleArea: {
-      flex: props.vertical ? undefined : 1,
+      flexGrow: props.vertical ? undefined : 0,
+      flexShrink: 1,
+      flexBasis: props.vertical ? undefined : 'auto',
       width: props.vertical ? '100%' : undefined,
       minWidth: 0,
+      marginRight: props.vertical ? undefined : token.iconGap,
       justifyContent: props.center ? 'center' : 'flex-start',
     },
     titleRow: {
