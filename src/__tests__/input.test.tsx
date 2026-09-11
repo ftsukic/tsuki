@@ -333,7 +333,13 @@ describe('Input', () => {
       />,
     )
 
-    expect(screen.queryByLabelText('清除输入')).toBeNull()
+    const clearButton = screen.getByLabelText('清除输入')
+    expect(clearButton.props.pointerEvents).toBe('none')
+    expect(StyleSheet.flatten(clearButton.props.style)).toMatchObject({
+      opacity: 0,
+      width: 0,
+      marginLeft: 0,
+    })
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent(screen.getByTestId('clear-input'), 'focus')
     // eslint-disable-next-line testing-library/no-await-sync-events
@@ -342,6 +348,42 @@ describe('Input', () => {
     expect(onClear).toHaveBeenCalledTimes(1)
     expect(onChangeText).toHaveBeenLastCalledWith('')
     await waitFor(() => expect(screen.getByTestId('clear-input').props.value).toBe(''))
+  })
+
+  it('keeps an always-visible clear button clickable before focus', async () => {
+    const onClear = jest.fn()
+
+    await render(
+      <Input
+        testID="always-clear-input"
+        defaultValue="hello"
+        clearable
+        clearTrigger="always"
+        onClear={onClear}
+      />,
+    )
+
+    const clearButton = screen.getByLabelText('清除输入')
+    expect(clearButton.props.pointerEvents).toBe('auto')
+    fireEvent.press(clearButton)
+
+    expect(onClear).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(screen.getByTestId('always-clear-input').props.value).toBe(''))
+  })
+
+  it('keeps the clear node mounted but ignores a hidden clear press', async () => {
+    const onClear = jest.fn()
+
+    await render(
+      <Input testID="hidden-clear-input" defaultValue="hello" clearable onClear={onClear} />,
+    )
+
+    const clearButton = screen.getByLabelText('清除输入')
+    expect(clearButton.props.pointerEvents).toBe('none')
+    fireEvent.press(clearButton)
+
+    expect(onClear).not.toHaveBeenCalled()
+    expect(screen.getByTestId('hidden-clear-input').props.value).toBe('hello')
   })
 
   it('toggles uncontrolled and controlled password visibility', async () => {
@@ -382,6 +424,8 @@ describe('Input', () => {
     )
 
     const toggle = screen.getByLabelText('显示密码')
-    expect(StyleSheet.flatten(toggle.props.style).height).toBe(52)
+    const toggleStyle = StyleSheet.flatten(toggle.props.style)
+    expect(toggleStyle.height).toBe(toggleStyle.width)
+    expect(toggle.props.hitSlop).toBe(8)
   })
 })

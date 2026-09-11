@@ -14,6 +14,7 @@ export interface InputResolvedStyles {
   prefix: TextStyle
   suffix: TextStyle
   clear: ViewStyle
+  clearHidden: ViewStyle
   wordLimit: TextStyle
   passwordToggle: ViewStyle
   singleShell: ViewStyle
@@ -30,12 +31,12 @@ export interface InputPasswordStyles {
 export function getInputPasswordStyles(token: InputToken): InputPasswordStyles {
   return {
     passwordToggle: {
-      width: token.height,
-      height: token.height,
+      width: token.fontSizeLG,
+      height: token.fontSizeLG,
       flexShrink: 0,
       alignItems: 'center',
       justifyContent: 'center',
-      marginLeft: token.paddingHorizontal,
+      marginLeft: token.paddingHorizontal / 2,
     },
   }
 }
@@ -132,7 +133,7 @@ export function getInputStyles(
     prefix: {
       fontFamily: token.fontFamily,
       color: token.prefixColor,
-      marginRight: token.paddingHorizontal,
+      marginRight: token.paddingHorizontal / 2,
     },
     suffix: {
       fontFamily: token.fontFamily,
@@ -148,6 +149,11 @@ export function getInputStyles(
       marginLeft: token.paddingHorizontal,
       borderRadius: token.clearButtonSize / 2,
       backgroundColor: token.clearButtonBackgroundColor,
+    },
+    clearHidden: {
+      opacity: 0,
+      width: 0,
+      marginLeft: 0,
     },
     wordLimit: {
       fontFamily: token.fontFamily,
