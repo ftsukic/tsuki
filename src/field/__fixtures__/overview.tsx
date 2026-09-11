@@ -1,19 +1,15 @@
 import { FixtureOverview } from '../../fixture-overview'
 import FieldBasicFixture from './examples/basic'
-import FieldCustomControlFixture from './examples/custom-control'
-import FieldFeedbackFixture from './examples/feedback'
-import FieldLayoutFixture from './examples/layout'
-import FieldSelectorFixture from './examples/selector'
-import FieldSwitchFixture from './examples/switch'
-import FieldTextareaFixture from './examples/textarea'
+import FieldCheckboxFixture from './examples/field-checkbox'
+import FieldInputFixture from './examples/field-input'
+import FieldPickerFixture from './examples/field-picker'
+import FieldRadioFixture from './examples/field-radio'
+import FieldStatesFixture from './examples/states'
 import FieldThemeFixture from './examples/theme'
-import FieldValueExtraFixture from './examples/value-extra'
-import FieldVerticalFixture from './examples/vertical'
-import FieldWarningFixture from './examples/warning'
 
 /**
  * @title Field overview
- * @description Field 使用 Cell 行布局汇总标签、必填标记、描述、错误和警告状态。
+ * @description Field 是基于 Cell 的 Form Item shell，control 通过独立 adapter 或 children 接入。
  */
 export default function FieldOverview() {
   return (
@@ -22,70 +18,45 @@ export default function FieldOverview() {
       examples={[
         {
           Component: FieldBasicFixture,
-          description:
-            'Field 使用 Cell 行布局，默认 Input 通过 value/onChange 和 inputProps 使用。',
+          description: 'Field 只负责布局和反馈，children 作为自定义 control。',
           id: 'basic',
-          title: '基础输入',
+          title: '基础 custom Field',
         },
         {
-          Component: FieldTextareaFixture,
-          description: 'vertical 只改变 Cell Main 内部排列，multiline 通过 inputProps 配置。',
-          id: 'textarea',
-          title: '多行输入',
+          Component: FieldInputFixture,
+          description: 'FieldInput 扁平暴露 Input props，并保持 Field value contract。',
+          id: 'field-input',
+          title: 'FieldInput',
         },
         {
-          Component: FieldVerticalFixture,
-          description: 'vertical Field 的独立布局示例。',
-          id: 'vertical',
-          title: 'Vertical',
+          Component: FieldRadioFixture,
+          description: 'FieldRadio 组合 Radio.Group。',
+          id: 'field-radio',
+          title: 'FieldRadio',
         },
         {
-          Component: FieldCustomControlFixture,
-          description: '普通 ReactNode children 是完全自管的 custom control。',
-          id: 'custom-control',
-          title: '自定义控件',
+          Component: FieldCheckboxFixture,
+          description: 'FieldCheckbox 组合 Checkbox.Group。',
+          id: 'field-checkbox',
+          title: 'FieldCheckbox',
         },
         {
-          Component: FieldSwitchFixture,
-          description: 'render function children 使用 FieldControlContext 连接 Switch。',
-          id: 'switch',
-          title: 'Switch 控件',
+          Component: FieldPickerFixture,
+          description: 'FieldPicker 仅在 Picker 确认后提交值。',
+          id: 'field-picker',
+          title: 'FieldPicker',
         },
         {
-          Component: FieldSelectorFixture,
-          description: 'Selector 等自定义 value 可以复用 Field 的链接语义。',
-          id: 'selector',
-          title: 'Selector 控件',
-        },
-        {
-          Component: FieldValueExtraFixture,
-          description: 'valueExtra 位于 control 之后，仍由 Cell 负责布局。',
-          id: 'value-extra',
-          title: 'Value extra',
-        },
-        {
-          Component: FieldFeedbackFixture,
-          description: '默认 Input 和 custom control 都支持 description/errorMessage。',
-          id: 'feedback',
-          title: '反馈信息',
-        },
-        {
-          Component: FieldWarningFixture,
-          description: 'status="warning" 的反馈状态。',
-          id: 'warning',
-          title: 'Warning',
-        },
-        {
-          Component: FieldLayoutFixture,
-          description: 'horizontal 下的 labelWidth 与 labelAlign。',
-          id: 'layout',
-          title: 'Label layout',
+          Component: FieldStatesFixture,
+          description: 'vertical、error、readOnly 和 disabled 状态。',
+          id: 'states',
+          title: '布局和状态',
         },
         {
           Component: FieldThemeFixture,
-          description: '状态 token 与语义样式插槽示例。',
+          description: 'Field token 与语义样式插槽。',
           id: 'theme',
-          title: '主题和语义样式',
+          title: '主题定制',
         },
       ]}
     />

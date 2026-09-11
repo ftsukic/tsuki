@@ -1,25 +1,24 @@
-import { Field } from '../../..'
 import { useState } from 'react'
-import { Text, View } from 'react-native'
+import { Field, Text } from '../../..'
 
 /**
- * @title Field basic input
- * @description 不提供 children 时，Field 自动创建一个 Input，value 和 onChange 组成数据契约。
+ * @title Basic custom Field
+ * @description Field 只负责 Cell-based Form Item shell，children 自己渲染 control。
  */
 export default function FieldBasicFixture() {
-  const [value, setValue] = useState('')
+  const [city, setCity] = useState('上海')
 
   return (
-    <View>
-      <Field
-        label="用户名"
-        value={value}
-        onChange={setValue}
-        inputProps={{ placeholder: '请输入用户名' }}
-      />
-      <Text>当前值：{value || '—'}</Text>
-      <Field label="禁用" disabled defaultValue="不可编辑" inputProps={{ testID: 'disabled' }} />
-      <Field label="只读" readOnly defaultValue="只读内容" />
-    </View>
+    <Field
+      label="城市"
+      value={city}
+      onChange={setCity}
+      valueExtra={<Text type="secondary">必填</Text>}
+      isLink
+      onPress={() => setCity(city === '上海' ? '北京' : '上海')}
+      description="点击整行切换自定义 control 的值"
+    >
+      {({ value }) => <Text>{value}</Text>}
+    </Field>
   )
 }

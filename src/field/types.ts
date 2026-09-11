@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import type { DimensionValue, StyleProp, TextStyle, ViewStyle } from 'react-native'
 import type { CellArrowDirection, CellProps } from '../cell'
-import type { InputProps, InputStyles } from '../input'
 import type { StyleInfo, StyleResolver } from '../style'
 
 export type FieldStatus = 'default' | 'error' | 'warning'
@@ -68,20 +67,8 @@ export interface FieldBaseProps<Value> {
   styles?: FieldStyles
 }
 
-export interface FieldInputProps extends FieldBaseProps<string> {
-  children?: never
-  inputProps?: Omit<InputProps, 'value' | 'defaultValue' | 'onChangeText' | 'style' | 'styles'>
-  inputStyle?: InputProps['style']
-  inputStyles?: InputStyles
-}
-
-export interface FieldCustomProps<Value> extends FieldBaseProps<Value> {
+export interface FieldProps<Value = unknown> extends FieldBaseProps<Value> {
   children: ReactNode | ((context: FieldControlContext<Value>) => ReactNode)
-  inputProps?: never
-  inputStyle?: never
-  inputStyles?: never
 }
-
-export type FieldProps<Value = string> = FieldInputProps | FieldCustomProps<Value>
 
 export type FieldStyleInfo = StyleInfo<FieldProps<unknown>, FieldStyleState>

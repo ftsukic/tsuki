@@ -1,6 +1,6 @@
 import type { TextStyle, ViewStyle } from 'react-native'
 import type { AliasToken, FieldToken } from '../theme'
-import type { FieldLabelAlign, FieldStatus, FieldStyleState } from './interface'
+import type { FieldLabelAlign, FieldStatus, FieldStyleState } from './types'
 
 export interface FieldResolvedStyles {
   root: ViewStyle
