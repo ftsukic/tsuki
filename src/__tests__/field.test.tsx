@@ -249,6 +249,31 @@ describe('FieldCheckbox', () => {
     expect(screen.getByTestId('sms').props.accessibilityState.checked).toBe(true)
   })
 
+  it('delegates value alignment to Cell without an extra control wrapper', async () => {
+    await render(
+      <>
+        <FieldCheckbox label="横向" testID="horizontal-checkbox-group" direction="horizontal">
+          <Checkbox name="one">一</Checkbox>
+        </FieldCheckbox>
+        <FieldCheckbox
+          label="纵向"
+          vertical
+          testID="vertical-checkbox-group"
+          direction="horizontal"
+        >
+          <Checkbox name="one">一</Checkbox>
+        </FieldCheckbox>
+      </>,
+    )
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId('horizontal-checkbox-group').parent?.props.style),
+    ).toMatchObject({ justifyContent: 'flex-end' })
+    expect(
+      StyleSheet.flatten(screen.getByTestId('vertical-checkbox-group').parent?.props.style),
+    ).toMatchObject({ justifyContent: 'flex-start' })
+  })
+
   it('passes disabled to Checkbox.Group and keeps readOnly controls visually enabled', async () => {
     const onChange = jest.fn()
 

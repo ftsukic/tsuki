@@ -79,7 +79,7 @@ import { Cell, FieldCheckbox, FieldInput, FieldPicker, FieldRadio } from '@ftsuk
 | style | `StyleProp<ViewStyle>` | — | Cell 根节点样式。 |
 | cellStyles | `CellStyles` | — | 直接传给 Cell 的语义样式；用于 Cell 区域定制。 |
 
-`labelWidth`、`labelAlign` 只是在具体适配器调用 Cell 时生成 Cell styles，不会创建隐藏的 Field 布局层。`vertical`、`center`、分割线、箭头和外围布局均由 Cell 负责。FieldRadio 不提供反馈节点或 Field 语义 `styles`，只保留 `cellStyles` 定制 Cell 区域。
+`labelWidth`、`labelAlign` 只是在具体适配器调用 Cell 时生成 Cell styles，不会创建隐藏的 Field 布局层。`vertical`、`center`、分割线、箭头和外围布局均由 Cell 负责。FieldRadio 和 FieldCheckbox 不提供反馈节点或 Field 语义 `styles`，只保留 `cellStyles` 定制 Cell 区域。
 
 ## FieldInput
 
@@ -121,6 +121,8 @@ import { Cell, FieldCheckbox, FieldInput, FieldPicker, FieldRadio } from '@ftsuk
 
 `FieldCheckbox` 直接将 `Checkbox.Group` 放入 Cell 的 value 区域，值类型为 `readonly CheckboxValue[]`。它暴露 `children`、`direction`、`gap` 及 Checkbox.Group 的其他 View props。`disabled` 会同时下传到 Cell 与 group；`readOnly` 只阻止交互。
 
+`FieldCheckbox` 不支持 `description`、`errorMessage`、`status` 或 Field 语义 `styles`；需要反馈内容时，应组合 `Cell` 与自定义 control。
+
 ```tsx | pure
 <FieldCheckbox label="通知方式" value={channels} onChange={setChannels}>
   <Checkbox name="email">邮件</Checkbox>
@@ -148,7 +150,7 @@ import { Cell, FieldCheckbox, FieldInput, FieldPicker, FieldRadio } from '@ftsuk
 
 ## 语义样式与主题
 
-FieldInput、FieldCheckbox 和 FieldPicker 的 `styles` 提供表单区域语义插槽：`control`、`feedback`、`description` 和 `error`。FieldRadio 不渲染反馈，也不提供 Field 语义 `styles`。Cell 区域使用 `cellStyles`，Input 使用 `inputStyle`/`inputStyles`，Picker 使用 `pickerStyle`/`pickerStyles`，三者边界互不重叠。
+FieldInput 和 FieldPicker 的 `styles` 提供表单区域语义插槽：`control`、`feedback`、`description` 和 `error`。FieldRadio、FieldCheckbox 不渲染反馈，也不提供 Field 语义 `styles`。Cell 区域使用 `cellStyles`，Input 使用 `inputStyle`/`inputStyles`，Picker 使用 `pickerStyle`/`pickerStyles`，三者边界互不重叠。
 
 `theme.components.Field` 仍表示 Field 系列表单 Cell 组合的主题 token，支持 `defaultLabelWidth`、`labelGap`、`descriptionGap`、`errorGap`、`descriptionColor`、`warningColor` 和 `errorColor`。它不产生运行时 `Field` 组件。
 
