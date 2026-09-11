@@ -185,6 +185,39 @@ describe('Cell', () => {
     expect(screen.getByTestId('extra')).toBeTruthy()
   })
 
+  it('centers custom titleExtra and valueExtra within their rows', async () => {
+    const view = await render(
+      <ConfigProvider>
+        <Cell
+          testID="title-extra"
+          vertical
+          title="标题"
+          titleExtra={<Text testID="title-extra-node">说明</Text>}
+        />
+        <Cell
+          testID="value-extra"
+          vertical
+          value="值"
+          valueExtra={<Text testID="value-extra-node">单位</Text>}
+        />
+      </ConfigProvider>,
+    )
+
+    const titleExtraContainer = findNode(
+      cellNode(view.toJSON(), 'title-extra'),
+      (node) => nodeStyle(node).alignSelf === 'center',
+    )
+    const valueExtraContainer = findNode(
+      cellNode(view.toJSON(), 'value-extra'),
+      (node) => nodeStyle(node).alignSelf === 'center',
+    )
+
+    expect(nodeStyle(titleExtraContainer).alignSelf).toBe('center')
+    expect(nodeStyle(valueExtraContainer).alignSelf).toBe('center')
+    expect(screen.getByTestId('title-extra-node')).toBeTruthy()
+    expect(screen.getByTestId('value-extra-node')).toBeTruthy()
+  })
+
   it('changes only Main direction in vertical mode and keeps trailing content horizontal', async () => {
     const view = await render(
       <Cell
@@ -235,7 +268,7 @@ describe('Cell', () => {
       (node) => nodeStyle(node).flexShrink === 1 && nodeStyle(node).marginLeft !== undefined,
     )
 
-    expect(nodeStyle(defaultExtraContainer).justifyContent).toBe('flex-start')
+    expect(nodeStyle(defaultExtraContainer).justifyContent).toBe('center')
     expect(nodeStyle(centeredExtraContainer).justifyContent).toBe('center')
     expect(screen.getByTestId('centered-extra-node')).toBeTruthy()
   })

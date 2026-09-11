@@ -75,11 +75,11 @@ import { Cell } from '@ftsukic/tsuki'
 | --- | --- | --- | --- |
 | icon | `ReactNode` | — | 左侧图标或自定义节点。 |
 | title | `ReactNode` | — | 标题区主内容。字符串/数字由 Cell 创建内部 `Text`，其他节点原样渲染。 |
-| titleExtra | `ReactNode` | — | 紧邻 title 的扩展，属于 `TitleRow`。 |
+| titleExtra | `ReactNode` | — | 紧邻 title 的扩展，属于 `TitleRow`；外层 wrapper 默认垂直居中，自定义节点内部样式由调用方负责。 |
 | label | `ReactNode` | — | title 下方的辅助文本。 |
 | value | `ReactNode` | — | 值区主内容。字符串/数字由 Cell 创建内部 `Text`，其他节点原样渲染。 |
-| valueExtra | `ReactNode` | — | 紧邻 value 的扩展，不会被塞入 value 的自定义节点。 |
-| extra | `ReactNode` | — | Item 级 trailing slot，位于 Main 之后、arrow 之前。 |
+| valueExtra | `ReactNode` | — | 紧邻 value 的扩展，不会被塞入 value 的自定义节点；外层 wrapper 默认垂直居中，自定义节点内部样式由调用方负责。 |
+| extra | `ReactNode` | — | Item 级 trailing slot，位于 Main 之后、arrow 之前；vertical 时默认与顶部 title 行对齐。 |
 | vertical | `boolean` | `false` | 只将 Main 内的 titleArea/valueArea 改为纵向；外层 Row、icon、extra、arrow 仍保持横向。 |
 | center | `boolean` | `false` | Item 内部元素的垂直居中；与 `vertical` 相互独立。 |
 | valueAlign | `'left' \| 'center' \| 'right'` | horizontal 为 `'right'`，vertical 为 `'left'` | value 区域的水平对齐；primitive value 同时设置 `Text.textAlign`，自定义节点只控制容器。 |
@@ -98,7 +98,7 @@ import { Cell } from '@ftsukic/tsuki'
 
 Cell 继承 React Native `PressableProps`，但由 Cell 管理 `children`、`style` 和 `disabled`；`onPress`、`testID`、无障碍和其他 Pressable 属性仍可使用。交互 Cell 默认 `accessibilityRole="button"`。`disabled` 时不触发 `onPress`。
 
-Cell 的内部结构固定为 `row -> icon + main + extra + suffix`。horizontal 时 Main 内部是 `titleArea | valueArea`，vertical 时只改变 Main 为 `titleArea` 换行到 `valueArea` 上方。自定义 ReactNode 不会被 `cloneElement`，也不会被注入任何 props。
+Cell 的内部结构固定为 `row -> icon + main + extra + suffix`。horizontal 时 Main 内部是 `titleArea | valueArea`，vertical 时只改变 Main 为 `titleArea` 换行到 `valueArea` 上方。`titleExtra`、`valueExtra` 和 `extra` 的外层 wrapper 负责默认垂直位置；自定义 ReactNode 不会被 `cloneElement`，也不会被注入任何 props。
 
 ### CellStyles
 

@@ -88,6 +88,7 @@ export function getCellStyles(
     titleExtraContainer: {
       marginLeft: token.titleExtraGap,
       flexShrink: 0,
+      alignSelf: 'center',
     },
     icon: {
       marginRight: token.iconGap,
@@ -108,11 +109,14 @@ export function getCellStyles(
     valueExtraContainer: {
       marginLeft: token.valueExtraGap,
       flexShrink: 0,
+      alignSelf: 'center',
     },
     extraContainer: {
       flexShrink: 1,
       marginLeft: token.iconGap,
-      justifyContent: props.center ? 'center' : 'flex-start',
+      alignSelf: props.vertical && !props.center ? 'flex-start' : undefined,
+      minHeight: props.vertical && !props.center ? token.lineHeight : undefined,
+      justifyContent: props.vertical || props.center ? 'center' : 'flex-start',
     },
     title: {
       fontFamily: token.fontFamily,
