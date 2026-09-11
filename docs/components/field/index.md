@@ -15,65 +15,160 @@ group:
 
 ## 介绍
 
-Field 是带标签和反馈信息的表单输入单元，使用 Cell 作为行布局，默认创建 Input，并允许通过 children 提供自定义控件。它不负责表单校验，状态由调用方通过 Props 控制。
+Field 是建立在 Cell 之上的 Form Item UI primitive。它只负责 label、control、反馈和 Item 布局，不实现 Form store、`rules`、validation trigger、`name` 或 dependencies。
 
 </section>
 
-<code src="../../../src/field/__fixtures__/overview.tsx" title="组件预览" description="Field 汇总默认输入、输入能力透传、标签布局、自定义控件和反馈状态。"></code>
+<code src="../../../src/field/__fixtures__/overview.tsx" title="组件预览" description="Field 汇总默认 Input、custom control、反馈和主题用法。"></code>
 
 ## 引入
 
 ```tsx | pure
 import { Field } from '@ftsukic/tsuki'
 
-;<Field label="用户名" placeholder="请输入用户名" />
+;<Field
+  label="用户名"
+  value={name}
+  onChange={setName}
+  inputProps={{ placeholder: '请输入用户名' }}
+/>
 ```
 
 ## 代码演示
 
-<code src="../../../src/field/__fixtures__/examples/error.tsx" title="错误状态" description="必填 Field 以 errorMessage 展示错误状态。"></code>
+<code src="../../../src/field/__fixtures__/examples/basic.tsx" title="基础输入" description="无 children 时使用默认 Input。"></code>
 
-<code src="../../../src/field/__fixtures__/examples/basic.tsx" title="基础输入" description="Field 默认创建 Input，直接使用输入相关 Props。"></code>
+<code src="../../../src/field/__fixtures__/examples/textarea.tsx" title="Vertical textarea" description="vertical 与 inputProps.multiline 的组合。"></code>
 
-<code src="../../../src/field/__fixtures__/examples/clearable.tsx" title="可清除" description="clearable 和清除回调透传给内部 Input。"></code>
+<code src="../../../src/field/__fixtures__/examples/vertical.tsx" title="Vertical" description="Field vertical 的独立布局。"></code>
 
-<code src="../../../src/field/__fixtures__/examples/password.tsx" title="密码输入" description="password 和 clearable 能力透传给内部 Input。"></code>
+<code src="../../../src/field/__fixtures__/examples/custom-control.tsx" title="自定义控件" description="普通 ReactNode children 完全自管 control。"></code>
 
-<code src="../../../src/field/__fixtures__/examples/textarea.tsx" title="多行输入" description="multiline 和 autoSize 输入随内容增长。"></code>
+<code src="../../../src/field/__fixtures__/examples/switch.tsx" title="Switch" description="function children 使用 FieldControlContext。"></code>
 
-<code src="../../../src/field/__fixtures__/examples/warning.tsx" title="警告状态" description="Field 使用 status=warning 展示辅助提示。"></code>
+<code src="../../../src/field/__fixtures__/examples/selector.tsx" title="Selector" description="Selector value 的自定义渲染和 Cell 链接语义。"></code>
 
-<code src="../../../src/field/__fixtures__/examples/layout.tsx" title="布局" description="展示 labelWidth、labelAlign 和 colon。"></code>
+<code src="../../../src/field/__fixtures__/examples/value-extra.tsx" title="Value extra" description="control 与 valueExtra 的兄弟关系。"></code>
 
-<code src="../../../src/field/__fixtures__/examples/custom-control.tsx" title="自定义控件" description="children 可以完整替换默认 Input，嵌入 Cell 等自定义控件。"></code>
+<code src="../../../src/field/__fixtures__/examples/feedback.tsx" title="反馈信息" description="默认 Input 与 custom control 共用 description/errorMessage。"></code>
 
-<code src="../../../src/field/__fixtures__/examples/theme.tsx" title="主题和语义样式" description="展示状态 token 与语义样式插槽。"></code>
+<code src="../../../src/field/__fixtures__/examples/warning.tsx" title="Warning" description="status=warning 的反馈状态。"></code>
+
+<code src="../../../src/field/__fixtures__/examples/layout.tsx" title="Label layout" description="labelWidth 与 labelAlign 的水平布局。"></code>
+
+<code src="../../../src/field/__fixtures__/examples/theme.tsx" title="主题和语义样式" description="Field token 与语义样式插槽。"></code>
 
 ## API
 
+### Field value contract
+
+`FieldProps<Value>` 是两个互斥模式的联合类型：
+
+- `FieldInputProps`：没有 `children`，`Value` 固定为 `string`；Field 创建默认 Input。
+- `FieldCustomProps<Value>`：必须提供 `children`，`Value` 可以是任意类型；Field 不创建 Input。
+
+因此 `<Field<boolean> value={true} />` 会在类型层被阻止；布尔、日期、选择器等值必须提供 custom control。
+
+### 共同属性
+
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| children | `ReactNode` | — | 自定义控件；存在时完整替换默认 Input，不会克隆或修改其 Props |
-| label | `ReactNode` | — | 左侧标签 |
-| required | `boolean` | `false` | 在标签前显示必填标记 |
-| description | `ReactNode` | — | 内容下方的辅助描述 |
-| errorMessage | `ReactNode` | — | 内容下方的错误消息；未传 status 时自动使用 error 状态 |
-| status | `'default' \| 'error' \| 'warning'` | `'default'` | 反馈消息的语义状态；传入 errorMessage 且未明确传 status 时自动使用 error |
-| labelWidth | `DimensionValue` | `fontSize * 6.2`（默认字号 14 时约 87px） | 标签区域宽度 |
-| labelAlign | `'left' \| 'center' \| 'right'` | `'left'` | 标签文字对齐方式 |
-| colon | `boolean` | `false` | 是否在标签后显示冒号 |
-| inputStyle | `InputProps['style']` | — | 默认输入模式下透传给内部 Input 根节点的样式 |
-| inputStyles | `InputStyles` | — | 默认输入模式下透传给内部 Input 的 semantic styles |
-| style | `StyleProp<ViewStyle>` | — | Field 根 Cell 节点样式 |
-| styles | `FieldStyles` | — | root、row、labelContainer、label、required、content/control、description、error 语义插槽；其中 row 使用 Cell 的行布局，content/control 使用 Field 的 value 区 |
+| label | `ReactNode` | — | 映射到 Cell.title。 |
+| labelExtra | `ReactNode` | — | 映射到 Cell.titleExtra。 |
+| value | `Value` | — | controlled 数据值。默认 Input 模式中必须是 `string`。 |
+| defaultValue | `Value` | — | uncontrolled 初始值。 |
+| onChange | `(value: Value) => void` | — | Field 数据变化回调；不是原生事件回调。 |
+| valueExtra | `ReactNode` | — | 映射到 Cell.valueExtra，不进入 Input/control。 |
+| extra | `ReactNode` | — | 映射到 Cell.extra。 |
+| required | `boolean` | `false` | 映射到 Cell.required。 |
+| disabled | `boolean` | `false` | 传给默认 Input 或 function children context。 |
+| readOnly | `boolean` | `false` | 传给默认 Input 或 function children context。 |
+| vertical | `boolean` | `false` | 映射到 Cell.vertical。 |
+| labelWidth | `DimensionValue` | Cell token | horizontal 时固定 titleArea 宽度；vertical 时不生效。 |
+| labelAlign | `'left' \| 'center' \| 'right'` | `'left'` | 只控制 label/title 文本。 |
+| valueAlign | `'left' \| 'center' \| 'right'` | `'right'` | 只控制 value/control 区域。 |
+| description | `ReactNode` | — | control 下方的辅助反馈。 |
+| errorMessage | `ReactNode` | — | control 下方的错误反馈。未指定 status 时使状态变为 `error`。 |
+| status | `'default' \| 'warning' \| 'error'` | `'default'` | 影响 feedback 和 function children context，不会自动染红 label。 |
+| icon | `ReactNode` | — | 映射到 Cell.icon。 |
+| isLink | `boolean` | `false` | 映射到 Cell.isLink。 |
+| clickable | `boolean` | — | 映射到 Cell.clickable。 |
+| arrowDirection | `CellArrowDirection` | `'right'` | 映射到 Cell.arrowDirection。 |
+| onPress | `CellProps['onPress']` | — | 映射到 Cell.onPress。 |
+| border | `boolean` | `true` | 映射到 Cell.border。 |
+| style | `StyleProp<ViewStyle>` | — | Field 根 Cell 样式。 |
+| styles | `FieldStyles` | — | Field 特有语义样式插槽。 |
 
-Field 的输入相关 Props 继承并复用 `InputProps`，包括 `value/defaultValue`、`onChangeText`、`formatter`、`clearable`、`type`、`prefix/suffix`、`multiline`、`rows`、`autoSize`、`showWordLimit`、`disabled` 和 `readOnly`。Field 不执行校验，也不引入 `Form` 或 `rc-field-form`。
+### 默认 Input 模式
 
-默认模式下 Field 的 ref 指向内部 `TextInputInstance`，可以调用 `focus()` 和 `blur()`；children 模式不会尝试接管自定义控件的 ref。Field 的 `style/styles` 只控制 Field，`inputStyle/inputStyles` 只控制默认内部 Input。
+不提供 `children` 时 Field 使用内部 `Input`。`value/defaultValue/onChange` 由 Field 统一管理，再映射为 Input 的 `value/onChangeText`；这保证 custom control 与默认 Input 使用相同的 controllable contract。
+
+```tsx | pure
+<Field
+  label="手机号"
+  value={phone}
+  onChange={setPhone}
+  inputProps={{
+    placeholder: '请输入手机号',
+    clearable: true,
+    keyboardType: 'phone-pad',
+  }}
+/>
+```
+
+| 属性 | 类型 | 说明 |
+| --- | --- | --- |
+| inputProps | `Omit<InputProps, 'value' \| 'defaultValue' \| 'onChangeText' \| 'style' \| 'styles'>` | 只属于默认 Input 模式的 Input 配置。Field 会覆盖其中的 value、defaultValue、onChangeText、style、styles、bordered、disabled、readOnly。 |
+| inputStyle | `InputProps['style']` | 默认 Input 根节点样式。 |
+| inputStyles | `InputStyles` | 默认 Input semantic styles；与 embedded Input 基础样式合并，用户配置最后覆盖。 |
+
+默认 Input 的 embedded 样式会关闭 bordered surface、背景、圆角和重复 padding；`valueAlign` 默认映射为 Input 的 `textAlign`。Input 的 ref 只在默认 Input 模式有效。
+
+Field 会强制将 embedded Input 的 `bordered` 设为 `false`，并以 Field 的 `disabled`、`readOnly` 覆盖 `inputProps` 中的同名状态；这些状态不能通过 `inputProps` 反向覆盖 Field contract。默认 Input 保留原生 TextInput 的无障碍语义，Field 的 Cell 行在 `isLink`/`clickable`/`onPress` 下使用 `button` role。
+
+### Custom control 模式
+
+提供 `children` 后 Field 不创建 Input、不识别 `child.type`、不 cloneElement，也不向普通 ReactNode 注入 props：
+
+```tsx | pure
+<Field label="通知" value={enabled}>
+  <Switch value={enabled} onChange={setEnabled} />
+</Field>
+```
+
+也可以使用 function children：
+
+```tsx | pure
+<Field<boolean> label="通知" value={enabled} onChange={setEnabled}>
+  {({ value, onChange, disabled, readOnly, status }) => (
+    <Switch value={value} onChange={onChange} disabled={disabled} accessibilityLabel={status} />
+  )}
+</Field>
+```
+
+Function children 接收：
+
+```ts | pure
+interface FieldControlContext<Value> {
+  value: Value | undefined
+  onChange: (value: Value) => void
+  disabled: boolean
+  readOnly: boolean
+  status: FieldStatus
+}
+```
+
+context 不包含 `vertical`、`labelWidth`、`labelAlign` 或 styles；这些属于 Field layout，而不是 control contract。`inputProps/inputStyle/inputStyles` 在 custom mode 不存在于类型中。
+
+普通 custom control 不会自动获得 accessibility label、role 或 disabled 行为；调用方应把 `FieldControlContext.disabled`、`readOnly` 和适当的无障碍 Props 传给自定义控件。function children 也只负责连接数据和交互，不改变 Field 的 Cell 布局。
+
+### FieldStyles
+
+FieldStyles 只保留 Field 特有语义：`root`、`label`、`labelExtra`、`control`、`feedback`、`description`、`error`。Cell 的 row、titleArea、valueArea、divider 等布局通过 Field 内部映射到 Cell，不作为 Field 公共结构暴露。
 
 ## 主题定制
 
-Field 使用 Cell 的背景、分割线和行布局，同时通过 `theme.components.Field` 覆盖标签、错误、警告颜色、标签宽度/间距和水平内边距：
+`theme.components.Field` 只负责 `defaultLabelWidth`、`labelGap`、`descriptionGap`、`errorGap`、`descriptionColor`、`warningColor` 和 `errorColor`。Cell 的背景、padding、minHeight、divider 和 value/title 基础视觉继续由 `theme.components.Cell` 负责。
 
 ```tsx | pure
 import { ConfigProvider, Field } from '@ftsukic/tsuki'
@@ -81,6 +176,10 @@ import { ConfigProvider, Field } from '@ftsukic/tsuki'
 ;<ConfigProvider
   theme={{ components: { Field: { errorColor: '#d4380d', warningColor: '#d89614' } } }}
 >
-  <Field label="手机号" errorMessage="请输入手机号" placeholder="请输入手机号" />
+  <Field label="邮箱" errorMessage="请输入有效邮箱" />
 </ConfigProvider>
 ```
+
+## 不包含的 Form 能力
+
+Field 不实现 Form store、rules、validation、trigger、dependencies、name 或字段联动。它只提供未来 `Form.Item` 可以复用的 UI 层和 value/control contract。

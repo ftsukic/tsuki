@@ -75,8 +75,7 @@ describe('Cell', () => {
     )
 
     const normalRow = findNode(view.toJSON(), (node) => nodeStyle(node).flexDirection === 'row')
-    const rows = findNodes(view.toJSON(), (node) => nodeStyle(node).flexDirection === 'row')
-    const largeRow = rows[1]
+    const largeRow = findNode(view.toJSON(), (node) => nodeStyle(node).paddingVertical === 12)
     const normalTitle = screen.getByText('普通')
     const largeTitle = screen.getByText('大号')
     const normalLabel = screen.getAllByText('说明')[0]
@@ -96,7 +95,7 @@ describe('Cell', () => {
     })
   })
 
-  it('gives title and value equal flexible columns without a value minimum width', async () => {
+  it('gives title and value areas equal flexible columns without a value minimum width', async () => {
     const view = await render(
       <ConfigProvider>
         <Cell testID="title-only" title="A very long title that should be allowed to shrink" />
@@ -109,27 +108,28 @@ describe('Cell', () => {
       </ConfigProvider>,
     )
 
-    const titleOnlyRow = findNode(
-      cellNode(view.toJSON(), 'title-only'),
-      (node) => nodeStyle(node).flexDirection === 'row',
-    )
-    const valueOnlyRow = findNode(
-      cellNode(view.toJSON(), 'value-only'),
-      (node) => nodeStyle(node).flexDirection === 'row',
-    )
-    const titleValueRow = findNode(
+    const titleValueMain = findNode(
       cellNode(view.toJSON(), 'title-value'),
-      (node) => nodeStyle(node).flexDirection === 'row',
+      (node) => nodeStyle(node).flex === 1 && nodeStyle(node).flexDirection === 'row',
     )
-    const titleValueFlexChildren = (titleValueRow.children ?? []).filter(
+    const valueOnlyMain = findNode(
+      cellNode(view.toJSON(), 'value-only'),
+      (node) => nodeStyle(node).flex === 1 && nodeStyle(node).flexDirection === 'row',
+    )
+    const titleValueFlexChildren = (titleValueMain.children ?? []).filter(
       (child) => nodeStyle(child).flex === 1,
     )
-    const valueOnlyFlexChildren = (valueOnlyRow.children ?? []).filter(
+    const valueOnlyFlexChildren = (valueOnlyMain.children ?? []).filter(
       (child) => nodeStyle(child).flex === 1,
     )
 
+    const titleOnlyMain = findNode(
+      cellNode(view.toJSON(), 'title-only'),
+      (node) => nodeStyle(node).flex === 1 && nodeStyle(node).flexDirection === 'row',
+    )
+
     expect(
-      (titleOnlyRow.children ?? []).filter((child) => nodeStyle(child).flex === 1),
+      (titleOnlyMain.children ?? []).filter((child) => nodeStyle(child).flex === 1),
     ).toHaveLength(1)
     expect(valueOnlyFlexChildren).toHaveLength(1)
     expect(titleValueFlexChildren).toHaveLength(2)
@@ -169,6 +169,63 @@ describe('Cell', () => {
     expect(screen.getByTestId('extra-icon')).toBeTruthy()
   })
 
+  it('keeps titleExtra, valueExtra and extra in their dedicated slots', async () => {
+    await render(
+      <Cell
+        title="标题"
+        titleExtra={<Text testID="title-extra">说明</Text>}
+        value="值"
+        valueExtra={<Text testID="value-extra">单位</Text>}
+        extra={<Text testID="extra">操作</Text>}
+      />,
+    )
+
+    expect(screen.getByTestId('title-extra')).toBeTruthy()
+    expect(screen.getByTestId('value-extra')).toBeTruthy()
+    expect(screen.getByTestId('extra')).toBeTruthy()
+  })
+
+  it('changes only Main direction in vertical mode and keeps trailing content horizontal', async () => {
+    const view = await render(
+      <Cell
+        testID="vertical"
+        vertical
+        title="标题"
+        value="值"
+        extra={<Text testID="vertical-extra">操作</Text>}
+        isLink
+      />,
+    )
+
+    const row = findNode(
+      cellNode(view.toJSON(), 'vertical'),
+      (node) => nodeStyle(node).minHeight !== undefined && nodeStyle(node).flexDirection === 'row',
+    )
+    const main = findNode(
+      cellNode(view.toJSON(), 'vertical'),
+      (node) => nodeStyle(node).flexDirection === 'column',
+    )
+
+    expect(nodeStyle(row).flexDirection).toBe('row')
+    expect(nodeStyle(main).flexDirection).toBe('column')
+    expect(screen.getByTestId('vertical-extra')).toBeTruthy()
+  })
+
+  it('puts required in the title row and applies primitive line limits', async () => {
+    await render(
+      <Cell testID="limited" title="标题" titleLines={1} value="值" valueLines={2} required />,
+    )
+
+    const title = screen.getByText('标题')
+    const value = screen.getByText('值')
+    expect(title.props.numberOfLines).toBe(1)
+    expect(value.props.numberOfLines).toBe(2)
+    expect(screen.getByText('*')).toBeTruthy()
+    expect(StyleSheet.flatten(screen.getByText('*').parent?.props.style)).toMatchObject({
+      flexDirection: 'row',
+    })
+  })
+
   it('keeps value content top-aligned by default and centers it with center', async () => {
     const view = await render(
       <ConfigProvider>
@@ -179,15 +236,15 @@ describe('Cell', () => {
 
     const defaultValueContainer = findNode(
       cellNode(view.toJSON(), 'default'),
-      (node) => nodeStyle(node).flex === 1 && nodeStyle(node).justifyContent === 'flex-start',
+      (node) => nodeStyle(node).flex === 1 && nodeStyle(node).alignItems === 'flex-start',
     )
     const centeredValueContainer = findNode(
       cellNode(view.toJSON(), 'center'),
-      (node) => nodeStyle(node).flex === 1 && nodeStyle(node).justifyContent === 'center',
+      (node) => nodeStyle(node).flex === 1 && nodeStyle(node).alignItems === 'center',
     )
 
-    expect(nodeStyle(defaultValueContainer).justifyContent).toBe('flex-start')
-    expect(nodeStyle(centeredValueContainer).justifyContent).toBe('center')
+    expect(nodeStyle(defaultValueContainer).alignItems).toBe('flex-start')
+    expect(nodeStyle(centeredValueContainer).alignItems).toBe('center')
   })
 
   it('keeps the link suffix in the same line-height box as the cell text', () => {

@@ -12,7 +12,7 @@ export default function FieldThemeFixture() {
       <Field
         label="邮箱"
         errorMessage="请输入有效邮箱"
-        placeholder="name@example.com"
+        inputProps={{ placeholder: 'name@example.com' }}
         styles={{ description: { fontStyle: 'italic' } }}
       />
     </ConfigProvider>

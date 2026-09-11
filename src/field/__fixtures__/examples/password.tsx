@@ -4,7 +4,7 @@ import { Text, View } from 'react-native'
 
 /**
  * @title Field password
- * @description Field 直接复用 Input 的 password 和 clearable 能力。
+ * @description 默认 Input 的 password 和 clearable 能力通过 inputProps 配置。
  */
 export default function FieldPasswordFixture() {
   const [value, setValue] = useState('')
@@ -13,11 +13,9 @@ export default function FieldPasswordFixture() {
     <View>
       <Field
         label="密码"
-        type="password"
-        clearable
-        placeholder="请输入密码"
         value={value}
-        onChangeText={setValue}
+        onChange={setValue}
+        inputProps={{ type: 'password', clearable: true, placeholder: '请输入密码' }}
       />
       <Text>已输入 {value.length} 个字符</Text>
     </View>

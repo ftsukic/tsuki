@@ -56,6 +56,9 @@ export interface CellToken {
   iconColor: string
   iconSize: number
   iconGap: number
+  verticalGap: number
+  titleExtraGap: number
+  valueExtraGap: number
   requiredColor: string
   requiredWidth: number
   groupTitleColor: string
@@ -170,12 +173,13 @@ export interface InputToken {
 }
 
 export interface FieldToken {
-  labelColor: string
+  defaultLabelWidth: number
+  labelGap: number
+  descriptionGap: number
+  errorGap: number
+  descriptionColor: string
   errorColor: string
   warningColor: string
-  padding: number
-  labelWidth: number
-  labelGap: number
 }
 
 export interface SearchToken {

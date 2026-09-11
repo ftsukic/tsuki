@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Cell, Field, Picker } from '@ftsukic/tsuki'
+import { Field, Picker } from '@ftsukic/tsuki'
 import { Text, View } from 'react-native'
 
 const options = [
@@ -10,7 +10,7 @@ const options = [
 
 /**
  * @title Field 联动
- * @description Field 默认使用 Input，也可以用 children 放入 Cell 等自定义控件；这里由 Cell 负责触发 Picker。
+ * @description Field 的 custom control 直接复用 Cell 的链接语义触发 Picker。
  */
 export default function PickerFieldExample() {
   const [visible, setVisible] = useState(false)
@@ -19,14 +19,8 @@ export default function PickerFieldExample() {
 
   return (
     <View>
-      <Field label="城市">
-        <Cell
-          clickable
-          isLink
-          onPress={() => setVisible(true)}
-          title={selectedText}
-          testID="picker-field-trigger"
-        />
+      <Field<string> label="城市" value={selectedText} isLink onPress={() => setVisible(true)}>
+        {({ value }) => <Text testID="picker-field-trigger">{value}</Text>}
       </Field>
       <Text>已选择：{selectedText}</Text>
       <Picker

@@ -1,13 +1,16 @@
-import { Cell, Field } from '../../..'
+import { useState } from 'react'
+import { Field, Text } from '../../..'
 
 /**
  * @title Field custom control
- * @description children 存在时替换默认 Input，可嵌入 Cell、Picker 等自定义控件。
+ * @description 普通 ReactNode 是完全自管的 value/control slot。
  */
 export default function FieldCustomControlFixture() {
+  const [city, setCity] = useState('上海')
+
   return (
-    <Field label="城市">
-      <Cell title="上海" isLink clickable />
+    <Field label="城市" value={city} valueAlign="right" isLink onPress={() => setCity('北京')}>
+      <Text>{city}（点击整行切换）</Text>
     </Field>
   )
 }

@@ -4,12 +4,17 @@ import CellCenterExample from './examples/center'
 import CellGroupExample from './examples/group'
 import CellGroupInsetExample from './examples/group-inset'
 import CellGroupTitleExample from './examples/group-title'
+import CellHorizontalExample from './examples/horizontal'
 import CellIconExample from './examples/icon'
 import CellLabelExample from './examples/label'
 import CellLargeExample from './examples/large'
 import CellLinkExample from './examples/link'
+import CellLongContentExample from './examples/long-content'
 import CellRequiredExample from './examples/required'
+import CellTitleExtraExample from './examples/title-extra'
 import CellValueExample from './examples/value'
+import CellValueExtraExample from './examples/value-extra'
+import CellVerticalExample from './examples/vertical'
 
 /**
  * @title Cell overview
@@ -32,6 +37,18 @@ export default function CellOverview() {
           title: 'Value',
         },
         {
+          Component: CellHorizontalExample,
+          description: 'title/value 在 Main 中保持横向布局。',
+          id: 'horizontal',
+          title: 'Horizontal',
+        },
+        {
+          Component: CellVerticalExample,
+          description: 'vertical 只改变 Main 内部排列，trailing 区域不移动。',
+          id: 'vertical',
+          title: 'Vertical',
+        },
+        {
           Component: CellIconExample,
           description: '展示左侧 icon 与标题、value 的组合。',
           id: 'icon',
@@ -42,6 +59,24 @@ export default function CellOverview() {
           description: '展示标题下方的 label 辅助信息。',
           id: 'label',
           title: 'Label',
+        },
+        {
+          Component: CellTitleExtraExample,
+          description: 'titleExtra 紧邻 title。',
+          id: 'title-extra',
+          title: 'Title extra',
+        },
+        {
+          Component: CellValueExtraExample,
+          description: 'valueExtra 紧邻 value。',
+          id: 'value-extra',
+          title: 'Value extra',
+        },
+        {
+          Component: CellLongContentExample,
+          description: '多行 primitive title/value 的行数控制。',
+          id: 'long-content',
+          title: 'Long content',
         },
         {
           Component: CellLargeExample,

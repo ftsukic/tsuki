@@ -29,17 +29,23 @@ function findFirstRow(value: unknown): JsonNode | null {
   return findFirstRow(node.children)
 }
 
+function findNodes(value: unknown, predicate: (node: JsonNode) => boolean): JsonNode[] {
+  if (Array.isArray(value)) return value.flatMap((item) => findNodes(item, predicate))
+  if (!value || typeof value !== 'object' || !('props' in value)) return []
+  const node = value as JsonNode
+  return (predicate(node) ? [node] : []).concat(findNodes(node.children, predicate))
+}
+
 describe('Field', () => {
-  it('creates a default Input and forwards input props', async () => {
-    const onChangeText = jest.fn()
+  it('maps value and onChange to the default Input and keeps Input props explicit', async () => {
+    const onChange = jest.fn()
 
     await render(
       <Field
         label="手机号"
-        placeholder="请输入手机号"
-        testID="field-input"
         value="138"
-        onChangeText={onChangeText}
+        onChange={onChange}
+        inputProps={{ placeholder: '请输入手机号', testID: 'field-input' }}
       />,
     )
 
@@ -49,11 +55,31 @@ describe('Field', () => {
 
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent.changeText(input, '139')
-    expect(onChangeText).toHaveBeenLastCalledWith('139')
+    expect(onChange).toHaveBeenLastCalledWith('139')
   })
 
-  it('uses Cell geometry for the field row and keeps the input in the value column', async () => {
-    const view = await render(<Field label="姓名" placeholder="请输入姓名" />)
+  it('supports uncontrolled defaultValue through the Field value contract', async () => {
+    const onChange = jest.fn()
+
+    await render(
+      <Field
+        label="昵称"
+        defaultValue="初始值"
+        onChange={onChange}
+        inputProps={{ testID: 'uncontrolled-input' }}
+      />,
+    )
+
+    const input = screen.getByTestId('uncontrolled-input')
+    expect(input.props.value).toBe('初始值')
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.changeText(input, '新值')
+    expect(onChange).toHaveBeenLastCalledWith('新值')
+    await waitFor(() => expect(screen.getByTestId('uncontrolled-input').props.value).toBe('新值'))
+  })
+
+  it('uses Cell geometry and keeps the default Input in the value area', async () => {
+    const view = await render(<Field label="姓名" inputProps={{ placeholder: '请输入姓名' }} />)
 
     const row = findFirstRow(view.toJSON())
     expect(row).not.toBeNull()
@@ -65,24 +91,8 @@ describe('Field', () => {
     expect(screen.getByPlaceholderText('请输入姓名')).toBeTruthy()
   })
 
-  it('uses a stable default label width and gap', async () => {
-    const theme = getDesignToken()
-    const fieldToken = getFieldToken(theme)
-
-    expect(fieldToken.labelWidth).toBeCloseTo(theme.fontSize * 6.2)
-    expect(fieldToken.labelGap).toBe(theme.paddingSM)
-
-    await render(<Field label="姓名" />)
-
-    const label = screen.getByText('姓名')
-    expect(StyleSheet.flatten(label.parent?.props.style)).toMatchObject({
-      width: fieldToken.labelWidth,
-      flexShrink: 0,
-    })
-  })
-
-  it('removes standalone Input surface styles inside Field', async () => {
-    await render(<Field label="禁用" disabled testID="embedded-input" />)
+  it('removes the standalone Input surface inside Field', async () => {
+    await render(<Field label="禁用" disabled inputProps={{ testID: 'embedded-input' }} />)
 
     let current = screen.getByTestId('embedded-input').parent
     let shellStyle: ViewStyle | undefined
@@ -106,77 +116,142 @@ describe('Field', () => {
         borderWidth: 0,
       }),
     )
-    expect(shellStyle?.height).toBeUndefined()
-    expect(shellStyle?.minHeight).toBeUndefined()
   })
 
-  it('forwards disabled and clearable behavior to the default Input', async () => {
-    const onClear = jest.fn()
-
+  it('does not create a default Input when custom children are present', async () => {
     await render(
-      <>
-        <Field label="禁用" disabled testID="disabled-field" />
-        <Field
-          label="手机号"
-          clearable
-          clearTrigger="always"
-          defaultValue="138"
-          onClear={onClear}
-          testID="clearable-field"
-        />
-      </>,
-    )
-
-    expect(screen.getByTestId('disabled-field').props.editable).toBe(false)
-    // eslint-disable-next-line testing-library/no-await-sync-events
-    await fireEvent.press(screen.getByLabelText('清除输入'))
-
-    expect(onClear).toHaveBeenCalledTimes(1)
-    await waitFor(() => expect(screen.getByTestId('clearable-field').props.value).toBe(''))
-  })
-
-  it('forwards multiline layout props to the default Input', async () => {
-    await render(<Field label="备注" multiline rows={3} testID="textarea-field" />)
-
-    const input = screen.getByTestId('textarea-field')
-    expect(input.props.multiline).toBe(true)
-    expect(input.props.numberOfLines).toBe(3)
-  })
-
-  it('uses custom children instead of rendering a default Input', async () => {
-    await render(
-      <Field label="城市" placeholder="默认输入">
+      <Field label="城市" value="上海">
         <View testID="custom-control" />
       </Field>,
     )
 
     expect(screen.getByTestId('custom-control')).toBeTruthy()
-    expect(screen.queryByPlaceholderText('默认输入')).toBeNull()
+    expect(findNodes(screen.toJSON(), (node) => node.type === 'TextInput')).toHaveLength(0)
   })
 
-  it('derives error status from errorMessage and keeps the label color neutral', async () => {
+  it('passes the Field control context to function children', async () => {
+    await render(
+      <Field<boolean>
+        label="通知"
+        value
+        disabled
+        readOnly
+        status="warning"
+        onChange={() => undefined}
+      >
+        {({ value, onChange, disabled, readOnly, status }) => (
+          <View testID="context-control">
+            <View testID={`value-${String(value)}`} />
+            <View testID="has-on-change" onTouchEnd={() => onChange(false)} />
+            <View testID={`disabled-${String(disabled)}`} />
+            <View testID={`read-only-${String(readOnly)}`} />
+            <View testID={`status-${status}`} />
+          </View>
+        )}
+      </Field>,
+    )
+
+    expect(screen.getByTestId('value-true')).toBeTruthy()
+    expect(screen.getByTestId('has-on-change')).toBeTruthy()
+    expect(screen.getByTestId('disabled-true')).toBeTruthy()
+    expect(screen.getByTestId('read-only-true')).toBeTruthy()
+    expect(screen.getByTestId('status-warning')).toBeTruthy()
+  })
+
+  it('supports generic custom values without an Input renderer', async () => {
+    const date = new Date('2026-01-01T00:00:00.000Z')
+
+    await render(
+      <Field<Date | null> label="生日" value={date}>
+        {({ value }) => <View testID={value?.toISOString()} />}
+      </Field>,
+    )
+
+    expect(screen.getByTestId(date.toISOString())).toBeTruthy()
+  })
+
+  it('maps vertical and valueAlign independently', async () => {
+    const view = await render(
+      <Field
+        label="备注"
+        vertical
+        valueAlign="left"
+        inputProps={{ multiline: true, testID: 'vertical-input' }}
+      />,
+    )
+
+    const rows = findNodes(view.toJSON(), (node) => {
+      const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
+      return style.flexDirection === 'row'
+    })
+    const main = findNodes(view.toJSON(), (node) => {
+      const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
+      return style.flexDirection === 'column'
+    })
+
+    expect(rows.length).toBeGreaterThan(0)
+    expect(main.length).toBeGreaterThan(0)
+    expect(screen.getByTestId('vertical-input').props.textAlign).toBe('left')
+  })
+
+  it('keeps valueExtra outside the control and renders feedback for custom controls', async () => {
+    await render(
+      <Field
+        label="验证码"
+        value=""
+        valueExtra={<View testID="value-extra" />}
+        errorMessage="请输入验证码"
+      >
+        <View testID="custom-control" />
+      </Field>,
+    )
+
+    expect(screen.getByTestId('value-extra')).toBeTruthy()
+    expect(screen.getByText('请输入验证码')).toBeTruthy()
+  })
+
+  it('uses the Field token default label width and keeps labels neutral on errors', async () => {
+    const theme = getDesignToken()
+    const fieldToken = getFieldToken(theme)
+
+    expect(fieldToken.defaultLabelWidth).toBeCloseTo(theme.fontSize * 6.2)
+
     await render(<Field label="手机号" errorMessage="请输入手机号" />)
 
-    const theme = getDesignToken()
-    expect(StyleSheet.flatten(screen.getByText('手机号').props.style)).toEqual(
-      expect.objectContaining({ color: theme.colorText }),
-    )
-    expect(StyleSheet.flatten(screen.getByText('请输入手机号').props.style)).toEqual(
-      expect.objectContaining({ color: theme.colorError }),
-    )
+    const label = screen.getByText('手机号')
+    expect(StyleSheet.flatten(label.props.style)).toMatchObject({
+      color: theme.colorText,
+    })
+    expect(StyleSheet.flatten(label.parent?.parent?.props.style)).toMatchObject({
+      width: fieldToken.defaultLabelWidth,
+      flexShrink: 0,
+    })
+    expect(StyleSheet.flatten(screen.getByText('请输入手机号').props.style)).toMatchObject({
+      color: theme.colorError,
+    })
   })
 
-  it('supports label width, alignment, colon and required marker', async () => {
-    await render(<Field label="备注" required colon labelWidth={96} labelAlign="right" />)
+  it('maps Cell interactive props and preserves the default Input ref', async () => {
+    const ref = createRef<TextInputInstance>()
 
-    expect(screen.getByText('备注:')).toBeTruthy()
-    expect(screen.getByText('*')).toBeTruthy()
-    expect(StyleSheet.flatten(screen.getByText('备注:').props.style)).toEqual(
-      expect.objectContaining({ flex: 1, textAlign: 'right' }),
+    await render(
+      <Field
+        ref={ref}
+        label="城市"
+        value="上海"
+        isLink
+        onPress={() => undefined}
+        inputProps={{ testID: 'ref-input' }}
+      />,
     )
+
+    expect(screen.getByTestId('ref-input').parent?.parent?.parent).toBeTruthy()
+    expect(ref.current).toBeTruthy()
+    expect(ref.current?.focus).toEqual(expect.any(Function))
+    expect(ref.current?.blur).toEqual(expect.any(Function))
   })
 
-  it('applies Field token overrides to feedback styles', async () => {
+  it('applies Field token overrides only to feedback', async () => {
     await render(
       <ConfigProvider
         theme={{
@@ -189,23 +264,11 @@ describe('Field', () => {
       </ConfigProvider>,
     )
 
-    expect(StyleSheet.flatten(screen.getByText('邮箱格式错误').props.style)).toEqual(
-      expect.objectContaining({ color: '#123456' }),
-    )
-    expect(StyleSheet.flatten(screen.getByText('邮箱').props.style)).not.toEqual(
-      expect.objectContaining({ color: '#123456' }),
-    )
-  })
-
-  it('exposes the default Input TextInput instance through ref', async () => {
-    const ref = createRef<TextInputInstance>()
-
-    await render(<Field ref={ref} label="用户名" testID="ref-field" />)
-
-    expect(ref.current).toBeTruthy()
-    expect(ref.current?.focus).toEqual(expect.any(Function))
-    expect(ref.current?.blur).toEqual(expect.any(Function))
-    expect(() => ref.current?.focus()).not.toThrow()
-    expect(() => ref.current?.blur()).not.toThrow()
+    expect(StyleSheet.flatten(screen.getByText('邮箱格式错误').props.style)).toMatchObject({
+      color: '#123456',
+    })
+    expect(StyleSheet.flatten(screen.getByText('邮箱').props.style)).not.toMatchObject({
+      color: '#123456',
+    })
   })
 })

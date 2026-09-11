@@ -1,10 +1,19 @@
 import type { ReactNode } from 'react'
 import type { DimensionValue, StyleProp, TextStyle, ViewStyle } from 'react-native'
+import type { CellArrowDirection, CellProps } from '../cell'
 import type { InputProps, InputStyles } from '../input'
 import type { StyleInfo, StyleResolver } from '../style'
 
 export type FieldStatus = 'default' | 'error' | 'warning'
 export type FieldLabelAlign = 'left' | 'center' | 'right'
+
+export interface FieldControlContext<Value> {
+  value: Value | undefined
+  onChange: (value: Value) => void
+  disabled: boolean
+  readOnly: boolean
+  status: FieldStatus
+}
 
 export interface FieldStyleState {
   status: FieldStatus
@@ -12,34 +21,67 @@ export interface FieldStyleState {
 
 export interface FieldSemanticStyles {
   root?: StyleProp<ViewStyle>
-  row?: StyleProp<ViewStyle>
-  labelContainer?: StyleProp<ViewStyle>
   label?: StyleProp<TextStyle>
-  required?: StyleProp<TextStyle>
-  content?: StyleProp<ViewStyle>
+  labelExtra?: StyleProp<TextStyle>
   control?: StyleProp<ViewStyle>
+  feedback?: StyleProp<ViewStyle>
   description?: StyleProp<TextStyle>
   error?: StyleProp<TextStyle>
 }
 
-export type FieldStyles = StyleResolver<FieldProps, FieldStyleState, FieldSemanticStyles>
+export type FieldStyles = StyleResolver<FieldProps<unknown>, FieldStyleState, FieldSemanticStyles>
 
-export interface FieldProps extends Omit<InputProps, 'style' | 'styles'> {
-  children?: ReactNode
+export interface FieldBaseProps<Value> {
   label?: ReactNode
+  labelExtra?: ReactNode
+
+  value?: Value
+  defaultValue?: Value
+  onChange?: (value: Value) => void
+
+  valueExtra?: ReactNode
+  extra?: ReactNode
+
   required?: boolean
+  disabled?: boolean
+  readOnly?: boolean
+
+  vertical?: boolean
+
+  labelWidth?: DimensionValue
+  labelAlign?: FieldLabelAlign
+  valueAlign?: CellProps['valueAlign']
+
   description?: ReactNode
   errorMessage?: ReactNode
   status?: FieldStatus
-  labelWidth?: DimensionValue
-  labelAlign?: FieldLabelAlign
-  colon?: boolean
-  /** Style applied to the internal Input root in the default input mode. */
-  inputStyle?: InputProps['style']
-  /** Semantic styles forwarded to the internal Input in the default input mode. */
-  inputStyles?: InputStyles
+
+  icon?: ReactNode
+
+  isLink?: boolean
+  clickable?: boolean
+  arrowDirection?: CellArrowDirection
+  onPress?: CellProps['onPress']
+
+  border?: boolean
   style?: StyleProp<ViewStyle>
   styles?: FieldStyles
 }
 
-export type FieldStyleInfo = StyleInfo<FieldProps, FieldStyleState>
+export interface FieldInputProps extends FieldBaseProps<string> {
+  children?: never
+  inputProps?: Omit<InputProps, 'value' | 'defaultValue' | 'onChangeText' | 'style' | 'styles'>
+  inputStyle?: InputProps['style']
+  inputStyles?: InputStyles
+}
+
+export interface FieldCustomProps<Value> extends FieldBaseProps<Value> {
+  children: ReactNode | ((context: FieldControlContext<Value>) => ReactNode)
+  inputProps?: never
+  inputStyle?: never
+  inputStyles?: never
+}
+
+export type FieldProps<Value = string> = FieldInputProps | FieldCustomProps<Value>
+
+export type FieldStyleInfo = StyleInfo<FieldProps<unknown>, FieldStyleState>

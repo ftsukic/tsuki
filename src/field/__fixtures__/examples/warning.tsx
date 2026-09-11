@@ -10,7 +10,7 @@ export default function FieldWarningFixture() {
       label="昵称"
       status="warning"
       description="昵称将展示给联系人"
-      placeholder="请输入昵称"
+      inputProps={{ placeholder: '请输入昵称' }}
     />
   )
 }
