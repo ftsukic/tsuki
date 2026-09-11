@@ -82,7 +82,7 @@ import { Cell } from '@ftsukic/tsuki'
 | extra | `ReactNode` | — | Item 级 trailing slot，位于 Main 之后、arrow 之前。 |
 | vertical | `boolean` | `false` | 只将 Main 内的 titleArea/valueArea 改为纵向；外层 Row、icon、extra、arrow 仍保持横向。 |
 | center | `boolean` | `false` | Item 内部元素的垂直居中；与 `vertical` 相互独立。 |
-| valueAlign | `'left' \| 'center' \| 'right'` | `'right'` | value 区域的水平对齐；primitive value 同时设置 `Text.textAlign`，自定义节点只控制容器。 |
+| valueAlign | `'left' \| 'center' \| 'right'` | horizontal 为 `'right'`，vertical 为 `'left'` | value 区域的水平对齐；primitive value 同时设置 `Text.textAlign`，自定义节点只控制容器。 |
 | required | `boolean` | `false` | 在 TitleRow 内显示必填星号，不增加独立的布局列。 |
 | isLink | `boolean` | `false` | 显示 arrow；未显式设置 `clickable` 时启用点击反馈。 |
 | clickable | `boolean` | — | 显式控制 active 点击反馈。 |

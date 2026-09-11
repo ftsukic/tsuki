@@ -44,7 +44,7 @@ export function getCellStyles(
   state: CellStyleState,
 ): CellResolvedStyles {
   const hasInteraction = isCellInteractive(props)
-  const valueAlign = props.valueAlign ?? 'right'
+  const valueAlign = props.valueAlign ?? (props.vertical ? 'left' : 'right')
   const valueAlignItems =
     valueAlign === 'left' ? 'flex-start' : valueAlign === 'center' ? 'center' : 'flex-end'
   const hasTitleArea =

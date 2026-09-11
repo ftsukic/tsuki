@@ -211,6 +211,33 @@ describe('Cell', () => {
     expect(screen.getByTestId('vertical-extra')).toBeTruthy()
   })
 
+  it('defaults vertical values to left alignment and horizontal values to right alignment', async () => {
+    const view = await render(
+      <ConfigProvider>
+        <Cell testID="horizontal" title="标题" value="横向值" />
+        <Cell testID="vertical" vertical title="标题" value="纵向值" />
+      </ConfigProvider>,
+    )
+
+    const horizontalValueArea = findNode(
+      cellNode(view.toJSON(), 'horizontal'),
+      (node) =>
+        nodeStyle(node).flex === 1 &&
+        nodeStyle(node).flexDirection === 'row' &&
+        nodeStyle(node).justifyContent !== undefined,
+    )
+    const verticalValueArea = findNode(
+      cellNode(view.toJSON(), 'vertical'),
+      (node) => nodeStyle(node).width === '100%' && nodeStyle(node).flexDirection === 'row',
+    )
+
+    expect(nodeStyle(horizontalValueArea).justifyContent).toBe('flex-end')
+    expect(nodeStyle(verticalValueArea).justifyContent).toBe('flex-start')
+    expect(StyleSheet.flatten(screen.getByText('纵向值').props.style)).toMatchObject({
+      textAlign: 'left',
+    })
+  })
+
   it('puts required in the title row and applies primitive line limits', async () => {
     await render(
       <Cell testID="limited" title="标题" titleLines={1} value="值" valueLines={2} required />,

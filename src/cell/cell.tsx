@@ -47,7 +47,7 @@ export const Cell = forwardRef<React.ComponentRef<typeof Pressable>, CellProps>(
     extra,
     vertical = false,
     center = false,
-    valueAlign = 'right',
+    valueAlign = vertical ? 'left' : 'right',
     isLink = false,
     clickable,
     border = true,
