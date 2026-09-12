@@ -1,6 +1,7 @@
 import { FixtureOverview } from '../../fixture-overview'
 import FieldBasicFixture from './examples/basic'
 import FieldCheckboxFixture from './examples/field-checkbox'
+import FieldDateRangePickerFixture from './examples/field-date-range-picker'
 import FieldInputFixture from './examples/field-input'
 import FieldPickerFixture from './examples/field-picker'
 import FieldRadioFixture from './examples/field-radio'
@@ -9,7 +10,7 @@ import FieldThemeFixture from './examples/theme'
 
 /**
  * @title Field overview
- * @description FieldInput、FieldRadio、FieldCheckbox 和 FieldPicker 都是直接组合 Cell 的表单场景。
+ * @description FieldInput、FieldRadio、FieldCheckbox、FieldPicker 和 FieldDateRangePicker 都是直接组合 Cell 的表单场景。
  */
 export default function FieldOverview() {
   return (
@@ -45,6 +46,12 @@ export default function FieldOverview() {
           description: 'FieldPicker 仅在 Picker 确认后提交值。',
           id: 'field-picker',
           title: 'FieldPicker',
+        },
+        {
+          Component: FieldDateRangePickerFixture,
+          description: 'FieldDateRangePicker 仅在 DateRangePicker 确认后提交完整日期范围。',
+          id: 'field-date-range-picker',
+          title: 'FieldDateRangePicker',
         },
         {
           Component: FieldStatesFixture,

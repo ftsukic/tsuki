@@ -15,16 +15,16 @@ group:
 
 ## 介绍
 
-Field 系列不是独立的基础 UI 容器，而是表单场景适配器：`FieldInput`、`FieldRadio`、`FieldCheckbox` 和 `FieldPicker` 分别直接组合 `Cell` 与对应控件。需要自定义表单项时，直接组合 `Cell` 和自定义 control。
+Field 系列不是独立的基础 UI 容器，而是表单场景适配器：`FieldInput`、`FieldRadio`、`FieldCheckbox`、`FieldPicker` 和 `FieldDateRangePicker` 分别直接组合 `Cell` 与对应控件。需要自定义表单项时，直接组合 `Cell` 和自定义 control。
 
 </section>
 
-<code src="../../../src/field/__fixtures__/overview.tsx" title="组件预览" description="自定义 Cell 表单项、四种具体适配器、布局状态和主题用法。"></code>
+<code src="../../../src/field/__fixtures__/overview.tsx" title="组件预览" description="自定义 Cell 表单项、五种具体适配器、布局状态和主题用法。"></code>
 
 ## 引入
 
 ```tsx | pure
-import { Cell, FieldCheckbox, FieldInput, FieldPicker, FieldRadio } from '@ftsukic/tsuki'
+import { Cell, FieldCheckbox, FieldDateRangePicker, FieldInput, FieldPicker, FieldRadio } from '@ftsukic/tsuki'
 ```
 
 包不导出运行时 `Field`，也不提供 `FieldProps` 或 `FieldControlContext`。通用的自定义项写法如下：
@@ -45,13 +45,15 @@ import { Cell, FieldCheckbox, FieldInput, FieldPicker, FieldRadio } from '@ftsuk
 
 <code src="../../../src/field/__fixtures__/examples/field-picker.tsx" title="FieldPicker" description="Cell 选择入口与 Picker 弹层的组合。"></code>
 
+<code src="../../../src/field/__fixtures__/examples/field-date-range-picker.tsx" title="FieldDateRangePicker" description="Cell 选择入口与 DateRangePicker 弹层的组合，确认后提交完整范围。"></code>
+
 <code src="../../../src/field/__fixtures__/examples/states.tsx" title="布局和状态" description="vertical、readOnly 和 disabled。"></code>
 
 <code src="../../../src/field/__fixtures__/examples/theme.tsx" title="主题和语义样式" description="Field token 与 FieldPicker feedback 语义样式。"></code>
 
 ## 共同表单属性
 
-四个适配器都保留 `label` 作为表单语义名称，并将它传给 `Cell.title`。以下属性在四个适配器中含义一致：
+五个适配器都保留 `label` 作为表单语义名称，并将它传给 `Cell.title`。以下属性在五个适配器中含义一致：
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -64,17 +66,17 @@ import { Cell, FieldCheckbox, FieldInput, FieldPicker, FieldRadio } from '@ftsuk
 | onChange | `(value) => void` | — | 表单值变化回调。 |
 | required | `boolean` | `false` | 映射到 `Cell.required`。 |
 | disabled | `boolean` | `false` | 同时禁用 Cell 和对应控件。 |
-| readOnly | `boolean` | `false` | 阻止控件交互，但保留正常视觉；`FieldPicker` 也不会打开。 |
+| readOnly | `boolean` | `false` | 阻止控件交互，但保留正常视觉；`FieldPicker` 和 `FieldDateRangePicker` 也不会打开。 |
 | vertical | `boolean` | `false` | 映射到 `Cell.vertical`。 |
 | center | `boolean` | `FieldInput` 为 `true`，其余适配器为 `false` | 映射到 `Cell.center`，由 Cell 决定垂直居中行为。 |
 | labelWidth | `DimensionValue` | Field token | horizontal 时覆盖 Cell 的 label 区宽度。 |
 | labelAlign | `'left' \| 'center' \| 'right'` | `'left'` | 通过 `Cell.styles.title` 设置 label 文本对齐。 |
 | valueAlign | `'left' \| 'center' \| 'right'` | horizontal 为 `'right'`，vertical 为 `'left'` | 映射到 Cell value 区域的水平对齐；`FieldInput` 同时映射到 Input 文本。 |
 | icon | `ReactNode` | — | 映射到 `Cell.icon`。 |
-| isLink | `boolean` | `false`；FieldPicker 为 `true` | 映射到 Cell 链接箭头。 |
+| isLink | `boolean` | `false`；FieldPicker 和 FieldDateRangePicker 为 `true` | 映射到 Cell 链接箭头。 |
 | clickable | `boolean` | — | 映射到 `Cell.clickable`。 |
 | arrowDirection | `CellArrowDirection` | `'right'` | 映射到 Cell 箭头方向。 |
-| onPress | `CellProps['onPress']` | — | Cell 行点击回调；FieldPicker 内部使用它打开 Picker。 |
+| onPress | `CellProps['onPress']` | — | Cell 行点击回调；FieldPicker 和 FieldDateRangePicker 内部使用它打开对应选择器。 |
 | border | `boolean` | `true` | 映射到 `Cell.border`。 |
 | style | `StyleProp<ViewStyle>` | — | Cell 根节点样式。 |
 | cellStyles | `CellStyles` | — | 直接传给 Cell 的语义样式；用于 Cell 区域定制。 |
@@ -152,9 +154,42 @@ button 选项可以设置每行列数；例如文档中的 FieldRadio fixture �
 
 `pickerStyle` 和 `pickerStyles` 只作用于 Picker；Picker 的 `visible`、`onChange`、`onConfirm` 和 `onCancel` 由适配器管理。没有已选值或选项时显示 `placeholder`。
 
+## FieldDateRangePicker
+
+`FieldDateRangePicker` 是 `Cell + DateRangePicker` 的表单适配器。它的领域值直接使用 `DateRangePickerValue`，即 `[startDate, endDate]`；`DateRangePicker` 独立负责年月日滚轮、端点切换、范围边界和 draft 生命周期，Field 只负责 Cell 展示和提交已确认值。
+
+```tsx | pure
+<FieldDateRangePicker
+  label="日期范围"
+  value={range}
+  onChange={setRange}
+  placeholder={['开始日期', '结束日期']}
+  minDate={new Date(2026, 0, 1)}
+  maxDate={new Date(2026, 11, 31)}
+/>
+```
+
+`value` 未设置时，Cell 展示两个端点的 `placeholder`，默认是 `['请选择', '请选择']`；取消或遮罩关闭后仍然保持空值。点击 Cell 只打开 DateRangePicker，滚轮变化不会触发 Field `onChange`；只有点击确认才会提交完整 tuple。`formatValue` 只作用于 Cell 展示，接收完整 `DateRangePickerValue` 并返回一个 `ReactNode`。
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `value` / `defaultValue` | `DateRangePickerValue` | — | 受控或非受控的完整日期范围 |
+| `onChange` | `(value: DateRangePickerValue) => void` | — | 只在 DateRangePicker 确认后调用 |
+| `placeholder` | `ReactNode \| readonly [ReactNode?, ReactNode?]` | `['请选择', '请选择']` | 空值时显示的两个端点文案；单个 ReactNode 会用于两端 |
+| `formatValue` | `(value: DateRangePickerValue) => ReactNode` | — | 自定义已选范围的 Cell 内容 |
+| `minDate` / `maxDate` | `Date` | DateRangePicker 默认范围 | 透传给 DateRangePicker 的全局边界 |
+| `title`、`cancelText`、`confirmText`、`formatter` | — | DateRangePicker 默认值 | 透传给 DateRangePicker |
+| `overlay`、`closeOnPressOverlay`、`safeAreaInsetBottom`、`duration` | — | DateRangePicker 默认值 | 透传给 DateRangePicker Popup |
+| `itemHeight` / `visibleItemCount` | `number` | Picker token | 透传给 DateRangePicker 滚轮 |
+| `pickerStyle` / `pickerStyles` | — | — | 只作用于 DateRangePicker；`style` / `cellStyles` 只作用于 Cell |
+
+`disabled` 会同时禁用 Cell 并阻止打开 Popup；`readOnly` 保留正常展示但阻止打开 Popup。`description`、`errorMessage`、`status`、`vertical`、`labelWidth`、`labelAlign`、`valueAlign`、`required`、`extra` 和 Cell 的其他表单布局属性继续沿用 Field 适配器约定。
+
+`FieldDateRangePicker` 与独立的 `DateRangePicker` 是两个职责不同的组件：前者不实现日期范围规范化、日期列或 active endpoint；如果不需要 Cell/Form 提交语义，直接使用 `DateRangePicker`。
+
 ## 语义样式与主题
 
-只有 FieldPicker 的 `styles` 提供表单区域语义插槽：`control`、`feedback`、`description` 和 `error`。FieldInput、FieldRadio、FieldCheckbox 不渲染反馈，也不提供 Field 语义 `styles`。Cell 区域使用 `cellStyles`，Input 使用 `inputStyle`/`inputStyles`，Picker 使用 `pickerStyle`/`pickerStyles`，三者边界互不重叠。
+FieldPicker 和 FieldDateRangePicker 的 `styles` 提供表单区域语义插槽：`control`、`feedback`、`description` 和 `error`。FieldInput、FieldRadio、FieldCheckbox 不渲染反馈，也不提供 Field 语义 `styles`。Cell 区域使用 `cellStyles`，Input 使用 `inputStyle`/`inputStyles`，Picker 使用 `pickerStyle`/`pickerStyles`，各自边界互不重叠。
 
 `theme.components.Field` 仍表示 Field 系列表单 Cell 组合的主题 token，支持 `defaultLabelWidth`、`labelGap`、`descriptionGap`、`errorGap`、`descriptionColor`、`warningColor` 和 `errorColor`。它不产生运行时 `Field` 组件。
 

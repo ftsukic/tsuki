@@ -3,6 +3,7 @@ import {
   Checkbox,
   ConfigProvider,
   FieldCheckbox,
+  FieldDateRangePicker,
   FieldInput,
   FieldPicker,
   FieldRadio,
@@ -17,6 +18,7 @@ import { StyleSheet } from 'react-native'
 import type { StyleProp, ViewStyle } from 'react-native'
 import type { PickerValue } from '../picker'
 import type { TextInputInstance } from '../text-input'
+import type { DateRangePickerValue } from '../date-range-picker'
 
 interface JsonNode {
   children?: JsonNode[] | null
@@ -34,6 +36,14 @@ function findNodes(value: unknown, predicate: (node: JsonNode) => boolean): Json
 async function press(target: Parameters<typeof fireEvent.press>[0]) {
   fireEvent.press(target)
   await Promise.resolve()
+}
+
+function date(year: number, month: number, day: number) {
+  return new Date(year, month - 1, day)
+}
+
+function dateRange(start: Date, end: Date): DateRangePickerValue {
+  return [start, end]
 }
 
 describe('FieldInput', () => {
@@ -455,6 +465,154 @@ describe('FieldPicker', () => {
   })
 })
 
+describe('FieldDateRangePicker', () => {
+  const value = dateRange(date(2026, 9, 10), date(2026, 9, 20))
+
+  it('renders a placeholder tuple and keeps the DateRangePicker outside Cell', async () => {
+    const view = await render(
+      <Provider theme={{ token: { motion: false } }}>
+        <FieldDateRangePicker
+          label="日期范围"
+          placeholder={['开始日期', '结束日期']}
+          testID="field-date-range-picker"
+        />
+      </Provider>,
+    )
+
+    expect(screen.getByText('开始日期')).toBeTruthy()
+    expect(screen.getByText('结束日期')).toBeTruthy()
+    expect(findNodes(view.toJSON(), (node) => node.type === 'DateRangePicker')).toHaveLength(0)
+  })
+
+  it('formats a committed range with the default and custom display values', async () => {
+    await render(
+      <Provider theme={{ token: { motion: false } }}>
+        <FieldDateRangePicker label="日期范围" value={value} />
+        <FieldDateRangePicker
+          formatValue={(nextValue) => `${nextValue[0].getDate()}-${nextValue[1].getDate()}`}
+          label="自定义范围"
+          value={value}
+        />
+      </Provider>,
+    )
+
+    expect(screen.getByText('2026-09-10')).toBeTruthy()
+    expect(screen.getByText('2026-09-20')).toBeTruthy()
+    expect(screen.getByText('10-20')).toBeTruthy()
+  })
+
+  it('isolates draft changes and commits only after confirmation', async () => {
+    const onChange = jest.fn()
+
+    await render(
+      <Provider theme={{ token: { motion: false } }}>
+        <FieldDateRangePicker
+          label="日期范围"
+          defaultValue={value}
+          minDate={date(2026, 1, 1)}
+          maxDate={date(2027, 12, 31)}
+          onChange={onChange}
+          title="选择日期范围"
+        />
+      </Provider>,
+    )
+
+    await press(screen.getByText('2026-09-10'))
+    await press(screen.getByTestId('picker-item-2-4'))
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByText('2026-09-10')).toBeTruthy()
+
+    await press(screen.getByTestId('picker-cancel'))
+    expect(screen.queryByTestId('picker-toolbar')).toBeNull()
+    expect(screen.getByText('2026-09-10')).toBeTruthy()
+
+    await press(screen.getByText('2026-09-10'))
+    await press(screen.getByTestId('picker-item-2-4'))
+    await press(screen.getByTestId('picker-confirm'))
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenLastCalledWith(dateRange(date(2026, 9, 5), date(2026, 9, 20)))
+  })
+
+  it('keeps an empty field empty after cancel and creates a tuple on confirm', async () => {
+    const onChange = jest.fn()
+
+    await render(
+      <Provider theme={{ token: { motion: false } }}>
+        <FieldDateRangePicker
+          label="日期范围"
+          onChange={onChange}
+          placeholder={['请选择开始', '请选择结束']}
+        />
+      </Provider>,
+    )
+
+    await press(screen.getAllByText('请选择开始')[0])
+    await press(screen.getByTestId('picker-cancel'))
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByText('请选择开始')).toBeTruthy()
+
+    await press(screen.getByText('请选择开始'))
+    await press(screen.getByTestId('picker-confirm'))
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange.mock.lastCall?.[0]).toEqual([expect.any(Date), expect.any(Date)])
+  })
+
+  it('synchronizes controlled values and blocks disabled or readOnly fields', async () => {
+    const first = value
+    const second = dateRange(date(2027, 3, 5), date(2027, 4, 6))
+    const view = await render(
+      <Provider theme={{ token: { motion: false } }}>
+        <FieldDateRangePicker label="受控范围" value={first} />
+        <FieldDateRangePicker label="禁用范围" disabled placeholder={['禁用', '禁用']} />
+        <FieldDateRangePicker label="只读范围" readOnly placeholder={['只读', '只读']} />
+      </Provider>,
+    )
+
+    await view.rerender(
+      <Provider theme={{ token: { motion: false } }}>
+        <FieldDateRangePicker label="受控范围" value={second} />
+        <FieldDateRangePicker label="禁用范围" disabled placeholder={['禁用', '禁用']} />
+        <FieldDateRangePicker label="只读范围" readOnly placeholder={['只读', '只读']} />
+      </Provider>,
+    )
+    expect(screen.getByText('2027-03-05')).toBeTruthy()
+    expect(screen.getByText('2027-04-06')).toBeTruthy()
+
+    await press(screen.getByText('禁用范围'))
+    expect(screen.queryByTestId('picker-toolbar')).toBeNull()
+    await press(screen.getByText('只读范围'))
+    expect(screen.queryByTestId('picker-toolbar')).toBeNull()
+  })
+
+  it('renders Field feedback and forwards Cell layout props', async () => {
+    const view = await render(
+      <Provider theme={{ token: { motion: false } }}>
+        <FieldDateRangePicker
+          label="日期范围"
+          description="选择有效的日期范围"
+          errorMessage="日期范围不能为空"
+          labelAlign="right"
+          labelWidth={180}
+          vertical
+          placeholder={['开始', '结束']}
+        />
+      </Provider>,
+    )
+
+    expect(screen.getByText('选择有效的日期范围')).toBeTruthy()
+    expect(screen.getByText('日期范围不能为空')).toBeTruthy()
+    const label = screen.getByText('日期范围')
+    expect(StyleSheet.flatten(label.props.style)).toMatchObject({ textAlign: 'right' })
+    expect(
+      findNodes(view.toJSON(), (node) => {
+        const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
+        return style?.width === '100%'
+      }).length,
+    ).toBeGreaterThan(0)
+  })
+})
+
 describe('Field exports', () => {
   it('exports concrete adapters without exporting the runtime Field component', () => {
     expect(packageExports).not.toHaveProperty('Field')
@@ -462,6 +620,7 @@ describe('Field exports', () => {
     expect(FieldRadio).toBeDefined()
     expect(FieldCheckbox).toBeDefined()
     expect(FieldPicker).toBeDefined()
+    expect(FieldDateRangePicker).toBeDefined()
     expect(ConfigProvider).toEqual(expect.any(Function))
   })
 })
