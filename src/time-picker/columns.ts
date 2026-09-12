@@ -1,4 +1,10 @@
-import type { PickerColumnContext, PickerColumns } from '../picker/types'
+import { createTemporalColumns } from '../temporal-picker/columns'
+import type {
+  PickerColumnContext,
+  PickerColumnSource,
+  PickerColumns,
+  PickerOption,
+} from '../picker/types'
 import type {
   TimePickerColumnType,
   TimePickerFilter,
@@ -23,85 +29,59 @@ type TimePickerColumnsConfig = Pick<
   | 'formatter'
 >
 
-interface TimeRange {
-  min: number
-  max: number
-}
-
-const TIME_RANGES: Record<TimePickerColumnType, TimeRange> = {
-  hour: { min: 0, max: 23 },
-  minute: { min: 0, max: 59 },
-  second: { min: 0, max: 59 },
-}
-
 export function padTimeValue(value: number): string {
   return String(Math.trunc(value)).padStart(2, '0')
 }
 
 export function createTimeOptions(min: number, max: number): TimePickerOption[] {
   const start = Number.isFinite(min) ? Math.trunc(min) : 0
-  const requestedEnd = Number.isFinite(max) ? Math.trunc(max) : start
-  const end = Math.max(start, requestedEnd)
-
+  const end = Math.max(start, Number.isFinite(max) ? Math.trunc(max) : start)
   return Array.from({ length: end - start + 1 }, (_, index) => {
     const value = padTimeValue(start + index)
     return { text: value, value }
   })
 }
 
-function normalizeTimeBound(value: number | undefined, fallback: number, range: TimeRange): number {
-  if (!Number.isFinite(value)) return fallback
-  return Math.min(range.max, Math.max(range.min, Math.trunc(value as number)))
+function toTimeOption(option: PickerOption): TimePickerOption {
+  return { ...option, value: padTimeValue(Number(option.value)) }
 }
 
-function resolveTimeRange(type: TimePickerColumnType, config: TimePickerColumnsConfig): TimeRange {
-  const range = TIME_RANGES[type]
-  const minValue =
-    type === 'hour' ? config.minHour : type === 'minute' ? config.minMinute : config.minSecond
-  const maxValue =
-    type === 'hour' ? config.maxHour : type === 'minute' ? config.maxMinute : config.maxSecond
-  const min = normalizeTimeBound(minValue, range.min, range)
-  const normalizedMax = normalizeTimeBound(maxValue, range.max, range)
-
-  return { min, max: min > normalizedMax ? min : normalizedMax }
-}
-
-function getResolvedValues(context: PickerColumnContext): TimePickerValue {
-  return context.selectedValues.map((value) => String(value))
-}
-
-function applyOptionTransforms(
-  type: TimePickerColumnType,
-  options: readonly TimePickerOption[],
-  values: TimePickerValue,
-  filter: TimePickerFilter | undefined,
-  formatter: TimePickerFormatter | undefined,
-): TimePickerOption[] {
-  const filteredOptions = filter?.(type, options, values) ?? options
-
-  return filteredOptions.map((option) => {
-    const formatted = formatter?.(type, option) ?? option
-    return {
-      ...option,
-      ...formatted,
-      value: option.value,
-    }
-  })
+function toPickerOption(option: TimePickerOption): PickerOption {
+  const value = Number(option.value)
+  return { ...option, value: Number.isFinite(value) ? value : option.value }
 }
 
 export function createTimePickerColumns(config: TimePickerColumnsConfig): PickerColumns {
-  const columnTypes = config.columnsType ?? DEFAULT_COLUMNS_TYPE
-
-  return columnTypes.map((type) => (context: PickerColumnContext) => {
-    const range = resolveTimeRange(type, config)
-    const options = createTimeOptions(range.min, range.max)
-
-    return applyOptionTransforms(
-      type,
-      options,
-      getResolvedValues(context),
-      config.filter,
-      config.formatter,
-    )
+  const columnsType = config.columnsType ?? DEFAULT_COLUMNS_TYPE
+  const columns = createTemporalColumns({
+    columnsType,
+    filter: config.filter
+      ? (type, options, _fields, selectedValues) =>
+          config.filter!(
+            type as TimePickerColumnType,
+            options.map(toTimeOption),
+            selectedValues.map((value) => padTimeValue(Number(value))),
+          ).map(toPickerOption)
+      : undefined,
+    formatter: config.formatter
+      ? (type, option) => {
+          const formatted = config.formatter!(type as TimePickerColumnType, toTimeOption(option))
+          return { ...formatted, value: option.value }
+        }
+      : undefined,
+    limits: {
+      hour: { max: config.maxHour, min: config.minHour },
+      minute: { max: config.maxMinute, min: config.minMinute },
+      second: { max: config.maxSecond, min: config.minSecond },
+    },
+    timeSuffix: false,
+  })
+  return (columns as readonly PickerColumnSource[]).map((source) => {
+    if (typeof source !== 'function') return source.map(toTimeOption)
+    return (context: PickerColumnContext) => (source(context) ?? []).map(toTimeOption)
   })
 }
+
+export type { TimePickerFilter, TimePickerFormatter, TimePickerValue }
+
+// Keep this context helper local to the compatibility generator's public surface.

@@ -1,6 +1,7 @@
 import type { PickerAction, PickerOption, PickerProps } from '../picker/types'
+import type { TemporalColumnType } from '../temporal-picker/types'
 
-export type TimePickerColumnType = 'hour' | 'minute' | 'second'
+export type TimePickerColumnType = Extract<TemporalColumnType, 'hour' | 'minute' | 'second'>
 
 export type TimePickerValue = readonly string[]
 
