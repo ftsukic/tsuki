@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react'
 import { PopupContent } from '../popup/popup'
 import { mountPortal, unmountPortal, updatePortal } from '../portal'
-import { Picker } from './Picker'
+import { Picker } from './picker'
 import type { PortalKey } from '../portal'
 import type { PickerOptions, PickerResult } from './types'
-import { resolvePickerState } from './usePicker'
+import { resolvePickerState } from './use-picker'
 
 interface PickerRecord {
   key: PortalKey | null

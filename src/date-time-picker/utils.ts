@@ -1,17 +1,27 @@
-import type { PickerColumns, PickerOption, PickerValue } from '../picker/types'
-import { createTemporalColumns } from '../temporal-picker/columns'
+import type { PickerValue } from '../picker/types'
 import {
-  dateToTemporalFields,
-  pickerValuesToTemporalFields,
-  temporalFieldsToDate,
-  temporalFieldsToPickerValues,
-} from '../temporal-picker/value'
-import type { DateTimePickerColumnType, DateTimePickerFormatter } from './date-time-picker.types'
+  clampDateTimeFields,
+  dateToFields,
+  fieldsToDate,
+  fieldsToPickerValues,
+  pickerValuesToFields,
+} from '../picker/date-time/value'
+import type { DateTimeColumnType } from '../picker/date-time/types'
+import type { DateTimePickerColumnType, DateTimePickerFormatter } from './types'
 
 export interface DateTimePickerDateRange {
   minDate: Date
   maxDate: Date
 }
+
+const COLUMNS_TYPE = [
+  'year',
+  'month',
+  'day',
+  'hour',
+  'minute',
+  'second',
+] as const satisfies readonly DateTimeColumnType[]
 
 export function isValidDateTime(value: Date | undefined): value is Date {
   return value instanceof Date && Number.isFinite(value.getTime())
@@ -46,14 +56,7 @@ export function clampDateTime(value: Date, minDate: Date, maxDate: Date): Date {
 }
 
 export function getDateTimePickerValues(date: Date): number[] {
-  return temporalFieldsToPickerValues(dateToTemporalFields(date), [
-    'year',
-    'month',
-    'day',
-    'hour',
-    'minute',
-    'second',
-  ])
+  return fieldsToPickerValues(dateToFields(date), COLUMNS_TYPE)
 }
 
 export function createDateTimeFromPickerValues(
@@ -62,33 +65,13 @@ export function createDateTimeFromPickerValues(
   minDate: Date,
   maxDate: Date,
 ): Date {
-  const fields = pickerValuesToTemporalFields(
-    values,
-    ['year', 'month', 'day', 'hour', 'minute', 'second'],
-    dateToTemporalFields(baseDate),
-  )
-  return clampDateTime(temporalFieldsToDate(fields), minDate, maxDate)
+  const fields = pickerValuesToFields(values, COLUMNS_TYPE, dateToFields(baseDate))
+  const normalized = clampDateTimeFields(fields, minDate, maxDate)
+  return clampDateTime(fieldsToDate(normalized), minDate, maxDate)
 }
 
-function dateFormatter(formatter?: DateTimePickerFormatter) {
-  return formatter
-    ? (type: DateTimePickerColumnType, option: PickerOption) => ({
-        ...option,
-        text: formatter(type, Number(option.value)),
-      })
-    : undefined
+export function getDateTimePickerColumnTypes(): readonly DateTimeColumnType[] {
+  return COLUMNS_TYPE
 }
 
-export function generateDateTimeColumns(
-  minDate?: Date,
-  maxDate?: Date,
-  formatter?: DateTimePickerFormatter,
-): PickerColumns {
-  const range = normalizeDateTimeRange(minDate, maxDate)
-  return createTemporalColumns({
-    columnsType: ['year', 'month', 'day', 'hour', 'minute', 'second'],
-    formatter: dateFormatter(formatter),
-    maxDate: range.maxDate,
-    minDate: range.minDate,
-  })
-}
+export type { DateTimePickerColumnType, DateTimePickerFormatter }

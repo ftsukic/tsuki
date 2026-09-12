@@ -5,8 +5,8 @@ import { DateTimePicker } from '../../index'
 import { Text } from '../../../text'
 import { TimePicker } from '../../../time-picker'
 
-/** @title Temporal picker regression @description 在同一页面手测三种 picker 的联动和 dependent column 同步。 */
-export default function TemporalRegressionExample() {
+/** @title Picker family regression @description 在同一页面手测三种 picker 的联动和 dependent column 同步。 */
+export default function PickerFamilyRegressionExample() {
   const [date, setDate] = useState(new Date(2026, 2, 31))
   const [time, setTime] = useState<readonly string[]>(['10', '20'])
   const [dateTime, setDateTime] = useState(new Date(2026, 2, 31, 10, 20, 0))

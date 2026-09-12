@@ -10,9 +10,9 @@ import Animated, {
 import { InteractionPressable } from '../interaction'
 import { Text } from '../text'
 import { useComponentToken } from '../theme'
-import { getPickerStyles } from './styles'
+import { getPickerStyles } from './style'
 import { getPickerToken } from './token'
-import { findNearestEnabledIndex } from './usePicker'
+import { findNearestEnabledIndex } from './use-picker'
 import type { PickerOption } from './types'
 import type {
   NativeScrollEvent,

@@ -107,12 +107,14 @@ describe('TimePicker', () => {
       <TimePicker maxHour={18} maxMinute={45} minHour={8} minMinute={15} showToolbar={false} />,
     )
 
-    expect(screen.getAllByTestId(/^picker-item-0-/)).toHaveLength(11)
-    expect(screen.getAllByTestId(/^picker-item-1-/)).toHaveLength(31)
-    expectItemText(0, 0, '08')
-    expectItemText(0, 10, '18')
-    expectItemText(1, 0, '15')
-    expectItemText(1, 30, '45')
+    expect(screen.getAllByTestId(/^picker-item-0-/)).toHaveLength(24)
+    expect(screen.getAllByTestId(/^picker-item-1-/)).toHaveLength(60)
+    expectItemText(0, 8, '08')
+    expectItemText(0, 18, '18')
+    expectItemText(1, 15, '15')
+    expectItemText(1, 45, '45')
+    expect(getItem(0, 0).props.accessibilityState).toMatchObject({ disabled: true })
+    expect(getItem(1, 14).props.accessibilityState).toMatchObject({ disabled: true })
   })
 
   it('clamps invalid bounds to the supported time range', async () => {
@@ -126,8 +128,9 @@ describe('TimePicker', () => {
   it('keeps one option when a range is reversed', async () => {
     await render(<TimePicker maxMinute={20} minMinute={50} showToolbar={false} />)
 
-    expect(screen.getAllByTestId(/^picker-item-1-/)).toHaveLength(1)
-    expectItemText(1, 0, '50')
+    expect(screen.getAllByTestId(/^picker-item-1-/)).toHaveLength(60)
+    expectItemText(1, 50, '50')
+    expect(getItem(1, 50).props.accessibilityState).toMatchObject({ selected: true })
   })
 
   it('uses filter for stepped minute options and passes resolved previous values', async () => {

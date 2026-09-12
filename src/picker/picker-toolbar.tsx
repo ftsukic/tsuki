@@ -1,16 +1,19 @@
 import { forwardRef } from 'react'
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
 import type { ReactNode } from 'react'
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native'
 import { InteractionPressable } from '../interaction'
-import { useComponentToken, useToken } from '../theme'
-import { getPickerStyles } from './styles'
+import { Text } from '../text'
+import { useComponentToken } from '../theme'
+import { getPickerStyles } from './style'
 import { getPickerToken } from './token'
 
 export interface PickerToolbarProps {
   title?: ReactNode
   cancelButtonText?: ReactNode
   confirmButtonText?: ReactNode
+  showDivider?: boolean
+  titleStyle?: StyleProp<TextStyle>
   onCancel?: () => void
   onConfirm?: () => void
   style?: StyleProp<ViewStyle>
@@ -32,6 +35,8 @@ export const PickerToolbar = forwardRef<View, PickerToolbarProps>(function Picke
     title,
     cancelButtonText = '取消',
     confirmButtonText = '确定',
+    showDivider = false,
+    titleStyle,
     onCancel,
     onConfirm,
     style,
@@ -41,9 +46,13 @@ export const PickerToolbar = forwardRef<View, PickerToolbarProps>(function Picke
   },
   ref,
 ) {
-  const { token: themeToken } = useToken()
   const token = useComponentToken('Picker', getPickerToken)
-  const resolved = getPickerStyles(token, token.picker_item_height, token.picker_visible_item_count)
+  const resolved = getPickerStyles(
+    token,
+    token.picker_item_height,
+    token.picker_visible_item_count,
+    showDivider,
+  )
   const buttonLabel = [resolved.toolbarButtonLabel, buttonLabelStyle]
 
   return (
@@ -54,7 +63,8 @@ export const PickerToolbar = forwardRef<View, PickerToolbarProps>(function Picke
           onPress={onCancel}
           style={({ pressed }) => [
             resolved.toolbarButton,
-            pressed && { backgroundColor: themeToken.interactionActiveColor },
+            { alignItems: 'flex-start' },
+            pressed && { opacity: token.picker_toolbar_button_active_opacity },
             buttonStyle,
           ]}
           testID="picker-cancel"
@@ -63,7 +73,7 @@ export const PickerToolbar = forwardRef<View, PickerToolbarProps>(function Picke
         </InteractionPressable>
       </View>
       <View pointerEvents="none" style={{ flex: 1, alignItems: 'center' }}>
-        {renderContent(title, [resolved.toolbarButtonLabel, { color: token.picker_text_color }])}
+        {renderContent(title, [resolved.toolbarTitle, titleStyle])}
       </View>
       <View style={{ flex: 1, alignItems: 'flex-end' }}>
         <InteractionPressable
@@ -71,7 +81,8 @@ export const PickerToolbar = forwardRef<View, PickerToolbarProps>(function Picke
           onPress={onConfirm}
           style={({ pressed }) => [
             resolved.toolbarButton,
-            pressed && { backgroundColor: themeToken.interactionActiveColor },
+            { alignItems: 'flex-end' },
+            pressed && { opacity: token.picker_toolbar_button_active_opacity },
             buttonStyle,
           ]}
           testID="picker-confirm"

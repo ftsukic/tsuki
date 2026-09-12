@@ -1,10 +1,5 @@
-import { createTemporalColumns } from '../temporal-picker/columns'
-import type {
-  PickerColumnContext,
-  PickerColumnSource,
-  PickerColumns,
-  PickerOption,
-} from '../picker/types'
+import { createDateTimeColumns } from '../picker/date-time/columns'
+import type { PickerColumns, PickerOption } from '../picker/types'
 import type {
   TimePickerColumnType,
   TimePickerFilter,
@@ -53,7 +48,7 @@ function toPickerOption(option: TimePickerOption): PickerOption {
 
 export function createTimePickerColumns(config: TimePickerColumnsConfig): PickerColumns {
   const columnsType = config.columnsType ?? DEFAULT_COLUMNS_TYPE
-  const columns = createTemporalColumns({
+  const columns = createDateTimeColumns({
     columnsType,
     filter: config.filter
       ? (type, options, _fields, selectedValues) =>
@@ -76,12 +71,7 @@ export function createTimePickerColumns(config: TimePickerColumnsConfig): Picker
     },
     timeSuffix: false,
   })
-  return (columns as readonly PickerColumnSource[]).map((source) => {
-    if (typeof source !== 'function') return source.map(toTimeOption)
-    return (context: PickerColumnContext) => (source(context) ?? []).map(toTimeOption)
-  })
+  return columns
 }
 
 export type { TimePickerFilter, TimePickerFormatter, TimePickerValue }
-
-// Keep this context helper local to the compatibility generator's public surface.

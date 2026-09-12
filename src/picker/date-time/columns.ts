@@ -1,20 +1,20 @@
-import type { PickerColumnContext, PickerColumns, PickerOption, PickerValue } from '../picker/types'
-import { DEFAULT_TEMPORAL_FIELDS, pickerValuesToTemporalFields } from './value'
+import type { PickerColumnContext, PickerColumns, PickerOption, PickerValue } from '../types'
+import { DEFAULT_DATE_TIME_FIELDS, getDaysInMonth, pickerValuesToFields } from './value'
 import type {
-  TemporalColumnType,
-  TemporalFields,
-  TemporalFilter,
-  TemporalFormatter,
-  TemporalLimits,
+  DateTimeColumnFilter,
+  DateTimeColumnFormatter,
+  DateTimeColumnType,
+  DateTimeFields,
+  DateTimeLimits,
 } from './types'
 
-export interface TemporalColumnsConfig {
-  columnsType: readonly TemporalColumnType[]
+export interface DateTimeColumnsConfig {
+  columnsType: readonly DateTimeColumnType[]
   minDate?: Date
   maxDate?: Date
-  limits?: TemporalLimits
-  filter?: TemporalFilter
-  formatter?: TemporalFormatter
+  limits?: DateTimeLimits
+  filter?: DateTimeColumnFilter
+  formatter?: DateTimeColumnFormatter
   timeSuffix?: boolean
 }
 
@@ -23,7 +23,7 @@ interface NumericRange {
   max: number
 }
 
-const NATURAL_RANGES: Record<TemporalColumnType, NumericRange> = {
+const NATURAL_RANGES: Record<DateTimeColumnType, NumericRange> = {
   day: { max: 31, min: 1 },
   hour: { max: 23, min: 0 },
   minute: { max: 59, min: 0 },
@@ -32,11 +32,7 @@ const NATURAL_RANGES: Record<TemporalColumnType, NumericRange> = {
   year: { max: 9999, min: 1 },
 }
 
-function daysInMonth(year: number, month: number): number {
-  return new Date(year, month, 0).getDate()
-}
-
-function sameDate(left: TemporalFields, right: Date): boolean {
+function sameDate(left: DateTimeFields, right: Date): boolean {
   return (
     left.year === right.getFullYear() &&
     left.month === right.getMonth() + 1 &&
@@ -45,9 +41,9 @@ function sameDate(left: TemporalFields, right: Date): boolean {
 }
 
 function resolveDateRange(
-  type: TemporalColumnType,
-  fields: TemporalFields,
-  config: TemporalColumnsConfig,
+  type: DateTimeColumnType,
+  fields: DateTimeFields,
+  config: DateTimeColumnsConfig,
 ) {
   const natural = NATURAL_RANGES[type]
   const minDate = config.minDate
@@ -69,7 +65,7 @@ function resolveDateRange(
     max =
       fields.year === maxDate?.getFullYear() && fields.month === maxDate.getMonth() + 1
         ? maxDate.getDate()
-        : daysInMonth(fields.year, fields.month)
+        : getDaysInMonth(fields.year, fields.month)
   } else if (type === 'hour') {
     min = minDate && sameDate(fields, minDate) ? minDate.getHours() : natural.min
     max = maxDate && sameDate(fields, maxDate) ? maxDate.getHours() : natural.max
@@ -110,7 +106,7 @@ function isWithinLimit(value: number, range: NumericRange, limit: { min: number;
 }
 
 function createBaseOption(
-  type: TemporalColumnType,
+  type: DateTimeColumnType,
   value: number,
   disabled = false,
   timeSuffix = true,
@@ -127,10 +123,10 @@ function createBaseOption(
 }
 
 function resolveOptions(
-  type: TemporalColumnType,
-  fields: TemporalFields,
+  type: DateTimeColumnType,
+  fields: DateTimeFields,
   selectedValues: readonly PickerValue[],
-  config: TemporalColumnsConfig,
+  config: DateTimeColumnsConfig,
 ): PickerOption[] {
   const natural = NATURAL_RANGES[type]
   const dateRange = resolveDateRange(type, fields, config)
@@ -141,8 +137,9 @@ function resolveOptions(
         min: normalizeLimit(rawLimit.min, natural.min, natural),
       }
     : null
-  const start = config.minDate || config.maxDate ? dateRange.min : natural.min
-  const end = config.minDate || config.maxDate ? dateRange.max : natural.max
+  const hasDateBounds = config.minDate !== undefined || config.maxDate !== undefined
+  const start = hasDateBounds ? dateRange.min : natural.min
+  const end = type === 'day' || hasDateBounds ? dateRange.max : natural.max
   const options = Array.from({ length: Math.max(0, end - start + 1) }, (_, index) => {
     const value = start + index
     const disabled = limit ? !isWithinLimit(value, natural, limit) : false
@@ -162,12 +159,12 @@ function resolveOptions(
   })
 }
 
-export function createTemporalColumns(config: TemporalColumnsConfig): PickerColumns {
+export function createDateTimeColumns(config: DateTimeColumnsConfig): PickerColumns {
   return config.columnsType.map((type) => (context: PickerColumnContext) => {
-    const fields = pickerValuesToTemporalFields(
+    const fields = pickerValuesToFields(
       context.selectedValues,
       config.columnsType,
-      DEFAULT_TEMPORAL_FIELDS,
+      DEFAULT_DATE_TIME_FIELDS,
     )
     return resolveOptions(type, fields, context.selectedValues, config)
   })

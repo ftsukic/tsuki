@@ -2,8 +2,8 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-
 import { InteractionPressable } from '../interaction'
 import { Picker, PickerToolbar, PickerView } from '../picker'
 import { Provider } from '../provider'
-import { DatePickerCore } from '../date-picker'
-import { DateTimePickerCore } from '../date-time-picker'
+import { DatePicker } from '../date-picker'
+import { DateTimePicker } from '../date-time-picker'
 import { TimePicker } from '../time-picker'
 import { useState } from 'react'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
@@ -372,11 +372,14 @@ describe('Picker', () => {
     }
 
     await render(
-      <DatePickerCore
-        maxDate={new Date(2037, 11, 31)}
-        minDate={new Date(2017, 0, 1)}
-        value={new Date(2027, 0, 1)}
-      />,
+      <Provider theme={{ token: { motion: false } }}>
+        <DatePicker
+          maxDate={new Date(2037, 11, 31)}
+          minDate={new Date(2017, 0, 1)}
+          value={new Date(2027, 0, 1)}
+          visible
+        />
+      </Provider>,
     )
     expectDefaultGeometry()
     await cleanup()
@@ -386,11 +389,14 @@ describe('Picker', () => {
     await cleanup()
 
     await render(
-      <DateTimePickerCore
-        maxDate={new Date(2037, 11, 31, 23, 59, 59)}
-        minDate={new Date(2017, 0, 1)}
-        value={new Date(2027, 0, 1, 8, 30, 0)}
-      />,
+      <Provider theme={{ token: { motion: false } }}>
+        <DateTimePicker
+          maxDate={new Date(2037, 11, 31, 23, 59, 59)}
+          minDate={new Date(2017, 0, 1)}
+          value={new Date(2027, 0, 1, 8, 30, 0)}
+          visible
+        />
+      </Provider>,
     )
     expectDefaultGeometry()
   })

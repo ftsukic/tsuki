@@ -3,11 +3,12 @@ import { View } from 'react-native'
 import { Popup } from '../popup'
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
-import { PickerToolbar } from './PickerToolbar'
-import { PickerView } from './PickerView'
-import { getPickerStyles } from './styles'
+import { PickerToolbar } from './picker-toolbar'
+import { PickerView } from './picker-view'
+import { getPickerStyles } from './style'
 import { getPickerToken } from './token'
-import { resolvePickerState } from './usePicker'
+import { resolvePickerState } from './use-picker'
+import type { ResolvedPickerState } from './use-picker'
 import type { PickerOption, PickerProps, PickerValue } from './types'
 
 export const Picker = forwardRef<View, PickerProps>(function Picker(
@@ -17,6 +18,7 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
     defaultValue,
     title,
     showToolbar = true,
+    showToolbarDivider = false,
     confirmButtonText = '确定',
     cancelButtonText = '取消',
     visible,
@@ -37,8 +39,10 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
   ref,
 ) {
   const token = useComponentToken('Picker', getPickerToken)
+  const previousResolvedStateRef = useRef<ResolvedPickerState | undefined>(undefined)
   const initialValues = useMemo(
-    () => resolvePickerState(columns, value ?? defaultValue).values,
+    () =>
+      resolvePickerState(columns, value ?? defaultValue, previousResolvedStateRef.current).values,
     [columns, defaultValue, value],
   )
   const [committedValues, setCommittedValues] = useState<readonly PickerValue[]>(initialValues)
@@ -51,7 +55,11 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
   committedValuesRef.current = committedValues
 
   useEffect(() => {
-    const nextValues = resolvePickerState(columns, value ?? committedValuesRef.current).values
+    const nextValues = resolvePickerState(
+      columns,
+      value ?? committedValuesRef.current,
+      previousResolvedStateRef.current,
+    ).values
     committedValuesRef.current = nextValues
     setCommittedValues(nextValues)
     if (value !== undefined || visible !== true) setDraftValues(nextValues)
@@ -67,7 +75,9 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
     previousVisibleRef.current = visible
     if (isVisible && wasVisible !== true) {
       const nextValues =
-        value === undefined ? committedValuesRef.current : resolvePickerState(columns, value).values
+        value === undefined
+          ? committedValuesRef.current
+          : resolvePickerState(columns, value, previousResolvedStateRef.current).values
       setDraftValues(nextValues)
     }
   }, [columns, isPopup, isVisible, value, visible])
@@ -77,20 +87,16 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
     : token.picker_item_height
   const visibleItemCountValue = Number.isFinite(visibleItemCount)
     ? Math.max(1, Math.floor(visibleItemCount as number))
-    : token.picker_visible_item_count
+    : Math.max(1, Math.floor(token.picker_visible_item_count))
   const resolved = useMemo(
-    () =>
-      getPickerStyles(
-        token,
-        itemHeightValue,
-        visibleItemCountValue % 2 === 0 ? visibleItemCountValue + 1 : visibleItemCountValue,
-      ),
+    () => getPickerStyles(token, itemHeightValue, visibleItemCountValue),
     [itemHeightValue, token, visibleItemCountValue],
   )
   const resolvedState = useMemo(
-    () => resolvePickerState(columns, draftValues),
+    () => resolvePickerState(columns, draftValues, previousResolvedStateRef.current),
     [columns, draftValues],
   )
+  previousResolvedStateRef.current = resolvedState
   const pickerProps: PickerProps = {
     ...viewProps,
     columns,
@@ -98,6 +104,7 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
     defaultValue,
     title,
     showToolbar,
+    showToolbarDivider,
     confirmButtonText,
     cancelButtonText,
     visible,
@@ -129,7 +136,7 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
   }
 
   const handleConfirm = () => {
-    const result = resolvePickerState(columns, draftValues)
+    const result = resolvePickerState(columns, draftValues, previousResolvedStateRef.current)
     if (value === undefined) {
       committedValuesRef.current = result.values
       setCommittedValues(result.values)
@@ -158,7 +165,9 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
           confirmButtonText={confirmButtonText}
           onCancel={handleCancel}
           onConfirm={handleConfirm}
+          showDivider={showToolbarDivider}
           style={semantic?.toolbar}
+          titleStyle={semantic?.toolbarTitle}
           testID="picker-toolbar"
           title={title}
         />
@@ -178,7 +187,7 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
           root: undefined,
         }}
         value={draftValues}
-        visibleItemCount={visibleItemCount}
+        visibleItemCount={visibleItemCountValue}
       />
     </View>
   )

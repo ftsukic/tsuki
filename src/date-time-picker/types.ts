@@ -1,18 +1,14 @@
 import type { ReactNode } from 'react'
 import type { PickerProps } from '../picker/types'
-import type { TemporalColumnType } from '../temporal-picker/types'
+import type { DateTimeColumnType } from '../picker/date-time/types'
 
-export type DateTimePickerColumnType = TemporalColumnType
+export type DateTimePickerColumnType = DateTimeColumnType
 
 export type DateTimePickerFormatter = (type: DateTimePickerColumnType, value: number) => string
 
 export interface DateTimePickerRef {
   open(): void
   close(): void
-  confirm(): void
-}
-
-export interface DateTimePickerCoreRef {
   confirm(): void
 }
 
@@ -40,17 +36,4 @@ export interface DateTimePickerProps extends Omit<
   onConfirm?(value: Date): void
   onCancel?(): void
   onVisibleChange?(visible: boolean): void
-}
-
-export interface DateTimePickerCoreProps extends Omit<
-  PickerProps,
-  'columns' | 'value' | 'defaultValue' | 'onChange' | 'onConfirm' | 'onCancel'
-> {
-  value: Date
-  minDate: Date
-  maxDate: Date
-  formatter?: DateTimePickerFormatter
-  onChange?(value: Date): void
-  onConfirm?(value: Date): void
-  onCancel?(): void
 }

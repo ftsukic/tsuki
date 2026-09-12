@@ -4,7 +4,7 @@ import Boundary from './examples/boundary'
 import Controlled from './examples/controlled'
 import LeapYear from './examples/leap-year'
 import Range from './examples/range'
-import TemporalRegression from './examples/temporal-regression'
+import PickerFamilyRegression from './examples/picker-family-regression'
 
 /** @title DateTimePicker overview @description DateTimePicker 汇总基础、受控、范围、边界和闰年示例。 */
 export default function DateTimePickerOverview() {
@@ -28,10 +28,10 @@ export default function DateTimePickerOverview() {
           title: '闰年',
         },
         {
-          Component: TemporalRegression,
+          Component: PickerFamilyRegression,
           description: '同屏手测 DatePicker、TimePicker、DateTimePicker 的 dependent column 联动。',
-          id: 'temporal-regression',
-          title: 'Temporal 联动回归',
+          id: 'picker-family-regression',
+          title: 'Picker family 联动回归',
         },
       ]}
     />

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type {
   PickerChangeInfo,
   PickerColumnData,
@@ -12,6 +12,8 @@ import type {
 export interface ResolvedPickerColumn {
   items: PickerColumnData
   index: number
+  requestedIndex: number
+  reconciled: boolean
 }
 
 export interface ResolvedPickerState {
@@ -32,9 +34,54 @@ function getColumnSources(columns: PickerColumns): readonly PickerColumnSource[]
   return isColumnSource(first) ? (columns as readonly PickerColumnSource[]) : null
 }
 
-function getIndex(items: PickerColumnData, requestedValue: PickerValue | undefined) {
+export function findNearestEnabledIndex(items: PickerColumnData, index: number): number {
+  if (items.length === 0) return -1
+  const normalized = Math.min(
+    items.length - 1,
+    Math.max(0, Math.trunc(Number.isFinite(index) ? index : 0)),
+  )
+  if (!items[normalized]?.disabled) return normalized
+  for (let distance = 1; distance < items.length; distance += 1) {
+    const lower = normalized - distance
+    if (lower >= 0 && !items[lower].disabled) return lower
+    const upper = normalized + distance
+    if (upper < items.length && !items[upper].disabled) return upper
+  }
+  return -1
+}
+
+function getIndex(
+  items: PickerColumnData,
+  requestedValue: PickerValue | undefined,
+  previousIndex?: number,
+  previousValue?: PickerValue,
+) {
   const requestedIndex = items.findIndex((item) => Object.is(item.value, requestedValue))
-  return requestedIndex >= 0 ? requestedIndex : items.length > 0 ? 0 : -1
+  const previousValueInvalidated =
+    previousValue !== undefined && !items.some((item) => Object.is(item.value, previousValue))
+  const indexRebased =
+    previousValue !== undefined &&
+    previousIndex !== undefined &&
+    requestedIndex >= 0 &&
+    Object.is(previousValue, items[requestedIndex].value) &&
+    previousIndex !== requestedIndex
+  if (requestedIndex >= 0 && !items[requestedIndex].disabled) {
+    return {
+      index: requestedIndex,
+      requestedIndex,
+      reconciled: previousValueInvalidated || indexRebased,
+    }
+  }
+  if (items.length === 0) return { index: -1, requestedIndex, reconciled: true }
+
+  const resolvedFallbackIndex = Number.isFinite(previousIndex)
+    ? Math.trunc(previousIndex as number)
+    : 0
+  return {
+    index: findNearestEnabledIndex(items, resolvedFallbackIndex),
+    requestedIndex,
+    reconciled: true,
+  }
 }
 
 function makeContext(
@@ -54,6 +101,7 @@ function makeContext(
 function resolveIndependentColumns(
   sources: readonly PickerColumnSource[],
   requestedValues: readonly PickerValue[],
+  previousState?: Pick<ResolvedPickerState, 'indexes' | 'values'>,
 ): ResolvedPickerState {
   const columns: ResolvedPickerColumn[] = []
   const indexes: number[] = []
@@ -63,10 +111,16 @@ function resolveIndependentColumns(
   sources.forEach((source, columnIndex) => {
     const context = makeContext(values, indexes, options)
     const items: PickerColumnData = typeof source === 'function' ? (source(context) ?? []) : source
-    const index = getIndex(items, requestedValues[columnIndex])
+    const resolvedIndex = getIndex(
+      items,
+      requestedValues[columnIndex],
+      previousState?.indexes?.[columnIndex],
+      previousState?.values?.[columnIndex],
+    )
+    const { index } = resolvedIndex
     const option: PickerOption | undefined = index >= 0 ? items[index] : undefined
 
-    columns.push({ items, index })
+    columns.push({ items, ...resolvedIndex })
     indexes.push(index)
     if (option) {
       values.push(option.value)
@@ -80,6 +134,7 @@ function resolveIndependentColumns(
 function resolveCascade(
   root: PickerColumnData,
   requestedValues: readonly PickerValue[],
+  previousState?: Pick<ResolvedPickerState, 'indexes' | 'values'>,
 ): ResolvedPickerState {
   const columns: ResolvedPickerColumn[] = []
   const indexes: number[] = []
@@ -89,9 +144,15 @@ function resolveCascade(
   let depth = 0
 
   while (items) {
-    const index = getIndex(items, requestedValues[depth])
+    const resolvedIndex = getIndex(
+      items,
+      requestedValues[depth],
+      previousState?.indexes?.[depth],
+      previousState?.values?.[depth],
+    )
+    const { index } = resolvedIndex
     const option: PickerOption | undefined = index >= 0 ? items[index] : undefined
-    columns.push({ items, index })
+    columns.push({ items, ...resolvedIndex })
     indexes.push(index)
 
     if (!option) break
@@ -108,11 +169,12 @@ function resolveCascade(
 export function resolvePickerState(
   columns: PickerColumns,
   requestedValues: readonly PickerValue[] = [],
+  previousState?: Pick<ResolvedPickerState, 'indexes' | 'values'>,
 ): ResolvedPickerState {
   const sources = getColumnSources(columns)
   return sources
-    ? resolveIndependentColumns(sources, requestedValues)
-    : resolveCascade(columns as PickerColumnData, requestedValues)
+    ? resolveIndependentColumns(sources, requestedValues, previousState)
+    : resolveCascade(columns as PickerColumnData, requestedValues, previousState)
 }
 
 export interface UsePickerResult extends ResolvedPickerState {
@@ -141,10 +203,14 @@ export function usePicker({
     () => resolvePickerState(columns, defaultValue).values,
   )
   const requestedValues = isControlled ? value : internalValues
+  const previousResolvedRef = useRef<ResolvedPickerState | undefined>(undefined)
   const resolved = useMemo(
-    () => resolvePickerState(columns, requestedValues),
+    () => resolvePickerState(columns, requestedValues, previousResolvedRef.current),
     [columns, requestedValues],
   )
+  useLayoutEffect(() => {
+    previousResolvedRef.current = resolved
+  }, [resolved])
   const valuesRef = useRef(resolved.values)
   valuesRef.current = resolved.values
   const onChangeRef = useRef(onChange)
@@ -159,16 +225,16 @@ export function usePicker({
     (columnIndex: number, index: number) => {
       const selectedColumn = resolved.columns[columnIndex]
       const option = selectedColumn?.items[index]
-      if (!selectedColumn || !option) return
+      if (!selectedColumn || !option || option.disabled) return
 
       const nextRequestedValues = [...valuesRef.current]
       nextRequestedValues[columnIndex] = option.value
-      const next = resolvePickerState(columns, nextRequestedValues)
+      const next = resolvePickerState(columns, nextRequestedValues, resolved)
       if (!isControlled) setInternalValues(next.values)
       valuesRef.current = next.values
       onChangeRef.current?.(next.values, next.options, { columnIndex, index, option })
     },
-    [columns, isControlled, resolved.columns],
+    [columns, isControlled, resolved],
   )
 
   return { ...resolved, select }

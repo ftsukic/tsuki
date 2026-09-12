@@ -7,6 +7,7 @@ export type PickerValue = string | number
 export interface PickerOption {
   text: string
   value: PickerValue
+  disabled?: boolean
   children?: readonly PickerOption[]
 }
 
@@ -73,6 +74,7 @@ export interface PickerSemanticStyles extends PickerViewSemanticStyles {
   toolbar?: StyleProp<ViewStyle>
   toolbarButton?: StyleProp<ViewStyle>
   toolbarButtonLabel?: StyleProp<TextStyle>
+  toolbarTitle?: StyleProp<TextStyle>
 }
 
 export type PickerStyles = StyleResolver<PickerProps, PickerStyleState, PickerSemanticStyles>
@@ -80,6 +82,7 @@ export type PickerStyles = StyleResolver<PickerProps, PickerStyleState, PickerSe
 export interface PickerProps extends Omit<PickerViewProps, 'style' | 'styles' | 'onChange'> {
   title?: ReactNode
   showToolbar?: boolean
+  showToolbarDivider?: boolean
   confirmButtonText?: ReactNode
   cancelButtonText?: ReactNode
   visible?: boolean

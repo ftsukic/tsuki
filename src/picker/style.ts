@@ -7,6 +7,7 @@ export interface PickerResolvedStyles {
   toolbar: ViewStyle
   toolbarButton: ViewStyle
   toolbarButtonLabel: TextStyle
+  toolbarTitle: TextStyle
   view: ViewStyle
   columns: ViewStyle
   column: ViewStyle
@@ -20,6 +21,7 @@ export function getPickerStyles(
   token: PickerToken,
   itemHeight: number,
   visibleItemCount: number,
+  showToolbarDivider = false,
 ): PickerResolvedStyles {
   const viewHeight = itemHeight * visibleItemCount
   const indicatorTop = ((visibleItemCount - 1) * itemHeight) / 2
@@ -35,12 +37,17 @@ export function getPickerStyles(
       height: token.picker_toolbar_height,
       flexDirection: 'row',
       alignItems: 'center',
-      borderBottomColor: token.picker_indicator_color,
-      borderBottomWidth: token.picker_border_width,
+      ...(showToolbarDivider
+        ? {
+            borderBottomColor: token.picker_indicator_color,
+            borderBottomWidth: token.picker_border_width,
+          }
+        : null),
     },
     toolbarButton: {
       minWidth: token.picker_toolbar_height,
       height: token.picker_toolbar_height,
+      alignSelf: 'stretch',
       alignItems: 'center',
       justifyContent: 'center',
       paddingHorizontal: token.picker_toolbar_padding_horizontal,
@@ -50,6 +57,14 @@ export function getPickerStyles(
       fontFamily: token.picker_font_family,
       fontSize: token.picker_toolbar_button_font_size,
       lineHeight: token.picker_toolbar_button_line_height,
+    },
+    toolbarTitle: {
+      color: token.picker_active_text_color,
+      fontFamily: token.picker_font_family,
+      fontSize: token.picker_item_font_size,
+      fontWeight: '600',
+      lineHeight: token.picker_toolbar_button_line_height,
+      textAlign: 'center',
     },
     view: {
       height: viewHeight,
@@ -63,6 +78,8 @@ export function getPickerStyles(
     column: {
       flex: 1,
       minWidth: 0,
+      height: viewHeight,
+      overflow: 'hidden',
     },
     item: {
       height: itemHeight,
@@ -83,6 +100,7 @@ export function getPickerStyles(
       right: 0,
       bottom: 0,
       left: 0,
+      zIndex: 1,
     },
     indicator: {
       position: 'absolute',

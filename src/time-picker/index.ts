@@ -1,4 +1,4 @@
-import { TimePicker as TimePickerComponent } from './TimePicker'
+import { TimePicker as TimePickerComponent } from './time-picker'
 import { closeTimePicker, showTimePicker } from './imperative'
 
 export const TimePicker = Object.assign(TimePickerComponent, { open: showTimePicker })
