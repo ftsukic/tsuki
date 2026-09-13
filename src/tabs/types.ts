@@ -30,6 +30,8 @@ export interface TabsProps extends Omit<ViewProps, 'children' | 'style'> {
   animated?: boolean
   swipeable?: boolean
   scrollable?: boolean
+  shrink?: boolean
+  lazyRender?: boolean
   style?: StyleProp<ViewStyle>
   styles?: TabsStyles
 }
@@ -42,6 +44,7 @@ export interface TabProps extends Omit<
 > {
   name?: TabsValue
   title: ReactNode
+  titleStyle?: StyleProp<TextStyle>
   disabled?: boolean
   children?: ReactNode
   style?: StyleProp<ViewStyle>

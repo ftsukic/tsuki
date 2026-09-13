@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Picker } from '@ftsukic/tsuki'
+import { Cell, Picker, Popup } from '@ftsukic/tsuki'
 import { Text, View } from 'react-native'
 
 const options = [
@@ -23,26 +23,44 @@ const options = [
 
 /**
  * @title 级联 Picker
- * @description 父级变化后，子级列会自动刷新并校正到可用的第一项。
+ * @description Cell 打开 Popup；父级变化后，子级列会自动刷新并校正到可用的第一项。
  */
 export default function PickerLinkedExample() {
   const [visible, setVisible] = useState(false)
-  const [value, setValue] = useState<readonly (string | number)[]>(['zhejiang', 'hangzhou'])
+  const [committed, setCommitted] = useState<readonly (string | number)[]>(['zhejiang', 'hangzhou'])
+  const [draft, setDraft] = useState(committed)
+
+  const handleOpen = () => {
+    setDraft(committed)
+    setVisible(true)
+  }
+  const handleCancel = () => setVisible(false)
 
   return (
     <View style={{ gap: 12 }}>
-      <Button onPress={() => setVisible(true)}>选择地区</Button>
-      <Text>{value.join(' / ')}</Text>
-      <Picker
-        columns={options}
-        onCancel={() => setVisible(false)}
-        onConfirm={(nextValue) => {
-          setValue(nextValue)
-          setVisible(false)
-        }}
-        value={value}
+      <Cell title="选择地区" value={committed.join(' / ')} isLink onPress={handleOpen} />
+      <Text>{committed.join(' / ')}</Text>
+      <Popup
         visible={visible}
-      />
+        position="bottom"
+        round
+        closeOnPressOverlay
+        safeAreaInsetBottom
+        destroyOnClosed
+        onRequestClose={handleCancel}
+      >
+        <Picker
+          columns={options}
+          title="选择地区"
+          value={draft}
+          onChange={setDraft}
+          onConfirm={(nextValue) => {
+            setCommitted(nextValue)
+            setVisible(false)
+          }}
+          onCancel={handleCancel}
+        />
+      </Popup>
     </View>
   )
 }

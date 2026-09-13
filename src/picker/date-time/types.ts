@@ -1,4 +1,4 @@
-import type { PickerOption, PickerValue } from '../types'
+import type { PickerOption } from '../types'
 
 export type DateTimeColumnType = 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'
 
@@ -11,22 +11,18 @@ export interface DateTimeFields {
   second: number
 }
 
-export interface DateTimeLimit {
-  min?: number
-  max?: number
-}
-
-export type DateTimeLimits = Partial<Record<DateTimeColumnType, DateTimeLimit>>
-
 export type DateTimeColumnFormatter = (
   type: DateTimeColumnType,
   option: PickerOption,
-  fields: DateTimeFields,
-) => PickerOption
+) => PickerOption | string
 
 export type DateTimeColumnFilter = (
   type: DateTimeColumnType,
   options: readonly PickerOption[],
-  fields: DateTimeFields,
-  selectedValues: readonly PickerValue[],
+  values: readonly string[],
 ) => readonly PickerOption[]
+
+export interface DateTimeTimeRange {
+  min?: string
+  max?: string
+}

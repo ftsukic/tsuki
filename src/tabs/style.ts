@@ -5,6 +5,7 @@ import type { TabsType } from './types'
 export interface TabsResolvedStyles {
   root: ViewStyle
   nav: ViewStyle
+  navContent: ViewStyle
   tab: ViewStyle
   label: TextStyle
   indicator: ViewStyle
@@ -25,13 +26,14 @@ function getTabColor(
 ): ColorValue {
   if (disabled) return token.disabledColor
   if (type === 'card' && active) return token.cardActiveTextColor
-  return active ? token.activeColor : token.inactiveColor
+  return active ? token.activeTextColor : token.inactiveTextColor
 }
 
 export function getTabsStyles(
   token: TabsToken,
   type: TabsType,
   scrollable: boolean,
+  shrink = false,
 ): TabsResolvedStyles {
   const isCard = type === 'card'
 
@@ -45,7 +47,7 @@ export function getTabsStyles(
       borderColor: isCard ? token.cardBorderColor : token.borderColor,
       borderRadius: isCard ? token.cardRadius : 0,
       borderWidth: isCard ? token.borderWidth : 0,
-      borderBottomWidth: token.borderWidth,
+      borderBottomWidth: isCard ? token.borderWidth : 0,
       flexDirection: 'row',
       height: token.height,
       overflow: 'hidden',
@@ -53,21 +55,26 @@ export function getTabsStyles(
     tab: {
       alignItems: 'center',
       backgroundColor: isCard ? token.cardBackgroundColor : 'transparent',
-      flex: scrollable ? undefined : 1,
+      flex: scrollable || shrink ? undefined : 1,
       height: token.height,
       justifyContent: 'center',
-      paddingHorizontal: token.paddingHorizontal,
+      paddingHorizontal: shrink ? token.paddingXS : token.paddingHorizontal,
     },
     label: {
-      color: token.inactiveColor,
+      color: token.inactiveTextColor,
       flexShrink: 1,
       fontFamily: token.fontFamily,
       fontSize: token.fontSize,
-      lineHeight: token.height,
+      lineHeight: token.lineHeight,
       textAlign: 'center',
     },
+    navContent: {
+      flexGrow: 1,
+      paddingHorizontal: shrink ? token.paddingXS : 0,
+      position: 'relative',
+    },
     indicator: {
-      backgroundColor: token.activeColor,
+      backgroundColor: token.indicatorColor,
       bottom: 0,
       height: token.indicatorHeight,
       left: 0,
@@ -108,8 +115,9 @@ export function getTabStyles(
       flexShrink: 1,
       fontFamily: token.fontFamily,
       fontSize: token.fontSize,
-      lineHeight: token.height,
+      lineHeight: token.lineHeight,
       textAlign: 'center',
+      fontWeight: type === 'line' && state.active ? '600' : '400',
     },
   }
 }

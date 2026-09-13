@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native'
 import type { TextStyle, ViewStyle } from 'react-native'
 import type { PickerToken } from '../theme'
 
@@ -8,6 +9,7 @@ export interface PickerResolvedStyles {
   toolbarButton: ViewStyle
   toolbarButtonLabel: TextStyle
   toolbarTitle: TextStyle
+  toolbarTitleContainer: ViewStyle
   view: ViewStyle
   columns: ViewStyle
   column: ViewStyle
@@ -15,6 +17,8 @@ export interface PickerResolvedStyles {
   itemLabel: TextStyle
   mask: ViewStyle
   indicator: ViewStyle
+  stateBackdrop: ViewStyle
+  stateItem: ViewStyle
 }
 
 export function getPickerStyles(
@@ -37,6 +41,7 @@ export function getPickerStyles(
       height: token.picker_toolbar_height,
       flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'space-between',
       ...(showToolbarDivider
         ? {
             borderBottomColor: token.picker_indicator_color,
@@ -66,7 +71,14 @@ export function getPickerStyles(
       lineHeight: token.picker_toolbar_button_line_height,
       textAlign: 'center',
     },
+    toolbarTitleContainer: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+    },
     view: {
+      position: 'relative',
       height: viewHeight,
       backgroundColor: token.picker_background_color,
       overflow: 'hidden',
@@ -105,14 +117,33 @@ export function getPickerStyles(
     indicator: {
       position: 'absolute',
       top: indicatorTop,
-      right: 0,
-      left: 0,
+      right: token.picker_indicator_horizontal_inset,
+      left: token.picker_indicator_horizontal_inset,
       height: itemHeight,
       zIndex: 2,
       borderTopColor: token.picker_indicator_color,
-      borderTopWidth: token.picker_border_width,
+      borderTopWidth: StyleSheet.hairlineWidth,
       borderBottomColor: token.picker_indicator_color,
-      borderBottomWidth: token.picker_border_width,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+    },
+    stateBackdrop: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      left: 0,
+      height: viewHeight,
+      backgroundColor: token.picker_background_color,
+      zIndex: 3,
+    },
+    stateItem: {
+      position: 'absolute',
+      top: indicatorTop,
+      right: 0,
+      left: 0,
+      height: itemHeight,
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 4,
     },
   }
 }

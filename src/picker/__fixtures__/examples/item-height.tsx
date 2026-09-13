@@ -1,4 +1,4 @@
-import { PickerView } from '@ftsukic/tsuki'
+import { Picker } from '@ftsukic/tsuki'
 import { View } from 'react-native'
 
 const options = [
@@ -10,12 +10,18 @@ const options = [
 
 /**
  * @title 自定义 itemHeight
- * @description 使用较大的行高和三行视口展示 PickerView。
+ * @description 使用较大的行高和三行视口展示 Picker。
  */
 export default function PickerItemHeightExample() {
   return (
     <View>
-      <PickerView columns={options} defaultValue={[2]} itemHeight={52} visibleItemCount={3} />
+      <Picker
+        columns={options}
+        defaultValue={[2]}
+        itemHeight={52}
+        showToolbar={false}
+        visibleItemCount={3}
+      />
     </View>
   )
 }

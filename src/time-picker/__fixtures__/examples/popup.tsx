@@ -1,31 +1,39 @@
 import { useState } from 'react'
-import { Button, Cell, TimePicker } from '@ftsukic/tsuki'
-import { Text, View } from 'react-native'
+import { Cell, Popup, TimePicker } from '@ftsukic/tsuki'
 import type { TimePickerValue } from '@ftsukic/tsuki'
 
-/**
- * @title Popup 组合
- * @description Cell 和 Button 都可以打开 TimePicker 的现有底部 Popup，确认后展示结果。
- */
+/** @title Popup 集成 @description 通过 Cell 打开受控底部 TimePicker，确认后提交值。 */
 export default function TimePickerPopupExample() {
+  const [value, setValue] = useState<TimePickerValue>(['12', '30'])
+  const [draft, setDraft] = useState(value)
   const [visible, setVisible] = useState(false)
-  const [value, setValue] = useState<TimePickerValue>(['09', '30'])
-
+  const handleOpen = () => {
+    setDraft(value)
+    setVisible(true)
+  }
+  const handleCancel = () => setVisible(false)
   return (
-    <View style={{ gap: 8 }}>
-      <Cell isLink onPress={() => setVisible(true)} title="预约时间" value={value.join(':')} />
-      <Button onPress={() => setVisible(true)}>选择时间</Button>
-      <Text>已确认：{value.join(':')}</Text>
-      <TimePicker
-        onCancel={() => setVisible(false)}
-        onConfirm={(nextValue) => {
-          setValue(nextValue)
-          setVisible(false)
-        }}
-        title="选择时间"
-        value={value}
+    <>
+      <Cell title="时间" value={value.join(':')} isLink onPress={handleOpen} />
+      <Popup
         visible={visible}
-      />
-    </View>
+        position="bottom"
+        round
+        closeOnPressOverlay
+        safeAreaInsetBottom
+        destroyOnClosed
+        onRequestClose={handleCancel}
+      >
+        <TimePicker
+          value={draft}
+          onChange={setDraft}
+          onCancel={handleCancel}
+          onConfirm={(nextValue) => {
+            setValue(nextValue)
+            setVisible(false)
+          }}
+        />
+      </Popup>
+    </>
   )
 }

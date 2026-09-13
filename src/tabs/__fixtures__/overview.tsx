@@ -2,8 +2,10 @@ import { FixtureOverview } from '../../fixture-overview'
 import CardBasicExample from './examples/card-basic'
 import ControlledTabsExample from './examples/controlled'
 import DisabledTabsExample from './examples/disabled'
+import LazyRenderTabsExample from './examples/lazy-render'
 import LineBasicExample from './examples/line-basic'
 import ScrollableTabsExample from './examples/scrollable'
+import ShrinkTabsExample from './examples/shrink'
 import SwipeableTabsExample from './examples/swipeable'
 import TabsThemeExample from './examples/theme'
 
@@ -40,6 +42,12 @@ export default function TabsOverview() {
           title: 'Scrollable',
         },
         {
+          Component: ShrinkTabsExample,
+          description: '内容宽度导航、titleStyle 和 shrink 布局。',
+          id: 'shrink',
+          title: 'Shrink',
+        },
+        {
           Component: ControlledTabsExample,
           description: '由父组件管理 value 的受控 Tabs。',
           id: 'controlled',
@@ -50,6 +58,12 @@ export default function TabsOverview() {
           description: '启用 swipeable 后通过横向手势切换有内容的 Tab。',
           id: 'swipeable',
           title: 'Swipeable',
+        },
+        {
+          Component: LazyRenderTabsExample,
+          description: '首次激活后保留 pane 挂载和内部状态。',
+          id: 'lazy-render',
+          title: 'Lazy render',
         },
         {
           Component: TabsThemeExample,

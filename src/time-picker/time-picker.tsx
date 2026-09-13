@@ -1,88 +1,180 @@
-import { forwardRef, useMemo } from 'react'
-import type { View } from 'react-native'
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react'
 import { Picker } from '../picker'
-import type { PickerOption, PickerValue } from '../picker/types'
-import { padTimeValue, createTimePickerColumns } from './columns'
-import type { TimePickerOption, TimePickerProps, TimePickerValue } from './types'
+import type { PickerOption, PickerRef, PickerSelection, PickerValue } from '../picker/types'
+import { createDateTimeColumns, normalizeDateTimePickerValues } from '../picker/date-time/columns'
+import type { DateTimeColumnsConfig } from '../picker/date-time/columns'
+import { normalizeColumnTypes, timeColumnTypes } from '../picker/date-time/normalize'
+import {
+  DEFAULT_DATE_TIME_FIELDS,
+  pickerValuesToFields,
+  pickerValuesToSelectedValues,
+  selectedValuesToPickerValues,
+} from '../picker/date-time/value'
+import type {
+  TimePickerColumnType,
+  TimePickerProps,
+  TimePickerRef,
+  TimePickerSelection,
+} from './types'
 
-const DEFAULT_COLUMNS_TYPE = ['hour', 'minute'] as const
+const DEFAULT_COLUMNS = ['hour', 'minute'] as const
+const EMPTY_SELECTION: TimePickerSelection = { indexes: [], options: [], values: [] }
 
-function toTimeOption(option: PickerOption): TimePickerOption {
-  return { ...option, value: padTimeValue(Number(option.value)) }
-}
-
-function toPickerValue(value: string): PickerValue {
-  const numericValue = Number(value)
-  return Number.isFinite(numericValue) ? Math.trunc(numericValue) : value
-}
-
-function toPickerValues(values: TimePickerValue | undefined): readonly PickerValue[] | undefined {
-  return values?.map(toPickerValue)
-}
-
-function toTimeValue(value: PickerValue): string {
-  return padTimeValue(Number(value))
-}
-
-function toTimeValues(values: readonly PickerValue[]): TimePickerValue {
-  return values.map(toTimeValue)
-}
-
-export const TimePicker = forwardRef<View, TimePickerProps>(function TimePicker(
+export const TimePicker = forwardRef<TimePickerRef, TimePickerProps>(function TimePicker(
   {
-    columnsType,
-    minHour = 0,
-    maxHour = 23,
-    minMinute = 0,
-    maxMinute = 59,
-    minSecond = 0,
-    maxSecond = 59,
-    filter,
-    formatter,
     value,
     defaultValue,
+    columnsType = DEFAULT_COLUMNS,
+    minHour,
+    maxHour,
+    minMinute,
+    maxMinute,
+    minSecond,
+    maxSecond,
+    minTime,
+    maxTime,
+    hourStep,
+    minuteStep,
+    secondStep,
+    formatter,
+    filter,
+    cancelText = '取消',
+    confirmText = '确定',
     onChange,
     onConfirm,
-    ...pickerProps
+    onCancel,
+    ...props
   },
   ref,
 ) {
-  const resolvedColumnsType = columnsType ?? DEFAULT_COLUMNS_TYPE
-  const columns = useMemo(
+  const resolvedColumns = useMemo(
+    () => normalizeColumnTypes(columnsType, timeColumnTypes(), 'TimePicker'),
+    [columnsType],
+  )
+  const baseFields = useMemo(
     () =>
-      createTimePickerColumns({
-        columnsType: resolvedColumnsType,
-        filter,
-        formatter,
-        maxHour,
-        maxMinute,
-        maxSecond,
-        minHour,
-        minMinute,
-        minSecond,
-      }),
-    [
-      filter,
-      formatter,
+      pickerValuesToFields(
+        selectedValuesToPickerValues(value ?? defaultValue ?? [], resolvedColumns),
+        resolvedColumns,
+        DEFAULT_DATE_TIME_FIELDS,
+      ),
+    [defaultValue, resolvedColumns, value],
+  )
+  const columnConfig = useMemo<DateTimeColumnsConfig>(
+    () => ({
+      baseFields,
+      columnsType: resolvedColumns,
+      filter: filter
+        ? (type, options, values) => filter(type as TimePickerColumnType, options, values)
+        : undefined,
+      formatter: formatter
+        ? (type, option) => formatter(type as TimePickerColumnType, option)
+        : undefined,
+      hourStep,
       maxHour,
       maxMinute,
       maxSecond,
+      maxTime,
       minHour,
       minMinute,
       minSecond,
-      resolvedColumnsType,
+      minTime,
+      minuteStep,
+      secondStep,
+    }),
+    [
+      baseFields,
+      filter,
+      formatter,
+      hourStep,
+      maxHour,
+      maxMinute,
+      maxSecond,
+      maxTime,
+      minHour,
+      minMinute,
+      minSecond,
+      minTime,
+      minuteStep,
+      resolvedColumns,
+      secondStep,
     ],
+  )
+  const columns = useMemo(() => createDateTimeColumns(columnConfig), [columnConfig])
+  const pickerRef = useRef<PickerRef>(null)
+  const pickerValue = useMemo(
+    () =>
+      value === undefined
+        ? undefined
+        : normalizeDateTimePickerValues(
+            selectedValuesToPickerValues(value, resolvedColumns),
+            columnConfig,
+          ),
+    [columnConfig, resolvedColumns, value],
+  )
+  const pickerDefaultValue = useMemo(
+    () =>
+      defaultValue === undefined
+        ? undefined
+        : normalizeDateTimePickerValues(
+            selectedValuesToPickerValues(defaultValue, resolvedColumns),
+            columnConfig,
+          ),
+    [columnConfig, defaultValue, resolvedColumns],
+  )
+  const handleChange = useCallback(
+    (nextValues: readonly PickerValue[], options: readonly PickerOption[]) => {
+      onChange?.(pickerValuesToSelectedValues(nextValues, resolvedColumns, baseFields), options)
+    },
+    [baseFields, onChange, resolvedColumns],
+  )
+  const handleConfirm = useCallback(
+    (nextValues: readonly PickerValue[], options: readonly PickerOption[]) => {
+      onConfirm?.(pickerValuesToSelectedValues(nextValues, resolvedColumns, baseFields), options)
+    },
+    [baseFields, onConfirm, resolvedColumns],
+  )
+  const getSelectedValues = useCallback(
+    () =>
+      pickerValuesToSelectedValues(
+        pickerRef.current?.getSelectedValues() ?? [],
+        resolvedColumns,
+        baseFields,
+      ),
+    [baseFields, resolvedColumns],
+  )
+  const confirm = useCallback((): TimePickerSelection => {
+    const selection: PickerSelection | undefined = pickerRef.current?.confirm()
+    if (!selection) return EMPTY_SELECTION
+    return {
+      indexes: selection.indexes,
+      options: selection.options,
+      values: pickerValuesToSelectedValues(selection.values, resolvedColumns, baseFields),
+    }
+  }, [baseFields, resolvedColumns])
+  useImperativeHandle(
+    ref,
+    () => ({
+      cancel: () => pickerRef.current?.cancel(),
+      confirm,
+      getSelectedOptions: () => pickerRef.current?.getSelectedOptions() ?? [],
+      getSelectedValues,
+    }),
+    [confirm, getSelectedValues],
   )
 
   return (
     <Picker
-      {...pickerProps}
+      {...props}
       columns={columns}
-      defaultValue={toPickerValues(defaultValue)}
-      onChange={(values, options) => onChange?.(toTimeValues(values), options.map(toTimeOption))}
-      onConfirm={(values, options) => onConfirm?.(toTimeValues(values), options.map(toTimeOption))}
-      ref={ref}
-      value={toPickerValues(value)}
+      defaultValue={pickerDefaultValue}
+      onCancel={onCancel}
+      onChange={handleChange}
+      onConfirm={handleConfirm}
+      ref={pickerRef}
+      value={pickerValue}
+      cancelButtonText={cancelText}
+      confirmButtonText={confirmText}
     />
   )
 })

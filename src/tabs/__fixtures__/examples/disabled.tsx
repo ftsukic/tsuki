@@ -3,12 +3,12 @@ import { View } from 'react-native'
 
 /**
  * @title Disabled tabs
- * @description Keep disabled tabs visible while preventing selection changes.
+ * @description Keep disabled tabs visible while preventing click and swipe selection changes.
  */
 export default function DisabledTabsExample() {
   return (
     <View style={{ gap: 16 }}>
-      <Tabs defaultValue="available">
+      <Tabs defaultValue="available" swipeable>
         <Tab name="available" title="可用">
           <Text>可用内容</Text>
         </Tab>

@@ -1,188 +1,262 @@
-import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react-native'
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
-import { createRef, useState } from 'react'
+import { createRef, useState, type Ref } from 'react'
 import { Text } from 'react-native'
-import {
-  DateTimePicker,
-  type DateTimePickerProps,
-  type DateTimePickerRef,
+import { DateTimePicker } from '../date-time-picker'
+import { validateDateTimeColumnOrder } from '../picker/date-time/normalize'
+import type {
+  DateTimePickerFilter,
+  DateTimePickerColumnType,
+  DateTimePickerProps,
+  DateTimePickerRef,
+  DateTimePickerValue,
 } from '../date-time-picker'
-import { InteractionPressable } from '../interaction'
 import { Provider } from '../provider'
 
 afterEach(cleanup)
 
-async function press(target: Parameters<typeof fireEvent.press>[0]) {
-  fireEvent.press(target)
+async function press(testID: string) {
+  fireEvent.press(screen.getByTestId(testID))
   await Promise.resolve()
 }
 
-function item(column: number, index: number) {
-  return screen.getByTestId(`picker-item-${column}-${index}`)
-}
-
-function expectDate(value: unknown, expected: [number, number, number, number, number, number]) {
-  expect(value).toBeInstanceOf(Date)
-  const date = value as Date
-  expect([
-    date.getFullYear(),
-    date.getMonth() + 1,
-    date.getDate(),
-    date.getHours(),
-    date.getMinutes(),
-    date.getSeconds(),
-  ]).toEqual(expected)
-}
-
-function VisibleDateTimePicker(props: DateTimePickerProps) {
-  return (
+async function renderPicker(props: DateTimePickerProps & { ref?: Ref<DateTimePickerRef> }) {
+  return render(
     <Provider theme={{ token: { motion: false } }}>
-      <DateTimePicker {...props} visible />
-    </Provider>
+      <DateTimePicker {...props} />
+    </Provider>,
   )
 }
 
 describe('DateTimePicker', () => {
-  it('renders six numeric columns with local-time labels', async () => {
-    await render(
-      <VisibleDateTimePicker
-        maxDate={new Date(2026, 11, 31, 23, 59, 59)}
-        minDate={new Date(2026, 0, 1)}
-        value={new Date(2026, 8, 3, 8, 5, 9)}
-      />,
-    )
+  it('uses five date-time columns by default and opts into seconds', async () => {
+    await renderPicker({
+      defaultValue: ['2026', '09', '13', '21', '30'],
+    })
+    expect(screen.getAllByTestId(/^picker-column-\d+$/)).toHaveLength(5)
+    expect(screen.getByTestId('picker-item-0-10').props.accessibilityState).toMatchObject({
+      selected: true,
+    })
+    expect(screen.getByTestId('picker-item-3-21').props.accessibilityState).toMatchObject({
+      selected: true,
+    })
+  })
+
+  it('opts into seconds', async () => {
+    await renderPicker({
+      columnsType: ['year', 'month', 'day', 'hour', 'minute', 'second'],
+      defaultValue: ['2026', '09', '13', '21', '30', '15'],
+    })
     expect(screen.getAllByTestId(/^picker-column-\d+$/)).toHaveLength(6)
-    expect(within(item(0, 0)).getByText('2026年')).toBeTruthy()
-    expect(within(item(1, 8)).getByText('09月')).toBeTruthy()
-    expect(within(item(2, 2)).getByText('03日')).toBeTruthy()
-    expect(within(item(3, 8)).getByText('08时')).toBeTruthy()
-    expect(within(item(4, 5)).getByText('05分')).toBeTruthy()
-    expect(within(item(5, 9)).getByText('09秒')).toBeTruthy()
+    expect(screen.getByTestId('picker-item-5-15').props.accessibilityState).toMatchObject({
+      selected: true,
+    })
   })
 
-  it('keeps formatter separate from Date values', async () => {
-    const onChange = jest.fn()
-    await render(
-      <VisibleDateTimePicker
-        formatter={(type, value) => `${type}:${value}`}
-        maxDate={new Date(2026, 11, 31, 23, 59, 59)}
-        minDate={new Date(2026, 0, 1)}
-        onChange={onChange}
-        value={new Date(2026, 8, 10, 8, 30, 15)}
-      />,
-    )
-    expect(within(item(3, 8)).getByText('hour:8')).toBeTruthy()
-    await press(item(5, 20))
-    expectDate(onChange.mock.lastCall?.[0], [2026, 9, 10, 8, 30, 20])
+  it('supports natural-order subsets without reordering fields', async () => {
+    await renderPicker({
+      columnsType: ['year', 'day', 'minute'],
+      defaultValue: ['2026', '13', '30'],
+    })
+    expect(screen.getAllByTestId(/^picker-column-\d+$/)).toHaveLength(3)
+    expect(screen.getByTestId('picker-item-0-10').props.accessibilityState).toMatchObject({
+      selected: true,
+    })
+    expect(screen.getByTestId('picker-item-1-12').props.accessibilityState).toMatchObject({
+      selected: true,
+    })
+    expect(screen.getByTestId('picker-item-2-30').props.accessibilityState).toMatchObject({
+      selected: true,
+    })
   })
 
-  it('clamps a complete timestamp at a boundary', async () => {
-    const onChange = jest.fn()
-    await render(
-      <VisibleDateTimePicker
-        maxDate={new Date(2026, 8, 10, 12, 30, 15)}
-        minDate={new Date(2026, 8, 10, 10, 20, 5)}
-        onChange={onChange}
-        value={new Date(2026, 8, 10, 12, 30, 15)}
-      />,
-    )
-    await press(item(3, 0))
-    await press(item(4, 0))
-    await press(item(5, 0))
-    expectDate(onChange.mock.lastCall?.[0], [2026, 9, 10, 10, 20, 5])
-    expect(within(item(4, 0)).getByText('20分')).toBeTruthy()
-  })
-
-  it('synchronizes preserved minute and second values when a boundary hour changes their indices', async () => {
-    const onChange = jest.fn()
-    await render(
-      <VisibleDateTimePicker
-        maxDate={new Date(2026, 8, 10, 12, 59, 59)}
-        minDate={new Date(2026, 8, 10, 10, 20, 30)}
-        onChange={onChange}
-        value={new Date(2026, 8, 10, 10, 20, 30)}
-      />,
-    )
-    expect(screen.getAllByTestId(/^picker-item-4-/)).toHaveLength(40)
-    expect(within(item(4, 0)).getByText('20分')).toBeTruthy()
-    await press(item(3, 1))
-
-    expectDate(onChange.mock.lastCall?.[0], [2026, 9, 10, 11, 20, 30])
-    expect(screen.getAllByTestId(/^picker-item-4-/)).toHaveLength(60)
-    expect(item(4, 20).props.accessibilityState).toMatchObject({ selected: true })
-    expect(item(5, 30).props.accessibilityState).toMatchObject({ selected: true })
-    expect(screen.queryByTestId('picker-column-4-scroll')).toBeNull()
-    expect(screen.queryByTestId('picker-column-5-scroll')).toBeNull()
-
-    await press(item(3, 0))
-
-    expectDate(onChange.mock.lastCall?.[0], [2026, 9, 10, 10, 20, 30])
-    expect(screen.getAllByTestId(/^picker-item-4-/)).toHaveLength(40)
-    expect(item(4, 0).props.accessibilityState).toMatchObject({ selected: true })
-    expect(item(5, 0).props.accessibilityState).toMatchObject({ selected: true })
-    expect(onChange).toHaveBeenCalledTimes(2)
-  })
-
-  it('repairs leap-year day values when changing month', async () => {
-    const onChange = jest.fn()
-    await render(
-      <VisibleDateTimePicker
-        maxDate={new Date(2028, 11, 31, 23, 59, 59)}
-        minDate={new Date(2028, 0, 1)}
-        onChange={onChange}
-        value={new Date(2028, 0, 31, 23, 59, 59)}
-      />,
-    )
-    await press(item(1, 1))
-    expectDate(onChange.mock.lastCall?.[0], [2028, 2, 29, 23, 59, 59])
-    expect(item(2, 28).props.accessibilityState).toMatchObject({ selected: true })
-  })
-})
-
-describe('DateTimePicker', () => {
-  it('keeps draft separate on cancel and supports imperative ref', async () => {
-    function Harness() {
-      const [visible, setVisible] = useState(false)
-      const [value, setValue] = useState(new Date(2026, 0, 1, 8, 30, 15))
-      return (
-        <Provider theme={{ token: { motion: false } }}>
-          <InteractionPressable onPress={() => setVisible(true)} testID="open" />
-          <Text testID="value">{value.getTime()}</Text>
-          <DateTimePicker
-            onCancel={() => setVisible(false)}
-            onConfirm={(next) => {
-              setValue(next)
-              setVisible(false)
-            }}
-            value={value}
-            visible={visible}
-          />
-        </Provider>
-      )
+  it.each([
+    ['year', 'month', 'day', 'hour'],
+    ['month', 'day', 'hour', 'minute'],
+    ['hour', 'minute'],
+    ['year', 'day', 'minute'],
+  ] as const)('accepts natural-order subset %s', async (...columnsType) => {
+    const valuesByType: Record<DateTimePickerColumnType, string> = {
+      day: '13',
+      hour: '21',
+      minute: '30',
+      month: '09',
+      second: '15',
+      year: '2026',
     }
-    await render(<Harness />)
-    const original = screen.getByTestId('value').props.children
-    await press(screen.getByTestId('open'))
-    await press(item(5, 20))
-    await press(screen.getByTestId('picker-cancel'))
-    expect(screen.getByTestId('value').props.children).toBe(original)
-
     const ref = createRef<DateTimePickerRef>()
-    const onConfirm = jest.fn()
-    await render(
+    await renderPicker({
+      columnsType,
+      defaultValue: columnsType.map((type) => valuesByType[type]),
+      ref,
+    })
+    expect(ref.current?.getSelectedValues()).toEqual(columnsType.map((type) => valuesByType[type]))
+  })
+
+  it.each([
+    ['month', 'year'],
+    ['hour', 'day'],
+    ['minute', 'day', 'year'],
+    ['second', 'hour'],
+  ])('throws for invalid column order: %s', (...columnsType) => {
+    expect(() => validateDateTimeColumnOrder(columnsType)).toThrow(
+      'DateTimePicker: columnsType must follow year -> month -> day -> hour -> minute -> second',
+    )
+  })
+
+  it('cascades complete minDate and maxDate timestamp constraints', async () => {
+    await renderPicker({
+      columnsType: ['year', 'month', 'day', 'hour', 'minute', 'second'],
+      defaultValue: ['2026', '09', '13', '10', '20', '30'],
+      maxDate: new Date(2026, 8, 13, 12, 40, 0),
+      minDate: new Date(2026, 8, 13, 10, 20, 30),
+    })
+    expect(screen.getAllByTestId(/^picker-item-2-\d+$/)).toHaveLength(1)
+    expect(screen.getAllByTestId(/^picker-item-3-\d+$/)).toHaveLength(3)
+    expect(screen.getAllByTestId(/^picker-item-4-\d+$/)).toHaveLength(40)
+    expect(screen.getAllByTestId(/^picker-item-5-\d+$/)).toHaveLength(30)
+
+    await press('picker-item-3-2')
+    expect(screen.getAllByTestId(/^picker-item-4-\d+$/)).toHaveLength(41)
+    await press('picker-item-4-40')
+    expect(screen.getAllByTestId(/^picker-item-5-\d+$/)).toHaveLength(1)
+  })
+
+  it('handles leap years and invalid day values', async () => {
+    const ref = createRef<DateTimePickerRef>()
+    const view = await renderPicker({
+      columnsType: ['year', 'month', 'day'],
+      defaultValue: ['2028', '02', '29'],
+      ref,
+    })
+    expect(screen.getAllByTestId(/^picker-item-2-\d+$/)).toHaveLength(29)
+
+    await view.rerender(
       <Provider theme={{ token: { motion: false } }}>
         <DateTimePicker
-          defaultValue={new Date(2026, 0, 1, 1, 2, 3)}
-          maxDate={new Date(2026, 11, 31, 23, 59, 59)}
-          minDate={new Date(2026, 0, 1)}
-          onConfirm={onConfirm}
+          columnsType={['year', 'month', 'day']}
+          value={['2027', '02', '31']}
           ref={ref}
         />
       </Provider>,
     )
-    await act(async () => ref.current?.open())
-    await act(async () => ref.current?.confirm())
-    expect(onConfirm).toHaveBeenCalledTimes(1)
-    expectDate(onConfirm.mock.lastCall?.[0], [2026, 1, 1, 1, 2, 3])
+    expect(screen.getAllByTestId(/^picker-item-2-\d+$/)).toHaveLength(28)
+    expect(ref.current?.getSelectedValues()).toEqual(['2027', '02', '28'])
+  })
+
+  it('reuses time step normalization inside the combined picker', async () => {
+    const ref = createRef<DateTimePickerRef>()
+    await renderPicker({
+      columnsType: ['year', 'month', 'day', 'hour', 'minute'],
+      defaultValue: ['2026', '09', '13', '10', '07'],
+      maxDate: new Date(2026, 8, 13, 12, 57),
+      minDate: new Date(2026, 8, 13, 10, 7),
+      minuteStep: 5,
+      ref,
+    })
+    expect(screen.getAllByTestId(/^picker-item-4-\d+$/)).toHaveLength(10)
+    expect(ref.current?.getSelectedValues()).toEqual(['2026', '09', '13', '10', '10'])
+  })
+
+  it('leaves a timestamp step boundary empty when no aligned option exists', async () => {
+    await renderPicker({
+      columnsType: ['year', 'month', 'day', 'hour', 'minute'],
+      defaultValue: ['2026', '09', '13', '10', '58'],
+      maxDate: new Date(2026, 8, 13, 10, 59),
+      minDate: new Date(2026, 8, 13, 10, 58),
+      minuteStep: 5,
+    })
+
+    expect(screen.queryAllByTestId(/^picker-item-4-\d+$/)).toHaveLength(0)
+  })
+
+  it('keeps formatter display-only and passes full values to filter', async () => {
+    const filterCalls: unknown[][] = []
+    const filter: DateTimePickerFilter = (type, options, values) => {
+      filterCalls.push([type, values])
+      return type === 'hour'
+        ? options.filter((option) => Number(option.value) >= 8 && Number(option.value) <= 18)
+        : options
+    }
+    const onChange = jest.fn()
+    await renderPicker({
+      defaultValue: ['2026', '09', '13', '12', '30'],
+      filter,
+      formatter: (type, option) => ({
+        ...option,
+        text: `${type}:${option.text}`,
+        value: 999,
+      }),
+      onChange,
+    })
+    expect(screen.getByText('year:2026')).toBeTruthy()
+    expect(screen.getByText('hour:12')).toBeTruthy()
+    expect(
+      filterCalls.some(
+        (call) => call[0] === 'hour' && Array.isArray(call[1]) && call[1][0] === '2026',
+      ),
+    ).toBe(true)
+
+    await press('picker-item-3-5')
+    expect(onChange).toHaveBeenLastCalledWith(['2026', '09', '13', '13', '30'], expect.any(Array))
+  })
+
+  it('supports controlled/defaultValue modes and confirm/cancel text', async () => {
+    function Controlled() {
+      const [value, setValue] = useState<DateTimePickerValue>(['2026', '09', '13', '12', '30'])
+      return (
+        <>
+          <DateTimePicker value={value} onChange={setValue} />
+          <Text testID="controlled-date-time">{value.join(' ')}</Text>
+        </>
+      )
+    }
+    await render(
+      <Provider theme={{ token: { motion: false } }}>
+        <Controlled />
+      </Provider>,
+    )
+    await press('picker-item-3-13')
+    expect(screen.getByTestId('controlled-date-time').props.children).toBe('2026 09 13 13 30')
+  })
+
+  it('forwards confirm/cancel callbacks and custom button text', async () => {
+    const ref = createRef<DateTimePickerRef>()
+    const onCancel = jest.fn()
+    const onConfirm = jest.fn()
+    await renderPicker({
+      cancelText: '放弃',
+      confirmText: '保存',
+      defaultValue: ['2026', '09', '13', '12', '30'],
+      onCancel,
+      onConfirm,
+      ref,
+    })
+    expect(screen.getByText('保存')).toBeTruthy()
+    expect(screen.getByText('放弃')).toBeTruthy()
+    await press('picker-item-3-13')
+    await press('picker-confirm')
+    expect(onConfirm).toHaveBeenCalledWith(['2026', '09', '13', '13', '30'], expect.any(Array))
+    let selection: ReturnType<DateTimePickerRef['confirm']> | undefined
+    await act(async () => {
+      selection = ref.current?.confirm()
+    })
+    expect(selection?.values).toEqual(['2026', '09', '13', '13', '30'])
+    await press('picker-cancel')
+    expect(onCancel).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not leak extension props to Picker view props', async () => {
+    await renderPicker({
+      cancelText: '放弃',
+      confirmText: '保存',
+      hourStep: 2,
+      minuteStep: 5,
+    })
+    const picker = screen.getByTestId('picker')
+    expect(picker.props.cancelText).toBeUndefined()
+    expect(picker.props.confirmText).toBeUndefined()
+    expect(picker.props.hourStep).toBeUndefined()
+    expect(picker.props.minuteStep).toBeUndefined()
   })
 })

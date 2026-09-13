@@ -1,18 +1,14 @@
 import { TimePicker } from '@ftsukic/tsuki'
 
-/**
- * @title 范围限制
- * @description min/max 限制 hour 为 08-18、minute 为 00-50，范围内仍然保持两位字符串。
- */
-export default function TimePickerRangeExample() {
+/** @title 时间范围 @description minTime 和 maxTime 会按小时、分钟、秒级联限制选项。 */
+export default function Range() {
   return (
     <TimePicker
-      defaultValue={['12', '30']}
-      maxHour={18}
-      maxMinute={50}
-      minHour={8}
-      minMinute={0}
-      title="工作时间"
+      columnsType={['hour', 'minute', 'second']}
+      defaultValue={['12', '00', '00']}
+      minTime="08:30:00"
+      maxTime="18:20:30"
+      title="08:30:00 - 18:20:30"
     />
   )
 }

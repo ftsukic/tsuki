@@ -18,12 +18,13 @@ import type {
   View as ViewComponent,
   ViewStyle,
 } from 'react-native'
-import { InteractionPressable, usePanGesture } from '../interaction'
+import { InteractionPressable } from '../interaction'
 import { resolveStyles } from '../style'
-import { useControllableSelection } from '../selection/state'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
 import { Tab } from './Tab'
+import { Swipe } from '../swipe'
+import type { SwipeRef } from '../swipe'
 import { TabsContext } from './TabsContext'
 import type {
   TabProps,
@@ -53,6 +54,18 @@ function isTabElement(value: unknown): value is ReactElement<TabProps> {
 
 function getTabValue(name: TabsValue | undefined, index: number): TabsValue {
   return name ?? index
+}
+
+function resolveInitialValue(
+  items: readonly NormalizedTab[],
+  defaultValue: TabsValue | undefined,
+): TabsValue | undefined {
+  const firstEnabledValue = items.find((item) => !item.element.props.disabled)?.value
+  const defaultItem = items.find(
+    (item) => Object.is(item.value, defaultValue) && !item.element.props.disabled,
+  )
+
+  return defaultItem?.value ?? firstEnabledValue ?? items[0]?.value
 }
 
 function hasContent(children: TabProps['children']): boolean {
@@ -95,6 +108,7 @@ function TabHeader({
     onLayout: userOnLayout,
     style,
     title,
+    titleStyle,
     ...pressableProps
   } = item.element.props
   void children
@@ -130,7 +144,7 @@ function TabHeader({
       ]}
     >
       {typeof title === 'string' || typeof title === 'number' ? (
-        <Text style={[labelStyle, semanticStyles?.label]}>{title}</Text>
+        <Text style={[labelStyle, semanticStyles?.label, titleStyle]}>{title}</Text>
       ) : (
         title
       )}
@@ -148,6 +162,8 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
     animated = true,
     swipeable = false,
     scrollable = false,
+    shrink = false,
+    lazyRender = true,
     style,
     styles,
     ...viewProps
@@ -166,22 +182,22 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
       })),
     [tabElements],
   )
-  const firstValue = items.find((item) => !item.element.props.disabled)?.value ?? items[0]?.value
-  const initialValue =
-    defaultValue !== undefined && items.some((item) => Object.is(item.value, defaultValue))
-      ? defaultValue
-      : firstValue
-  const selection = useControllableSelection({ value, defaultValue: initialValue, onChange })
-  const selectSelection = selection.select
-  const activeValue = selection.value
+  const controlled = value !== undefined
+  const [internalValue, setInternalValue] = useState<TabsValue | undefined>(() =>
+    resolveInitialValue(items, defaultValue),
+  )
+  const activeValue = controlled ? value : internalValue
   const activeIndex = items.findIndex((item) => Object.is(item.value, activeValue))
-  const activeItem = activeIndex >= 0 ? items[activeIndex] : undefined
+  const initialSwipeRef = useRef(Math.max(0, activeIndex))
+  const activeIndexRef = useRef(activeIndex)
+  activeIndexRef.current = activeIndex
+  const resolvedScrollable = scrollable || shrink
   const [layouts, setLayouts] = useState<readonly TabLayout[]>([])
   const indicatorX = useRef(new Animated.Value(0)).current
   const indicatorAnimation = useRef<Animated.CompositeAnimation | null>(null)
   const resolvedStyles = useMemo(
-    () => getTabsStyles(token, type, scrollable),
-    [scrollable, token, type],
+    () => getTabsStyles(token, type, scrollable, shrink),
+    [scrollable, shrink, token, type],
   )
   const tabsProps = useMemo<TabsProps>(
     () => ({
@@ -193,12 +209,32 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
       animated,
       swipeable,
       scrollable,
+      shrink,
+      lazyRender,
       style,
       styles,
     }),
-    [animated, children, defaultValue, onChange, scrollable, style, styles, swipeable, type, value],
+    [
+      animated,
+      children,
+      defaultValue,
+      lazyRender,
+      onChange,
+      scrollable,
+      shrink,
+      style,
+      styles,
+      swipeable,
+      type,
+      value,
+    ],
   )
-  const styleState: TabsStyleState = { activeIndex, activeValue, type, scrollable }
+  const styleState: TabsStyleState = {
+    activeIndex,
+    activeValue,
+    type,
+    scrollable: resolvedScrollable,
+  }
   const semanticStyles = resolveStyles(styles, { props: tabsProps, state: styleState })
 
   const setTabLayout = useCallback((index: number, event: LayoutChangeEvent) => {
@@ -251,40 +287,46 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
     (nextValue: TabsValue) => {
       const item = items.find((candidate) => Object.is(candidate.value, nextValue))
       if (!item || item.element.props.disabled) return false
-      return selectSelection(nextValue)
+      if (Object.is(activeValue, nextValue)) return false
+      if (!controlled) setInternalValue(nextValue)
+      onChange?.(nextValue)
+      return true
     },
-    [items, selectSelection],
+    [activeValue, controlled, items, onChange],
   )
 
-  const selectAdjacent = useCallback(
-    (distance: number) => {
-      if (activeIndex < 0 || distance === 0) return
-      const direction = distance < 0 ? 1 : -1
-      for (
-        let index = activeIndex + direction;
-        index >= 0 && index < items.length;
-        index += direction
-      ) {
-        if (!items[index].element.props.disabled) {
-          selectValue(items[index].value)
-          return
+  const swipeRef = useRef<SwipeRef>(null)
+  const motionEnabled = animated && themeToken.motion
+  useEffect(() => {
+    if (activeIndex >= 0) {
+      swipeRef.current?.swipeTo(activeIndex, {
+        emitChange: false,
+        immediate: !motionEnabled,
+      })
+    }
+  }, [activeIndex, motionEnabled])
+
+  const handleSwipeChange = useCallback(
+    (next: number) => {
+      const item = items[next]
+      const restoreIndex = activeIndexRef.current
+      if (!item || item.element.props.disabled) {
+        if (restoreIndex >= 0) {
+          swipeRef.current?.swipeTo(restoreIndex, { emitChange: false, immediate: true })
         }
+        return
+      }
+
+      selectValue(item.value)
+      if (controlled && restoreIndex >= 0) {
+        swipeRef.current?.swipeTo(activeIndexRef.current, {
+          emitChange: false,
+          immediate: !motionEnabled,
+        })
       }
     },
-    [activeIndex, items, selectValue],
+    [controlled, items, motionEnabled, selectValue],
   )
-
-  const contentEnabled =
-    swipeable && activeItem !== undefined && hasContent(activeItem.element.props.children)
-  const { panHandlers } = usePanGesture({
-    axis: 'horizontal',
-    distance: 8,
-    enabled: contentEnabled,
-    onEnd: ({ distance, velocity }) => {
-      if (Math.abs(distance) < 40 && Math.abs(velocity) < 0.3) return
-      selectAdjacent(distance)
-    },
-  })
 
   const contextValue = useMemo(
     () => ({
@@ -304,6 +346,7 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
           semanticStyles?.indicator,
           { transform: [{ translateX: indicatorX }] },
         ]}
+        testID="tabs-indicator"
       />
     ) : null
 
@@ -320,12 +363,13 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
   ))
 
   const navigation = (
-    <View style={[resolvedStyles.nav, semanticStyles?.nav]}>
-      {scrollable ? (
+    <View style={[resolvedStyles.nav, semanticStyles?.nav]} testID="tabs-nav">
+      {resolvedScrollable ? (
         <ScrollView
           horizontal
-          contentContainerStyle={{ flexGrow: 1, position: 'relative' }}
+          contentContainerStyle={resolvedStyles.navContent}
           showsHorizontalScrollIndicator={false}
+          testID="tabs-nav-scroll"
         >
           {tabHeaders}
           {indicator}
@@ -339,12 +383,32 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
     </View>
   )
 
-  const content =
-    activeItem && hasContent(activeItem.element.props.children) ? (
-      <View {...panHandlers} style={[resolvedStyles.content, semanticStyles?.content]}>
-        {renderTextContent(activeItem.element.props.children)}
-      </View>
-    ) : null
+  const hasPaneContent = items.some((item) => hasContent(item.element.props.children))
+  const contentTestID =
+    typeof viewProps.testID === 'string' ? `${viewProps.testID}-content` : undefined
+  const content = hasPaneContent ? (
+    <Swipe
+      ref={swipeRef}
+      autoHeight
+      duration={motionEnabled ? token.animationDuration : 0}
+      initialSwipe={initialSwipeRef.current}
+      loop={false}
+      lazyRender={lazyRender}
+      showIndicators={false}
+      style={[resolvedStyles.content, semanticStyles?.content]}
+      testID={contentTestID}
+      touchable={swipeable}
+      onChange={handleSwipeChange}
+    >
+      {items.map((item) => (
+        <Swipe.Item key={item.element.key ?? item.index}>
+          {hasContent(item.element.props.children)
+            ? renderTextContent(item.element.props.children)
+            : null}
+        </Swipe.Item>
+      ))}
+    </Swipe>
+  ) : null
 
   return (
     <TabsContext.Provider value={contextValue}>

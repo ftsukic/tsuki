@@ -1,9 +1,14 @@
-import { TimePicker } from '@ftsukic/tsuki'
+import { useState } from 'react'
+import { Text, TimePicker } from '@ftsukic/tsuki'
+import type { TimePickerValue } from '@ftsukic/tsuki'
 
-/**
- * @title 基础时间选择
- * @description 默认使用 24 小时制 hour、minute 两列，并以两位字符串保存时间。
- */
-export default function TimePickerBasicExample() {
-  return <TimePicker defaultValue={['12', '30']} />
+/** @title 基础时间 @description inline 受控 TimePicker，默认选择小时和分钟。 */
+export default function Basic() {
+  const [value, setValue] = useState<TimePickerValue>(['12', '30'])
+  return (
+    <>
+      <TimePicker value={value} onChange={setValue} />
+      <Text>{value.join(':')}</Text>
+    </>
+  )
 }

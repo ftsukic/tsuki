@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Picker } from '@ftsukic/tsuki'
+import { Cell, Picker, Popup } from '@ftsukic/tsuki'
 import { Text, View } from 'react-native'
 
 const options = [
@@ -10,26 +10,45 @@ const options = [
 
 /**
  * @title 基础弹层
- * @description 使用 Button 控制 Picker Popup，确认后提交选中的 value。
+ * @description 使用 Cell 打开 Popup；Picker 只负责滚轮选择，确认后提交选中的 value。
  */
 export default function PickerBasicExample() {
   const [visible, setVisible] = useState(false)
-  const [value, setValue] = useState<readonly (string | number)[]>(['hangzhou'])
+  const [committed, setCommitted] = useState<readonly (string | number)[]>(['hangzhou'])
+  const [draft, setDraft] = useState(committed)
+  const selectedText = options.find((option) => option.value === committed[0])?.text ?? '请选择'
+
+  const handleOpen = () => {
+    setDraft(committed)
+    setVisible(true)
+  }
+  const handleCancel = () => setVisible(false)
 
   return (
     <View style={{ gap: 12 }}>
-      <Button onPress={() => setVisible(true)}>选择城市</Button>
-      <Text>当前值：{value[0]}</Text>
-      <Picker
-        columns={options}
-        onCancel={() => setVisible(false)}
-        onConfirm={(nextValue) => {
-          setValue(nextValue)
-          setVisible(false)
-        }}
-        value={value}
+      <Cell title="选择城市" value={selectedText} isLink onPress={handleOpen} />
+      <Text>当前值：{selectedText}</Text>
+      <Popup
         visible={visible}
-      />
+        position="bottom"
+        round
+        closeOnPressOverlay
+        safeAreaInsetBottom
+        destroyOnClosed
+        onRequestClose={handleCancel}
+      >
+        <Picker
+          columns={options}
+          title="选择城市"
+          value={draft}
+          onChange={setDraft}
+          onConfirm={(nextValue) => {
+            setCommitted(nextValue)
+            setVisible(false)
+          }}
+          onCancel={handleCancel}
+        />
+      </Popup>
     </View>
   )
 }

@@ -6,7 +6,8 @@ import type { CellProps, CellStyles } from '../cell'
 import { Cell } from '../cell'
 import { Picker } from '../picker'
 import type { PickerOption, PickerProps, PickerValue } from '../picker'
-import { resolvePickerState } from '../picker/use-picker'
+import { Popup } from '../popup'
+import { resolvePickerState } from '../picker/utils'
 import { resolveStyles } from '../style'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
@@ -35,7 +36,7 @@ type FieldPickerCellProps = Pick<
 
 type PickerAdapterProps = Omit<
   PickerProps,
-  'value' | 'defaultValue' | 'onChange' | 'onConfirm' | 'onCancel' | 'visible' | 'style' | 'styles'
+  'value' | 'defaultValue' | 'onChange' | 'onConfirm' | 'onCancel' | 'style' | 'styles'
 >
 
 export type FieldPickerFormatValue = (
@@ -204,17 +205,26 @@ export function FieldPicker(props: FieldPickerProps) {
         onPressDebounceWait={props.onPressDebounceWait}
         styles={resolvedCellStyles}
       />
-      <Picker
-        {...pickerProps}
-        columns={columns}
-        value={draftValues}
+      <Popup
         visible={visible}
-        onChange={handleChange}
-        onConfirm={handleConfirm}
-        onCancel={handleCancel}
-        style={pickerStyle}
-        styles={pickerStyles}
-      />
+        position="bottom"
+        round
+        closeOnPressOverlay
+        safeAreaInsetBottom
+        destroyOnClosed
+        onRequestClose={handleCancel}
+      >
+        <Picker
+          {...pickerProps}
+          columns={columns}
+          value={draftValues}
+          onChange={handleChange}
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}
+          style={pickerStyle}
+          styles={pickerStyles}
+        />
+      </Popup>
     </>
   )
 }

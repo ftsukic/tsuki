@@ -65,10 +65,6 @@ export function normalizeDateTimeFields(fields: Partial<DateTimeFields>): DateTi
   return { day, hour, minute, month, second, year }
 }
 
-function isValidDate(value: Date | undefined): value is Date {
-  return value instanceof Date && Number.isFinite(value.getTime())
-}
-
 export function clampDateTimeFields(
   fields: Partial<DateTimeFields>,
   minDate?: Date,
@@ -76,8 +72,12 @@ export function clampDateTimeFields(
 ): DateTimeFields {
   const normalized = normalizeDateTimeFields(fields)
   const date = fieldsToDate(normalized)
-  if (isValidDate(minDate) && date.getTime() < minDate.getTime()) return dateToFields(minDate)
-  if (isValidDate(maxDate) && date.getTime() > maxDate.getTime()) return dateToFields(maxDate)
+  if (minDate && Number.isFinite(minDate.getTime()) && date.getTime() < minDate.getTime()) {
+    return dateToFields(minDate)
+  }
+  if (maxDate && Number.isFinite(maxDate.getTime()) && date.getTime() > maxDate.getTime()) {
+    return dateToFields(maxDate)
+  }
   return normalized
 }
 
@@ -95,7 +95,7 @@ export function pickerValuesToFields(
   columnsType.forEach((type, index) => {
     fields[type] = getNumericValue(values[index], fields[type])
   })
-  return fields
+  return normalizeDateTimeFields(fields)
 }
 
 export function fieldsToPickerValues(
@@ -103,6 +103,35 @@ export function fieldsToPickerValues(
   columnsType: readonly DateTimeColumnType[],
 ): number[] {
   return columnsType.map((type) => fields[type])
+}
+
+export function formatDateTimeValue(type: DateTimeColumnType, value: number): string {
+  return type === 'year' ? String(value) : String(value).padStart(2, '0')
+}
+
+export function fieldsToSelectedValues(
+  fields: DateTimeFields,
+  columnsType: readonly DateTimeColumnType[],
+): string[] {
+  return columnsType.map((type) => formatDateTimeValue(type, fields[type]))
+}
+
+export function pickerValuesToSelectedValues(
+  values: readonly PickerValue[],
+  columnsType: readonly DateTimeColumnType[],
+  base: DateTimeFields = DEFAULT_DATE_TIME_FIELDS,
+): string[] {
+  return fieldsToSelectedValues(pickerValuesToFields(values, columnsType, base), columnsType)
+}
+
+export function selectedValuesToPickerValues(
+  values: readonly string[],
+  columnsType: readonly DateTimeColumnType[],
+): number[] {
+  return columnsType.map((_, index) => {
+    const value = Number(values[index])
+    return Number.isFinite(value) ? Math.trunc(value) : Number.NaN
+  })
 }
 
 export function fieldsKey(fields: DateTimeFields): string {

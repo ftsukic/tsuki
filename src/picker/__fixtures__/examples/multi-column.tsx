@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Picker } from '@ftsukic/tsuki'
+import { Cell, Picker, Popup } from '@ftsukic/tsuki'
 import { Text, View } from 'react-native'
 
 const columns = [
@@ -19,22 +19,40 @@ const columns = [
  */
 export default function PickerMultiColumnExample() {
   const [visible, setVisible] = useState(false)
-  const [value, setValue] = useState<readonly (string | number)[]>(['zhejiang', 'hangzhou'])
+  const [committed, setCommitted] = useState<readonly (string | number)[]>(['zhejiang', 'hangzhou'])
+  const [draft, setDraft] = useState(committed)
+
+  const handleOpen = () => {
+    setDraft(committed)
+    setVisible(true)
+  }
+  const handleCancel = () => setVisible(false)
 
   return (
     <View style={{ gap: 12 }}>
-      <Button onPress={() => setVisible(true)}>选择省市</Button>
-      <Text>{value.join(' / ')}</Text>
-      <Picker
-        columns={columns}
-        onCancel={() => setVisible(false)}
-        onConfirm={(nextValue) => {
-          setValue(nextValue)
-          setVisible(false)
-        }}
-        value={value}
+      <Cell title="选择省市" value={committed.join(' / ')} isLink onPress={handleOpen} />
+      <Text>{committed.join(' / ')}</Text>
+      <Popup
         visible={visible}
-      />
+        position="bottom"
+        round
+        closeOnPressOverlay
+        safeAreaInsetBottom
+        destroyOnClosed
+        onRequestClose={handleCancel}
+      >
+        <Picker
+          columns={columns}
+          title="选择省市"
+          value={draft}
+          onChange={setDraft}
+          onConfirm={(nextValue) => {
+            setCommitted(nextValue)
+            setVisible(false)
+          }}
+          onCancel={handleCancel}
+        />
+      </Popup>
     </View>
   )
 }

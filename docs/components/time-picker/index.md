@@ -15,208 +15,82 @@ group:
 
 ## 介绍
 
-TimePicker 是基于 Picker 的 24 小时制时间选择器，按 `columnsType` 生成 hour、minute、second 滚轮。它只处理时间列，不处理日期、时区或 locale 时间格式；所有滚轮、吸附、遮罩、指示框、Toolbar 和 Popup 行为都由 Picker 提供。
+`TimePicker` 是纯时间滚轮选择器，负责生成 hour、minute、second 列和时间范围联动。它不内置 Popup，公开 `value`、`defaultValue` 和事件值都是按 `columnsType` 顺序排列的 `string[]`。
 
 </section>
 
-<code src="../../../src/time-picker/__fixtures__/overview.tsx" title="组件预览" description="TimePicker 汇总基础时间、秒、范围、filter、formatter 和 Popup 示例。"></code>
-
-## 引入
-
-```tsx | pure
-import { TimePicker, showTimePicker, closeTimePicker } from '@ftsukic/tsuki'
-```
+<code src="../../../src/time-picker/__fixtures__/overview.tsx" title="组件预览" description="TimePicker 的列组合、范围、过滤、步进和 Popup 示例。"></code>
 
 ## 代码演示
 
-<code src="../../../src/time-picker/__fixtures__/examples/basic.tsx" title="基础时间选择" description="默认使用 hour 和 minute 两列，并以两位字符串保存时间。"></code>
+<code src="../../../src/time-picker/__fixtures__/examples/basic.tsx" title="基础时间" description="受控选择小时和分钟。"></code>
 
-<code src="../../../src/time-picker/__fixtures__/examples/seconds.tsx" title="包含秒" description="通过 columnsType 增加 second 列。"></code>
+<code src="../../../src/time-picker/__fixtures__/examples/columns.tsx" title="列组合" description="展示时间列子集和任意合法重排。"></code>
 
-<code src="../../../src/time-picker/__fixtures__/examples/range.tsx" title="范围限制" description="使用 min/max 限制小时和分钟范围。"></code>
+<code src="../../../src/time-picker/__fixtures__/examples/seconds.tsx" title="带秒" description="展示 hour、minute、second 三列。"></code>
 
-<code src="../../../src/time-picker/__fixtures__/examples/filter.tsx" title="filter 步进" description="通过 filter 实现每 5 分钟一个选项。"></code>
+<code src="../../../src/time-picker/__fixtures__/examples/range.tsx" title="时间范围" description="展示 minTime 和 maxTime 的级联边界。"></code>
 
-<code src="../../../src/time-picker/__fixtures__/examples/formatter.tsx" title="formatter 展示" description="增加时、分展示后缀，同时保持 callback value 不变。"></code>
+<code src="../../../src/time-picker/__fixtures__/examples/formatter.tsx" title="formatter" description="只修改时间选项的显示文本。"></code>
 
-<code src="../../../src/time-picker/__fixtures__/examples/popup.tsx" title="Popup 组合" description="使用 Cell 或 Button 打开 Picker Popup，确认后回写时间。"></code>
+<code src="../../../src/time-picker/__fixtures__/examples/filter.tsx" title="filter" description="按当前完整 values 过滤时间选项。"></code>
+
+<code src="../../../src/time-picker/__fixtures__/examples/step.tsx" title="步进" description="展示 minuteStep 如何生成真实 options。"></code>
+
+<code src="../../../src/time-picker/__fixtures__/examples/popup.tsx" title="Popup 集成" description="通过 Cell + Popup 组合 TimePicker，并在外层维护 draft。"></code>
 
 ## API
-
-### TimePickerOption
-
-```ts | pure
-interface TimePickerOption extends PickerOption {
-  value: string
-}
-```
-
-`text` 是滚轮显示文本，`value` 是两位数字字符串。TimePicker 生成的基础 option 形如 `{ text: '09', value: '09' }`。
 
 ### TimePickerProps
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `columnsType` | `readonly ('hour' \| 'minute' \| 'second')[]` | `['hour', 'minute']` | 按数组顺序生成列；支持任意顺序，也可以传 `[]`，不会偷偷恢复默认列 |
-| `value` | `readonly string[]` | — | 受控时间值，顺序与 `columnsType` 一致 |
-| `defaultValue` | `readonly string[]` | — | 非受控初始时间值；非法值回退到对应列第一项 |
-| `minHour` / `maxHour` | `number` | `0` / `23` | 小时范围；有效值为 `00`-`23` |
-| `minMinute` / `maxMinute` | `number` | `0` / `59` | 分钟范围；有效值为 `00`-`59` |
-| `minSecond` / `maxSecond` | `number` | `0` / `59` | 秒范围；有效值为 `00`-`59` |
-| `filter` | `(type, options, values) => readonly TimePickerOption[]` | — | 过滤当前列选项，可用于实现 5 分钟或 10 分钟步进 |
-| `formatter` | `(type, option) => TimePickerOption` | — | 只格式化展示 option；TimePicker 会保留原始 canonical `value` |
-| `onChange` | `(values, options) => void` | — | 当前列吸附完成后触发，返回 draft 的时间值和选项 |
-| `onConfirm` | `(values, options) => void` | — | 点击 Toolbar 确认后触发，返回当前 draft |
-| `onCancel` | `() => void` | — | 取消并丢弃 draft；通常由调用方关闭受控 `visible` |
-| `title` | `ReactNode` | — | Picker Toolbar 标题 |
-| `showToolbar` | `boolean` | `true` | 是否渲染 Toolbar |
-| `showToolbarDivider` | `boolean` | `false` | 是否显示 Toolbar 底部分隔线 |
-| `confirmButtonText` / `cancelButtonText` | `ReactNode` | `'确定'` / `'取消'` | Toolbar 操作内容 |
-| `visible` | `boolean` | — | 未传入时内联渲染；传入后使用 Picker 的 bottom Popup |
-| `overlay` | `boolean` | `true` | Popup 是否渲染遮罩 |
-| `closeOnPressOverlay` | `boolean` | `true` | 点击遮罩是否触发取消 |
-| `safeAreaInsetBottom` | `boolean` | `true` | 自动 Popup 是否填充底部安全区 |
-| `duration` | `number` | Popup 默认值 | Popup 动画时长 |
-| `itemHeight` | `number` | Picker token `44` | 透传给 Picker 的滚轮行高 |
-| `visibleItemCount` | `number` | Picker token `5` | 透传给 Picker 的可见行数；偶数会调整为奇数 |
-| `style` | `StyleProp<ViewStyle>` | — | Picker 内容根节点样式 |
-| `styles` | `PickerStyles` | — | Picker 的 `root`、`container`、Toolbar、滚轮、`item`、`itemLabel`、`mask`、`indicator` 等语义样式 |
+| `value` | `TimePickerValue`（`readonly string[]`） | - | 受控值，顺序必须与 `columnsType` 一致 |
+| `defaultValue` | `TimePickerValue` | `[]` | 非受控初始值，只在初始化时使用 |
+| `columnsType` | `readonly ('hour' \| 'minute' \| 'second')[]` | `['hour', 'minute']` | 允许时间字段子集和任意合法排列；value 同样按该顺序传递 |
+| `minHour` / `maxHour` | `number` | `0` / `23` | 小时范围 |
+| `minMinute` / `maxMinute` | `number` | `0` / `59` | 分钟范围 |
+| `minSecond` / `maxSecond` | `number` | `0` / `59` | 秒范围 |
+| `minTime` / `maxTime` | `string` | - | 完整时间边界，格式为 `HH:mm:ss`；设置后按 timestamp 语义级联 |
+| `hourStep` | `number` | `1` | 小时的 canonical options 步进 |
+| `minuteStep` | `number` | `1` | 分钟的 canonical options 步进 |
+| `secondStep` | `number` | `1` | 秒的 canonical options 步进 |
+| `formatter` | `(type, option) => TimePickerOption \| string` | - | 修改显示文本或 option metadata；不会修改 canonical `value` |
+| `filter` | `(type, options, values) => readonly TimePickerOption[]` | - | 过滤当前列；返回的 option 必须来自当前 canonical options |
+| `title` | `ReactNode` | - | Picker toolbar 标题 |
+| `showToolbar` | `boolean` | `true` | 是否显示 Picker toolbar |
+| `showToolbarDivider` | `boolean` | `false` | 是否显示 toolbar 分隔线 |
+| `cancelText` | `ReactNode` | `取消` | 取消按钮文案 |
+| `confirmText` | `ReactNode` | `确定` | 确认按钮文案 |
+| `loading` | `boolean` | `false` | 覆盖滚轮并阻止选择，toolbar 仍可操作 |
+| `swipeDuration` | `number` | 主题默认值 | 滚轮吸附动画时长 |
+| `itemHeight` | `number` | 主题默认值 | 单项高度 |
+| `visibleItemCount` | `number` | 主题默认值 | 可视项数量 |
+| `onChange` | `(value, options) => void` | - | 选择完成后触发一次，返回当前列顺序的 values 和 options |
+| `onConfirm` | `(value, options) => void` | - | toolbar 确认时触发 |
+| `onCancel` | `() => void` | - | toolbar 取消时触发；不负责回滚外层 draft |
+| `style` | `StyleProp<ViewStyle>` | - | Picker 根 View 样式 |
+| `styles` | `PickerStyles` | - | Picker semantic styles |
 
-TimePicker 继承 Picker 合法的 React Native `ViewProps`，例如 `testID`、`accessibilityLabel` 和 `onLayout`；组件管理 `columns`、`value`、`defaultValue`、`onChange` 和 `onConfirm`，因此不能直接传入 `columns`，也不提供 `Date`、`number[]`、`onChangeTime`、`onSelect` 或 `onValueChange`。
+TimePicker 还继承 Picker 的 `ViewProps`（不包括 `children` 和 `style`）以及 `testID`。弹层状态和关闭策略由 Popup 或业务组合层管理。
 
-## value model
+Picker option 的 canonical `value` 是内部数字；TimePicker 对外的 `value` 和事件值是两位字符串，例如 `['12', '30']`。`columnsType={['minute', 'hour']}` 时，value 必须写成 `['30', '12']`。范围计算始终按 hour、minute、second 的时间语义处理，不依赖视觉上的前一列；`minTime` / `maxTime` 会在同一小时、分钟边界上继续收窄后续列。
 
-TimePicker 的 value 永远是按 `columnsType` 顺序排列的两位数字字符串，不公开 `Date` 对象，也不使用 `number[]`：
+step 在范围之后生成真实 options，当前 value 不存在时会归一化到最近的合法 option；如果范围内没有符合步进的 option，列保持为空，不回退到违反 step 的值。`formatter` 返回 string 时只替换 `text`；返回 option 时仍保留原始 canonical `value`。`filter` 的 values 是当前完整、按 `columnsType` 排列的 string values，未知 value 会被丢弃。
 
-```tsx | pure
-// columnsType 默认值：['hour', 'minute']
-const timeValue = ['09', '30']
+TimePicker 的受控模式以 `value` 为唯一 selection 来源，滚轮操作只通过 `onChange` 请求新值；非受控模式使用 `defaultValue` 初始化并在选择后更新内部值。Popup 中的 committed/draft、打开、关闭和取消回滚应由 `Cell` / `Popup` 组合或 Field 层维护。
 
-// columnsType={['minute', 'second']}
-const reorderedTimeValue = ['30', '05']
-```
+### TimePickerRef
 
-默认列是 24 小时制的 `00`-`23` 和 `00`-`59`。未传 `value` 或 `defaultValue` 时默认选中每列第一项，即 `['00', '00']`。Picker 的 resolver 负责受控/非受控值规范化；例如不存在的 `['99', '99']` 会回退到对应列第一项，filter 删除当前值时也会回退到过滤后第一项。
+| 方法 | 返回值 | 说明 |
+| --- | --- | --- |
+| `confirm()` | `TimePickerSelection` | 返回当前 values、options 和 indexes，并触发 `onConfirm` |
+| `cancel()` | `void` | 触发 Picker 的 `onCancel` |
+| `getSelectedValues()` | `TimePickerValue` | 获取当前按 `columnsType` 排列的值 |
+| `getSelectedOptions()` | `readonly TimePickerOption[]` | 获取当前选中的 options |
 
-## columnsType
+`TimePicker` 不提供 `open` / `close` 状态机，也不会因 `cancel()` 自动恢复外层业务值。需要弹窗时请使用 `Cell + Popup + TimePicker`，参见 Popup 集成示例。
 
-支持 `['hour']`、`['hour', 'minute']`、`['hour', 'minute', 'second']`，实现也不依赖固定的三种组合。列顺序完全遵循传入数组，例如 `columnsType={['minute', 'second']}` 时 value 是 `['30', '05']`。传入空数组会原样交给 Picker 渲染空 columns。
+### 样式、主题与无障碍
 
-## min/max
-
-每个单位先独立规范化范围，再生成 option：边界必须是 finite number，随后执行 `Math.trunc` 并 clamp 到单位合法范围。小时合法范围是 `0...23`，分钟和秒是 `0...59`。
-
-当规范化后的 `min` 大于 `max` 时不会交换两者，而是将 `max` 降级为 `min`，保证至少有一项。例如 `minMinute={50}`、`maxMinute={20}` 最终只生成 `50`。这样可以保留调用方传参方向问题，同时避免 Picker 出现空列或 `NaN`。
-
-## filter
-
-`filter` 在基础范围生成之后、`formatter` 之前执行。它适合表达步进和依赖前序选择的业务规则，不需要额外的 `stepMinute` 或 `secondStep` API：
-
-```tsx | pure
-<TimePicker
-  filter={(type, options) => {
-    if (type === 'minute') {
-      return options.filter((option) => Number(option.value) % 5 === 0)
-    }
-
-    return options
-  }}
-/>
-```
-
-TimePicker 使用 Picker 的 `PickerColumnSource` 函数列。传给 `filter` 的 `values` 是当前列之前已经解析出的时间值，因此可以让 minute 根据 hour、second 根据 hour/minute 动态过滤；第一列的 `values` 为空。第一版不保证 filter 读取未来列的值，也不会为此重构 Picker。
-
-## formatter
-
-`formatter` 只改变展示文本，不改变提交 value：
-
-```tsx | pure
-<TimePicker
-  formatter={(type, option) => {
-    if (type === 'hour') return { ...option, text: `${option.text} 时` }
-    if (type === 'minute') return { ...option, text: `${option.text} 分` }
-    return option
-  }}
-/>
-```
-
-即使 formatter 返回了其他 `value`，TimePicker 仍会保留 option 原始的 canonical 时间值。因此界面可以显示 `09 时`、`30 分`，而 `onChange` 和 `onConfirm` 仍返回 `['09', '30']`。
-
-## controlled / uncontrolled
-
-受控用法由业务保存已确认的时间；滚轮变化先进入 Picker 的 draft，确认后再回写：
-
-```tsx | pure
-const [value, setValue] = useState<TimePickerValue>(['09', '30'])
-
-<TimePicker
-  onConfirm={setValue}
-  value={value}
-/>
-```
-
-非受控用法只需提供初始值：
-
-```tsx | pure
-<TimePicker defaultValue={['09', '30']} />
-```
-
-取消不会提交 draft；受控 Popup 通常在 `onCancel` 中设置 `visible={false}`。TimePicker 不维护第二套 selection resolver，非法 value 和 filter 后的 fallback 都沿用 Picker 的 `resolvePickerState`。
-
-## Popup behavior
-
-不传 `visible` 时，TimePicker 是内联 Picker panel，可直接嵌入页面或现有容器。传入 `visible` 后，TimePicker 直接使用 Picker 的 bottom Popup，因此沿用现有的 Overlay、Portal、round、safe-area 和 Toolbar 行为；TimePicker 不单独创建 Popup、Portal、滚轮、mask、indicator 或 draft state。
-
-## imperative API
-
-`showTimePicker` 和 `TimePicker.open` 需要在 `Provider`（或显式 `Portal.Host`）下调用，并返回 `Promise<TimePickerResult>`：
-
-```tsx | pure
-const result = await TimePicker.open({
-  defaultValue: ['10', '30'],
-  title: '选择时间',
-})
-
-// { action: 'confirm', values: ['10', '30'], options: [...] }
-```
-
-`TimePickerOptions` 与 TimePicker props 相同，但不接受 `visible` 和 `columns`；命令式实现会生成时间列后调用 Picker 的 `showPicker`。`TimePickerResult` 的 `action` 是 `'confirm' | 'cancel'`，`values` 是 `TimePickerValue`，`options` 是当前选项。`closeTimePicker()` 直接关闭当前命令式 Picker；与 `closePicker()` 一致，它不会解析 pending Promise。
-
-## style / styles
-
-TimePicker 没有独立的 `TimePickerToken`、`style.ts` 或视觉 token。`itemHeight`、`visibleItemCount`、Toolbar、滚轮、文字、mask、indicator 以及 Popup 内容的视觉都继续使用 Picker 的 token 和 `PickerStyles`：
-
-```tsx | pure
-<TimePicker
-  styles={{
-    toolbar: { backgroundColor: '#f7f8fa' },
-    item: { paddingHorizontal: 20 },
-    itemLabel: { fontVariant: ['tabular-nums'] },
-  }}
-/>
-```
-
-`style` 作用于 Picker 内容根节点；`styles` 可以定制 Picker 的语义插槽。Popup 宿主的圆角和底部安全区仍由现有 Popup 负责。
-
-## 主题关系
-
-通过 `theme.components.Picker` 同时定制 Picker 与 TimePicker，不增加 `theme.components.TimePicker`：
-
-```tsx | pure
-<ConfigProvider
-  theme={{
-    components: {
-      Picker: {
-        picker_item_height: 48,
-        picker_active_text_color: '#1677ff',
-      },
-    },
-  }}
->
-  <TimePicker />
-</ConfigProvider>
-```
-
-## 无障碍与平台说明
-
-每个时间选项沿用 Picker 的 `radio` 角色和 `selected` 状态，Toolbar 的确认、取消按钮沿用 `button` 语义。滚轮由原生 `Animated.ScrollView`、吸附和现有 PickerColumn 处理；Jest 和 Web 构建覆盖列模型与组件结构，iOS、Android 的实际手势速度和视觉效果仍应在目标设备截图验证。
+`style` 作用于 Picker 内容根节点；`styles` 可设置 Picker 的 semantic slots。`loading` 时滚轮区域对无障碍隐藏，toolbar 保持可访问。滚轮尺寸和默认动画由 Picker token 控制。

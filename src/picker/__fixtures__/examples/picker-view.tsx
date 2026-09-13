@@ -1,4 +1,4 @@
-import { PickerView } from '@ftsukic/tsuki'
+import { Picker } from '@ftsukic/tsuki'
 import { View } from 'react-native'
 
 const options = [
@@ -8,13 +8,13 @@ const options = [
 ]
 
 /**
- * @title 无 toolbar PickerView
- * @description PickerView 独立渲染纯滚轮，可嵌入自定义容器或 Popup。
+ * @title 无 toolbar Picker
+ * @description Picker 独立渲染纯滚轮，可嵌入自定义容器或 Popup。
  */
-export default function PickerViewExample() {
+export default function PickerWheelExample() {
   return (
     <View>
-      <PickerView columns={options} defaultValue={['pm']} />
+      <Picker columns={options} defaultValue={['pm']} showToolbar={false} />
     </View>
   )
 }

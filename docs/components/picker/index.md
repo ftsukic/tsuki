@@ -15,23 +15,25 @@ group:
 
 ## 介绍
 
-Picker 用于从一个或多个滚轮列中选择值，提供 Vant 风格的 Toolbar、确认/取消操作、吸附和级联列。滚动过程只更新滚轮位置，停稳后才提交选中 index 和 `onChange`；PickerView 是不包含 Popup 和 Toolbar 的纯滚轮版本。
+Picker 是纯滚轮选择器，负责列数据、选中值、吸附动画和 Toolbar 操作。它不会自动创建 Popup；需要弹层时由调用方组合 `Cell` 和 `Popup`。
 
 </section>
 
-<code src="../../../src/picker/__fixtures__/overview.tsx" title="组件预览" description="Picker 汇总弹层、Toolbar、单列、多列、级联、FieldPicker 联动和纯滚轮示例。"></code>
+<code src="../../../src/picker/__fixtures__/overview.tsx" title="组件预览" description="Picker 汇总 Cell + Popup 组合、Toolbar、单列、多列、级联、Loading、空数据和 FieldPicker 联动示例。"></code>
 
 ## 引入
 
 ```tsx | pure
-import { Picker, PickerToolbar, PickerView, showPicker } from '@ftsukic/tsuki'
+import { Cell, Picker, PickerToolbar, Popup, showPicker } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/picker/__fixtures__/examples/default-popup.tsx" title="默认 Picker Popup" description="由 Picker 自动挂载底部 Popup，Toolbar 和滚轮作为一个面板同步进出动画。"></code>
+<code src="../../../src/picker/__fixtures__/examples/basic.tsx" title="Cell + Popup" description="由 Cell 打开底部 Popup，Picker 只负责滚轮选择和确认。"></code>
 
-<code src="../../../src/picker/__fixtures__/examples/basic.tsx" title="基础弹层" description="使用 visible 控制 Popup，确认后提交选中的值。"></code>
+<code src="../../../src/picker/__fixtures__/examples/loading.tsx" title="Loading" description="Loading 覆盖滚轮内容并暂时禁止列交互，同时保留面板高度和 Toolbar。"></code>
+
+<code src="../../../src/picker/__fixtures__/examples/empty.tsx" title="暂无数据" description="将暂无数据作为 disabled option 展示，不扩展 Picker 的空状态 API。"></code>
 
 <code src="../../../src/picker/__fixtures__/examples/long-list.tsx" title="长列表 Picker" description="验证长列表的首尾居中、滚轮吸附和受控值更新。"></code>
 
@@ -43,11 +45,11 @@ import { Picker, PickerToolbar, PickerView, showPicker } from '@ftsukic/tsuki'
 
 <code src="../../../src/picker/__fixtures__/examples/linked.tsx" title="级联 Picker" description="父级变化后自动刷新并校正子级列。"></code>
 
-<code src="../../../src/picker/__fixtures__/examples/field.tsx" title="FieldPicker 联动" description="FieldPicker 直接组合 Cell 与 Picker，确认后回写字段展示值。"></code>
+<code src="../../../src/picker/__fixtures__/examples/field.tsx" title="FieldPicker 联动" description="FieldPicker 组合 Cell、Popup 与 Picker，确认后回写字段展示值。"></code>
 
-<code src="../../../src/picker/__fixtures__/examples/item-height.tsx" title="自定义行高" description="PickerView 支持自定义 itemHeight 和 visibleItemCount。"></code>
+<code src="../../../src/picker/__fixtures__/examples/item-height.tsx" title="自定义行高" description="Picker 支持自定义 itemHeight 和 visibleItemCount。"></code>
 
-<code src="../../../src/picker/__fixtures__/examples/picker-view.tsx" title="PickerView" description="独立使用不带 Toolbar 的纯滚轮。"></code>
+<code src="../../../src/picker/__fixtures__/examples/picker-view.tsx" title="无 Toolbar Picker" description="使用 showToolbar=false 渲染不带 Toolbar 的滚轮。"></code>
 
 ## API
 
@@ -57,94 +59,105 @@ import { Picker, PickerToolbar, PickerView, showPicker } from '@ftsukic/tsuki'
 interface PickerOption {
   text: string
   value: string | number
+  disabled?: boolean
   children?: readonly PickerOption[]
 }
 ```
 
-`text` 是显示文本，`value` 是提交值。`children` 用于级联数据；不支持在组件内部修改传入的 options。
-
-### PickerViewProps
-
-| 属性 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `columns` | `PickerColumns` | — | 单列、多列或包含 `children` 的级联数据；也支持由前置选择计算列数据的函数列 |
-| `value` | `readonly (string \| number)[]` | — | 受控选中值，数组顺序对应列顺序 |
-| `defaultValue` | `readonly (string \| number)[]` | — | 非受控初始值；非法值回退到当前列第一项 |
-| `onChange` | `(values, options) => void` | — | 列完成 momentum 吸附后触发，返回规范化 value 和对应的选中 options |
-| `itemHeight` | `number` | `44` | 单行高度；小于 `1` 会被校正 |
-| `visibleItemCount` | `number` | `5` | 可见行数；偶数会调整为下一个奇数 |
-| `style` | `StyleProp<ViewStyle>` | — | PickerView 根节点样式 |
-| `styles` | `PickerViewStyles` | — | `root`、`columns`、`column`、`item`、`itemLabel`、`mask`、`indicator` 语义样式 |
-
-PickerView 使用原生 `Animated.ScrollView`、`snapToInterval` 和 `onMomentumScrollEnd` 处理快速滑动及吸附。顶部和底部 padding 会根据 `visibleItemCount` 保证第一项和最后一项能够居中；中间 indicator、上下渐隐遮罩以及文字的 opacity、scale、translateY 会随滚动位置变化。
-
-函数列接收 `PickerColumnContext`，其中包含前置列的 `selectedValues`、`selectedIndexes`、`selectedOptions`、`values` 和 `indexes`。
+`text` 是显示文本，`value` 是规范化和提交值，`disabled` 的 option 不可选，`children` 用于级联数据。`formatter` 或 `filter` 不属于基础 Picker API，而应由日期时间组件处理。
 
 ### PickerProps
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| `columns` | `PickerColumns` | — | PickerView 的列或级联数据 |
-| `value` | `readonly (string \| number)[]` | — | 外部已提交值；Picker 打开时以此初始化 draft |
-| `defaultValue` | `readonly (string \| number)[]` | — | 非受控初始值 |
+| `columns` | `PickerColumns` | — | 单列、多列或级联数据 |
+| `value` | `readonly (string \| number)[]` | — | 受控选中值；未收到新的 prop 时，点击和手势不会改变最终选中状态 |
+| `defaultValue` | `readonly (string \| number)[]` | — | 非受控初始值，只在初始化时使用 |
+| `itemHeight` | `number` | 主题 token | 每个 option 的行高 |
+| `visibleItemCount` | `number` | 主题 token | 滚轮视口显示的行数 |
+| `loading` | `boolean` | `false` | 覆盖滚轮并禁止 option 的 tap/pan；不改变选中值，Toolbar 仍可操作 |
 | `title` | `ReactNode` | — | Toolbar 中间标题 |
-| `showToolbar` | `boolean` | `true` | 是否渲染 Toolbar |
+| `showToolbar` | `boolean` | `true` | 是否渲染 Toolbar；设置为 `false` 即为无 Toolbar Picker |
+| `showToolbarDivider` | `boolean` | `false` | 是否显示 Toolbar 底部分隔线 |
 | `confirmButtonText` | `ReactNode` | `'确定'` | 确认按钮内容 |
 | `cancelButtonText` | `ReactNode` | `'取消'` | 取消按钮内容 |
-| `visible` | `boolean` | — | 传入后由 Picker 挂载底部 Popup；未传入时只渲染内嵌 Picker 内容，便于作为现有 Popup 的 children |
-| `onChange` | `(values, options) => void` | — | 滚轮吸附后的 draft 变化 |
-| `onConfirm` | `(values, options) => void` | — | 确认当前 draft，返回最终 value/options |
-| `onCancel` | `() => void` | — | 丢弃 draft；调用方负责关闭受控 `visible` |
-| `safeAreaInsetBottom` | `boolean` | `true` | 自动挂载的 bottom Popup 是否填充宿主提供的底部安全区；内嵌模式不生效 |
-| `style` | `StyleProp<ViewStyle>` | — | Picker 内容根节点样式 |
-| `styles` | `PickerStyles` | — | Picker 内容、Toolbar、按钮、滚轮和指示框语义样式 |
+| `swipeDuration` | `number` | 主题 token | 手势吸附到目标 option 的时长 |
+| `onChange` | `(values, options) => void` | — | tap 或 pan 最终吸附后调用一次；外部 value 更新不会触发 |
+| `onConfirm` | `(values, options) => void` | — | Toolbar 确认回调，不重复触发 `onChange` |
+| `onCancel` | `() => void` | — | Toolbar 取消回调；Popup 的关闭和 draft 回滚由调用方负责 |
+| `style` | `StyleProp<ViewStyle>` | — | Picker 根 View 样式 |
+| `styles` | `PickerStyles` | — | `root`、`container`、`toolbar`、`columns`、`column`、`item`、`itemLabel`、`mask`、`indicator` 和 `loading` 语义样式 |
 
-确认和取消由调用方关闭受控 Popup：
+Picker 继承 React Native `ViewProps`，但不接受 `children` 和被组件接管的 `style`。弹层状态和关闭策略由 Popup 或业务组合层管理。
+
+### 受控与非受控
+
+受控 Picker 的显示值始终由 `value` 派生。用户选择后只调用 `onChange`；父组件回写 `value` 后才会更新选中项。非受控 Picker 使用 `defaultValue` 初始化，并在吸附完成后内部更新。
 
 ```tsx | pure
 const [visible, setVisible] = useState(false)
-const [value, setValue] = useState<readonly (string | number)[]>(['beijing'])
+const [committed, setCommitted] = useState<readonly PickerValue[]>(['beijing'])
+const [draft, setDraft] = useState(committed)
 
-<Picker
-  columns={columns}
-  value={value}
-  visible={visible}
-  onCancel={() => setVisible(false)}
-  onConfirm={(nextValue) => {
-    setValue(nextValue)
-    setVisible(false)
+<Cell
+  title="城市"
+  value={String(committed[0])}
+  isLink
+  onPress={() => {
+    setDraft(committed)
+    setVisible(true)
   }}
-/>;
+/>
+<Popup
+  visible={visible}
+  position="bottom"
+  round
+  closeOnPressOverlay
+  safeAreaInsetBottom
+  onRequestClose={() => setVisible(false)}
+>
+  <Picker
+    columns={columns}
+    value={draft}
+    onChange={setDraft}
+    onCancel={() => setVisible(false)}
+    onConfirm={(nextValues) => {
+      setCommitted(nextValues)
+      setVisible(false)
+    }}
+  />
+</Popup>
 ```
 
-滚动期间 Picker 只维护 draft；取消不会改动外部 `value`。Picker 不实现输入框，Field、Cell 或其他触发控件应由调用方组合。
+Picker 不维护 Popup 的 draft/commit 生命周期；上例中的 `draft`、`committed` 和关闭逻辑属于调用方。`columns={[]}` 时保留滚轮 frame，不渲染 option，确认结果是空数组；需要展示“暂无数据”时传入一个 disabled option。
 
 ### PickerToolbarProps
 
-`PickerToolbar` 可独立使用，支持 `title`、`cancelButtonText`、`confirmButtonText`、`onCancel` 和 `onConfirm`。取消和确认按钮统一使用 `InteractionPressable`，不提供 `TouchableOpacity` 或独立点击态 API。
+`PickerToolbar` 可独立使用，支持 `title`、`cancelButtonText`、`confirmButtonText`、`showDivider`、`titleStyle`、`onCancel`、`onConfirm`、`style`、`buttonStyle`、`buttonLabelStyle` 和 `testID`。取消和确认按钮分别位于左右两侧，标题保持居中。
 
 ### 命令式 API
 
-`showPicker(options)` 需要在 `Provider` 下调用，返回 `Promise<PickerResult>`；确认或取消后分别返回 `action: 'confirm'` 或 `action: 'cancel'`，并包含规范化的 `values` 和 `options`。`Picker.open` 是 `showPicker` 的同义入口。`closePicker()` 只关闭当前命令式 Picker，不会解析 pending Promise。命令式 API 的 `options` 与 Picker props 相同，但不接受受控 `visible`。
+`showPicker(options)` 需要在 `Provider` 下调用，返回 `Promise<PickerResult>`；确认或取消后分别返回 `action: 'confirm'` 或 `action: 'cancel'`，并包含规范化的 `values` 和 `options`。`Picker.open` 是 `showPicker` 的同义入口，`closePicker()` 只关闭当前命令式 Picker。
+
+命令式 `PickerOptions` 在 `PickerProps` 基础上允许配置 `overlay`、`closeOnPressOverlay`、`safeAreaInsetBottom` 和 `duration`，这些属性只由命令式 Popup adapter 消费，不会传给基础 Picker。
 
 ## 主题定制
 
 通过 `ConfigProvider` 的 `theme.components.Picker` 覆盖 token：
 
-| Token                          | 默认来源               | 说明                      |
-| ------------------------------ | ---------------------- | ------------------------- |
-| `picker_item_height`           | `44`                   | 默认行高                  |
-| `picker_text_color`            | `colorTextSecondary`   | 非选中项文字颜色          |
-| `picker_active_text_color`     | `colorText`            | 选中项和操作按钮文字颜色  |
-| `picker_indicator_color`       | `colorBorderSecondary` | 选中框和 Toolbar 边框颜色 |
-| `picker_mask_color`            | `colorBgContainer`     | 上下渐隐遮罩颜色          |
-| `picker_visible_item_count`    | `5`                    | 默认可见行数              |
-| `picker_item_inactive_opacity` | `0.3`                  | 远离中心的文字透明度      |
-| `picker_item_inactive_scale`   | `0.9`                  | 远离中心的文字缩放比例    |
-| `picker_item_translate_y`      | `4`                    | 滚轮层次的最大垂直位移    |
-
-其他字号、字体、背景、内边距和遮罩 stop opacity 也通过 Picker component token 控制；实现中不写死颜色。
+| Token                                  | 默认来源               | 说明                       |
+| -------------------------------------- | ---------------------- | -------------------------- |
+| `picker_item_height`                   | `44`                   | 默认行高                   |
+| `picker_text_color`                    | `colorText`            | 选项文字颜色               |
+| `picker_active_text_color`             | `colorText`            | 选中项和操作按钮文字颜色   |
+| `picker_indicator_color`               | `colorBorderSecondary` | 选中框和 Toolbar 边框颜色  |
+| `picker_toolbar_button_active_opacity` | `0.6`                  | Toolbar 按钮按下时的透明度 |
+| `picker_mask_color`                    | `colorBgContainer`     | 上下渐隐遮罩颜色           |
+| `picker_visible_item_count`            | `6`                    | 默认可见行数               |
+| `picker_disabled_option_opacity`       | `0.3`                  | disabled option 的透明度   |
+| `picker_indicator_horizontal_inset`    | `16`                   | indicator 水平内缩         |
+| `picker_swipe_duration`                | `1000`                 | 手势吸附动画时长           |
 
 ## 无障碍与平台说明
 
-滚轮项目暴露 `radio` 角色和 selected 状态，Toolbar 按钮暴露 `button` 角色。Popup 继续使用现有 Portal、Overlay 和 Animation，因此不在 Picker 中重复实现弹层。Jest 和 Web 构建覆盖结构及逻辑；iOS、Android 的实际手势速度和视觉效果仍需在目标设备截图验证。
+滚轮 option 暴露 `radio` 角色和 selected/disabled 状态，Toolbar 操作暴露 `button` 角色。Loading 隐藏 option 的无障碍树并保留 progressbar。PickerColumn 使用 `Gesture.Pan`、SharedValue 和 timing 吸附；iOS、Android 的实际 tap/pan 冲突、速度和视觉效果仍需在目标设备确认。

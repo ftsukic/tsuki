@@ -4,7 +4,7 @@ import { mountPortal, unmountPortal, updatePortal } from '../portal'
 import { Picker } from './picker'
 import type { PortalKey } from '../portal'
 import type { PickerOptions, PickerResult } from './types'
-import { resolvePickerState } from './use-picker'
+import { resolvePickerState } from './utils'
 
 interface PickerRecord {
   key: PortalKey | null

@@ -1,224 +1,162 @@
-import {
-  forwardRef,
-  useCallback,
-  useEffect,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react'
 import { Picker } from '../picker'
-import { createDateTimeColumns } from '../picker/date-time/columns'
-import type { DateTimeColumnFormatter } from '../picker/date-time/types'
-import type { PickerValue } from '../picker/types'
+import type { PickerOption, PickerRef, PickerSelection, PickerValue } from '../picker/types'
+import { createDateTimeColumns, normalizeDateTimePickerValues } from '../picker/date-time/columns'
+import type { DateTimeColumnsConfig } from '../picker/date-time/columns'
+import { normalizeColumnTypes, normalizeDatePickerBounds } from '../picker/date-time/normalize'
 import {
-  clampDate,
-  createDateFromPickerValues,
-  getDatePickerColumnTypes,
-  getDatePickerValues,
-  normalizeDateRange,
-  startOfDate,
-} from './utils'
-import type { DatePickerColumnType, DatePickerProps, DatePickerRef } from './types'
+  dateToFields,
+  fieldsToPickerValues,
+  pickerValuesToFields,
+  pickerValuesToSelectedValues,
+  selectedValuesToPickerValues,
+} from '../picker/date-time/value'
+import type {
+  DatePickerColumnType,
+  DatePickerProps,
+  DatePickerRef,
+  DatePickerSelection,
+} from './types'
+
+const DEFAULT_COLUMNS = ['year', 'month', 'day'] as const
+const COLUMN_TYPES = DEFAULT_COLUMNS
+const EMPTY_SELECTION: DatePickerSelection = { indexes: [], options: [], values: [] }
 
 export const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(function DatePicker(
   {
     value,
     defaultValue,
+    columnsType = DEFAULT_COLUMNS,
     minDate,
     maxDate,
-    type = 'date',
-    title,
+    formatter,
+    filter,
     cancelText = '取消',
     confirmText = '确定',
-    formatter,
-    visible,
-    onVisibleChange,
     onChange,
     onConfirm,
     onCancel,
-    testID,
-    ...pickerProps
+    ...props
   },
   ref,
 ) {
-  const initialReferenceRef = useRef<Date | undefined>(undefined)
-  if (!initialReferenceRef.current) {
-    initialReferenceRef.current = startOfDate(value ?? defaultValue ?? new Date())
-  }
-
-  const dateRange = useMemo(() => normalizeDateRange(minDate, maxDate), [maxDate, minDate])
-  const initialDate = clampDate(
-    value ?? defaultValue ?? initialReferenceRef.current ?? new Date(),
-    dateRange.minDate,
-    dateRange.maxDate,
+  const resolvedColumns = useMemo(
+    () => normalizeColumnTypes(columnsType, COLUMN_TYPES, 'DatePicker'),
+    [columnsType],
   )
-  const [committedDate, setCommittedDate] = useState(initialDate)
-  const [draftDate, setDraftDate] = useState(initialDate)
-  const [internalVisible, setInternalVisible] = useState(false)
-  const draftDateRef = useRef(draftDate)
-  const previousVisibleRef = useRef(visible ?? false)
-  const previousValueTimestampRef = useRef(value?.getTime())
-
-  const isVisibleControlled = visible !== undefined
-  const isVisible = visible ?? internalVisible
-  const valueTimestamp = value?.getTime()
-  const resolvedValue = clampDate(value ?? committedDate, dateRange.minDate, dateRange.maxDate)
-  const resolvedValueTimestamp = resolvedValue.getTime()
-  const columnsType = useMemo(() => getDatePickerColumnTypes(type), [type])
-  const columnFormatter = useMemo<DateTimeColumnFormatter | undefined>(
-    () =>
-      formatter
-        ? (columnType, option) => ({
-            ...option,
-            text: formatter(columnType as DatePickerColumnType, Number(option.value)),
-          })
-        : undefined,
-    [formatter],
+  const referenceDateRef = useRef(new Date())
+  const bounds = useMemo(
+    () => normalizeDatePickerBounds(minDate, maxDate, referenceDateRef.current),
+    [maxDate, minDate],
   )
-  const columns = useMemo(
-    () =>
-      createDateTimeColumns({
-        columnsType,
-        formatter: columnFormatter,
-        maxDate: dateRange.maxDate,
-        minDate: dateRange.minDate,
-      }),
-    [columnFormatter, columnsType, dateRange.maxDate, dateRange.minDate],
-  )
-
-  useEffect(() => {
-    const nextValueTimestamp = value?.getTime()
-    const previousValueTimestamp = previousValueTimestampRef.current
-    previousValueTimestampRef.current = nextValueTimestamp
-    if (value === undefined || nextValueTimestamp === previousValueTimestamp) return
-
-    const nextValue = clampDate(value, dateRange.minDate, dateRange.maxDate)
-    draftDateRef.current = nextValue
-    setCommittedDate(nextValue)
-    setDraftDate(nextValue)
-  }, [dateRange.maxDate, dateRange.minDate, value, valueTimestamp])
-
-  useEffect(() => {
-    const nextCommittedDate = clampDate(
-      value ?? committedDate,
-      dateRange.minDate,
-      dateRange.maxDate,
+  const initialDate = useMemo(() => {
+    const timestamp = Math.min(
+      bounds.maxDate.getTime(),
+      Math.max(bounds.minDate.getTime(), referenceDateRef.current.getTime()),
     )
-
-    if (nextCommittedDate.getTime() !== committedDate.getTime()) {
-      setCommittedDate(nextCommittedDate)
-    }
-    if (!isVisible && draftDate.getTime() !== nextCommittedDate.getTime()) {
-      draftDateRef.current = nextCommittedDate
-      setDraftDate(nextCommittedDate)
-    }
-  }, [
-    committedDate,
-    dateRange.maxDate,
-    dateRange.minDate,
-    draftDate,
-    isVisible,
-    value,
-    valueTimestamp,
-  ])
-
-  useEffect(() => {
-    if (isVisible && previousVisibleRef.current !== true) {
-      draftDateRef.current = resolvedValue
-      setDraftDate(resolvedValue)
-    }
-    previousVisibleRef.current = isVisible
-  }, [isVisible, resolvedValue, resolvedValueTimestamp])
-
-  const open = useCallback(() => {
-    draftDateRef.current = resolvedValue
-    setDraftDate(resolvedValue)
-    if (!isVisibleControlled) setInternalVisible(true)
-    onVisibleChange?.(true)
-  }, [isVisibleControlled, onVisibleChange, resolvedValue])
-
-  const close = useCallback(() => {
-    if (!isVisibleControlled) setInternalVisible(false)
-    onVisibleChange?.(false)
-  }, [isVisibleControlled, onVisibleChange])
-
+    return new Date(timestamp)
+  }, [bounds.maxDate, bounds.minDate])
+  const baseFields = useMemo(
+    () =>
+      pickerValuesToFields(
+        selectedValuesToPickerValues(value ?? defaultValue ?? [], resolvedColumns),
+        resolvedColumns,
+        dateToFields(initialDate),
+      ),
+    [defaultValue, initialDate, resolvedColumns, value],
+  )
+  const columnConfig = useMemo<DateTimeColumnsConfig>(
+    () => ({
+      baseFields,
+      columnsType: resolvedColumns,
+      filter: filter
+        ? (type, options, values) => filter(type as DatePickerColumnType, options, values)
+        : undefined,
+      formatter: formatter
+        ? (type, option) => formatter(type as DatePickerColumnType, option)
+        : undefined,
+      maxDate: bounds.maxDate,
+      minDate: bounds.minDate,
+    }),
+    [baseFields, bounds.maxDate, bounds.minDate, filter, formatter, resolvedColumns],
+  )
+  const columns = useMemo(() => createDateTimeColumns(columnConfig), [columnConfig])
+  const pickerRef = useRef<PickerRef>(null)
+  const pickerValue = useMemo(
+    () =>
+      value === undefined
+        ? undefined
+        : normalizeDateTimePickerValues(
+            selectedValuesToPickerValues(value, resolvedColumns),
+            columnConfig,
+          ),
+    [columnConfig, resolvedColumns, value],
+  )
+  const pickerDefaultValue = useMemo(
+    () =>
+      value !== undefined
+        ? undefined
+        : normalizeDateTimePickerValues(
+            defaultValue === undefined
+              ? fieldsToPickerValues(baseFields, resolvedColumns)
+              : selectedValuesToPickerValues(defaultValue, resolvedColumns),
+            columnConfig,
+          ),
+    [baseFields, columnConfig, defaultValue, resolvedColumns, value],
+  )
   const handleChange = useCallback(
-    (nextDate: Date) => {
-      draftDateRef.current = nextDate
-      setDraftDate(nextDate)
-      onChange?.(nextDate)
+    (nextValues: readonly PickerValue[], options: readonly PickerOption[]) => {
+      onChange?.(pickerValuesToSelectedValues(nextValues, resolvedColumns, baseFields), options)
     },
-    [onChange],
+    [baseFields, onChange, resolvedColumns],
   )
-
   const handleConfirm = useCallback(
-    (nextDate: Date) => {
-      const normalizedDate = clampDate(nextDate, dateRange.minDate, dateRange.maxDate)
-      draftDateRef.current = normalizedDate
-      setDraftDate(normalizedDate)
-      if (value === undefined) setCommittedDate(normalizedDate)
-      onConfirm?.(normalizedDate)
-      close()
+    (nextValues: readonly PickerValue[], options: readonly PickerOption[]) => {
+      onConfirm?.(pickerValuesToSelectedValues(nextValues, resolvedColumns, baseFields), options)
     },
-    [close, dateRange.maxDate, dateRange.minDate, onConfirm, value],
+    [baseFields, onConfirm, resolvedColumns],
   )
-
-  const handlePickerChange = useCallback(
-    (values: readonly PickerValue[]) =>
-      handleChange(
-        createDateFromPickerValues(
-          values,
-          draftDateRef.current,
-          type,
-          dateRange.minDate,
-          dateRange.maxDate,
-        ),
+  const getSelectedValues = useCallback(
+    () =>
+      pickerValuesToSelectedValues(
+        pickerRef.current?.getSelectedValues() ?? [],
+        resolvedColumns,
+        baseFields,
       ),
-    [dateRange.maxDate, dateRange.minDate, handleChange, type],
+    [baseFields, resolvedColumns],
   )
-
-  const handlePickerConfirm = useCallback(
-    (values: readonly PickerValue[]) =>
-      handleConfirm(
-        createDateFromPickerValues(
-          values,
-          draftDateRef.current,
-          type,
-          dateRange.minDate,
-          dateRange.maxDate,
-        ),
-      ),
-    [dateRange.maxDate, dateRange.minDate, handleConfirm, type],
+  const confirm = useCallback((): DatePickerSelection => {
+    const selection: PickerSelection | undefined = pickerRef.current?.confirm()
+    if (!selection) return EMPTY_SELECTION
+    return {
+      indexes: selection.indexes,
+      options: selection.options,
+      values: pickerValuesToSelectedValues(selection.values, resolvedColumns, baseFields),
+    }
+  }, [baseFields, resolvedColumns])
+  useImperativeHandle(
+    ref,
+    () => ({
+      cancel: () => pickerRef.current?.cancel(),
+      confirm,
+      getSelectedOptions: () => pickerRef.current?.getSelectedOptions() ?? [],
+      getSelectedValues,
+    }),
+    [confirm, getSelectedValues],
   )
-
-  const handleCancel = useCallback(() => {
-    draftDateRef.current = resolvedValue
-    setDraftDate(resolvedValue)
-    onCancel?.()
-    close()
-  }, [close, onCancel, resolvedValue])
-
-  const confirm = useCallback(() => {
-    if (!isVisible) return
-    handleConfirm(draftDateRef.current)
-  }, [handleConfirm, isVisible])
-
-  useImperativeHandle(ref, () => ({ close, confirm, open }), [close, confirm, open])
 
   return (
     <Picker
-      {...pickerProps}
-      cancelButtonText={cancelText}
+      {...props}
       columns={columns}
+      defaultValue={pickerDefaultValue}
+      onCancel={onCancel}
+      onChange={handleChange}
+      onConfirm={handleConfirm}
+      ref={pickerRef}
+      value={pickerValue}
+      cancelButtonText={cancelText}
       confirmButtonText={confirmText}
-      onCancel={handleCancel}
-      onChange={handlePickerChange}
-      onConfirm={handlePickerConfirm}
-      testID={testID ?? 'date-picker'}
-      title={title}
-      value={getDatePickerValues(draftDate, type)}
-      visible={isVisible}
     />
   )
 })

@@ -1,143 +1,53 @@
-import { forwardRef, memo, useCallback, useLayoutEffect, useMemo, useRef } from 'react'
+import { Easing } from 'react-native-reanimated'
+import {
+  forwardRef,
+  memo,
+  useCallback,
+  useImperativeHandle,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from 'react'
+import type { StyleProp, TextStyle, ViewStyle } from 'react-native'
 import { View } from 'react-native'
-import Animated, {
-  Extrapolation,
-  interpolate,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-} from 'react-native-reanimated'
+import { Gesture, GestureDetector } from '../gesture'
 import { InteractionPressable } from '../interaction'
 import { Text } from '../text'
-import { useComponentToken } from '../theme'
+import { useComponentToken, useToken } from '../theme'
+import { scheduleOnRN } from 'react-native-worklets'
+import Animated, {
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated'
 import { getPickerStyles } from './style'
 import { getPickerToken } from './token'
-import { findNearestEnabledIndex } from './use-picker'
+import {
+  DEFAULT_DURATION,
+  findEnabledIndex,
+  findEnabledIndexWorklet,
+  getIndexByOffset,
+  getMomentumTarget,
+  getOffsetByIndex,
+  MOMENTUM_TIME,
+} from './utils'
 import type { PickerOption } from './types'
-import type {
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  ScrollView as ScrollViewType,
-  StyleProp,
-  TextStyle,
-  ViewStyle,
-} from 'react-native'
 
-const AnimatedText = Animated.createAnimatedComponent(Text)
+const LOCK_DISTANCE = 10
+const PICKER_EASING = Easing.bezier(0.23, 1, 0.68, 1)
 
-function getPickerOptionKey(value: PickerOption['value']) {
-  return `${typeof value}:${String(value)}`
+export interface PickerColumnRef {
+  stopMomentum(): number | null
 }
-
-const PICKER_MOMENTUM_VELOCITY_EPSILON = 0.05
-
-interface PickerColumnItemProps {
-  item: PickerOption
-  index: number
-  itemStyle?: StyleProp<ViewStyle>
-  itemLabelStyle?: StyleProp<TextStyle>
-  columnIndex: number
-  selectedIndex: number
-  scrollOffset: ReturnType<typeof useSharedValue<number>>
-  itemHeight: number
-  inactiveOpacity: number
-  inactiveScale: number
-  translateY: number
-  token: ReturnType<typeof getPickerToken>
-  resolvedStyles: ReturnType<typeof getPickerStyles>
-  onPress: (index: number) => void
-}
-
-const PickerColumnItem = memo(function PickerColumnItem({
-  item,
-  index,
-  itemStyle,
-  itemLabelStyle,
-  columnIndex,
-  selectedIndex,
-  scrollOffset,
-  itemHeight,
-  inactiveOpacity,
-  inactiveScale,
-  translateY,
-  token,
-  resolvedStyles,
-  onPress,
-}: PickerColumnItemProps) {
-  const animatedLabelStyle = useAnimatedStyle(() => {
-    const inputRange = [
-      (index - 2) * itemHeight,
-      (index - 1) * itemHeight,
-      index * itemHeight,
-      (index + 1) * itemHeight,
-      (index + 2) * itemHeight,
-    ]
-    const adjacentOpacity = Math.min(1, inactiveOpacity + 0.35)
-    const adjacentScale = Math.min(1, inactiveScale + 0.05)
-
-    return {
-      opacity: interpolate(
-        scrollOffset.value,
-        inputRange,
-        [inactiveOpacity, adjacentOpacity, 1, adjacentOpacity, inactiveOpacity],
-        Extrapolation.CLAMP,
-      ),
-      transform: [
-        {
-          translateY: interpolate(
-            scrollOffset.value,
-            inputRange,
-            [translateY, translateY / 2, 0, -translateY / 2, -translateY],
-            Extrapolation.CLAMP,
-          ),
-        },
-        {
-          scale: interpolate(
-            scrollOffset.value,
-            inputRange,
-            [inactiveScale, adjacentScale, 1, adjacentScale, inactiveScale],
-            Extrapolation.CLAMP,
-          ),
-        },
-      ],
-    }
-  }, [index, inactiveOpacity, inactiveScale, itemHeight, scrollOffset, translateY])
-
-  return (
-    <InteractionPressable
-      accessibilityRole="radio"
-      accessibilityState={{ disabled: item.disabled, selected: index === selectedIndex }}
-      disabled={item.disabled}
-      onPress={() => onPress(index)}
-      style={[resolvedStyles.item, itemStyle]}
-      testID={`picker-item-${columnIndex}-${index}`}
-    >
-      <AnimatedText
-        numberOfLines={1}
-        style={[
-          resolvedStyles.itemLabel,
-          itemLabelStyle,
-          {
-            color: item.disabled
-              ? token.picker_disabled_text_color
-              : index === selectedIndex
-                ? token.picker_active_text_color
-                : token.picker_text_color,
-          },
-          animatedLabelStyle,
-        ]}
-      >
-        {item.text}
-      </AnimatedText>
-    </InteractionPressable>
-  )
-})
 
 export interface PickerColumnProps {
   items: readonly PickerOption[]
   selectedIndex: number
   itemHeight: number
   visibleItemCount: number
+  swipeDuration?: number
+  disabled?: boolean
   columnIndex: number
   onIndexChange?: (index: number) => void
   style?: StyleProp<ViewStyle>
@@ -146,12 +56,66 @@ export interface PickerColumnProps {
   testID?: string
 }
 
-export const PickerColumn = forwardRef<View, PickerColumnProps>(function PickerColumn(
+interface ItemProps {
+  item: PickerOption
+  index: number
+  selectedIndex: number
+  columnDisabled: boolean
+  columnIndex: number
+  styles: ReturnType<typeof getPickerStyles>
+  token: ReturnType<typeof getPickerToken>
+  onPress: (index: number) => void
+  itemStyle?: StyleProp<ViewStyle>
+  itemLabelStyle?: StyleProp<TextStyle>
+}
+
+interface PendingSnap {
+  emitChange: boolean
+  index: number
+}
+
+const PickerColumnItem = memo(function PickerColumnItem({
+  item,
+  index,
+  selectedIndex,
+  columnDisabled,
+  columnIndex,
+  styles,
+  token,
+  onPress,
+  itemStyle,
+  itemLabelStyle,
+}: ItemProps) {
+  const disabled = columnDisabled || item.disabled === true
+
+  return (
+    <InteractionPressable
+      accessibilityRole="radio"
+      accessibilityState={{ disabled, selected: index === selectedIndex }}
+      disabled={disabled}
+      onPress={() => onPress(index)}
+      style={[
+        styles.item,
+        itemStyle,
+        item.disabled && { opacity: token.picker_disabled_option_opacity },
+      ]}
+      testID={`picker-item-${columnIndex}-${index}`}
+    >
+      <Text numberOfLines={1} style={[styles.itemLabel, itemLabelStyle]}>
+        {item.text}
+      </Text>
+    </InteractionPressable>
+  )
+})
+
+export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(function PickerColumn(
   {
     items,
     selectedIndex,
     itemHeight,
     visibleItemCount,
+    swipeDuration,
+    disabled = false,
     columnIndex,
     onIndexChange,
     style,
@@ -161,145 +125,333 @@ export const PickerColumn = forwardRef<View, PickerColumnProps>(function PickerC
   },
   ref,
 ) {
+  const { token: themeToken } = useToken()
   const token = useComponentToken('Picker', getPickerToken)
-  const resolvedVisibleItemCount = Math.max(1, Math.floor(visibleItemCount) || 1)
-  const topInset = ((resolvedVisibleItemCount - 1) * itemHeight) / 2
-  const bottomInset = topInset
-  const maxIndex = Math.max(0, items.length - 1)
-  const nextIndex = selectedIndex < 0 ? -1 : findNearestEnabledIndex(items, selectedIndex)
-  const initialIndex = Math.max(0, nextIndex)
-  const scrollRef = useRef<ScrollViewType>(null)
-  const scrollOffset = useSharedValue(initialIndex * itemHeight)
-  const currentIndexRef = useRef(initialIndex)
-  const programmaticSettleRef = useRef<number | null>(null)
+  const count = items.length
+  const visible = Math.max(1, Math.floor(visibleItemCount) || 1)
+  const resolvedSwipeDuration = Number.isFinite(swipeDuration)
+    ? Math.max(0, swipeDuration as number)
+    : DEFAULT_DURATION
+  const styles = useMemo(
+    () => getPickerStyles(token, itemHeight, visible),
+    [itemHeight, token, visible],
+  )
+  const enabledFlags = useMemo(() => items.map((item) => !item.disabled), [items])
+  const itemsKey = useMemo(
+    () =>
+      items
+        .map((item) => `${typeof item.value}:${String(item.value)}:${item.disabled ? 'd' : 'e'}`)
+        .join('|'),
+    [items],
+  )
+  const selectedIndexRef = useRef(selectedIndex)
+  selectedIndexRef.current = selectedIndex
   const onIndexChangeRef = useRef(onIndexChange)
   onIndexChangeRef.current = onIndexChange
 
-  const resolvedStyles = useMemo(
-    () => getPickerStyles(token, itemHeight, resolvedVisibleItemCount),
-    [itemHeight, resolvedVisibleItemCount, token],
-  )
-  const optionKeys = useMemo(() => {
-    const occurrences = new Map<string, number>()
-    return items.map((item) => {
-      const baseKey = getPickerOptionKey(item.value)
-      const occurrence = occurrences.get(baseKey) ?? 0
-      occurrences.set(baseKey, occurrence + 1)
-      return `${baseKey}:${occurrence}`
-    })
-  }, [items])
+  const initialIndex = findEnabledIndex(items, selectedIndex)
+  const offset = useSharedValue(getOffsetByIndex(Math.max(0, initialIndex), itemHeight))
+  const startOffset = useSharedValue(offset.value)
+  const momentumOffset = useSharedValue(offset.value)
+  const touchStartTime = useSharedValue(0)
+  const panActive = useSharedValue(false)
+  const panEndHandled = useSharedValue(false)
+  const snapGeneration = useSharedValue(0)
+  const generationRef = useRef(0)
+  const pendingSnapRef = useRef<PendingSnap | null>(null)
+  const motionEnabled = themeToken.motion !== false
+  const previousItemsKeyRef = useRef<string | null>(null)
+  const previousSelectedIndexRef = useRef(selectedIndex)
+  const previousItemHeightRef = useRef(itemHeight)
 
-  const scrollToIndex = useCallback(
-    (index: number, animated: boolean) => {
-      scrollRef.current?.scrollTo({ y: Math.max(0, index * itemHeight), animated })
+  const invalidateSnap = useCallback(() => {
+    const generation = Math.max(generationRef.current, snapGeneration.value) + 1
+    generationRef.current = generation
+    snapGeneration.value = generation
+    pendingSnapRef.current = null
+    return generation
+  }, [snapGeneration])
+
+  const beginPan = useCallback(
+    (generation: number) => {
+      if (generation !== snapGeneration.value) return
+      generationRef.current = generation
+      pendingSnapRef.current = null
     },
-    [itemHeight],
+    [snapGeneration],
   )
 
-  const settle = useCallback(
-    (offset: number, animated: boolean) => {
-      const snapped = Math.min(maxIndex, Math.max(0, Math.round(offset / itemHeight)))
-      const target = findNearestEnabledIndex(items, snapped)
-      if (target < 0) return
-      const targetOffset = target * itemHeight
-      const needsCorrection = Math.abs(offset - targetOffset) > 0.5
-      if (target !== currentIndexRef.current) {
-        currentIndexRef.current = target
-        if (needsCorrection) {
-          programmaticSettleRef.current = target
-          scrollToIndex(target, animated)
-        }
-        onIndexChangeRef.current?.(target)
-      } else if (needsCorrection) {
-        programmaticSettleRef.current = target
-        scrollToIndex(target, animated)
-      }
+  const beginPendingSnap = useCallback(
+    (index: number, generation: number, emitChange: boolean) => {
+      if (generation !== snapGeneration.value) return
+      generationRef.current = generation
+      pendingSnapRef.current = { emitChange, index }
     },
-    [itemHeight, items, maxIndex, scrollToIndex],
+    [snapGeneration],
   )
+
+  const commitSnap = useCallback((index: number, generation: number) => {
+    const pending = pendingSnapRef.current
+    if (generationRef.current !== generation || pending === null || pending.index !== index) return
+    pendingSnapRef.current = null
+    if (pending.emitChange) onIndexChangeRef.current?.(index)
+  }, [])
 
   useLayoutEffect(() => {
-    if (nextIndex < 0 || currentIndexRef.current === nextIndex) return
-    currentIndexRef.current = nextIndex
-    scrollOffset.value = nextIndex * itemHeight
-    scrollToIndex(nextIndex, false)
-  }, [itemHeight, items.length, nextIndex, scrollOffset, scrollToIndex])
+    const structuralChange =
+      previousItemsKeyRef.current !== null && previousItemsKeyRef.current !== itemsKey
+    const selectedChange = previousSelectedIndexRef.current !== selectedIndex
+    const itemHeightChange = previousItemHeightRef.current !== itemHeight
 
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollOffset.value = event.contentOffset.y
-    },
-  })
-  const handleScrollEndDrag = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      programmaticSettleRef.current = null
-      const velocityY = Math.abs(event.nativeEvent.velocity?.y ?? 0)
-      if (velocityY <= PICKER_MOMENTUM_VELOCITY_EPSILON) {
-        settle(event.nativeEvent.contentOffset.y, true)
-      }
-    },
-    [settle],
-  )
-  const handleMomentumEnd = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (programmaticSettleRef.current !== null) {
-        programmaticSettleRef.current = null
+    if (
+      previousItemsKeyRef.current === null ||
+      structuralChange ||
+      selectedChange ||
+      itemHeightChange
+    ) {
+      cancelAnimation(offset)
+      invalidateSnap()
+      const nextIndex = findEnabledIndex(items, selectedIndex)
+      offset.value = getOffsetByIndex(Math.max(0, nextIndex), itemHeight)
+    }
+
+    previousItemsKeyRef.current = itemsKey
+    previousSelectedIndexRef.current = selectedIndex
+    previousItemHeightRef.current = itemHeight
+  }, [invalidateSnap, itemHeight, items, itemsKey, offset, selectedIndex])
+
+  const animateTap = useCallback(
+    (index: number) => {
+      const targetIndex = findEnabledIndex(items, index)
+      if (targetIndex < 0) return
+
+      cancelAnimation(offset)
+      const generation = invalidateSnap()
+      const emitChange = targetIndex !== findEnabledIndex(items, selectedIndexRef.current)
+      pendingSnapRef.current = { emitChange, index: targetIndex }
+      const targetOffset = getOffsetByIndex(targetIndex, itemHeight)
+      if (!motionEnabled) {
+        offset.value = targetOffset
+        commitSnap(targetIndex, generation)
         return
       }
-      settle(event.nativeEvent.contentOffset.y, true)
+      offset.value = withTiming(
+        targetOffset,
+        { duration: resolvedSwipeDuration, easing: PICKER_EASING },
+        (finished) => {
+          'worklet'
+          if (finished && snapGeneration.value === generation) {
+            scheduleOnRN(commitSnap, targetIndex, generation)
+          }
+        },
+      )
     },
-    [settle],
+    [
+      commitSnap,
+      invalidateSnap,
+      itemHeight,
+      items,
+      motionEnabled,
+      offset,
+      resolvedSwipeDuration,
+      snapGeneration,
+    ],
   )
+
+  const gesture = useMemo(() => {
+    const pan = Gesture.Pan()
+      .enabled(!disabled && count > 0)
+      .maxPointers(1)
+      .activeOffsetY([-LOCK_DISTANCE, LOCK_DISTANCE])
+      .failOffsetX([-LOCK_DISTANCE, LOCK_DISTANCE])
+      .onBegin(() => {
+        'worklet'
+        panActive.value = false
+        panEndHandled.value = false
+      })
+      .onStart(() => {
+        'worklet'
+        if (count === 0) return
+        const generation = snapGeneration.value + 1
+        snapGeneration.value = generation
+        panActive.value = true
+        panEndHandled.value = false
+        cancelAnimation(offset)
+        startOffset.value = offset.value
+        momentumOffset.value = offset.value
+        touchStartTime.value = Date.now()
+        scheduleOnRN(beginPan, generation)
+      })
+      .onUpdate((event) => {
+        'worklet'
+        if (!panActive.value || count === 0) return
+        const nextOffset = startOffset.value + event.translationY
+        const minOffset = -(count - 1) * itemHeight
+        offset.value = Math.max(minOffset, Math.min(0, nextOffset))
+        const now = Date.now()
+        if (now - touchStartTime.value > MOMENTUM_TIME) {
+          touchStartTime.value = now
+          momentumOffset.value = offset.value
+        }
+      })
+      .onEnd((event, success) => {
+        'worklet'
+        if (!panActive.value || !success || count === 0) return
+
+        const duration = Math.max(1, Date.now() - touchStartTime.value)
+        const momentumTarget = getMomentumTarget({
+          offset: offset.value,
+          momentumOffset: momentumOffset.value,
+          duration,
+        })
+        const rawIndex = getIndexByOffset(momentumTarget ?? offset.value, itemHeight, count)
+        const targetIndex = findEnabledIndexWorklet(enabledFlags, rawIndex)
+        if (targetIndex < 0) {
+          panEndHandled.value = true
+          return
+        }
+
+        const generation = snapGeneration.value + 1
+        snapGeneration.value = generation
+        const emitChange = targetIndex !== selectedIndexRef.current
+        panEndHandled.value = true
+        scheduleOnRN(beginPendingSnap, targetIndex, generation, emitChange)
+        const targetOffset = getOffsetByIndex(targetIndex, itemHeight)
+        if (!motionEnabled) {
+          offset.value = targetOffset
+          scheduleOnRN(commitSnap, targetIndex, generation)
+        } else {
+          offset.value = withTiming(
+            targetOffset,
+            {
+              duration: resolvedSwipeDuration,
+              easing: PICKER_EASING,
+            },
+            (finished) => {
+              'worklet'
+              if (finished && snapGeneration.value === generation) {
+                scheduleOnRN(commitSnap, targetIndex, generation)
+              }
+            },
+          )
+        }
+      })
+      .onFinalize(() => {
+        'worklet'
+        if (!panActive.value) return
+
+        if (!panEndHandled.value && count > 0) {
+          const rawIndex = getIndexByOffset(offset.value, itemHeight, count)
+          const targetIndex = findEnabledIndexWorklet(enabledFlags, rawIndex)
+          if (targetIndex >= 0) {
+            const generation = snapGeneration.value + 1
+            snapGeneration.value = generation
+            const emitChange = targetIndex !== selectedIndexRef.current
+            panEndHandled.value = true
+            scheduleOnRN(beginPendingSnap, targetIndex, generation, emitChange)
+            const targetOffset = getOffsetByIndex(targetIndex, itemHeight)
+            if (!motionEnabled) {
+              offset.value = targetOffset
+              scheduleOnRN(commitSnap, targetIndex, generation)
+            } else {
+              offset.value = withTiming(
+                targetOffset,
+                { duration: resolvedSwipeDuration, easing: PICKER_EASING },
+                (finished) => {
+                  'worklet'
+                  if (finished && snapGeneration.value === generation) {
+                    scheduleOnRN(commitSnap, targetIndex, generation)
+                  }
+                },
+              )
+            }
+          }
+        }
+
+        panActive.value = false
+        panEndHandled.value = false
+      })
+
+    if (testID) pan.withTestId(`${testID}-gesture`)
+    return pan
+  }, [
+    beginPan,
+    beginPendingSnap,
+    commitSnap,
+    count,
+    disabled,
+    enabledFlags,
+    itemHeight,
+    motionEnabled,
+    momentumOffset,
+    offset,
+    panActive,
+    panEndHandled,
+    snapGeneration,
+    startOffset,
+    resolvedSwipeDuration,
+    testID,
+    touchStartTime,
+  ])
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      stopMomentum() {
+        const pendingIndex = pendingSnapRef.current?.index
+        cancelAnimation(offset)
+        invalidateSnap()
+        if (count === 0) {
+          offset.value = 0
+          return null
+        }
+
+        const rawIndex = pendingIndex ?? getIndexByOffset(offset.value, itemHeight, count)
+        const finalIndex = findEnabledIndex(items, rawIndex)
+        if (finalIndex < 0) {
+          offset.value = 0
+          return null
+        }
+        offset.value = getOffsetByIndex(finalIndex, itemHeight)
+        return finalIndex
+      },
+    }),
+    [count, invalidateSnap, itemHeight, items, offset],
+  )
+
   const handlePress = useCallback(
     (index: number) => {
-      if (items[index]?.disabled) return
-      if (index === currentIndexRef.current) return
-      currentIndexRef.current = index
-      programmaticSettleRef.current = index
-      scrollToIndex(index, true)
-      onIndexChangeRef.current?.(index)
+      if (disabled || items[index]?.disabled) return
+      animateTap(index)
     },
-    [items, scrollToIndex],
+    [animateTap, disabled, items],
+  )
+  const wrapperStyle = useAnimatedStyle(
+    () => ({ transform: [{ translateY: ((visible - 1) * itemHeight) / 2 + offset.value }] }),
+    [itemHeight, offset, visible],
   )
 
   return (
-    <View ref={ref} style={[resolvedStyles.column, style]} testID={testID}>
-      <Animated.ScrollView
-        ref={scrollRef}
-        contentOffset={{ x: 0, y: initialIndex * itemHeight }}
-        contentContainerStyle={{ paddingBottom: bottomInset, paddingTop: topInset }}
-        decelerationRate="fast"
-        keyboardShouldPersistTaps="handled"
-        nestedScrollEnabled
-        onMomentumScrollEnd={handleMomentumEnd}
-        onScroll={scrollHandler}
-        onScrollEndDrag={handleScrollEndDrag}
-        scrollEventThrottle={16}
-        showsVerticalScrollIndicator={false}
-        snapToAlignment="start"
-        snapToInterval={itemHeight}
-        testID={testID ? `${testID}-viewport` : undefined}
-      >
-        {items.map((item, index) => (
-          <PickerColumnItem
-            columnIndex={columnIndex}
-            index={index}
-            item={item}
-            itemLabelStyle={itemLabelStyle}
-            itemHeight={itemHeight}
-            itemStyle={itemStyle}
-            inactiveOpacity={token.picker_item_inactive_opacity}
-            inactiveScale={token.picker_item_inactive_scale}
-            key={optionKeys[index]}
-            onPress={handlePress}
-            resolvedStyles={resolvedStyles}
-            scrollOffset={scrollOffset}
-            selectedIndex={nextIndex}
-            token={token}
-            translateY={token.picker_item_translate_y}
-          />
-        ))}
-      </Animated.ScrollView>
+    <View style={[styles.column, style]} testID={testID}>
+      <GestureDetector gesture={gesture}>
+        <Animated.View style={wrapperStyle} testID={testID ? `${testID}-viewport` : undefined}>
+          {items.map((item, index) => (
+            <PickerColumnItem
+              key={`${typeof item.value}:${String(item.value)}:${index}`}
+              columnIndex={columnIndex}
+              index={index}
+              item={item}
+              columnDisabled={disabled}
+              itemLabelStyle={itemLabelStyle}
+              itemStyle={itemStyle}
+              onPress={handlePress}
+              selectedIndex={selectedIndex}
+              styles={styles}
+              token={token}
+            />
+          ))}
+        </Animated.View>
+      </GestureDetector>
     </View>
   )
 })

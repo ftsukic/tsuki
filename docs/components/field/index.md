@@ -138,7 +138,7 @@ button 选项可以设置每行列数；例如文档中的 FieldRadio fixture �
 
 ## FieldPicker
 
-`FieldPicker` 将已确认的选项文本直接交给 Cell 展示，并将 Picker 作为 Cell 外部的弹层兄弟节点渲染。Picker 滚动只更新 draft；点击确认后才调用 `onChange`，取消、遮罩关闭或 readOnly 不会提交值。
+`FieldPicker` 将已确认的选项文本直接交给 Cell 展示，并将 `Popup` 与纯 `Picker` 作为 Cell 外部的弹层兄弟节点渲染。Picker 滚动只更新 draft；点击确认后才调用 `onChange`，取消、遮罩关闭或 readOnly 不会提交值。
 
 ```tsx | pure
 <FieldPicker
@@ -152,7 +152,7 @@ button 选项可以设置每行列数；例如文档中的 FieldRadio fixture �
 />
 ```
 
-`pickerStyle` 和 `pickerStyles` 只作用于 Picker；Picker 的 `visible`、`onChange`、`onConfirm` 和 `onCancel` 由适配器管理。没有已选值或选项时显示 `placeholder`。
+`pickerStyle` 和 `pickerStyles` 只作用于 Picker；Popup 的 `visible` 以及 Picker 的 `onChange`、`onConfirm` 和 `onCancel` 均由适配器管理。没有已选值或选项时显示 `placeholder`。Picker 本身不接收 Popup props。
 
 ## FieldDateRangePicker
 

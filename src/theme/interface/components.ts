@@ -319,9 +319,12 @@ export interface CheckboxToken {
 export interface TabsToken {
   height: number
   paddingHorizontal: number
+  paddingXS: number
   fontSize: number
-  activeColor: string
-  inactiveColor: string
+  lineHeight: number
+  activeTextColor: string
+  inactiveTextColor: string
+  indicatorColor: string
   disabledColor: string
   indicatorHeight: number
   indicatorWidth: number
@@ -405,18 +408,22 @@ export interface PickerToken {
   picker_item_font_size: number
   picker_item_line_height: number
   picker_text_color: string
+  picker_disabled_text_color: string
   picker_active_text_color: string
+  picker_cancel_button_color: string
+  picker_confirm_button_color: string
+  picker_disabled_option_opacity: number
   picker_indicator_color: string
   picker_mask_color: string
   picker_background_color: string
   picker_toolbar_button_font_size: number
   picker_toolbar_button_line_height: number
   picker_toolbar_padding_horizontal: number
+  picker_toolbar_button_active_opacity: number
   picker_border_width: number
   picker_item_padding_horizontal: number
-  picker_item_inactive_opacity: number
-  picker_item_inactive_scale: number
-  picker_item_translate_y: number
+  picker_swipe_duration: number
+  picker_indicator_horizontal_inset: number
   picker_mask_opacities: readonly number[]
   picker_font_family: string
 }

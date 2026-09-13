@@ -1,17 +1,71 @@
-import { forwardRef, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useId,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { View } from 'react-native'
-import { Popup } from '../popup'
+import { Defs, LinearGradient, Rect, Stop, Svg } from 'react-native-svg'
+import { Loading } from '../loading'
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import { PickerToolbar } from './picker-toolbar'
-import { PickerView } from './picker-view'
+import { PickerColumn } from './picker-column'
+import type { PickerColumnRef } from './picker-column'
 import { getPickerStyles } from './style'
 import { getPickerToken } from './token'
-import { resolvePickerState } from './use-picker'
-import type { ResolvedPickerState } from './use-picker'
-import type { PickerOption, PickerProps, PickerValue } from './types'
+import { arePickerValuesEqual, resolvePickerState } from './utils'
+import type { ResolvedPickerState } from './utils'
+import type { PickerOption, PickerProps, PickerRef, PickerSelection, PickerValue } from './types'
+import { usePickerGroup } from '../picker-group/context'
 
-export const Picker = forwardRef<View, PickerProps>(function Picker(
+function PickerMask({
+  height,
+  maskHeight,
+  color,
+  opacities,
+  style,
+}: {
+  height: number
+  maskHeight: number
+  color: string
+  opacities: readonly number[]
+  style?: object
+}) {
+  const id = useId().replace(/:/gu, '')
+  const outer = opacities[0] ?? 0.9
+  const inner = opacities[1] ?? 0.4
+  return (
+    <Svg
+      height={height}
+      pointerEvents="none"
+      preserveAspectRatio="none"
+      style={style}
+      testID="picker-mask"
+      viewBox={`0 0 100 ${height}`}
+      width="100%"
+    >
+      <Defs>
+        <LinearGradient id={`${id}-top`} x1="0%" x2="0%" y1="0%" y2="100%">
+          <Stop offset="0%" stopColor={color} stopOpacity={outer} />
+          <Stop offset="100%" stopColor={color} stopOpacity={inner} />
+        </LinearGradient>
+        <LinearGradient id={`${id}-bottom`} x1="0%" x2="0%" y1="0%" y2="100%">
+          <Stop offset="0%" stopColor={color} stopOpacity={inner} />
+          <Stop offset="100%" stopColor={color} stopOpacity={outer} />
+        </LinearGradient>
+      </Defs>
+      <Rect fill={`url(#${id}-top)`} height={maskHeight} width="100%" />
+      <Rect fill={`url(#${id}-bottom)`} height={maskHeight} width="100%" y={height - maskHeight} />
+    </Svg>
+  )
+}
+
+export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
   {
     columns,
     value,
@@ -21,16 +75,13 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
     showToolbarDivider = false,
     confirmButtonText = '确定',
     cancelButtonText = '取消',
-    visible,
-    overlay = true,
-    closeOnPressOverlay = true,
-    safeAreaInsetBottom = true,
-    duration,
+    swipeDuration,
     onChange,
     onConfirm,
     onCancel,
     itemHeight,
     visibleItemCount,
+    loading = false,
     style,
     styles,
     testID,
@@ -38,49 +89,36 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
   },
   ref,
 ) {
+  const group = usePickerGroup()
   const token = useComponentToken('Picker', getPickerToken)
-  const previousResolvedStateRef = useRef<ResolvedPickerState | undefined>(undefined)
-  const initialValues = useMemo(
-    () =>
-      resolvePickerState(columns, value ?? defaultValue, previousResolvedStateRef.current).values,
-    [columns, defaultValue, value],
+  const controlled = value !== undefined
+  const initialRequestedValues = useMemo<readonly PickerValue[]>(
+    () => value ?? defaultValue ?? [],
+    [defaultValue, value],
   )
-  const [committedValues, setCommittedValues] = useState<readonly PickerValue[]>(initialValues)
-  const [draftValues, setDraftValues] = useState<readonly PickerValue[]>(initialValues)
-  const committedValuesRef = useRef(committedValues)
-  const previousVisibleRef = useRef<boolean | undefined>(visible)
-  const isPopup = visible !== undefined
-  const isVisible = visible === true
-
-  committedValuesRef.current = committedValues
+  const initialValues = useMemo(
+    () => resolvePickerState(columns, initialRequestedValues).values,
+    [columns, initialRequestedValues],
+  )
+  const [internalValues, setInternalValues] = useState<readonly PickerValue[]>(initialValues)
+  const requestedValuesRef = useRef<readonly PickerValue[]>(initialRequestedValues)
+  if (controlled) requestedValuesRef.current = value
+  const columnsRef = useRef(columns)
+  columnsRef.current = columns
+  const previousResolvedStateRef = useRef<ResolvedPickerState | undefined>(undefined)
+  const requestedValues = controlled ? value : internalValues
+  const selectedValuesRef = useRef<readonly PickerValue[]>(initialValues)
+  const columnRefs = useRef<Array<PickerColumnRef | null>>([])
 
   useEffect(() => {
+    if (controlled) return
     const nextValues = resolvePickerState(
       columns,
-      value ?? committedValuesRef.current,
+      requestedValuesRef.current,
       previousResolvedStateRef.current,
     ).values
-    committedValuesRef.current = nextValues
-    setCommittedValues(nextValues)
-    if (value !== undefined || visible !== true) setDraftValues(nextValues)
-  }, [columns, value, visible])
-
-  useEffect(() => {
-    if (!isPopup) {
-      previousVisibleRef.current = visible
-      return
-    }
-
-    const wasVisible = previousVisibleRef.current
-    previousVisibleRef.current = visible
-    if (isVisible && wasVisible !== true) {
-      const nextValues =
-        value === undefined
-          ? committedValuesRef.current
-          : resolvePickerState(columns, value, previousResolvedStateRef.current).values
-      setDraftValues(nextValues)
-    }
-  }, [columns, isPopup, isVisible, value, visible])
+    if (!arePickerValuesEqual(internalValues, nextValues)) setInternalValues(nextValues)
+  }, [columns, controlled, internalValues])
 
   const itemHeightValue = Number.isFinite(itemHeight)
     ? Math.max(1, itemHeight as number)
@@ -93,10 +131,11 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
     [itemHeightValue, token, visibleItemCountValue],
   )
   const resolvedState = useMemo(
-    () => resolvePickerState(columns, draftValues, previousResolvedStateRef.current),
-    [columns, draftValues],
+    () => resolvePickerState(columns, requestedValues, previousResolvedStateRef.current),
+    [columns, requestedValues],
   )
   previousResolvedStateRef.current = resolvedState
+  selectedValuesRef.current = resolvedState.values
   const pickerProps: PickerProps = {
     ...viewProps,
     columns,
@@ -107,16 +146,13 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
     showToolbarDivider,
     confirmButtonText,
     cancelButtonText,
-    visible,
-    overlay,
-    closeOnPressOverlay,
-    safeAreaInsetBottom,
-    duration,
+    swipeDuration,
     onChange,
     onConfirm,
     onCancel,
     itemHeight,
     visibleItemCount,
+    loading,
     style,
     styles,
   }
@@ -126,38 +162,93 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
       values: resolvedState.values,
       options: resolvedState.options,
       indexes: resolvedState.indexes,
-      visible: isVisible,
     },
   })
 
-  const handleChange = (nextValues: readonly PickerValue[], options: readonly PickerOption[]) => {
-    setDraftValues(nextValues)
-    onChange?.(nextValues, options)
-  }
+  const handleChange = useCallback(
+    (nextValues: readonly PickerValue[], options: readonly PickerOption[]) => {
+      if (!controlled) {
+        requestedValuesRef.current = nextValues
+        setInternalValues(nextValues)
+      }
+      onChange?.(nextValues, options)
+    },
+    [controlled, onChange],
+  )
 
-  const handleConfirm = () => {
-    const result = resolvePickerState(columns, draftValues, previousResolvedStateRef.current)
-    if (value === undefined) {
-      committedValuesRef.current = result.values
-      setCommittedValues(result.values)
+  const settleColumns = useCallback(() => {
+    const nextValues = [...resolvedState.values]
+    columnRefs.current.forEach((column, columnIndex) => {
+      const finalIndex = column?.stopMomentum()
+      if (finalIndex == null) return
+      const option = resolvedState.columns[columnIndex]?.items[finalIndex]
+      if (option) nextValues[columnIndex] = option.value
+    })
+    const next = resolvePickerState(columns, nextValues, resolvedState)
+    if (!controlled) {
+      requestedValuesRef.current = next.values
+      setInternalValues(next.values)
     }
-    setDraftValues(result.values)
-    onConfirm?.(result.values, result.options)
-  }
+    return next
+  }, [columns, controlled, resolvedState])
 
-  const handleCancel = () => {
-    setDraftValues(committedValuesRef.current)
+  const handleConfirm = useCallback((): PickerSelection => {
+    const settled = settleColumns()
+    const result = controlled
+      ? {
+          values: resolvedState.values,
+          options: resolvedState.options,
+          indexes: resolvedState.indexes,
+        }
+      : settled
+    onConfirm?.(result.values, result.options)
+    return { values: result.values, options: result.options, indexes: result.indexes }
+  }, [controlled, onConfirm, resolvedState, settleColumns])
+
+  const handleCancel = useCallback(() => {
     onCancel?.()
-  }
+  }, [onCancel])
+
+  const confirmHandlerRef = useRef(handleConfirm)
+  confirmHandlerRef.current = handleConfirm
+  const cancelHandlerRef = useRef(handleCancel)
+  cancelHandlerRef.current = handleCancel
+
+  const pickerRef = useMemo<PickerRef>(
+    () => ({
+      cancel: () => cancelHandlerRef.current(),
+      confirm: () => confirmHandlerRef.current(),
+      getSelectedOptions: () =>
+        resolvePickerState(
+          columnsRef.current,
+          selectedValuesRef.current,
+          previousResolvedStateRef.current,
+        ).options,
+      getSelectedValues: () =>
+        resolvePickerState(
+          columnsRef.current,
+          selectedValuesRef.current,
+          previousResolvedStateRef.current,
+        ).values,
+    }),
+    [],
+  )
+  useImperativeHandle(ref, () => pickerRef, [pickerRef])
+  useEffect(() => {
+    if (group) group.register(group.index, pickerRef)
+    return () => {
+      if (group) group.register(group.index, null)
+    }
+  }, [group, group?.index, pickerRef])
 
   const content = (
     <View
       {...viewProps}
-      ref={isPopup ? undefined : ref}
-      style={[resolved.root, semantic?.root, !isPopup ? semantic?.container : null, style]}
+      ref={undefined}
+      style={[resolved.root, semantic?.root, semantic?.container, style]}
       testID={testID ?? 'picker'}
     >
-      {showToolbar ? (
+      {showToolbar && !group ? (
         <PickerToolbar
           buttonLabelStyle={semantic?.toolbarButtonLabel}
           buttonStyle={semantic?.toolbarButton}
@@ -172,45 +263,72 @@ export const Picker = forwardRef<View, PickerProps>(function Picker(
           title={title}
         />
       ) : null}
-      <PickerView
-        columns={columns}
-        defaultValue={defaultValue}
-        itemHeight={itemHeight}
-        onChange={handleChange}
-        styles={{
-          column: semantic?.column,
-          columns: semantic?.columns,
-          indicator: semantic?.indicator,
-          item: semantic?.item,
-          itemLabel: semantic?.itemLabel,
-          mask: semantic?.mask,
-          root: undefined,
-        }}
-        value={draftValues}
-        visibleItemCount={visibleItemCountValue}
-      />
+      <View style={resolved.view} testID="picker-frame">
+        <View
+          accessibilityElementsHidden={loading || undefined}
+          importantForAccessibility={loading ? 'no-hide-descendants' : undefined}
+          style={[resolved.columns, semantic?.columns]}
+          testID="picker-columns"
+        >
+          {resolvedState.columns.map((column, columnIndex) => (
+            <PickerColumn
+              key={columnIndex}
+              columnIndex={columnIndex}
+              disabled={loading || column.items.length === 0}
+              itemHeight={itemHeightValue}
+              itemLabelStyle={semantic?.itemLabel}
+              itemStyle={semantic?.item}
+              items={column.items}
+              swipeDuration={swipeDuration ?? token.picker_swipe_duration}
+              onIndexChange={(index) => {
+                const nextValues = [...resolvedState.values]
+                nextValues[columnIndex] = column.items[index].value
+                const next = resolvePickerState(columns, nextValues, resolvedState)
+                handleChange(next.values, next.options)
+              }}
+              ref={(columnRef) => {
+                columnRefs.current[columnIndex] = columnRef
+              }}
+              selectedIndex={column.index}
+              style={semantic?.column}
+              testID={`picker-column-${columnIndex}`}
+              visibleItemCount={visibleItemCountValue}
+            />
+          ))}
+        </View>
+        <PickerMask
+          color={token.picker_mask_color}
+          height={itemHeightValue * visibleItemCountValue}
+          maskHeight={((visibleItemCountValue - 1) * itemHeightValue) / 2}
+          opacities={token.picker_mask_opacities}
+          style={[resolved.mask, semantic?.mask]}
+        />
+        <View
+          pointerEvents="none"
+          style={[resolved.indicator, semantic?.indicator]}
+          testID="picker-indicator"
+        />
+        {loading ? (
+          <>
+            <View
+              pointerEvents="none"
+              style={resolved.stateBackdrop}
+              testID="picker-state-backdrop"
+            />
+            <View
+              pointerEvents="none"
+              style={[resolved.stateItem, semantic?.loading]}
+              testID="picker-loading"
+            >
+              <Loading />
+            </View>
+          </>
+        ) : null}
+      </View>
     </View>
   )
 
-  if (!isPopup) return content
-
-  return (
-    <Popup
-      closeOnPressOverlay={closeOnPressOverlay}
-      duration={duration}
-      destroyOnClosed
-      onRequestClose={handleCancel}
-      overlay={overlay}
-      position="bottom"
-      ref={ref}
-      round
-      safeAreaInsetBottom={safeAreaInsetBottom}
-      style={[resolved.container, semantic?.container]}
-      visible={isVisible}
-    >
-      {content}
-    </Popup>
-  )
+  return content
 })
 
 Picker.displayName = 'Picker'

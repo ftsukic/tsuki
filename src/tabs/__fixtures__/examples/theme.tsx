@@ -12,7 +12,7 @@ export default function TabsThemeExample() {
       theme={{
         components: {
           Tabs: {
-            activeColor: '#1677ff',
+            indicatorColor: '#1677ff',
             indicatorWidth: 56,
           },
         },

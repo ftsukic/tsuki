@@ -1,15 +1,31 @@
 import type { ReactNode } from 'react'
-import type { PickerProps } from '../picker/types'
+import type { PickerOption, PickerProps } from '../picker/types'
 import type { DateTimeColumnType } from '../picker/date-time/types'
 
 export type DateTimePickerColumnType = DateTimeColumnType
+export type DateTimePickerValue = readonly string[]
+export type DateTimePickerOption = PickerOption
+export type DateTimePickerFormatter = (
+  type: DateTimePickerColumnType,
+  option: DateTimePickerOption,
+) => DateTimePickerOption | string
+export type DateTimePickerFilter = (
+  type: DateTimePickerColumnType,
+  options: readonly DateTimePickerOption[],
+  values: DateTimePickerValue,
+) => readonly DateTimePickerOption[]
 
-export type DateTimePickerFormatter = (type: DateTimePickerColumnType, value: number) => string
+export interface DateTimePickerSelection {
+  values: DateTimePickerValue
+  options: readonly DateTimePickerOption[]
+  indexes: readonly number[]
+}
 
 export interface DateTimePickerRef {
-  open(): void
-  close(): void
-  confirm(): void
+  confirm(): DateTimePickerSelection
+  cancel(): void
+  getSelectedValues(): DateTimePickerValue
+  getSelectedOptions(): readonly DateTimePickerOption[]
 }
 
 export interface DateTimePickerProps extends Omit<
@@ -24,16 +40,20 @@ export interface DateTimePickerProps extends Omit<
   | 'confirmButtonText'
   | 'cancelButtonText'
 > {
-  value?: Date
-  defaultValue?: Date
+  value?: DateTimePickerValue
+  defaultValue?: DateTimePickerValue
+  columnsType?: readonly DateTimePickerColumnType[]
   minDate?: Date
   maxDate?: Date
+  hourStep?: number
+  minuteStep?: number
+  secondStep?: number
   title?: ReactNode
   cancelText?: ReactNode
   confirmText?: ReactNode
   formatter?: DateTimePickerFormatter
-  onChange?(value: Date): void
-  onConfirm?(value: Date): void
+  filter?: DateTimePickerFilter
+  onChange?(value: DateTimePickerValue, options: readonly DateTimePickerOption[]): void
+  onConfirm?(value: DateTimePickerValue, options: readonly DateTimePickerOption[]): void
   onCancel?(): void
-  onVisibleChange?(visible: boolean): void
 }
