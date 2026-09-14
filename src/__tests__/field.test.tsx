@@ -810,6 +810,52 @@ describe('FieldDateTimePicker', () => {
   })
 })
 
+describe('Field picker alignment', () => {
+  it('centers all picker field rows by default', async () => {
+    const view = await render(
+      <Provider theme={{ token: { motion: false } }}>
+        <FieldPicker label="城市" columns={[{ text: '上海', value: 'shanghai' }]} />
+        <FieldDatePicker label="日期" />
+        <FieldTimePicker label="时间" />
+        <FieldDateTimePicker label="日期时间" />
+      </Provider>,
+    )
+    const rows = findNodes(view.toJSON(), (node) => {
+      const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
+      return (
+        style?.flexDirection === 'row' &&
+        style?.paddingHorizontal === 16 &&
+        style?.paddingVertical === 10 &&
+        style?.minHeight === 44
+      )
+    })
+    expect(rows).toHaveLength(4)
+    expect(
+      rows.every(
+        (row) =>
+          StyleSheet.flatten(row.props.style as StyleProp<ViewStyle>)?.alignItems === 'center',
+      ),
+    ).toBe(true)
+  })
+
+  it('allows opting out of centered alignment', async () => {
+    const view = await render(
+      <Provider theme={{ token: { motion: false } }}>
+        <FieldTimePicker label="时间" center={false} />
+      </Provider>,
+    )
+    const optOutRow = findNodes(view.toJSON(), (node) => {
+      const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
+      return (
+        style?.flexDirection === 'row' && style?.paddingHorizontal === 16 && style?.minHeight === 44
+      )
+    })
+    expect(
+      StyleSheet.flatten(optOutRow[0].props.style as StyleProp<ViewStyle>)?.alignItems,
+    ).not.toBe('center')
+  })
+})
+
 describe('Field exports', () => {
   it('exports concrete adapters without exporting the runtime Field component', () => {
     expect(packageExports).not.toHaveProperty('Field')

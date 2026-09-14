@@ -120,6 +120,7 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
     disabled = false,
     readOnly = false,
     vertical,
+    center = true,
     labelWidth,
     labelAlign,
     valueAlign,
@@ -206,7 +207,7 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
         disabled={disabled}
         vertical={vertical}
         valueAlign={resolvedValueAlign}
-        center={props.center}
+        center={center}
         icon={icon}
         isLink={isLink}
         clickable={clickable}

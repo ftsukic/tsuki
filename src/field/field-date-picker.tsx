@@ -72,7 +72,7 @@ function renderSelectorValue(
 ) {
   if (typeof value === 'string' || typeof value === 'number') {
     return (
-      <Text type={type} numberOfLines={1} style={{ flex: 1, textAlign: valueAlign }}>
+      <Text type={type} numberOfLines={1} style={{ textAlign: valueAlign }}>
         {value}
       </Text>
     )
@@ -101,6 +101,7 @@ export function FieldDatePicker(props: FieldDatePickerProps) {
     disabled = false,
     readOnly = false,
     vertical,
+    center = true,
     labelWidth,
     labelAlign,
     valueAlign,
@@ -193,7 +194,7 @@ export function FieldDatePicker(props: FieldDatePickerProps) {
         disabled={disabled}
         vertical={vertical}
         valueAlign={resolvedValueAlign}
-        center={props.center}
+        center={center}
         icon={icon}
         isLink={isLink}
         clickable={clickable}
