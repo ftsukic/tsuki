@@ -1,6 +1,6 @@
 {
   "name": "@ftsukic/tsuki",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "基础 React Native UI 组件库。",
   "license": "MIT",
   "repository": {
@@ -36,6 +36,8 @@
     "README.md",
     "LICENSE",
     "!**/__fixtures__",
+    "!**/__tests__",
+    "!**/__mocks__",
     "!**/*.md"
   ],
   "sideEffects": false,
