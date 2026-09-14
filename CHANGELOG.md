@@ -1,5 +1,11 @@
 # @ftsukic/tsuki
 
+## 0.0.3
+
+### Patch Changes
+
+- 修复 Search 在不同 action 场景下的高度异常。
+
 ## 0.0.2
 
 ### Patch Changes

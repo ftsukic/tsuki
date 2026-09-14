@@ -144,9 +144,6 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
     </View>
   ) : undefined
   const inputStyles: InputStyles = {
-    root: {
-      flex: 1,
-    },
     shell: {
       height: token.search_height,
       minHeight: token.search_height,
