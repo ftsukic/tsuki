@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-Field 系列不是独立的基础 UI 容器，而是表单场景适配器：`FieldInput`、`FieldRadio`、`FieldCheckbox`、`FieldSwitch`、`FieldPicker` 和 `FieldDatePicker` 分别直接组合 `Cell` 与对应控件。需要自定义表单项时，直接组合 `Cell` 和自定义 control。
+Field 系列不是独立的基础 UI 容器，而是表单场景适配器：`FieldInput`、`FieldRadio`、`FieldCheckbox`、`FieldSwitch`、`FieldPicker`、`FieldDatePicker`、`FieldTimePicker` 和 `FieldDateTimePicker` 分别直接组合 `Cell` 与对应控件。需要自定义表单项时，直接组合 `Cell` 和自定义 control。
 
 </section>
 
@@ -28,10 +28,12 @@ import {
   Cell,
   FieldCheckbox,
   FieldDatePicker,
+  FieldDateTimePicker,
   FieldInput,
   FieldPicker,
   FieldRadio,
   FieldSwitch,
+  FieldTimePicker,
 } from '@ftsukic/tsuki'
 ```
 
@@ -57,13 +59,17 @@ import {
 
 <code src="../../../src/field/__fixtures__/examples/field-date-picker.tsx" title="FieldDatePicker" description="Cell 日期入口与 DatePicker 弹层的组合。"></code>
 
+<code src="../../../src/field/__fixtures__/examples/field-time-picker.tsx" title="FieldTimePicker" description="Cell 时间入口与 TimePicker 弹层的组合。"></code>
+
+<code src="../../../src/field/__fixtures__/examples/field-date-time-picker.tsx" title="FieldDateTimePicker" description="Cell 日期时间入口与 DateTimePicker 弹层的组合。"></code>
+
 <code src="../../../src/field/__fixtures__/examples/states.tsx" title="布局和状态" description="vertical、readOnly 和 disabled。"></code>
 
 <code src="../../../src/field/__fixtures__/examples/theme.tsx" title="主题和语义样式" description="Field token 与 FieldPicker feedback 语义样式。"></code>
 
 ## 共同表单属性
 
-六个适配器都保留 `label` 作为表单语义名称，并将它传给 `Cell.title`。以下属性在六个适配器中含义一致：
+八个适配器都保留 `label` 作为表单语义名称，并将它传给 `Cell.title`。以下属性在八个适配器中含义一致：
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -218,6 +224,26 @@ FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessi
 ```
 
 默认显示值按日期列值以 `-` 连接，例如 `2026-09-13`；`formatValue` 可自定义 Cell 显示，参数为选项和值。`pickerStyle` 和 `pickerStyles` 只作用于 DatePicker，`cellStyles` 和 `styles` 的作用范围与 FieldPicker 相同。它不复制 DatePicker 的日期计算，也不提供 FieldTimePicker、FieldDateTimePicker 或日期范围能力。
+
+## FieldTimePicker
+
+`FieldTimePicker` 是 `Cell + Popup + TimePicker` 的时间表单适配器。它保持 `TimePickerValue` 的字符串数组契约，默认显示值为 `09:30`，包含秒列时显示为 `09:30:15`。时间列、边界、步长、`formatter` 和 `filter` 等能力均透传给 TimePicker；滚动只更新 draft，确认后才提交。
+
+```tsx
+<FieldTimePicker label="时间" defaultValue={['09', '30']} />
+```
+
+`formatValue` 可自定义 Cell 显示；`pickerStyle` 和 `pickerStyles` 只作用于 TimePicker。
+
+## FieldDateTimePicker
+
+`FieldDateTimePicker` 是 `Cell + Popup + DateTimePicker` 的日期时间表单适配器。默认使用 `year`、`month`、`day`、`hour`、`minute` 五列，显示值按 `columnsType` 组合日期与时间，例如 `2026-09-13 13:30`；只有时间列时显示为 `13:30`。日期边界、列顺序验证、联动和格式化能力均由 DateTimePicker 负责。
+
+```tsx
+<FieldDateTimePicker label="日期时间" defaultValue={['2026', '09', '13', '13', '30']} />
+```
+
+`formatValue` 可自定义 Cell 显示；`pickerStyle` 和 `pickerStyles` 只作用于 DateTimePicker。两个适配器都遵循确认提交、取消恢复、遮罩关闭等同取消的 Field 语义。
 
 ## 语义样式与主题
 

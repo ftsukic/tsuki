@@ -4,10 +4,12 @@ import {
   ConfigProvider,
   FieldCheckbox,
   FieldDatePicker,
+  FieldDateTimePicker,
   FieldInput,
   FieldPicker,
   FieldRadio,
   FieldSwitch,
+  FieldTimePicker,
   getDesignToken,
   getFieldToken,
   Provider,
@@ -22,6 +24,8 @@ import { getTextareaMetrics } from '../input/style'
 import type { StyleProp, ViewStyle } from 'react-native'
 import type { PickerValue } from '../picker'
 import type { DatePickerValue } from '../date-picker'
+import type { DateTimePickerValue } from '../date-time-picker'
+import type { TimePickerValue } from '../time-picker'
 import type { TextInputInstance } from '../text-input'
 
 interface JsonNode {
@@ -761,6 +765,51 @@ describe('FieldDatePicker', () => {
   })
 })
 
+describe('FieldTimePicker', () => {
+  it('displays time values and commits only after confirmation', async () => {
+    const onChange = jest.fn()
+    function Harness() {
+      const [value, setValue] = useState<TimePickerValue>(['09', '30'])
+      return (
+        <FieldTimePicker
+          label="时间"
+          value={value}
+          onChange={(next) => {
+            onChange(next)
+            setValue(next)
+          }}
+        />
+      )
+    }
+
+    await render(
+      <Provider theme={{ token: { motion: false } }}>
+        <Harness />
+      </Provider>,
+    )
+    expect(screen.getByText('09:30')).toBeTruthy()
+    await press(screen.getByText('09:30'))
+    await press(screen.getByTestId('picker-item-1-31'))
+    expect(onChange).not.toHaveBeenCalled()
+    await press(screen.getByTestId('picker-confirm'))
+    expect(onChange).toHaveBeenCalledWith(['09', '31'])
+  })
+})
+
+describe('FieldDateTimePicker', () => {
+  it('formats the default value according to the selected columns', async () => {
+    const value: DateTimePickerValue = ['2026', '09', '13', '13', '30']
+    await render(
+      <Provider theme={{ token: { motion: false } }}>
+        <FieldDateTimePicker label="日期时间" value={value} />
+        <FieldDateTimePicker label="时间" value={['13', '30']} columnsType={['hour', 'minute']} />
+      </Provider>,
+    )
+    expect(screen.getByText('2026-09-13 13:30')).toBeTruthy()
+    expect(screen.getByText('13:30')).toBeTruthy()
+  })
+})
+
 describe('Field exports', () => {
   it('exports concrete adapters without exporting the runtime Field component', () => {
     expect(packageExports).not.toHaveProperty('Field')
@@ -770,6 +819,8 @@ describe('Field exports', () => {
     expect(FieldSwitch).toBeDefined()
     expect(FieldPicker).toBeDefined()
     expect(FieldDatePicker).toBeDefined()
+    expect(FieldTimePicker).toBeDefined()
+    expect(FieldDateTimePicker).toBeDefined()
     expect(ConfigProvider).toEqual(expect.any(Function))
   })
 })

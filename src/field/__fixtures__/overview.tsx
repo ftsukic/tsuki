@@ -2,16 +2,18 @@ import { FixtureOverview } from '../../fixture-overview'
 import FieldBasicFixture from './examples/basic'
 import FieldCheckboxFixture from './examples/field-checkbox'
 import FieldDatePickerFixture from './examples/field-date-picker'
+import FieldDateTimePickerFixture from './examples/field-date-time-picker'
 import FieldInputFixture from './examples/field-input'
 import FieldPickerFixture from './examples/field-picker'
 import FieldRadioFixture from './examples/field-radio'
 import FieldSwitchFixture from './examples/field-switch'
+import FieldTimePickerFixture from './examples/field-time-picker'
 import FieldStatesFixture from './examples/states'
 import FieldThemeFixture from './examples/theme'
 
 /**
  * @title Field overview
- * @description FieldInput、FieldRadio、FieldCheckbox、FieldSwitch 和 FieldPicker 都是直接组合 Cell 的表单场景。
+ * @description Field 系列适配器直接组合 Cell 与对应控件，日期时间选择器在确认后提交值。
  */
 export default function FieldOverview() {
   return (
@@ -59,6 +61,18 @@ export default function FieldOverview() {
           description: 'FieldDatePicker 仅在 DatePicker 确认后提交值。',
           id: 'field-date-picker',
           title: 'FieldDatePicker',
+        },
+        {
+          Component: FieldTimePickerFixture,
+          description: 'FieldTimePicker 仅在 TimePicker 确认后提交值。',
+          id: 'field-time-picker',
+          title: 'FieldTimePicker',
+        },
+        {
+          Component: FieldDateTimePickerFixture,
+          description: 'FieldDateTimePicker 仅在 DateTimePicker 确认后提交值。',
+          id: 'field-date-time-picker',
+          title: 'FieldDateTimePicker',
         },
         {
           Component: FieldStatesFixture,
