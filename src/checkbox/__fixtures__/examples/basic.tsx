@@ -1,6 +1,6 @@
-import { Checkbox } from '@ftsukic/tsuki'
+import { Button, Checkbox, Flex, Text } from '@ftsukic/tsuki'
 import { useState } from 'react'
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
 
 /**
  * @title 基础状态
@@ -21,6 +21,18 @@ export default function Example() {
       </Checkbox>
       <Checkbox shape="square" labelPosition="left">
         方形且标签在左侧
+      </Checkbox>
+      <Checkbox shape="square" styles={{ indicator: { borderRadius: 4 } }}>
+        <Flex>
+          <Text>自定义render</Text>
+          <Button variant="text" type="primary">
+            协议1
+          </Button>
+          <Text>和</Text>
+          <Button variant="text" type="primary">
+            协议2
+          </Button>
+        </Flex>
       </Checkbox>
       <Text accessibilityLiveRegion="polite" style={{ color: '#68788d', fontSize: 12 }}>
         受控状态：{checked ? 'checked' : 'unchecked'}
