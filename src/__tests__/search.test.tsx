@@ -8,6 +8,10 @@ function getInputShell(testID: string) {
   return screen.getByTestId(testID).parent?.parent
 }
 
+function getInputContent(testID: string) {
+  return screen.getByTestId(testID).parent
+}
+
 describe('Search', () => {
   it('renders the placeholder and default search icon', async () => {
     await render(
@@ -131,6 +135,16 @@ describe('Search', () => {
     expect(rootStyle.backgroundColor).toBe('#ffffff')
     expect(contentStyle.backgroundColor).toBeUndefined()
     expect(inputShellStyle.backgroundColor).not.toBe(rootStyle.backgroundColor)
+  })
+
+  it('keeps the Input content aligned with the Search control height', async () => {
+    await render(<Search testID="search" />)
+
+    const shellStyle = StyleSheet.flatten(getInputShell('search')?.props.style)
+    const contentStyle = StyleSheet.flatten(getInputContent('search')?.props.style)
+
+    expect(contentStyle.minHeight).toBe(shellStyle.minHeight)
+    expect(contentStyle.minHeight).toBe(shellStyle.height)
   })
 
   it('applies Search content styles only to the Search content layer', async () => {

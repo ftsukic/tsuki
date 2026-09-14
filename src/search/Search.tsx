@@ -155,6 +155,9 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
         shape === 'round' ? token.search_round_border_radius : token.search_border_radius,
       ...(isDisabled ? {} : { backgroundColor: token.search_content_background_color }),
     },
+    content: {
+      minHeight: token.search_height,
+    },
     input: [{ textAlign: inputAlign }, semantic?.input],
     suffix: semantic?.suffix,
     clear: semantic?.clear,
