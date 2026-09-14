@@ -166,8 +166,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview14,
     component: 'field',
-    description:
-      'FieldInput、FieldRadio、FieldCheckbox、FieldSwitch 和 FieldPicker 都是直接组合 Cell 的表单场景。',
+    description: 'Field 系列适配器直接组合 Cell 与对应控件，日期时间选择器在确认后提交值。',
     id: 'field',
     title: 'Field',
   },
