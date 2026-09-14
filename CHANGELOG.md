@@ -1,5 +1,11 @@
 # @ftsukic/tsuki
 
+## 0.0.2
+
+### Patch Changes
+
+- 2cba51e: Fix component interaction and layout details, including Search input vertical alignment, single-line Input shell focus behavior, Button text alignment, and Icon touch handling.
+
 ## 0.0.1
 
 ### Major Changes
