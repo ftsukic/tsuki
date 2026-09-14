@@ -53,6 +53,8 @@ import { Tabs } from '@ftsukic/tsuki'
 
 <code src="../../../src/tabs/__fixtures__/examples/swipeable.tsx" title="手势切换" description="启用 swipeable 后可以通过横向手势切换内容。"></code>
 
+<code src="../../../src/tabs/__fixtures__/examples/animated.tsx" title="内容切换动画" description="显式设置 animated 开启内容区域切换动画。"></code>
+
 <code src="../../../src/tabs/__fixtures__/examples/lazy-render.tsx" title="Lazy render" description="页面首次激活后保持挂载，切换回来时内部状态不丢失。"></code>
 
 <code src="../../../src/tabs/__fixtures__/examples/theme.tsx" title="主题与语义样式" description="通过组件 token 和 styles 定制 Tabs。"></code>
@@ -68,10 +70,10 @@ import { Tabs } from '@ftsukic/tsuki'
 | defaultValue | `string \| number` | 第一个可用 Tab | 非受控初始激活值 |
 | onChange | `(value: string \| number) => void` | — | 用户请求切换到其他可用 Tab 时触发；受控模式不会替代 `value`，重复点击当前项不会触发 |
 | type | `'line' \| 'card'` | `'line'` | 导航样式 |
-| animated | `boolean` | `true` | 同时控制 line indicator 和内容页的程序切换/吸附动画；主题关闭 motion 时立即切换 |
+| animated | `boolean` | `false` | 是否开启内容区域切换动画 |
 | swipeable | `boolean` | `false` | 内容存在时允许横向手势切换；手势到达 disabled Tab 会恢复当前可用页且不触发 `onChange` |
-| scrollable | `boolean` | `false` | Tab 数量较多时启用横向滚动；默认 Tab 等分宽度 |
-| shrink | `boolean` | `false` | 按标题内容布局 Tab，并启用横向滚动；等价于 `scrollable || shrink` 的导航行为 |
+| scrollable | `boolean` | `false` | Tab 数量较多时启用横向滚动；默认 Tab 等分宽度；激活项变化时会自动滚动到可见区域 |
+| shrink | `boolean` | `false` | 按标题内容布局 Tab，并启用横向滚动；等价于 `scrollable |  | shrink` 的导航行为，激活项变化时会自动滚动到可见区域 |
 | lazyRender | `boolean` | `true` | 首次激活前不渲染 pane；首次激活后保持挂载，后续切换不卸载 |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
 | styles | `TabsStyles` | — | `root`、`nav`、`tab`、`label`、`indicator`、`content` 语义样式 |
@@ -95,6 +97,10 @@ Tabs 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`
 Tab 的 `children` 不要求存在。没有任何 pane 内容时，Tabs 只渲染导航，不生成空内容区域。`lazyRender` 默认为 visit-once：pane 首次激活前不渲染，激活后保持挂载；设为 `false` 时所有 pane 一开始都挂载。`swipeable` 只在存在内容时启用横向手势，不会把 navigation-only Tab 变成空页面。
 
 `value` 存在时 Tabs 是严格受控的：点击或手势切换只调用 `onChange`，界面继续由当前 `value` 决定；父组件回写新值后才改变激活项。`defaultValue` 只用于非受控初始化；无效值或 disabled 值会回退到第一个可用 Tab。
+
+启用 `scrollable` 或 `shrink` 时，Tabs 会根据激活 Tab 的布局将导航尽量居中；首尾位置会自动限制在可滚动范围内。普通非滚动导航不会调用横向滚动。
+
+Tab 标题和 line indicator 的切换动画默认始终开启，scrollable/shrink 导航自动定位默认使用动画；`animated` 只控制内容面板切换。全局 theme `motion=false` 时所有动画立即完成。
 
 ## 语义样式
 

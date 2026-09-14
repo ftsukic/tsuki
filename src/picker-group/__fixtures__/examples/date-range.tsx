@@ -3,8 +3,9 @@ import { Cell } from '../../../cell'
 import { DatePicker } from '../../../date-picker'
 import { Popup } from '../../../popup'
 import { PickerGroup } from '../../index'
+import type { PickerGroupSelection } from '../../types'
 
-type DateValue = readonly string[]
+type DateValue = readonly [string, string, string]
 
 const formatDate = (value: DateValue) => `${value[0]}-${value[1]}-${value[2]}`
 
@@ -13,6 +14,19 @@ const dateValueToDate = (value: DateValue) =>
 
 const compareDateValue = (a: DateValue, b: DateValue) =>
   dateValueToDate(a).getTime() - dateValueToDate(b).getTime()
+
+const getDateValue = (results: readonly PickerGroupSelection[], index: number): DateValue => {
+  const values = results[index]?.values
+  if (
+    values?.length !== 3 ||
+    typeof values[0] !== 'string' ||
+    typeof values[1] !== 'string' ||
+    typeof values[2] !== 'string'
+  ) {
+    throw new Error('PickerGroup DatePicker result must contain year/month/day string values')
+  }
+  return [values[0], values[1], values[2]]
+}
 
 /** @title Date Range @description Cell 打开底部 Popup；两个日期 Picker 使用 draft 即时联动范围。 */
 export default function DateRange() {
@@ -53,18 +67,19 @@ export default function DateRange() {
           title="选择日期范围"
           tabs={['开始日期', '结束日期']}
           nextStepText="下一步"
-          onConfirm={() => {
-            setCommittedStart(draftStart)
-            setCommittedEnd(draftEnd)
+          onConfirm={(results) => {
+            const start = getDateValue(results, 0)
+            let end = getDateValue(results, 1)
+            if (compareDateValue(start, end) > 0) end = start
+            setCommittedStart(start)
+            setCommittedEnd(end)
+            setDraftStart(start)
+            setDraftEnd(end)
             setVisible(false)
           }}
           onCancel={handleCancel}
         >
-          <DatePicker
-            value={draftStart}
-            maxDate={dateValueToDate(draftEnd)}
-            onChange={handleStartChange}
-          />
+          <DatePicker value={draftStart} onChange={handleStartChange} />
           <DatePicker
             value={draftEnd}
             minDate={dateValueToDate(draftStart)}

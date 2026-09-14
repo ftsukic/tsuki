@@ -322,8 +322,14 @@ describe('Cell', () => {
     expect(title.props.numberOfLines).toBe(1)
     expect(value.props.numberOfLines).toBe(2)
     expect(screen.getByText('*')).toBeTruthy()
+    expect(StyleSheet.flatten(screen.getByText('*').props.style)).toMatchObject({
+      position: 'absolute',
+      left: -8,
+      top: 0,
+    })
     expect(StyleSheet.flatten(screen.getByText('*').parent?.props.style)).toMatchObject({
       flexDirection: 'row',
+      position: 'relative',
     })
   })
 

@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import React from 'react'
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
-import { fireEvent, render, screen } from '@testing-library/react-native'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { ImagePreview, PortalHost } from '..'
 import { useImagePreviewPaging } from '../image-preview/use-image-preview-paging'
 
@@ -30,7 +30,19 @@ describe('ImagePreview source rect lifecycle', () => {
       </PortalHost>,
     )
     fireEvent.press(screen.getByTestId('image-preview-close'))
-    expect(getSourceRect).toHaveBeenCalledWith(1)
+    await waitFor(() => expect(getSourceRect).toHaveBeenCalledWith(1))
+    await waitFor(() => expect(screen.queryByTestId('image-preview')).toBeNull())
+  })
+
+  it('keeps transition lifecycle in the parent progress owner', () => {
+    const transitionSource = readFileSync(
+      join(__dirname, '../image-preview/image-preview-transition.tsx'),
+      'utf8',
+    )
+    expect(transitionSource).not.toContain('useSharedValue')
+    expect(transitionSource).not.toContain('withTiming')
+    expect(transitionSource).not.toContain('onComplete')
+    expect(transitionSource).toContain('progress: SharedValue<number>')
   })
 
   it('uses native FlatList paging instead of Swipe', async () => {
@@ -49,7 +61,7 @@ describe('ImagePreview source rect lifecycle', () => {
     expect(pager.props.initialNumToRender).toBe(1)
     expect(pager.props.windowSize).toBe(3)
     expect(pager.props.maxToRenderPerBatch).toBe(3)
-    expect(pager.props.removeClippedSubviews).toBe(true)
+    expect(pager.props.removeClippedSubviews).toBe(false)
     expect(pager.props.getItemLayout(null, 2)).toEqual(
       expect.objectContaining({ index: 2, length: expect.any(Number), offset: expect.any(Number) }),
     )

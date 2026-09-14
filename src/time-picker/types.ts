@@ -53,8 +53,8 @@ export interface TimePickerProps extends Omit<
   minuteStep?: number
   secondStep?: number
   title?: ReactNode
-  cancelText?: ReactNode
-  confirmText?: ReactNode
+  cancelButtonText?: ReactNode
+  confirmButtonText?: ReactNode
   formatter?: TimePickerFormatter
   filter?: TimePickerFilter
   onChange?(value: TimePickerValue, options: readonly TimePickerOption[]): void

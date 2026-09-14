@@ -1,4 +1,4 @@
-export { Pressable } from './Pressable'
-export { usePressAnimation } from './usePressAnimation'
-export type { PressableProps } from './Pressable'
-export type { PressStyle, UsePressAnimationOptions } from './usePressAnimation'
+export { Pressable } from './pressable'
+export { usePressAnimation } from './use-press-animation'
+export type { PressableProps } from './pressable'
+export type { PressStyle, UsePressAnimationOptions } from './use-press-animation'

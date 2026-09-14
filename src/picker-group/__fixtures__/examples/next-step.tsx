@@ -4,12 +4,19 @@ import { DatePicker } from '../../../date-picker'
 import { Popup } from '../../../popup'
 import { TimePicker } from '../../../time-picker'
 import { PickerGroup } from '../../index'
+import type { PickerGroupSelection } from '../../types'
 
 type DateValue = readonly string[]
 type TimeValue = readonly string[]
 
 const formatDateTime = (date: DateValue, time: TimeValue) =>
   `${date[0]}-${date[1]}-${date[2]} ${time[0]}:${time[1]}`
+
+const getStringValues = (
+  results: readonly PickerGroupSelection[],
+  index: number,
+): readonly string[] =>
+  (results[index]?.values ?? []).filter((value): value is string => typeof value === 'string')
 
 /** @title Next Step @description Cell 打开底部 Popup；nextStepText 让第一个 tab 先进入下一步。 */
 export default function NextStep() {
@@ -47,9 +54,9 @@ export default function NextStep() {
           title="选择日期和时间"
           tabs={['选择日期', '选择时间']}
           nextStepText="下一步"
-          onConfirm={() => {
-            setCommittedDate(draftDate)
-            setCommittedTime(draftTime)
+          onConfirm={(results) => {
+            setCommittedDate(getStringValues(results, 0))
+            setCommittedTime(getStringValues(results, 1))
             setVisible(false)
           }}
           onCancel={handleCancel}

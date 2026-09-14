@@ -24,6 +24,13 @@ export default function ButtonGroupFixture() {
         <Button type="primary">删除</Button>
       </ButtonGroup>
 
+      <Text style={styles.heading}>Inherited variant</Text>
+      <ButtonGroup variant="outline">
+        <Button>继承边框</Button>
+        <Button variant="solid">显式实心</Button>
+        <Button>继承边框</Button>
+      </ButtonGroup>
+
       <Text style={styles.heading}>Outline group</Text>
       <ButtonGroup>
         <Button type="primary" variant="outline" round>

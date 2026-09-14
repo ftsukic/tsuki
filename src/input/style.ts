@@ -1,6 +1,6 @@
-import type { TextStyle, ViewStyle } from 'react-native'
+import { Platform, type TextStyle, type ViewStyle } from 'react-native'
 import type { InputToken } from '../theme'
-import type { InputProps, InputStyleState } from './interface'
+import type { InputProps, InputStyleState } from './types'
 
 export interface InputResolvedStyles {
   root: ViewStyle
@@ -28,6 +28,78 @@ export interface InputPasswordStyles {
   passwordToggle: ViewStyle
 }
 
+export interface InputMetrics {
+  fontSize: number
+  lineHeight: number
+  paddingHorizontal: number
+  paddingVertical: number
+}
+
+interface InputLineHeightMetrics {
+  lineHeightSM: number
+  lineHeight: number
+  lineHeightLG: number
+}
+
+function createInputMetrics(
+  token: InputToken,
+  size: InputProps['size'],
+  embedded: boolean,
+  lineHeights: InputLineHeightMetrics,
+  paddingHorizontal: number,
+  paddingVertical: number,
+): InputMetrics {
+  const fontSize =
+    size === 'small' ? token.fontSizeSM : size === 'large' ? token.fontSizeLG : token.fontSize
+  const lineHeight =
+    size === 'small'
+      ? lineHeights.lineHeightSM
+      : size === 'large'
+        ? lineHeights.lineHeightLG
+        : lineHeights.lineHeight
+
+  return {
+    fontSize,
+    lineHeight,
+    paddingHorizontal: embedded ? 0 : paddingHorizontal,
+    paddingVertical: embedded ? 0 : paddingVertical,
+  }
+}
+
+export function getInputMetrics(
+  token: InputToken,
+  size: InputProps['size'],
+  embedded = false,
+): InputMetrics {
+  return createInputMetrics(
+    token,
+    size,
+    embedded,
+    {
+      lineHeightSM: token.lineHeightSM,
+      lineHeight: token.lineHeight,
+      lineHeightLG: token.lineHeightLG,
+    },
+    token.paddingHorizontal,
+    token.paddingVertical,
+  )
+}
+
+export function getTextareaMetrics(token: InputToken, size: InputProps['size']): InputMetrics {
+  return createInputMetrics(
+    token,
+    size,
+    false,
+    {
+      lineHeightSM: token.textareaLineHeightSM,
+      lineHeight: token.textareaLineHeight,
+      lineHeightLG: token.textareaLineHeightLG,
+    },
+    token.textareaPaddingHorizontal,
+    token.textareaPaddingVertical,
+  )
+}
+
 export function getInputPasswordStyles(token: InputToken): InputPasswordStyles {
   return {
     passwordToggle: {
@@ -41,31 +113,26 @@ export function getInputPasswordStyles(token: InputToken): InputPasswordStyles {
   }
 }
 
-function getInputHeight(token: InputToken, size: NonNullable<InputProps['size']>) {
-  switch (size) {
-    case 'small':
-      return token.heightSM
-    case 'large':
-      return token.heightLG
-    case 'normal':
-    default:
-      return token.height
-  }
-}
-
 export function getInputStyles(
   token: InputToken,
   props: InputProps,
   state: InputStyleState,
+  embedded = false,
 ): InputResolvedStyles {
-  const height = getInputHeight(token, props.size ?? 'normal')
   const textarea = props.multiline === true
-  const lineHeight =
-    props.size === 'small'
-      ? token.lineHeightSM
-      : props.size === 'large'
-        ? token.lineHeightLG
-        : token.lineHeight
+  const isIOSSingle = Platform.OS === 'ios' && !textarea
+  const singleMetrics = getInputMetrics(token, props.size, embedded)
+  const textareaMetrics = getTextareaMetrics(token, props.size)
+  const metrics = textarea ? textareaMetrics : singleMetrics
+  const wordLimitLineHeight = textarea ? token.textareaLineHeightSM : token.lineHeightSM
+  const wordLimitPadding =
+    props.showWordLimit && props.maxLength !== undefined
+      ? wordLimitLineHeight + metrics.paddingVertical
+      : 0
+  const textareaMinHeight =
+    metrics.lineHeight * Math.max(1, props.rows ?? 2) +
+    metrics.paddingVertical * 2 +
+    wordLimitPadding
 
   return {
     root: {
@@ -95,14 +162,19 @@ export function getInputStyles(
       minWidth: 0,
       flexDirection: 'row',
       position: 'relative',
-      paddingHorizontal: token.paddingHorizontal,
+      paddingHorizontal: metrics.paddingHorizontal,
       borderWidth: props.bordered ? token.borderWidth : 0,
       borderColor:
         state.focused && props.activeBordered !== false
           ? token.activeBorderColor
           : token.borderColor,
-      borderRadius: token.borderRadius,
-      backgroundColor: state.disabled ? token.disabledBackgroundColor : token.backgroundColor,
+      borderRadius: props.bordered || !embedded ? token.borderRadius : 0,
+      backgroundColor:
+        embedded && !props.bordered
+          ? 'transparent'
+          : state.disabled
+            ? token.disabledBackgroundColor
+            : token.backgroundColor,
     },
     content: {
       flex: 1,
@@ -116,22 +188,26 @@ export function getInputStyles(
       flex: 1,
       minWidth: 0,
       paddingHorizontal: 0,
-      paddingTop: textarea ? token.paddingVertical : 0,
+      paddingTop: textarea ? metrics.paddingVertical : 0,
       paddingBottom:
         textarea && props.showWordLimit && props.maxLength !== undefined
-          ? token.paddingVertical + token.lineHeightSM + token.paddingVertical
+          ? metrics.paddingVertical + wordLimitLineHeight + metrics.paddingVertical
           : textarea
-            ? token.paddingVertical
+            ? metrics.paddingVertical
             : 0,
       color: state.disabled ? token.disabledColor : token.textColor,
-      fontSize:
-        props.size === 'small'
-          ? token.fontSizeSM
-          : props.size === 'large'
-            ? token.fontSizeLG
-            : token.fontSize,
-      lineHeight: textarea ? lineHeight : undefined,
+      fontSize: metrics.fontSize,
+      lineHeight: isIOSSingle ? undefined : metrics.lineHeight,
       textAlignVertical: textarea ? 'top' : 'center',
+      ...Platform.select({
+        android: {
+          includeFontPadding: false,
+        },
+        web: {
+          outlineColor: 'transparent',
+          outlineStyle: 'solid',
+        },
+      }),
     },
     prefix: {
       fontFamily: token.fontFamily,
@@ -162,36 +238,34 @@ export function getInputStyles(
       fontFamily: token.fontFamily,
       color: token.wordLimitColor,
       fontSize: token.wordLimitFontSize,
+      lineHeight: wordLimitLineHeight,
       position: 'absolute',
-      right: token.paddingHorizontal,
-      bottom: token.paddingVertical,
+      right: metrics.paddingHorizontal,
+      bottom: metrics.paddingVertical,
     },
     passwordToggle: getInputPasswordStyles(token).passwordToggle,
     singleShell: {
-      height,
-      minHeight: height,
       alignItems: 'center',
-      alignContent: 'center',
+      paddingVertical: singleMetrics.paddingVertical,
     },
     singleContent: {
       alignItems: 'center',
-      alignContent: 'center',
+      minHeight: isIOSSingle ? singleMetrics.lineHeight : undefined,
     },
     singleInput: {
       flex: undefined,
       flexGrow: 1,
       flexShrink: 1,
-      alignSelf: 'stretch',
+      alignSelf: 'center',
       paddingVertical: 0,
-      lineHeight: undefined,
     },
     textareaShell: {
-      minHeight: props.autoSize ? undefined : height * Math.max(1, props.rows ?? 2),
+      minHeight: props.autoSize ? undefined : textareaMinHeight,
       alignItems: 'stretch',
     },
     textareaInput: {
       alignSelf: 'stretch',
-      minHeight: props.autoSize ? undefined : height * Math.max(1, props.rows ?? 2),
+      minHeight: props.autoSize ? undefined : textareaMinHeight,
     },
   }
 }

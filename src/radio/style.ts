@@ -1,5 +1,5 @@
 import type { ColorValue, TextStyle, ViewStyle } from 'react-native'
-import type { RadioProps, RadioStyleState } from './interface'
+import type { RadioProps, RadioStyleState } from './types'
 import type { RadioToken } from '../theme'
 import {
   getSelectionButtonStyles,
@@ -30,12 +30,16 @@ export function getRadioStyles(
       ? getSelectionButtonStyles(
           {
             height: token.buttonHeight,
+            minWidth: token.buttonMinWidth,
             paddingHorizontal: token.buttonPaddingHorizontal,
             borderWidth: token.borderWidth,
             borderRadius: token.buttonBorderRadius,
+            variant: props.buttonVariant ?? 'solid',
             backgroundColor: token.buttonBackground,
+            filledBackgroundColor: token.buttonFilledBackground,
             borderColor: token.borderColor,
             checkedBackgroundColor: checkedColor,
+            checkedFilledBackgroundColor: token.buttonCheckedFilledBackground,
             checkedBorderColor: checkedColor,
             labelColor: token.labelColor,
             checkedLabelColor: token.buttonCheckedLabelColor,

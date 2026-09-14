@@ -60,8 +60,8 @@ group:
 | `title` | `ReactNode` | - | Picker toolbar 标题 |
 | `showToolbar` | `boolean` | `true` | 是否显示 Picker toolbar |
 | `showToolbarDivider` | `boolean` | `false` | 是否显示 toolbar 分隔线 |
-| `cancelText` | `ReactNode` | `取消` | 取消按钮文案 |
-| `confirmText` | `ReactNode` | `确定` | 确认按钮文案 |
+| `cancelButtonText` | `ReactNode` | `取消` | 取消按钮文案 |
+| `confirmButtonText` | `ReactNode` | `确定` | 确认按钮文案 |
 | `loading` | `boolean` | `false` | 覆盖滚轮并阻止选择，toolbar 仍可操作 |
 | `swipeDuration` | `number` | 主题默认值 | 滚轮吸附动画时长 |
 | `itemHeight` | `number` | 主题默认值 | 单项高度 |

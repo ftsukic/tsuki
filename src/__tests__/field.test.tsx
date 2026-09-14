@@ -3,22 +3,24 @@ import {
   Checkbox,
   ConfigProvider,
   FieldCheckbox,
-  FieldDateRangePicker,
   FieldInput,
   FieldPicker,
   FieldRadio,
+  FieldSwitch,
   getDesignToken,
   getFieldToken,
   Provider,
   Radio,
 } from '..'
-import { fireEvent, render, screen } from '@testing-library/react-native'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { createRef, useState } from 'react'
 import { StyleSheet } from 'react-native'
+import * as Reanimated from 'react-native-reanimated'
+import { getInputToken } from '../input/token'
+import { getTextareaMetrics } from '../input/style'
 import type { StyleProp, ViewStyle } from 'react-native'
 import type { PickerValue } from '../picker'
 import type { TextInputInstance } from '../text-input'
-import type { DateRangePickerValue } from '../date-range-picker'
 
 interface JsonNode {
   children?: JsonNode[] | null
@@ -36,14 +38,6 @@ function findNodes(value: unknown, predicate: (node: JsonNode) => boolean): Json
 async function press(target: Parameters<typeof fireEvent.press>[0]) {
   fireEvent.press(target)
   await Promise.resolve()
-}
-
-function date(year: number, month: number, day: number) {
-  return new Date(year, month - 1, day)
-}
-
-function dateRange(start: Date, end: Date): DateRangePickerValue {
-  return [start, end]
 }
 
 describe('FieldInput', () => {
@@ -90,7 +84,34 @@ describe('FieldInput', () => {
     expect(onChange).toHaveBeenLastCalledWith('139')
   })
 
-  it('supports uncontrolled multiline values and keeps the embedded Input flat', async () => {
+  it('keeps the embedded Input flat while Cell owns the field spacing', async () => {
+    const view = await render(<FieldInput label="手机号" testID="bordered-field-input" />)
+    const cellRows = findNodes(view.toJSON(), (node) => {
+      const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
+      return style?.paddingHorizontal === 16 && style?.paddingVertical === 10
+    })
+    expect(cellRows).toHaveLength(1)
+
+    const input = screen.getByTestId('bordered-field-input')
+    expect(StyleSheet.flatten(input.props.style)).toMatchObject({
+      paddingHorizontal: 0,
+      paddingVertical: 0,
+    })
+
+    const embeddedShells = findNodes(view.toJSON(), (node) => {
+      const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
+      return (
+        style?.flexDirection === 'row' &&
+        style?.paddingHorizontal === 0 &&
+        style?.borderWidth === 0 &&
+        style?.borderRadius === 0 &&
+        style?.backgroundColor === 'transparent'
+      )
+    })
+    expect(embeddedShells).toHaveLength(1)
+  })
+
+  it('supports uncontrolled multiline values with Cell spacing outside the embedded Input', async () => {
     const view = await render(
       <FieldInput
         label="备注"
@@ -104,15 +125,73 @@ describe('FieldInput', () => {
 
     expect(screen.getByTestId('textarea-input').props.value).toBe('初始')
     expect(screen.getByTestId('textarea-input').props.textAlign).toBe('left')
+    const textareaMetrics = getTextareaMetrics(getInputToken(getDesignToken()), 'normal')
+    const inputStyle = StyleSheet.flatten(screen.getByTestId('textarea-input').props.style)
+    expect(inputStyle).toMatchObject({
+      paddingHorizontal: 0,
+      paddingTop: textareaMetrics.paddingVertical,
+      paddingBottom: textareaMetrics.paddingVertical,
+      minHeight: textareaMetrics.lineHeight * 2 + textareaMetrics.paddingVertical * 2,
+    })
     const embeddedShells = findNodes(view.toJSON(), (node) => {
       const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
       return (
-        style?.backgroundColor === 'transparent' &&
+        style?.flexDirection === 'row' &&
+        style?.paddingHorizontal === textareaMetrics.paddingHorizontal &&
+        style?.borderWidth === 0 &&
         style?.borderRadius === 0 &&
-        style?.borderWidth === 0
+        style?.backgroundColor === 'transparent'
       )
     })
-    expect(embeddedShells.length).toBeGreaterThan(0)
+    expect(embeddedShells).toHaveLength(1)
+  })
+
+  it('allows an explicit embedded Input border without restoring its padding', async () => {
+    const token = getInputToken(getDesignToken())
+    const view = await render(
+      <FieldInput label="手机号" bordered testID="explicit-bordered-field-input" />,
+    )
+    const shells = findNodes(view.toJSON(), (node) => {
+      const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
+      return style?.borderWidth === token.borderWidth && style?.borderRadius === token.borderRadius
+    })
+
+    expect(shells).toHaveLength(1)
+    expect(
+      StyleSheet.flatten(screen.getByTestId('explicit-bordered-field-input').props.style),
+    ).toMatchObject({
+      paddingHorizontal: 0,
+      paddingVertical: 0,
+    })
+  })
+
+  it('uses textarea metrics for autoSize inside FieldInput', async () => {
+    await render(
+      <FieldInput
+        label="备注"
+        vertical
+        multiline
+        autoSize={{ minRows: 1, maxRows: 5 }}
+        defaultValue="初始"
+        testID="embedded-auto-size"
+      />,
+    )
+    const input = screen.getByTestId('embedded-auto-size')
+    const measurementInput = screen.getByTestId('embedded-auto-size__measure', {
+      includeHiddenElements: true,
+    })
+
+    expect(StyleSheet.flatten(input.props.style)).toMatchObject({
+      minHeight: 36,
+      height: 36,
+      maxHeight: 116,
+    })
+
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(measurementInput, 'contentSizeChange', {
+      nativeEvent: { contentSize: { width: 200, height: 200 } },
+    })
+    await waitFor(() => expect(StyleSheet.flatten(input.props.style).height).toBe(116))
   })
 
   it('applies label width and alignment through Cell styles', async () => {
@@ -126,6 +205,12 @@ describe('FieldInput', () => {
       return style?.width === 180 && style?.flexShrink === 0
     })
     expect(labelAreas.length).toBeGreaterThan(0)
+    expect(StyleSheet.flatten(labelAreas[0].props.style as StyleProp<ViewStyle>)).toMatchObject({
+      width: 180,
+      flexGrow: 0,
+      flexShrink: 0,
+      flexBasis: 'auto',
+    })
     expect(StyleSheet.flatten(screen.getByText('手机号').props.style)).toMatchObject({
       textAlign: 'right',
     })
@@ -215,6 +300,22 @@ describe('FieldRadio', () => {
         return style?.flexBasis === '20%'
       }),
     ).toHaveLength(8)
+  })
+
+  it('passes buttonVariant from FieldRadio to its Radio.Group', async () => {
+    await render(
+      <FieldRadio
+        label="样式"
+        variant="button"
+        buttonVariant="outline"
+        options={[{ value: 'outline', label: 'Outline' }]}
+      />,
+    )
+
+    expect(StyleSheet.flatten(screen.getByText('Outline').parent?.props.style)).toMatchObject({
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+    })
   })
 
   it('delegates value alignment to Cell without an extra control wrapper', async () => {
@@ -391,6 +492,117 @@ describe('FieldCheckbox', () => {
       }),
     ).toHaveLength(8)
   })
+
+  it('passes buttonVariant from FieldCheckbox to its Checkbox.Group', async () => {
+    await render(
+      <FieldCheckbox
+        label="样式"
+        variant="button"
+        buttonVariant="text"
+        options={[{ value: 'text', label: 'Text' }]}
+      />,
+    )
+
+    expect(StyleSheet.flatten(screen.getByText('Text').parent?.props.style)).toMatchObject({
+      backgroundColor: 'transparent',
+      borderWidth: 0,
+    })
+  })
+})
+
+describe('FieldSwitch', () => {
+  it('composes Cell with Switch and supports uncontrolled values', async () => {
+    const onChange = jest.fn()
+
+    await render(
+      <FieldSwitch label="通知" defaultValue={false} onChange={onChange} testID="field-switch" />,
+    )
+
+    const fieldSwitch = screen.getByTestId('field-switch')
+    expect(fieldSwitch.props.accessibilityState.checked).toBe(false)
+
+    await press(fieldSwitch)
+
+    expect(onChange).toHaveBeenCalledWith(true)
+    expect(screen.getByTestId('field-switch').props.accessibilityState.checked).toBe(true)
+  })
+
+  it('preserves custom active and inactive value types', async () => {
+    const onChange = jest.fn()
+
+    await render(
+      <FieldSwitch
+        label="连接"
+        defaultValue="off"
+        activeValue="on"
+        inactiveValue="off"
+        onChange={onChange}
+        testID="custom-field-switch"
+      />,
+    )
+
+    await press(screen.getByTestId('custom-field-switch'))
+
+    expect(onChange).toHaveBeenCalledWith('on')
+  })
+
+  it('blocks readOnly interaction without applying disabled semantics', async () => {
+    const onChange = jest.fn()
+
+    await render(
+      <FieldSwitch
+        label="只读"
+        defaultValue={false}
+        readOnly
+        onChange={onChange}
+        testID="read-only-field-switch"
+      />,
+    )
+
+    const fieldSwitch = screen.getByTestId('read-only-field-switch')
+    await press(fieldSwitch)
+
+    expect(onChange).not.toHaveBeenCalled()
+    expect(fieldSwitch.props.accessibilityState.disabled).toBe(false)
+  })
+
+  it('passes disabled to Cell and Switch', async () => {
+    const onChange = jest.fn()
+
+    await render(
+      <FieldSwitch
+        label="禁用"
+        defaultValue={false}
+        disabled
+        onChange={onChange}
+        testID="disabled-field-switch"
+      />,
+    )
+
+    const fieldSwitch = screen.getByTestId('disabled-field-switch')
+    await press(fieldSwitch)
+
+    expect(fieldSwitch.props.accessibilityState.disabled).toBe(true)
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('passes beforeChange to Switch', async () => {
+    const onChange = jest.fn()
+
+    await render(
+      <FieldSwitch
+        label="确认"
+        defaultValue={false}
+        beforeChange={() => false}
+        onChange={onChange}
+        testID="before-change-field-switch"
+      />,
+    )
+
+    await press(screen.getByTestId('before-change-field-switch'))
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
 })
 
 describe('FieldPicker', () => {
@@ -401,6 +613,12 @@ describe('FieldPicker', () => {
 
   it('keeps draft changes local and commits only after Picker confirmation', async () => {
     const onChange = jest.fn()
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value, _config, callback) => {
+        callback?.(true)
+        return value as never
+      })
 
     function Harness() {
       const [value, setValue] = useState<readonly PickerValue[]>(['shanghai'])
@@ -442,6 +660,7 @@ describe('FieldPicker', () => {
     expect(await screen.findByText('北京')).toBeTruthy()
     expect(onChange).toHaveBeenCalledWith(['beijing'])
     expect(screen.queryByTestId('picker-toolbar')).toBeNull()
+    timing.mockRestore()
   })
 
   it('supports placeholder and formatValue while keeping Picker separate from Cell', async () => {
@@ -465,162 +684,14 @@ describe('FieldPicker', () => {
   })
 })
 
-describe('FieldDateRangePicker', () => {
-  const value = dateRange(date(2026, 9, 10), date(2026, 9, 20))
-
-  it('renders a placeholder tuple and keeps the DateRangePicker outside Cell', async () => {
-    const view = await render(
-      <Provider theme={{ token: { motion: false } }}>
-        <FieldDateRangePicker
-          label="日期范围"
-          placeholder={['开始日期', '结束日期']}
-          testID="field-date-range-picker"
-        />
-      </Provider>,
-    )
-
-    expect(screen.getByText('开始日期')).toBeTruthy()
-    expect(screen.getByText('结束日期')).toBeTruthy()
-    expect(findNodes(view.toJSON(), (node) => node.type === 'DateRangePicker')).toHaveLength(0)
-  })
-
-  it('formats a committed range with the default and custom display values', async () => {
-    await render(
-      <Provider theme={{ token: { motion: false } }}>
-        <FieldDateRangePicker label="日期范围" value={value} />
-        <FieldDateRangePicker
-          formatValue={(nextValue) => `${nextValue[0].getDate()}-${nextValue[1].getDate()}`}
-          label="自定义范围"
-          value={value}
-        />
-      </Provider>,
-    )
-
-    expect(screen.getByText('2026-09-10')).toBeTruthy()
-    expect(screen.getByText('2026-09-20')).toBeTruthy()
-    expect(screen.getByText('10-20')).toBeTruthy()
-  })
-
-  it('isolates draft changes and commits only after confirmation', async () => {
-    const onChange = jest.fn()
-
-    await render(
-      <Provider theme={{ token: { motion: false } }}>
-        <FieldDateRangePicker
-          label="日期范围"
-          defaultValue={value}
-          minDate={date(2026, 1, 1)}
-          maxDate={date(2027, 12, 31)}
-          onChange={onChange}
-          title="选择日期范围"
-        />
-      </Provider>,
-    )
-
-    await press(screen.getByText('2026-09-10'))
-    await press(screen.getByTestId('picker-item-2-4'))
-    expect(onChange).not.toHaveBeenCalled()
-    expect(screen.getByText('2026-09-10')).toBeTruthy()
-
-    await press(screen.getByTestId('picker-cancel'))
-    expect(screen.queryByTestId('picker-toolbar')).toBeNull()
-    expect(screen.getByText('2026-09-10')).toBeTruthy()
-
-    await press(screen.getByText('2026-09-10'))
-    await press(screen.getByTestId('picker-item-2-4'))
-    await press(screen.getByTestId('picker-confirm'))
-
-    expect(onChange).toHaveBeenCalledTimes(1)
-    expect(onChange).toHaveBeenLastCalledWith(dateRange(date(2026, 9, 5), date(2026, 9, 20)))
-  })
-
-  it('keeps an empty field empty after cancel and creates a tuple on confirm', async () => {
-    const onChange = jest.fn()
-
-    await render(
-      <Provider theme={{ token: { motion: false } }}>
-        <FieldDateRangePicker
-          label="日期范围"
-          onChange={onChange}
-          placeholder={['请选择开始', '请选择结束']}
-        />
-      </Provider>,
-    )
-
-    await press(screen.getAllByText('请选择开始')[0])
-    await press(screen.getByTestId('picker-cancel'))
-    expect(onChange).not.toHaveBeenCalled()
-    expect(screen.getByText('请选择开始')).toBeTruthy()
-
-    await press(screen.getByText('请选择开始'))
-    await press(screen.getByTestId('picker-confirm'))
-    expect(onChange).toHaveBeenCalledTimes(1)
-    expect(onChange.mock.lastCall?.[0]).toEqual([expect.any(Date), expect.any(Date)])
-  })
-
-  it('synchronizes controlled values and blocks disabled or readOnly fields', async () => {
-    const first = value
-    const second = dateRange(date(2027, 3, 5), date(2027, 4, 6))
-    const view = await render(
-      <Provider theme={{ token: { motion: false } }}>
-        <FieldDateRangePicker label="受控范围" value={first} />
-        <FieldDateRangePicker label="禁用范围" disabled placeholder={['禁用', '禁用']} />
-        <FieldDateRangePicker label="只读范围" readOnly placeholder={['只读', '只读']} />
-      </Provider>,
-    )
-
-    await view.rerender(
-      <Provider theme={{ token: { motion: false } }}>
-        <FieldDateRangePicker label="受控范围" value={second} />
-        <FieldDateRangePicker label="禁用范围" disabled placeholder={['禁用', '禁用']} />
-        <FieldDateRangePicker label="只读范围" readOnly placeholder={['只读', '只读']} />
-      </Provider>,
-    )
-    expect(screen.getByText('2027-03-05')).toBeTruthy()
-    expect(screen.getByText('2027-04-06')).toBeTruthy()
-
-    await press(screen.getByText('禁用范围'))
-    expect(screen.queryByTestId('picker-toolbar')).toBeNull()
-    await press(screen.getByText('只读范围'))
-    expect(screen.queryByTestId('picker-toolbar')).toBeNull()
-  })
-
-  it('renders Field feedback and forwards Cell layout props', async () => {
-    const view = await render(
-      <Provider theme={{ token: { motion: false } }}>
-        <FieldDateRangePicker
-          label="日期范围"
-          description="选择有效的日期范围"
-          errorMessage="日期范围不能为空"
-          labelAlign="right"
-          labelWidth={180}
-          vertical
-          placeholder={['开始', '结束']}
-        />
-      </Provider>,
-    )
-
-    expect(screen.getByText('选择有效的日期范围')).toBeTruthy()
-    expect(screen.getByText('日期范围不能为空')).toBeTruthy()
-    const label = screen.getByText('日期范围')
-    expect(StyleSheet.flatten(label.props.style)).toMatchObject({ textAlign: 'right' })
-    expect(
-      findNodes(view.toJSON(), (node) => {
-        const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
-        return style?.width === '100%'
-      }).length,
-    ).toBeGreaterThan(0)
-  })
-})
-
 describe('Field exports', () => {
   it('exports concrete adapters without exporting the runtime Field component', () => {
     expect(packageExports).not.toHaveProperty('Field')
     expect(FieldInput).toBeDefined()
     expect(FieldRadio).toBeDefined()
     expect(FieldCheckbox).toBeDefined()
+    expect(FieldSwitch).toBeDefined()
     expect(FieldPicker).toBeDefined()
-    expect(FieldDateRangePicker).toBeDefined()
     expect(ConfigProvider).toEqual(expect.any(Function))
   })
 })

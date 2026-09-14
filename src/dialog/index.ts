@@ -19,4 +19,4 @@ export type {
   DialogStyleState,
   DialogStyles,
   DialogTheme,
-} from './interface'
+} from './types'

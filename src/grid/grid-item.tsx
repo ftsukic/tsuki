@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
 import { InteractionPressable } from '../interaction'
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
 import { useToken } from '../theme'
 import { useGridContext } from './context'
+import { Text } from '../text'
 import type { GridItemProps } from './interface'
 
 function isVisible(value: ReactNode): boolean {

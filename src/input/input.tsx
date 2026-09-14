@@ -3,8 +3,8 @@ import { resolveStyles } from '../style'
 import type { TextInputInstance, TextInputProps } from '../text-input'
 import { forwardRef, useCallback, useMemo, useState } from 'react'
 import { View } from 'react-native'
-import type { InputProps, InputStyleState } from './interface'
-import { getInputStyles } from './style'
+import type { InputProps, InputStyleState } from './types'
+import { getInputMetrics, getInputStyles, getTextareaMetrics } from './style'
 import { getInputToken } from './token'
 import { InputSingle } from './input-single'
 import { InputTextarea } from './input-textarea'
@@ -12,7 +12,12 @@ import { renderInputAffix } from './input-affix'
 import { useInputAutoSize } from './use-input-auto-size'
 import { useInputValue } from './use-input-value'
 
-export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
+interface InputInternalProps {
+  /** Internal layout mode used by FieldInput. */
+  embedded?: boolean
+}
+
+export const Input = forwardRef<TextInputInstance, InputProps & InputInternalProps>(function Input(
   {
     type = 'text',
     size = 'normal',
@@ -47,6 +52,7 @@ export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
     onBlur,
     onEndEditing,
     onContentSizeChange,
+    embedded = false,
     ...nativeProps
   },
   ref,
@@ -67,6 +73,9 @@ export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
     type === 'number' ? 'numeric' : type === 'tel' ? 'phone-pad' : nativeProps.keyboardType
   const secureTextEntry = isPassword ? !currentPasswordVisible : nativeProps.secureTextEntry
   const state: InputStyleState = { focused, disabled: isDisabled }
+  const metrics = isTextarea
+    ? getTextareaMetrics(token, size)
+    : getInputMetrics(token, size, embedded)
   const inputProps = useMemo<InputProps>(
     () => ({
       ...nativeProps,
@@ -136,7 +145,7 @@ export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
       value,
     ],
   )
-  const resolved = getInputStyles(token, inputProps, state)
+  const resolved = getInputStyles(token, inputProps, state, embedded)
   const semantic = resolveStyles(styles, { props: inputProps, state })
   const {
     value: currentValue,
@@ -156,17 +165,17 @@ export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
     isEditable &&
     currentValue.length > 0 &&
     (clearTrigger === 'always' || focused)
-  const lineHeight =
-    size === 'small' ? token.lineHeightSM : size === 'large' ? token.lineHeightLG : token.lineHeight
   const wordLimitPadding =
-    showWordLimit && maxLength !== undefined ? token.lineHeightSM + token.paddingVertical : 0
+    showWordLimit && maxLength !== undefined
+      ? (isTextarea ? token.textareaLineHeightSM : token.lineHeightSM) + metrics.paddingVertical
+      : 0
   const autoSizeState = useInputAutoSize({
     enabled: isAutoSize,
     value: currentValue,
     minRows,
     maxRows,
-    lineHeight,
-    verticalPadding: token.paddingVertical * 2,
+    lineHeight: metrics.lineHeight,
+    verticalPadding: metrics.paddingVertical * 2,
     wordLimitPadding,
   })
 
@@ -186,8 +195,7 @@ export const Input = forwardRef<TextInputInstance, InputProps>(function Input(
   )
   const handleEndEditingEvent = useCallback(
     (event: Parameters<NonNullable<InputProps['onEndEditing']>>[0]) => {
-      const formattedValue = handleEndEditing(event.nativeEvent.text)
-      if (formattedValue !== event.nativeEvent.text) event.nativeEvent.text = formattedValue
+      handleEndEditing(event.nativeEvent.text)
       onEndEditing?.(event)
     },
     [handleEndEditing, onEndEditing],

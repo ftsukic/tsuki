@@ -17,10 +17,11 @@ export type {
   ImagePreviewRect,
   ImagePreviewRef,
   ImagePreviewRenderIndexParams,
+  ImagePreviewRenderImageContext,
   ImagePreviewSemanticStyles,
   ImagePreviewStyleState,
   ImagePreviewStyles,
-} from './interface'
+} from './types'
 export {
   calculateFocalPointTranslation,
   clampTranslation,

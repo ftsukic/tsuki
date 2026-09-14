@@ -1,7 +1,9 @@
 import React from 'react'
-import { ConfigProvider, Tab, Tabs, getDesignToken, getTabsToken } from '..'
+import { Tab, Tabs, getTabsToken } from '../tabs'
+import { getTabScrollOffset } from '../tabs/tabs'
+import { ConfigProvider, getDesignToken } from '../theme'
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
-import { StyleSheet, Text } from 'react-native'
+import { Animated, ScrollView, StyleSheet, Text } from 'react-native'
 import { State } from 'react-native-gesture-handler'
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils'
 import * as Reanimated from 'react-native-reanimated'
@@ -96,6 +98,92 @@ describe('Tabs', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
+  it('reconciles uncontrolled tabs when children appear after mount', async () => {
+    const onChange = jest.fn()
+    const view = await render(<Tabs onChange={onChange}>{null}</Tabs>)
+
+    await view.rerender(
+      <Tabs onChange={onChange}>
+        <Tab testID="async-first" name="first" title="第一项" />
+        <Tab testID="async-second" name="second" title="第二项" />
+      </Tabs>,
+    )
+
+    expect(screen.getByTestId('async-first').props.accessibilityState?.selected).toBe(true)
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('preserves the initial defaultValue intent until async children appear', async () => {
+    const view = await render(<Tabs defaultValue="second">{null}</Tabs>)
+
+    await view.rerender(
+      <Tabs defaultValue="second">
+        <Tab testID="async-default-first" name="first" title="第一项" />
+        <Tab testID="async-default-second" name="second" title="第二项" />
+      </Tabs>,
+    )
+
+    expect(screen.getByTestId('async-default-second').props.accessibilityState?.selected).toBe(true)
+    expect(screen.getByTestId('async-default-first').props.accessibilityState?.selected).toBe(false)
+  })
+
+  it('falls back when the uncontrolled active tab is removed', async () => {
+    const view = await render(
+      <Tabs defaultValue="second">
+        <Tab name="first" title="第一项" />
+        <Tab name="second" title="第二项" />
+        <Tab testID="removable-third" name="third" title="第三项" />
+      </Tabs>,
+    )
+
+    await press(screen.getByTestId('removable-third'))
+
+    await view.rerender(
+      <Tabs defaultValue="second">
+        <Tab testID="removed-fallback" name="first" title="第一项" />
+        <Tab name="second" title="第二项" />
+      </Tabs>,
+    )
+
+    expect(screen.getByTestId('removed-fallback').props.accessibilityState?.selected).toBe(true)
+  })
+
+  it('falls back when the uncontrolled active tab becomes disabled', async () => {
+    const view = await render(
+      <Tabs defaultValue="second">
+        <Tab testID="enabled-fallback" name="first" title="第一项" />
+        <Tab name="second" title="第二项" />
+      </Tabs>,
+    )
+
+    await view.rerender(
+      <Tabs defaultValue="second">
+        <Tab testID="enabled-fallback" name="first" title="第一项" />
+        <Tab disabled name="second" title="第二项" />
+      </Tabs>,
+    )
+
+    expect(screen.getByTestId('enabled-fallback').props.accessibilityState?.selected).toBe(true)
+  })
+
+  it('does not repair an invalid controlled value', async () => {
+    const onChange = jest.fn()
+    await render(
+      <Tabs value="missing" onChange={onChange}>
+        <Tab name="first" title="第一项" />
+        <Tab name="second" title="第二项" />
+      </Tabs>,
+    )
+
+    expect(screen.getByRole('tab', { name: '第一项' }).props.accessibilityState?.selected).toBe(
+      false,
+    )
+    expect(screen.getByRole('tab', { name: '第二项' }).props.accessibilityState?.selected).toBe(
+      false,
+    )
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
   it('supports card, scrollable navigation and unnamed navigation-only tabs', async () => {
     await render(
       <>
@@ -172,14 +260,156 @@ describe('Tabs', () => {
     })
   })
 
-  it('animates controlled pane changes and makes animated=false immediate', async () => {
+  it('clamps the active tab scroll offset around the viewport', () => {
+    expect(
+      getTabScrollOffset({
+        activeLayout: { x: 0, width: 80 },
+        contentWidth: 400,
+        viewportWidth: 200,
+      }),
+    ).toBe(0)
+    expect(
+      getTabScrollOffset({
+        activeLayout: { x: 180, width: 80 },
+        contentWidth: 400,
+        viewportWidth: 200,
+      }),
+    ).toBe(120)
+    expect(
+      getTabScrollOffset({
+        activeLayout: { x: 320, width: 80 },
+        contentWidth: 400,
+        viewportWidth: 200,
+      }),
+    ).toBe(200)
+  })
+
+  it('keeps the active controlled tab visible in scrollable navigation', async () => {
+    const scrollTo = jest
+      .spyOn(ScrollView.prototype, 'scrollTo')
+      .mockImplementation(() => undefined)
+    try {
+      const view = await render(
+        <Tabs scrollable value="first" onChange={() => undefined}>
+          {Array.from({ length: 4 }, (_, index) => (
+            <Tab
+              key={index}
+              testID={`scrollable-tab-${index}`}
+              name={`tab-${index}`}
+              title={`Tab ${index}`}
+            />
+          ))}
+        </Tabs>,
+      )
+      const nav = screen.getByTestId('tabs-nav')
+      const navScroll = screen.getByTestId('tabs-nav-scroll')
+
+      await act(async () => {
+        nav.props.onLayout({ nativeEvent: { layout: { width: 200, height: 44, x: 0, y: 0 } } })
+        for (let index = 0; index < 4; index += 1) {
+          screen.getByTestId(`scrollable-tab-${index}`).props.onLayout({
+            nativeEvent: { layout: { width: 80, height: 44, x: index * 80, y: 0 } },
+          })
+        }
+        navScroll.props.onContentSizeChange(320, 44)
+        await Promise.resolve()
+      })
+
+      scrollTo.mockClear()
+      await view.rerender(
+        <Tabs scrollable value="tab-3" onChange={() => undefined}>
+          {Array.from({ length: 4 }, (_, index) => (
+            <Tab
+              key={index}
+              testID={`scrollable-tab-${index}`}
+              name={`tab-${index}`}
+              title={`Tab ${index}`}
+            />
+          ))}
+        </Tabs>,
+      )
+
+      expect(scrollTo).toHaveBeenCalledWith({ x: 120, y: 0, animated: true })
+
+      scrollTo.mockClear()
+      await view.rerender(
+        <Tabs animated={false} scrollable value="tab-2" onChange={() => undefined}>
+          {Array.from({ length: 4 }, (_, index) => (
+            <Tab
+              key={index}
+              testID={`scrollable-tab-${index}`}
+              name={`tab-${index}`}
+              title={`Tab ${index}`}
+            />
+          ))}
+        </Tabs>,
+      )
+      expect(scrollTo).toHaveBeenCalledWith({ x: 100, y: 0, animated: true })
+    } finally {
+      scrollTo.mockRestore()
+    }
+  })
+
+  it('uses the same active-tab visibility behavior for shrink navigation', async () => {
+    const scrollTo = jest
+      .spyOn(ScrollView.prototype, 'scrollTo')
+      .mockImplementation(() => undefined)
+    try {
+      await render(
+        <Tabs animated shrink value="last" onChange={() => undefined}>
+          <Tab testID="shrink-scroll-first" name="first" title="第一项" />
+          <Tab testID="shrink-scroll-last" name="last" title="最后一项" />
+        </Tabs>,
+      )
+      const nav = screen.getByTestId('tabs-nav')
+      const navScroll = screen.getByTestId('tabs-nav-scroll')
+      await act(async () => {
+        nav.props.onLayout({ nativeEvent: { layout: { width: 100, height: 44, x: 0, y: 0 } } })
+        screen.getByTestId('shrink-scroll-first').props.onLayout({
+          nativeEvent: { layout: { width: 80, height: 44, x: 0, y: 0 } },
+        })
+        screen.getByTestId('shrink-scroll-last').props.onLayout({
+          nativeEvent: { layout: { width: 80, height: 44, x: 80, y: 0 } },
+        })
+        navScroll.props.onContentSizeChange(160, 44)
+        await Promise.resolve()
+      })
+
+      expect(scrollTo).toHaveBeenCalledWith({ x: 60, y: 0, animated: true })
+    } finally {
+      scrollTo.mockRestore()
+    }
+  })
+
+  it('does not scroll ordinary tab navigation', async () => {
+    const scrollTo = jest
+      .spyOn(ScrollView.prototype, 'scrollTo')
+      .mockImplementation(() => undefined)
+    try {
+      await render(
+        <Tabs value="last" onChange={() => undefined}>
+          <Tab testID="ordinary-first" name="first" title="第一项" />
+          <Tab testID="ordinary-last" name="last" title="最后一项" />
+        </Tabs>,
+      )
+      expect(screen.queryByTestId('tabs-nav-scroll')).toBeNull()
+      expect(scrollTo).not.toHaveBeenCalled()
+    } finally {
+      scrollTo.mockRestore()
+    }
+  })
+
+  it('animates the indicator by default while content stays immediate', async () => {
     const timing = jest
       .spyOn(Reanimated, 'withTiming')
       .mockImplementation((value, _config, callback) => {
         callback?.(true)
         return value as never
       })
-    const renderTabs = (animated = true, value: 'date' | 'time' = 'date') => (
+    const indicatorTiming = jest
+      .spyOn(Animated, 'timing')
+      .mockImplementation(() => ({ start: jest.fn(), stop: jest.fn() }) as never)
+    const renderTabs = (animated = false, value: 'date' | 'time' = 'date') => (
       <Tabs animated={animated} value={value} onChange={() => undefined}>
         <Tab name="date" title="日期">
           <Text>日期内容</Text>
@@ -190,16 +420,85 @@ describe('Tabs', () => {
       </Tabs>
     )
     const view = await render(renderTabs())
+    await act(async () => {
+      screen.getByRole('tab', { name: '日期' }).props.onLayout({
+        nativeEvent: { layout: { width: 100, height: 44, x: 0, y: 0 } },
+      })
+      screen.getByRole('tab', { name: '时间' }).props.onLayout({
+        nativeEvent: { layout: { width: 100, height: 44, x: 100, y: 0 } },
+      })
+      await Promise.resolve()
+    })
+    timing.mockClear()
+    indicatorTiming.mockClear()
+    await view.rerender(renderTabs(false, 'time'))
+    await Promise.resolve()
+    expect(timing).not.toHaveBeenCalled()
+    expect(indicatorTiming).toHaveBeenCalled()
+
+    indicatorTiming.mockClear()
+    await view.rerender(renderTabs(true, 'date'))
     timing.mockClear()
     await view.rerender(renderTabs(true, 'time'))
     await Promise.resolve()
     expect(timing).toHaveBeenCalled()
+    expect(indicatorTiming).toHaveBeenCalled()
 
     timing.mockClear()
+    indicatorTiming.mockClear()
     await view.rerender(renderTabs(false))
     await Promise.resolve()
     expect(timing).not.toHaveBeenCalled()
+    expect(indicatorTiming).toHaveBeenCalled()
+    indicatorTiming.mockRestore()
     timing.mockRestore()
+  })
+
+  it('disables header and content motion when the theme disables motion', async () => {
+    const indicatorTiming = jest
+      .spyOn(Animated, 'timing')
+      .mockImplementation(() => ({ start: jest.fn(), stop: jest.fn() }) as never)
+    const scrollTo = jest
+      .spyOn(ScrollView.prototype, 'scrollTo')
+      .mockImplementation(() => undefined)
+
+    try {
+      const view = await render(
+        <ConfigProvider theme={{ token: { motion: false } }}>
+          <Tabs scrollable value="first" onChange={() => undefined}>
+            <Tab testID="motion-off-first" name="first" title="第一项" />
+            <Tab testID="motion-off-second" name="second" title="第二项" />
+          </Tabs>
+        </ConfigProvider>,
+      )
+      const nav = screen.getByTestId('tabs-nav')
+      const navScroll = screen.getByTestId('tabs-nav-scroll')
+      await act(async () => {
+        nav.props.onLayout({ nativeEvent: { layout: { width: 100, height: 44, x: 0, y: 0 } } })
+        screen.getByTestId('motion-off-first').props.onLayout({
+          nativeEvent: { layout: { width: 80, height: 44, x: 0, y: 0 } },
+        })
+        screen.getByTestId('motion-off-second').props.onLayout({
+          nativeEvent: { layout: { width: 80, height: 44, x: 80, y: 0 } },
+        })
+        navScroll.props.onContentSizeChange(160, 44)
+        await Promise.resolve()
+      })
+
+      await view.rerender(
+        <ConfigProvider theme={{ token: { motion: false } }}>
+          <Tabs scrollable value="second" onChange={() => undefined}>
+            <Tab testID="motion-off-first" name="first" title="第一项" />
+            <Tab testID="motion-off-second" name="second" title="第二项" />
+          </Tabs>
+        </ConfigProvider>,
+      )
+      expect(indicatorTiming).not.toHaveBeenCalled()
+      expect(scrollTo).toHaveBeenCalledWith({ x: 60, y: 0, animated: false })
+    } finally {
+      indicatorTiming.mockRestore()
+      scrollTo.mockRestore()
+    }
   })
 
   it('keeps lazy panes mounted after their first activation', async () => {

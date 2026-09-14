@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-按钮用于触发操作，支持 Vant 风格的类型、尺寸、加载状态和 `default`、`round`、`square`、`circle` 形状。
+按钮用于触发操作，支持 Vant 风格的类型、尺寸、视觉变体、加载状态和 `default`、`round`、`square`、`circle` 形状。
 
 </section>
 
@@ -33,7 +33,7 @@ import { Button, Icon } from '@ftsukic/tsuki'
 
 <code src="../../../src/button/__fixtures__/examples/shapes.tsx" title="形状" description="并排比较默认、方角、胶囊和不同尺寸的圆形图标按钮。"></code>
 
-<code src="../../../src/button/__fixtures__/examples/group.tsx" title="Button.Group" description="展示连接按钮组、统一尺寸、显式尺寸覆盖和单按钮组。"></code>
+<code src="../../../src/button/__fixtures__/examples/group.tsx" title="Button.Group" description="展示连接按钮组、统一尺寸、视觉变体、显式尺寸覆盖和单按钮组。"></code>
 
 ## API
 
@@ -101,12 +101,12 @@ import { Button, ConfigProvider } from '@ftsukic/tsuki'
 
 ### Button.Group
 
-`Button.Group` 是 Button 的静态子组件，也可以通过 named export `ButtonGroup` 引入。它默认横向排列直接传入的 Button，并连接相邻按钮的边框与内侧圆角。推荐直接放置 `Button` children；Group 不会透传 `type`、`variant`、`disabled` 等 Button 属性。
+`Button.Group` 是 Button 的静态子组件，也可以通过 named export `ButtonGroup` 引入。它默认横向排列直接传入的 Button，并连接相邻按钮的边框与内侧圆角。推荐直接放置 `Button` children；Group 可以统一透传 `size`、`shape` 和 `variant`，子 Button 显式属性优先。
 
 ```tsx | pure
 import { Button, ButtonGroup } from '@ftsukic/tsuki'
 
-;<Button.Group size="small">
+;<Button.Group size="small" variant="outline">
   <Button>左侧</Button>
   <Button size="large">显式尺寸优先</Button>
   <Button>右侧</Button>
@@ -120,8 +120,9 @@ import { Button, ButtonGroup } from '@ftsukic/tsuki'
 | children | `ReactNode` | — | 推荐传入直接的 `Button` 子项；实际子项位置用于连接圆角和边框 |
 | size | `ButtonSize` | — | Group 尺寸；未显式设置 `size` 的 Button 继承此值，Button 子项显式 `size` 优先 |
 | shape | `'default' \| 'round'` | `'default'` | Group 形状；未显式设置形状的 Button 子项继承此值 |
+| variant | `ButtonVariant` | — | Group 视觉变体；未显式设置 `variant` 的 Button 子项继承此值，子项显式 `variant` 优先 |
 | block | `boolean` | `false` | Group 占满父级可用宽度，直接 Button 子项等分可用宽度 |
 | style | `StyleProp<ViewStyle>` | — | Group 根 View 的样式；默认 `flexDirection: 'row'`，显式样式优先 |
 | 其他 ViewProps | React Native `ViewProps` | — | Group 继承 View 的其他属性，例如 `testID`、`accessibilityLabel` 和 `onLayout` |
 
-Group 不添加 `gap`。有边框的相邻 Button 使用实际 `borderWidth` 消除双边框；`filled`、`text` 等无边框变体不会产生负 `marginLeft`。设置 `block` 后 Group 撑满父级宽度，直接 Button 子项等分可用空间。单个 Button 保持自身显式 `shape` 或 `round`、`square`、`circle` 的形状行为。
+Group 不添加 `gap`。有边框的相邻 Button 使用实际 `borderWidth` 消除双边框；`filled`、`text` 等无边框变体不会产生负 `marginLeft`。设置 `block` 后 Group 撑满父级宽度，直接 Button 子项等分可用空间。Group 的 `variant` 只作为未显式设置子项的默认值，不会覆盖子 Button 自己的 `variant`。单个 Button 保持自身显式 `shape` 或 `round`、`square`、`circle` 的形状行为。

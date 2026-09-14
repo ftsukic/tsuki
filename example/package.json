@@ -10,6 +10,7 @@
     "react-dom": "19.2.3",
     "react-native": "0.86.3",
     "react-native-gesture-handler": "~2.32.0",
+    "react-native-keyboard-controller": "1.22.4",
     "react-native-reanimated": "4.5.1",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-svg": "~15.15.0",
@@ -23,8 +24,8 @@
   "scripts": {
     "generate:fixtures": "node ../scripts/generate-fixture-catalog.cjs",
     "start": "yarn generate:fixtures && expo start",
-    "android": "yarn generate:fixtures && expo start --android",
-    "ios": "yarn generate:fixtures && expo start --ios",
+    "android": "yarn generate:fixtures && expo run:android",
+    "ios": "yarn generate:fixtures && expo run:ios",
     "web": "yarn generate:fixtures && expo start --web",
     "typecheck": "yarn generate:fixtures && tsc --noEmit",
     "config": "yarn generate:fixtures && expo config --type public",

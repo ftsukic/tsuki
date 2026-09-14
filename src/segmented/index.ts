@@ -1,4 +1,4 @@
-export { Segmented } from './Segmented'
+export { Segmented } from './segmented'
 export { getSegmentedToken } from './token'
 export type {
   SegmentedOption,

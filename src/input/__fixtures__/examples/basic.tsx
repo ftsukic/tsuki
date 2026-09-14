@@ -22,6 +22,13 @@ export default function InputBasicFixture() {
       <Text>当前值：{value || '—'}</Text>
       <Input disabled defaultValue="禁用输入" bordered />
       <Input readOnly defaultValue="只读输入" bordered />
+      <Text>自定义边框</Text>
+      <Input styles={{ shell: { borderRadius: 50 } }} bordered placeholder="没有边框" />
+      <Input
+        styles={{ shell: { borderRadius: 16, backgroundColor: '#f055D' } }}
+        bordered
+        placeholder="没有边框"
+      />
     </View>
   )
 }

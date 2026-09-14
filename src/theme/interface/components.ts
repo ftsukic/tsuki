@@ -1,5 +1,5 @@
 import type { AliasToken } from './alias'
-import type { DimensionValue, TextStyle } from 'react-native'
+import type { ColorValue, DimensionValue, TextStyle } from 'react-native'
 
 export interface ButtonToken {
   heightXS: number
@@ -126,6 +126,17 @@ export interface SwipeCellToken {
   fontFamily: string
 }
 
+export interface SwipeToken {
+  indicatorSize: number
+  indicatorMargin: number
+  indicatorGap: number
+  indicatorInactiveOpacity: number
+  indicatorActiveOpacity: number
+  indicatorBackground: string
+  indicatorActiveBackground: string
+  animationDuration: number
+}
+
 export interface ImagePreviewToken {
   zIndex: number
   overlayColor: string
@@ -141,18 +152,20 @@ export interface ImagePreviewToken {
 }
 
 export interface InputToken {
-  heightSM: number
-  height: number
-  heightLG: number
   fontSizeSM: number
   fontSize: number
   fontSizeLG: number
   lineHeightSM: number
   lineHeight: number
   lineHeightLG: number
+  textareaLineHeightSM: number
+  textareaLineHeight: number
+  textareaLineHeightLG: number
   borderRadius: number
   paddingHorizontal: number
   paddingVertical: number
+  textareaPaddingHorizontal: number
+  textareaPaddingVertical: number
   backgroundColor: string
   borderColor: string
   activeBorderColor: string
@@ -239,6 +252,7 @@ export interface BadgeToken {
   fontSizeSM: number
   color: string
   textColor: string
+  statusTextColor: string
   borderColor: string
   successColor: string
   processingColor: string
@@ -246,6 +260,27 @@ export interface BadgeToken {
   errorColor: string
   warningColor: string
   statusGap: number
+  fontFamily: string
+}
+
+export interface TagToken {
+  heightSM: number
+  height: number
+  heightLG: number
+  paddingHorizontalSM: number
+  paddingHorizontal: number
+  paddingHorizontalLG: number
+  fontSizeSM: number
+  fontSize: number
+  fontSizeLG: number
+  closeIconSizeSM: number
+  closeIconSize: number
+  closeIconSizeLG: number
+  borderRadius: number
+  borderRadiusRound: number
+  borderWidth: number
+  closeGap: number
+  disabledOpacity: number
   fontFamily: string
 }
 
@@ -263,6 +298,23 @@ export interface FloatingPanelToken {
   shadowOffset: number
   elevation: number
   animationDuration: number
+}
+
+export interface FloatingBubbleToken {
+  size: number
+  iconSize: number
+  backgroundColor: string
+  color: string
+  borderRadius: number
+  gap: number
+  zIndex: number
+  shadowColor: string
+  shadowOpacity: number
+  shadowRadius: number
+  shadowOffset: number
+  elevation: number
+  animationDuration: number
+  pressedOpacity: number
 }
 
 export interface RadioToken {
@@ -285,10 +337,13 @@ export interface RadioToken {
   disabledOpacity: number
   fontFamily: string
   buttonHeight: number
+  buttonMinWidth: number
   buttonPaddingHorizontal: number
   buttonBorderRadius: number
   buttonBackground: string
+  buttonFilledBackground: string
   buttonDisabledBackground: string
+  buttonCheckedFilledBackground: string
   buttonCheckedLabelColor: string
 }
 
@@ -310,10 +365,13 @@ export interface CheckboxToken {
   lineHeight: number
   fontFamily: string
   buttonHeight: number
+  buttonMinWidth: number
   buttonPaddingHorizontal: number
   buttonBorderRadius: number
   buttonBackground: string
+  buttonFilledBackground: string
   buttonDisabledBackground: string
+  buttonCheckedFilledBackground: string
 }
 
 export interface TabsToken {
@@ -540,6 +598,21 @@ export interface ProgressToken {
   progress_animation_duration: number
 }
 
+export interface WatermarkToken {
+  width: number
+  height: number
+  gapX: number
+  gapY: number
+  rotate: number
+  opacity: number
+  zIndex: number
+  color: ColorValue
+  fontSize: number
+  lineHeight: number
+  fontFamily?: string
+  fontWeight?: TextStyle['fontWeight']
+}
+
 export interface NotifyToken {
   primaryBackgroundColor: string
   successBackgroundColor: string
@@ -591,6 +664,7 @@ export interface ComponentTokenOverrides {
   Collapse?: Partial<CollapseToken>
   Navbar?: Partial<NavbarToken>
   SwipeCell?: Partial<SwipeCellToken>
+  Swipe?: Partial<SwipeToken>
   ImagePreview?: Partial<ImagePreviewToken>
   Input?: Partial<InputToken>
   Field?: Partial<FieldToken>
@@ -602,7 +676,9 @@ export interface ComponentTokenOverrides {
   Avatar?: Partial<AvatarToken>
   Empty?: Partial<EmptyToken>
   Badge?: Partial<BadgeToken>
+  Tag?: Partial<TagToken>
   FloatingPanel?: Partial<FloatingPanelToken>
+  FloatingBubble?: Partial<FloatingBubbleToken>
   Dialog?: Partial<DialogToken>
   Overlay?: Partial<OverlayToken>
   Popup?: Partial<PopupToken>
@@ -613,6 +689,7 @@ export interface ComponentTokenOverrides {
   Skeleton?: Partial<SkeletonToken>
   Switch?: Partial<SwitchToken>
   Progress?: Partial<ProgressToken>
+  Watermark?: Partial<WatermarkToken>
   Notify?: Partial<NotifyToken>
   Dropdown?: Partial<DropdownToken>
 }
@@ -623,6 +700,7 @@ export interface ComponentTokenMap {
   Collapse: CollapseToken
   Navbar: NavbarToken
   SwipeCell: SwipeCellToken
+  Swipe: SwipeToken
   ImagePreview: ImagePreviewToken
   Input: InputToken
   Field: FieldToken
@@ -634,7 +712,9 @@ export interface ComponentTokenMap {
   Avatar: AvatarToken
   Empty: EmptyToken
   Badge: BadgeToken
+  Tag: TagToken
   FloatingPanel: FloatingPanelToken
+  FloatingBubble: FloatingBubbleToken
   Dialog: DialogToken
   Overlay: OverlayToken
   Popup: PopupToken
@@ -645,6 +725,7 @@ export interface ComponentTokenMap {
   Skeleton: SkeletonToken
   Switch: SwitchToken
   Progress: ProgressToken
+  Watermark: WatermarkToken
   Notify: NotifyToken
   Dropdown: DropdownToken
 }

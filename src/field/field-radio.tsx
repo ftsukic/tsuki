@@ -67,6 +67,7 @@ export function FieldRadio(props: FieldRadioProps) {
     disabled,
     readOnly,
     variant,
+    buttonVariant,
     buttonLayout,
     buttonColumns,
     vertical,
@@ -105,6 +106,7 @@ export function FieldRadio(props: FieldRadioProps) {
           onChange={setValue}
           disabled={disabled}
           variant={variant}
+          buttonVariant={buttonVariant}
           direction={direction}
           gap={gap}
           buttonLayout={buttonLayout ?? 'equal'}

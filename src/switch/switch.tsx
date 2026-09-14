@@ -12,7 +12,7 @@ import {
   resolveSwitchSize,
 } from './style'
 import { getSwitchToken } from './token'
-import type { SwitchProps, SwitchStyleState } from './interface'
+import type { SwitchProps, SwitchStyleState } from './types'
 
 type SwitchRef = React.ComponentRef<typeof InteractionPressable>
 
@@ -53,6 +53,9 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
   const active = Object.is(currentValue, activeValue)
   const activeRef = useRef(active)
   activeRef.current = active
+  const beforeChangeRequestRef = useRef(0)
+  const currentValueRef = useRef(currentValue)
+  currentValueRef.current = currentValue
   const translateProgress = useRef(new Animated.Value(active ? 1 : 0)).current
   const trackProgress = useRef(new Animated.Value(active ? 1 : 0)).current
   const animationRef = useRef<Animated.CompositeAnimation | null>(null)
@@ -130,6 +133,7 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
     () => () => {
       animationRef.current?.stop()
       animationRef.current = null
+      beforeChangeRequestRef.current += 1
     },
     [],
   )
@@ -138,6 +142,8 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
     if (disabled || loading) return
 
     onPress?.()
+    const requestId = ++beforeChangeRequestRef.current
+    const sourceValue = currentValueRef.current
     const nextValue = activeRef.current ? inactiveValue : activeValue
 
     if (!beforeChange) {
@@ -153,6 +159,12 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
 
     void result.then(
       (allowed) => {
+        if (
+          requestId !== beforeChangeRequestRef.current ||
+          !Object.is(currentValueRef.current, sourceValue)
+        ) {
+          return
+        }
         if (allowed !== false) setValue(nextValue)
       },
       () => undefined,

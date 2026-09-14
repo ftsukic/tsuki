@@ -150,13 +150,15 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
   onIndexChangeRef.current = onIndexChange
 
   const initialIndex = findEnabledIndex(items, selectedIndex)
-  const offset = useSharedValue(getOffsetByIndex(Math.max(0, initialIndex), itemHeight))
-  const startOffset = useSharedValue(offset.value)
-  const momentumOffset = useSharedValue(offset.value)
+  const initialOffset = getOffsetByIndex(Math.max(0, initialIndex), itemHeight)
+  const offset = useSharedValue(initialOffset)
+  const startOffset = useSharedValue(initialOffset)
+  const momentumOffset = useSharedValue(initialOffset)
   const touchStartTime = useSharedValue(0)
   const panActive = useSharedValue(false)
   const panEndHandled = useSharedValue(false)
   const snapGeneration = useSharedValue(0)
+  const pendingIndex = useSharedValue(-1)
   const generationRef = useRef(0)
   const pendingSnapRef = useRef<PendingSnap | null>(null)
   const motionEnabled = themeToken.motion !== false
@@ -168,9 +170,10 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
     const generation = Math.max(generationRef.current, snapGeneration.value) + 1
     generationRef.current = generation
     snapGeneration.value = generation
+    pendingIndex.value = -1
     pendingSnapRef.current = null
     return generation
-  }, [snapGeneration])
+  }, [pendingIndex, snapGeneration])
 
   const beginPan = useCallback(
     (generation: number) => {
@@ -192,9 +195,13 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
 
   const commitSnap = useCallback((index: number, generation: number) => {
     const pending = pendingSnapRef.current
-    if (generationRef.current !== generation || pending === null || pending.index !== index) return
+    if (generationRef.current !== generation || pending === null || pending.index !== index) {
+      return
+    }
     pendingSnapRef.current = null
-    if (pending.emitChange) onIndexChangeRef.current?.(index)
+    if (!pending.emitChange) return
+
+    onIndexChangeRef.current?.(index)
   }, [])
 
   useLayoutEffect(() => {
@@ -228,6 +235,7 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
       cancelAnimation(offset)
       const generation = invalidateSnap()
       const emitChange = targetIndex !== findEnabledIndex(items, selectedIndexRef.current)
+      pendingIndex.value = targetIndex
       pendingSnapRef.current = { emitChange, index: targetIndex }
       const targetOffset = getOffsetByIndex(targetIndex, itemHeight)
       if (!motionEnabled) {
@@ -237,7 +245,7 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
       }
       offset.value = withTiming(
         targetOffset,
-        { duration: resolvedSwipeDuration, easing: PICKER_EASING },
+        { duration: DEFAULT_DURATION, easing: PICKER_EASING },
         (finished) => {
           'worklet'
           if (finished && snapGeneration.value === generation) {
@@ -253,7 +261,7 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
       items,
       motionEnabled,
       offset,
-      resolvedSwipeDuration,
+      pendingIndex,
       snapGeneration,
     ],
   )
@@ -276,6 +284,7 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
         snapGeneration.value = generation
         panActive.value = true
         panEndHandled.value = false
+        pendingIndex.value = -1
         cancelAnimation(offset)
         startOffset.value = offset.value
         momentumOffset.value = offset.value
@@ -313,7 +322,8 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
 
         const generation = snapGeneration.value + 1
         snapGeneration.value = generation
-        const emitChange = targetIndex !== selectedIndexRef.current
+        const emitChange = targetIndex !== selectedIndex
+        pendingIndex.value = targetIndex
         panEndHandled.value = true
         scheduleOnRN(beginPendingSnap, targetIndex, generation, emitChange)
         const targetOffset = getOffsetByIndex(targetIndex, itemHeight)
@@ -346,7 +356,8 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
           if (targetIndex >= 0) {
             const generation = snapGeneration.value + 1
             snapGeneration.value = generation
-            const emitChange = targetIndex !== selectedIndexRef.current
+            const emitChange = targetIndex !== selectedIndex
+            pendingIndex.value = targetIndex
             panEndHandled.value = true
             scheduleOnRN(beginPendingSnap, targetIndex, generation, emitChange)
             const targetOffset = getOffsetByIndex(targetIndex, itemHeight)
@@ -387,9 +398,11 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
     offset,
     panActive,
     panEndHandled,
+    pendingIndex,
     snapGeneration,
     startOffset,
     resolvedSwipeDuration,
+    selectedIndex,
     testID,
     touchStartTime,
   ])
@@ -398,7 +411,9 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
     ref,
     () => ({
       stopMomentum() {
-        const pendingIndex = pendingSnapRef.current?.index
+        const pendingIndexValue =
+          pendingSnapRef.current?.index ??
+          (pendingIndex.value >= 0 ? pendingIndex.value : undefined)
         cancelAnimation(offset)
         invalidateSnap()
         if (count === 0) {
@@ -406,7 +421,7 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
           return null
         }
 
-        const rawIndex = pendingIndex ?? getIndexByOffset(offset.value, itemHeight, count)
+        const rawIndex = pendingIndexValue ?? getIndexByOffset(offset.value, itemHeight, count)
         const finalIndex = findEnabledIndex(items, rawIndex)
         if (finalIndex < 0) {
           offset.value = 0
@@ -416,7 +431,7 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
         return finalIndex
       },
     }),
-    [count, invalidateSnap, itemHeight, items, offset],
+    [count, invalidateSnap, itemHeight, items, offset, pendingIndex],
   )
 
   const handlePress = useCallback(

@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { Provider } from '@ftsukic/tsuki'
+import { defaultAlgorithm, Provider } from '@ftsukic/tsuki'
 import { componentCatalog } from '../fixtures/catalog'
 import type { ComponentFixtureEntry } from '../fixtures/catalog'
 
+const KeyboardChatScrollViewPage = lazy(() => import('../pages/keyboard-chat-scroll-view'))
+
 export default function FixtureExplorer() {
   return (
-    <Provider safeArea>
+    <Provider safeArea theme={{ algorithm: defaultAlgorithm }}>
       <Explorer />
     </Provider>
   )
@@ -16,15 +18,32 @@ export default function FixtureExplorer() {
 
 function Explorer() {
   const [selected, setSelected] = useState<ComponentFixtureEntry | null>(null)
+  const [showKeyboardChat, setShowKeyboardChat] = useState(false)
+
+  if (showKeyboardChat) {
+    return (
+      <Suspense fallback={<Text style={styles.loading}>正在加载专项实验…</Text>}>
+        <KeyboardChatScrollViewPage onBack={() => setShowKeyboardChat(false)} />
+      </Suspense>
+    )
+  }
 
   if (selected) {
     return <PreviewScreen fixture={selected} onBack={() => setSelected(null)} />
   }
 
-  return <FixtureCatalog onSelect={setSelected} />
+  return (
+    <FixtureCatalog onOpenKeyboardChat={() => setShowKeyboardChat(true)} onSelect={setSelected} />
+  )
 }
 
-function FixtureCatalog({ onSelect }: { onSelect: (component: ComponentFixtureEntry) => void }) {
+function FixtureCatalog({
+  onOpenKeyboardChat,
+  onSelect,
+}: {
+  onOpenKeyboardChat: () => void
+  onSelect: (component: ComponentFixtureEntry) => void
+}) {
   return (
     <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
       <View style={styles.header}>
@@ -34,6 +53,22 @@ function FixtureCatalog({ onSelect }: { onSelect: (component: ComponentFixtureEn
           每个组件进入自己的 overview，examples 在 overview 内组织。
         </Text>
       </View>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onOpenKeyboardChat}
+        style={({ pressed }) => [styles.specialCard, pressed && styles.fixtureCardPressed]}
+      >
+        <View style={styles.cardText}>
+          <Text style={styles.specialEyebrow}>专项实验</Text>
+          <Text style={styles.cardTitle}>KeyboardChatScrollView</Text>
+          <Text style={styles.cardDescription} selectable>
+            测试键盘抬升、interactive dismissal、sticky composer 和消息滚动。
+          </Text>
+        </View>
+        <Text style={styles.chevron} accessibilityElementsHidden>
+          ›
+        </Text>
+      </Pressable>
       <FlatList
         data={componentCatalog}
         keyExtractor={(item) => item.id}
@@ -143,6 +178,25 @@ const styles = StyleSheet.create({
   fixtureCardPressed: {
     opacity: 0.7,
   },
+  specialCard: {
+    backgroundColor: '#eef6ff',
+    borderColor: '#b2d4ff',
+    borderRadius: 14,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: 20,
+    marginTop: 16,
+    padding: 16,
+  },
+  specialEyebrow: {
+    color: '#1677ff',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+    textTransform: 'uppercase',
+  },
   cardText: {
     flex: 1,
     gap: 4,
@@ -166,6 +220,11 @@ const styles = StyleSheet.create({
   empty: {
     color: '#667085',
     padding: 20,
+    textAlign: 'center',
+  },
+  loading: {
+    color: '#667085',
+    padding: 24,
     textAlign: 'center',
   },
   previewHeader: {

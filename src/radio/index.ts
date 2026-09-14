@@ -1,5 +1,5 @@
 import { Radio } from './radio'
-import { RadioGroup } from './group'
+import { RadioGroup } from './radio-group'
 
 export const RadioWithGroup = Object.assign(Radio, { Group: RadioGroup })
 export { RadioWithGroup as Radio }
@@ -18,4 +18,4 @@ export type {
   RadioStyles,
   RadioValue,
   RadioVariant,
-} from './interface'
+} from './types'

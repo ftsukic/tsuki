@@ -5,7 +5,7 @@ import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import { getSearchStyles } from './style'
 import { getSearchToken } from './token'
-import type { SearchInstance, SearchProps, SearchShape, SearchStyleState } from './interface'
+import type { SearchInstance, SearchProps, SearchShape, SearchStyleState } from './types'
 import { forwardRef, useCallback, useEffect, useRef } from 'react'
 import { Text, View } from 'react-native'
 
@@ -19,7 +19,6 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
     value,
     defaultValue,
     onChange,
-    onChangeText,
     onClear,
     onSearch,
     autoSearch = false,
@@ -56,7 +55,6 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
     value,
     defaultValue,
     onChange,
-    onChangeText,
     onClear,
     onSearch,
     autoSearch,
@@ -94,7 +92,6 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
     (nextValue: string) => {
       currentValueRef.current = nextValue
       onChange?.(nextValue)
-      onChangeText?.(nextValue)
 
       if (!autoSearch || onSearch === undefined) return
       clearDebounce()
@@ -106,7 +103,7 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
         Math.max(0, debounce),
       )
     },
-    [autoSearch, clearDebounce, debounce, onChange, onChangeText, onSearch],
+    [autoSearch, clearDebounce, debounce, onChange, onSearch],
   )
 
   const handleSubmitEditing = useCallback<NonNullable<SearchProps['onSubmitEditing']>>(

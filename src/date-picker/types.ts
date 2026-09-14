@@ -44,8 +44,8 @@ export interface DatePickerProps extends Omit<
   minDate?: Date
   maxDate?: Date
   title?: ReactNode
-  cancelText?: ReactNode
-  confirmText?: ReactNode
+  cancelButtonText?: ReactNode
+  confirmButtonText?: ReactNode
   formatter?: DatePickerFormatter
   filter?: DatePickerFilter
   onChange?(value: DatePickerValue, options: readonly DatePickerOption[]): void

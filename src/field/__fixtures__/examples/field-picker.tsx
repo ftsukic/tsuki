@@ -17,6 +17,7 @@ export default function FieldPickerFixture() {
 
   return (
     <FieldPicker
+      center
       label="城市"
       value={value}
       onChange={setValue}

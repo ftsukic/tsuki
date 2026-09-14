@@ -1,5 +1,5 @@
 import { act, render, screen } from '@testing-library/react-native'
-import { Avatar, Badge, ConfigProvider } from '..'
+import { Avatar, Badge, ConfigProvider, getDesignToken } from '..'
 import { StyleSheet, Text } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
 
@@ -76,6 +76,9 @@ describe('Badge', () => {
 
     expect(screen.getByText('在线')).toBeTruthy()
     expect(screen.getByText('在线').props.numberOfLines).toBeUndefined()
+    expect(StyleSheet.flatten(screen.getByText('在线').props.style).color).toBe(
+      getDesignToken().colorText,
+    )
     const dot = findViewWithBackground(toJSON(), '#7232DD')
     const status = findViewWithBackground(toJSON(), '#07C160')
     expect(dot).toBeTruthy()

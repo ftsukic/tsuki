@@ -22,4 +22,4 @@ export type {
   ToastStyleState,
   ToastStyles,
   ToastType,
-} from './interface'
+} from './types'

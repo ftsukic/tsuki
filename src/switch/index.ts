@@ -8,4 +8,4 @@ export type {
   SwitchStyleInfo,
   SwitchStyleState,
   SwitchStyles,
-} from './interface'
+} from './types'

@@ -86,8 +86,9 @@ export function createFieldCellStyles(
             }
           : {
               width: effectiveLabelWidth,
-              flex: 0,
+              flexGrow: 0,
               flexShrink: 0,
+              flexBasis: 'auto',
               marginRight: fieldToken.labelGap,
             },
         custom?.titleArea,

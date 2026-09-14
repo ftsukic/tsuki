@@ -1,6 +1,7 @@
 import {
   forwardRef,
   isValidElement,
+  useContext,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -8,12 +9,14 @@ import {
   useRef,
   useState,
 } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { Easing } from 'react-native-reanimated'
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { Animated, motionPresets, useTransitionProgress } from '../motion'
 import { Portal } from '../portal'
+import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
-import type { NotifyMethods, NotifyProps } from './interface'
+import type { NotifyMethods, NotifyProps } from './types'
 import { getNotifyToken } from './token'
 
 function getBackgroundColor(type: NotifyProps['type'], token: ReturnType<typeof getNotifyToken>) {
@@ -39,6 +42,7 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
     backgroundColor,
     visible: visibleProp = true,
     duration = 0,
+    safeAreaInsetTop = true,
     style,
     textStyle,
     onClosed,
@@ -48,6 +52,7 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
 ) {
   const { token: themeToken } = useToken()
   const token = useComponentToken('Notify', getNotifyToken)
+  const safeAreaInsets = useContext(SafeAreaInsetsContext)
   const [visible, setVisible] = useState(visibleProp)
   const [currentMessage, setCurrentMessage] = useState(message)
   const renderedRef = useRef(visibleProp)
@@ -95,6 +100,7 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
   )
 
   const content = isValidElement(currentMessage) ? currentMessage : (currentMessage ?? children)
+  const topInset = safeAreaInsetTop ? Math.max(0, safeAreaInsets?.top ?? 0) : 0
 
   const animationDuration = themeToken.motion ? themeToken.motionDurationSlow : 0
   const enteringConfig = useMemo(
@@ -158,8 +164,9 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
               alignItems: 'center',
               backgroundColor: backgroundColor ?? getBackgroundColor(type, token),
               justifyContent: 'center',
+              paddingBottom: token.paddingVertical,
+              paddingTop: token.paddingVertical + topInset,
               paddingHorizontal: token.paddingHorizontal,
-              paddingVertical: token.paddingVertical,
               width: '100%',
             },
             style,

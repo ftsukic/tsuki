@@ -1,5 +1,5 @@
 import { Cell } from './cell'
-import { CellGroup } from './group'
+import { CellGroup } from './cell-group'
 
 export const CellWithGroup = Object.assign(Cell, { Group: CellGroup })
 export { CellWithGroup as Cell }
@@ -15,4 +15,4 @@ export type {
   CellStyleInfo,
   CellStyleState,
   CellStyles,
-} from './interface'
+} from './types'

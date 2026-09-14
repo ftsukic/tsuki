@@ -1,5 +1,10 @@
-import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef } from 'react'
 import { Picker } from '../picker'
+import {
+  PickerGroupProvider,
+  usePickerGroup,
+  usePickerGroupRegistrationContext,
+} from '../picker-group/context'
 import type { PickerOption, PickerRef, PickerSelection, PickerValue } from '../picker/types'
 import { createDateTimeColumns, normalizeDateTimePickerValues } from '../picker/date-time/columns'
 import type { DateTimeColumnsConfig } from '../picker/date-time/columns'
@@ -38,8 +43,8 @@ export const TimePicker = forwardRef<TimePickerRef, TimePickerProps>(function Ti
     secondStep,
     formatter,
     filter,
-    cancelText = '取消',
-    confirmText = '确定',
+    cancelButtonText = '取消',
+    confirmButtonText = '确定',
     onChange,
     onConfirm,
     onCancel,
@@ -152,30 +157,43 @@ export const TimePicker = forwardRef<TimePickerRef, TimePickerProps>(function Ti
       values: pickerValuesToSelectedValues(selection.values, resolvedColumns, baseFields),
     }
   }, [baseFields, resolvedColumns])
-  useImperativeHandle(
-    ref,
+  const group = usePickerGroup()
+  const registrationContext = usePickerGroupRegistrationContext()
+  const confirmRef = useRef(confirm)
+  confirmRef.current = confirm
+  const getSelectedValuesRef = useRef(getSelectedValues)
+  getSelectedValuesRef.current = getSelectedValues
+  const publicRef = useMemo<TimePickerRef>(
     () => ({
       cancel: () => pickerRef.current?.cancel(),
-      confirm,
+      confirm: () => confirmRef.current(),
       getSelectedOptions: () => pickerRef.current?.getSelectedOptions() ?? [],
-      getSelectedValues,
+      getSelectedValues: () => getSelectedValuesRef.current(),
     }),
-    [confirm, getSelectedValues],
+    [],
   )
+  useImperativeHandle(ref, () => publicRef, [publicRef])
+  useEffect(() => {
+    if (!group) return
+    group.register(group.index, publicRef)
+    return () => group.register(group.index, null)
+  }, [group, group?.index, publicRef])
 
   return (
-    <Picker
-      {...props}
-      columns={columns}
-      defaultValue={pickerDefaultValue}
-      onCancel={onCancel}
-      onChange={handleChange}
-      onConfirm={handleConfirm}
-      ref={pickerRef}
-      value={pickerValue}
-      cancelButtonText={cancelText}
-      confirmButtonText={confirmText}
-    />
+    <PickerGroupProvider value={registrationContext}>
+      <Picker
+        {...props}
+        columns={columns}
+        defaultValue={pickerDefaultValue}
+        onCancel={onCancel}
+        onChange={handleChange}
+        onConfirm={handleConfirm}
+        ref={pickerRef}
+        value={pickerValue}
+        cancelButtonText={cancelButtonText}
+        confirmButtonText={confirmButtonText}
+      />
+    </PickerGroupProvider>
   )
 })
 

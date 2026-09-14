@@ -70,6 +70,233 @@ describe('Dropdown', () => {
     expect(screen.queryByTestId('dropdown-panel')).toBeNull()
   })
 
+  it('preserves keyed item identity when closed items reorder', async () => {
+    const menuRef = createRef<DropdownMenuRef>()
+    function Reordered() {
+      const [reversed, setReversed] = useState(false)
+      return (
+        <>
+          <DropdownMenu ref={menuRef}>
+            {reversed
+              ? [
+                  <DropdownItem key="b" title="B">
+                    <Text>面板 B</Text>
+                  </DropdownItem>,
+                  <DropdownItem key="a" title="A">
+                    <Text>面板 A</Text>
+                  </DropdownItem>,
+                ]
+              : [
+                  <DropdownItem key="a" title="A">
+                    <Text>面板 A</Text>
+                  </DropdownItem>,
+                  <DropdownItem key="b" title="B">
+                    <Text>面板 B</Text>
+                  </DropdownItem>,
+                ]}
+          </DropdownMenu>
+          <Text testID="reverse" onPress={() => setReversed(true)}>
+            reverse
+          </Text>
+        </>
+      )
+    }
+
+    await render(
+      <AppProvider>
+        <Reordered />
+      </AppProvider>,
+    )
+    await press(screen.getByTestId('reverse'))
+    await act(async () => menuRef.current?.open(0))
+
+    expect(screen.getByTestId('dropdown-panel')).toHaveTextContent('面板 B')
+  })
+
+  it('keeps the active keyed item and lifecycle stable when items reorder', async () => {
+    const onChange = jest.fn()
+    const onOpen = jest.fn()
+    const onClose = jest.fn()
+
+    function Reordered() {
+      const [reversed, setReversed] = useState(false)
+      return (
+        <>
+          <DropdownMenu onChange={onChange}>
+            {reversed
+              ? [
+                  <DropdownItem key="b" title="B">
+                    <Text>面板 B</Text>
+                  </DropdownItem>,
+                  <DropdownItem key="a" title="A" onOpen={onOpen} onClose={onClose}>
+                    <Text>面板 A</Text>
+                  </DropdownItem>,
+                ]
+              : [
+                  <DropdownItem key="a" title="A" onOpen={onOpen} onClose={onClose}>
+                    <Text>面板 A</Text>
+                  </DropdownItem>,
+                  <DropdownItem key="b" title="B">
+                    <Text>面板 B</Text>
+                  </DropdownItem>,
+                ]}
+          </DropdownMenu>
+          <Text testID="active-reverse" onPress={() => setReversed(true)}>
+            reverse
+          </Text>
+        </>
+      )
+    }
+
+    await render(
+      <AppProvider>
+        <Reordered />
+      </AppProvider>,
+    )
+    await press(screen.getByTestId('dropdown-item-0'))
+    await press(screen.getByTestId('active-reverse'))
+
+    expect(screen.getByTestId('dropdown-panel')).toHaveTextContent('面板 A')
+    expect(screen.getByTestId('dropdown-item-1').props.accessibilityState).toMatchObject({
+      expanded: true,
+    })
+    expect(screen.getByTestId('dropdown-item-0').props.accessibilityState).toMatchObject({
+      expanded: false,
+    })
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenCalledWith(0)
+    expect(onOpen).toHaveBeenCalledTimes(1)
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('closes the active item exactly once when it is removed', async () => {
+    const animations: Array<{ complete: (finished?: boolean) => void }> = []
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, _config, callback) => {
+      if (callback) animations.push({ complete: (finished = true) => callback(finished) })
+      return value
+    })
+    const onChange = jest.fn()
+    const onClose = jest.fn()
+    const onClosed = jest.fn()
+
+    function Removable() {
+      const [visible, setVisible] = useState(true)
+      return (
+        <>
+          <DropdownMenu duration={240} onChange={onChange}>
+            {visible ? (
+              <DropdownItem
+                key="a"
+                defaultValue="a"
+                options={[{ text: 'A', value: 'a' }]}
+                onClose={onClose}
+                onClosed={onClosed}
+              />
+            ) : null}
+            <DropdownItem key="b" defaultValue="b" options={[{ text: 'B', value: 'b' }]} />
+          </DropdownMenu>
+          <Text testID="remove-active" onPress={() => setVisible(false)}>
+            remove
+          </Text>
+        </>
+      )
+    }
+
+    await render(
+      <AppProvider theme={{ token: { motion: true } }}>
+        <Removable />
+      </AppProvider>,
+    )
+    await press(screen.getByTestId('dropdown-item-0'))
+    await act(async () => animations.forEach((animation) => animation.complete()))
+    expect(screen.getByTestId('dropdown-panel')).toBeTruthy()
+
+    await press(screen.getByTestId('remove-active'))
+    expect(onChange).toHaveBeenLastCalledWith(null)
+    expect(onChange).toHaveBeenCalledTimes(2)
+    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(onClosed).not.toHaveBeenCalled()
+
+    await act(async () => animations.slice(2).forEach((animation) => animation.complete()))
+    expect(onClosed).toHaveBeenCalledTimes(1)
+    expect(screen.queryByTestId('dropdown-panel')).toBeNull()
+    expect(screen.getByTestId('dropdown-item-0').props.accessibilityState).toMatchObject({
+      expanded: false,
+    })
+  })
+
+  it('blocks a new open after an item becomes disabled', async () => {
+    const menuRef = createRef<DropdownMenuRef>()
+
+    function DynamicDisabled() {
+      const [disabled, setDisabled] = useState(false)
+      return (
+        <>
+          <DropdownMenu ref={menuRef}>
+            <DropdownItem title="A" disabled={disabled}>
+              <Text>面板 A</Text>
+            </DropdownItem>
+          </DropdownMenu>
+          <Text testID="disable-item" onPress={() => setDisabled(true)}>
+            disable
+          </Text>
+        </>
+      )
+    }
+
+    await render(
+      <AppProvider>
+        <DynamicDisabled />
+      </AppProvider>,
+    )
+    await press(screen.getByTestId('disable-item'))
+    await act(async () => menuRef.current?.open(0))
+
+    expect(screen.queryByTestId('dropdown-panel')).toBeNull()
+  })
+
+  it('refreshes active metadata without reopening the popup', async () => {
+    const onOpen = jest.fn()
+    const onClose = jest.fn()
+
+    function Metadata() {
+      const [version, setVersion] = useState<'old' | 'new'>('old')
+      const value = version === 'old' ? 'old' : 'new'
+      const options = [{ text: version === 'old' ? '旧选项' : '新选项', value }]
+      return (
+        <>
+          <DropdownMenu>
+            <DropdownItem
+              title={version === 'old' ? '旧标题' : '新标题'}
+              value={value}
+              options={options}
+              onOpen={onOpen}
+              onClose={onClose}
+            />
+          </DropdownMenu>
+          <Text testID="refresh-metadata" onPress={() => setVersion('new')}>
+            refresh
+          </Text>
+        </>
+      )
+    }
+
+    await render(
+      <AppProvider>
+        <Metadata />
+      </AppProvider>,
+    )
+    await press(screen.getByTestId('dropdown-item-0'))
+    const panel = screen.getByTestId('dropdown-panel')
+    await press(screen.getByTestId('refresh-metadata'))
+
+    expect(screen.getByTestId('dropdown-panel')).toBe(panel)
+    expect(screen.getByTestId('dropdown-title-0')).toHaveTextContent('新标题')
+    expect(screen.getByTestId('dropdown-option-0-0')).toHaveTextContent('新选项')
+    expect(onOpen).toHaveBeenCalledTimes(1)
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
   it('keeps trigger active state separate from the selected option state', async () => {
     await render(
       <AppProvider>

@@ -8,4 +8,4 @@ export type {
   NavbarStyleInfo,
   NavbarStyleState,
   NavbarStyles,
-} from './interface'
+} from './types'

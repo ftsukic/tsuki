@@ -1,8 +1,8 @@
 import { ConfigProvider, Input, getDesignToken } from '..'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { useState } from 'react'
-import { StyleSheet } from 'react-native'
-import { getInputStyles } from '../input/style'
+import { Platform, StyleSheet } from 'react-native'
+import { getInputStyles, getTextareaMetrics } from '../input/style'
 import { getInputToken } from '../input/token'
 
 describe('Input', () => {
@@ -22,24 +22,179 @@ describe('Input', () => {
     expect(input.props.scrollEnabled).toBeUndefined()
   })
 
-  it('keeps single-line controls at a stable token height', async () => {
-    await render(
-      <>
-        <Input testID="small-input" size="small" prefix="$" suffix="USD" />
-        <Input testID="normal-input" />
-        <Input testID="large-input" size="large" clearable defaultValue="value" />
-      </>,
+  it('uses the Vant 24/10/16 contract for single-line sizes', () => {
+    const token = getInputToken(getDesignToken())
+    expect(token.lineHeight).toBe(24)
+    expect(token.paddingVertical).toBe(10)
+    expect(token.paddingHorizontal).toBe(16)
+    expect(token).not.toHaveProperty('heightSM')
+    expect(token).not.toHaveProperty('height')
+    expect(token).not.toHaveProperty('heightLG')
+
+    const stylesBySize = {
+      small: getInputStyles(token, { size: 'small' }, { focused: false, disabled: false }),
+      normal: getInputStyles(token, { size: 'normal' }, { focused: false, disabled: false }),
+      large: getInputStyles(token, { size: 'large' }, { focused: false, disabled: false }),
+    }
+
+    for (const styles of Object.values(stylesBySize)) {
+      expect(styles.singleShell.height).toBeUndefined()
+      expect(styles.singleShell.minHeight).toBeUndefined()
+      expect(styles.singleShell.paddingVertical).toBe(token.paddingVertical)
+      expect(styles.singleShell.alignContent).toBeUndefined()
+      expect(styles.singleInput.height).toBeUndefined()
+      expect(styles.singleInput.minHeight).toBeUndefined()
+      expect(styles.singleInput.paddingVertical).toBe(0)
+      expect(styles.singleInput.alignSelf).toBe('center')
+      expect(styles.shell.paddingHorizontal).toBe(token.paddingHorizontal)
+      expect(styles.input.paddingHorizontal).toBe(0)
+      const nativeInputStyle = StyleSheet.flatten([styles.input, styles.singleInput])
+      expect(nativeInputStyle.height).toBeUndefined()
+      expect(nativeInputStyle.minHeight).toBeUndefined()
+      expect(nativeInputStyle.paddingVertical).toBe(0)
+    }
+
+    expect(
+      StyleSheet.flatten([stylesBySize.small.input, stylesBySize.small.singleInput]),
+    ).toMatchObject({ fontSize: token.fontSizeSM })
+    expect(
+      StyleSheet.flatten([stylesBySize.normal.input, stylesBySize.normal.singleInput]),
+    ).toMatchObject({ fontSize: token.fontSize })
+    expect(
+      StyleSheet.flatten([stylesBySize.large.input, stylesBySize.large.singleInput]),
+    ).toMatchObject({ fontSize: token.fontSizeLG })
+
+    expect(stylesBySize.small.input.lineHeight).toBe(
+      Platform.OS === 'ios' ? undefined : token.lineHeightSM,
+    )
+    expect(stylesBySize.normal.input.lineHeight).toBe(
+      Platform.OS === 'ios' ? undefined : token.lineHeight,
+    )
+    expect(stylesBySize.large.input.lineHeight).toBe(
+      Platform.OS === 'ios' ? undefined : token.lineHeightLG,
+    )
+    expect(stylesBySize.small.singleContent.minHeight).toBe(
+      Platform.OS === 'ios' ? token.lineHeightSM : undefined,
+    )
+    expect(stylesBySize.normal.singleContent.minHeight).toBe(
+      Platform.OS === 'ios' ? token.lineHeight : undefined,
+    )
+    expect(stylesBySize.large.singleContent.minHeight).toBe(
+      Platform.OS === 'ios' ? token.lineHeightLG : undefined,
+    )
+  })
+
+  it('removes standalone single-line spacing while keeping textarea padding', () => {
+    const token = getInputToken(getDesignToken())
+    const state = { focused: false, disabled: false }
+    const singleStyles = getInputStyles(token, { size: 'normal' }, state, true)
+    const textareaStyles = getInputStyles(token, { multiline: true, rows: 2 }, state, true)
+    const textareaMetrics = getTextareaMetrics(token, 'normal')
+
+    expect(singleStyles.shell).toMatchObject({
+      paddingHorizontal: 0,
+      borderWidth: 0,
+      borderRadius: 0,
+      backgroundColor: 'transparent',
+    })
+    expect(singleStyles.singleShell.paddingVertical).toBe(0)
+    expect(singleStyles.input).toMatchObject({
+      fontSize: token.fontSize,
+      paddingHorizontal: 0,
+      paddingTop: 0,
+      paddingBottom: 0,
+    })
+    expect(singleStyles.input.lineHeight).toBe(Platform.OS === 'ios' ? undefined : token.lineHeight)
+    expect(singleStyles.singleContent.minHeight).toBe(
+      Platform.OS === 'ios' ? token.lineHeight : undefined,
+    )
+    expect(textareaStyles.shell.paddingHorizontal).toBe(textareaMetrics.paddingHorizontal)
+    expect(textareaStyles.textareaShell.minHeight).toBe(
+      textareaMetrics.lineHeight * 2 + textareaMetrics.paddingVertical * 2,
+    )
+    expect(textareaStyles.textareaInput.minHeight).toBe(
+      textareaMetrics.lineHeight * 2 + textareaMetrics.paddingVertical * 2,
+    )
+    expect(textareaStyles.input.lineHeight).toBe(textareaMetrics.lineHeight)
+    expect(textareaStyles.input.paddingTop).toBe(textareaMetrics.paddingVertical)
+    expect(textareaStyles.input.paddingBottom).toBe(textareaMetrics.paddingVertical)
+  })
+
+  it('keeps component metric overrides in the layout source of truth', () => {
+    const token = {
+      ...getInputToken(getDesignToken()),
+      lineHeight: 28,
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+    }
+    const state = { focused: false, disabled: false }
+    const standaloneStyles = getInputStyles(token, {}, state)
+    const embeddedStyles = getInputStyles(token, {}, state, true)
+
+    expect(standaloneStyles.shell.paddingHorizontal).toBe(20)
+    expect(standaloneStyles.singleShell.paddingVertical).toBe(12)
+    expect(standaloneStyles.singleContent.minHeight).toBe(Platform.OS === 'ios' ? 28 : undefined)
+    expect(standaloneStyles.input.lineHeight).toBe(Platform.OS === 'ios' ? undefined : 28)
+    expect(embeddedStyles.shell.paddingHorizontal).toBe(0)
+    expect(embeddedStyles.singleShell.paddingVertical).toBe(0)
+    expect(embeddedStyles.input.fontSize).toBe(token.fontSize)
+
+    const baseToken = getInputToken(getDesignToken())
+    const baseTextareaStyles = getInputStyles(baseToken, { multiline: true, rows: 1 }, state)
+    const changedTextareaStyles = getInputStyles(token, { multiline: true, rows: 1 }, state)
+    expect(changedTextareaStyles.input.lineHeight).toBe(baseTextareaStyles.input.lineHeight)
+    expect(changedTextareaStyles.shell.paddingHorizontal).toBe(
+      baseTextareaStyles.shell.paddingHorizontal,
+    )
+    expect(changedTextareaStyles.input.paddingTop).toBe(baseTextareaStyles.input.paddingTop)
+    expect(changedTextareaStyles.textareaShell.minHeight).toBe(
+      baseTextareaStyles.textareaShell.minHeight,
+    )
+  })
+
+  it('keeps textarea line height and padding on the multiline path', () => {
+    const token = getInputToken(getDesignToken())
+    const textareaMetrics = getTextareaMetrics(token, 'normal')
+    const textareaStyles = getInputStyles(
+      token,
+      { multiline: true, size: 'normal' },
+      { focused: false, disabled: false },
     )
 
-    for (const testID of ['small-input', 'normal-input', 'large-input']) {
-      const style = getInputStyle(testID)
-      expect(style).not.toEqual(
-        expect.objectContaining({
-          height: expect.anything(),
-          minHeight: expect.anything(),
-        }),
-      )
-    }
+    expect(textareaStyles.input).toMatchObject({
+      lineHeight: textareaMetrics.lineHeight,
+      paddingTop: textareaMetrics.paddingVertical,
+    })
+  })
+
+  it('sizes fixed textarea rows from line height and padding', () => {
+    const token = getInputToken(getDesignToken())
+    const state = { focused: false, disabled: false }
+    const normalStyles = getInputStyles(token, { multiline: true, rows: 2 }, state)
+    const smallStyles = getInputStyles(token, { multiline: true, rows: 2, size: 'small' }, state)
+    const largeStyles = getInputStyles(token, { multiline: true, rows: 2, size: 'large' }, state)
+    const normalMetrics = getTextareaMetrics(token, 'normal')
+    const smallMetrics = getTextareaMetrics(token, 'small')
+    const largeMetrics = getTextareaMetrics(token, 'large')
+
+    const expectedNormalHeight = normalMetrics.lineHeight * 2 + normalMetrics.paddingVertical * 2
+    expect(normalStyles.textareaShell.minHeight).toBe(expectedNormalHeight)
+    expect(normalStyles.textareaInput.minHeight).toBe(expectedNormalHeight)
+    expect(smallStyles.textareaShell.minHeight).toBe(
+      smallMetrics.lineHeight * 2 + smallMetrics.paddingVertical * 2,
+    )
+    expect(largeStyles.textareaShell.minHeight).toBe(
+      largeMetrics.lineHeight * 2 + largeMetrics.paddingVertical * 2,
+    )
+
+    const wordLimitStyles = getInputStyles(
+      token,
+      { multiline: true, rows: 2, showWordLimit: true, maxLength: 20 },
+      state,
+    )
+    expect(wordLimitStyles.textareaShell.minHeight).toBe(
+      expectedNormalHeight + smallMetrics.lineHeight + normalMetrics.paddingVertical,
+    )
   })
 
   it('can keep a bordered textarea on its normal border color while focused', async () => {
@@ -62,7 +217,7 @@ describe('Input', () => {
     })
   })
 
-  it('uses a separate unconstrained InputCore for autoSize measurement', async () => {
+  it('uses a separate unconstrained TextInput for autoSize measurement', async () => {
     await render(
       <Input
         testID="stable-auto-size"
@@ -398,6 +553,80 @@ describe('Input', () => {
     await waitFor(() => expect(screen.getByTestId('formatted-input').props.value).toBe('ABC'))
   })
 
+  it('formats on end editing without mutating the native event', async () => {
+    const onChangeText = jest.fn()
+    const onEndEditing = jest.fn()
+    const event = { nativeEvent: { text: '  abc  ' } }
+
+    await render(
+      <Input
+        testID="end-editing-input"
+        defaultValue="  abc  "
+        formatter={(value) => value.trim()}
+        formatTrigger="onEndEditing"
+        onChangeText={onChangeText}
+        onEndEditing={onEndEditing}
+      />,
+    )
+
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(screen.getByTestId('end-editing-input'), 'endEditing', event)
+
+    expect(onChangeText).toHaveBeenCalledTimes(1)
+    expect(onChangeText).toHaveBeenCalledWith('abc')
+    expect(onEndEditing).toHaveBeenCalledTimes(1)
+    expect(onEndEditing.mock.calls[0][0].nativeEvent.text).toBe('  abc  ')
+    await waitFor(() => expect(screen.getByTestId('end-editing-input').props.value).toBe('abc'))
+  })
+
+  it('writes back an end editing formatter result in controlled mode', async () => {
+    function ControlledInput() {
+      const [value, setValue] = useState('  abc  ')
+
+      return (
+        <Input
+          testID="controlled-end-editing-input"
+          formatter={(nextValue) => nextValue.trim()}
+          formatTrigger="onEndEditing"
+          onChangeText={setValue}
+          value={value}
+        />
+      )
+    }
+
+    await render(<ControlledInput />)
+    const event = { nativeEvent: { text: '  abc  ' } }
+
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(screen.getByTestId('controlled-end-editing-input'), 'endEditing', event)
+
+    await waitFor(() =>
+      expect(screen.getByTestId('controlled-end-editing-input').props.value).toBe('abc'),
+    )
+  })
+
+  it('calls onChangeText once when an end editing formatter keeps the same text', async () => {
+    const onChangeText = jest.fn()
+
+    await render(
+      <Input
+        testID="same-end-editing-input"
+        defaultValue="abc"
+        formatter={(value) => value}
+        formatTrigger="onEndEditing"
+        onChangeText={onChangeText}
+      />,
+    )
+
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(screen.getByTestId('same-end-editing-input'), 'endEditing', {
+      nativeEvent: { text: 'abc' },
+    })
+
+    expect(onChangeText).toHaveBeenCalledTimes(1)
+    expect(onChangeText).toHaveBeenCalledWith('abc')
+  })
+
   it('supports focus-triggered clearing and reports onClear once', async () => {
     const onClear = jest.fn()
     const onChangeText = jest.fn()
@@ -497,7 +726,7 @@ describe('Input', () => {
 
   it('uses component tokens for password toggle layout', async () => {
     await render(
-      <ConfigProvider theme={{ components: { Input: { height: 52 } } }}>
+      <ConfigProvider theme={{ components: { Input: { paddingVertical: 10 } } }}>
         <Input testID="token-input" type="password" />
       </ConfigProvider>,
     )

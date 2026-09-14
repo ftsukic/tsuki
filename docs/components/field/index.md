@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-Field 系列不是独立的基础 UI 容器，而是表单场景适配器：`FieldInput`、`FieldRadio`、`FieldCheckbox`、`FieldPicker` 和 `FieldDateRangePicker` 分别直接组合 `Cell` 与对应控件。需要自定义表单项时，直接组合 `Cell` 和自定义 control。
+Field 系列不是独立的基础 UI 容器，而是表单场景适配器：`FieldInput`、`FieldRadio`、`FieldCheckbox`、`FieldSwitch` 和 `FieldPicker` 分别直接组合 `Cell` 与对应控件。需要自定义表单项时，直接组合 `Cell` 和自定义 control。
 
 </section>
 
@@ -24,7 +24,14 @@ Field 系列不是独立的基础 UI 容器，而是表单场景适配器：`Fie
 ## 引入
 
 ```tsx | pure
-import { Cell, FieldCheckbox, FieldDateRangePicker, FieldInput, FieldPicker, FieldRadio } from '@ftsukic/tsuki'
+import {
+  Cell,
+  FieldCheckbox,
+  FieldInput,
+  FieldPicker,
+  FieldRadio,
+  FieldSwitch,
+} from '@ftsukic/tsuki'
 ```
 
 包不导出运行时 `Field`，也不提供 `FieldProps` 或 `FieldControlContext`。通用的自定义项写法如下：
@@ -43,9 +50,9 @@ import { Cell, FieldCheckbox, FieldDateRangePicker, FieldInput, FieldPicker, Fie
 
 <code src="../../../src/field/__fixtures__/examples/field-checkbox.tsx" title="FieldCheckbox" description="Cell 与 Checkbox.Group 的表单组合。"></code>
 
-<code src="../../../src/field/__fixtures__/examples/field-picker.tsx" title="FieldPicker" description="Cell 选择入口与 Picker 弹层的组合。"></code>
+<code src="../../../src/field/__fixtures__/examples/field-switch.tsx" title="FieldSwitch" description="Cell 与 Switch 的表单组合，包含自定义值、状态和 beforeChange。"></code>
 
-<code src="../../../src/field/__fixtures__/examples/field-date-range-picker.tsx" title="FieldDateRangePicker" description="Cell 选择入口与 DateRangePicker 弹层的组合，确认后提交完整范围。"></code>
+<code src="../../../src/field/__fixtures__/examples/field-picker.tsx" title="FieldPicker" description="Cell 选择入口与 Picker 弹层的组合。"></code>
 
 <code src="../../../src/field/__fixtures__/examples/states.tsx" title="布局和状态" description="vertical、readOnly 和 disabled。"></code>
 
@@ -66,17 +73,17 @@ import { Cell, FieldCheckbox, FieldDateRangePicker, FieldInput, FieldPicker, Fie
 | onChange | `(value) => void` | — | 表单值变化回调。 |
 | required | `boolean` | `false` | 映射到 `Cell.required`。 |
 | disabled | `boolean` | `false` | 同时禁用 Cell 和对应控件。 |
-| readOnly | `boolean` | `false` | 阻止控件交互，但保留正常视觉；`FieldPicker` 和 `FieldDateRangePicker` 也不会打开。 |
+| readOnly | `boolean` | `false` | 阻止控件交互，但保留正常视觉；`FieldPicker` 也不会打开。 |
 | vertical | `boolean` | `false` | 映射到 `Cell.vertical`。 |
 | center | `boolean` | `FieldInput` 为 `true`，其余适配器为 `false` | 映射到 `Cell.center`，由 Cell 决定垂直居中行为。 |
 | labelWidth | `DimensionValue` | Field token | horizontal 时覆盖 Cell 的 label 区宽度。 |
 | labelAlign | `'left' \| 'center' \| 'right'` | `'left'` | 通过 `Cell.styles.title` 设置 label 文本对齐。 |
 | valueAlign | `'left' \| 'center' \| 'right'` | horizontal 为 `'right'`，vertical 为 `'left'` | 映射到 Cell value 区域的水平对齐；`FieldInput` 同时映射到 Input 文本。 |
 | icon | `ReactNode` | — | 映射到 `Cell.icon`。 |
-| isLink | `boolean` | `false`；FieldPicker 和 FieldDateRangePicker 为 `true` | 映射到 Cell 链接箭头。 |
+| isLink | `boolean` | `false`；FieldPicker 为 `true` | 映射到 Cell 链接箭头。 |
 | clickable | `boolean` | — | 映射到 `Cell.clickable`。 |
 | arrowDirection | `CellArrowDirection` | `'right'` | 映射到 Cell 箭头方向。 |
-| onPress | `CellProps['onPress']` | — | Cell 行点击回调；FieldPicker 和 FieldDateRangePicker 内部使用它打开对应选择器。 |
+| onPress | `CellProps['onPress']` | — | Cell 行点击回调；FieldPicker 内部使用它打开 Picker。 |
 | border | `boolean` | `true` | 映射到 `Cell.border`。 |
 | style | `StyleProp<ViewStyle>` | — | Cell 根节点样式。 |
 | cellStyles | `CellStyles` | — | 直接传给 Cell 的语义样式；用于 Cell 区域定制。 |
@@ -85,7 +92,7 @@ import { Cell, FieldCheckbox, FieldDateRangePicker, FieldInput, FieldPicker, Fie
 
 ## FieldInput
 
-`FieldInput` 直接渲染 `Cell`，并把扁平的 Input props 传给嵌入的 `Input`。`value`、`defaultValue` 和字符串 `onChange` 属于 FieldInput；Input 的原生 `onChangeText` 不单独暴露。适配器会自动使用 `bordered={false}`、透明输入 surface，并保留 `password`、formatter、clearable、textarea、prefix/suffix 和 autoSize 能力。`FieldInput` 的 `center` 默认值为 `true`；传入 `center={false}` 可恢复非居中的 Cell 对齐行为。
+`FieldInput` 直接渲染 `Cell`，并把扁平的 Input props 传给嵌入的 `Input`。`value`、`defaultValue` 和字符串 `onChange` 属于 FieldInput；Input 的原生 `onChangeText` 不单独暴露。适配器默认使用 `bordered={false}`，由 Cell 提供字段的背景、分割线和 10 / 16 外部间距；单行 Input 会移除自身的重复内边距，多行 Textarea 保留自己的 `textarea` 内边距。显式传入 `bordered` 后仍可为嵌入的 Input 开启独立边框，`activeBordered` 默认保持 `false`。它保留 `password`、formatter、clearable、textarea、prefix/suffix 和 autoSize 能力。`FieldInput` 的 `center` 默认值为 `true`；传入 `center={false}` 可恢复非居中的 Cell 对齐行为。
 
 ```tsx | pure
 <FieldInput
@@ -102,7 +109,7 @@ import { Cell, FieldCheckbox, FieldDateRangePicker, FieldInput, FieldPicker, Fie
 
 ## FieldRadio
 
-`FieldRadio` 直接将 `Radio.Group` 放入 Cell 的 value 区域，值类型为 `RadioValue`。它暴露 `options`、`children`、`variant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Radio.Group 的其他 View props（`style` 由 Cell 保留）。当选项为 `button` variant 时默认使用 Grid 等宽布局，每行默认最多 5 个，超出后换行；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonLayout="intrinsic"` 可恢复内容宽度。`readOnly` 会阻止 group 交互，但不会给 Radio 套用 disabled 视觉。
+`FieldRadio` 直接将 `Radio.Group` 放入 Cell 的 value 区域，值类型为 `RadioValue`。它暴露 `options`、`children`、`variant`、`buttonVariant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Radio.Group 的其他 View props（`style` 由 Cell 保留）。当选项为 `button` variant 时默认使用 Grid 等宽布局，每行默认最多 5 个，超出后换行；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonVariant` 可透传 Button 的视觉变体；`buttonLayout="intrinsic"` 可恢复内容宽度。`readOnly` 会阻止 group 交互，但不会给 Radio 套用 disabled 视觉。
 
 `FieldRadio` 不支持 `description`、`errorMessage`、`status` 或 Field 语义 `styles`；需要反馈内容时，应组合 `Cell` 与自定义 control。
 
@@ -123,7 +130,7 @@ button 选项可以设置每行列数；例如文档中的 FieldRadio fixture �
 
 ## FieldCheckbox
 
-`FieldCheckbox` 直接将 `Checkbox.Group` 放入 Cell 的 value 区域，值类型为 `readonly CheckboxValue[]`。它暴露 `options`、`children`、`variant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Checkbox.Group 的其他 View props。`variant="button"` 时默认使用 Grid 等宽布局，每行默认最多 5 个，超出后换行；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonLayout="intrinsic"` 可恢复内容宽度。`disabled` 会同时下传到 Cell 与 group；`readOnly` 只阻止交互。
+`FieldCheckbox` 直接将 `Checkbox.Group` 放入 Cell 的 value 区域，值类型为 `readonly CheckboxValue[]`。它暴露 `options`、`children`、`variant`、`buttonVariant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Checkbox.Group 的其他 View props。`variant="button"` 时默认使用 Grid 等宽布局，每行默认最多 5 个，超出后换行；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonVariant` 可透传 Button 的视觉变体；`buttonLayout="intrinsic"` 可恢复内容宽度。`disabled` 会同时下传到 Cell 与 group；`readOnly` 只阻止交互。
 
 `FieldCheckbox` 不支持 `description`、`errorMessage`、`status` 或 Field 语义 `styles`；需要反馈内容时，应组合 `Cell` 与自定义 control。
 
@@ -135,6 +142,43 @@ button 选项可以设置每行列数；例如文档中的 FieldRadio fixture �
 ```
 
 也可以使用与 `Checkbox.Group` 相同的 `options` 配置式选项，完整可运行示例见上方 `FieldCheckbox` fixture。
+
+## FieldSwitch
+
+`FieldSwitch` 是 `Cell + Switch` 的表单场景适配器，直接将 `Switch` 放入 Cell 的 value 区域，不增加额外布局容器。它保留 Switch 的受控 `value`、非受控 `defaultValue`、`onChange`、`loading` 和 `beforeChange` 能力，并支持不同类型的 `activeValue` 与 `inactiveValue`：
+
+公开类型为 `FieldSwitchProps<ActiveValueT, InactiveValueT>`，其中 `value` 和 `defaultValue` 的类型为 `ActiveValueT | InactiveValueT`。除 Field 公共属性外，Switch 相关属性如下：
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| value | `ActiveValueT \| InactiveValueT` | — | 受控值；等于 `activeValue` 时表示开启 |
+| defaultValue | `ActiveValueT \| InactiveValueT` | `inactiveValue` | 非受控初始值 |
+| activeValue | `ActiveValueT` | `true` | 开启时通过 `onChange` 输出的值 |
+| inactiveValue | `InactiveValueT` | `false` | 关闭时通过 `onChange` 输出的值 |
+| onChange | `(value: ActiveValueT \| InactiveValueT) => void` | — | 切换确认通过后的值变化回调 |
+| beforeChange | `(value: ActiveValueT \| InactiveValueT) => boolean \| Promise<boolean>` | — | 返回 `false` 或解析为 `false` 时取消切换 |
+| loading | `boolean` | `false` | 显示 Switch loading，并禁止切换 |
+| size | `'small' \| 'medium' \| 'large' \| number` | `'medium'` | Switch 尺寸 |
+| activeColor / inactiveColor | `ColorValue` | Switch token | 开启/关闭时的轨道颜色 |
+| switchStyle | `StyleProp<ViewStyle>` | — | 只作用于 Switch 根 Pressable |
+| switchStyles | `SwitchStyles<ActiveValueT, InactiveValueT>` | — | 只作用于 Switch 的 root、track、thumb、loading 插槽 |
+| switchOnPress | `() => void` | — | Switch 自身的点击回调；Field 的 `onPress` 保留给 Cell 行 |
+
+FieldSwitch 继承 Switch 可安全使用的 React Native `PressableProps`，例如 accessibility props、`testID`、`hitSlop` 和 `pointerEvents`；`children`、Switch 原始 `style`、`disabled` 和 `onPress` 由适配器分别管理或重命名。它不提供 Field 语义 `styles`，也不支持 Web 专属属性、`checked` 或 `defaultChecked` 别名。
+
+```tsx | pure
+<FieldSwitch
+  label="通知"
+  value="enabled"
+  activeValue="enabled"
+  inactiveValue="disabled"
+  onChange={setNotificationState}
+/>
+```
+
+`disabled` 会同时传给 Cell 和 Switch，并产生禁用无障碍状态；`readOnly` 只阻止 Switch 交互，不使用 disabled，也不产生 disabled 视觉。Switch 自身的样式通过 `switchStyle` 和 `switchStyles` 传入；FieldSwitch 的 `style` 仍只作用于 Cell。Field 的 `onPress` 仍是 Cell 行点击回调；如需 Switch 自身的回调，使用 `switchOnPress`。Cell 行点击不会自动切换 Switch。
+
+FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessibility props、`testID`、`hitSlop` 和 `pointerEvents`。只读状态会将 Switch 的 `pointerEvents` 设为 `none`，但不会改变其 `accessibilityState.disabled`。
 
 ## FieldPicker
 
@@ -154,42 +198,9 @@ button 选项可以设置每行列数；例如文档中的 FieldRadio fixture �
 
 `pickerStyle` 和 `pickerStyles` 只作用于 Picker；Popup 的 `visible` 以及 Picker 的 `onChange`、`onConfirm` 和 `onCancel` 均由适配器管理。没有已选值或选项时显示 `placeholder`。Picker 本身不接收 Popup props。
 
-## FieldDateRangePicker
-
-`FieldDateRangePicker` 是 `Cell + DateRangePicker` 的表单适配器。它的领域值直接使用 `DateRangePickerValue`，即 `[startDate, endDate]`；`DateRangePicker` 独立负责年月日滚轮、端点切换、范围边界和 draft 生命周期，Field 只负责 Cell 展示和提交已确认值。
-
-```tsx | pure
-<FieldDateRangePicker
-  label="日期范围"
-  value={range}
-  onChange={setRange}
-  placeholder={['开始日期', '结束日期']}
-  minDate={new Date(2026, 0, 1)}
-  maxDate={new Date(2026, 11, 31)}
-/>
-```
-
-`value` 未设置时，Cell 展示两个端点的 `placeholder`，默认是 `['请选择', '请选择']`；取消或遮罩关闭后仍然保持空值。点击 Cell 只打开 DateRangePicker，滚轮变化不会触发 Field `onChange`；只有点击确认才会提交完整 tuple。`formatValue` 只作用于 Cell 展示，接收完整 `DateRangePickerValue` 并返回一个 `ReactNode`。
-
-| 属性 | 类型 | 默认值 | 说明 |
-| --- | --- | --- | --- |
-| `value` / `defaultValue` | `DateRangePickerValue` | — | 受控或非受控的完整日期范围 |
-| `onChange` | `(value: DateRangePickerValue) => void` | — | 只在 DateRangePicker 确认后调用 |
-| `placeholder` | `ReactNode \| readonly [ReactNode?, ReactNode?]` | `['请选择', '请选择']` | 空值时显示的两个端点文案；单个 ReactNode 会用于两端 |
-| `formatValue` | `(value: DateRangePickerValue) => ReactNode` | — | 自定义已选范围的 Cell 内容 |
-| `minDate` / `maxDate` | `Date` | DateRangePicker 默认范围 | 透传给 DateRangePicker 的全局边界 |
-| `title`、`cancelText`、`confirmText`、`formatter` | — | DateRangePicker 默认值 | 透传给 DateRangePicker |
-| `overlay`、`closeOnPressOverlay`、`safeAreaInsetBottom`、`duration` | — | DateRangePicker 默认值 | 透传给 DateRangePicker Popup |
-| `itemHeight` / `visibleItemCount` | `number` | Picker token | 透传给 DateRangePicker 滚轮 |
-| `pickerStyle` / `pickerStyles` | — | — | 只作用于 DateRangePicker；`style` / `cellStyles` 只作用于 Cell |
-
-`disabled` 会同时禁用 Cell 并阻止打开 Popup；`readOnly` 保留正常展示但阻止打开 Popup。`description`、`errorMessage`、`status`、`vertical`、`labelWidth`、`labelAlign`、`valueAlign`、`required`、`extra` 和 Cell 的其他表单布局属性继续沿用 Field 适配器约定。
-
-`FieldDateRangePicker` 与独立的 `DateRangePicker` 是两个职责不同的组件：前者不实现日期范围规范化、日期列或 active endpoint；如果不需要 Cell/Form 提交语义，直接使用 `DateRangePicker`。
-
 ## 语义样式与主题
 
-FieldPicker 和 FieldDateRangePicker 的 `styles` 提供表单区域语义插槽：`control`、`feedback`、`description` 和 `error`。FieldInput、FieldRadio、FieldCheckbox 不渲染反馈，也不提供 Field 语义 `styles`。Cell 区域使用 `cellStyles`，Input 使用 `inputStyle`/`inputStyles`，Picker 使用 `pickerStyle`/`pickerStyles`，各自边界互不重叠。
+FieldPicker 的 `styles` 提供表单区域语义插槽：`control`、`feedback`、`description` 和 `error`。FieldInput、FieldRadio、FieldCheckbox、FieldSwitch 不渲染反馈，也不提供 Field 语义 `styles`。Cell 区域使用 `cellStyles`，Input 使用 `inputStyle`/`inputStyles`，Switch 使用 `switchStyle`/`switchStyles`，Picker 使用 `pickerStyle`/`pickerStyles`，各自边界互不重叠。
 
 `theme.components.Field` 仍表示 Field 系列表单 Cell 组合的主题 token，支持 `defaultLabelWidth`、`labelGap`、`descriptionGap`、`errorGap`、`descriptionColor`、`warningColor` 和 `errorColor`。它不产生运行时 `Field` 组件。
 

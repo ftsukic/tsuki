@@ -1,5 +1,5 @@
 export { Button } from './button'
-export { ButtonGroup } from './group'
+export { ButtonGroup } from './button-group'
 export { getButtonToken } from './token'
 export type {
   ButtonGroupProps,
@@ -14,4 +14,4 @@ export type {
   ButtonStyles,
   ButtonType,
   ButtonVariant,
-} from './interface'
+} from './types'

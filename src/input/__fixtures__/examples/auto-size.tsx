@@ -26,7 +26,7 @@ export default function InputAutoSizeFixture() {
         <Input
           multiline
           bordered
-          autoSize={{ minRows: 1, maxRows: 5 }}
+          autoSize={{ minRows: 1, maxRows: 3 }}
           placeholder="发送消息"
           value={composerValue}
           onChangeText={setComposerValue}

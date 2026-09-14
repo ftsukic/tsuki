@@ -21,7 +21,7 @@ import { getCellInteractionStyle } from '../cell/style'
 import { getCellToken } from '../cell/token'
 import { Pressable } from '../pressable'
 import { useComponentToken, useToken } from '../theme'
-import { SwipeCellAction } from './action'
+import { SwipeCellAction } from './swipe-cell-action'
 import { getSwipeCellStyles } from './style'
 import { getSwipeCellToken } from './token'
 import { useSwipeCellManager } from './context'
@@ -33,7 +33,7 @@ import type {
   SwipeCellProps,
   SwipeCellRef,
   SwipeCellSide,
-} from './interface'
+} from './types'
 
 interface SwipeCellGroupContextValue {
   register: (id: string, close: () => void) => () => void
@@ -222,6 +222,20 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     [animationEnabled, animationToken, completeClose, completeOpen, translation],
   )
 
+  const syncOpenOffset = useCallback(
+    (side: SwipeCellSide, width: number) => {
+      if (openSideRef.current !== side || phaseRef.current === 'closed') return
+
+      const nextToken = animationTokenRef.current + 1
+      animationTokenRef.current = nextToken
+      animationToken.value = nextToken
+      const nextOffset = getOffset(side, width)
+      translation.value = nextOffset
+      currentOffsetRef.current = nextOffset
+    },
+    [animationToken, translation],
+  )
+
   const releaseOrClear = useCallback(() => {
     manager?.release(cellId)
     interaction.clear(cellId)
@@ -284,9 +298,13 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         pendingOpenRef.current = null
         openSideRef.current = side
         settleTo(getOffset(side, width), side)
+      } else if (phaseRef.current === 'opening' && openSideRef.current === side) {
+        settleTo(getOffset(side, width), side)
+      } else {
+        syncOpenOffset(side, width)
       }
     },
-    [leftActionWidth, rightActionWidth, settleTo],
+    [leftActionWidth, rightActionWidth, settleTo, syncOpenOffset],
   )
 
   const pan = useMemo(() => {
@@ -387,15 +405,27 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   }, [cellId, close, interaction, manager])
 
   useEffect(() => {
-    if (!hasLeftAction && actionWidthsRef.current.left !== 0) {
+    if (!hasLeftAction) {
+      const wasActive =
+        openSideRef.current === 'left' ||
+        pendingOpenRef.current === 'left' ||
+        (phaseRef.current !== 'closed' && currentOffsetRef.current > 0)
       actionWidthsRef.current.left = 0
       leftActionWidth.value = 0
+      if (pendingOpenRef.current === 'left') pendingOpenRef.current = null
+      if (wasActive) close()
     }
-    if (!hasRightAction && actionWidthsRef.current.right !== 0) {
+    if (!hasRightAction) {
+      const wasActive =
+        openSideRef.current === 'right' ||
+        pendingOpenRef.current === 'right' ||
+        (phaseRef.current !== 'closed' && currentOffsetRef.current < 0)
       actionWidthsRef.current.right = 0
       rightActionWidth.value = 0
+      if (pendingOpenRef.current === 'right') pendingOpenRef.current = null
+      if (wasActive) close()
     }
-  }, [hasLeftAction, hasRightAction, leftActionWidth, rightActionWidth])
+  }, [close, hasLeftAction, hasRightAction, leftActionWidth, rightActionWidth])
 
   useEffect(() => {
     if (!group) return undefined

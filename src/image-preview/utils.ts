@@ -1,5 +1,5 @@
 import type { ImageSourcePropType } from 'react-native'
-import type { ImagePreviewImage, ImagePreviewRect } from './interface'
+import type { ImagePreviewImage, ImagePreviewRect } from './types'
 
 export interface NormalizedImage {
   source: ImageSourcePropType

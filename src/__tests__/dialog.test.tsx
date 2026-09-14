@@ -274,6 +274,24 @@ describe('Dialog', () => {
     await view.unmount()
   })
 
+  it('settles the previous imperative dialog before replacing its content', async () => {
+    const view = await render(<AppProvider />)
+    let first!: Promise<unknown>
+    let second!: Promise<unknown>
+
+    await act(async () => {
+      first = showDialog({ message: '第一个' })
+      second = showConfirmDialog({ message: '第二个' })
+    })
+    await expect(first).resolves.toBeUndefined()
+    expect(screen.getByText('第二个')).toBeTruthy()
+
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => fireEvent.press(screen.getByTestId('dialog-confirm-button')))
+    await expect(second).resolves.toBe('confirm')
+    await view.unmount()
+  })
+
   it('keeps component token defaults available to imperative dialogs', async () => {
     const view = await render(
       <ConfigProvider
@@ -626,7 +644,7 @@ describe('Dialog', () => {
     await view.unmount()
     expect(screen.queryByText('宿主卸载后清理')).toBeNull()
     expect(() => closeDialog()).not.toThrow()
-    void pending
+    await expect(pending).resolves.toBeUndefined()
   })
 
   it('requires PortalHost for controlled rendering', async () => {

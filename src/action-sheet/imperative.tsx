@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { mountPortal, unmountPortal, updatePortal } from '../portal'
 import type { PortalKey } from '../portal'
 import { ActionSheetContent } from './action-sheet'
-import type { ActionSheetAction, ActionSheetOptions, ActionSheetResult } from './interface'
+import type { ActionSheetAction, ActionSheetOptions, ActionSheetResult } from './types'
 
 interface ActionSheetRecord {
   key: PortalKey | null
@@ -45,7 +45,10 @@ function ActionSheetMethod({ record }: { record: ActionSheetRecord }) {
 
   useEffect(
     () => () => {
-      if (currentRecord === recordRef.current) currentRecord = null
+      const current = recordRef.current
+      if (currentRecord !== current) return
+      settleRecord(current, 'cancel')
+      currentRecord = null
     },
     [],
   )
@@ -97,6 +100,7 @@ export function showActionSheet(
   const nextOptions = { ...currentOptions, ...options }
 
   if (currentRecord?.key !== null && currentRecord) {
+    settleRecord(currentRecord, 'cancel')
     replaceRecord(currentRecord, {
       options: nextOptions,
       resolve: resolvePromise,
@@ -127,6 +131,7 @@ export function closeActionSheet(): void {
   const current = currentRecord
   if (!current || current.key === null) return
 
+  settleRecord(current, 'cancel')
   replaceRecord(current, { visible: false })
 }
 

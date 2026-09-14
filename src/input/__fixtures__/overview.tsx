@@ -4,6 +4,7 @@ import InputBasicFixture from './examples/basic'
 import InputLayoutFixture from './examples/layout'
 import InputNumberFixture from './examples/number'
 import InputPasswordFixture from './examples/password'
+import InputScrollViewFixture from './examples/scroll-view'
 import InputTextareaFixture from './examples/textarea'
 
 /**
@@ -49,6 +50,12 @@ export default function InputOverview() {
           description: 'small/large 尺寸、前后缀和 addon 组合布局。',
           id: 'layout',
           title: '尺寸和布局',
+        },
+        {
+          Component: InputScrollViewFixture,
+          description: 'ScrollView 内的单行输入和键盘触摸处理。',
+          id: 'scroll-view',
+          title: 'ScrollView 场景',
         },
       ]}
     />

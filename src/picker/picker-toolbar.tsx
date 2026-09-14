@@ -72,7 +72,7 @@ export const PickerToolbar = forwardRef<View, PickerToolbarProps>(function Picke
           buttonLabelStyle,
         ])}
       </InteractionPressable>
-      <View pointerEvents="none" style={resolved.toolbarTitleContainer}>
+      <View style={[resolved.toolbarTitleContainer, { pointerEvents: 'none' }]}>
         {renderContent(title, [resolved.toolbarTitle, titleStyle])}
       </View>
       <InteractionPressable

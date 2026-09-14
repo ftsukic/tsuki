@@ -7,7 +7,17 @@ import { FieldInput, FieldRadio } from '../../..'
 export default function FieldStatesFixture() {
   return (
     <>
-      <FieldInput label="备注" vertical multiline rows={3} placeholder="请输入备注" />
+      <FieldInput
+        label="备注"
+        maxLength={80}
+        vertical
+        multiline
+        rows={3}
+        bordered
+        activeBordered={false}
+        showWordLimit
+        placeholder="请输入备注"
+      />
       <FieldRadio
         label="只读状态"
         value="yes"

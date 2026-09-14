@@ -105,11 +105,11 @@ const result = await showActionSheet({
 | API | 类型 | 说明 |
 | --- | --- | --- |
 | showActionSheet | `(options?: ActionSheetOptions) => Promise<ActionSheetResult \| undefined>` | 创建或更新当前命令式实例；action 选择后 resolve action，取消或遮罩关闭 resolve `'cancel'` |
-| closeActionSheet | `() => void` | 关闭当前实例，不结算 Promise；没有实例时安全无效 |
+| closeActionSheet | `() => void` | 关闭当前实例，并以 `'cancel'` 结算当前 Promise；没有实例时安全无效 |
 | setActionSheetDefaultOptions | `(options: ActionSheetOptions) => void` | 设置命令式默认参数，显式参数优先 |
 | resetActionSheetDefaultOptions | `() => void` | 恢复默认参数 |
 
-命令式实例通过当前 `PortalHost` 挂载，关闭动画完成后才卸载 Portal。没有 `PortalHost` 时 `showActionSheet` 会抛出 Portal 宿主错误。
+命令式实例通过当前 `PortalHost` 挂载，关闭动画完成后才卸载 Portal。新的 `showActionSheet` 会先以 `'cancel'` 结算前一个 pending Promise，再接管当前实例。`closeActionSheet()` 同样以 `'cancel'` 结算当前 Promise；宿主卸载时 pending Promise 也会以 `'cancel'` 结束。没有 `PortalHost` 时 `showActionSheet` 会抛出 Portal 宿主错误。
 
 ## 主题定制
 

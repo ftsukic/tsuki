@@ -49,8 +49,8 @@ export interface DateTimePickerProps extends Omit<
   minuteStep?: number
   secondStep?: number
   title?: ReactNode
-  cancelText?: ReactNode
-  confirmText?: ReactNode
+  cancelButtonText?: ReactNode
+  confirmButtonText?: ReactNode
   formatter?: DateTimePickerFormatter
   filter?: DateTimePickerFilter
   onChange?(value: DateTimePickerValue, options: readonly DateTimePickerOption[]): void

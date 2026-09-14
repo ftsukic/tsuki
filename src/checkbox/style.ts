@@ -1,5 +1,5 @@
 import type { ColorValue, TextStyle, ViewStyle } from 'react-native'
-import type { CheckboxProps, CheckboxStyleState } from './interface'
+import type { CheckboxProps, CheckboxStyleState } from './types'
 import type { CheckboxToken } from '../theme'
 import {
   getSelectionButtonStyles,
@@ -28,21 +28,20 @@ export function getCheckboxStyles(
   const size = props.iconSize ?? token.size
   const labelOnLeft = props.labelPosition === 'left'
   const checkedBackground = state.disabled ? token.disabledBackground : token.checkedBackground
-  const labelColor = state.disabled
-    ? token.disabledColor
-    : isButton && state.checked
-      ? token.checkedIconColor
-      : token.labelColor
   const buttonStyles = isButton
     ? getSelectionButtonStyles(
         {
           height: token.buttonHeight,
+          minWidth: token.buttonMinWidth,
           paddingHorizontal: token.buttonPaddingHorizontal,
           borderWidth: token.borderWidth,
           borderRadius: token.buttonBorderRadius,
+          variant: props.buttonVariant ?? 'solid',
           backgroundColor: token.buttonBackground,
+          filledBackgroundColor: token.buttonFilledBackground,
           borderColor: token.borderColor,
           checkedBackgroundColor: token.checkedBackground,
+          checkedFilledBackgroundColor: token.buttonCheckedFilledBackground,
           checkedBorderColor: token.checkedBackground,
           labelColor: token.labelColor,
           checkedLabelColor: token.checkedIconColor,
@@ -84,17 +83,14 @@ export function getCheckboxStyles(
       justifyContent: 'center',
       width: size,
     },
-    label: {
-      color: labelColor,
+    label: buttonStyles?.label ?? {
+      color: state.disabled ? token.disabledColor : token.labelColor,
       flexShrink: 1,
       fontFamily: token.fontFamily,
       fontSize: token.fontSize,
-      lineHeight: isButton
-        ? Math.max(token.fontSize + 4, token.buttonHeight - token.borderWidth * 2)
-        : token.lineHeight,
-      marginLeft: isButton ? 0 : labelOnLeft ? 0 : token.gap,
-      marginRight: isButton ? 0 : labelOnLeft ? token.gap : 0,
-      ...(isButton ? { textAlign: 'center' as const } : {}),
+      lineHeight: token.lineHeight,
+      marginLeft: labelOnLeft ? 0 : token.gap,
+      marginRight: labelOnLeft ? token.gap : 0,
     },
     checkColor: state.disabled ? token.disabledColor : token.checkedIconColor,
     checkSize: size * 0.72,

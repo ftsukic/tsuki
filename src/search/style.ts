@@ -1,6 +1,6 @@
 import type { TextStyle, ViewStyle } from 'react-native'
 import type { AliasToken, SearchToken } from '../theme'
-import type { SearchProps, SearchStyleState } from './interface'
+import type { SearchProps, SearchStyleState } from './types'
 
 export interface SearchResolvedStyles {
   root: ViewStyle

@@ -11,7 +11,7 @@ import { useComponentToken } from '../theme'
 import { useCellGroupContext } from './context'
 import { getCellStyles, isCellInteractive } from './style'
 import { getCellToken } from './token'
-import type { CellProps, CellStyleState } from './interface'
+import type { CellProps, CellStyleState } from './types'
 
 const ARROW_ICONS: Record<NonNullable<CellProps['arrowDirection']>, IconName> = {
   right: 'RightOutlined',

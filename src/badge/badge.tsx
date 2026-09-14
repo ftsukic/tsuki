@@ -1,9 +1,9 @@
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import { getBadgeToken } from './token'
-import type { BadgeProps, BadgeStatus } from './interface'
+import type { BadgeProps, BadgeStatus } from './types'
 import { forwardRef, isValidElement, useState } from 'react'
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
 import type {
   LayoutChangeEvent,
   StyleProp,
@@ -11,6 +11,7 @@ import type {
   View as ViewComponent,
   ViewStyle,
 } from 'react-native'
+import { Text } from '../text'
 
 function isRenderable(value: BadgeProps['children'] | BadgeProps['count']): boolean {
   return value !== undefined && value !== null && value !== false
@@ -255,7 +256,7 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
               {isRenderable(text)
                 ? renderValue(text, [
                     {
-                      color: token.textColor,
+                      color: token.statusTextColor,
                       fontFamily: token.fontFamily,
                       fontSize: token.fontSize,
                       flexShrink: 0,

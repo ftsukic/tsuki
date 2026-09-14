@@ -1,5 +1,7 @@
 ---
 title: Icon
+componentDoc: true
+toc: false
 nav:
   title: 组件
 group:

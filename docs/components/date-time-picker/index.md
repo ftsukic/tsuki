@@ -58,8 +58,8 @@ group:
 | `title` | `ReactNode` | - | Picker toolbar 标题 |
 | `showToolbar` | `boolean` | `true` | 是否显示 Picker toolbar |
 | `showToolbarDivider` | `boolean` | `false` | 是否显示 toolbar 分隔线 |
-| `cancelText` | `ReactNode` | `取消` | 取消按钮文案 |
-| `confirmText` | `ReactNode` | `确定` | 确认按钮文案 |
+| `cancelButtonText` | `ReactNode` | `取消` | 取消按钮文案 |
+| `confirmButtonText` | `ReactNode` | `确定` | 确认按钮文案 |
 | `loading` | `boolean` | `false` | 覆盖滚轮并阻止选择，toolbar 仍可操作 |
 | `swipeDuration` | `number` | 主题默认值 | 滚轮吸附动画时长 |
 | `itemHeight` | `number` | 主题默认值 | 单项高度 |
@@ -70,7 +70,7 @@ group:
 | `style` | `StyleProp<ViewStyle>` | - | Picker 根 View 样式 |
 | `styles` | `PickerStyles` | - | Picker semantic styles |
 
-DateTimePicker 还继承 Picker 的 `ViewProps`（不包括 `children` 和 `style`）以及 `testID`。弹层状态和关闭策略由 Popup 或业务组合层管理。它也不提供 DateRangePicker、时间段、时区或日程语义。
+DateTimePicker 还继承 Picker 的 `ViewProps`（不包括 `children` 和 `style`）以及 `testID`。弹层状态和关闭策略由 Popup 或业务组合层管理。它也不提供日期范围选择、时间段、时区或日程语义。
 
 Picker option 的 canonical `value` 是内部数字；DateTimePicker 对外的 `value` 和事件值是字符串，日期字段中 year 不补零，其余字段补为两位。合法示例包括 `['year', 'month', 'day', 'hour', 'minute']`、`['month', 'day', 'hour']`、`['day', 'hour', 'minute']` 和 `['hour', 'minute']`；`['hour', 'minute', 'year']`、`['month', 'year', 'day']` 等颠倒顺序会抛出错误。value 始终按视觉列顺序传递。
 

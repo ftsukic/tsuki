@@ -1,16 +1,16 @@
 import { FixtureOverview } from '../../fixture-overview'
 import FieldBasicFixture from './examples/basic'
 import FieldCheckboxFixture from './examples/field-checkbox'
-import FieldDateRangePickerFixture from './examples/field-date-range-picker'
 import FieldInputFixture from './examples/field-input'
 import FieldPickerFixture from './examples/field-picker'
 import FieldRadioFixture from './examples/field-radio'
+import FieldSwitchFixture from './examples/field-switch'
 import FieldStatesFixture from './examples/states'
 import FieldThemeFixture from './examples/theme'
 
 /**
  * @title Field overview
- * @description FieldInput、FieldRadio、FieldCheckbox、FieldPicker 和 FieldDateRangePicker 都是直接组合 Cell 的表单场景。
+ * @description FieldInput、FieldRadio、FieldCheckbox、FieldSwitch 和 FieldPicker 都是直接组合 Cell 的表单场景。
  */
 export default function FieldOverview() {
   return (
@@ -42,16 +42,16 @@ export default function FieldOverview() {
           title: 'FieldCheckbox',
         },
         {
+          Component: FieldSwitchFixture,
+          description: 'FieldSwitch 组合 Switch，并保留自定义值与确认能力。',
+          id: 'field-switch',
+          title: 'FieldSwitch',
+        },
+        {
           Component: FieldPickerFixture,
           description: 'FieldPicker 仅在 Picker 确认后提交值。',
           id: 'field-picker',
           title: 'FieldPicker',
-        },
-        {
-          Component: FieldDateRangePickerFixture,
-          description: 'FieldDateRangePicker 仅在 DateRangePicker 确认后提交完整日期范围。',
-          id: 'field-date-range-picker',
-          title: 'FieldDateRangePicker',
         },
         {
           Component: FieldStatesFixture,

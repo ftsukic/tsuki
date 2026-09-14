@@ -358,6 +358,28 @@ describe('ActionSheet', () => {
     await view.unmount()
   })
 
+  it('settles replacement, programmatic close, and host teardown exactly once', async () => {
+    const view = await render(<AppProvider />)
+
+    let first!: Promise<unknown>
+    let second!: Promise<unknown>
+    await act(async () => {
+      first = showActionSheet({ title: '第一个', actions: [] })
+      second = showActionSheet({ title: '第二个', actions: [] })
+    })
+    await expect(first).resolves.toBe('cancel')
+    await act(async () => closeActionSheet())
+    closeActionSheet()
+    await expect(second).resolves.toBe('cancel')
+
+    let pending!: Promise<unknown>
+    await act(async () => {
+      pending = showActionSheet({ title: '宿主卸载', actions: [] })
+    })
+    await view.unmount()
+    await expect(pending).resolves.toBe('cancel')
+  })
+
   it('applies ActionSheet component tokens', async () => {
     const view = await render(
       <ConfigProvider

@@ -4,8 +4,9 @@ import { IconSizeProvider } from '../icon/context'
 import { getAvatarToken } from './token'
 import type { AvatarProps, AvatarSize } from './interface'
 import { forwardRef, useEffect, useMemo, useState } from 'react'
-import { Image, Text, View } from 'react-native'
+import { Image, View } from 'react-native'
 import type { ImageSourcePropType, View as ViewComponent } from 'react-native'
+import { Text } from '../text'
 
 function isRenderable(value: AvatarProps['children']): boolean {
   return value !== undefined && value !== null && value !== false

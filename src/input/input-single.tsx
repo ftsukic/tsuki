@@ -1,11 +1,11 @@
-import { forwardRef, useRef, type ReactNode } from 'react'
+import { forwardRef, useCallback, useRef, type ReactNode } from 'react'
 import { View } from 'react-native'
 import type { TextInputInstance } from '../text-input'
 import type { TextInputProps } from '../text-input'
-import { InputCore } from './input-core'
+import { TextInput } from '../text-input'
 import { InputClear, InputPasswordToggle, renderInputAffix } from './input-affix'
 import type { InputResolvedStyles } from './style'
-import type { InputSemanticStyles } from './interface'
+import type { InputSemanticStyles } from './types'
 import type { InputToken } from '../theme'
 import type { StyleProp, TextStyle } from 'react-native'
 
@@ -18,6 +18,7 @@ export interface InputSingleProps {
   value: string
   prefix?: ReactNode
   suffix?: ReactNode
+  clearable: boolean
   showClear: boolean
   passwordVisible: boolean
   isPassword: boolean
@@ -36,6 +37,7 @@ export const InputSingle = forwardRef<TextInputInstance, InputSingleProps>(funct
     value,
     prefix,
     suffix,
+    clearable,
     showClear,
     passwordVisible,
     isPassword,
@@ -62,12 +64,17 @@ export const InputSingle = forwardRef<TextInputInstance, InputSingleProps>(funct
   ) : (
     suffix
   )
+  const handleClear = useCallback(() => {
+    inputRef.current?.clear()
+    onClear()
+    inputRef.current?.focus()
+  }, [onClear])
 
   return (
     <View style={[styles.shell, styles.singleShell, semantic?.shell]}>
       <View style={[styles.content, styles.singleContent, semantic?.content]}>
-        {renderInputAffix(prefix, [styles.prefix, semantic?.prefix] as StyleProp<TextStyle>)}
-        <InputCore
+        {renderInputAffix(prefix, [styles.prefix, semantic?.prefix] as StyleProp<TextStyle>, true)}
+        <TextInput
           {...coreProps}
           ref={assignInputRef}
           value={value}
@@ -75,16 +82,12 @@ export const InputSingle = forwardRef<TextInputInstance, InputSingleProps>(funct
           style={[styles.input, styles.singleInput, semantic?.input]}
           onChangeText={onChangeText}
         />
-        {showClear ? (
+        {clearable ? (
           <InputClear
             token={token}
-            disabled={disabled}
-            onPress={() => {
-              inputRef.current?.clear()
-              inputRef.current?.focus()
-              onClear()
-            }}
-            style={[styles.clear, semantic?.clear]}
+            showClear={showClear}
+            onPress={handleClear}
+            style={[styles.clear, !showClear && styles.clearHidden, semantic?.clear]}
           />
         ) : null}
         {renderInputAffix(renderedSuffix, [

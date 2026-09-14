@@ -1,5 +1,5 @@
-export { DropdownItem } from './DropdownItem'
-export { DropdownMenu } from './DropdownMenu'
+export { DropdownItem } from './dropdown-item'
+export { DropdownMenu } from './dropdown-menu'
 export { getDropdownToken } from './token'
 export type {
   DropdownDirection,

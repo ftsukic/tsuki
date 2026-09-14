@@ -3,12 +3,13 @@ import { useComponentToken } from '../theme'
 import { Icon } from '../icon'
 import { InteractionPressable } from '../interaction'
 import { RadioGroupContext } from './context'
-import type { RadioProps, RadioStyleState } from './interface'
+import type { RadioProps, RadioStyleState } from './types'
 import { getRadioStyles } from './style'
 import { getRadioToken } from './token'
 import { forwardRef, useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
 import type { ReactNode } from 'react'
+import { Text } from '../text'
 
 function isTextContent(value: ReactNode): value is string | number {
   return typeof value === 'string' || typeof value === 'number'
@@ -30,6 +31,7 @@ export const Radio = forwardRef<React.ComponentRef<typeof InteractionPressable>,
       disabled = false,
       shape = 'round',
       variant,
+      buttonVariant,
       labelPosition = 'right',
       checkedColor,
       style,
@@ -47,6 +49,7 @@ export const Radio = forwardRef<React.ComponentRef<typeof InteractionPressable>,
     const isControlled = checked !== undefined
     const effectiveDisabled = disabled || !!group?.disabled
     const resolvedVariant = variant ?? group?.variant ?? 'default'
+    const resolvedButtonVariant = buttonVariant ?? group?.buttonVariant ?? 'solid'
     const buttonLayout = group?.buttonLayout ?? 'intrinsic'
     const isChecked = group
       ? value !== undefined && Object.is(group.value, value)
@@ -89,6 +92,7 @@ export const Radio = forwardRef<React.ComponentRef<typeof InteractionPressable>,
       disabled: effectiveDisabled,
       shape,
       variant: resolvedVariant,
+      buttonVariant: resolvedButtonVariant,
       labelPosition,
       checkedColor,
       style,

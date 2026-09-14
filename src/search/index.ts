@@ -7,4 +7,4 @@ export type {
   SearchStyleInfo,
   SearchStyleState,
   SearchStyles,
-} from './interface'
+} from './types'

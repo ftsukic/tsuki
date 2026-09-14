@@ -1,6 +1,19 @@
 import type { ReactNode } from 'react'
 import type { StyleProp, ViewStyle } from 'react-native'
-import type { PickerRef, PickerSelection, PickerValue } from '../picker/types'
+import type { PickerOption, PickerValue } from '../picker/types'
+
+export interface PickerGroupSelection {
+  values: readonly PickerValue[]
+  options: readonly PickerOption[]
+  indexes: readonly number[]
+}
+
+export interface PickerGroupChildRef {
+  confirm(): PickerGroupSelection
+  cancel(): void
+  getSelectedValues(): readonly PickerValue[]
+  getSelectedOptions(): readonly PickerOption[]
+}
 
 export interface PickerGroupProps {
   children?: ReactNode
@@ -13,7 +26,7 @@ export interface PickerGroupProps {
   cancelButtonText?: ReactNode
   confirmButtonText?: ReactNode
   showToolbar?: boolean
-  onConfirm?: (results: readonly PickerSelection[]) => void
+  onConfirm?: (results: readonly PickerGroupSelection[]) => void
   onCancel?: () => void
   style?: StyleProp<ViewStyle>
   styles?: PickerGroupStyles
@@ -25,8 +38,6 @@ export interface PickerGroupRef {
   cancel(): void
   getSelectedValues(): readonly (readonly PickerValue[])[]
 }
-
-export type PickerGroupChildRef = PickerRef
 
 export interface PickerGroupSemanticStyles {
   root?: StyleProp<ViewStyle>

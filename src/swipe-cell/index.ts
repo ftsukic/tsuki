@@ -1,5 +1,5 @@
 export { SwipeCell, SwipeCellGroup } from './swipe-cell'
-export { SwipeCellAction } from './action'
+export { SwipeCellAction } from './swipe-cell-action'
 export { getSwipeCellToken } from './token'
 export { useSwipeCellController } from './swipe-cell'
 export { SwipeCellContext, useSwipeCellManager } from './context'
@@ -12,5 +12,5 @@ export type {
   SwipeCellProps,
   SwipeCellRef,
   SwipeCellSide,
-} from './interface'
+} from './types'
 export type { SwipeCellHandle } from './manager'

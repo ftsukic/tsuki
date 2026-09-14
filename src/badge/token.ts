@@ -15,6 +15,7 @@ export function getBadgeToken(token: AliasToken): BadgeToken {
     fontSizeSM: 10,
     color: token.colorError,
     textColor: token.colorTextLightSolid,
+    statusTextColor: token.colorText,
     borderColor: token.colorBgContainer,
     successColor: token.colorSuccess,
     processingColor: token.colorPrimary,

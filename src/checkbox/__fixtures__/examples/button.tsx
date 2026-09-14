@@ -16,7 +16,13 @@ export default function Example() {
       <Checkbox variant="button" disabled>
         Disabled button
       </Checkbox>
-      <Checkbox.Group direction="horizontal" gap={8} value={value} onChange={setValue}>
+      <Checkbox.Group
+        direction="horizontal"
+        gap={8}
+        value={value}
+        onChange={setValue}
+        buttonVariant="filled"
+      >
         <Checkbox variant="button" name="apple">
           Apple
         </Checkbox>

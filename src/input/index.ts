@@ -11,4 +11,4 @@ export type {
   InputStyleState,
   InputStyles,
   InputType,
-} from './interface'
+} from './types'

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { mountPortal, unmountPortal, updatePortal } from '../portal'
 import type { PortalKey } from '../portal'
 import { ImagePreviewContent } from './image-preview'
-import type { ImagePreviewCloseReason, ImagePreviewImperativeOptions } from './interface'
+import type { ImagePreviewCloseReason, ImagePreviewImperativeOptions } from './types'
 
 interface ImagePreviewRecord {
   key: PortalKey | null
@@ -100,7 +100,6 @@ export function showImagePreview(options: ImagePreviewImperativeOptions): void {
 export function closeImagePreview(): void {
   const current = currentRecord
   if (!current || current.key === null || !current.visible) return
-  current.options.onClose?.('imperative')
   replaceRecord(current, { visible: false })
 }
 

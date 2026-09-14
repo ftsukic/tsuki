@@ -1,8 +1,13 @@
 import { Fragment, createRef, useEffect } from 'react'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react-native'
-import { Picker, PickerGroup } from '..'
+import { DatePicker } from '../date-picker'
+import { DateTimePicker } from '../date-time-picker'
+import { Picker } from '../picker'
+import { PickerGroup } from '../picker-group'
+import { TimePicker } from '../time-picker'
 import type { PickerGroupRef } from '../picker-group'
+
 import * as Reanimated from 'react-native-reanimated'
 
 afterEach(() => {
@@ -148,17 +153,52 @@ describe('PickerGroup', () => {
 
   it('does not crash when tabs and children have different counts', async () => {
     const onConfirm = jest.fn()
+    const groupRef = createRef<PickerGroupRef>()
     await render(
-      <PickerGroup tabs={['A', 'B', 'C']} onConfirm={onConfirm}>
+      <PickerGroup ref={groupRef} tabs={['A', 'B', 'C']} onConfirm={onConfirm}>
         <Picker columns={columns('A')} />
         <Picker columns={columns('B')} />
       </PickerGroup>,
     )
 
+    expect(groupRef.current?.getSelectedValues()).toEqual([['A'], ['B'], []])
     await press(screen.getByTestId('picker-confirm'))
     expect(onConfirm).toHaveBeenCalledWith([
       expect.objectContaining({ values: ['A'] }),
       expect.objectContaining({ values: ['B'] }),
+      { values: [], options: [], indexes: [] },
+    ])
+  })
+
+  it('warns once when tabs and children counts are mismatched', async () => {
+    const warning = jest.spyOn(console, 'warn').mockImplementation(() => {})
+    const view = await render(
+      <PickerGroup tabs={['一', '二']}>
+        <Picker columns={columns('one')} />
+      </PickerGroup>,
+    )
+    await view.rerender(
+      <PickerGroup tabs={['一', '二']}>
+        <Picker columns={columns('one')} />
+      </PickerGroup>,
+    )
+    expect(warning).toHaveBeenCalledTimes(1)
+    warning.mockRestore()
+  })
+
+  it('keeps a missing first child at its positional result index', async () => {
+    const groupConfirm = jest.fn()
+    await render(
+      <PickerGroup tabs={['一', '二']} onConfirm={groupConfirm}>
+        <View />
+        <Picker columns={columns('two')} />
+      </PickerGroup>,
+    )
+
+    await press(screen.getByTestId('picker-confirm'))
+    expect(groupConfirm).toHaveBeenCalledWith([
+      { values: [], options: [], indexes: [] },
+      expect.objectContaining({ values: ['two'] }),
     ])
   })
 
@@ -222,7 +262,150 @@ describe('PickerGroup', () => {
     expect(groupConfirm).toHaveBeenCalledTimes(1)
   })
 
-  it('applies Vant title spacing to text, not the tab root', async () => {
+  it('registers DatePicker public string values and exposes them through the group ref', async () => {
+    const groupConfirm = jest.fn()
+    const groupRef = createRef<PickerGroupRef>()
+    await render(
+      <PickerGroup ref={groupRef} tabs={['日期']} onConfirm={groupConfirm}>
+        <DatePicker defaultValue={['2026', '09', '13']} />
+      </PickerGroup>,
+    )
+
+    expect(groupRef.current?.getSelectedValues()).toEqual([['2026', '09', '13']])
+    await press(screen.getByTestId('picker-confirm'))
+
+    const values = groupConfirm.mock.calls[0]?.[0][0].values
+    expect(values).toEqual(['2026', '09', '13'])
+    expect(typeof values[0]).toBe('string')
+  })
+
+  it('registers TimePicker public string values', async () => {
+    const groupConfirm = jest.fn()
+    await render(
+      <PickerGroup tabs={['时间']} onConfirm={groupConfirm}>
+        <TimePicker defaultValue={['10', '30']} />
+      </PickerGroup>,
+    )
+
+    await press(screen.getByTestId('picker-confirm'))
+
+    const values = groupConfirm.mock.calls[0]?.[0][0].values
+    expect(values).toEqual(['10', '30'])
+    expect(typeof values[0]).toBe('string')
+  })
+
+  it('registers DateTimePicker public string values', async () => {
+    const groupConfirm = jest.fn()
+    await render(
+      <PickerGroup tabs={['日期时间']} onConfirm={groupConfirm}>
+        <DateTimePicker defaultValue={['2026', '09', '13', '10', '30']} />
+      </PickerGroup>,
+    )
+
+    await press(screen.getByTestId('picker-confirm'))
+
+    const values = groupConfirm.mock.calls[0]?.[0][0].values
+    expect(values).toEqual(['2026', '09', '13', '10', '30'])
+    expect(typeof values[0]).toBe('string')
+  })
+
+  it('keeps generic Picker values unchanged in a group', async () => {
+    const groupConfirm = jest.fn()
+    await render(
+      <PickerGroup tabs={['通用']} onConfirm={groupConfirm}>
+        <Picker columns={[[{ text: '1', value: 1 }]]} />
+      </PickerGroup>,
+    )
+
+    await press(screen.getByTestId('picker-confirm'))
+
+    expect(groupConfirm.mock.calls[0]?.[0][0].values).toEqual([1])
+  })
+
+  it('confirms a DatePicker pending tap through the group before timing finishes', async () => {
+    const groupConfirm = jest.fn()
+    const onChange = jest.fn()
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value) => value as never)
+    await render(
+      <PickerGroup tabs={['日期']} onConfirm={groupConfirm}>
+        <DatePicker defaultValue={['2026', '09', '13']} onChange={onChange} />
+      </PickerGroup>,
+    )
+
+    await press(screen.getByTestId('picker-item-2-13'))
+    expect(onChange).not.toHaveBeenCalled()
+    await press(screen.getByTestId('picker-confirm'))
+
+    expect(groupConfirm).toHaveBeenCalledWith([
+      expect.objectContaining({ values: ['2026', '09', '14'] }),
+    ])
+  })
+
+  it('keeps a pending first DatePicker positional through next-step confirmation', async () => {
+    const groupConfirm = jest.fn()
+    const firstConfirm = jest.fn()
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value) => value as never)
+
+    await render(
+      <PickerGroup tabs={['开始日期', '结束日期']} nextStepText="下一步" onConfirm={groupConfirm}>
+        <DatePicker defaultValue={['2026', '09', '10']} onConfirm={firstConfirm} />
+        <DatePicker defaultValue={['2026', '09', '20']} />
+      </PickerGroup>,
+    )
+
+    await press(screen.getAllByTestId('picker-item-2-24')[0])
+    expect(firstConfirm).not.toHaveBeenCalled()
+    await press(screen.getByTestId('picker-confirm'))
+    await press(screen.getByTestId('picker-confirm'))
+
+    expect(groupConfirm).toHaveBeenCalledTimes(1)
+    expect(groupConfirm).toHaveBeenCalledWith([
+      expect.objectContaining({ values: ['2026', '09', '25'] }),
+      expect.objectContaining({ values: ['2026', '09', '20'] }),
+    ])
+    expect(firstConfirm).toHaveBeenCalledTimes(1)
+  })
+
+  it('unregisters a child ref when its pane child unmounts', async () => {
+    const groupConfirm = jest.fn()
+    const view = await render(
+      <PickerGroup tabs={['一', '二']} onConfirm={groupConfirm}>
+        <Picker columns={columns('one')} />
+        <Picker columns={columns('two')} />
+      </PickerGroup>,
+    )
+
+    await view.rerender(
+      <PickerGroup tabs={['一', '二']} onConfirm={groupConfirm}>
+        <Picker columns={columns('one')} />
+      </PickerGroup>,
+    )
+    await press(screen.getByTestId('picker-confirm'))
+
+    expect(groupConfirm).toHaveBeenCalledWith([
+      expect.objectContaining({ values: ['one'] }),
+      { values: [], options: [], indexes: [] },
+    ])
+  })
+
+  it('keeps temporal child replacement registered to the same pane', async () => {
+    const groupConfirm = jest.fn()
+    const view = await render(
+      <PickerGroup tabs={['时间']} onConfirm={groupConfirm}>
+        <DatePicker defaultValue={['2026', '09', '13']} />
+      </PickerGroup>,
+    )
+
+    await view.rerender(
+      <PickerGroup tabs={['时间']} onConfirm={groupConfirm}>
+        <TimePicker defaultValue={['10', '30']} />
+      </PickerGroup>,
+    )
+    await press(screen.getByTestId('picker-confirm'))
+    expect(groupConfirm).toHaveBeenCalledWith([expect.objectContaining({ values: ['10', '30'] })])
+  })
+
+  it('keeps tab spacing out of the title and tab root styles', async () => {
     await render(
       <PickerGroup tabs={['选择日期', '选择时间']}>
         <Picker columns={columns('date')} />
@@ -230,9 +413,9 @@ describe('PickerGroup', () => {
       </PickerGroup>,
     )
 
-    expect(StyleSheet.flatten(screen.getByText('选择日期').props.style)).toMatchObject({
-      marginRight: 16,
-    })
+    expect(StyleSheet.flatten(screen.getByText('选择日期').props.style)).not.toHaveProperty(
+      'marginRight',
+    )
     expect(StyleSheet.flatten(screen.getAllByRole('tab')[0].props.style)).not.toHaveProperty(
       'marginRight',
     )

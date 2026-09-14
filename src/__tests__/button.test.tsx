@@ -339,6 +339,28 @@ describe('Button', () => {
     )
   })
 
+  it('inherits group variant unless a child overrides it', async () => {
+    await render(
+      <ConfigProvider>
+        <ButtonGroup variant="outline">
+          <Button testID="group-inherited-variant">Inherited outline</Button>
+          <Button testID="group-explicit-variant" variant="solid">
+            Explicit solid
+          </Button>
+        </ButtonGroup>
+      </ConfigProvider>,
+    )
+
+    expect(getButtonStyle('group-inherited-variant')).toMatchObject({
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+    })
+    expect(getButtonStyle('group-explicit-variant')).toMatchObject({
+      backgroundColor: getDesignToken().colorBgContainer,
+      borderWidth: 1,
+    })
+  })
+
   it('makes a block group fill its parent and its buttons share the available width', async () => {
     await render(
       <ConfigProvider>

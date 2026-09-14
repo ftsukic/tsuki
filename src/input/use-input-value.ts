@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import type { InputFormatTrigger } from './interface'
+import type { InputFormatTrigger } from './types'
 
 interface UseInputValueOptions {
   value?: string

@@ -1,5 +1,5 @@
 import type { ColorValue, ViewStyle } from 'react-native'
-import type { SwitchProps, SwitchSize, SwitchStyleState } from './interface'
+import type { SwitchProps, SwitchSize, SwitchStyleState } from './types'
 import type { SwitchToken } from '../theme'
 
 export interface SwitchDimensions {

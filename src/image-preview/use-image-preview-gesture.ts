@@ -5,7 +5,7 @@ import { scheduleOnRN } from 'react-native-worklets'
 import { Gesture } from '../gesture'
 import { useAnimatedStyle, useSharedValue, withSpring } from '../animation'
 import type { GestureType } from 'react-native-gesture-handler'
-import type { ImagePreviewCloseReason, ImagePreviewRect } from './interface'
+import type { ImagePreviewCloseReason, ImagePreviewRect } from './types'
 import type { NormalizedImage } from './utils'
 import {
   calculateFocalPointTranslation,

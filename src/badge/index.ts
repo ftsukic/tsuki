@@ -9,4 +9,4 @@ export type {
   BadgeStyleInfo,
   BadgeStyleState,
   BadgeStyles,
-} from './interface'
+} from './types'

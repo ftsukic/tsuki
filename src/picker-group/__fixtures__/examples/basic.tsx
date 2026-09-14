@@ -4,12 +4,19 @@ import { DatePicker } from '../../../date-picker'
 import { Popup } from '../../../popup'
 import { TimePicker } from '../../../time-picker'
 import { PickerGroup } from '../../index'
+import type { PickerGroupSelection } from '../../types'
 
 type DateValue = readonly string[]
 type TimeValue = readonly string[]
 
 const formatDateTime = (date: DateValue, time: TimeValue) =>
   `${date[0]}-${date[1]}-${date[2]} ${time[0]}:${time[1]}`
+
+const getStringValues = (
+  results: readonly PickerGroupSelection[],
+  index: number,
+): readonly string[] =>
+  (results[index]?.values ?? []).filter((value): value is string => typeof value === 'string')
 
 /** @title Basic @description Cell 打开底部 Popup；不设置 nextStepText 时确认按钮直接提交所有 Picker。 */
 export default function Basic() {
@@ -46,9 +53,9 @@ export default function Basic() {
         <PickerGroup
           title="选择日期和时间"
           tabs={['选择日期', '选择时间']}
-          onConfirm={() => {
-            setCommittedDate(draftDate)
-            setCommittedTime(draftTime)
+          onConfirm={(results) => {
+            setCommittedDate(getStringValues(results, 0))
+            setCommittedTime(getStringValues(results, 1))
             setVisible(false)
           }}
           onCancel={handleCancel}

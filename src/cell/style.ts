@@ -1,5 +1,5 @@
 import type { TextStyle, ViewStyle } from 'react-native'
-import type { CellProps, CellStyleState } from './interface'
+import type { CellProps, CellStyleState } from './types'
 import type { CellToken } from '../theme'
 
 export function isCellInteractive(props: Pick<CellProps, 'clickable' | 'onPress' | 'isLink'>) {
@@ -87,6 +87,7 @@ export function getCellStyles(
       flexDirection: 'row',
       alignItems: 'flex-start',
       minWidth: 0,
+      position: 'relative',
     },
     titleExtraContainer: {
       marginLeft: token.titleExtraGap,
@@ -171,12 +172,13 @@ export function getCellStyles(
       justifyContent: 'center',
     },
     required: {
+      position: 'absolute',
+      left: -8,
+      top: 0,
       fontFamily: token.fontFamily,
       color: token.requiredColor,
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
-      width: token.requiredWidth,
-      marginRight: 2,
     },
     divider: {
       position: 'absolute',

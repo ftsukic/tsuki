@@ -1,6 +1,6 @@
 import type { TextStyle, ViewStyle } from 'react-native'
 import type { SwipeCellToken } from '../theme'
-import type { SwipeCellActionColor } from './interface'
+import type { SwipeCellActionColor } from './types'
 
 export interface SwipeCellResolvedStyles {
   root: ViewStyle

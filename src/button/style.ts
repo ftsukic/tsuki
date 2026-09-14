@@ -1,7 +1,7 @@
 import { StyleSheet } from 'react-native'
 import type { ColorValue, TextStyle, ViewStyle } from 'react-native'
 import { alphaColor } from '../theme/util/colors'
-import type { ButtonProps, ButtonStyleState, ButtonVariant } from './interface'
+import type { ButtonProps, ButtonStyleState, ButtonVariant } from './types'
 import type { AliasToken, ButtonToken } from '../theme'
 
 export interface ButtonResolvedStyles {

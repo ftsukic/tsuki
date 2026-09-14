@@ -33,17 +33,16 @@ describe('Search', () => {
     expect(screen.getByTestId('controlled-search').props.value).toBe('Bob')
   })
 
-  it('emits string change callbacks', async () => {
+  it('emits one string change callback', async () => {
     const onChange = jest.fn()
-    const onChangeText = jest.fn()
-    await render(<Search testID="search" onChange={onChange} onChangeText={onChangeText} />)
+    await render(<Search testID="search" onChange={onChange} />)
 
     // RNTL's TextInput update is flushed asynchronously under React 19.
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent.changeText(screen.getByTestId('search'), 'Alice')
 
-    expect(onChange).toHaveBeenLastCalledWith('Alice')
-    expect(onChangeText).toHaveBeenLastCalledWith('Alice')
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenCalledWith('Alice')
     await waitFor(() => expect(screen.getByTestId('search').props.value).toBe('Alice'))
   })
 

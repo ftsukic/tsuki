@@ -81,7 +81,7 @@ interface PickerOption {
 | `showToolbarDivider` | `boolean` | `false` | 是否显示 Toolbar 底部分隔线 |
 | `confirmButtonText` | `ReactNode` | `'确定'` | 确认按钮内容 |
 | `cancelButtonText` | `ReactNode` | `'取消'` | 取消按钮内容 |
-| `swipeDuration` | `number` | 主题 token | 手势吸附到目标 option 的时长 |
+| `swipeDuration` | `number` | 主题 token | 手势 / 惯性吸附时长 |
 | `onChange` | `(values, options) => void` | — | tap 或 pan 最终吸附后调用一次；外部 value 更新不会触发 |
 | `onConfirm` | `(values, options) => void` | — | Toolbar 确认回调，不重复触发 `onChange` |
 | `onCancel` | `() => void` | — | Toolbar 取消回调；Popup 的关闭和 draft 回滚由调用方负责 |
@@ -92,7 +92,7 @@ Picker 继承 React Native `ViewProps`，但不接受 `children` 和被组件接
 
 ### 受控与非受控
 
-受控 Picker 的显示值始终由 `value` 派生。用户选择后只调用 `onChange`；父组件回写 `value` 后才会更新选中项。非受控 Picker 使用 `defaultValue` 初始化，并在吸附完成后内部更新。
+受控 Picker 的显示值始终由 `value` 派生。用户请求新值后调用 `onChange`；如果父组件不回写，滚轮会恢复到当前受控值，回写后则停在新位置。确认会结算当前正在吸附的用户目标，但不会修改受控 `value`。非受控 Picker 使用 `defaultValue` 初始化，并在吸附完成后内部更新。
 
 ```tsx | pure
 const [visible, setVisible] = useState(false)
@@ -137,7 +137,7 @@ Picker 不维护 Popup 的 draft/commit 生命周期；上例中的 `draft`、`c
 
 ### 命令式 API
 
-`showPicker(options)` 需要在 `Provider` 下调用，返回 `Promise<PickerResult>`；确认或取消后分别返回 `action: 'confirm'` 或 `action: 'cancel'`，并包含规范化的 `values` 和 `options`。`Picker.open` 是 `showPicker` 的同义入口，`closePicker()` 只关闭当前命令式 Picker。
+`showPicker(options)` 需要在 `Provider` 下调用，返回 `Promise<PickerResult>`；确认或取消后分别返回 `action: 'confirm'` 或 `action: 'cancel'`，并包含规范化的 `values` 和 `options`。命令式调用中的 `value` 和 `defaultValue` 都只用于初始化，后续 draft 由 adapter 自己维护。`Picker.open` 是 `showPicker` 的同义入口，`closePicker()` 以 cancel 结果结束当前命令式 Picker；如果 imperative host 被卸载，pending command 也按 cancel 结束。
 
 命令式 `PickerOptions` 在 `PickerProps` 基础上允许配置 `overlay`、`closeOnPressOverlay`、`safeAreaInsetBottom` 和 `duration`，这些属性只由命令式 Popup adapter 消费，不会传给基础 Picker。
 
@@ -156,7 +156,7 @@ Picker 不维护 Popup 的 draft/commit 生命周期；上例中的 `draft`、`c
 | `picker_visible_item_count`            | `6`                    | 默认可见行数               |
 | `picker_disabled_option_opacity`       | `0.3`                  | disabled option 的透明度   |
 | `picker_indicator_horizontal_inset`    | `16`                   | indicator 水平内缩         |
-| `picker_swipe_duration`                | `1000`                 | 手势吸附动画时长           |
+| `picker_swipe_duration`                | `1000`                 | 手势 / 惯性吸附动画时长    |
 
 ## 无障碍与平台说明
 

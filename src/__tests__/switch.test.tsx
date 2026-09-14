@@ -62,11 +62,24 @@ describe('Switch', () => {
   it('blocks disabled and loading switches', async () => {
     const onPress = jest.fn()
     const onChange = jest.fn()
+    const beforeChange = jest.fn(() => true)
 
     await render(
       <>
-        <Switch disabled onChange={onChange} onPress={onPress} testID="disabled" />
-        <Switch loading onChange={onChange} onPress={onPress} testID="loading" />
+        <Switch
+          beforeChange={beforeChange}
+          disabled
+          onChange={onChange}
+          onPress={onPress}
+          testID="disabled"
+        />
+        <Switch
+          beforeChange={beforeChange}
+          loading
+          onChange={onChange}
+          onPress={onPress}
+          testID="loading"
+        />
       </>,
     )
 
@@ -75,6 +88,7 @@ describe('Switch', () => {
 
     expect(onPress).not.toHaveBeenCalled()
     expect(onChange).not.toHaveBeenCalled()
+    expect(beforeChange).not.toHaveBeenCalled()
     expect(screen.getByTestId('disabled').props.accessibilityState).toMatchObject({
       checked: false,
       disabled: true,
@@ -122,6 +136,111 @@ describe('Switch', () => {
 
     expect(onChange).toHaveBeenCalledWith(true)
     expect(screen.getByTestId('switch').props.accessibilityState?.checked).toBe(true)
+  })
+
+  it('commits only the latest rapid async beforeChange request', async () => {
+    const resolvers: Array<(allowed: boolean) => void> = []
+    const beforeChange = jest.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          resolvers.push(resolve)
+        }),
+    )
+    const onChange = jest.fn()
+
+    await render(<Switch beforeChange={beforeChange} onChange={onChange} testID="switch" />)
+
+    await press('switch')
+    await press('switch')
+    expect(resolvers).toHaveLength(2)
+
+    await act(async () => {
+      resolvers[1](true)
+      await Promise.resolve()
+    })
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenCalledWith(true)
+
+    await act(async () => {
+      resolvers[0](true)
+      await Promise.resolve()
+    })
+    expect(onChange).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not commit an older async request after the latest request is denied', async () => {
+    const resolvers: Array<(allowed: boolean) => void> = []
+    const beforeChange = jest.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          resolvers.push(resolve)
+        }),
+    )
+    const onChange = jest.fn()
+
+    await render(<Switch beforeChange={beforeChange} onChange={onChange} testID="switch" />)
+
+    await press('switch')
+    await press('switch')
+
+    await act(async () => {
+      resolvers[1](false)
+      await Promise.resolve()
+      resolvers[0](true)
+      await Promise.resolve()
+    })
+
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByTestId('switch').props.accessibilityState?.checked).toBe(false)
+  })
+
+  it('invalidates an async request after a controlled value update', async () => {
+    let resolve!: (allowed: boolean) => void
+    const beforeChange = jest.fn(
+      () =>
+        new Promise<boolean>((nextResolve) => {
+          resolve = nextResolve
+        }),
+    )
+    const onChange = jest.fn()
+    const view = await render(
+      <Switch beforeChange={beforeChange} onChange={onChange} testID="switch" value={false} />,
+    )
+
+    await press('switch')
+    await view.rerender(
+      <Switch beforeChange={beforeChange} onChange={onChange} testID="switch" value />,
+    )
+
+    await act(async () => {
+      resolve(true)
+      await Promise.resolve()
+    })
+
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByTestId('switch').props.accessibilityState?.checked).toBe(true)
+  })
+
+  it('ignores a rejected async beforeChange result', async () => {
+    let reject!: (reason?: unknown) => void
+    const beforeChange = jest.fn(
+      () =>
+        new Promise<boolean>((_, nextReject) => {
+          reject = nextReject
+        }),
+    )
+    const onChange = jest.fn()
+
+    await render(<Switch beforeChange={beforeChange} onChange={onChange} testID="switch" />)
+    await press('switch')
+
+    await act(async () => {
+      reject(new Error('rejected'))
+      await Promise.resolve()
+    })
+
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByTestId('switch').props.accessibilityState?.checked).toBe(false)
   })
 
   it('maps custom active and inactive values', async () => {

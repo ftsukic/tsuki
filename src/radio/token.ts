@@ -23,11 +23,14 @@ export function getRadioToken(token: AliasToken): RadioToken {
     activeOpacity: buttonToken.activeOpacity,
     disabledOpacity: buttonToken.disabledOpacity,
     fontFamily: buttonToken.fontFamily,
-    buttonHeight: buttonToken.height,
-    buttonPaddingHorizontal: buttonToken.paddingHorizontalSM,
+    buttonHeight: 32,
+    buttonMinWidth: 62,
+    buttonPaddingHorizontal: token.paddingXS,
     buttonBorderRadius: buttonToken.borderRadius,
     buttonBackground: token.colorBgContainer,
+    buttonFilledBackground: token.colorFillTertiary,
     buttonDisabledBackground: token.colorBgContainerDisabled,
+    buttonCheckedFilledBackground: token.colorPrimaryBg,
     buttonCheckedLabelColor: token.colorTextLightSolid,
   }
 }

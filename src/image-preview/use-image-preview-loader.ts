@@ -3,10 +3,19 @@ import { Image } from 'react-native'
 import type { ImageDimensions, NormalizedImage } from './utils'
 import { cacheImageDimensions, getCachedImageDimensions, getImageSourceUri } from './utils'
 
-function addToSet(current: Set<number>, index: number) {
-  if (current.has(index)) return current
+const readyImageKeys = new Set<string>()
+
+function getImageReadyKey(image: NormalizedImage, index: number) {
+  const uri = getImageSourceUri(image)
+  if (uri) return `uri:${uri}`
+  if (image.key !== undefined) return `key:${String(image.key)}`
+  return `source:${String(image.source)}:${index}`
+}
+
+function addToSet(current: Set<string>, key: string) {
+  if (current.has(key)) return current
   const next = new Set(current)
-  next.add(index)
+  next.add(key)
   return next
 }
 
@@ -22,6 +31,7 @@ function getAdjacentIndices(index: number, count: number, loop: boolean) {
 
 export interface ImagePreviewLoader {
   loadedIndices: ReadonlySet<number>
+  isImageReady: (index: number) => boolean
   markImageReady: (index: number, dimensions?: ImageDimensions) => void
   prepareIndex: (index: number) => void
 }
@@ -32,18 +42,30 @@ export function useImagePreviewLoader(
   activeIndex: number,
   visible: boolean,
   loop: boolean,
-  hasCustomRenderer: boolean,
+  enableNativePrefetch: boolean,
 ): ImagePreviewLoader {
-  const [loadedIndices, setLoadedIndices] = useState<Set<number>>(() => new Set())
-  const [activeReady, setActiveReady] = useState(false)
+  const imageKeys = useMemo(
+    () => normalizedImages.map((image, index) => getImageReadyKey(image, index)),
+    [normalizedImages],
+  )
+  const [readyKeys, setReadyKeys] = useState<Set<string>>(() => {
+    return new Set(imageKeys.filter((key) => readyImageKeys.has(key)))
+  })
   const [, setDimensionsVersion] = useState(0)
   const preparingRef = useMemo(() => new Set<number>(), [])
-  const sourceSignature = useMemo(
-    () =>
-      normalizedImages
-        .map((image, index) => getImageSourceUri(image) ?? String(image.key ?? index))
-        .join('|'),
-    [normalizedImages],
+  const sourceSignature = useMemo(() => imageKeys.join('|'), [imageKeys])
+
+  const loadedIndices = useMemo(() => {
+    const indices = new Set<number>()
+    imageKeys.forEach((key, index) => {
+      if (readyKeys.has(key)) indices.add(index)
+    })
+    return indices
+  }, [imageKeys, readyKeys])
+
+  const isImageReady = useCallback(
+    (index: number) => Boolean(imageKeys[index] && readyKeys.has(imageKeys[index])),
+    [imageKeys, readyKeys],
   )
 
   const markImageReady = useCallback(
@@ -53,16 +75,18 @@ export function useImagePreviewLoader(
         cacheImageDimensions(getImageSourceUri(image), dimensions)
         setDimensionsVersion((value) => value + 1)
       }
-      setLoadedIndices((current) => addToSet(current, index))
-      if (index === activeIndex) setActiveReady(true)
+      const key = imageKeys[index]
+      if (!key) return
+      readyImageKeys.add(key)
+      setReadyKeys((current) => addToSet(current, key))
     },
-    [activeIndex, normalizedImages],
+    [imageKeys, normalizedImages],
   )
 
   const prepareIndex = useCallback(
     (index: number) => {
       if (
-        hasCustomRenderer ||
+        !enableNativePrefetch ||
         index < 0 ||
         index >= normalizedImages.length ||
         preparingRef.has(index)
@@ -86,14 +110,13 @@ export function useImagePreviewLoader(
         preparingRef.delete(index)
       }
     },
-    [hasCustomRenderer, normalizedImages, preparingRef],
+    [enableNativePrefetch, normalizedImages, preparingRef],
   )
 
   useEffect(() => {
     preparingRef.clear()
-    setLoadedIndices(new Set())
-    setActiveReady(false)
-  }, [preparingRef, sourceSignature, visible])
+    setReadyKeys(new Set(imageKeys.filter((key) => readyImageKeys.has(key))))
+  }, [imageKeys, preparingRef, sourceSignature])
 
   useEffect(() => {
     if (!visible || activeIndex < 0 || activeIndex >= normalizedImages.length) return
@@ -117,11 +140,12 @@ export function useImagePreviewLoader(
   }, [activeIndex, normalizedImages, visible])
 
   useEffect(() => {
-    if (!visible || !activeReady) return
+    if (!visible || activeIndex < 0 || activeIndex >= normalizedImages.length) return
+    prepareIndex(activeIndex)
     getAdjacentIndices(activeIndex, normalizedImages.length, loop).forEach(prepareIndex)
-  }, [activeIndex, activeReady, loop, normalizedImages.length, prepareIndex, visible])
+  }, [activeIndex, loop, normalizedImages.length, prepareIndex, visible])
 
-  return { loadedIndices, markImageReady, prepareIndex }
+  return { isImageReady, loadedIndices, markImageReady, prepareIndex }
 }
 
 export type { NormalizedImage }

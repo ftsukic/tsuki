@@ -20,6 +20,7 @@ export default function Example() {
         value={value}
         onChange={setValue}
         variant="button"
+        buttonVariant="outline"
         direction="horizontal"
         gap={8}
       >

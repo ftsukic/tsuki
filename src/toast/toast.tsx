@@ -1,12 +1,13 @@
 import { forwardRef, isValidElement, useEffect, useMemo, useRef, useState } from 'react'
-import { Animated, Easing, Platform, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Animated, Easing, Platform, Pressable, StyleSheet, View } from 'react-native'
 import type { IconDefinition } from '@ant-design/icons-svg/lib/types'
 import { Icon, isIconName } from '../icon'
 import { Loading } from '../loading'
 import { Portal } from '../portal'
 import { resolveStyles } from '../style'
+import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
-import type { ToastIcon, ToastProps, ToastType } from './interface'
+import type { ToastIcon, ToastProps, ToastType } from './types'
 import { getToastToken } from './token'
 
 function isRenderable(value: unknown): boolean {

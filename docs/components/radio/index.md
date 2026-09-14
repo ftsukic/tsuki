@@ -67,6 +67,7 @@ type RadioLabelPosition = 'left' | 'right';
 | disabled | `boolean` | `false` | 禁用点击和状态变化 |
 | shape | `'round' \| 'square' \| 'dot'` | `'round'` | `round` 为圆形 checked indicator + check，`square` 为方形 checked indicator + check，`dot` 为圆形外圈 + 中心圆点 |
 | variant | `'default' \| 'button'` | `'default'` | `button` 隐藏 radio indicator，使用内容宽度的按钮容器；仍保持 Radio 的单选逻辑 |
+| buttonVariant | `ButtonVariant` | `'solid'` | `variant="button"` 时使用的 Button 视觉变体；不影响普通 Radio |
 | labelPosition | `'left' \| 'right'` | `'right'` | 标签相对于指示器的位置 |
 | checkedColor | `ColorValue` | 主题主色 | 选中指示器颜色 |
 | onChange | `(checked: boolean) => void` | — | 独立 Radio 选中状态改变时触发 |
@@ -77,7 +78,7 @@ type RadioLabelPosition = 'left' | 'right';
 
 独立 Radio 只有在从未选中变为选中时触发 `onChange(true)`；再次点击已选中项不会取消选中。需要取消选中时，由上层通过受控 `checked` 改变状态。
 
-`variant="button"` 隐藏 indicator，默认使用内容加水平 padding 的自适应宽度容器。选中状态改变背景、边框和文字颜色，但不显示 check icon；Group 仍保持互斥选择，已选项不能通过再次点击取消。需要等宽按钮时，在 Group 上设置 `buttonLayout="equal"`；FieldRadio 的 button 选项默认使用该布局。
+`variant="button"` 隐藏 indicator，默认使用内容加水平 padding 的自适应宽度容器，并保证最小宽度为 `buttonMinWidth`。选中状态改变背景、边框和文字颜色，但不显示 check icon；Group 仍保持互斥选择，已选项不能通过再次点击取消。`buttonVariant` 可使用 Button 的 `solid`、`filled`、`outline`、`dashed` 和 `text` 视觉变体。需要等宽按钮时，在 Group 上设置 `buttonLayout="equal"`；FieldRadio 的 button 选项默认使用该布局。
 
 `shape="round"` 是默认形状，选中后显示白色 check；`shape="square"` 使用方形 checked indicator 并显示白色 check；`shape="dot"` 保持透明圆形外圈，仅在内部显示 `dotSize` 大小的 checkedColor 圆点。
 
@@ -94,6 +95,7 @@ type RadioLabelPosition = 'left' | 'right';
 | onChange | `(value: RadioValue) => void` | — | 选中值改变时触发 |
 | disabled | `boolean` | `false` | 禁用整个 Group，并覆盖子项的启用设置 |
 | variant | `'default' \| 'button'` | `'default'` | 统一设置子 Radio 的显示模式；`button` 同时适用于 `children` 和 `options` |
+| buttonVariant | `ButtonVariant` | `'solid'` | 统一设置 button variant 子项的 Button 视觉变体；子 Radio 显式设置时优先 |
 | direction | `'vertical' \| 'horizontal'` | `'vertical'` | 选项排列方向 |
 | gap | `number` | 主题间距 | 选项之间的间距 |
 | buttonLayout | `'intrinsic' \| 'equal'` | `'intrinsic'` | `equal` 使用 Grid 等宽布局；仅当所有直接子项都是 button variant 时生效 |
@@ -144,6 +146,6 @@ type RadioLabelPosition = 'left' | 'right';
 </ConfigProvider>
 ```
 
-可覆盖的主要 token 包括 `indicatorSize`、`dotSize`、`borderWidth`、`borderRadius`、`borderColor`、`checkedColor`、`labelColor`、`disabledBorderColor`、`disabledBackgroundColor`、`disabledCheckedBackgroundColor`、`disabledMarkColor`、`disabledLabelColor`、`fontSize`、`lineHeight`、`gap`、`activeOpacity`、`disabledOpacity`，以及 button variant 的 `buttonHeight`、`buttonPaddingHorizontal`、`buttonBorderRadius`、`buttonBackground`、`buttonDisabledBackground` 和 `buttonCheckedLabelColor`。
+可覆盖的主要 token 包括 `indicatorSize`、`dotSize`、`borderWidth`、`borderRadius`、`borderColor`、`checkedColor`、`labelColor`、`disabledBorderColor`、`disabledBackgroundColor`、`disabledCheckedBackgroundColor`、`disabledMarkColor`、`disabledLabelColor`、`fontSize`、`lineHeight`、`gap`、`activeOpacity`、`disabledOpacity`，以及 button variant 的 `buttonHeight`、`buttonMinWidth`、`buttonPaddingHorizontal`、`buttonBorderRadius`、`buttonBackground`、`buttonFilledBackground`、`buttonDisabledBackground`、`buttonCheckedFilledBackground` 和 `buttonCheckedLabelColor`。
 
 Radio 暴露 `radio` 无障碍角色和 `selected`、`disabled` 状态；Group 暴露 `radiogroup` 角色。当前不提供多选、取消选中、动画或 options 与 children 混用能力。

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { ToastContent } from './toast'
-import type { ToastInstance, ToastMessage, ToastOptions, ToastType } from './interface'
+import type { ToastInstance, ToastMessage, ToastOptions, ToastType } from './types'
 import { mountPortal, unmountPortal, updatePortal } from '../portal'
 import type { PortalKey } from '../portal'
 

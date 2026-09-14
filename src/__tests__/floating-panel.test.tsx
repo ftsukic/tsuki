@@ -4,6 +4,7 @@ import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import type { RenderResult } from '@testing-library/react-native'
 import type { TestInstance } from 'test-renderer'
 import { ConfigProvider, FloatingPanel, PortalHost } from '..'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 
 type TouchEvent = ReturnType<typeof touchEvent>
@@ -209,6 +210,125 @@ describe('FloatingPanel', () => {
     await drag(getResponders(view)[0], -100)
 
     expect(onHeightChangeEnd).toHaveBeenCalledWith(300)
+    await view.unmount()
+  })
+
+  it('reconciles a controlled drag after the parent ignores the request', async () => {
+    const onHeightChange = jest.fn()
+    const onHeightChangeEnd = jest.fn()
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel
+          testID="controlled-ignore"
+          height={100}
+          anchors={[100, 300]}
+          onHeightChange={onHeightChange}
+          onHeightChangeEnd={onHeightChangeEnd}
+        >
+          <Text>controlled</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+
+    await drag(getResponders(view)[0], -120)
+
+    expect(onHeightChangeEnd).toHaveBeenCalledWith(300)
+    expect(getPanelHeight('controlled-ignore')).toBe(100)
+    await view.unmount()
+  })
+
+  it('keeps a controlled drag when the parent writes the target back', async () => {
+    function Controlled() {
+      const [height, setHeight] = useState(100)
+      return (
+        <FloatingPanel
+          testID="controlled-writeback"
+          height={height}
+          anchors={[100, 300]}
+          onHeightChange={setHeight}
+        >
+          <Text>controlled</Text>
+        </FloatingPanel>
+      )
+    }
+
+    const view = await render(
+      <AppProvider>
+        <Controlled />
+      </AppProvider>,
+    )
+    await drag(getResponders(view)[0], -120)
+
+    expect(getPanelHeight('controlled-writeback')).toBe(300)
+    await view.unmount()
+  })
+
+  it('applies the latest controlled prop after a no-op drag', async () => {
+    const onHeightChangeEnd = jest.fn()
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel
+          testID="controlled-during-drag"
+          height={100}
+          anchors={[100, 300]}
+          onHeightChangeEnd={onHeightChangeEnd}
+        >
+          <Text>controlled</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+
+    const header = getResponders(view)[0]
+    await act(async () => {
+      const props = getResponderProps(header)
+      const start = touchEvent(0, 0, 1)
+      props.onStartShouldSetResponderCapture(start)
+      props.onResponderGrant(start)
+      props.onResponderMove(gesture(-120, 2))
+    })
+
+    await view.rerender(
+      <AppProvider>
+        <FloatingPanel
+          testID="controlled-during-drag"
+          height={200}
+          anchors={[100, 300]}
+          onHeightChangeEnd={onHeightChangeEnd}
+        >
+          <Text>controlled</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+
+    await act(async () => {
+      const props = getResponderProps(getResponders(view)[0])
+      props.onResponderMove(touchEvent(0, -120, 3))
+      props.onResponderRelease(touchEvent(0, -120, 4))
+    })
+
+    expect(getPanelHeight('controlled-during-drag')).toBe(200)
+    expect(onHeightChangeEnd).not.toHaveBeenCalled()
+    await view.unmount()
+  })
+
+  it('clamps a controlled height when anchors shrink', async () => {
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel testID="shrinking-anchors" height={300} anchors={[100, 300]}>
+          <Text>anchors</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+
+    await view.rerender(
+      <AppProvider>
+        <FloatingPanel testID="shrinking-anchors" height={300} anchors={[100, 200]}>
+          <Text>anchors</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+
+    expect(getPanelHeight('shrinking-anchors')).toBe(200)
     await view.unmount()
   })
 

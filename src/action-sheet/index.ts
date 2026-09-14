@@ -15,4 +15,4 @@ export type {
   ActionSheetStyleInfo,
   ActionSheetStyleState,
   ActionSheetStyles,
-} from './interface'
+} from './types'

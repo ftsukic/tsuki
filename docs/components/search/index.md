@@ -61,7 +61,6 @@ import { Search } from '@ftsukic/tsuki'
 | defaultValue | `string` | `''` | 非受控初始搜索关键词 |
 | placeholder | `string` | — | 占位文本 |
 | onChange | `(value: string) => void` | — | 文本变化和清除时回调 |
-| onChangeText | `InputProps['onChangeText']` | — | 文本变化回调 |
 | disabled | `boolean` | `false` | 交给 Input 禁止编辑和清除 |
 | readOnly | `boolean` | `false` | 交给 Input 禁止编辑但保留普通视觉 |
 | clearable | `boolean` | `true` | 是否启用 Input 的清除能力 |
@@ -74,7 +73,7 @@ import { Search } from '@ftsukic/tsuki'
 | suffix | `ReactNode` | — | 输入区域内部右侧内容 |
 | left | `ReactNode` | — | Search 外部左侧扩展区域 |
 | action | `ReactNode` | — | Search 外部右侧操作区域 |
-| onSearch | `(value: string) => void` | — | 键盘提交或自动搜索回调 |
+| onSearch | `(value: string) => void` | — | 键盘提交或自动搜索 intent；开启 `autoSearch` 时也用于 debounce 后的搜索 |
 | autoSearch | `boolean` | `false` | 是否在输入变化后自动搜索 |
 | debounce | `number` | `300` | 自动搜索的延迟毫秒数 |
 | style | `StyleProp<ViewStyle>` | — | Search root 节点样式 |

@@ -15,6 +15,7 @@ export interface DropdownItemRegistration {
   onClose?: () => void
   onOpened?: () => void
   onClosed?: () => void
+  metadata?: readonly unknown[]
 }
 
 export interface DropdownMenuContextValue {
@@ -31,7 +32,7 @@ export interface DropdownMenuContextValue {
   zIndex?: number
   menuProps: DropdownMenuProps
   menuStyles?: DropdownMenuStyles
-  registerItem: (id: symbol, disabled: boolean) => number
+  registerItem: (id: symbol, index: number, disabled: boolean) => void
   updateItem: (id: symbol, item: Partial<DropdownItemRegistration>) => void
   unregisterItem: (id: symbol) => void
   open: (index: number) => void
@@ -42,6 +43,8 @@ export interface DropdownMenuContextValue {
 }
 
 export const DropdownMenuContext = createContext<DropdownMenuContextValue | undefined>(undefined)
+
+export const DropdownItemPositionContext = createContext<number | null>(null)
 
 export function sameDropdownValue(
   left: DropdownValue | undefined,

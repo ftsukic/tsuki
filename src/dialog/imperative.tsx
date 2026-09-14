@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { DialogContent } from './dialog'
-import type { DialogAction, DialogBeforeClose, DialogOptions } from './interface'
+import type { DialogAction, DialogBeforeClose, DialogOptions } from './types'
 import { mountPortal, unmountPortal, updatePortal } from '../portal'
 import type { PortalKey } from '../portal'
 
@@ -74,7 +74,10 @@ function DialogMethod({ record }: { record: DialogRecord }) {
 
   useEffect(
     () => () => {
-      if (currentRecord === recordRef.current) currentRecord = null
+      const current = recordRef.current
+      if (currentRecord !== current) return
+      settleRecord(current, undefined)
+      currentRecord = null
     },
     [],
   )
@@ -121,6 +124,7 @@ export function showDialog(options: DialogOptions = {}): Promise<DialogAction | 
   })
 
   if (currentRecord?.key !== null && currentRecord) {
+    settleRecord(currentRecord, undefined)
     replaceRecord(currentRecord, {
       options: { ...currentOptions, ...options },
       resolve: resolvePromise,

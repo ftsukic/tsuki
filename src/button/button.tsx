@@ -3,13 +3,14 @@ import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import { ButtonGroupContext } from './context'
-import { ButtonGroup, getButtonGroupConnectedStyle } from './group'
+import { ButtonGroup, getButtonGroupConnectedStyle } from './button-group'
 import { getButtonStyles } from './style'
 import { getButtonToken } from './token'
-import type { ButtonProps, ButtonStyleState } from './interface'
+import type { ButtonProps, ButtonStyleState } from './types'
 import { Fragment, forwardRef, isValidElement, useContext } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import type { ReactNode } from 'react'
+import { Text } from '../text'
 
 function isTextContent(value: ReactNode): value is string | number {
   return typeof value === 'string' || typeof value === 'number'
@@ -72,7 +73,7 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
       shape ?? (circle ? 'circle' : square ? 'square' : round ? 'round' : undefined)
     const mergedShape = explicitShape ?? groupContext.shape ?? 'default'
     const isDisabled = disabled || loading
-    const resolvedVariant = variant ?? (plain ? 'outline' : undefined)
+    const resolvedVariant = variant ?? (plain ? 'outline' : groupContext.variant)
     const buttonProps: ButtonProps = {
       children,
       type,

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { PopupContent } from '../popup/popup'
 import { mountPortal, unmountPortal, updatePortal } from '../portal'
 import { Picker } from './picker'
@@ -10,6 +10,7 @@ interface PickerRecord {
   key: PortalKey | null
   options: PickerOptions
   resolve: (result: PickerResult) => void
+  selection: Pick<PickerResult, 'values' | 'options'>
   show: boolean
   settled: boolean
 }
@@ -32,36 +33,88 @@ function updateRecord(record: PickerRecord, next: Partial<PickerRecord>): Picker
 }
 
 function settleRecord(record: PickerRecord, result: PickerResult) {
-  if (record.settled || currentRecord !== record) return
+  if (record.settled) return false
   record.settled = true
   record.resolve(result)
+  return true
+}
+
+function closeRecord(record: PickerRecord, result: PickerResult) {
+  if (record.settled) return false
+  const closingRecord = updateRecord(record, { show: false })
+  return settleRecord(closingRecord, result)
+}
+
+function cancelCurrentRecord() {
+  const record = currentRecord
+  if (!record || record.settled) return
+
+  const settled = closeRecord(record, { action: 'cancel', ...record.selection })
+  if (settled) record.options.onCancel?.()
 }
 
 function PickerMethod({ record }: { record: PickerRecord }) {
-  const { duration, overlay, closeOnPressOverlay, safeAreaInsetBottom, ...pickerOptions } =
-    record.options
-  const selectionRef = useRef<Pick<PickerResult, 'values' | 'options'>>(
-    resolvePickerSelection(record.options),
-  )
+  const {
+    duration,
+    overlay,
+    closeOnPressOverlay,
+    safeAreaInsetBottom,
+    value,
+    defaultValue,
+    ...pickerOptions
+  } = record.options
+  void value
+  void defaultValue
+  const [draftValues, setDraftValues] = useState(record.selection.values)
+  const selectionRef = useRef<Pick<PickerResult, 'values' | 'options'>>(record.selection)
   const recordRef = useRef(record)
   recordRef.current = record
 
   useEffect(
     () => () => {
-      if (currentRecord === recordRef.current) currentRecord = null
+      const current = recordRef.current
+      if (currentRecord !== current || current.settled) return
+      if (settleRecord(current, { action: 'cancel', ...current.selection })) {
+        current.options.onCancel?.()
+      }
+      currentRecord = null
     },
     [],
   )
 
   useEffect(() => {
-    selectionRef.current = resolvePickerSelection(record.options)
+    selectionRef.current = record.selection
   }, [record])
 
-  const close = (result: PickerResult) => {
+  const close = (result: PickerResult, callback?: () => void) => {
     const current = recordRef.current
-    if (currentRecord !== current) return
-    const closingRecord = updateRecord(current, { show: false })
-    settleRecord(closingRecord, result)
+    if (currentRecord !== current || current.settled) return
+    if (closeRecord(current, result)) callback?.()
+  }
+
+  const handleCancel = () => {
+    const current = recordRef.current
+    close({ action: 'cancel', ...selectionRef.current }, () => current.options.onCancel?.())
+  }
+
+  const handleChange = (values: PickerResult['values'], options: PickerResult['options']) => {
+    const current = recordRef.current
+    if (currentRecord !== current || current.settled) return
+    const selection = { values, options }
+    setDraftValues(values)
+    selectionRef.current = selection
+    current.selection = selection
+    current.options.onChange?.(values, options)
+  }
+
+  const handleConfirm = (values: PickerResult['values'], options: PickerResult['options']) => {
+    const current = recordRef.current
+    if (currentRecord !== current || current.settled) return
+    const selection = { values, options }
+    setDraftValues(values)
+    selectionRef.current = selection
+    current.selection = selection
+    close({ action: 'confirm', ...selection }, () => current.options.onConfirm?.(values, options))
   }
 
   return (
@@ -69,7 +122,7 @@ function PickerMethod({ record }: { record: PickerRecord }) {
       closeOnPressOverlay={closeOnPressOverlay ?? true}
       destroyOnClosed
       duration={duration}
-      onRequestClose={() => close({ action: 'cancel', ...selectionRef.current })}
+      onRequestClose={handleCancel}
       overlay={overlay ?? true}
       position="bottom"
       round
@@ -81,17 +134,10 @@ function PickerMethod({ record }: { record: PickerRecord }) {
     >
       <Picker
         {...pickerOptions}
-        onCancel={() => close({ action: 'cancel', ...selectionRef.current })}
-        onChange={(values, options) => {
-          selectionRef.current = { values, options }
-          record.options.onChange?.(values, options)
-        }}
-        onConfirm={(values, options) => {
-          selectionRef.current = { values, options }
-          record.options.onChange?.(values, options)
-          record.options.onConfirm?.(values, options)
-          close({ action: 'confirm', values, options })
-        }}
+        value={draftValues}
+        onCancel={handleCancel}
+        onChange={handleChange}
+        onConfirm={handleConfirm}
       />
     </PopupContent>
   )
@@ -99,12 +145,16 @@ function PickerMethod({ record }: { record: PickerRecord }) {
 
 export function showPicker(options: PickerOptions): Promise<PickerResult> {
   return new Promise((resolve) => {
-    if (currentRecord) {
-      updateRecord(currentRecord, { options, resolve, show: true })
-      return
-    }
+    cancelCurrentRecord()
 
-    const record: PickerRecord = { key: null, options, resolve, settled: false, show: true }
+    const record: PickerRecord = {
+      key: null,
+      options,
+      resolve,
+      selection: resolvePickerSelection(options),
+      settled: false,
+      show: true,
+    }
     currentRecord = record
     try {
       record.key = mountPortal(<PickerMethod record={record} />)
@@ -116,7 +166,5 @@ export function showPicker(options: PickerOptions): Promise<PickerResult> {
 }
 
 export function closePicker(): void {
-  const record = currentRecord
-  if (!record || record.key === null) return
-  updateRecord(record, { show: false })
+  cancelCurrentRecord()
 }

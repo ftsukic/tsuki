@@ -1,7 +1,6 @@
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { ImagePreview } from '../..'
-import { Button } from '../../../button'
-import { Image, StyleSheet, View } from 'react-native'
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import type { ImagePreviewRect } from '../..'
 
 /** @title Thumbnail transition @description Measure the tapped thumbnail and animate to the fullscreen image. */
@@ -13,35 +12,52 @@ export default function Transition() {
   ]
   const refs = useRef<Array<Image | null>>([])
   const [visible, setVisible] = useState(false)
+  const [startPosition, setStartPosition] = useState(0)
   const [sourceRect, setSourceRect] = useState<ImagePreviewRect | null>(null)
 
   const open = (index: number) => {
     refs.current[index]?.measureInWindow((x, y, width, height) => {
       const rect = { x, y, width, height }
       setSourceRect(rect)
+      setStartPosition(index)
       setVisible(true)
     })
   }
+
+  const getSourceRect = useCallback(
+    (index: number) =>
+      new Promise<ImagePreviewRect | null>((resolve) => {
+        const image = refs.current[index]
+        if (!image) {
+          resolve(null)
+          return
+        }
+        image.measureInWindow((x, y, width, height) => resolve({ x, y, width, height }))
+      }),
+    [],
+  )
 
   return (
     <View>
       <View style={styles.row}>
         {images.map((image, index) => (
-          <Image
-            key={image}
-            ref={(value) => {
-              refs.current[index] = value
-            }}
-            source={{ uri: image }}
-            style={styles.thumbnail}
-          />
+          <Pressable key={image} accessibilityRole="button" onPress={() => open(index)}>
+            <Image
+              ref={(value) => {
+                refs.current[index] = value
+              }}
+              source={{ uri: image }}
+              style={styles.thumbnail}
+            />
+            <Text style={styles.label}>{`第 ${index + 1} 张`}</Text>
+          </Pressable>
         ))}
       </View>
-      <Button onPress={() => open(0)}>从第一张打开</Button>
       <ImagePreview
+        getSourceRect={getSourceRect}
         visible={visible}
         images={images}
-        startPosition={0}
+        startPosition={startPosition}
         sourceRect={sourceRect}
         closeable
         onRequestClose={() => setVisible(false)}
@@ -53,5 +69,6 @@ export default function Transition() {
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 8 },
+  label: { textAlign: 'center' },
   thumbnail: { height: 96, width: 72 },
 })

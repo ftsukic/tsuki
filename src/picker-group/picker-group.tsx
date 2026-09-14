@@ -7,16 +7,18 @@ import {
   useMemo,
   useRef,
   useState,
+  useEffect,
 } from 'react'
 import type { ReactNode } from 'react'
 import { View } from 'react-native'
 import { Tab, Tabs } from '../tabs'
 import { useToken } from '../theme'
 import { PickerToolbar } from '../picker/picker-toolbar'
-import type { PickerRef } from '../picker/types'
 import { PickerGroupProvider } from './context'
 import { getPickerGroupStyles } from './style'
-import type { PickerGroupProps, PickerGroupRef } from './types'
+import type { PickerGroupChildRef, PickerGroupProps, PickerGroupRef } from './types'
+
+const EMPTY_SELECTION = { values: [], options: [], indexes: [] } as const
 
 function flattenPickerGroupChildren(children: ReactNode): ReactNode[] {
   if (children === null || children === undefined || children === false) return []
@@ -40,7 +42,7 @@ function PickerGroupPane({
 }: {
   index: number
   children: ReactNode
-  register: (index: number, ref: PickerRef | null) => void
+  register: (index: number, ref: PickerGroupChildRef | null) => void
 }) {
   const value = useMemo(() => ({ index, register }), [index, register])
   return <PickerGroupProvider value={value}>{children}</PickerGroupProvider>
@@ -67,8 +69,22 @@ export const PickerGroup = forwardRef<PickerGroupRef, PickerGroupProps>(function
   ref,
 ) {
   const { token } = useToken()
-  const childRefs = useRef<Array<PickerRef | null>>([])
+  const childRefs = useRef<Array<PickerGroupChildRef | null>>([])
   const childNodes = useMemo(() => flattenPickerGroupChildren(children), [children])
+  const mismatchSignature = `${tabs.length}:${childNodes.length}`
+  const warnedMismatchRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (typeof __DEV__ !== 'undefined' && __DEV__ && tabs.length !== childNodes.length) {
+      if (warnedMismatchRef.current !== mismatchSignature) {
+        console.warn(
+          `PickerGroup tabs (${tabs.length}) and children (${childNodes.length}) are not positionally aligned`,
+        )
+        warnedMismatchRef.current = mismatchSignature
+      }
+    } else {
+      warnedMismatchRef.current = null
+    }
+  }, [childNodes.length, mismatchSignature, tabs.length])
   const controlled = activeTab !== undefined
   const [internalActiveTab, setInternalActiveTab] = useState(() =>
     normalizeActiveTab(activeTab ?? defaultActiveTab, tabs.length),
@@ -87,14 +103,14 @@ export const PickerGroup = forwardRef<PickerGroupRef, PickerGroupProps>(function
     },
     [controlled, index, onChange, tabs.length],
   )
-  const register = useCallback((i: number, childRef: PickerRef | null) => {
+  const register = useCallback((i: number, childRef: PickerGroupChildRef | null) => {
     childRefs.current[i] = childRef
   }, [])
   const finalConfirm = useCallback(() => {
-    const results = childRefs.current
-      .slice(0, tabs.length)
-      .filter((child): child is PickerRef => child !== null)
-      .map((child) => child.confirm())
+    const results = Array.from(
+      { length: tabs.length },
+      (_, childIndex) => childRefs.current[childIndex]?.confirm() ?? EMPTY_SELECTION,
+    )
     onConfirm?.(results)
   }, [onConfirm, tabs.length])
   const confirm = useCallback(() => {
@@ -111,7 +127,10 @@ export const PickerGroup = forwardRef<PickerGroupRef, PickerGroupProps>(function
       cancel,
       confirm,
       getSelectedValues: () =>
-        childRefs.current.slice(0, tabs.length).map((child) => child?.getSelectedValues() ?? []),
+        Array.from(
+          { length: tabs.length },
+          (_, childIndex) => childRefs.current[childIndex]?.getSelectedValues() ?? [],
+        ),
     }),
     [cancel, confirm, tabs.length],
   )
@@ -124,13 +143,7 @@ export const PickerGroup = forwardRef<PickerGroupRef, PickerGroupProps>(function
     [groupStyles.tabs, styles?.tabs],
   )
   const panes = tabs.map((tab, i) => (
-    <Tab
-      key={i}
-      title={tab}
-      titleStyle={
-        typeof tab === 'string' || typeof tab === 'number' ? groupStyles.tabTitle : undefined
-      }
-    >
+    <Tab key={i} title={tab}>
       <PickerGroupPane index={i} register={register}>
         {childNodes[i]}
       </PickerGroupPane>

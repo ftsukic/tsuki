@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { StyleSheet } from 'react-native'
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
-import { createRef } from 'react'
+import { createRef, useState } from 'react'
 import { State } from 'react-native-gesture-handler'
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils'
 import * as Reanimated from 'react-native-reanimated'
@@ -70,6 +70,50 @@ describe('Picker', () => {
     expect(onChange).toHaveBeenCalledTimes(1)
   })
 
+  it('uses the short tap duration instead of swipeDuration', async () => {
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value) => value as never)
+    await render(
+      <Picker
+        columns={options}
+        showToolbar={false}
+        swipeDuration={1000}
+        defaultValue={['first']}
+      />,
+    )
+
+    fireEvent.press(screen.getByTestId('picker-item-0-2'))
+    expect(timing.mock.calls[0]?.[1]).toEqual(expect.objectContaining({ duration: 200 }))
+    timing.mockRestore()
+  })
+
+  it('uses swipeDuration for pan snapping', async () => {
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value) => value as never)
+    await render(
+      <Picker
+        columns={options}
+        showToolbar={false}
+        swipeDuration={1000}
+        defaultValue={['first']}
+      />,
+    )
+
+    timing.mockClear()
+    fireGestureHandler(getByGestureTestId('picker-column-0-gesture'), [
+      { state: State.BEGAN },
+      { state: State.ACTIVE, translationY: -80 },
+      { translationY: -80 },
+      { state: State.END, translationY: -80 },
+    ])
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(timing.mock.calls.some(([, config]) => config?.duration === 1000)).toBe(true)
+    timing.mockRestore()
+  })
+
   it('emits one change after a pan settles', async () => {
     const onChange = jest.fn()
     jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, _config, callback) => {
@@ -127,6 +171,197 @@ describe('Picker', () => {
       <Picker columns={options} ref={pickerRef} value={['third']} showToolbar={false} />,
     )
     expect(pickerRef.current?.getSelectedValues()).toEqual(['third'])
+  })
+
+  it('keeps the controlled visual selection until the external value changes', async () => {
+    const onChange = jest.fn()
+    const pickerRef = createRef<PickerRef>()
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value, _config, callback) => {
+        callback?.(true)
+        return value as never
+      })
+    const view = await render(
+      <Picker
+        columns={options}
+        onChange={onChange}
+        ref={pickerRef}
+        value={['first']}
+        showToolbar={false}
+      />,
+    )
+
+    fireEvent.press(screen.getByTestId('picker-item-0-2'))
+    await waitFor(() => expect(onChange).toHaveBeenCalledWith(['third'], [options[2]]))
+
+    expect(pickerRef.current?.getSelectedValues()).toEqual(['first'])
+    expect(timing.mock.calls.some(([value]) => value === 0)).toBe(false)
+
+    await view.rerender(
+      <Picker columns={options} ref={pickerRef} value={['third']} showToolbar={false} />,
+    )
+    expect(pickerRef.current?.getSelectedValues()).toEqual(['third'])
+    expect(screen.getByTestId('picker-item-0-2').props.accessibilityState?.selected).toBe(true)
+  })
+
+  it('does not restore the controlled wheel after the parent writes back', async () => {
+    const onChange = jest.fn()
+    const pickerRef = createRef<PickerRef>()
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value, _config, callback) => {
+        callback?.(true)
+        return value as never
+      })
+
+    function ControlledPicker() {
+      const [value, setValue] = useState<readonly (string | number)[]>(['first'])
+      return (
+        <Picker
+          columns={options}
+          onChange={(nextValues, nextOptions) => {
+            onChange(nextValues, nextOptions)
+            setValue(nextValues)
+          }}
+          ref={pickerRef}
+          value={value}
+          showToolbar={false}
+        />
+      )
+    }
+
+    await render(<ControlledPicker />)
+    timing.mockClear()
+
+    fireEvent.press(screen.getByTestId('picker-item-0-2'))
+    await waitFor(() => expect(onChange).toHaveBeenCalledWith(['third'], [options[2]]))
+    await waitFor(() =>
+      expect(screen.getByTestId('picker-item-0-2').props.accessibilityState?.selected).toBe(true),
+    )
+
+    expect(screen.getByTestId('picker-item-0-2').props.accessibilityState?.selected).toBe(true)
+    expect(timing.mock.calls.some(([value]) => value === 0)).toBe(false)
+  })
+
+  it('confirms a tapped pending option before the tap animation finishes', async () => {
+    const callbacks: Array<(finished?: boolean) => void> = []
+    const onChange = jest.fn()
+    const onConfirm = jest.fn()
+    const pickerRef = createRef<PickerRef>()
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, _config, callback) => {
+      if (callback) callbacks.push(callback)
+      return value as never
+    })
+    await render(
+      <Picker
+        columns={options}
+        defaultValue={['first']}
+        onChange={onChange}
+        onConfirm={onConfirm}
+        ref={pickerRef}
+      />,
+    )
+
+    fireEvent.press(screen.getByTestId('picker-item-0-2'))
+    const selection = pickerRef.current?.confirm()
+
+    expect(selection?.values).toEqual(['third'])
+    expect(onConfirm).toHaveBeenCalledWith(['third'], [options[2]])
+    expect(onChange).not.toHaveBeenCalled()
+
+    callbacks[0]?.(true)
+    await Promise.resolve()
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('confirms a panning pending option before the snap animation finishes', async () => {
+    const callbacks: Array<(finished?: boolean) => void> = []
+    const onConfirm = jest.fn()
+    const pickerRef = createRef<PickerRef>()
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, _config, callback) => {
+      if (callback) callbacks.push(callback)
+      return value as never
+    })
+    await render(
+      <Picker columns={options} value={['first']} onConfirm={onConfirm} ref={pickerRef} />,
+    )
+
+    fireGestureHandler(getByGestureTestId('picker-column-0-gesture'), [
+      { state: State.BEGAN },
+      { state: State.ACTIVE, translationY: -80 },
+      { translationY: -80 },
+      { state: State.END, translationY: -80 },
+    ])
+    await Promise.resolve()
+    await Promise.resolve()
+    const selection = pickerRef.current?.confirm()
+
+    expect(selection?.values).toEqual(['third'])
+    expect(onConfirm).toHaveBeenCalledWith(['third'], [options[2]])
+    callbacks[0]?.(true)
+    await Promise.resolve()
+    expect(onConfirm).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps a controlled pending selection after immediate confirm', async () => {
+    const callbacks: Array<(finished?: boolean) => void> = []
+    const onChange = jest.fn()
+    const onConfirm = jest.fn()
+    const pickerRef = createRef<PickerRef>()
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, _config, callback) => {
+      if (callback) callbacks.push(callback)
+      return value as never
+    })
+    await render(
+      <Picker
+        columns={options}
+        onChange={onChange}
+        onConfirm={onConfirm}
+        ref={pickerRef}
+        value={['first']}
+      />,
+    )
+
+    fireEvent.press(screen.getByTestId('picker-item-0-2'))
+    const selection = pickerRef.current?.confirm()
+
+    expect(selection?.values).toEqual(['third'])
+    expect(onConfirm).toHaveBeenCalledWith(['third'], [options[2]])
+    expect(pickerRef.current?.getSelectedValues()).toEqual(['first'])
+    callbacks[0]?.(true)
+    await Promise.resolve()
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('ignores stale animation callbacks from an older tap', async () => {
+    const staleOptions = [
+      { text: '第一项', value: 'first' },
+      { text: '第二项', value: 'second' },
+      { text: '第三项', value: 'third' },
+    ]
+    const callbacks: Array<(finished?: boolean) => void> = []
+    const onChange = jest.fn()
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((value, _config, callback) => {
+      if (callback) callbacks.push(callback)
+      return value as never
+    })
+    await render(<Picker columns={staleOptions} onChange={onChange} value={['first']} />)
+
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {
+      fireEvent.press(screen.getByTestId('picker-item-0-2'))
+      fireEvent.press(screen.getByTestId('picker-item-0-1'))
+      callbacks[0]?.(true)
+      await Promise.resolve()
+      expect(onChange).not.toHaveBeenCalled()
+      callbacks[1]?.(true)
+      await Promise.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+    expect(onChange).toHaveBeenCalledWith(['second'], [staleOptions[1]])
+    expect(onChange).toHaveBeenCalledTimes(1)
   })
 
   it('updates an uncontrolled selection after a tapped option settles', async () => {
@@ -225,6 +460,7 @@ describe('Picker', () => {
     let selection: ReturnType<PickerRef['confirm']> | undefined
     await act(async () => {
       selection = pickerRef.current?.confirm()
+      await Promise.resolve()
     })
     expect(onConfirm).toHaveBeenCalledWith([], [])
     expect(selection).toEqual({ indexes: [], options: [], values: [] })

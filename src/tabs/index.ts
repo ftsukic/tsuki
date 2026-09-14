@@ -1,5 +1,5 @@
-export { Tab } from './Tab'
-export { Tabs } from './Tabs'
+export { Tab } from './tab'
+export { Tabs } from './tabs'
 export { getTabsToken } from './token'
 export type {
   TabProps,

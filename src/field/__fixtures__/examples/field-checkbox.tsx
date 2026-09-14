@@ -19,11 +19,13 @@ export default function FieldCheckboxFixture() {
       <FieldCheckbox
         label="通知方式"
         variant="button"
+        buttonVariant="filled"
         value={value}
         onChange={setValue}
         direction="horizontal"
-        gap={16}
-        buttonColumns={5}
+        gap={8}
+        buttonColumns={4}
+        buttonLayout="equal"
       >
         <Checkbox name="email">邮件</Checkbox>
         <Checkbox name="sms">短信通知</Checkbox>

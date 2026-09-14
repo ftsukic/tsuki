@@ -2,6 +2,7 @@ import { FixtureOverview } from '../../fixture-overview'
 import CardBasicExample from './examples/card-basic'
 import ControlledTabsExample from './examples/controlled'
 import DisabledTabsExample from './examples/disabled'
+import AnimatedTabsExample from './examples/animated'
 import LazyRenderTabsExample from './examples/lazy-render'
 import LineBasicExample from './examples/line-basic'
 import ScrollableTabsExample from './examples/scrollable'
@@ -52,6 +53,12 @@ export default function TabsOverview() {
           description: '由父组件管理 value 的受控 Tabs。',
           id: 'controlled',
           title: 'Controlled',
+        },
+        {
+          Component: AnimatedTabsExample,
+          description: '显式开启内容区域切换动画。',
+          id: 'animated',
+          title: 'Animated content',
         },
         {
           Component: SwipeableTabsExample,

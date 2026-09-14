@@ -1,4 +1,13 @@
-import { forwardRef, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  forwardRef,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+} from 'react'
 import { Animated, Easing, ScrollView, useWindowDimensions, View } from 'react-native'
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { usePanGesture } from '../interaction'
@@ -9,7 +18,7 @@ import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import { getFloatingPanelStyles } from './style'
 import { getFloatingPanelToken } from './token'
-import type { FloatingPanelProps } from './interface'
+import type { FloatingPanelProps } from './types'
 
 const DEFAULT_MIN_HEIGHT = 100
 const DEFAULT_MAX_HEIGHT_RATIO = 0.6
@@ -112,6 +121,10 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
     const initialHeight = resolveHeight(height, defaultHeight ?? minHeight, minHeight, maxHeight)
     const [currentHeight, setCurrentHeight] = useState(initialHeight)
     const [dragging, setDragging] = useState(false)
+    const [controlledCommitVersion, requestControlledReconcile] = useReducer(
+      (value: number) => value + 1,
+      0,
+    )
     const currentHeightRef = useRef(currentHeight)
     const draggingRef = useRef(false)
     const startHeightRef = useRef(initialHeight)
@@ -125,6 +138,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
     const panelHeight = useRef(new Animated.Value(initialHeight)).current
     const onHeightChangeRef = useRef(onHeightChange)
     const onHeightChangeEndRef = useRef(onHeightChangeEnd)
+    const heightPropRef = useRef(height)
     const configRef = useRef<PanelConfig>({
       anchors: resolvedAnchors,
       minHeight,
@@ -143,6 +157,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
 
     onHeightChangeRef.current = onHeightChange
     onHeightChangeEndRef.current = onHeightChangeEnd
+    heightPropRef.current = height
     configRef.current = {
       anchors: resolvedAnchors,
       minHeight,
@@ -162,6 +177,10 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
         onHeightChangeRef.current?.(nextHeight)
       }
     }, [])
+
+    const requestControlledHeightReconcile = useCallback(() => {
+      if (heightPropRef.current !== undefined) requestControlledReconcile()
+    }, [requestControlledReconcile])
 
     const animateToHeight = useCallback(
       (nextHeight: number, onComplete?: () => void) => {
@@ -254,15 +273,20 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
         ? getClosestAnchor(config.anchors, current)
         : clamp(current, config.minHeight, config.maxHeight)
       const startedAt = startHeightRef.current
-      const notifyHeightChangeEnd = () => onHeightChangeEndRef.current?.(nextHeight)
+      const notifyHeightChangeEnd = () => {
+        onHeightChangeEndRef.current?.(nextHeight)
+        requestControlledHeightReconcile()
+      }
 
       if (!Object.is(current, nextHeight)) {
         setVisualHeight(nextHeight, true)
         animateToHeight(nextHeight, notifyHeightChangeEnd)
       } else if (!Object.is(startedAt, nextHeight)) {
         notifyHeightChangeEnd()
+      } else {
+        requestControlledHeightReconcile()
       }
-    }, [animateToHeight, setVisualHeight])
+    }, [animateToHeight, requestControlledHeightReconcile, setVisualHeight])
 
     const headerResponder = usePanGesture({
       axis: 'vertical',
@@ -315,6 +339,25 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       }
       initializedRef.current = true
     }, [animateToHeight, height, maxHeight, minHeight, panelHeight, placement, setVisualHeight])
+
+    const reconcileControlledHeight = useCallback(() => {
+      if (heightPropRef.current === undefined) return
+
+      const config = configRef.current
+      const nextHeight = resolveHeight(
+        heightPropRef.current,
+        currentHeightRef.current,
+        config.minHeight,
+        config.maxHeight,
+      )
+      setVisualHeight(nextHeight, false)
+      panelHeight.setValue(nextHeight)
+    }, [panelHeight, setVisualHeight])
+
+    useEffect(() => {
+      if (controlledCommitVersion === 0) return
+      reconcileControlledHeight()
+    }, [controlledCommitVersion, reconcileControlledHeight])
 
     useEffect(
       () => () => {

@@ -12,8 +12,8 @@ export default function FieldInputFixture() {
   return (
     <View>
       <FieldInput
+        center
         label="用户名"
-        value={name}
         onChange={setName}
         placeholder="请输入用户名"
         clearable
@@ -22,6 +22,13 @@ export default function FieldInputFixture() {
       <Text>当前值：{name || '—'}</Text>
       <FieldInput label="禁用" defaultValue="不可编辑" disabled />
       <FieldInput label="只读" defaultValue="只读内容" readOnly />
+      <FieldInput
+        label="密码"
+        defaultValue="只读内容"
+        type="password"
+        clearable
+        onChange={setName}
+      />
     </View>
   )
 }

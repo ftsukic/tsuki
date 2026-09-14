@@ -6,4 +6,4 @@ export type {
   FloatingPanelStyleInfo,
   FloatingPanelStyleState,
   FloatingPanelStyles,
-} from './interface'
+} from './types'

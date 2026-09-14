@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Text, View } from 'react-native'
-import { Cell } from '../../..'
+import { View } from 'react-native'
+import { Cell, Text, Avatar, Icon, showPicker } from '../../..'
 
 /**
  * @title Link
@@ -11,7 +11,45 @@ export default function CellLinkFixture() {
 
   return (
     <View>
-      <Cell title="账号" value="查看详情" isLink onPress={() => setMessage('已打开账号详情')} />
+      <Cell
+        size="large"
+        title="账号"
+        value="查看详情"
+        isLink
+        onPress={() => setMessage('已打开账号详情')}
+      />
+      <Cell
+        styles={{ title: { alignSelf: 'center' } }}
+        center
+        title="参会人"
+        titleExtra={
+          <Avatar.Group shape="square" size={30}>
+            <Avatar style={{ backgroundColor: '#1989FA' }}>A</Avatar>
+            <Avatar style={{ backgroundColor: '#07C160' }}>B</Avatar>
+            <Avatar style={{ backgroundColor: '#FF976A' }}>C</Avatar>
+            <Avatar
+              style={{
+                backgroundColor: '#fff',
+                borderStyle: 'dashed',
+                borderColor: 'rgba(0,0,0,0.2)',
+              }}
+            >
+              <Icon name="PlusOutlined" />
+            </Avatar>
+          </Avatar.Group>
+        }
+        value="3人"
+        isLink
+        onPress={() => showPicker({ title: 'test', columns: [] })}
+      />
+      <Cell
+        size="large"
+        title="账号"
+        value="查看详情"
+        isLink
+        onPress={() => setMessage('已打开账号详情')}
+      />
+
       <Text>{message}</Text>
     </View>
   )

@@ -108,6 +108,24 @@ describe('Checkbox', () => {
     expect(disabledChecked.checkColor).toBe(token.disabledColor)
   })
 
+  it.each([
+    ['solid', getCheckboxToken(getDesignToken()).checkedIconColor],
+    ['filled', getCheckboxToken(getDesignToken()).checkedBackground],
+    ['outline', getCheckboxToken(getDesignToken()).checkedBackground],
+  ] as const)('uses the shared checked label style for %s buttons', (buttonVariant, color) => {
+    const styles = getCheckboxStyles(
+      getCheckboxToken(getDesignToken()),
+      { buttonVariant, variant: 'button' },
+      {
+        checked: true,
+        disabled: false,
+        pressed: false,
+      },
+    )
+
+    expect(styles.label.color).toBe(color)
+  })
+
   it('renders the button variant without a checkbox indicator', async () => {
     await render(
       <ConfigProvider>
@@ -126,6 +144,9 @@ describe('Checkbox', () => {
     expect(styleOf('button-unchecked')).toMatchObject({
       backgroundColor: getCheckboxToken(getDesignToken()).buttonBackground,
       borderWidth: 1,
+      height: getCheckboxToken(getDesignToken()).buttonHeight,
+      minHeight: getCheckboxToken(getDesignToken()).buttonHeight,
+      minWidth: getCheckboxToken(getDesignToken()).buttonMinWidth,
     })
     expect(styleOf('button-checked')).toMatchObject({
       backgroundColor: getCheckboxToken(getDesignToken()).checkedBackground,
@@ -160,6 +181,33 @@ describe('Checkbox', () => {
     await press(checkbox)
     expect(checkbox.props.accessibilityState?.checked).toBe(false)
     expect(onChange).toHaveBeenLastCalledWith(false)
+  })
+
+  it('inherits the Button visual variant through the group and preserves selection state', async () => {
+    await render(
+      <ConfigProvider>
+        <Checkbox.Group variant="button" buttonVariant="filled" defaultValue={['filled']}>
+          <Checkbox testID="filled-unchecked" name="unchecked">
+            Unchecked
+          </Checkbox>
+          <Checkbox testID="filled-checked" name="filled">
+            Checked
+          </Checkbox>
+        </Checkbox.Group>
+      </ConfigProvider>,
+    )
+
+    expect(styleOf('filled-unchecked')).toMatchObject({
+      backgroundColor: getCheckboxToken(getDesignToken()).buttonFilledBackground,
+      borderWidth: 0,
+    })
+    expect(styleOf('filled-checked')).toMatchObject({
+      backgroundColor: getCheckboxToken(getDesignToken()).buttonCheckedFilledBackground,
+      borderWidth: 0,
+    })
+    expect(StyleSheet.flatten(screen.getByText('Checked').props.style).color).toBe(
+      getCheckboxToken(getDesignToken()).checkedBackground,
+    )
   })
 })
 

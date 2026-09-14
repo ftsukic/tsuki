@@ -17,6 +17,7 @@ export default function InputPasswordFixture() {
         value={value}
         bordered
         placeholder="请输入密码"
+        clearable
         passwordVisible={visible}
         onPasswordVisibleChange={setVisible}
         onChangeText={setValue}

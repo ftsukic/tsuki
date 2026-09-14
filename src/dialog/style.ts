@@ -1,5 +1,5 @@
 import type { TextStyle, ViewStyle } from 'react-native'
-import type { DialogProps, DialogStyleState } from './interface'
+import type { DialogProps, DialogStyleState } from './types'
 import type { DialogToken } from '../theme'
 
 export interface DialogResolvedStyles {

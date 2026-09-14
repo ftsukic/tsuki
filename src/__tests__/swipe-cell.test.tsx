@@ -1,6 +1,7 @@
 import React from 'react'
 import { act, cleanup, render, screen, userEvent } from '@testing-library/react-native'
-import { Pressable, Text } from 'react-native'
+import { Pressable, StyleSheet, Text } from 'react-native'
+import * as Reanimated from 'react-native-reanimated'
 import { State } from 'react-native-gesture-handler'
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils'
 import {
@@ -43,6 +44,16 @@ function TestProvider({ children }: { children: React.ReactNode }) {
 
 function InteractionProvider({ children }: { children: React.ReactNode }) {
   return <Provider theme={{ token: { motion: false } }}>{children}</Provider>
+}
+
+function getTranslation(testID: string) {
+  const style = StyleSheet.flatten(screen.getByTestId(`${testID}-content`).props.style)
+  const transform = style.transform as Array<Record<string, unknown>>
+  const value = transform.find((item) => 'translateX' in item)?.translateX
+  if (value && typeof value === 'object' && '__getValue' in value) {
+    return (value as { __getValue: () => number }).__getValue()
+  }
+  return value
 }
 
 function CloseCurrentButton() {
@@ -305,6 +316,171 @@ describe('SwipeCell', () => {
 
     await act(async () => ref.current?.close())
     expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('closes and clears ownership when the open action is removed', async () => {
+    const ref = React.createRef<SwipeCellRef>()
+    const onOpen = jest.fn()
+    const onClose = jest.fn()
+    const view = await render(
+      <TestProvider>
+        <SwipeCell
+          ref={ref}
+          testID="removed-action"
+          rightAction="删除"
+          onOpen={onOpen}
+          onClose={onClose}
+        >
+          <Text>内容</Text>
+        </SwipeCell>
+      </TestProvider>,
+    )
+
+    await layoutAction('removed-action', 'right', 100)
+    await act(async () => ref.current?.open())
+    expect(onOpen).toHaveBeenCalledTimes(1)
+
+    await view.rerender(
+      <TestProvider>
+        <SwipeCell ref={ref} testID="removed-action" onOpen={onOpen} onClose={onClose}>
+          <Text>内容</Text>
+        </SwipeCell>
+      </TestProvider>,
+    )
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+    await act(async () => ref.current?.close())
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('updates the open offset when an action width changes without reopening', async () => {
+    const ref = React.createRef<SwipeCellRef>()
+    const onOpen = jest.fn()
+    const onClose = jest.fn()
+    await render(
+      <TestProvider>
+        <SwipeCell
+          ref={ref}
+          testID="resized-action"
+          rightAction="删除"
+          onOpen={onOpen}
+          onClose={onClose}
+        >
+          <Text>内容</Text>
+        </SwipeCell>
+      </TestProvider>,
+    )
+
+    await layoutAction('resized-action', 'right', 100)
+    await act(async () => ref.current?.open())
+    await layoutAction('resized-action', 'right', 140)
+
+    expect(onOpen).toHaveBeenCalledTimes(1)
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('restarts the opening spring when the action resizes', async () => {
+    const springs: Array<(finished?: boolean) => void> = []
+    jest.spyOn(Reanimated, 'withSpring').mockImplementation((_value, _config, callback) => {
+      if (callback) springs.push(callback)
+      return 0
+    })
+    const ref = React.createRef<SwipeCellRef>()
+    const onOpen = jest.fn()
+    const onClose = jest.fn()
+    await render(
+      <ConfigProvider
+        theme={{
+          token: { motion: true },
+          components: { SwipeCell: { animationDuration: 120 } },
+        }}
+      >
+        <SwipeCell
+          ref={ref}
+          testID="motion-resized-action"
+          rightAction="删除"
+          onOpen={onOpen}
+          onClose={onClose}
+        >
+          <Text>内容</Text>
+        </SwipeCell>
+      </ConfigProvider>,
+    )
+
+    await layoutAction('motion-resized-action', 'right', 100)
+    await act(async () => ref.current?.open())
+    expect(springs).toHaveLength(1)
+
+    await layoutAction('motion-resized-action', 'right', 140)
+    expect(springs).toHaveLength(2)
+
+    await act(async () => springs[0](true))
+    expect(onOpen).not.toHaveBeenCalled()
+    await act(async () => {
+      springs[1](true)
+      await Promise.resolve()
+    })
+    expect(onOpen).toHaveBeenCalledTimes(1)
+
+    await act(async () => ref.current?.close())
+    expect(springs).toHaveLength(3)
+    await act(async () => {
+      springs[2](true)
+      await Promise.resolve()
+    })
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not reopen from a stale opening callback after the action is removed', async () => {
+    const springs: Array<(finished?: boolean) => void> = []
+    jest.spyOn(Reanimated, 'withSpring').mockImplementation((_value, _config, callback) => {
+      if (callback) springs.push(callback)
+      return 0
+    })
+    const ref = React.createRef<SwipeCellRef>()
+    const onOpen = jest.fn()
+    const onClose = jest.fn()
+    const view = await render(
+      <ConfigProvider
+        theme={{
+          token: { motion: true },
+          components: { SwipeCell: { animationDuration: 120 } },
+        }}
+      >
+        <SwipeCell
+          ref={ref}
+          testID="motion-removed-action"
+          rightAction="删除"
+          onOpen={onOpen}
+          onClose={onClose}
+        >
+          <Text>内容</Text>
+        </SwipeCell>
+      </ConfigProvider>,
+    )
+
+    await layoutAction('motion-removed-action', 'right', 100)
+    await act(async () => ref.current?.open())
+    expect(springs).toHaveLength(1)
+
+    await view.rerender(
+      <ConfigProvider theme={{ token: { motion: true } }}>
+        <SwipeCell ref={ref} testID="motion-removed-action" onOpen={onOpen} onClose={onClose}>
+          <Text>内容</Text>
+        </SwipeCell>
+      </ConfigProvider>,
+    )
+    expect(springs).toHaveLength(2)
+
+    await act(async () => springs[0](true))
+    expect(onOpen).not.toHaveBeenCalled()
+    await act(async () => {
+      springs[1](true)
+      await Promise.resolve()
+    })
+    expect(onOpen).not.toHaveBeenCalled()
+    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(getTranslation('motion-removed-action')).toBe(0)
   })
 
   it('keeps only one cell open inside SwipeCellGroup', async () => {

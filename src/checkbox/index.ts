@@ -1,5 +1,5 @@
-import { Checkbox } from './Checkbox'
-import { CheckboxGroup } from './CheckboxGroup'
+import { Checkbox } from './checkbox'
+import { CheckboxGroup } from './checkbox-group'
 
 export const CheckboxWithGroup = Object.assign(Checkbox, { Group: CheckboxGroup })
 export { CheckboxWithGroup as Checkbox }
@@ -19,4 +19,4 @@ export type {
   CheckboxStyles,
   CheckboxValue,
   CheckboxVariant,
-} from './interface'
+} from './types'

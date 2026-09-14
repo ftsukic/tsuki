@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
-import type { CheckboxValue } from './interface'
+import type { CheckboxValue } from './types'
 
 interface UseCheckboxStateOptions {
   checked?: boolean

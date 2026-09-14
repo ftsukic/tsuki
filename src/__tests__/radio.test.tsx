@@ -107,6 +107,7 @@ describe('Radio', () => {
     expect(buttonStyle).toMatchObject({
       height: getRadioToken(getDesignToken()).buttonHeight,
       minHeight: getRadioToken(getDesignToken()).buttonHeight,
+      minWidth: getRadioToken(getDesignToken()).buttonMinWidth,
       paddingHorizontal: getRadioToken(getDesignToken()).buttonPaddingHorizontal,
     })
     expect(buttonStyle.width).toBeUndefined()
@@ -307,6 +308,33 @@ describe('Radio', () => {
     expect(
       findIndicator(toJSON(), getRadioToken(getDesignToken()).indicatorSize, 1),
     ).toBeUndefined()
+  })
+
+  it('inherits the Button visual variant through the group and lets children override it', async () => {
+    await render(
+      <ConfigProvider>
+        <Radio.Group variant="button" buttonVariant="outline" defaultValue="outline">
+          <Radio testID="outline-radio" value="outline">
+            Outline
+          </Radio>
+          <Radio testID="solid-radio" buttonVariant="solid" value="solid">
+            Solid
+          </Radio>
+        </Radio.Group>
+      </ConfigProvider>,
+    )
+
+    expect(styleOf('outline-radio')).toMatchObject({
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+    })
+    expect(StyleSheet.flatten(screen.getByText('Outline').props.style).color).toBe(
+      getRadioToken(getDesignToken()).checkedColor,
+    )
+    expect(styleOf('solid-radio')).toMatchObject({
+      backgroundColor: getRadioToken(getDesignToken()).buttonBackground,
+      borderWidth: 1,
+    })
   })
 
   it('inherits the group variant for options and preserves explicit child variants', async () => {

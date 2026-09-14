@@ -1,8 +1,8 @@
 export { FieldInput } from './field-input'
 export { FieldRadio } from './field-radio'
 export { FieldCheckbox } from './field-checkbox'
+export { FieldSwitch } from './field-switch'
 export { FieldPicker } from './field-picker'
-export { FieldDateRangePicker } from './field-date-range-picker'
 export { getFieldStatusColor, getFieldStyles, getFieldToken } from './style'
 export type {
   FieldLabelAlign,
@@ -15,8 +15,5 @@ export type {
 export type { FieldInputProps } from './field-input'
 export type { FieldRadioProps } from './field-radio'
 export type { FieldCheckboxProps } from './field-checkbox'
+export type { FieldSwitchProps } from './field-switch'
 export type { FieldPickerFormatValue, FieldPickerProps } from './field-picker'
-export type {
-  FieldDateRangePickerFormatValue,
-  FieldDateRangePickerProps,
-} from './field-date-range-picker'

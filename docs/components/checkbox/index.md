@@ -55,6 +55,7 @@ import { Checkbox } from '@ftsukic/tsuki'
 | shape | `'round' \| 'square'` | `'round'` | `round` 使用圆形外框，`square` 使用主题圆角方框；不提供 Radio 的 `dot` |
 | labelPosition | `'left' \| 'right'` | `'right'` | 标签相对于 checkbox 指示器的位置 |
 | variant | `'default' \| 'button'` | `'default'` | `button` 隐藏 indicator，使用按钮边框和背景，但仍由 Checkbox 自己渲染和管理状态；宽度由内容和水平 padding 撑开 |
+| buttonVariant | `ButtonVariant` | `'solid'` | `variant="button"` 时使用的 Button 视觉变体；不影响普通 Checkbox |
 | style | `StyleProp<ViewStyle>` | — | 根 `InteractionPressable` 节点样式，优先级高于默认样式和 `styles.root` |
 | styles | `CheckboxStyles` | — | `root`、`indicator`、`label` 三个语义样式插槽，也支持函数形式 |
 | onPressDebounceWait | `number` | — | 两次点击之间的最小间隔，单位为毫秒 |
@@ -74,6 +75,7 @@ import { Checkbox } from '@ftsukic/tsuki'
 | onChange | `(value: (string \| number)[]) => void` | — | 数组改变后回调；添加和移除都返回新的数组 |
 | disabled | `boolean` | `false` | 禁用整个 Group，并覆盖子 Checkbox 的启用设置 |
 | variant | `'default' \| 'button'` | `'default'` | 统一设置子 Checkbox 的显示模式；子 Checkbox 显式设置时优先 |
+| buttonVariant | `ButtonVariant` | `'solid'` | 统一设置 button variant 子项的 Button 视觉变体；子 Checkbox 显式设置时优先 |
 | direction | `'vertical' \| 'horizontal'` | `'vertical'` | 子项排列方向 |
 | gap | `number` | Checkbox token.groupGap | 子项间距 |
 | buttonLayout | `'intrinsic' \| 'equal'` | `'intrinsic'` | `equal` 使用 Grid 等宽布局；仅当所有直接子项都是 button variant 时生效 |
@@ -82,11 +84,11 @@ import { Checkbox } from '@ftsukic/tsuki'
 
 `options` 和 `children` 只能选择一种声明方式；同时传入时开发环境会提示错误，并以 `children` 为渲染来源。`options` 中的 `value` 会作为生成 Checkbox 的 `name`，每个 `value` 应保持唯一，`label` 作为标签，`disabled` 只禁用对应选项。Group 子项缺少 `name` 时不会参与选择，并在开发环境提示配置错误。Group 不提供 `multiple` 或 `max` 兼容层。
 
-`variant="button"` 配合 `buttonLayout="equal"` 时，Group 使用 Grid 作为纯布局容器。横向 `buttonColumns={5}` 时，8 个按钮会按 5+3 换行，并保持两行按钮宽度一致；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；默认 `buttonLayout="intrinsic"` 仍是内容自适应宽度。
+`variant="button"` 配合 `buttonVariant` 可以使用 Button 的 `solid`、`filled`、`outline`、`dashed` 和 `text` 视觉变体。button 选项默认高度为 `buttonHeight`，并保证最小宽度为 `buttonMinWidth`。配合 `buttonLayout="equal"` 时，Group 使用 Grid 作为纯布局容器。横向 `buttonColumns={5}` 时，8 个按钮会按 5+3 换行，并保持两行按钮宽度一致；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；默认 `buttonLayout="intrinsic"` 仍是内容自适应宽度。
 
 ### Checkbox token
 
-通过 `ConfigProvider` 的 `theme.components.Checkbox` 覆盖 token。核心字段包括 `size`、`borderRadius`、`borderColor`、`checkedBackground`、`checkedIconColor`、`disabledColor`、`disabledBackground`、`labelColor`、`gap`、`groupGap`、`activeOpacity` 和 `disabledOpacity`；button variant 还使用 `buttonHeight`、`buttonPaddingHorizontal`、`buttonBorderRadius`、`buttonBackground` 和 `buttonDisabledBackground`。
+通过 `ConfigProvider` 的 `theme.components.Checkbox` 覆盖 token。核心字段包括 `size`、`borderRadius`、`borderColor`、`checkedBackground`、`checkedIconColor`、`disabledColor`、`disabledBackground`、`labelColor`、`gap`、`groupGap`、`activeOpacity` 和 `disabledOpacity`；button variant 还使用 `buttonHeight`、`buttonMinWidth`、`buttonPaddingHorizontal`、`buttonBorderRadius`、`buttonBackground`、`buttonFilledBackground`、`buttonDisabledBackground` 和 `buttonCheckedFilledBackground`。
 
 ```tsx | pure
 import { Checkbox, ConfigProvider } from '@ftsukic/tsuki'

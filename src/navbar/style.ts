@@ -4,9 +4,15 @@ import type { AliasToken, NavbarToken } from '../theme'
 export interface NavbarResolvedStyles {
   root: ViewStyle
   bar: ViewStyle
+  barCentered: ViewStyle
+  barSplit: ViewStyle
   left: ViewStyle
+  leftCentered: ViewStyle
+  leftSplit: ViewStyle
   right: ViewStyle
-  titleContainer: ViewStyle
+  rightCentered: ViewStyle
+  rightSplit: ViewStyle
+  center: ViewStyle
   title: TextStyle
   divider: ViewStyle
 }
@@ -20,38 +26,50 @@ export function getNavbarStyles(token: NavbarToken, aliasToken: AliasToken): Nav
       alignItems: 'center',
       flexDirection: 'row',
       height: token.height,
-      justifyContent: 'center',
       position: 'relative',
+    },
+    barCentered: {
+      justifyContent: 'center',
+    },
+    barSplit: {
+      justifyContent: 'space-between',
     },
     left: {
       alignItems: 'center',
-      bottom: 0,
       flexDirection: 'row',
-      flexShrink: 1,
       justifyContent: 'center',
+    },
+    leftCentered: {
+      bottom: 0,
       left: 0,
-      maxWidth: '20%',
       position: 'absolute',
-      paddingHorizontal: token.paddingHorizontal,
       top: 0,
+    },
+    leftSplit: {
+      flexShrink: 1,
     },
     right: {
       alignItems: 'center',
-      bottom: 0,
       flexDirection: 'row',
-      flexShrink: 1,
       justifyContent: 'center',
-      maxWidth: '20%',
-      paddingHorizontal: token.paddingHorizontal,
+    },
+    rightCentered: {
+      bottom: 0,
       position: 'absolute',
       right: 0,
       top: 0,
     },
-    titleContainer: {
+    rightSplit: {
       flexShrink: 1,
-      marginHorizontal: 'auto',
-      maxWidth: '60%',
-      overflow: 'hidden',
+    },
+    center: {
+      alignItems: 'center',
+      bottom: 0,
+      justifyContent: 'center',
+      left: 0,
+      position: 'absolute',
+      right: 0,
+      top: 0,
     },
     title: {
       color: token.titleColor,

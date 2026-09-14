@@ -225,8 +225,8 @@ describe('DateTimePicker', () => {
     const onCancel = jest.fn()
     const onConfirm = jest.fn()
     await renderPicker({
-      cancelText: '放弃',
-      confirmText: '保存',
+      cancelButtonText: '放弃',
+      confirmButtonText: '保存',
       defaultValue: ['2026', '09', '13', '12', '30'],
       onCancel,
       onConfirm,
@@ -248,14 +248,14 @@ describe('DateTimePicker', () => {
 
   it('does not leak extension props to Picker view props', async () => {
     await renderPicker({
-      cancelText: '放弃',
-      confirmText: '保存',
+      cancelButtonText: '放弃',
+      confirmButtonText: '保存',
       hourStep: 2,
       minuteStep: 5,
     })
     const picker = screen.getByTestId('picker')
-    expect(picker.props.cancelText).toBeUndefined()
-    expect(picker.props.confirmText).toBeUndefined()
+    expect(picker.props.cancelButtonText).toBeUndefined()
+    expect(picker.props.confirmButtonText).toBeUndefined()
     expect(picker.props.hourStep).toBeUndefined()
     expect(picker.props.minuteStep).toBeUndefined()
   })

@@ -20,7 +20,7 @@ title: PickerGroup 选择器组
 
 <code src="../../../src/picker-group/__fixtures__/examples/next-step.tsx" title="下一步" description="设置 nextStepText 后，前面的 tab 先切换到下一步，最后一页才汇总确认。"></code>
 
-<code src="../../../src/picker-group/__fixtures__/examples/date-range.tsx" title="日期范围组合" description="使用两个 DatePicker 组合日期范围，不新增公共 DateRangePicker 能力。"></code>
+<code src="../../../src/picker-group/__fixtures__/examples/date-range.tsx" title="日期范围组合" description="使用 PickerGroup 和两个 DatePicker 组合实现日期范围选择。"></code>
 
 <code src="../../../src/picker-group/__fixtures__/examples/controlled.tsx" title="受控 activeTab" description="通过 activeTab 和 onChange 控制当前 tab。"></code>
 
@@ -40,19 +40,19 @@ title: PickerGroup 选择器组
 | `showToolbar` | `boolean` | `true` | 是否显示共享 toolbar |
 | `cancelButtonText` | `ReactNode` | `取消` | 取消按钮文案 |
 | `confirmButtonText` | `ReactNode` | `确定` | 最后一页确认按钮文案 |
-| `onConfirm` | `(results: readonly PickerSelection[]) => void` | - | 汇总各已挂载子 Picker 的当前 selection 后触发 |
+| `onConfirm` | `(results: readonly PickerGroupSelection[]) => void` | - | 按 `tabs` 位置汇总 selection；缺少 child 时返回 `{ values: [], options: [], indexes: [] }`；日期时间 Picker 返回公共 string values |
 | `onCancel` | `() => void` | - | 仅触发 group 的取消回调，不调用子 Picker 的 `onCancel` |
 | `style` | `StyleProp<ViewStyle>` | - | 组件根 View 样式 |
 | `styles` | `PickerGroupStyles` | - | `root` 和 `tabs` 语义样式 |
 | `testID` | `string` | `picker-group` | 根 View 的测试标识 |
 
-`PickerSelection` 的结构为 `{ values, options, indexes }`。未设置 `nextStepText` 时，确认会直接调用所有已挂载子 Picker 的 `confirm()`；设置后，非最后一页的确认只切换到下一 tab，不确认子 Picker。
+`PickerGroupSelection` 的结构为 `{ values, options, indexes }`。未设置 `nextStepText` 时，确认会直接调用所有已挂载子 Picker 的 `confirm()`；设置后，非最后一页的确认只切换到下一 tab，不确认子 Picker。`DatePicker`、`TimePicker` 和 `DateTimePicker` 的 `values` 保持各自公共 API 的 string 格式。
 
 ### 子组件和边界
 
 子 Picker 在 group context 中自动使用 `showToolbar={false}` 的效果，但仍保留自己的 value、onChange 和 imperative selection。不要再为子 Picker 传入 toolbar 以外的 Popup 状态。
 
-`tabs` 按 Vant PickerGroup 的语义决定 pane 数量，children 按位置映射。children 多于 tabs 时，超出的 child 不会渲染或参与确认；children 少于 tabs 时，缺少 child 的 pane 保留为空，确认结果只包含实际挂载的子 Picker。需要 Popup 时请显式组合：
+`tabs` 按 Vant PickerGroup 的语义决定 pane 数量，children 按位置映射。children 多于 tabs 时，超出的 child 不会渲染或参与确认；children 少于 tabs 时，缺少 child 的 pane 保留为空，确认结果仍按 tab position 保留空 selection，不会压缩结果。日期范围推荐使用 `PickerGroup + DatePicker + DatePicker` 组合，不提供独立的日期范围组件。需要 Popup 时请显式组合：
 
 ```tsx | pure
 <Cell title="选择日期和时间" onPress={() => setVisible(true)} />

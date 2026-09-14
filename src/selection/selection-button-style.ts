@@ -1,4 +1,5 @@
 import type { ColorValue, TextStyle, ViewStyle } from 'react-native'
+import type { ButtonVariant } from '../button/types'
 
 export type SelectionButtonLayout = 'intrinsic' | 'equal'
 
@@ -9,12 +10,16 @@ export function normalizeSelectionButtonColumns(value: number | undefined): numb
 
 export interface SelectionButtonStyleToken {
   height: number
+  minWidth: number
   paddingHorizontal: number
   borderWidth: number
   borderRadius: number
+  variant: ButtonVariant
   backgroundColor: ColorValue
+  filledBackgroundColor: ColorValue
   borderColor: ColorValue
   checkedBackgroundColor: ColorValue
+  checkedFilledBackgroundColor: ColorValue
   checkedBorderColor: ColorValue
   labelColor: ColorValue
   checkedLabelColor: ColorValue
@@ -43,11 +48,24 @@ export function getSelectionButtonStyles(
   state: SelectionButtonStyleState,
   buttonLayout: SelectionButtonLayout = 'intrinsic',
 ): SelectionButtonResolvedStyles {
+  const isBorderless = token.variant === 'filled' || token.variant === 'text'
+  const isTransparent =
+    token.variant === 'outline' || token.variant === 'dashed' || token.variant === 'text'
   const backgroundColor = state.disabled
-    ? token.disabledBackgroundColor
+    ? isTransparent
+      ? 'transparent'
+      : token.disabledBackgroundColor
     : state.checked
-      ? token.checkedBackgroundColor
-      : token.backgroundColor
+      ? token.variant === 'filled'
+        ? token.checkedFilledBackgroundColor
+        : isTransparent
+          ? 'transparent'
+          : token.checkedBackgroundColor
+      : token.variant === 'filled'
+        ? token.filledBackgroundColor
+        : isTransparent
+          ? 'transparent'
+          : token.backgroundColor
   const borderColor = state.disabled
     ? token.disabledBorderColor
     : state.checked
@@ -56,7 +74,9 @@ export function getSelectionButtonStyles(
   const labelColor = state.disabled
     ? token.disabledLabelColor
     : state.checked
-      ? token.checkedLabelColor
+      ? token.variant === 'solid'
+        ? token.checkedLabelColor
+        : token.checkedBorderColor
       : token.labelColor
 
   return {
@@ -66,7 +86,8 @@ export function getSelectionButtonStyles(
       backgroundColor,
       borderColor,
       borderRadius: token.borderRadius,
-      borderWidth: token.borderWidth,
+      borderStyle: token.variant === 'dashed' ? 'dashed' : 'solid',
+      borderWidth: isBorderless ? 0 : token.borderWidth,
       flexDirection: 'row',
       ...(buttonLayout === 'equal'
         ? {
@@ -78,6 +99,7 @@ export function getSelectionButtonStyles(
       height: token.height,
       justifyContent: 'center',
       minHeight: token.height,
+      minWidth: token.minWidth,
       opacity: state.disabled ? token.disabledOpacity : state.pressed ? token.activeOpacity : 1,
       paddingHorizontal: token.paddingHorizontal,
     },

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ComponentType } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { Text } from './text'
 
 export interface FixtureExampleEntry {
   Component: ComponentType
@@ -36,6 +37,7 @@ export function FixtureOverview({
           <Text style={styles.selectorLabel}>选择示例</Text>
           <ScrollView
             horizontal
+            keyboardShouldPersistTaps="handled"
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.selectorContent}
           >
@@ -69,7 +71,11 @@ export function FixtureOverview({
   }
 
   return (
-    <ScrollView style={styles.allOverview} contentContainerStyle={styles.allContent}>
+    <ScrollView
+      keyboardShouldPersistTaps="handled"
+      style={styles.allOverview}
+      contentContainerStyle={styles.allContent}
+    >
       {examples.map((example) => {
         const Example = example.Component
 

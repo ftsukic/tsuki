@@ -3,8 +3,8 @@ import { StyleSheet, View } from 'react-native'
 import type { TextInputInstance } from '../text-input'
 import type { TextInputProps } from '../text-input'
 import { Text } from '../text'
-import { InputCore } from './input-core'
-import type { InputSemanticStyles } from './interface'
+import { TextInput } from '../text-input'
+import type { InputSemanticStyles } from './types'
 import type { InputResolvedStyles } from './style'
 import type { StyleProp, TextStyle } from 'react-native'
 
@@ -52,7 +52,7 @@ export const InputTextarea = forwardRef<TextInputInstance, InputTextareaProps>(
 
     return (
       <View style={[styles.shell, styles.textareaShell, semantic?.shell]}>
-        <InputCore
+        <TextInput
           {...coreProps}
           ref={ref}
           value={value}
@@ -70,7 +70,7 @@ export const InputTextarea = forwardRef<TextInputInstance, InputTextareaProps>(
           onChangeText={onChangeText}
         />
         {autoSize ? (
-          <InputCore
+          <TextInput
             value={value.length > 0 ? value : ' '}
             multiline
             editable={false}

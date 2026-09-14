@@ -8,10 +8,12 @@ import NavbarLongRightActionExample from './examples/long-right-action'
 import NavbarLongTitleExample from './examples/long-title'
 import NavbarRightActionExample from './examples/right-action'
 import NavbarTitleOnlyExample from './examples/title-only'
+import NavbarThreeSectionsExample from './examples/three-sections'
+import NavbarTwoSectionsExample from './examples/two-sections'
 
 /**
  * @title Navbar overview
- * @description Vant-style Navbar title, left text and right action examples.
+ * @description Vant-style Navbar title, two-section and three-section layout examples.
  */
 export default function NavbarOverview() {
   return (
@@ -48,6 +50,18 @@ export default function NavbarOverview() {
           title: 'Right action',
         },
         {
+          Component: NavbarThreeSectionsExample,
+          description: '展示有标题时左右槽位与中心标题的独立布局。',
+          id: 'three-sections',
+          title: 'Three sections',
+        },
+        {
+          Component: NavbarTwoSectionsExample,
+          description: '展示无标题时在左右槽位中组合多个独立 action。',
+          id: 'two-sections',
+          title: 'Two sections',
+        },
+        {
           Component: NavbarLongTitleExample,
           description: '展示长标题仍然保持居中。',
           id: 'long-title',
@@ -61,13 +75,13 @@ export default function NavbarOverview() {
         },
         {
           Component: NavbarLongLeftTextExample,
-          description: '展示长左侧文字在有限宽度内省略。',
+          description: '展示默认左侧文字的单行行为。',
           id: 'long-left-text',
           title: 'Long left text',
         },
         {
           Component: NavbarLongRightActionExample,
-          description: '展示长右侧操作在有限宽度内省略。',
+          description: '展示默认右侧文字的单行行为。',
           id: 'long-right-action',
           title: 'Long right action',
         },

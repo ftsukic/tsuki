@@ -65,31 +65,12 @@ function createEmbeddedInputStyles(
 ): InputStyles {
   return ({ props, state }: { props: InputProps; state: InputStyleState }) => {
     const custom = resolveStyles(inputStyles, { props, state })
-    const isTextarea = props.multiline === true
 
     return {
       root: [{ width: '100%', flex: 1 }, custom?.root],
-      shell: [
-        {
-          paddingHorizontal: 0,
-          borderWidth: 0,
-          borderRadius: 0,
-          backgroundColor: 'transparent',
-        },
-        isTextarea ? undefined : { height: undefined, minHeight: undefined },
-        custom?.shell,
-      ],
-      content: [isTextarea ? undefined : { alignItems: 'center' }, custom?.content],
-      input: [
-        isTextarea
-          ? { textAlign: props.textAlign ?? valueAlign }
-          : {
-              paddingVertical: 0,
-              textAlignVertical: 'center',
-              textAlign: props.textAlign ?? valueAlign,
-            },
-        custom?.input,
-      ],
+      shell: custom?.shell,
+      content: custom?.content,
+      input: [{ textAlign: props.textAlign ?? valueAlign }, custom?.input],
       prefix: custom?.prefix,
       suffix: custom?.suffix,
       clear: custom?.clear,
@@ -153,7 +134,9 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
             {...inputControlProps}
             value={currentValue ?? ''}
             onChangeText={setValue}
-            bordered={false}
+            embedded
+            bordered={inputControlProps.bordered ?? false}
+            activeBordered={inputControlProps.activeBordered ?? false}
             disabled={disabled}
             readOnly={readOnly}
             textAlign={inputControlProps.textAlign ?? resolvedValueAlign}

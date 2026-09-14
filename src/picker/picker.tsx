@@ -42,9 +42,8 @@ function PickerMask({
   return (
     <Svg
       height={height}
-      pointerEvents="none"
       preserveAspectRatio="none"
-      style={style}
+      style={[style, { pointerEvents: 'none' }]}
       testID="picker-mask"
       viewBox={`0 0 100 ${height}`}
       width="100%"
@@ -180,9 +179,10 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
     const nextValues = [...resolvedState.values]
     columnRefs.current.forEach((column, columnIndex) => {
       const finalIndex = column?.stopMomentum()
-      if (finalIndex == null) return
-      const option = resolvedState.columns[columnIndex]?.items[finalIndex]
-      if (option) nextValues[columnIndex] = option.value
+      if (finalIndex != null) {
+        const option = resolvedState.columns[columnIndex]?.items[finalIndex]
+        if (option) nextValues[columnIndex] = option.value
+      }
     })
     const next = resolvePickerState(columns, nextValues, resolvedState)
     if (!controlled) {
@@ -193,17 +193,10 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
   }, [columns, controlled, resolvedState])
 
   const handleConfirm = useCallback((): PickerSelection => {
-    const settled = settleColumns()
-    const result = controlled
-      ? {
-          values: resolvedState.values,
-          options: resolvedState.options,
-          indexes: resolvedState.indexes,
-        }
-      : settled
+    const result = settleColumns()
     onConfirm?.(result.values, result.options)
     return { values: result.values, options: result.options, indexes: result.indexes }
-  }, [controlled, onConfirm, resolvedState, settleColumns])
+  }, [onConfirm, settleColumns])
 
   const handleCancel = useCallback(() => {
     onCancel?.()
@@ -235,9 +228,9 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
   )
   useImperativeHandle(ref, () => pickerRef, [pickerRef])
   useEffect(() => {
-    if (group) group.register(group.index, pickerRef)
+    if (group && !group.registrationDisabled) group.register(group.index, pickerRef)
     return () => {
-      if (group) group.register(group.index, null)
+      if (group && !group.registrationDisabled) group.register(group.index, null)
     }
   }, [group, group?.index, pickerRef])
 
@@ -304,20 +297,17 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
           style={[resolved.mask, semantic?.mask]}
         />
         <View
-          pointerEvents="none"
-          style={[resolved.indicator, semantic?.indicator]}
+          style={[resolved.indicator, semantic?.indicator, { pointerEvents: 'none' }]}
           testID="picker-indicator"
         />
         {loading ? (
           <>
             <View
-              pointerEvents="none"
-              style={resolved.stateBackdrop}
+              style={[resolved.stateBackdrop, { pointerEvents: 'none' }]}
               testID="picker-state-backdrop"
             />
             <View
-              pointerEvents="none"
-              style={[resolved.stateItem, semantic?.loading]}
+              style={[resolved.stateItem, semantic?.loading, { pointerEvents: 'none' }]}
               testID="picker-loading"
             >
               <Loading />
