@@ -1,6 +1,7 @@
 import { FixtureOverview } from '../../fixture-overview'
 import FieldBasicFixture from './examples/basic'
 import FieldCheckboxFixture from './examples/field-checkbox'
+import FieldDatePickerFixture from './examples/field-date-picker'
 import FieldInputFixture from './examples/field-input'
 import FieldPickerFixture from './examples/field-picker'
 import FieldRadioFixture from './examples/field-radio'
@@ -52,6 +53,12 @@ export default function FieldOverview() {
           description: 'FieldPicker 仅在 Picker 确认后提交值。',
           id: 'field-picker',
           title: 'FieldPicker',
+        },
+        {
+          Component: FieldDatePickerFixture,
+          description: 'FieldDatePicker 仅在 DatePicker 确认后提交值。',
+          id: 'field-date-picker',
+          title: 'FieldDatePicker',
         },
         {
           Component: FieldStatesFixture,

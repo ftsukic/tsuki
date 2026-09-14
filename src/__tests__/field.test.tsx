@@ -3,6 +3,7 @@ import {
   Checkbox,
   ConfigProvider,
   FieldCheckbox,
+  FieldDatePicker,
   FieldInput,
   FieldPicker,
   FieldRadio,
@@ -20,6 +21,7 @@ import { getInputToken } from '../input/token'
 import { getTextareaMetrics } from '../input/style'
 import type { StyleProp, ViewStyle } from 'react-native'
 import type { PickerValue } from '../picker'
+import type { DatePickerValue } from '../date-picker'
 import type { TextInputInstance } from '../text-input'
 
 interface JsonNode {
@@ -684,6 +686,81 @@ describe('FieldPicker', () => {
   })
 })
 
+describe('FieldDatePicker', () => {
+  const value: DatePickerValue = ['2026', '09', '13']
+  const bounds = {
+    maxDate: new Date(2026, 11, 31, 23, 59, 59),
+    minDate: new Date(2026, 0, 1),
+  }
+
+  it('keeps date draft changes local until confirmation', async () => {
+    const onChange = jest.fn()
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((nextValue, _config, callback) => {
+        callback?.(true)
+        return nextValue as never
+      })
+
+    function Harness() {
+      const [currentValue, setCurrentValue] = useState<DatePickerValue>(value)
+      return (
+        <Provider theme={{ token: { motion: false } }}>
+          <FieldDatePicker
+            label="日期"
+            value={currentValue}
+            onChange={(nextValue) => {
+              onChange(nextValue)
+              setCurrentValue(nextValue)
+            }}
+            {...bounds}
+          />
+        </Provider>
+      )
+    }
+
+    await render(<Harness />)
+    expect(screen.getByText('2026-09-13')).toBeTruthy()
+
+    await press(screen.getByText('2026-09-13'))
+    expect(screen.getByTestId('picker-toolbar')).toBeTruthy()
+    await press(screen.getByTestId('picker-item-2-1'))
+    expect(screen.getByTestId('picker-item-2-1').props.accessibilityState.selected).toBe(true)
+    expect(screen.getAllByText('2026-09-13').length).toBeGreaterThan(0)
+    expect(onChange).not.toHaveBeenCalled()
+
+    await press(screen.getByTestId('picker-cancel'))
+    expect(screen.queryByTestId('picker-toolbar')).toBeNull()
+    expect(screen.getByText('2026-09-13')).toBeTruthy()
+
+    await press(screen.getByText('2026-09-13'))
+    await press(screen.getByTestId('picker-item-2-1'))
+    await press(screen.getByTestId('picker-confirm'))
+
+    expect(await screen.findByText('2026-09-02')).toBeTruthy()
+    expect(onChange).toHaveBeenCalledWith(['2026', '09', '02'])
+    timing.mockRestore()
+  })
+
+  it('supports placeholder, formatValue, and date picker props', async () => {
+    await render(
+      <Provider theme={{ token: { motion: false } }}>
+        <FieldDatePicker label="日期" placeholder="请选择日期" {...bounds} />
+        <FieldDatePicker
+          label="格式化日期"
+          defaultValue={['2026', '09']}
+          formatValue={(_options, values) => values.join('/')}
+          columnsType={['year', 'month']}
+          {...bounds}
+        />
+      </Provider>,
+    )
+
+    expect(screen.getByText('请选择日期')).toBeTruthy()
+    expect(screen.getByText('2026/09')).toBeTruthy()
+  })
+})
+
 describe('Field exports', () => {
   it('exports concrete adapters without exporting the runtime Field component', () => {
     expect(packageExports).not.toHaveProperty('Field')
@@ -692,6 +769,7 @@ describe('Field exports', () => {
     expect(FieldCheckbox).toBeDefined()
     expect(FieldSwitch).toBeDefined()
     expect(FieldPicker).toBeDefined()
+    expect(FieldDatePicker).toBeDefined()
     expect(ConfigProvider).toEqual(expect.any(Function))
   })
 })
