@@ -147,7 +147,7 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
               {children}
             </Text>
           ) : children !== undefined && children !== null && typeof children !== 'boolean' ? (
-            <View style={semantic?.label}>{children}</View>
+            <View>{children}</View>
           ) : null
 
           if (resolvedVariant === 'button') return label

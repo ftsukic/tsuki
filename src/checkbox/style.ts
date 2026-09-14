@@ -26,7 +26,6 @@ export function getCheckboxStyles(
 ): CheckboxResolvedStyles {
   const isButton = props.variant === 'button'
   const size = props.iconSize ?? token.size
-  const labelOnLeft = props.labelPosition === 'left'
   const checkedBackground = state.disabled ? token.disabledBackground : token.checkedBackground
   const buttonStyles = isButton
     ? getSelectionButtonStyles(
@@ -62,6 +61,7 @@ export function getCheckboxStyles(
     root: buttonStyles?.root ?? {
       alignItems: 'center',
       alignSelf: 'flex-start',
+      columnGap: token.gap,
       flexDirection: 'row',
       opacity: state.disabled ? 1 : state.pressed ? token.activeOpacity : 1,
     },
@@ -89,8 +89,6 @@ export function getCheckboxStyles(
       fontFamily: token.fontFamily,
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
-      marginLeft: labelOnLeft ? 0 : token.gap,
-      marginRight: labelOnLeft ? token.gap : 0,
     },
     checkColor: state.disabled ? token.disabledColor : token.checkedIconColor,
     checkSize: size * 0.72,

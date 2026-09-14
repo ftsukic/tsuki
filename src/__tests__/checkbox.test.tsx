@@ -1,6 +1,6 @@
 import { Checkbox, CheckboxGroup, ConfigProvider, getDesignToken } from '..'
 import { fireEvent, render, screen } from '@testing-library/react-native'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import type { JsonElement } from 'test-renderer'
 import { getCheckboxStyles } from '../checkbox/style'
 import { getCheckboxToken } from '../checkbox/token'
@@ -106,6 +106,41 @@ describe('Checkbox', () => {
       borderColor: token.disabledColor,
     })
     expect(disabledChecked.checkColor).toBe(token.disabledColor)
+  })
+
+  it('uses root column gap for default labels in either position', () => {
+    const token = getCheckboxToken(getDesignToken())
+
+    const rightStyles = getCheckboxStyles(
+      token,
+      { labelPosition: 'right' },
+      { checked: false, disabled: false, pressed: false },
+    )
+    expect(rightStyles.root.columnGap).toBe(token.gap)
+    expect(rightStyles.label.marginLeft).toBeUndefined()
+    expect(rightStyles.label.marginRight).toBeUndefined()
+    expect(
+      getCheckboxStyles(
+        token,
+        { labelPosition: 'left' },
+        { checked: false, disabled: false, pressed: false },
+      ).root.columnGap,
+    ).toBe(token.gap)
+  })
+
+  it('applies the label semantic style only to text labels', async () => {
+    const token = getCheckboxToken(getDesignToken())
+
+    await render(
+      <ConfigProvider>
+        <Checkbox testID="custom-label" styles={{ label: { color: 'red', marginLeft: 99 } }}>
+          <View testID="custom-label-content" />
+        </Checkbox>
+      </ConfigProvider>,
+    )
+
+    expect(styleOf('custom-label').columnGap).toBe(token.gap)
+    expect(screen.getByTestId('custom-label-content').props.style).toBeUndefined()
   })
 
   it.each([
