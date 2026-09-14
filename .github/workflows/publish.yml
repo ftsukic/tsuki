@@ -1,0 +1,92 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    env:
+      HUSKY: 0
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install npm
+        run: npm install --global 'npm@^11.5.1'
+
+      - name: Show runtime versions
+        run: |
+          node --version
+          npm --version
+          yarn --version
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Verify main ancestry
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "Refusing to publish tag outside origin/main."
+            exit 1
+          fi
+
+      - name: Validate release tag
+        run: node scripts/validate-release.cjs
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Build package
+        run: yarn build
+
+      - name: Validate package contents
+        run: yarn release:check-package
+
+      - name: Check registry version
+        run: node scripts/check-registry-version.cjs "$(node -p "require('./package.json').version")"
+
+      - name: Publish to npm
+        run: npm publish --access public --provenance
+
+      - name: Verify published package
+        shell: bash
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          for attempt in 1 2 3 4 5; do
+            PUBLISHED_VERSION="$(npm view "@ftsukic/tsuki@${VERSION}" version 2>/dev/null || true)"
+            LATEST="$(npm view @ftsukic/tsuki dist-tags --json 2>/dev/null | node -e "let input=''; process.stdin.on('data', chunk => input += chunk).on('end', () => { try { process.stdout.write(JSON.parse(input).latest || '') } catch {} })" || true)"
+            if [ "$PUBLISHED_VERSION" = "$VERSION" ] && [ "$LATEST" = "$VERSION" ]; then
+              echo "Verified @ftsukic/tsuki@${VERSION} with latest dist-tag."
+              exit 0
+            fi
+            echo "Registry has not converged yet (attempt ${attempt}/5)."
+            if [ "$attempt" -lt 5 ]; then sleep 10; fi
+          done
+          echo "Published package verification failed."
+          exit 1

@@ -79,6 +79,7 @@
     "changeset:status": "node scripts/changeset-status.cjs",
     "release:version": "changeset version",
     "release:publish": "changeset publish",
+    "release:check-package": "node scripts/validate-package.cjs",
     "postinstall": "husky"
   },
   "devDependencies": {
