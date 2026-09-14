@@ -103,7 +103,15 @@ function renderNode(
     case 'svg': {
       const attrs = resolveAttributes(node.attrs, primaryColor)
       return (
-        <Svg {...svgProps} {...attrs} key={key} width={size} height={size} style={svgStyle}>
+        <Svg
+          {...svgProps}
+          {...attrs}
+          pointerEvents="none"
+          key={key}
+          width={size}
+          height={size}
+          style={svgStyle}
+        >
           {children}
         </Svg>
       )
