@@ -289,10 +289,43 @@ describe('Button', () => {
     expect(rootStyle.minHeight).toBeUndefined()
     expect(rootStyle.paddingHorizontal).toBe(0)
     expect(rootStyle.alignSelf).toBe('flex-start')
-    expect(labelStyle.lineHeight).toBe(labelStyle.fontSize + 4)
+    expect(labelStyle.lineHeight).toBe(getDesignToken().lineHeight)
     if (!contentContainer) throw new Error('Text Button content container was not rendered')
     expect(StyleSheet.flatten(contentContainer.props.style).minHeight).toBeUndefined()
     expect(contentContainer.children).toHaveLength(2)
+  })
+
+  it('uses the matching typography line height for each text button size', async () => {
+    await render(
+      <ConfigProvider>
+        <Button testID="text-mini" variant="text" size="mini">
+          迷你文字
+        </Button>
+        <Button testID="text-small" variant="text" size="small">
+          小号文字
+        </Button>
+        <Button testID="text-normal" variant="text" size="normal">
+          普通文字
+        </Button>
+        <Button testID="text-large" variant="text" size="large">
+          大号文字
+        </Button>
+      </ConfigProvider>,
+    )
+
+    const token = getDesignToken()
+    expect(StyleSheet.flatten(screen.getByText('迷你文字').props.style).lineHeight).toBe(
+      token.lineHeightXS,
+    )
+    expect(StyleSheet.flatten(screen.getByText('小号文字').props.style).lineHeight).toBe(
+      token.lineHeightSM,
+    )
+    expect(StyleSheet.flatten(screen.getByText('普通文字').props.style).lineHeight).toBe(
+      token.lineHeight,
+    )
+    expect(StyleSheet.flatten(screen.getByText('大号文字').props.style).lineHeight).toBe(
+      token.lineHeightLG,
+    )
   })
 
   it('keeps a text button content-sized when block is true', async () => {

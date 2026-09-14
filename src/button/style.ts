@@ -23,25 +23,32 @@ function resolveShape(props: ButtonProps): ResolvedButtonShape {
   return 'default'
 }
 
-function getSizeStyles(token: ButtonToken, size: NonNullable<ButtonProps['size']>) {
+function getSizeStyles(
+  token: ButtonToken,
+  themeToken: AliasToken,
+  size: NonNullable<ButtonProps['size']>,
+) {
   switch (size) {
     case 'mini':
       return {
         height: token.heightXS,
         paddingHorizontal: token.paddingHorizontalXS,
         fontSize: token.contentFontSizeXS,
+        lineHeight: themeToken.lineHeightXS,
       }
     case 'small':
       return {
         height: token.heightSM,
         paddingHorizontal: token.paddingHorizontalSM,
         fontSize: token.contentFontSizeSM,
+        lineHeight: themeToken.lineHeightSM,
       }
     case 'large':
       return {
         height: token.heightLG,
         paddingHorizontal: token.paddingHorizontalLG,
         fontSize: token.contentFontSizeLG,
+        lineHeight: themeToken.lineHeightLG,
       }
     case 'normal':
     default:
@@ -49,6 +56,7 @@ function getSizeStyles(token: ButtonToken, size: NonNullable<ButtonProps['size']
         height: token.height,
         paddingHorizontal: token.paddingHorizontal,
         fontSize: token.contentFontSize,
+        lineHeight: themeToken.lineHeight,
       }
   }
 }
@@ -120,7 +128,7 @@ export function getButtonStyles(
   props: ButtonProps,
   state: ButtonStyleState,
 ): ButtonResolvedStyles {
-  const size = getSizeStyles(token, props.size ?? 'normal')
+  const size = getSizeStyles(token, themeToken, props.size ?? 'normal')
   const shape = resolveShape(props)
   const isCircle = shape === 'circle'
   const type = props.type ?? 'default'
@@ -193,7 +201,7 @@ export function getButtonStyles(
       fontSize: size.fontSize,
       lineHeight:
         isText && !isCircle
-          ? size.fontSize + 4
+          ? size.lineHeight
           : Math.max(size.fontSize + 4, size.height - token.borderWidth * 2),
       textAlign: 'center',
     },
