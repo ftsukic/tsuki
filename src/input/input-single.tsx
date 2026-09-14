@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useRef, type ReactNode } from 'react'
-import { View } from 'react-native'
+import { Pressable, View } from 'react-native'
 import type { TextInputInstance } from '../text-input'
 import type { TextInputProps } from '../text-input'
 import { TextInput } from '../text-input'
@@ -69,9 +69,16 @@ export const InputSingle = forwardRef<TextInputInstance, InputSingleProps>(funct
     onClear()
     inputRef.current?.focus()
   }, [onClear])
+  const handleShellPress = useCallback(() => {
+    if (disabled) return
+    inputRef.current?.focus()
+  }, [disabled])
 
   return (
-    <View style={[styles.shell, styles.singleShell, semantic?.shell]}>
+    <Pressable
+      onPress={handleShellPress}
+      style={[styles.shell, styles.singleShell, semantic?.shell]}
+    >
       <View style={[styles.content, styles.singleContent, semantic?.content]}>
         {renderInputAffix(prefix, [styles.prefix, semantic?.prefix] as StyleProp<TextStyle>, true)}
         <TextInput
@@ -95,7 +102,7 @@ export const InputSingle = forwardRef<TextInputInstance, InputSingleProps>(funct
           semantic?.suffix,
         ] as StyleProp<TextStyle>)}
       </View>
-    </View>
+    </Pressable>
   )
 })
 

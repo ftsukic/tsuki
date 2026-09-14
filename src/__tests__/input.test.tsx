@@ -1,9 +1,28 @@
 import { ConfigProvider, Input, getDesignToken } from '..'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
-import { useState } from 'react'
+import { useState, type ForwardedRef } from 'react'
 import { Platform, StyleSheet } from 'react-native'
 import { getInputStyles, getTextareaMetrics } from '../input/style'
 import { getInputToken } from '../input/token'
+
+const mockTextInputFocus = jest.fn()
+
+jest.mock('../text-input', () => {
+  const React = jest.requireActual('react')
+  const actual = jest.requireActual('../text-input')
+  const MockTextInput = React.forwardRef(
+    (props: Record<string, unknown>, ref: ForwardedRef<unknown>) => {
+      React.useImperativeHandle(ref, () => ({ focus: mockTextInputFocus, clear: jest.fn() }), [])
+      return React.createElement(actual.TextInput, props)
+    },
+  )
+  MockTextInput.displayName = 'MockTextInput'
+
+  return {
+    ...actual,
+    TextInput: MockTextInput,
+  }
+})
 
 describe('Input', () => {
   function getInputStyle(testID: string) {
@@ -536,6 +555,45 @@ describe('Input', () => {
     expect(screen.getByTestId('readonly-input').props.editable).toBe(false)
   })
 
+  it('focuses a single-line input when its shell is pressed', async () => {
+    mockTextInputFocus.mockClear()
+    await render(<Input testID="shell-focus-input" />)
+
+    const input = screen.getByTestId('shell-focus-input')
+    const shell = input.parent?.parent
+    expect(shell).toBeTruthy()
+
+    fireEvent.press(shell!)
+
+    expect(mockTextInputFocus).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not focus a disabled single-line input when its shell is pressed', async () => {
+    mockTextInputFocus.mockClear()
+    await render(<Input testID="disabled-shell-focus-input" disabled />)
+
+    const input = screen.getByTestId('disabled-shell-focus-input')
+    const shell = input.parent?.parent
+    expect(shell).toBeTruthy()
+
+    fireEvent.press(shell!)
+
+    expect(mockTextInputFocus).not.toHaveBeenCalled()
+  })
+
+  it('does not focus an uneditable single-line input when its shell is pressed', async () => {
+    await render(<Input testID="uneditable-shell-focus-input" editable={false} />)
+
+    const input = screen.getByTestId('uneditable-shell-focus-input')
+    const shell = input.parent?.parent
+    expect(shell).toBeTruthy()
+
+    mockTextInputFocus.mockClear()
+    fireEvent.press(shell!)
+
+    expect(mockTextInputFocus).not.toHaveBeenCalled()
+  })
+
   it('formats values before the string change callback', async () => {
     const onChangeText = jest.fn()
 
@@ -705,10 +763,12 @@ describe('Input', () => {
 
     const passwordInput = screen.getByTestId('password-input')
     expect(passwordInput.props.secureTextEntry).toBe(true)
+    mockTextInputFocus.mockClear()
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent.press(screen.getByLabelText('显示密码'))
     expect(screen.getByTestId('password-input').props.secureTextEntry).toBe(false)
     expect(screen.getByLabelText('隐藏密码')).toBeTruthy()
+    expect(mockTextInputFocus).not.toHaveBeenCalled()
 
     await render(
       <Input
