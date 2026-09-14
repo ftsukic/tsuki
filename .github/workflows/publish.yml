@@ -48,6 +48,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Install example dependencies
+        run: yarn --cwd example install --immutable
+
       - name: Verify main ancestry
         run: |
           git fetch origin main
