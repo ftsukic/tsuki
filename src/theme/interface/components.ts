@@ -493,7 +493,6 @@ export interface ActionSheetToken {
   titleColor: string
   actionColor: string
   descriptionColor: string
-  dangerColor: string
   disabledColor: string
   loadingColor: string
   dividerColor: string
@@ -505,7 +504,6 @@ export interface ActionSheetToken {
   descriptionFontSize: number
   descriptionLineHeight: number
   titleHeight: number
-  actionHeight: number
   titlePaddingHorizontal: number
   titlePaddingVertical: number
   actionPaddingHorizontal: number

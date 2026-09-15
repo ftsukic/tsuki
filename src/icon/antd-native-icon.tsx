@@ -217,9 +217,10 @@ export function AntdNativeIcon({
     ) : (
       <View style={{ transform: [{ rotate: `${rotation}deg` }] }}>{renderedIcon}</View>
     )
+  const touchBoundary = <View pointerEvents="none">{iconContent}</View>
   const resolvedStyle = [defaultStyle, disabled && { opacity: 0.4 }, style] as StyleProp<ViewStyle>
 
-  if (!onPress) return <View style={resolvedStyle}>{iconContent}</View>
+  if (!onPress) return <View style={resolvedStyle}>{touchBoundary}</View>
 
   return (
     <InteractionPressable
@@ -228,7 +229,7 @@ export function AntdNativeIcon({
       hitSlop={getIconHitSlop(resolvedSize, touchableSize, hitSlop)}
       style={({ pressed }) => [resolvedStyle, pressed && { opacity: 0.6 }]}
     >
-      {iconContent}
+      {touchBoundary}
     </InteractionPressable>
   )
 }

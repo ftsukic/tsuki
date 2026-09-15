@@ -54,14 +54,14 @@ describe('ActionSheet', () => {
     jest.restoreAllMocks()
   })
 
-  it('renders a title, action descriptions, custom content, and a cancel button', async () => {
+  it('renders a title, action subnames, custom content, and a cancel button', async () => {
     const view = await render(
       <AppProvider>
         <ActionSheet
           visible
           title="请选择操作"
           actions={[
-            { name: '拍照', description: '使用相机拍摄' },
+            { name: '拍照', subname: '使用相机拍摄' },
             { name: <Text testID="custom-action">自定义内容</Text> },
           ]}
           cancelText="取消"
@@ -78,30 +78,41 @@ describe('ActionSheet', () => {
       StyleSheet.flatten(screen.getByTestId('action-sheet-cancel-gap').props.style).height,
     ).toBeGreaterThan(0)
     expect(
-      StyleSheet.flatten(screen.getByTestId('action-sheet-action-0').props.style).height,
-    ).toBeGreaterThan(0)
+      StyleSheet.flatten(screen.getByTestId('action-sheet-action-0').props.style),
+    ).toMatchObject({
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+    })
+    expect(
+      StyleSheet.flatten(screen.getByTestId('action-sheet-action-0').props.style),
+    ).not.toHaveProperty('height')
 
     await view.unmount()
   })
 
-  it('uses danger, disabled, and loading action states', async () => {
-    const dangerPress = jest.fn()
-    const disabledPress = jest.fn()
+  it('uses custom color, disabled, and loading action states', async () => {
+    const events: string[] = []
+    const colorCallback = jest.fn((action) => {
+      events.push(action.name === '删除' ? 'callback' : 'unexpected')
+    })
+    const disabledCallback = jest.fn()
+    const onSelect = jest.fn(() => events.push('onSelect'))
     const view = await render(
       <AppProvider>
         <ActionSheet
           visible
           actions={[
-            { name: '删除', danger: true, onPress: dangerPress },
-            { name: '不可用', disabled: true, onPress: disabledPress },
-            { name: '加载中', loading: true, onPress: disabledPress },
+            { name: '删除', color: '#ee0a24', callback: colorCallback },
+            { name: '不可用', disabled: true, callback: disabledCallback },
+            { name: '加载中', loading: true, callback: disabledCallback },
           ]}
+          onSelect={onSelect}
         />
       </AppProvider>,
     )
 
     expect(StyleSheet.flatten(screen.getByText('删除').props.style)).toMatchObject({
-      color: '#EE0A24',
+      color: '#ee0a24',
     })
     expect(screen.getByTestId('action-sheet-action-1').props.accessibilityState).toMatchObject({
       disabled: true,
@@ -116,11 +127,17 @@ describe('ActionSheet', () => {
       fireEvent.press(screen.getByTestId('action-sheet-action-1'))
       fireEvent.press(screen.getByTestId('action-sheet-action-2'))
     })
-    expect(disabledPress).not.toHaveBeenCalled()
+    expect(disabledCallback).not.toHaveBeenCalled()
 
     // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => fireEvent.press(screen.getByTestId('action-sheet-action-0')))
-    expect(dangerPress).toHaveBeenCalledTimes(1)
+    expect(colorCallback).toHaveBeenCalledTimes(1)
+    expect(colorCallback).toHaveBeenCalledWith(
+      expect.objectContaining({ name: '删除', color: '#ee0a24' }),
+    )
+    expect(onSelect).toHaveBeenCalledTimes(1)
+    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ name: '删除' }), 0)
+    expect(events).toEqual(['callback', 'onSelect'])
     await view.unmount()
   })
 
@@ -216,8 +233,8 @@ describe('ActionSheet', () => {
     const pressedStyle = pressableStyle('action-sheet-action-0', true)
     expect(pressedStyle).toMatchObject({
       backgroundColor: '#e6f4ff',
-      height: regularStyle.height,
     })
+    expect(regularStyle).not.toHaveProperty('height')
     await firePressState(screen.getByTestId('action-sheet-action-0'), 'pressOut')
 
     await firePressState(screen.getByTestId('action-sheet-action-1'), 'pressIn')
@@ -252,7 +269,7 @@ describe('ActionSheet', () => {
       return (
         <ActionSheet
           visible={visible}
-          actions={[{ name: '确认', onPress: () => events.push('action') }]}
+          actions={[{ name: '确认', callback: () => events.push('action') }]}
           onClose={() => {
             events.push('close')
             setVisible(false)
@@ -302,22 +319,25 @@ describe('ActionSheet', () => {
   })
 
   it('keeps the sheet open when closeOnAction is false', async () => {
-    const onPress = jest.fn()
+    const callback = jest.fn()
+    const onSelect = jest.fn()
     const onClose = jest.fn()
     const view = await render(
       <AppProvider>
         <ActionSheet
           visible
           closeOnAction={false}
-          actions={[{ name: '保留', onPress }]}
+          actions={[{ name: '保留', callback }]}
           onClose={onClose}
+          onSelect={onSelect}
         />
       </AppProvider>,
     )
 
     // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => fireEvent.press(screen.getByTestId('action-sheet-action-0')))
-    expect(onPress).toHaveBeenCalledTimes(1)
+    expect(callback).toHaveBeenCalledTimes(1)
+    expect(onSelect).toHaveBeenCalledWith(expect.objectContaining({ name: '保留' }), 0)
     expect(onClose).not.toHaveBeenCalled()
     expect(screen.getByText('保留')).toBeTruthy()
     await view.unmount()
@@ -343,7 +363,7 @@ describe('ActionSheet', () => {
     })
     // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => fireEvent.press(screen.getByTestId('action-sheet-cancel-button')))
-    await expect(cancelPromise).resolves.toBe('cancel')
+    await expect(cancelPromise).resolves.toBeUndefined()
     expect(screen.queryByText('取消测试')).toBeNull()
 
     let overlayPromise!: Promise<unknown>
@@ -352,7 +372,7 @@ describe('ActionSheet', () => {
     })
     // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => fireEvent.press(findOverlay(view)))
-    await expect(overlayPromise).resolves.toBe('cancel')
+    await expect(overlayPromise).resolves.toBeUndefined()
     expect(screen.queryByText('遮罩测试')).toBeNull()
 
     await view.unmount()
@@ -367,25 +387,25 @@ describe('ActionSheet', () => {
       first = showActionSheet({ title: '第一个', actions: [] })
       second = showActionSheet({ title: '第二个', actions: [] })
     })
-    await expect(first).resolves.toBe('cancel')
+    await expect(first).resolves.toBeUndefined()
     await act(async () => closeActionSheet())
     closeActionSheet()
-    await expect(second).resolves.toBe('cancel')
+    await expect(second).resolves.toBeUndefined()
 
     let pending!: Promise<unknown>
     await act(async () => {
       pending = showActionSheet({ title: '宿主卸载', actions: [] })
     })
     await view.unmount()
-    await expect(pending).resolves.toBe('cancel')
+    await expect(pending).resolves.toBeUndefined()
   })
 
-  it('applies ActionSheet component tokens', async () => {
+  it('keeps the title height token without fixing action height', async () => {
     const view = await render(
       <ConfigProvider
         theme={{
           token: { motion: false },
-          components: { ActionSheet: { actionHeight: 64, titleHeight: 56 } },
+          components: { ActionSheet: { titleHeight: 56 } },
         }}
       >
         <PortalHost>
@@ -396,12 +416,42 @@ describe('ActionSheet', () => {
 
     expect(
       StyleSheet.flatten(screen.getByTestId('action-sheet-action-0').props.style),
-    ).toMatchObject({
-      height: 64,
-    })
+    ).not.toHaveProperty('height')
     expect(StyleSheet.flatten(screen.getByTestId('action-sheet-title').props.style)).toMatchObject({
       height: 56,
     })
+    await view.unmount()
+  })
+
+  it('uses natural action and cancel padding for subname content', async () => {
+    const view = await render(
+      <AppProvider>
+        <ActionSheet
+          visible
+          actions={[{ name: '账号', subname: 'workspace@example.com' }]}
+          cancelText="取消"
+        />
+      </AppProvider>,
+    )
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId('action-sheet-action-0').props.style),
+    ).toMatchObject({
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+    })
+    expect(
+      StyleSheet.flatten(screen.getByTestId('action-sheet-action-0').props.style),
+    ).not.toHaveProperty('height')
+    expect(
+      StyleSheet.flatten(screen.getByTestId('action-sheet-cancel-content').props.style),
+    ).toMatchObject({
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+    })
+    expect(
+      StyleSheet.flatten(screen.getByTestId('action-sheet-cancel-content').props.style),
+    ).not.toHaveProperty('height')
     await view.unmount()
   })
 
@@ -444,9 +494,12 @@ describe('ActionSheet', () => {
     expect(
       StyleSheet.flatten(screen.getByTestId('action-sheet-cancel-content').props.style),
     ).toMatchObject({
-      height: 46,
+      paddingVertical: 14,
       overflow: 'hidden',
     })
+    expect(
+      StyleSheet.flatten(screen.getByTestId('action-sheet-cancel-content').props.style),
+    ).not.toHaveProperty('height')
     expect(StyleSheet.flatten(screen.getByTestId('safe-area-sheet').props.style)).toMatchObject({
       backgroundColor: 'transparent',
     })

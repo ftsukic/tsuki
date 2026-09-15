@@ -8,8 +8,8 @@ jest.mock('../icon', () => {
   const { Text: NativeText } = jest.requireActual('react-native')
 
   return {
-    Icon: ({ name }: { name: string }) =>
-      React.createElement(NativeText, { testID: `icon-${name}` }),
+    Icon: ({ name, size }: { name: string; size?: number }) =>
+      React.createElement(NativeText, { testID: `icon-${name}`, size }),
   }
 })
 
@@ -152,8 +152,19 @@ describe('Navbar', () => {
   it('keeps the default back arrow and text in one horizontal content row', async () => {
     await render(<Navbar testID="navbar" title="标题" leftText="返回" />)
 
-    expect(screen.getByTestId('icon-LeftOutlined')).toBeTruthy()
+    expect(screen.getByTestId('icon-LeftOutlined').props.size).toBe(
+      getNavbarToken(getDesignToken()).iconSize,
+    )
     expect(screen.getByText('返回')).toBeTruthy()
+    expect(flattenStyle('navbar-left-action')).toMatchObject({ flexDirection: 'row' })
+  })
+
+  it('allows overriding the default left arrow size without changing the action', async () => {
+    await render(
+      <Navbar testID="navbar" title="标题" leftArrow leftIconSize={20} leftText="返回" />,
+    )
+
+    expect(screen.getByTestId('icon-LeftOutlined').props.size).toBe(20)
     expect(flattenStyle('navbar-left-action')).toMatchObject({ flexDirection: 'row' })
   })
 

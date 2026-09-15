@@ -1,10 +1,10 @@
 import { FixtureOverview } from '../../fixture-overview'
 import ActionSheetBasicFixture from './examples/basic'
-import ActionSheetDangerFixture from './examples/danger'
+import ActionSheetCustomColorFixture from './examples/custom-color'
 import ActionSheetDisabledFixture from './examples/disabled'
 import ActionSheetLoadingFixture from './examples/loading'
 import ActionSheetTitleFixture from './examples/title'
-import ActionSheetDescriptionFixture from './examples/custom-description'
+import ActionSheetSubnameFixture from './examples/custom-subname'
 
 /**
  * @title ActionSheet overview
@@ -27,10 +27,10 @@ export default function ActionSheetOverview() {
           title: 'Title',
         },
         {
-          Component: ActionSheetDangerFixture,
-          description: 'Mark destructive actions with the danger semantic color.',
-          id: 'danger',
-          title: 'Danger action',
+          Component: ActionSheetCustomColorFixture,
+          description: 'Use a custom color for a destructive action.',
+          id: 'custom-color',
+          title: 'Custom color action',
         },
         {
           Component: ActionSheetDisabledFixture,
@@ -45,10 +45,10 @@ export default function ActionSheetOverview() {
           title: 'Loading action',
         },
         {
-          Component: ActionSheetDescriptionFixture,
-          description: 'Render custom ReactNode names and descriptions.',
-          id: 'custom-description',
-          title: 'Custom description',
+          Component: ActionSheetSubnameFixture,
+          description: 'Render custom ReactNode names and subnames.',
+          id: 'custom-subname',
+          title: 'Custom subname',
         },
       ]}
     />

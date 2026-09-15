@@ -51,6 +51,7 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
       onPressOverlay,
       onOpened,
       onClosed,
+      onSelect,
       onAction,
       onCancelAction,
       onRequestClose,
@@ -94,16 +95,16 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
 
     const renderAction = (action: ActionSheetAction, index: number) => {
       const disabled = action.disabled === true || action.loading === true
-      const actionColor = action.danger ? token.dangerColor : token.actionColor
+      const actionColor = action.color ?? token.actionColor
       const nameStyle = [
         resolved.name,
         { color: disabled ? token.disabledColor : actionColor },
         semantic?.name,
       ]
-      const descriptionStyle = [
-        resolved.description,
+      const subnameStyle = [
+        resolved.subname,
         { color: disabled ? token.disabledColor : token.descriptionColor },
-        semantic?.description,
+        semantic?.subname,
       ]
 
       return (
@@ -115,8 +116,9 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
           pressStyle="none"
           onPress={() => {
             try {
-              action.onPress?.()
+              action.callback?.(action)
             } finally {
+              onSelect?.(action, index)
               onAction?.(action)
               if (closeOnAction) requestClose('action')
             }
@@ -141,9 +143,7 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
               ) : null}
               {renderContent(action.name, nameStyle)}
             </View>
-            {isRenderable(action.description)
-              ? renderContent(action.description, descriptionStyle)
-              : null}
+            {isRenderable(action.subname) ? renderContent(action.subname, subnameStyle) : null}
           </View>
         </Pressable>
       )

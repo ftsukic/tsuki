@@ -2,6 +2,17 @@ const { execFileSync } = require('node:child_process')
 const fs = require('node:fs')
 
 const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+const forbiddenInstallScripts = ['preinstall', 'install', 'postinstall']
+const invalidInstallScripts = forbiddenInstallScripts.filter((name) => packageJson.scripts?.[name])
+
+if (invalidInstallScripts.length > 0) {
+  throw new Error(
+    `Published package must not define consumer install scripts: ${invalidInstallScripts.join(
+      ', ',
+    )}`,
+  )
+}
+
 const output = execFileSync('npm', ['pack', '--dry-run', '--json'], {
   encoding: 'utf8',
   stdio: ['ignore', 'pipe', 'inherit'],

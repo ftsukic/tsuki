@@ -18,7 +18,7 @@ export default function ActionSheetDisabledFixture() {
         actions={[
           { name: '编辑' },
           { name: '同步中', disabled: true },
-          { name: '删除', danger: true },
+          { name: '删除', color: '#ee0a24' },
         ]}
         onClose={() => setVisible(false)}
       />

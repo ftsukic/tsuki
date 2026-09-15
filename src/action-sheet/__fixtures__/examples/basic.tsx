@@ -16,8 +16,8 @@ export default function ActionSheetBasicFixture() {
       <ActionSheet
         visible={visible}
         actions={[
-          { name: '拍照', onPress: () => setVisible(false) },
-          { name: '从相册选择', onPress: () => setVisible(false) },
+          { name: '拍照', callback: () => setVisible(false) },
+          { name: '从相册选择', callback: () => setVisible(false) },
         ]}
         onClose={() => setVisible(false)}
       />

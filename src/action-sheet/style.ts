@@ -10,7 +10,7 @@ export interface ActionSheetResolvedStyles {
   action: ViewStyle
   actionContent: ViewStyle
   name: TextStyle
-  description: TextStyle
+  subname: TextStyle
   cancelGap: ViewStyle
   cancelPanel: ViewStyle
   cancelPressable: ViewStyle
@@ -53,7 +53,6 @@ export function getActionSheetStyles(token: ActionSheetToken): ActionSheetResolv
     },
     action: {
       alignItems: 'center',
-      height: token.actionHeight,
       justifyContent: 'center',
       paddingHorizontal: token.actionPaddingHorizontal,
       paddingVertical: token.actionPaddingVertical,
@@ -70,7 +69,7 @@ export function getActionSheetStyles(token: ActionSheetToken): ActionSheetResolv
       lineHeight: token.actionLineHeight,
       textAlign: 'center',
     },
-    description: {
+    subname: {
       color: token.descriptionColor,
       fontFamily: token.fontFamily,
       fontSize: token.descriptionFontSize,
@@ -91,7 +90,6 @@ export function getActionSheetStyles(token: ActionSheetToken): ActionSheetResolv
     cancel: {
       alignItems: 'center',
       backgroundColor: token.backgroundColor,
-      height: token.actionHeight,
       justifyContent: 'center',
       overflow: 'hidden',
       paddingHorizontal: token.actionPaddingHorizontal,

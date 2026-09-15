@@ -1,5 +1,11 @@
 # @ftsukic/tsuki
 
+## 0.0.4
+
+### Patch Changes
+
+- Align ActionSheet action fields and imperative result handling with the current API, update related component fixtures and documentation, and fix package installation so consuming projects no longer run the library's Husky setup.
+
 ## 0.0.3
 
 ### Patch Changes

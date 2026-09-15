@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native'
 
 /**
  * @title Custom ActionSheet content
- * @description Use ReactNode values for action names and descriptions.
+ * @description Use ReactNode values for action names and subnames.
  */
 export default function ActionSheetCustomDescriptionFixture() {
   const [visible, setVisible] = useState(false)
@@ -17,11 +17,11 @@ export default function ActionSheetCustomDescriptionFixture() {
         actions={[
           {
             name: <Text style={styles.account}>工作账号</Text>,
-            description: <Text style={styles.description}>workspace@example.com</Text>,
+            subname: <Text style={styles.subname}>workspace@example.com</Text>,
           },
           {
             name: <Text style={styles.account}>个人账号</Text>,
-            description: <Text style={styles.description}>personal@example.com</Text>,
+            subname: <Text style={styles.subname}>personal@example.com</Text>,
           },
         ]}
         onClose={() => setVisible(false)}
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
   container: {
     gap: 10,
   },
-  description: {
+  subname: {
     color: '#667085',
     fontSize: 13,
     marginTop: 3,

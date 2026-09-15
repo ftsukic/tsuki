@@ -7,7 +7,7 @@ import type { ActionSheetAction, ActionSheetOptions, ActionSheetResult } from '.
 interface ActionSheetRecord {
   key: PortalKey | null
   options: ActionSheetOptions
-  resolve: (result: ActionSheetResult | undefined) => void
+  resolve: (result: ActionSheetResult) => void
   visible: boolean
   settled: boolean
 }
@@ -33,7 +33,7 @@ function replaceRecord(record: ActionSheetRecord, next: Partial<ActionSheetRecor
   }
 }
 
-function settleRecord(record: ActionSheetRecord, result: ActionSheetResult | undefined) {
+function settleRecord(record: ActionSheetRecord, result: ActionSheetResult) {
   if (record.settled) return
   record.settled = true
   record.resolve(result)
@@ -47,7 +47,7 @@ function ActionSheetMethod({ record }: { record: ActionSheetRecord }) {
     () => () => {
       const current = recordRef.current
       if (currentRecord !== current) return
-      settleRecord(current, 'cancel')
+      settleRecord(current, undefined)
       currentRecord = null
     },
     [],
@@ -60,13 +60,13 @@ function ActionSheetMethod({ record }: { record: ActionSheetRecord }) {
 
   const handleCancel = () => {
     const current = recordRef.current
-    if (currentRecord === current) settleRecord(current, 'cancel')
+    if (currentRecord === current) settleRecord(current, undefined)
   }
 
   const handleRequestClose = (reason: 'action' | 'cancel' | 'overlay') => {
     const current = recordRef.current
     if (currentRecord !== current || !current.visible) return
-    if (reason === 'overlay') settleRecord(current, 'cancel')
+    if (reason === 'overlay') settleRecord(current, undefined)
     replaceRecord(current, { visible: false })
   }
 
@@ -90,17 +90,17 @@ function ActionSheetMethod({ record }: { record: ActionSheetRecord }) {
 
 ActionSheetMethod.displayName = 'ActionSheet.Method'
 
-export function showActionSheet(
-  options: ActionSheetOptions = {},
-): Promise<ActionSheetResult | undefined> {
-  let resolvePromise!: (result: ActionSheetResult | undefined) => void
-  const promise = new Promise<ActionSheetResult | undefined>((resolve) => {
-    resolvePromise = resolve
+export function showActionSheet<T extends ActionSheetAction = ActionSheetAction>(
+  options: ActionSheetOptions<T> = {},
+): Promise<ActionSheetResult<T>> {
+  let resolvePromise!: (result: ActionSheetResult) => void
+  const promise = new Promise<ActionSheetResult<T>>((resolve) => {
+    resolvePromise = (result) => resolve(result as ActionSheetResult<T>)
   })
   const nextOptions = { ...currentOptions, ...options }
 
   if (currentRecord?.key !== null && currentRecord) {
-    settleRecord(currentRecord, 'cancel')
+    settleRecord(currentRecord, undefined)
     replaceRecord(currentRecord, {
       options: nextOptions,
       resolve: resolvePromise,
@@ -131,7 +131,7 @@ export function closeActionSheet(): void {
   const current = currentRecord
   if (!current || current.key === null) return
 
-  settleRecord(current, 'cancel')
+  settleRecord(current, undefined)
   replaceRecord(current, { visible: false })
 }
 

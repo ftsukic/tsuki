@@ -124,6 +124,7 @@ function Page() {
 | leftText | `ReactNode` | — | 默认左侧 action 的文字 |
 | rightText | `ReactNode` | — | 默认右侧 action 的文字 |
 | leftArrow | `boolean` | `true` | 是否显示 `LeftOutlined` |
+| leftIconSize | `number` | `Navbar` token 的 `iconSize` | 默认左侧返回图标尺寸；只作用于内置 `leftArrow`，不作用于自定义 `left` |
 | onPressLeft | `PressableProps['onPress']` | — | 默认返回区域的点击回调 |
 | onPressRight | `PressableProps['onPress']` | — | 默认右侧 action 的点击回调 |
 | border | `boolean` | `true` | 是否渲染底部分割线 |

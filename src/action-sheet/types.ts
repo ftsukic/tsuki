@@ -9,12 +9,12 @@ import type {
 import type { StyleInfo, StyleResolver } from '../style'
 
 export interface ActionSheetAction {
-  name: ReactNode
-  description?: ReactNode
-  disabled?: boolean
-  danger?: boolean
+  name?: ReactNode
+  subname?: ReactNode
+  color?: string
   loading?: boolean
-  onPress?: () => void
+  disabled?: boolean
+  callback?: (action: ActionSheetAction) => void
 }
 
 export interface ActionSheetStyleState {
@@ -30,7 +30,7 @@ export interface ActionSheetSemanticStyles {
   title?: StyleProp<TextStyle>
   action?: StyleProp<ViewStyle>
   name?: StyleProp<TextStyle>
-  description?: StyleProp<TextStyle>
+  subname?: StyleProp<TextStyle>
   cancelGap?: StyleProp<ViewStyle>
   cancelPanel?: StyleProp<ViewStyle>
   cancel?: StyleProp<ViewStyle>
@@ -57,16 +57,19 @@ export interface ActionSheetProps extends Omit<ViewProps, 'children' | 'style'> 
   style?: StyleProp<ViewStyle>
   styles?: ActionSheetStyles
   onClose?: () => void
+  onSelect?: (action: ActionSheetAction, index: number) => void
   onPressOverlay?: (event: GestureResponderEvent) => void
   onOpened?: () => void
   onClosed?: () => void
 }
 
-export type ActionSheetOptions = Omit<
+export type ActionSheetOptions<T extends ActionSheetAction = ActionSheetAction> = Omit<
   ActionSheetProps,
-  'visible' | 'onClose' | 'onOpened' | 'onClosed'
->
+  'visible' | 'actions' | 'onClose' | 'onOpened' | 'onClosed'
+> & {
+  actions?: readonly T[]
+}
 
-export type ActionSheetResult = ActionSheetAction | 'cancel'
+export type ActionSheetResult<T extends ActionSheetAction = ActionSheetAction> = T | undefined
 
 export type ActionSheetStyleInfo = StyleInfo<ActionSheetProps, ActionSheetStyleState>

@@ -1,6 +1,6 @@
 {
   "name": "@ftsukic/tsuki",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "基础 React Native UI 组件库。",
   "license": "MIT",
   "repository": {
@@ -80,7 +80,7 @@
     "release:version": "changeset version",
     "release:publish": "changeset publish",
     "release:check-package": "node scripts/validate-package.cjs",
-    "postinstall": "husky"
+    "prepare": "husky"
   },
   "devDependencies": {
     "@babel/core": "^7.28.4",

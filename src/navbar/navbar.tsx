@@ -55,6 +55,7 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
     left,
     right,
     leftArrow = true,
+    leftIconSize,
     leftText,
     rightText,
     onPressLeft,
@@ -74,6 +75,7 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
     left,
     right,
     leftArrow,
+    leftIconSize,
     leftText,
     rightText,
     onPressLeft,
@@ -101,7 +103,7 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
     <NavbarBackContent
       arrow={leftArrow}
       iconColor={token.actionColor}
-      iconSize={token.iconSize}
+      iconSize={leftIconSize ?? token.iconSize}
       gap={aliasToken.paddingXXS}
       text={leftText}
       textStyle={leftTextStyle}
