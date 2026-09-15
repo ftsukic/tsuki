@@ -1,5 +1,11 @@
 # @ftsukic/tsuki
 
+## 0.0.5
+
+### Patch Changes
+
+- Make package content validation robust when the package lifecycle runs in CI.
+
 ## 0.0.4
 
 ### Patch Changes

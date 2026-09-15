@@ -13,7 +13,7 @@ if (invalidInstallScripts.length > 0) {
   )
 }
 
-const output = execFileSync('npm', ['pack', '--dry-run', '--json'], {
+const output = execFileSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {
   encoding: 'utf8',
   stdio: ['ignore', 'pipe', 'inherit'],
 })
