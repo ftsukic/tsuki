@@ -12,6 +12,7 @@ export interface SearchStyleState {
 
 export interface SearchSemanticStyles {
   root?: StyleProp<ViewStyle>
+  divider?: StyleProp<ViewStyle>
   left?: StyleProp<ViewStyle>
   content?: StyleProp<ViewStyle>
   prefix?: StyleProp<ViewStyle>
@@ -64,6 +65,7 @@ export interface SearchProps extends Omit<
   suffix?: ReactNode
   left?: ReactNode
   action?: ReactNode
+  divider?: boolean
   style?: StyleProp<ViewStyle>
   styles?: SearchStyles
 }

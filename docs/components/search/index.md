@@ -37,6 +37,8 @@ import { Search } from '@ftsukic/tsuki'
 
 <code src="../../../src/search/__fixtures__/examples/disabled.tsx" title="禁用状态" description="禁用状态由 Input 负责输入状态和视觉。"></code>
 
+<code src="../../../src/search/__fixtures__/examples/divider.tsx" title="底部分割线" description="显示 Search 整体底部分割线。"></code>
+
 <code src="../../../src/search/__fixtures__/examples/background.tsx" title="自定义背景" description="自定义 Search 外层背景，输入区域保持独立底色。"></code>
 
 <code src="../../../src/search/__fixtures__/examples/label.tsx" title="内部 Label" description="在默认搜索图标后放置地址等内部内容。"></code>
@@ -62,6 +64,7 @@ import { Search } from '@ftsukic/tsuki'
 | placeholder | `string` | — | 占位文本 |
 | onChange | `(value: string) => void` | — | 文本变化和清除时回调 |
 | disabled | `boolean` | `false` | 交给 Input 禁止编辑和清除 |
+| divider | `boolean` | `false` | 是否显示 Search 底部分割线 |
 | readOnly | `boolean` | `false` | 交给 Input 禁止编辑但保留普通视觉 |
 | clearable | `boolean` | `true` | 是否启用 Input 的清除能力 |
 | clearTrigger | `'always' \| 'focus'` | `'always'` | Input 清除按钮的显示时机 |
@@ -77,7 +80,7 @@ import { Search } from '@ftsukic/tsuki'
 | autoSearch | `boolean` | `false` | 是否在输入变化后自动搜索 |
 | debounce | `number` | `300` | 自动搜索的延迟毫秒数 |
 | style | `StyleProp<ViewStyle>` | — | Search root 节点样式 |
-| styles | `SearchStyles` | — | `root`、`left`、`content`、`prefix`、`label`、`input`、`suffix`、`clear`、`action` 语义样式 |
+| styles | `SearchStyles` | — | `root`、`divider`、`left`、`content`、`prefix`、`label`、`input`、`suffix`、`clear`、`action` 语义样式 |
 
 Search 继承 Input 支持的原生 TextInput props，包括键盘、选择、可访问性、`editable` 和提交事件属性，但始终保持单行。`multiline`、`height`、`leftIcon` 不属于 Search API；IM 或自动增高输入请直接使用 `<Input multiline autoSize />`。
 

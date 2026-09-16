@@ -1,5 +1,6 @@
 import { Input } from '../input'
 import type { InputClearTrigger, InputStyles } from '../input'
+import { Divider } from '../divider'
 import { Icon } from '../icon'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
@@ -35,6 +36,7 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
     suffix,
     left,
     action,
+    divider = false,
     style,
     styles,
     testID,
@@ -71,6 +73,7 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
     suffix,
     left,
     action,
+    divider,
     onSubmitEditing,
     placeholder,
     testID,
@@ -205,6 +208,14 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
         >
           {action}
         </View>
+      ) : null}
+      {divider ? (
+        <Divider
+          testID={testID === undefined ? undefined : `${testID}-divider`}
+          color={aliasToken.colorBorder}
+          thickness={aliasToken.lineWidthHairline}
+          style={[resolved.divider, semantic?.divider]}
+        />
       ) : null}
     </View>
   )

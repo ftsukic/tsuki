@@ -23,6 +23,33 @@ describe('Search', () => {
     expect(screen.getByPlaceholderText('搜索联系人')).toBeTruthy()
     expect(screen.getByTestId('search-prefix')).toBeTruthy()
     expect(screen.getByTestId('search-root')).toBeTruthy()
+    expect(screen.queryByTestId('search-divider')).toBeNull()
+  })
+
+  it('renders a full-width hairline divider on the Search root', async () => {
+    await render(
+      <Search
+        testID="search"
+        divider
+        styles={{ divider: { marginHorizontal: 16, opacity: 0.5 } }}
+      />,
+    )
+
+    const divider = screen.getByTestId('search-divider')
+    const dividerStyle = StyleSheet.flatten(divider.props.style)
+    const root = screen.getByTestId('search-root')
+
+    expect(divider.parent).toBe(root)
+    expect(divider.parent).not.toBe(getInputShell('search'))
+    expect(dividerStyle).toMatchObject({
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: 0.5,
+      marginHorizontal: 16,
+      opacity: 0.5,
+    })
   })
 
   it('forwards value and defaultValue through Input', async () => {

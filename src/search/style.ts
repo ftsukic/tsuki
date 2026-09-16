@@ -4,6 +4,7 @@ import type { SearchProps, SearchStyleState } from './types'
 
 export interface SearchResolvedStyles {
   root: ViewStyle
+  divider: ViewStyle
   left: ViewStyle
   content: ViewStyle
   prefix: ViewStyle
@@ -21,11 +22,18 @@ export function getSearchStyles(
     root: {
       width: '100%',
       minWidth: 0,
+      position: 'relative',
       flexDirection: 'row',
       alignItems: 'center',
       paddingHorizontal: token.search_padding_horizontal,
       paddingVertical: token.search_padding_vertical,
       backgroundColor: props.background ?? token.search_background_color,
+    },
+    divider: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
     },
     left: {
       flexShrink: 0,

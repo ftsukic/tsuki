@@ -9,6 +9,7 @@ import SearchButtonActionExample from './examples/button-action'
 import SearchContactExample from './examples/contact'
 import SearchControlledExample from './examples/controlled'
 import SearchDisabledExample from './examples/disabled'
+import SearchDividerExample from './examples/divider'
 import SearchLabelExample from './examples/label'
 import SearchLeftExample from './examples/left'
 import SearchSquareExample from './examples/square'
@@ -44,6 +45,12 @@ export default function SearchOverview() {
           description: '禁用状态由 Input 负责输入状态和视觉。',
           id: 'disabled',
           title: 'Disabled',
+        },
+        {
+          Component: SearchDividerExample,
+          description: '显示 Search 整体底部分割线。',
+          id: 'divider',
+          title: 'Divider',
         },
         {
           Component: SearchBackgroundExample,
