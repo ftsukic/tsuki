@@ -6,9 +6,9 @@ import { Cell } from '../../..'
  */
 export default function CellLargeFixture() {
   return (
-    <>
+    <Cell.Group border={false}>
       <Cell title="普通尺寸" label="14px 标题层级" value="内容" />
       <Cell size="large" title="大号尺寸" label="16px 标题层级" value="内容" />
-    </>
+    </Cell.Group>
   )
 }

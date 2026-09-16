@@ -18,11 +18,10 @@ export default function FieldPickerFixture() {
   return (
     <FieldPicker
       center
-      label="城市"
+      title="城市"
       value={value}
       onChange={setValue}
       columns={cities}
-      title="选择城市"
       placeholder="请选择城市"
       isLink
     />

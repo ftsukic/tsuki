@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FieldRadio } from '../../..'
+import { Cell, FieldRadio } from '../../..'
 import type { RadioValue } from '../../..'
 
 /**
@@ -10,9 +10,9 @@ export default function FieldRadioFixture() {
   const [value, setValue] = useState<RadioValue>('small')
 
   return (
-    <>
+    <Cell.Group border={false}>
       <FieldRadio
-        label="尺寸"
+        title="尺寸"
         value={value}
         onChange={setValue}
         options={[
@@ -25,7 +25,7 @@ export default function FieldRadioFixture() {
         buttonColumns={5}
       />
       <FieldRadio
-        label="尺寸"
+        title="尺寸"
         value={value}
         onChange={setValue}
         required
@@ -47,7 +47,7 @@ export default function FieldRadioFixture() {
         buttonLayout="equal"
       />
       <FieldRadio
-        label="尺寸"
+        title="尺寸"
         value={value}
         onChange={setValue}
         required
@@ -69,6 +69,6 @@ export default function FieldRadioFixture() {
         gap={8}
         buttonColumns={4}
       />
-    </>
+    </Cell.Group>
   )
 }

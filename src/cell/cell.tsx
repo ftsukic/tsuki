@@ -51,6 +51,7 @@ export const Cell = forwardRef<React.ComponentRef<typeof Pressable>, CellProps>(
     isLink = false,
     clickable,
     border = true,
+    divider,
     required = false,
     arrowDirection = 'right',
     size = 'normal',
@@ -69,7 +70,8 @@ export const Cell = forwardRef<React.ComponentRef<typeof Pressable>, CellProps>(
   const groupContext = useCellGroupContext()
   const isDisabled = disabled === true
   const hasInteraction = isCellInteractive({ clickable, onPress, isLink })
-  const showDivider = border && groupContext?.position !== 'last'
+  const autoDivider = groupContext != null && groupContext.position !== 'last'
+  const showDivider = border && (divider ?? autoDivider)
   const cellProps: CellProps = {
     icon,
     title,
@@ -84,6 +86,7 @@ export const Cell = forwardRef<React.ComponentRef<typeof Pressable>, CellProps>(
     isLink,
     clickable,
     border,
+    divider,
     required,
     arrowDirection,
     size,

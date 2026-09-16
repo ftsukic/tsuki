@@ -6,42 +6,25 @@ import { Checkbox } from '../checkbox'
 import type { CheckboxGroupProps, CheckboxValue } from '../checkbox'
 import { useComponentToken } from '../theme'
 import { createFieldCellStyles, getFieldToken } from './style'
-import type { FieldLabelAlign } from './types'
+import type { FieldCellProps, FieldTitleAlign } from './types'
 import { useFieldValue } from './use-field-value'
-
-type FieldCheckboxCellProps = Pick<
-  CellProps,
-  | 'titleExtra'
-  | 'valueExtra'
-  | 'extra'
-  | 'vertical'
-  | 'center'
-  | 'valueAlign'
-  | 'required'
-  | 'border'
-  | 'icon'
-  | 'isLink'
-  | 'clickable'
-  | 'arrowDirection'
-  | 'onPress'
-  | 'onPressDebounceWait'
->
 
 type CheckboxAdapterProps = Omit<
   CheckboxGroupProps,
   'children' | 'value' | 'defaultValue' | 'disabled' | 'onChange' | 'style'
 >
 
-export interface FieldCheckboxProps extends FieldCheckboxCellProps, CheckboxAdapterProps {
+export interface FieldCheckboxProps extends FieldCellProps, CheckboxAdapterProps {
+  title?: ReactNode
+  titleExtra?: ReactNode
   label?: ReactNode
-  labelExtra?: ReactNode
   value?: readonly CheckboxValue[]
   defaultValue?: readonly CheckboxValue[]
   onChange?: (value: readonly CheckboxValue[]) => void
   disabled?: boolean
   readOnly?: boolean
-  labelWidth?: DimensionValue
-  labelAlign?: FieldLabelAlign
+  titleWidth?: DimensionValue
+  titleAlign?: FieldTitleAlign
   style?: CellProps['style']
   cellStyles?: CellStyles
   children?: ReactNode
@@ -54,8 +37,9 @@ export function FieldCheckbox(props: FieldCheckboxProps) {
     children,
     direction,
     gap,
+    title,
+    titleExtra,
     label,
-    labelExtra,
     value,
     defaultValue,
     onChange,
@@ -69,8 +53,8 @@ export function FieldCheckbox(props: FieldCheckboxProps) {
     buttonLayout,
     buttonColumns,
     vertical,
-    labelWidth,
-    labelAlign,
+    titleWidth,
+    titleAlign,
     valueAlign,
     icon,
     isLink,
@@ -78,6 +62,7 @@ export function FieldCheckbox(props: FieldCheckboxProps) {
     arrowDirection,
     onPress,
     border,
+    divider,
     style,
     cellStyles,
     ...groupProps
@@ -90,16 +75,17 @@ export function FieldCheckbox(props: FieldCheckboxProps) {
     onChange,
   })
   const resolvedCellStyles = createFieldCellStyles(fieldToken, {
-    labelWidth,
-    labelAlign,
+    titleWidth,
+    titleAlign,
     vertical,
     cellStyles,
   })
 
   return (
     <Cell
-      title={label}
-      titleExtra={labelExtra}
+      title={title}
+      titleExtra={titleExtra}
+      label={label}
       value={
         <Checkbox.Group
           {...groupProps}
@@ -130,6 +116,7 @@ export function FieldCheckbox(props: FieldCheckboxProps) {
       arrowDirection={arrowDirection}
       onPress={onPress}
       border={border}
+      divider={divider}
       style={style}
       onPressDebounceWait={props.onPressDebounceWait}
       styles={resolvedCellStyles}

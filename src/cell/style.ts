@@ -96,10 +96,11 @@ export function getCellStyles(
     },
     icon: {
       marginRight: token.iconGap,
-      width: token.iconSize,
-      height: token.lineHeight,
+      minWidth: token.iconSize,
+      minHeight: token.lineHeight,
       alignItems: 'center',
       justifyContent: 'center',
+      flexShrink: 0,
     },
     valueArea: {
       flex: props.vertical ? undefined : 1,

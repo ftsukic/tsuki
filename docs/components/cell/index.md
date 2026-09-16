@@ -53,6 +53,8 @@ import { Cell } from '@ftsukic/tsuki'
 
 <code src="../../../src/cell/__fixtures__/examples/center.tsx" title="Center" description="独立于 vertical 的垂直居中。"></code>
 
+<code src="../../../src/cell/__fixtures__/examples/divider.tsx" title="Divider" description="standalone 与连续 Cell 的显式 divider 控制。"></code>
+
 <code src="../../../src/cell/__fixtures__/examples/large.tsx" title="Size" description="normal 与 large 尺寸。"></code>
 
 <code src="../../../src/cell/__fixtures__/examples/group.tsx" title="CellGroup" description="CellGroup 基础组合。"></code>
@@ -87,7 +89,8 @@ import { Cell } from '@ftsukic/tsuki'
 | isLink | `boolean` | `false` | 显示 arrow；未显式设置 `clickable` 时启用点击反馈。 |
 | clickable | `boolean` | — | 显式控制 active 点击反馈。 |
 | arrowDirection | `'left' \| 'up' \| 'right' \| 'down'` | `'right'` | `isLink` arrow 方向。 |
-| border | `boolean` | `true` | 显示底部 divider；CellGroup 最后一项不显示内部 divider。 |
+| border | `boolean` | `true` | 是否允许当前 Cell 显示底部分割线；`border={false}` 会禁用 divider。未设置 `divider` 时，CellGroup 最后一项不显示内部 divider，standalone Cell 不绘制 divider。 |
+| divider | `boolean` | — | 手动覆盖当前 Cell 的底部分割线显示状态，主要用于 RN 下无法获得 Web `:last-child` 语义的 standalone / 自定义布局场景；仍受 `border={false}` 限制。 |
 | size | `'normal' \| 'large'` | `'normal'` | 影响 Cell 的 minHeight、padding 和 primitive 文本层级。 |
 | titleLines | `number` | — | 只应用于 primitive title。 |
 | valueLines | `number` | — | 只应用于 primitive value。 |
@@ -106,18 +109,22 @@ Cell 的内部结构固定为 `row -> icon + main + extra + suffix`。horizontal
 
 ### Cell.Group
 
-`Cell.Group` 也可以通过 named export `CellGroup` 引入。`title` 与 `extra` 位于 cells body 外；Group 只负责集合、inset 容器和最后一项 divider 位置，不识别子元素类型。
+`Cell.Group` 也可以通过 named export `CellGroup` 引入。`title` 与 `extra` 位于 cells body 外；Group 只负责集合、inset 容器和最后一项 divider 位置，不识别子元素类型。`border` 仅控制非 inset Group 的顶部/底部 hairline，不影响子 Cell 之间的 divider。
 
-| 属性     | 类型                      | 默认值  | 说明                                    |
-| -------- | ------------------------- | ------- | --------------------------------------- |
-| children | `ReactNode`               | —       | Cell 子项。                             |
-| testID   | `string`                  | —       | Group 根 View 的测试标识。              |
-| title    | `ReactNode`               | —       | body 外的分组标题。                     |
-| extra    | `ReactNode`               | —       | body 外标题右侧的扩展。                 |
-| inset    | `boolean`                 | `false` | 使用横向 margin、圆角和裁剪容器。       |
-| border   | `boolean`                 | `true`  | 控制非 inset body 的上下 hairline。     |
-| style    | `StyleProp<ViewStyle>`    | —       | Group 根样式。                          |
-| styles   | `CellGroupSemanticStyles` | —       | `root`、`title`、`extra`、`body` 插槽。 |
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| children | `ReactNode` | — | Cell 子项。 |
+| testID | `string` | — | Group 根 View 的测试标识。 |
+| title | `ReactNode` | — | body 外的分组标题。 |
+| extra | `ReactNode` | — | body 外标题右侧的扩展。 |
+| inset | `boolean` | `false` | 使用横向 margin、圆角和裁剪容器。 |
+| border | `boolean` | `true` | 仅控制非 inset body 的上下 hairline，不影响子 Cell 之间的 divider。 |
+| style | `StyleProp<ViewStyle>` | — | Group 根样式。 |
+| styles | `CellGroupSemanticStyles` | — | `root`、`title`、`extra`、`body` 插槽。 |
+
+React Native 中需要连续 Cell、但不需要 Group 外边框时，推荐使用 `<Cell.Group border={false}>` 包裹；这样会保留 Cell 之间的 divider，并关闭 Group 上下 hairline。裸的多个 Cell 无法获得 Web `:last-child` 的最后项语义。
+
+divider 的优先级为 `border={false}` 禁用，其次是显式 `divider`，最后才使用 Group position 自动规则：`showDivider = border && (divider ?? autoDivider)`。例如可用 `<Cell divider title="第一项" />` 和 `<Cell title="最后一项" />` 手动模拟连续 Cell。
 
 ## 主题定制
 

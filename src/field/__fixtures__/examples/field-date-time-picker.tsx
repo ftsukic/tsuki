@@ -8,5 +8,5 @@ import type { DateTimePickerValue } from '../../..'
  */
 export default function FieldDateTimePickerFixture() {
   const [value, setValue] = useState<DateTimePickerValue>(['2026', '09', '13', '13', '30'])
-  return <FieldDateTimePicker label="日期时间" value={value} onChange={setValue} />
+  return <FieldDateTimePicker title="日期时间" value={value} onChange={setValue} />
 }

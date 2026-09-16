@@ -6,25 +6,7 @@ import { Switch } from '../switch'
 import type { SwitchProps } from '../switch'
 import { useComponentToken } from '../theme'
 import { createFieldCellStyles, getFieldToken } from './style'
-import type { FieldLabelAlign } from './types'
-
-type FieldSwitchCellProps = Pick<
-  CellProps,
-  | 'titleExtra'
-  | 'valueExtra'
-  | 'extra'
-  | 'vertical'
-  | 'center'
-  | 'valueAlign'
-  | 'required'
-  | 'border'
-  | 'icon'
-  | 'isLink'
-  | 'clickable'
-  | 'arrowDirection'
-  | 'onPress'
-  | 'onPressDebounceWait'
->
+import type { FieldCellProps, FieldTitleAlign } from './types'
 
 type SwitchAdapterProps<ActiveValueT, InactiveValueT> = Omit<
   SwitchProps<ActiveValueT, InactiveValueT>,
@@ -40,9 +22,10 @@ type SwitchAdapterProps<ActiveValueT, InactiveValueT> = Omit<
 >
 
 export interface FieldSwitchProps<ActiveValueT = boolean, InactiveValueT = boolean>
-  extends FieldSwitchCellProps, SwitchAdapterProps<ActiveValueT, InactiveValueT> {
+  extends FieldCellProps, SwitchAdapterProps<ActiveValueT, InactiveValueT> {
+  title?: ReactNode
+  titleExtra?: ReactNode
   label?: ReactNode
-  labelExtra?: ReactNode
   value?: ActiveValueT | InactiveValueT
   defaultValue?: ActiveValueT | InactiveValueT
   activeValue?: ActiveValueT
@@ -50,8 +33,8 @@ export interface FieldSwitchProps<ActiveValueT = boolean, InactiveValueT = boole
   onChange?: (value: ActiveValueT | InactiveValueT) => void
   disabled?: boolean
   readOnly?: boolean
-  labelWidth?: DimensionValue
-  labelAlign?: FieldLabelAlign
+  titleWidth?: DimensionValue
+  titleAlign?: FieldTitleAlign
   style?: CellProps['style']
   cellStyles?: CellStyles
   switchOnPress?: SwitchProps<ActiveValueT, InactiveValueT>['onPress']
@@ -63,8 +46,9 @@ export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT =
   props: FieldSwitchProps<ActiveValueT, InactiveValueT>,
 ) {
   const {
+    title,
+    titleExtra,
     label,
-    labelExtra,
     value,
     defaultValue,
     activeValue,
@@ -82,8 +66,8 @@ export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT =
     extra,
     required,
     vertical,
-    labelWidth,
-    labelAlign,
+    titleWidth,
+    titleAlign,
     valueAlign,
     icon,
     isLink,
@@ -91,6 +75,7 @@ export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT =
     arrowDirection,
     onPress,
     border,
+    divider,
     style,
     cellStyles,
     onPressDebounceWait,
@@ -99,16 +84,17 @@ export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT =
 
   const fieldToken = useComponentToken('Field', getFieldToken)
   const resolvedCellStyles = createFieldCellStyles(fieldToken, {
-    labelWidth,
-    labelAlign,
+    titleWidth,
+    titleAlign,
     vertical,
     cellStyles,
   })
 
   return (
     <Cell
-      title={label}
-      titleExtra={labelExtra}
+      title={title}
+      titleExtra={titleExtra}
+      label={label}
       value={
         <Switch
           {...switchProps}
@@ -139,6 +125,7 @@ export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT =
       arrowDirection={arrowDirection}
       onPress={onPress}
       border={border}
+      divider={divider}
       style={style}
       onPressDebounceWait={onPressDebounceWait}
       styles={resolvedCellStyles}

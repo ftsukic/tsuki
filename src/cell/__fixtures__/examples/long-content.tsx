@@ -6,7 +6,7 @@ import { Cell } from '../../..'
  */
 export default function CellLongContentFixture() {
   return (
-    <>
+    <Cell.Group border={false}>
       <Cell
         title="这是一段需要收缩的较长标题这是一段需要收缩的较长标题这是一段需要收缩的较长标题"
         titleLines={1}
@@ -42,6 +42,6 @@ export default function CellLongContentFixture() {
         valueLines={3}
         isLink
       />
-    </>
+    </Cell.Group>
   )
 }

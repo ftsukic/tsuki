@@ -1,4 +1,4 @@
-import { Children } from 'react'
+import { Fragment, isValidElement, type ReactNode } from 'react'
 import { View } from 'react-native'
 import { Divider } from '../divider'
 import { resolveStyles } from '../style'
@@ -19,6 +19,15 @@ function getPosition(index: number, count: number): CellGroupPosition {
   return 'middle'
 }
 
+function flattenCellGroupChildren(children: ReactNode): ReactNode[] {
+  if (children === null || children === undefined || children === false) return []
+  if (Array.isArray(children)) return children.flatMap(flattenCellGroupChildren)
+  if (isValidElement(children) && children.type === Fragment) {
+    return flattenCellGroupChildren((children.props as { children?: ReactNode }).children)
+  }
+  return [children]
+}
+
 export function CellGroup({
   children,
   testID,
@@ -34,7 +43,7 @@ export function CellGroup({
     props: { children, testID, title, extra, inset, border, style, styles },
     state: {},
   })
-  const childItems = Children.toArray(children)
+  const childItems = flattenCellGroupChildren(children)
   const hasHeader = isVisible(title) || isVisible(extra)
   const titlePaddingHorizontal = inset
     ? token.groupInsetTitlePaddingHorizontal
@@ -112,6 +121,7 @@ export function CellGroup({
           semantic?.body,
         ]}
       >
+        {renderChildren()}
         {border && !inset ? (
           <>
             <Divider
@@ -119,16 +129,13 @@ export function CellGroup({
               style={{ position: 'absolute', top: 0, left: 0, right: 0 }}
               thickness={token.groupBorderWidth}
             />
-            {renderChildren()}
             <Divider
               color={token.groupBorderColor}
               style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}
               thickness={token.groupBorderWidth}
             />
           </>
-        ) : (
-          renderChildren()
-        )}
+        ) : null}
       </View>
     </View>
   )

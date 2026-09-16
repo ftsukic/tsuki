@@ -1,5 +1,11 @@
 # @ftsukic/tsuki
 
+## 0.0.6
+
+### Patch Changes
+
+- Align Cell and Field title APIs, add explicit divider control, and update the related documentation and examples.
+
 ## 0.0.5
 
 ### Patch Changes

@@ -8,7 +8,8 @@ export { FieldTimePicker } from './field-time-picker'
 export { FieldDateTimePicker } from './field-date-time-picker'
 export { getFieldStatusColor, getFieldStyles, getFieldToken } from './style'
 export type {
-  FieldLabelAlign,
+  FieldCellProps,
+  FieldTitleAlign,
   FieldSemanticStyles,
   FieldStatus,
   FieldStyleInfo,

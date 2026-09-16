@@ -5,43 +5,26 @@ import { Cell } from '../cell'
 import { useComponentToken } from '../theme'
 import { createFieldCellStyles, getFieldToken } from './style'
 import { useFieldValue } from './use-field-value'
-import type { FieldLabelAlign } from './types'
+import type { FieldCellProps, FieldTitleAlign } from './types'
 import { Radio } from '../radio'
 import type { RadioDirection, RadioGroupProps, RadioOption, RadioValue } from '../radio'
-
-type FieldRadioCellProps = Pick<
-  CellProps,
-  | 'titleExtra'
-  | 'valueExtra'
-  | 'extra'
-  | 'vertical'
-  | 'center'
-  | 'valueAlign'
-  | 'required'
-  | 'border'
-  | 'icon'
-  | 'isLink'
-  | 'clickable'
-  | 'arrowDirection'
-  | 'onPress'
-  | 'onPressDebounceWait'
->
 
 type RadioAdapterProps = Omit<
   RadioGroupProps,
   'children' | 'value' | 'defaultValue' | 'disabled' | 'onChange' | 'style'
 >
 
-export interface FieldRadioProps extends FieldRadioCellProps, RadioAdapterProps {
+export interface FieldRadioProps extends FieldCellProps, RadioAdapterProps {
+  title?: ReactNode
+  titleExtra?: ReactNode
   label?: ReactNode
-  labelExtra?: ReactNode
   value?: RadioValue
   defaultValue?: RadioValue
   onChange?: (value: RadioValue) => void
   disabled?: boolean
   readOnly?: boolean
-  labelWidth?: DimensionValue
-  labelAlign?: FieldLabelAlign
+  titleWidth?: DimensionValue
+  titleAlign?: FieldTitleAlign
   style?: CellProps['style']
   cellStyles?: CellStyles
   children?: ReactNode
@@ -56,8 +39,9 @@ export function FieldRadio(props: FieldRadioProps) {
     options,
     direction,
     gap,
+    title,
+    titleExtra,
     label,
-    labelExtra,
     value,
     defaultValue,
     onChange,
@@ -71,8 +55,8 @@ export function FieldRadio(props: FieldRadioProps) {
     buttonLayout,
     buttonColumns,
     vertical,
-    labelWidth,
-    labelAlign,
+    titleWidth,
+    titleAlign,
     valueAlign,
     icon,
     isLink,
@@ -80,6 +64,7 @@ export function FieldRadio(props: FieldRadioProps) {
     arrowDirection,
     onPress,
     border,
+    divider,
     style,
     cellStyles,
     ...groupProps
@@ -88,16 +73,17 @@ export function FieldRadio(props: FieldRadioProps) {
   const fieldToken = useComponentToken('Field', getFieldToken)
   const { currentValue, setValue } = useFieldValue({ value, defaultValue, onChange })
   const resolvedCellStyles = createFieldCellStyles(fieldToken, {
-    labelWidth,
-    labelAlign,
+    titleWidth,
+    titleAlign,
     vertical,
     cellStyles,
   })
 
   return (
     <Cell
-      title={label}
-      titleExtra={labelExtra}
+      title={title}
+      titleExtra={titleExtra}
+      label={label}
       value={
         <Radio.Group
           {...groupProps}
@@ -129,6 +115,7 @@ export function FieldRadio(props: FieldRadioProps) {
       arrowDirection={arrowDirection}
       onPress={onPress}
       border={border}
+      divider={divider}
       style={style}
       onPressDebounceWait={props.onPressDebounceWait}
       styles={resolvedCellStyles}

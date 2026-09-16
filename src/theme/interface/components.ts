@@ -186,8 +186,8 @@ export interface InputToken {
 }
 
 export interface FieldToken {
-  defaultLabelWidth: number
-  labelGap: number
+  defaultTitleWidth: number
+  titleGap: number
   descriptionGap: number
   errorGap: number
   descriptionColor: string

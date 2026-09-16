@@ -6,7 +6,7 @@ import { Cell } from '../../..'
  */
 export default function CellHorizontalFixture() {
   return (
-    <>
+    <Cell.Group border={false}>
       <Cell title="单元格" value="1内容内容内容内容内容内容内容1内2" />
       <Cell title="可省略" value="1内容内容内容内容内容内容内容内容..." valueLines={1} />
       <Cell
@@ -15,6 +15,6 @@ export default function CellHorizontalFixture() {
         value="1内容内容内容内容内容内容内容内容内容内容内容内容..."
         valueLines={2}
       />
-    </>
+    </Cell.Group>
   )
 }

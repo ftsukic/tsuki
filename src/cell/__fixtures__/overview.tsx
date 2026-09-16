@@ -1,6 +1,7 @@
 import { FixtureOverview } from '../../fixture-overview'
 import CellBasicExample from './examples/basic'
 import CellCenterExample from './examples/center'
+import CellDividerExample from './examples/divider'
 import CellGroupExample from './examples/group'
 import CellGroupInsetExample from './examples/group-inset'
 import CellGroupTitleExample from './examples/group-title'
@@ -101,6 +102,12 @@ export default function CellOverview() {
           description: '展示 center 对多行 Cell 内容的垂直对齐。',
           id: 'center',
           title: 'Center',
+        },
+        {
+          Component: CellDividerExample,
+          description: '展示 standalone 与连续 Cell 的显式 divider 控制。',
+          id: 'divider',
+          title: 'Divider',
         },
         {
           Component: CellGroupExample,

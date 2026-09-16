@@ -1,6 +1,7 @@
 import * as packageExports from '..'
 import {
   Checkbox,
+  Cell,
   ConfigProvider,
   FieldCheckbox,
   FieldDatePicker,
@@ -41,12 +42,64 @@ function findNodes(value: unknown, predicate: (node: JsonNode) => boolean): Json
   return (predicate(node) ? [node] : []).concat(findNodes(node.children, predicate))
 }
 
+function dividerCount(tree: unknown) {
+  return findNodes(tree, (node) => {
+    const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
+    return style?.position === 'absolute' && style?.bottom === 0
+  }).length
+}
+
+function groupHairlineCount(tree: unknown) {
+  return findNodes(tree, (node) => {
+    const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
+    return (
+      style?.position === 'absolute' &&
+      style?.left === 0 &&
+      style?.right === 0 &&
+      (style?.top === 0 || style?.bottom === 0)
+    )
+  }).length
+}
+
 async function press(target: Parameters<typeof fireEvent.press>[0]) {
   fireEvent.press(target)
   await Promise.resolve()
 }
 
 describe('FieldInput', () => {
+  it('inherits Cell divider overrides and group positioning', async () => {
+    const { toJSON: openedToJSON } = await render(<FieldInput divider testID="field" />)
+    expect(dividerCount(openedToJSON())).toBe(1)
+
+    const { toJSON: blockedToJSON } = await render(
+      <FieldInput border={false} divider testID="field" />,
+    )
+    expect(dividerCount(blockedToJSON())).toBe(0)
+
+    const { toJSON: automaticToJSON } = await render(
+      <Cell.Group border={false}>
+        <FieldInput testID="first" />
+        <FieldInput testID="last" />
+      </Cell.Group>,
+    )
+    expect(dividerCount(automaticToJSON())).toBe(1)
+    expect(groupHairlineCount(automaticToJSON())).toBe(0)
+
+    const { toJSON: overriddenToJSON } = await render(
+      <Cell.Group border={false}>
+        <FieldInput divider={false} testID="first" />
+        <FieldInput divider testID="last" />
+      </Cell.Group>,
+    )
+    expect(dividerCount(overriddenToJSON())).toBe(1)
+  })
+
+  it('passes divider through another Field adapter', async () => {
+    const view = await render(<FieldSwitch divider label="通知" />)
+
+    expect(dividerCount(view.toJSON())).toBe(1)
+  })
+
   it('centers the Cell row by default', async () => {
     const view = await render(<FieldInput label="用户名" defaultValue="张三" />)
     const cellRows = findNodes(view.toJSON(), (node) => {
@@ -200,11 +253,11 @@ describe('FieldInput', () => {
     await waitFor(() => expect(StyleSheet.flatten(input.props.style).height).toBe(116))
   })
 
-  it('applies label width and alignment through Cell styles', async () => {
+  it('applies title width and alignment through Cell styles', async () => {
     const theme = getDesignToken()
     const fieldToken = getFieldToken(theme)
 
-    const view = await render(<FieldInput label="手机号" labelWidth={180} labelAlign="right" />)
+    const view = await render(<FieldInput title="手机号" titleWidth={180} titleAlign="right" />)
 
     const labelAreas = findNodes(view.toJSON(), (node) => {
       const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
@@ -220,7 +273,21 @@ describe('FieldInput', () => {
     expect(StyleSheet.flatten(screen.getByText('手机号').props.style)).toMatchObject({
       textAlign: 'right',
     })
-    expect(fieldToken.defaultLabelWidth).toBeCloseTo(theme.fontSize * 6.2)
+    expect(fieldToken.defaultTitleWidth).toBeCloseTo(theme.fontSize * 6.2)
+  })
+
+  it('uses Cell title, titleExtra, and label semantics directly', async () => {
+    await render(<FieldInput title="手机号" titleExtra="必填" label="用于接收验证码" />)
+
+    expect(screen.getByText('手机号')).toBeTruthy()
+    expect(screen.getByText('必填')).toBeTruthy()
+    expect(screen.getByText('用于接收验证码')).toBeTruthy()
+    expect(StyleSheet.flatten(screen.getByText('手机号').props.style)).toMatchObject({
+      fontSize: 14,
+    })
+    expect(StyleSheet.flatten(screen.getByText('用于接收验证码').props.style)).toMatchObject({
+      fontSize: 12,
+    })
   })
 
   it('gives FieldInput disabled/readOnly state precedence and preserves the ref', async () => {

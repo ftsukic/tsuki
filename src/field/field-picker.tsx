@@ -13,26 +13,8 @@ import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
 import { renderFieldFeedback, resolveFieldStatus } from './feedback'
 import { createFieldCellStyles, getFieldStyles, getFieldToken } from './style'
-import type { FieldLabelAlign, FieldStatus, FieldStyles } from './types'
+import type { FieldCellProps, FieldStatus, FieldStyles, FieldTitleAlign } from './types'
 import { useFieldValue } from './use-field-value'
-
-type FieldPickerCellProps = Pick<
-  CellProps,
-  | 'titleExtra'
-  | 'valueExtra'
-  | 'extra'
-  | 'vertical'
-  | 'center'
-  | 'valueAlign'
-  | 'required'
-  | 'border'
-  | 'icon'
-  | 'isLink'
-  | 'clickable'
-  | 'arrowDirection'
-  | 'onPress'
-  | 'onPressDebounceWait'
->
 
 type PickerAdapterProps = Omit<
   PickerProps,
@@ -44,16 +26,17 @@ export type FieldPickerFormatValue = (
   values: readonly PickerValue[],
 ) => ReactNode
 
-export interface FieldPickerProps extends FieldPickerCellProps, PickerAdapterProps {
+export interface FieldPickerProps extends FieldCellProps, PickerAdapterProps {
+  title?: ReactNode
+  titleExtra?: ReactNode
   label?: ReactNode
-  labelExtra?: ReactNode
   value?: readonly PickerValue[]
   defaultValue?: readonly PickerValue[]
   onChange?: (value: readonly PickerValue[]) => void
   disabled?: boolean
   readOnly?: boolean
-  labelWidth?: DimensionValue
-  labelAlign?: FieldLabelAlign
+  titleWidth?: DimensionValue
+  titleAlign?: FieldTitleAlign
   description?: ReactNode
   errorMessage?: ReactNode
   status?: FieldStatus
@@ -88,8 +71,9 @@ export function FieldPicker(props: FieldPickerProps) {
     formatValue,
     pickerStyle,
     pickerStyles,
+    title,
+    titleExtra,
     label,
-    labelExtra,
     value,
     defaultValue,
     onChange,
@@ -100,8 +84,8 @@ export function FieldPicker(props: FieldPickerProps) {
     readOnly = false,
     vertical,
     center = true,
-    labelWidth,
-    labelAlign,
+    titleWidth,
+    titleAlign,
     valueAlign,
     description,
     errorMessage,
@@ -112,6 +96,7 @@ export function FieldPicker(props: FieldPickerProps) {
     arrowDirection,
     onPress,
     border,
+    divider,
     style,
     styles,
     cellStyles,
@@ -161,8 +146,8 @@ export function FieldPicker(props: FieldPickerProps) {
   }, [columns])
 
   const resolvedCellStyles = createFieldCellStyles(fieldToken, {
-    labelWidth,
-    labelAlign,
+    titleWidth,
+    titleAlign,
     vertical,
     cellStyles,
   })
@@ -177,8 +162,9 @@ export function FieldPicker(props: FieldPickerProps) {
   return (
     <>
       <Cell
-        title={label}
-        titleExtra={labelExtra}
+        title={title}
+        titleExtra={titleExtra}
+        label={label}
         value={
           <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.control]}>
             {renderSelectorValue(
@@ -202,6 +188,7 @@ export function FieldPicker(props: FieldPickerProps) {
         arrowDirection={arrowDirection}
         onPress={handleOpen}
         border={border}
+        divider={divider}
         style={style}
         onPressDebounceWait={props.onPressDebounceWait}
         styles={resolvedCellStyles}

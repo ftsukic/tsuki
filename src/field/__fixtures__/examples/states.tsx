@@ -1,4 +1,4 @@
-import { FieldInput, FieldRadio } from '../../..'
+import { Cell, FieldInput, FieldRadio } from '../../..'
 
 /**
  * @title Layout and states
@@ -6,9 +6,10 @@ import { FieldInput, FieldRadio } from '../../..'
  */
 export default function FieldStatesFixture() {
   return (
-    <>
+    <Cell.Group border={false}>
       <FieldInput
-        label="备注"
+        title="备注"
+        label="补充说明"
         maxLength={80}
         vertical
         multiline
@@ -19,7 +20,7 @@ export default function FieldStatesFixture() {
         placeholder="请输入备注"
       />
       <FieldRadio
-        label="只读状态"
+        title="只读状态"
         value="yes"
         readOnly
         options={[
@@ -27,7 +28,7 @@ export default function FieldStatesFixture() {
           { value: 'no', label: '否' },
         ]}
       />
-      <FieldInput label="禁用状态" defaultValue="不可编辑" disabled />
-    </>
+      <FieldInput title="禁用状态" defaultValue="不可编辑" disabled />
+    </Cell.Group>
   )
 }

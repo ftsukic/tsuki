@@ -6,7 +6,7 @@ import { Cell, Text } from '../../..'
  */
 export default function CellVerticalFixture() {
   return (
-    <>
+    <Cell.Group border={false}>
       <Cell vertical title="垂直布局标题" value="垂直布局value" />
       <Cell
         vertical
@@ -44,6 +44,6 @@ export default function CellVerticalFixture() {
         extra={<Text>Extra</Text>}
         isLink
       />
-    </>
+    </Cell.Group>
   )
 }

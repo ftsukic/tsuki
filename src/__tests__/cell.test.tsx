@@ -42,9 +42,128 @@ function cellDividerCount(cell: JsonNode) {
   ).length
 }
 
+function groupHairlineCount(group: JsonNode) {
+  return findNodes(group, (node) => {
+    const style = nodeStyle(node)
+    return (
+      node !== group &&
+      style.position === 'absolute' &&
+      style.left === 0 &&
+      style.right === 0 &&
+      (style.top === 0 || style.bottom === 0)
+    )
+  }).length
+}
+
 const press = (instance: Parameters<typeof fireEvent.press>[0]) => fireEvent.press(instance)
 
 describe('Cell', () => {
+  it('does not render a divider for a standalone Cell', async () => {
+    const view = await render(<Cell testID="single" />)
+
+    expect(cellDividerCount(cellNode(view.toJSON(), 'single'))).toBe(0)
+  })
+
+  it('allows divider to override automatic positioning while respecting border', async () => {
+    const { toJSON: standaloneToJSON } = await render(
+      <>
+        <Cell testID="opened" divider />
+        <Cell testID="closed" divider={false} />
+        <Cell testID="blocked" border={false} divider />
+      </>,
+    )
+    const standaloneTree = standaloneToJSON()
+    expect(cellDividerCount(cellNode(standaloneTree, 'opened'))).toBe(1)
+    expect(cellDividerCount(cellNode(standaloneTree, 'closed'))).toBe(0)
+    expect(cellDividerCount(cellNode(standaloneTree, 'blocked'))).toBe(0)
+
+    const { toJSON: groupToJSON } = await render(
+      <Cell.Group border={false}>
+        <Cell testID="group-first" divider={false} />
+        <Cell testID="group-last" divider />
+      </Cell.Group>,
+    )
+    const groupTree = groupToJSON()
+    expect(cellDividerCount(cellNode(groupTree, 'group-first'))).toBe(0)
+    expect(cellDividerCount(cellNode(groupTree, 'group-last'))).toBe(1)
+
+    const { toJSON: blockedLastToJSON } = await render(
+      <Cell.Group>
+        <Cell />
+        <Cell testID="blocked-last" border={false} divider />
+      </Cell.Group>,
+    )
+    expect(cellDividerCount(cellNode(blockedLastToJSON(), 'blocked-last'))).toBe(0)
+  })
+
+  it('keeps Cell dividers independent from group borders', async () => {
+    const { toJSON: borderedToJSON } = await render(
+      <Cell.Group testID="single-group">
+        <Cell testID="only" />
+      </Cell.Group>,
+    )
+    const borderedTree = borderedToJSON()
+    expect(cellDividerCount(cellNode(borderedTree, 'only'))).toBe(0)
+    expect(groupHairlineCount(cellNode(borderedTree, 'single-group'))).toBe(2)
+
+    const { toJSON: borderlessToJSON } = await render(
+      <Cell.Group testID="borderless-group" border={false}>
+        <Cell testID="first" />
+        <Cell testID="last" />
+      </Cell.Group>,
+    )
+    const borderlessTree = borderlessToJSON()
+    expect(cellDividerCount(cellNode(borderlessTree, 'first'))).toBe(1)
+    expect(cellDividerCount(cellNode(borderlessTree, 'last'))).toBe(0)
+    expect(groupHairlineCount(cellNode(borderlessTree, 'borderless-group'))).toBe(0)
+  })
+
+  it('flattens nested arrays and Fragments when assigning group positions', async () => {
+    const { toJSON } = await render(
+      <Cell.Group>
+        {[
+          <Cell key="first" testID="first" />,
+          [
+            <>
+              <Cell testID="middle" />
+              <Cell testID="last" />
+            </>,
+          ],
+        ]}
+      </Cell.Group>,
+    )
+    const tree = toJSON()
+
+    expect(cellDividerCount(cellNode(tree, 'first'))).toBe(1)
+    expect(cellDividerCount(cellNode(tree, 'middle'))).toBe(1)
+    expect(cellDividerCount(cellNode(tree, 'last'))).toBe(0)
+  })
+
+  it('keeps middle dividers and honors Cell border=false in groups', async () => {
+    const view = await render(
+      <Cell.Group>
+        <Cell testID="first" />
+        <Cell testID="middle" />
+        <Cell testID="last" />
+      </Cell.Group>,
+    )
+    const tree = view.toJSON()
+    expect(cellDividerCount(cellNode(tree, 'first'))).toBe(1)
+    expect(cellDividerCount(cellNode(tree, 'middle'))).toBe(1)
+    expect(cellDividerCount(cellNode(tree, 'last'))).toBe(0)
+
+    const { toJSON: insetToJSON } = await render(
+      <Cell.Group inset testID="inset-group">
+        <Cell testID="inset-first" border={false} />
+        <Cell testID="inset-last" />
+      </Cell.Group>,
+    )
+    const insetTree = insetToJSON()
+    expect(cellDividerCount(cellNode(insetTree, 'inset-first'))).toBe(0)
+    expect(cellDividerCount(cellNode(insetTree, 'inset-last'))).toBe(0)
+    expect(groupHairlineCount(cellNode(insetTree, 'inset-group'))).toBe(0)
+  })
+
   it('uses stretch for the default row and center for the center modifier', async () => {
     const view = await render(
       <ConfigProvider>
@@ -361,6 +480,20 @@ describe('Cell', () => {
     expect(resolved.suffix).toMatchObject({ height: token.lineHeight })
   })
 
+  it('keeps the icon slot at its minimum size while allowing larger nodes to size it', () => {
+    const token = getCellToken(getDesignToken())
+    const resolved = getCellStyles(token, {}, { pressed: false, disabled: false })
+
+    expect(resolved.icon).not.toHaveProperty('width')
+    expect(resolved.icon).not.toHaveProperty('height')
+    expect(resolved.icon).toMatchObject({
+      minWidth: token.iconSize,
+      minHeight: token.lineHeight,
+      marginRight: token.iconGap,
+      flexShrink: 0,
+    })
+  })
+
   it('renders the group title outside the cells body', async () => {
     const view = await render(
       <ConfigProvider>
@@ -592,7 +725,10 @@ describe('Cell', () => {
           },
         }}
       >
-        <Cell testID="themed-cell" title="主题分割线" />
+        <Cell.Group border={false}>
+          <Cell testID="themed-cell" title="主题分割线" />
+          <Cell title="最后一项" />
+        </Cell.Group>
       </ConfigProvider>,
     )
 

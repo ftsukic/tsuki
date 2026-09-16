@@ -17,26 +17,10 @@ import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
 import { renderFieldFeedback, resolveFieldStatus } from './feedback'
 import { createFieldCellStyles, getFieldStyles, getFieldToken } from './style'
-import type { FieldLabelAlign, FieldStatus, FieldStyles } from './types'
+import type { FieldCellProps, FieldStatus, FieldStyles, FieldTitleAlign } from './types'
 import { useFieldValue } from './use-field-value'
 
-type FieldDateTimePickerCellProps = Pick<
-  CellProps,
-  | 'titleExtra'
-  | 'valueExtra'
-  | 'extra'
-  | 'vertical'
-  | 'center'
-  | 'valueAlign'
-  | 'required'
-  | 'border'
-  | 'icon'
-  | 'isLink'
-  | 'clickable'
-  | 'arrowDirection'
-  | 'onPress'
-  | 'onPressDebounceWait'
->
+type FieldDateTimePickerCellProps = FieldCellProps
 type DateTimePickerAdapterProps = Omit<
   DateTimePickerProps,
   'value' | 'defaultValue' | 'onChange' | 'onConfirm' | 'onCancel' | 'style' | 'styles'
@@ -50,14 +34,13 @@ export type FieldDateTimePickerFormatValue = (
 export interface FieldDateTimePickerProps
   extends FieldDateTimePickerCellProps, DateTimePickerAdapterProps {
   label?: ReactNode
-  labelExtra?: ReactNode
   value?: DateTimePickerValue
   defaultValue?: DateTimePickerValue
   onChange?: (value: DateTimePickerValue) => void
   disabled?: boolean
   readOnly?: boolean
-  labelWidth?: DimensionValue
-  labelAlign?: FieldLabelAlign
+  titleWidth?: DimensionValue
+  titleAlign?: FieldTitleAlign
   description?: ReactNode
   errorMessage?: ReactNode
   status?: FieldStatus
@@ -109,8 +92,9 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
     formatValue,
     pickerStyle,
     pickerStyles,
+    title,
+    titleExtra,
     label,
-    labelExtra,
     value,
     defaultValue,
     onChange,
@@ -121,8 +105,8 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
     readOnly = false,
     vertical,
     center = true,
-    labelWidth,
-    labelAlign,
+    titleWidth,
+    titleAlign,
     valueAlign,
     description,
     errorMessage,
@@ -133,6 +117,7 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
     arrowDirection,
     onPress,
     border,
+    divider,
     style,
     styles,
     cellStyles,
@@ -175,8 +160,8 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
     setVisible(false)
   }, [])
   const resolvedCellStyles = createFieldCellStyles(fieldToken, {
-    labelWidth,
-    labelAlign,
+    titleWidth,
+    titleAlign,
     vertical,
     cellStyles,
   })
@@ -189,8 +174,9 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
   return (
     <>
       <Cell
-        title={label}
-        titleExtra={labelExtra}
+        title={title}
+        titleExtra={titleExtra}
+        label={label}
         value={
           <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.control]}>
             {renderSelectorValue(
@@ -214,6 +200,7 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
         arrowDirection={arrowDirection}
         onPress={handleOpen}
         border={border}
+        divider={divider}
         style={style}
         onPressDebounceWait={props.onPressDebounceWait}
         styles={resolvedCellStyles}

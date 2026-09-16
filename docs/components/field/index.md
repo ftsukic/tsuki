@@ -69,12 +69,13 @@ import {
 
 ## 共同表单属性
 
-八个适配器都保留 `label` 作为表单语义名称，并将它传给 `Cell.title`。以下属性在八个适配器中含义一致：
+八个适配器都复用 `Cell` 的展示层语义。以下属性在八个适配器中含义一致：
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| label | `ReactNode` | — | 映射到 `Cell.title`。 |
-| labelExtra | `ReactNode` | — | 映射到 `Cell.titleExtra`。 |
+| title | `ReactNode` | — | 映射到 `Cell.title`，字段主标题。 |
+| titleExtra | `ReactNode` | — | 映射到 `Cell.titleExtra`，主标题同行附加内容。 |
+| label | `ReactNode` | — | 映射到 `Cell.label`，标题下方辅助描述。 |
 | valueExtra | `ReactNode` | — | 映射到 `Cell.valueExtra`，不进入控件区域。 |
 | extra | `ReactNode` | — | 映射到 `Cell.extra`。 |
 | value | 适配器值类型 | — | 受控值。 |
@@ -85,8 +86,8 @@ import {
 | readOnly | `boolean` | `false` | 阻止控件交互，但保留正常视觉；`FieldPicker` 也不会打开。 |
 | vertical | `boolean` | `false` | 映射到 `Cell.vertical`。 |
 | center | `boolean` | `FieldInput` 为 `true`，其余适配器为 `false` | 映射到 `Cell.center`，由 Cell 决定垂直居中行为。 |
-| labelWidth | `DimensionValue` | Field token | horizontal 时覆盖 Cell 的 label 区宽度。 |
-| labelAlign | `'left' \| 'center' \| 'right'` | `'left'` | 通过 `Cell.styles.title` 设置 label 文本对齐。 |
+| titleWidth | `DimensionValue` | Field token | horizontal 时覆盖 Cell 的 title 区宽度。 |
+| titleAlign | `'left' \| 'center' \| 'right'` | `'left'` | 通过 `Cell.styles.title` 设置 title 文本对齐。 |
 | valueAlign | `'left' \| 'center' \| 'right'` | horizontal 为 `'right'`，vertical 为 `'left'` | 映射到 Cell value 区域的水平对齐；`FieldInput` 同时映射到 Input 文本。 |
 | icon | `ReactNode` | — | 映射到 `Cell.icon`。 |
 | isLink | `boolean` | `false`；FieldPicker 为 `true` | 映射到 Cell 链接箭头。 |
@@ -94,10 +95,11 @@ import {
 | arrowDirection | `CellArrowDirection` | `'right'` | 映射到 Cell 箭头方向。 |
 | onPress | `CellProps['onPress']` | — | Cell 行点击回调；FieldPicker 内部使用它打开 Picker。 |
 | border | `boolean` | `true` | 映射到 `Cell.border`。 |
+| divider | `boolean` | — | 映射到 `Cell.divider`；仍受 `border={false}` 限制。 |
 | style | `StyleProp<ViewStyle>` | — | Cell 根节点样式。 |
 | cellStyles | `CellStyles` | — | 直接传给 Cell 的语义样式；用于 Cell 区域定制。 |
 
-`labelWidth`、`labelAlign` 只是在具体适配器调用 Cell 时生成 Cell styles，不会创建隐藏的 Field 布局层。`vertical`、`center`、分割线、箭头和外围布局均由 Cell 负责。FieldRadio 和 FieldCheckbox 不提供反馈节点或 Field 语义 `styles`，只保留 `cellStyles` 定制 Cell 区域。
+`titleWidth`、`titleAlign` 只是在具体适配器调用 Cell 时生成 Cell styles，不会创建隐藏的 Field 布局层。`vertical`、`center`、分割线、箭头和外围布局均由 Cell 负责。FieldRadio 和 FieldCheckbox 不提供反馈节点或 Field 语义 `styles`，只保留 `cellStyles` 定制 Cell 区域。
 
 ## FieldInput
 
@@ -105,7 +107,7 @@ import {
 
 ```tsx | pure
 <FieldInput
-  label="手机号"
+  title="手机号"
   value={phone}
   onChange={setPhone}
   placeholder="请输入手机号"
@@ -124,7 +126,7 @@ import {
 
 ```tsx | pure
 <FieldRadio
-  label="尺寸"
+  title="尺寸"
   value={size}
   onChange={setSize}
   options={[
@@ -144,7 +146,7 @@ button 选项可以设置每行列数；例如文档中的 FieldRadio fixture �
 `FieldCheckbox` 不支持 `description`、`errorMessage`、`status` 或 Field 语义 `styles`；需要反馈内容时，应组合 `Cell` 与自定义 control。
 
 ```tsx | pure
-<FieldCheckbox label="通知方式" value={channels} onChange={setChannels}>
+<FieldCheckbox title="通知方式" value={channels} onChange={setChannels}>
   <Checkbox name="email">邮件</Checkbox>
   <Checkbox name="sms">短信</Checkbox>
 </FieldCheckbox>
@@ -177,7 +179,7 @@ FieldSwitch 继承 Switch 可安全使用的 React Native `PressableProps`，例
 
 ```tsx | pure
 <FieldSwitch
-  label="通知"
+  title="通知"
   value="enabled"
   activeValue="enabled"
   inactiveValue="disabled"
@@ -195,7 +197,7 @@ FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessi
 
 ```tsx | pure
 <FieldPicker
-  label="城市"
+  title="城市"
   value={city}
   onChange={setCity}
   columns={cities}
@@ -213,7 +215,7 @@ FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessi
 
 ```tsx | pure
 <FieldDatePicker
-  label="日期"
+  title="日期"
   value={date}
   onChange={setDate}
   minDate={new Date(2026, 0, 1)}
@@ -230,7 +232,7 @@ FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessi
 `FieldTimePicker` 是 `Cell + Popup + TimePicker` 的时间表单适配器。它保持 `TimePickerValue` 的字符串数组契约，默认显示值为 `09:30`，包含秒列时显示为 `09:30:15`。时间列、边界、步长、`formatter` 和 `filter` 等能力均透传给 TimePicker；滚动只更新 draft，确认后才提交。
 
 ```tsx
-<FieldTimePicker label="时间" defaultValue={['09', '30']} />
+<FieldTimePicker title="时间" defaultValue={['09', '30']} />
 ```
 
 `formatValue` 可自定义 Cell 显示；`pickerStyle` 和 `pickerStyles` 只作用于 TimePicker。
@@ -240,7 +242,7 @@ FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessi
 `FieldDateTimePicker` 是 `Cell + Popup + DateTimePicker` 的日期时间表单适配器。默认使用 `year`、`month`、`day`、`hour`、`minute` 五列，显示值按 `columnsType` 组合日期与时间，例如 `2026-09-13 13:30`；只有时间列时显示为 `13:30`。日期边界、列顺序验证、联动和格式化能力均由 DateTimePicker 负责。
 
 ```tsx
-<FieldDateTimePicker label="日期时间" defaultValue={['2026', '09', '13', '13', '30']} />
+<FieldDateTimePicker title="日期时间" defaultValue={['2026', '09', '13', '13', '30']} />
 ```
 
 `formatValue` 可自定义 Cell 显示；`pickerStyle` 和 `pickerStyles` 只作用于 DateTimePicker。两个适配器都遵循确认提交、取消恢复、遮罩关闭等同取消的 Field 语义。
@@ -249,6 +251,6 @@ FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessi
 
 FieldPicker 的 `styles` 提供表单区域语义插槽：`control`、`feedback`、`description` 和 `error`。FieldInput、FieldRadio、FieldCheckbox、FieldSwitch 不渲染反馈，也不提供 Field 语义 `styles`。Cell 区域使用 `cellStyles`，Input 使用 `inputStyle`/`inputStyles`，Switch 使用 `switchStyle`/`switchStyles`，Picker 使用 `pickerStyle`/`pickerStyles`，各自边界互不重叠。
 
-`theme.components.Field` 仍表示 Field 系列表单 Cell 组合的主题 token，支持 `defaultLabelWidth`、`labelGap`、`descriptionGap`、`errorGap`、`descriptionColor`、`warningColor` 和 `errorColor`。它不产生运行时 `Field` 组件。
+`theme.components.Field` 仍表示 Field 系列表单 Cell 组合的主题 token，支持 `defaultTitleWidth`、`titleGap`、`descriptionGap`、`errorGap`、`descriptionColor`、`warningColor` 和 `errorColor`。它不产生运行时 `Field` 组件。
 
 Field 系列不实现 Form store、rules、validation、trigger、dependencies 或 name；这些能力由上层业务组合实现。

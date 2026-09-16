@@ -8,5 +8,5 @@ import type { TimePickerValue } from '../../..'
  */
 export default function FieldTimePickerFixture() {
   const [value, setValue] = useState<TimePickerValue>(['09', '30'])
-  return <FieldTimePicker label="时间" value={value} onChange={setValue} />
+  return <FieldTimePicker title="时间" value={value} onChange={setValue} />
 }

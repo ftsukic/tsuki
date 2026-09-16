@@ -2,7 +2,7 @@ import type { DimensionValue, TextStyle, ViewStyle } from 'react-native'
 import type { CellStyles } from '../cell'
 import { resolveStyles } from '../style'
 import type { AliasToken, FieldToken } from '../theme'
-import type { FieldLabelAlign, FieldStatus, FieldStyleState } from './types'
+import type { FieldStatus, FieldStyleState, FieldTitleAlign } from './types'
 
 export interface FieldResolvedStyles {
   control: ViewStyle
@@ -12,16 +12,16 @@ export interface FieldResolvedStyles {
 }
 
 export interface FieldCellStyleOptions {
-  labelWidth?: DimensionValue
-  labelAlign?: FieldLabelAlign
+  titleWidth?: DimensionValue
+  titleAlign?: FieldTitleAlign
   vertical?: boolean
   cellStyles?: CellStyles
 }
 
 export function getFieldToken(token: AliasToken): FieldToken {
   return {
-    defaultLabelWidth: token.fontSize * 6.2,
-    labelGap: token.paddingSM,
+    defaultTitleWidth: token.fontSize * 6.2,
+    titleGap: token.paddingSM,
     descriptionGap: token.paddingXS,
     errorGap: token.paddingXS,
     descriptionColor: token.colorTextSecondary,
@@ -69,11 +69,11 @@ export function getFieldStyles(
 
 export function createFieldCellStyles(
   fieldToken: FieldToken,
-  { labelWidth, labelAlign = 'left', vertical = false, cellStyles }: FieldCellStyleOptions,
+  { titleWidth, titleAlign = 'left', vertical = false, cellStyles }: FieldCellStyleOptions,
 ): CellStyles {
   return (info) => {
     const custom = resolveStyles(cellStyles, info)
-    const effectiveLabelWidth = labelWidth ?? fieldToken.defaultLabelWidth
+    const effectiveTitleWidth = titleWidth ?? fieldToken.defaultTitleWidth
 
     return {
       ...custom,
@@ -85,15 +85,15 @@ export function createFieldCellStyles(
               marginRight: undefined,
             }
           : {
-              width: effectiveLabelWidth,
+              width: effectiveTitleWidth,
               flexGrow: 0,
               flexShrink: 0,
               flexBasis: 'auto',
-              marginRight: fieldToken.labelGap,
+              marginRight: fieldToken.titleGap,
             },
         custom?.titleArea,
       ],
-      title: [{ textAlign: labelAlign }, custom?.title],
+      title: [{ textAlign: titleAlign }, custom?.title],
       valueArea: [
         vertical
           ? { width: '100%' }

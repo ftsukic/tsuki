@@ -45,6 +45,7 @@ export interface CellProps extends Omit<PressableProps, 'children' | 'style'> {
   isLink?: boolean
   clickable?: boolean
   border?: boolean
+  divider?: boolean
   required?: boolean
   arrowDirection?: CellArrowDirection
   size?: CellSize

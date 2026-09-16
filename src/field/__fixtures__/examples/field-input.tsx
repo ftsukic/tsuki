@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FieldInput } from '../../..'
+import { Cell, FieldInput } from '../../..'
 import { Text, View } from 'react-native'
 
 /**
@@ -13,22 +13,25 @@ export default function FieldInputFixture() {
     <View>
       <FieldInput
         center
-        label="用户名"
+        title="用户名"
+        label="请输入登录用户名"
         onChange={setName}
         placeholder="请输入用户名"
         clearable
         clearTrigger="always"
       />
       <Text>当前值：{name || '—'}</Text>
-      <FieldInput label="禁用" defaultValue="不可编辑" disabled />
-      <FieldInput label="只读" defaultValue="只读内容" readOnly />
-      <FieldInput
-        label="密码"
-        defaultValue="只读内容"
-        type="password"
-        clearable
-        onChange={setName}
-      />
+      <Cell.Group border={false}>
+        <FieldInput title="禁用" defaultValue="不可编辑" disabled />
+        <FieldInput title="只读" defaultValue="只读内容" readOnly />
+        <FieldInput
+          title="密码"
+          defaultValue="只读内容"
+          type="password"
+          clearable
+          onChange={setName}
+        />
+      </Cell.Group>
     </View>
   )
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Checkbox, FieldCheckbox } from '../../..'
+import { Cell, Checkbox, FieldCheckbox } from '../../..'
 import type { CheckboxOption, CheckboxValue } from '../../..'
 
 /**
@@ -15,9 +15,9 @@ export default function FieldCheckboxFixture() {
   ]
 
   return (
-    <>
+    <Cell.Group border={false}>
       <FieldCheckbox
-        label="通知方式"
+        title="通知方式"
         variant="button"
         buttonVariant="filled"
         value={value}
@@ -36,7 +36,7 @@ export default function FieldCheckboxFixture() {
         <Checkbox name="security">安全提醒</Checkbox>
         <Checkbox name="activity">活动</Checkbox>
       </FieldCheckbox>
-      <FieldCheckbox label="快捷配置" value={value} onChange={setValue} options={options} />
-    </>
+      <FieldCheckbox title="快捷配置" value={value} onChange={setValue} options={options} />
+    </Cell.Group>
   )
 }

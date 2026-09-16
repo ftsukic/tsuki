@@ -9,26 +9,8 @@ import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import type { TextInputInstance } from '../text-input'
 import { createFieldCellStyles, getFieldToken } from './style'
-import type { FieldLabelAlign } from './types'
+import type { FieldCellProps, FieldTitleAlign } from './types'
 import { useFieldValue } from './use-field-value'
-
-type FieldInputCellProps = Pick<
-  CellProps,
-  | 'icon'
-  | 'titleExtra'
-  | 'valueExtra'
-  | 'extra'
-  | 'vertical'
-  | 'center'
-  | 'valueAlign'
-  | 'required'
-  | 'border'
-  | 'isLink'
-  | 'clickable'
-  | 'arrowDirection'
-  | 'onPress'
-  | 'onPressDebounceWait'
->
 
 type InputAdapterProps = Omit<
   InputProps,
@@ -43,16 +25,17 @@ type InputAdapterProps = Omit<
   | 'styles'
 >
 
-export interface FieldInputProps extends FieldInputCellProps, InputAdapterProps {
+export interface FieldInputProps extends FieldCellProps, InputAdapterProps {
+  title?: ReactNode
+  titleExtra?: ReactNode
   label?: ReactNode
-  labelExtra?: ReactNode
   value?: string
   defaultValue?: string
   onChange?: (value: string) => void
   disabled?: boolean
   readOnly?: boolean
-  labelWidth?: DimensionValue
-  labelAlign?: FieldLabelAlign
+  titleWidth?: DimensionValue
+  titleAlign?: FieldTitleAlign
   style?: CellProps['style']
   cellStyles?: CellStyles
   inputStyle?: InputProps['style']
@@ -84,8 +67,9 @@ function createEmbeddedInputStyles(
 export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
   function FieldInput(props, ref) {
     const {
+      title,
+      titleExtra,
       label,
-      labelExtra,
       value,
       defaultValue,
       onChange,
@@ -96,8 +80,8 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
       readOnly,
       vertical,
       center = true,
-      labelWidth,
-      labelAlign,
+      titleWidth,
+      titleAlign,
       valueAlign,
       icon,
       isLink,
@@ -105,6 +89,7 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
       arrowDirection,
       onPress,
       border,
+      divider,
       style,
       inputStyle,
       inputStyles,
@@ -119,16 +104,17 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
       [inputStyles, resolvedValueAlign],
     )
     const resolvedCellStyles = createFieldCellStyles(fieldToken, {
-      labelWidth,
-      labelAlign,
+      titleWidth,
+      titleAlign,
       vertical,
       cellStyles,
     })
 
     return (
       <Cell
-        title={label}
-        titleExtra={labelExtra}
+        title={title}
+        titleExtra={titleExtra}
+        label={label}
         value={
           <Input
             {...inputControlProps}
@@ -158,6 +144,7 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
         arrowDirection={arrowDirection}
         onPress={onPress}
         border={border}
+        divider={divider}
         style={style}
         onPressDebounceWait={props.onPressDebounceWait}
         styles={resolvedCellStyles}
