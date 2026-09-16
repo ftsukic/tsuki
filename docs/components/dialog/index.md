@@ -124,7 +124,7 @@ setDialogDefaultOptions(options: DialogOptions): void
 resetDialogDefaultOptions(): void
 ```
 
-`showDialog` 默认只有确认按钮，确认后 Promise resolve `'confirm'`。`showConfirmDialog` 默认增加取消按钮，确认 resolve `'confirm'`，取消 resolve `'cancel'`。两个函数共用一个当前实例；新调用会先以 `undefined` 结算前一个 pending Promise，再更新当前内容。`closeDialog` 会在关闭动画完成后 resolve `undefined`；PortalHost 卸载时 pending Promise 也会以 `undefined` 结束。
+`showDialog` 默认只有确认按钮，点击确认后 Promise resolve `'confirm'`。`showConfirmDialog` 默认增加取消按钮，点击确认时 Promise resolve `'confirm'`，点击取消时 Promise reject `'cancel'`，因此可以使用 `.then(...).catch(...)`。`beforeClose` 阻止关闭时 Promise 保持 pending。两个函数共用一个当前实例；新调用会先以 `undefined` 结算前一个 pending Promise，再更新当前内容。`closeDialog` 会在关闭动画完成后 resolve `undefined`；PortalHost 卸载时 pending Promise 也会以 `undefined` 结束，这些情况不会模拟用户点击取消。
 
 命令式 options 不包含 `show` 和生命周期回调，显式 options 优先于 `setDialogDefaultOptions`。未挂载 `PortalHost` 时，命令式调用会抛出错误；`closeDialog()` 在没有当前实例时安全无效。`ConfigProvider` 只负责主题，不会替代 `PortalHost`。
 

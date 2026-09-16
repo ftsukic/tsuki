@@ -234,13 +234,14 @@ describe('Dialog', () => {
       </AppProvider>,
     )
     // eslint-disable-next-line testing-library/no-unnecessary-act
+    // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => fireEvent.press(screen.getByTestId('dialog-confirm-button')))
     expect(onConfirm).toHaveBeenCalledTimes(1)
     expect(screen.queryByText('是否继续？')).toBeNull()
     await utils.unmount()
   })
 
-  it('resolves the imperative dialog promises for confirm and cancel', async () => {
+  it('resolves confirm and rejects cancel for imperative dialog promises', async () => {
     const view = await render(<AppProvider />)
 
     let alertPromise!: Promise<unknown>
@@ -257,7 +258,7 @@ describe('Dialog', () => {
     await act(async () => {
       confirmPromise = showConfirmDialog({ message: '需要确认' })
     })
-    const cancelExpectation = expect(confirmPromise).resolves.toBe('cancel')
+    const cancelExpectation = expect(confirmPromise).rejects.toBe('cancel')
     // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => fireEvent.press(screen.getByTestId('dialog-cancel-button')))
     await cancelExpectation
@@ -370,6 +371,7 @@ describe('Dialog', () => {
       settled = true
     })
     // eslint-disable-next-line testing-library/no-unnecessary-act
+    // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => {})
     expect(settled).toBe(false)
 
@@ -420,6 +422,94 @@ describe('Dialog', () => {
     // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => {})
     expect(screen.queryByText('异步拦截')).toBeNull()
+    await view.unmount()
+  })
+
+  it('keeps imperative promises pending when beforeClose blocks confirm or cancel', async () => {
+    const view = await render(<AppProvider />)
+    let confirmPromise!: Promise<unknown>
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {
+      confirmPromise = showConfirmDialog({ beforeClose: () => false, message: '阻止确认' })
+    })
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => fireEvent.press(screen.getByTestId('dialog-confirm-button')))
+    let confirmSettled = false
+    void confirmPromise.then(
+      () => {
+        confirmSettled = true
+      },
+      () => {
+        confirmSettled = true
+      },
+    )
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {})
+    expect(confirmSettled).toBe(false)
+
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {
+      closeDialog()
+    })
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {})
+
+    let cancelPromise!: Promise<unknown>
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {
+      cancelPromise = showConfirmDialog({ beforeClose: () => false, message: '阻止取消' })
+    })
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => fireEvent.press(screen.getByTestId('dialog-cancel-button')))
+    let cancelSettled = false
+    void cancelPromise.then(
+      () => {
+        cancelSettled = true
+      },
+      () => {
+        cancelSettled = true
+      },
+    )
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {})
+    expect(cancelSettled).toBe(false)
+    await view.unmount()
+  })
+
+  it('settles the allowed async beforeClose action with its action semantics', async () => {
+    let allow!: (value: boolean) => void
+    const beforeClose = () => new Promise<boolean>((resolve) => (allow = resolve))
+    const view = await render(<AppProvider />)
+
+    let confirmPromise!: Promise<unknown>
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {
+      confirmPromise = showConfirmDialog({ beforeClose, message: '异步确认' })
+    })
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => fireEvent.press(screen.getByTestId('dialog-confirm-button')))
+    allow(true)
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {})
+    await expect(confirmPromise).resolves.toBe('confirm')
+
+    let cancelAllow!: (value: boolean) => void
+    const cancelBeforeClose = () =>
+      new Promise<boolean>((resolve) => {
+        cancelAllow = resolve
+      })
+    let cancelPromise!: Promise<unknown>
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {
+      cancelPromise = showConfirmDialog({ beforeClose: cancelBeforeClose, message: '异步取消' })
+    })
+    const cancelExpectation = expect(cancelPromise).rejects.toBe('cancel')
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => fireEvent.press(screen.getByTestId('dialog-cancel-button')))
+    cancelAllow(true)
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {})
+    await cancelExpectation
     await view.unmount()
   })
 

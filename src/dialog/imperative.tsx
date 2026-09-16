@@ -7,8 +7,10 @@ import type { PortalKey } from '../portal'
 interface DialogRecord {
   key: PortalKey | null
   options: DialogOptions
-  resolve: (action: DialogAction | undefined) => void
+  resolve: (action: 'confirm' | undefined) => void
+  reject: (action: 'cancel') => void
   show: boolean
+  closingAction: DialogAction | null
   settled: boolean
 }
 
@@ -37,11 +39,18 @@ function replaceRecord(record: DialogRecord, next: Partial<DialogRecord>) {
   }
 }
 
-function settleRecord(record: DialogRecord, action: DialogAction | undefined) {
+function resolveRecord(record: DialogRecord, action: 'confirm' | undefined) {
   if (record.settled) return
 
   record.settled = true
   record.resolve(action)
+}
+
+function rejectRecord(record: DialogRecord, action: 'cancel') {
+  if (record.settled) return
+
+  record.settled = true
+  record.reject(action)
 }
 
 function wrapBeforeClose(
@@ -76,7 +85,7 @@ function DialogMethod({ record }: { record: DialogRecord }) {
     () => () => {
       const current = recordRef.current
       if (currentRecord !== current) return
-      settleRecord(current, undefined)
+      resolveRecord(current, undefined)
       currentRecord = null
     },
     [],
@@ -88,13 +97,14 @@ function DialogMethod({ record }: { record: DialogRecord }) {
     const current = recordRef.current
     const action = actionRef.current
     actionRef.current = null
-    settleRecord(current, action ?? undefined)
-    replaceRecord(current, { show: false })
+    replaceRecord(current, { show: false, closingAction: action })
   }
 
   const handleClose = () => {
     const current = recordRef.current
-    settleRecord(current, undefined)
+    const action = current.closingAction
+    if (action === 'cancel') rejectRecord(current, 'cancel')
+    else resolveRecord(current, action === 'confirm' ? 'confirm' : undefined)
     if (currentRecord === current) currentRecord = null
     if (current.key !== null) unmountPortal(current.key)
   }
@@ -119,16 +129,20 @@ function DialogMethod({ record }: { record: DialogRecord }) {
 /** Displays a Dialog through the active PortalHost. */
 export function showDialog(options: DialogOptions = {}): Promise<DialogAction | undefined> {
   let resolvePromise!: (action: DialogAction | undefined) => void
-  const promise = new Promise<DialogAction | undefined>((resolve) => {
+  let rejectPromise!: (action: 'cancel') => void
+  const promise = new Promise<DialogAction | undefined>((resolve, reject) => {
     resolvePromise = resolve
+    rejectPromise = reject
   })
 
   if (currentRecord?.key !== null && currentRecord) {
-    settleRecord(currentRecord, undefined)
+    resolveRecord(currentRecord, undefined)
     replaceRecord(currentRecord, {
       options: { ...currentOptions, ...options },
       resolve: resolvePromise,
+      reject: rejectPromise,
       show: true,
+      closingAction: null,
       settled: false,
     })
     return promise
@@ -138,7 +152,9 @@ export function showDialog(options: DialogOptions = {}): Promise<DialogAction | 
     key: null,
     options: { ...currentOptions, ...options },
     resolve: resolvePromise,
+    reject: rejectPromise,
     show: true,
+    closingAction: null,
     settled: false,
   }
   currentRecord = record
