@@ -43,6 +43,7 @@ export default function CustomRenderer() {
         visible={visible}
         images={['https://picsum.photos/id/1025/900/900']}
         closeable
+        showIndicators={false}
         onRequestClose={() => setVisible(false)}
         onClosed={() => setVisible(false)}
         renderImage={(image, index, { source, style, onLoadStart, onLoad, onLoadEnd, onError }) => (

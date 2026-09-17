@@ -43,6 +43,8 @@ import { ImagePreview, showImagePreview } from '@ftsukic/tsuki'
 | loop | `boolean` | `true` | 是否循环切换 |
 | showIndex | `boolean` | `true` | 是否显示 `当前页/总数` |
 | showIndicators | `boolean` | `false` | 是否显示底部圆点 |
+| safeAreaInsetTop | `boolean` | `true` | 是否让顶部页码和关闭按钮避让顶部 safe-area |
+| safeAreaInsetBottom | `boolean` | `true` | 是否让底部 indicators 和 toolbar 避让底部 safe-area |
 | minZoom / maxZoom | `number` | `0.5 / 3` | pinch 的 rubber-band 边界；释放后稳定倍率回到 `1..maxZoom` |
 | doubleTapZoom | `number` | `2` | 首次 double tap 的目标倍率 |
 | closeable | `boolean` | `false` | 是否显示关闭按钮 |
@@ -55,14 +57,14 @@ import { ImagePreview, showImagePreview } from '@ftsukic/tsuki'
 | transitionDuration | `number` | token | 缩略图与全屏之间的 rect 动画时长 |
 | renderImage | `(image, index, context) => ReactNode` | — | 替换默认 RN Image 内容；将 `context.style` 应用到最终图片节点，并通过 `context` 的生命周期回调通知加载结果；不需要处理 loading/error UI 或缩放手势 |
 | renderIndex | `({ index, total }) => ReactNode` | — | 自定义页码 |
-| renderToolbar | `({ index, total }) => ReactNode` | — | 自定义工具栏扩展口 |
+| renderToolbar | `({ index, total }) => ReactNode` | — | 自定义底部操作区域内容。ImagePreview 负责底部定位和 safe-area，toolbar 内部内容由业务控制 |
 | onChange | `(index) => void` | — | logical index 改变时调用一次 |
 | onScale | `({ index, scale }) => void` | — | pinch 或 double tap settle 后回调 |
 | onRequestClose | `(reason) => void` | — | 关闭请求；reason 为 `gesture`、`image`、`overlay`、`close-icon`、`back` 或 `imperative` |
 | onOpen / onOpened | `() => void` | — | 打开开始、打开动画结束 |
 | onClose / onClosed | `() => void` / `() => void` | — | visible 从 true 变为 false 后关闭开始、关闭动画结束；关闭请求的 reason 只通过 `onRequestClose` 提供 |
 | style | `StyleProp<ViewStyle>` | — | fullscreen root 样式 |
-| styles | `ImagePreviewStyles` | — | `root`、`overlay`、`pager`、`controls`、`index`、`closeButton`、`closeLabel` 语义样式 |
+| styles | `ImagePreviewStyles` | — | `root`、`overlay`、`pager`、`controls`、`bottomControls`、`index`、`closeButton`、`closeLabel`、`indicators`、`indicator`、`activeIndicator`、`toolbar` 语义样式 |
 
 ImagePreview 继承 React Native `ViewProps`，不提供 Popup、Web DOM、CSS `className` 或自动滚动查找缩略图的 API。字符串图片会转换为 `{ uri: value }`。
 

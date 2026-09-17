@@ -1,9 +1,16 @@
 import React from 'react'
 import * as Reanimated from 'react-native-reanimated'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
-import { Text } from 'react-native'
+import { StyleSheet, Text } from 'react-native'
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import type { ImagePreviewRef, ImagePreviewRenderImageContext } from '..'
-import { ImagePreview, ImagePreviewContent, PortalHost } from '..'
+import {
+  getDesignToken,
+  getImagePreviewToken,
+  ImagePreview,
+  ImagePreviewContent,
+  PortalHost,
+} from '..'
 import { ImagePreviewItem } from '../image-preview/image-preview-item'
 
 async function renderWithHost(element: React.ReactNode) {
@@ -45,6 +52,132 @@ describe('ImagePreview', () => {
   it('renders empty images without an invalid index indicator', async () => {
     await renderWithHost(<ImagePreview visible images={[]} />)
     expect(screen.queryByText('1/0')).toBeNull()
+  })
+
+  it('applies the top safe area independently to the index and close button', async () => {
+    const token = getImagePreviewToken(getDesignToken())
+
+    await render(
+      <SafeAreaInsetsContext.Provider value={{ top: 24, right: 0, bottom: 18, left: 0 }}>
+        <ImagePreviewContent closeable images={['safe-area-top']} visible />
+      </SafeAreaInsetsContext.Provider>,
+    )
+
+    expect(StyleSheet.flatten(screen.getByText('1/1').props.style)).toMatchObject({
+      top: token.indexTop + 24,
+    })
+    expect(StyleSheet.flatten(screen.getByTestId('image-preview-close').props.style)).toMatchObject(
+      {
+        top: token.closeIconTop - 8 + 24,
+      },
+    )
+  })
+
+  it('can disable only the top safe area inset', async () => {
+    const token = getImagePreviewToken(getDesignToken())
+
+    await render(
+      <SafeAreaInsetsContext.Provider value={{ top: 24, right: 0, bottom: 18, left: 0 }}>
+        <ImagePreviewContent
+          closeable
+          images={['safe-area-top-disabled']}
+          safeAreaInsetTop={false}
+          visible
+        />
+      </SafeAreaInsetsContext.Provider>,
+    )
+
+    expect(StyleSheet.flatten(screen.getByText('1/1').props.style)).toMatchObject({
+      top: token.indexTop,
+    })
+    expect(StyleSheet.flatten(screen.getByTestId('image-preview-close').props.style)).toMatchObject(
+      {
+        top: token.closeIconTop - 8,
+      },
+    )
+  })
+
+  it('keeps custom index content in the top safe-area position', async () => {
+    await render(
+      <SafeAreaInsetsContext.Provider value={{ top: 20, right: 0, bottom: 0, left: 0 }}>
+        <ImagePreviewContent
+          images={['custom-index']}
+          renderIndex={() => <Text testID="custom-index">自定义页码</Text>}
+          visible
+        />
+      </SafeAreaInsetsContext.Provider>,
+    )
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId('custom-index').parent?.props.style),
+    ).toMatchObject({
+      top: getImagePreviewToken(getDesignToken()).indexTop + 20,
+    })
+  })
+
+  it('keeps the toolbar and bottom safe area when indicators are hidden', async () => {
+    await render(
+      <SafeAreaInsetsContext.Provider value={{ top: 0, right: 0, bottom: 18, left: 0 }}>
+        <ImagePreviewContent
+          images={['toolbar-a', 'toolbar-b']}
+          renderToolbar={() => <Text testID="toolbar-content">操作</Text>}
+          showIndicators={false}
+          visible
+        />
+      </SafeAreaInsetsContext.Provider>,
+    )
+
+    expect(screen.getByTestId('image-preview-toolbar')).toBeTruthy()
+    expect(screen.getByTestId('toolbar-content')).toBeTruthy()
+    expect(screen.queryByTestId('image-preview-indicators')).toBeNull()
+    expect(
+      StyleSheet.flatten(screen.getByTestId('image-preview-bottom-controls').props.style),
+    ).toMatchObject({
+      bottom: 0,
+      left: 0,
+      paddingBottom: 18,
+      position: 'absolute',
+      right: 0,
+    })
+  })
+
+  it('lays visible indicators and the toolbar in the same bottom controls container', async () => {
+    await render(
+      <ImagePreviewContent
+        images={['indicators-a', 'indicators-b']}
+        renderToolbar={() => <Text testID="indicators-toolbar">操作</Text>}
+        showIndicators
+        visible
+      />,
+    )
+
+    const bottomControls = screen.getByTestId('image-preview-bottom-controls')
+    const indicators = screen.getByTestId('image-preview-indicators')
+    const toolbar = screen.getByTestId('image-preview-toolbar')
+
+    expect(indicators.parent).toBe(bottomControls)
+    expect(toolbar.parent).toBe(bottomControls)
+    expect(StyleSheet.flatten(indicators.props.style)).not.toMatchObject({
+      bottom: expect.anything(),
+      position: 'absolute',
+    })
+  })
+
+  it('can disable only the bottom safe area inset', async () => {
+    await render(
+      <SafeAreaInsetsContext.Provider value={{ top: 0, right: 0, bottom: 18, left: 0 }}>
+        <ImagePreviewContent
+          images={['toolbar-bottom-disabled']}
+          renderToolbar={() => <Text testID="toolbar-bottom-disabled">操作</Text>}
+          safeAreaInsetBottom={false}
+          visible
+        />
+      </SafeAreaInsetsContext.Provider>,
+    )
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId('image-preview-bottom-controls').props.style),
+    ).toMatchObject({ paddingBottom: 0 })
   })
 
   it('mounts only the active custom-rendered page initially', async () => {

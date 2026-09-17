@@ -62,12 +62,14 @@ export interface ImagePreviewSemanticStyles {
   overlay?: StyleProp<ViewStyle>
   pager?: StyleProp<ViewStyle>
   controls?: StyleProp<ViewStyle>
+  bottomControls?: StyleProp<ViewStyle>
   index?: StyleProp<TextStyle>
   closeButton?: StyleProp<ViewStyle>
   closeLabel?: StyleProp<TextStyle>
   indicators?: StyleProp<ViewStyle>
   indicator?: StyleProp<ViewStyle>
   activeIndicator?: StyleProp<ViewStyle>
+  toolbar?: StyleProp<ViewStyle>
 }
 
 export type ImagePreviewStyles = StyleResolver<
@@ -83,6 +85,8 @@ export interface ImagePreviewProps extends Omit<ViewProps, 'children' | 'style'>
   loop?: boolean
   showIndex?: boolean
   showIndicators?: boolean
+  safeAreaInsetTop?: boolean
+  safeAreaInsetBottom?: boolean
   minZoom?: number
   maxZoom?: number
   doubleTapZoom?: number

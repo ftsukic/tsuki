@@ -19,13 +19,18 @@ export function getImagePreviewStyles(token: ImagePreviewToken) {
       ...StyleSheet.absoluteFillObject,
       pointerEvents: 'box-none',
     },
+    bottomControls: {
+      bottom: 0,
+      left: 0,
+      position: 'absolute',
+      right: 0,
+    },
     index: {
       color: token.indexColor,
       fontSize: token.indexFontSize,
       lineHeight: token.indexLineHeight,
       position: 'absolute',
       textAlign: 'center',
-      top: token.indexTop,
       width: '100%',
     },
     closeButton: {
@@ -34,7 +39,6 @@ export function getImagePreviewStyles(token: ImagePreviewToken) {
       justifyContent: 'center',
       position: 'absolute',
       right: Math.max(0, token.closeIconRight - 8),
-      top: Math.max(0, token.closeIconTop - 8),
       width: Math.max(44, token.closeIconSize + 16),
     },
     closeLabel: {
@@ -43,13 +47,14 @@ export function getImagePreviewStyles(token: ImagePreviewToken) {
       fontWeight: '300',
       lineHeight: token.closeIconSize,
     },
+    toolbar: {
+      width: '100%',
+    },
     indicators: {
       alignItems: 'center',
-      bottom: token.indexTop,
       flexDirection: 'row',
       gap: 6,
       justifyContent: 'center',
-      position: 'absolute',
       width: '100%',
     },
     indicator: {

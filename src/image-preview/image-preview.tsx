@@ -1,6 +1,7 @@
 import {
   forwardRef,
   useCallback,
+  useContext,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -9,6 +10,7 @@ import {
 } from 'react'
 import { BackHandler, Dimensions, FlatList, Platform, Pressable, View } from 'react-native'
 import type { LayoutChangeEvent, ListRenderItemInfo } from 'react-native'
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { scheduleOnRN } from 'react-native-worklets'
 import { Animated, useAnimatedStyle, useSharedValue, withTiming } from '../animation'
 import { GestureDetector } from '../gesture'
@@ -81,6 +83,8 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
       loop = true,
       showIndex = true,
       showIndicators = false,
+      safeAreaInsetTop = true,
+      safeAreaInsetBottom = true,
       minZoom = 0.5,
       maxZoom = 3,
       doubleTapZoom = 2,
@@ -117,6 +121,9 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
     const { token: themeToken } = useToken()
     const token = useComponentToken('ImagePreview', getImagePreviewToken)
     const resolved = getImagePreviewStyles(token)
+    const safeAreaInsets = useContext(SafeAreaInsetsContext)
+    const topInset = safeAreaInsetTop ? Math.max(0, safeAreaInsets?.top ?? 0) : 0
+    const bottomInset = safeAreaInsetBottom ? Math.max(0, safeAreaInsets?.bottom ?? 0) : 0
     const count = images.length
     const normalizedImages = useMemo(() => Array.from(images, normalizeImageSource), [images])
     const safeMinZoom = Number.isFinite(minZoom) && minZoom > 0 ? minZoom : 0.5
@@ -517,12 +524,35 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
 
     if (!rendered) return null
 
+    const indexPositionStyle = {
+      top: topInset + token.indexTop,
+    }
+    const indexStyle = [resolved.index, indexPositionStyle, semantic?.index]
+    const customIndex =
+      showIndex && count > 0 ? renderIndex?.({ index: activeIndex, total: count }) : null
     const renderIndexContent =
       showIndex && count > 0 ? (
         renderIndex ? (
-          renderSlot(renderIndex({ index: activeIndex, total: count }), resolved.index)
+          customIndex == null ? null : typeof customIndex === 'string' ||
+            typeof customIndex === 'number' ? (
+            renderSlot(customIndex, indexStyle)
+          ) : (
+            <View
+              pointerEvents="box-none"
+              style={[
+                {
+                  position: 'absolute',
+                  width: '100%',
+                },
+                indexPositionStyle,
+                semantic?.index,
+              ]}
+            >
+              {customIndex}
+            </View>
+          )
         ) : (
-          <Text style={[resolved.index, semantic?.index]}>{`${activeIndex + 1}/${count}`}</Text>
+          <Text style={indexStyle}>{`${activeIndex + 1}/${count}`}</Text>
         )
       ) : null
     const transitionIndex = transition?.imageIndex ?? activeIndex
@@ -591,28 +621,61 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
             style={[resolved.controls, semantic?.controls, controlsOpacityStyle]}
           >
             {renderIndexContent}
-            {renderSlot(renderToolbar?.({ index: activeIndex, total: count }))}
             {closeable ? (
               <Pressable
                 accessibilityLabel="Close image preview"
                 accessibilityRole="button"
                 onPress={() => requestClose('close-icon')}
-                style={[resolved.closeButton, semantic?.closeButton]}
+                style={[
+                  resolved.closeButton,
+                  {
+                    top: topInset + Math.max(0, token.closeIconTop - 8),
+                  },
+                  semantic?.closeButton,
+                ]}
                 testID="image-preview-close"
               >
                 <Text style={[resolved.closeLabel, semantic?.closeLabel]}>×</Text>
               </Pressable>
             ) : null}
-            {showIndicators && count > 1 ? (
-              <View pointerEvents="none" style={resolved.indicators}>
-                {Array.from({ length: count }, (_, index) => (
-                  <View
-                    key={index}
-                    style={[resolved.indicator, index === activeIndex && resolved.activeIndicator]}
-                  />
-                ))}
-              </View>
-            ) : null}
+            <View
+              pointerEvents="box-none"
+              style={[
+                resolved.bottomControls,
+                {
+                  paddingBottom: bottomInset,
+                },
+                semantic?.bottomControls,
+              ]}
+              testID="image-preview-bottom-controls"
+            >
+              {showIndicators && count > 1 ? (
+                <View
+                  pointerEvents="none"
+                  style={[resolved.indicators, semantic?.indicators]}
+                  testID="image-preview-indicators"
+                >
+                  {Array.from({ length: count }, (_, index) => (
+                    <View
+                      key={index}
+                      style={[
+                        resolved.indicator,
+                        semantic?.indicator,
+                        index === activeIndex && [
+                          resolved.activeIndicator,
+                          semantic?.activeIndicator,
+                        ],
+                      ]}
+                    />
+                  ))}
+                </View>
+              ) : null}
+              {renderToolbar ? (
+                <View style={[resolved.toolbar, semantic?.toolbar]} testID="image-preview-toolbar">
+                  {renderSlot(renderToolbar({ index: activeIndex, total: count }))}
+                </View>
+              ) : null}
+            </View>
           </Animated.View>
         </View>
       </GestureDetector>
