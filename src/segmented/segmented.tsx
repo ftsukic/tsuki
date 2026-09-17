@@ -75,6 +75,7 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
     size = 'middle',
     block = false,
     disabled = false,
+    selectedTextColor,
     style,
     styles,
     ...viewProps
@@ -114,10 +115,23 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
       size,
       block,
       disabled,
+      selectedTextColor,
       style,
       styles,
     }),
-    [block, defaultValue, disabled, onChange, options, shape, size, style, styles, value],
+    [
+      block,
+      defaultValue,
+      disabled,
+      onChange,
+      options,
+      selectedTextColor,
+      shape,
+      size,
+      style,
+      styles,
+      value,
+    ],
   )
   const styleState: SegmentedStyleState = { block, disabled, shape, size, value: activeValue }
   const semanticStyles = resolveStyles(styles, { props: segmentedProps, state: styleState })
@@ -223,7 +237,7 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
               optionLayoutStyles.minHeight - buttonToken.borderWidth * 2,
             ),
           },
-          active ? { color: segmentedToken.selectedTextColor } : undefined,
+          active ? { color: selectedTextColor ?? segmentedToken.selectedTextColor } : undefined,
           effectiveDisabled ? { color: segmentedToken.disabledColor } : undefined,
           semanticStyles?.label,
         ]

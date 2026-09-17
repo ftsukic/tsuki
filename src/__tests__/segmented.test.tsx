@@ -112,6 +112,59 @@ describe('Segmented', () => {
     expect(labelStyle).toMatchObject({ color: token.colorText, fontWeight: '600', fontSize: 16 })
   })
 
+  it('applies selectedTextColor to the active item without changing inactive labels', async () => {
+    const themeToken = getDesignToken()
+
+    await render(
+      <Segmented defaultValue="one" selectedTextColor="#1677ff" options={['one', 'two']} />,
+    )
+
+    expect(StyleSheet.flatten(screen.getByText('one').props.style).color).toBe('#1677ff')
+    expect(StyleSheet.flatten(screen.getByText('two').props.style).color).toBe(themeToken.colorText)
+  })
+
+  it('follows selectedTextColor when the active item changes', async () => {
+    const themeToken = getDesignToken()
+
+    await render(
+      <Segmented defaultValue="one" selectedTextColor="#1677ff" options={['one', 'two']} />,
+    )
+
+    await press(screen.getAllByRole('radio')[1])
+
+    expect(StyleSheet.flatten(screen.getByText('one').props.style).color).toBe(themeToken.colorText)
+    expect(StyleSheet.flatten(screen.getByText('two').props.style).color).toBe('#1677ff')
+  })
+
+  it('keeps disabled color ahead of selectedTextColor', async () => {
+    const segmentedToken = getSegmentedToken(getDesignToken())
+
+    await render(
+      <Segmented
+        defaultValue="one"
+        selectedTextColor="#1677ff"
+        options={[
+          { label: 'one', value: 'one', disabled: true },
+          { label: 'two', value: 'two' },
+        ]}
+      />,
+    )
+
+    expect(StyleSheet.flatten(screen.getByText('one').props.style).color).toBe(
+      segmentedToken.disabledColor,
+    )
+  })
+
+  it('uses the token selected text color when selectedTextColor is omitted', async () => {
+    const segmentedToken = getSegmentedToken(getDesignToken())
+
+    await render(<Segmented defaultValue="one" options={['one', 'two']} />)
+
+    expect(StyleSheet.flatten(screen.getByText('one').props.style).color).toBe(
+      segmentedToken.selectedTextColor,
+    )
+  })
+
   it('applies radius only to the container and thumb', async () => {
     await render(
       <>

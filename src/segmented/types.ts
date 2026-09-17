@@ -38,6 +38,7 @@ export interface SegmentedProps extends Omit<ViewProps, 'children' | 'style'> {
   size?: SegmentedSize
   block?: boolean
   disabled?: boolean
+  selectedTextColor?: string
   style?: StyleProp<ViewStyle>
   styles?: SegmentedStyles
 }

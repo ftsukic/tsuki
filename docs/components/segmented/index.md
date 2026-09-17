@@ -39,7 +39,7 @@ import { Segmented } from '@ftsukic/tsuki'
 
 <code src="../../../src/segmented/__fixtures__/examples/shapes.tsx" title="形状" description="对比 default 和 round 两种整体圆角形态。"></code>
 
-<code src="../../../src/segmented/__fixtures__/examples/theme.tsx" title="主题与语义样式" description="通过组件 token 和 styles 定制胶囊控件。"></code>
+<code src="../../../src/segmented/__fixtures__/examples/theme.tsx" title="主题与语义样式" description="通过组件 token、单实例选中颜色和 styles 定制胶囊控件。"></code>
 
 ## API
 
@@ -55,6 +55,7 @@ import { Segmented } from '@ftsukic/tsuki'
 | size | `'small' \| 'middle' \| 'large'` | `'middle'` | 控件尺寸 |
 | block | `boolean` | `false` | 占满父级宽度，并让各 option 等分 |
 | disabled | `boolean` | `false` | 禁用整个控件并覆盖 option 状态 |
+| selectedTextColor | `string` | — | 仅覆盖当前实例选中 option 的文字颜色；禁用 option 仍使用 `disabledColor` |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
 | styles | `SegmentedStyles` | — | `root`、`option`、`label`、`selectedBackground` 语义样式 |
 
@@ -92,7 +93,11 @@ interface SegmentedOption {
 
 ## 主题定制
 
-默认 track 背景使用 `colorFillTertiary`，selected thumb 使用 `colorBgContainer`，选中文字使用 `colorText`。如需局部调整，可通过 `ConfigProvider` 的 `theme.components.Segmented` 覆盖组件 token：
+默认 track 背景使用 `colorFillTertiary`，selected thumb 使用 `colorBgContainer`，选中文字使用 `colorText`。如需只覆盖当前实例的选中文字颜色，可直接传入 `selectedTextColor`；如需统一调整多个实例，可通过 `ConfigProvider` 的 `theme.components.Segmented` 覆盖组件 token：
+
+```tsx | pure
+<Segmented defaultValue="list" selectedTextColor="#1677ff" options={['list', 'board']} />
+```
 
 | Token                   | 默认来源                  | 说明                       |
 | ----------------------- | ------------------------- | -------------------------- |

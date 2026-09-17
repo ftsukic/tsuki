@@ -3,7 +3,7 @@ import { View } from 'react-native'
 
 /**
  * @title Theme and semantic styles
- * @description Customize the selected thumb and semantic option styles.
+ * @description Customize the selected thumb, selected text color, and semantic option styles.
  */
 export default function SegmentedThemeExample() {
   return (
@@ -28,9 +28,10 @@ export default function SegmentedThemeExample() {
             root: { borderWidth: 1, borderColor: '#91caff' },
           })}
         />
+        <Segmented defaultValue="list" selectedTextColor="#1677ff" options={['list', 'board']} />
         <Text type="secondary">
-          selected thumb 默认使用 colorBgContainer，选中文字默认使用 colorText，semantic styles
-          控制局部样式。
+          selectedTextColor 用于单实例覆盖选中项文字颜色；selected thumb 默认使用
+          colorBgContainer，semantic styles 控制局部样式。
         </Text>
       </View>
     </ConfigProvider>
