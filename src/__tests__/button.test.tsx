@@ -595,7 +595,7 @@ describe('Button', () => {
     if (!overlay) throw new Error('Pressed Button overlay was not rendered')
 
     expect(StyleSheet.flatten(overlay.props.style)).toMatchObject({
-      backgroundColor: 'rgba(0,0,0,0.1)',
+      backgroundColor: 'rgba(0, 0, 0, 0.1)',
       bottom: 0,
       left: 0,
       right: 0,

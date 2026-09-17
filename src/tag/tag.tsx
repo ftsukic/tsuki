@@ -8,7 +8,7 @@ import type {
 } from 'react-native'
 import type { ReactNode } from 'react'
 import { Icon } from '../icon'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
@@ -83,13 +83,14 @@ export const Tag = forwardRef<ViewComponent, TagProps>(function Tag(
       <View style={[resolved.content, semantic?.content]}>
         {Children.map(children, (child) => renderChild(child, semantic?.label ?? resolved.label))}
         {closeable ? (
-          <InteractionPressable
+          <Pressable
             accessibilityLabel="关闭标签"
             accessibilityRole="button"
             accessibilityState={{ disabled }}
             disabled={disabled}
             hitSlop={resolved.hitSlop}
             onPress={handleClose}
+            pressStyle="opacity"
             style={[resolved.close, semantic?.close]}
           >
             <Icon
@@ -98,7 +99,7 @@ export const Tag = forwardRef<ViewComponent, TagProps>(function Tag(
               size={resolved.iconSize}
               style={[resolved.icon, semantic?.icon]}
             />
-          </InteractionPressable>
+          </Pressable>
         ) : null}
       </View>
     </View>

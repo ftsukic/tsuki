@@ -640,7 +640,7 @@ describe('Cell', () => {
         <Cell testID="explicit-clickable" title="可点击" clickable />
       </ConfigProvider>,
     )
-    const activeColor = getCellToken(getDesignToken()).activeColor
+    const pressedBackgroundColor = getCellToken(getDesignToken()).pressedBackgroundColor
 
     expect(screen.getByTestId('link').props.accessibilityRole).toBe('button')
     expect(
@@ -649,21 +649,21 @@ describe('Cell', () => {
         { isLink: true },
         { pressed: true, disabled: false },
       ).root.backgroundColor,
-    ).toBe(activeColor)
+    ).toBe(pressedBackgroundColor)
     expect(
       getCellStyles(
         getCellToken(getDesignToken()),
         { isLink: true, clickable: false },
         { pressed: true, disabled: false },
       ).root.backgroundColor,
-    ).not.toBe(activeColor)
+    ).not.toBe(pressedBackgroundColor)
     expect(
       getCellStyles(
         getCellToken(getDesignToken()),
         { clickable: true },
         { pressed: true, disabled: false },
       ).root.backgroundColor,
-    ).toBe(activeColor)
+    ).toBe(pressedBackgroundColor)
   })
 
   it('keeps Cell press behavior and dividers after Interaction migration', async () => {

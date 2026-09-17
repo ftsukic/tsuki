@@ -56,7 +56,7 @@ import { Segmented } from '@ftsukic/tsuki'
 | block | `boolean` | `false` | 占满父级宽度，并让各 option 等分 |
 | disabled | `boolean` | `false` | 禁用整个控件并覆盖 option 状态 |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
-| styles | `SegmentedStyles` | — | `root`、`option`、`label`、`activeBackground` 语义样式 |
+| styles | `SegmentedStyles` | — | `root`、`option`、`label`、`selectedBackground` 语义样式 |
 
 ### SegmentedOption
 
@@ -86,7 +86,7 @@ interface SegmentedOption {
 /
 ```
 
-`style` 和 `styles.root` 作用于根节点；`styles.option` 作用于每个完整点击项；`styles.label` 作用于文本 label；`styles.activeBackground` 作用于动画 thumb。自定义 label 的内部样式由调用方控制。
+`style` 和 `styles.root` 作用于根节点；`styles.option` 作用于每个完整点击项；`styles.label` 作用于文本 label；`styles.selectedBackground` 作用于动画 thumb。自定义 label 的内部样式由调用方控制。
 
 `shape="default"` 使用 Button 的 `borderRadius`，`shape="round"` 使用 `borderRadiusRound`；两种形态都只由外层容器和动画 thumb 控制圆角。`block` 会让 option 等分可用宽度。
 
@@ -94,27 +94,29 @@ interface SegmentedOption {
 
 默认 track 背景使用 `colorFillTertiary`，selected thumb 使用 `colorBgContainer`，选中文字使用 `colorText`。如需局部调整，可通过 `ConfigProvider` 的 `theme.components.Segmented` 覆盖组件 token：
 
-| Token                 | 默认来源            | 说明                       |
-| --------------------- | ------------------- | -------------------------- |
-| activeBackgroundColor | `colorBgContainer`  | selected thumb 颜色        |
-| activeColor           | `colorText`         | 选中文字颜色               |
-| backgroundColor       | `colorFillTertiary` | track 背景颜色             |
-| borderColor           | `colorBorder`       | track 边框颜色             |
-| borderWidth           | `lineWidth`         | track 边框宽度             |
-| disabledColor         | `colorTextDisabled` | 禁用文字颜色               |
-| animationDuration     | `motionDurationMid` | thumb 的位置和宽度动画时长 |
-| padding               | `paddingXXS`        | track 内间距               |
-| fontFamily            | `fontFamily`        | option label 字体          |
+| Token                   | 默认来源                  | 说明                       |
+| ----------------------- | ------------------------- | -------------------------- |
+| selectedBackgroundColor | `colorBgContainer`        | selected thumb 颜色        |
+| selectedTextColor       | `colorText`               | 选中文字颜色               |
+| pressedBackgroundColor  | `colorBgContainerPressed` | 未选中 option 按下背景     |
+| backgroundColor         | `colorFillTertiary`       | track 背景颜色             |
+| borderColor             | `colorBorder`             | track 边框颜色             |
+| borderWidth             | `lineWidth`               | track 边框宽度             |
+| disabledColor           | `colorTextDisabled`       | 禁用文字颜色               |
+| animationDuration       | `motionDurationMid`       | thumb 的位置和宽度动画时长 |
+| padding                 | `paddingXXS`              | track 内间距               |
+| fontFamily              | `fontFamily`              | option label 字体          |
 
-尺寸、排版和按压颜色不在 Segmented 中重复定义，分别复用 `Button` token 的 `height`、`paddingHorizontal`、字体和 pressed overlay；按压层的 `borderRadius` 与 selected thumb 保持一致，`round` 形态始终保持胶囊轮廓。已选项不再叠加第二层按压面。
+尺寸和排版不在 Segmented 中重复定义，复用 `Button` token 的 `height`、`paddingHorizontal` 和字体；未选中 option 按下时使用 `pressedBackgroundColor`，按压层的 `borderRadius` 与 selected thumb 保持一致，`round` 形态始终保持胶囊轮廓。已选项不再叠加第二层按压面。
 
 ```tsx | pure
 <ConfigProvider
   theme={{
     components: {
       Segmented: {
-        activeBackgroundColor: '#e6f4ff',
-        activeColor: '#0958d9',
+        selectedBackgroundColor: '#e6f4ff',
+        selectedTextColor: '#0958d9',
+        pressedBackgroundColor: '#f2f3f5',
       },
     },
   }}

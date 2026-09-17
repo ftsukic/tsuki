@@ -15,6 +15,6 @@ export function getFloatingBubbleToken(token: AliasToken): FloatingBubbleToken {
     shadowOffset: 3,
     elevation: 6,
     animationDuration: Math.max(0, token.motionDurationSlow),
-    pressedOpacity: 0.72,
+    pressedOpacity: token.pressedOpacity,
   }
 }

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native'
 import * as Reanimated from 'react-native-reanimated'
 import { createRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { ConfigProvider, DropdownItem, DropdownMenu, PortalHost } from '..'
+import { ConfigProvider, DropdownItem, DropdownMenu, getDesignToken, PortalHost } from '..'
 import type { DropdownItemRef, DropdownMenuRef } from '..'
 
 function AppProvider({
@@ -668,19 +668,19 @@ describe('Dropdown', () => {
     expect(screen.getByTestId('dropdown-caret-0').props.style).toMatchObject({
       borderLeftWidth: 4,
       borderRightWidth: 4,
-      borderTopColor: '#323233',
+      borderTopColor: getDesignToken().colorText,
       borderTopWidth: 4,
     })
     expect(StyleSheet.flatten(screen.getByTestId('dropdown-title-0').props.style)).toMatchObject({
-      color: '#323233',
+      color: getDesignToken().colorText,
     })
 
     await press(screen.getByTestId('dropdown-item-0'))
     expect(screen.getByTestId('dropdown-caret-0').props.style).toMatchObject({
-      borderTopColor: '#1989fa',
+      borderTopColor: getDesignToken().colorPrimary,
     })
     expect(StyleSheet.flatten(screen.getByTestId('dropdown-title-0').props.style)).toMatchObject({
-      color: '#1989fa',
+      color: getDesignToken().colorPrimary,
     })
   })
 

@@ -87,7 +87,7 @@ import { Cell } from '@ftsukic/tsuki'
 | valueAlign | `'left' \| 'center' \| 'right'` | horizontal 为 `'right'`，vertical 为 `'left'` | value 区域的水平对齐；primitive value 同时设置 `Text.textAlign`，自定义节点只控制容器。 |
 | required | `boolean` | `false` | 在 TitleRow 内显示必填星号，不增加独立的布局列。 |
 | isLink | `boolean` | `false` | 显示 arrow；未显式设置 `clickable` 时启用点击反馈。 |
-| clickable | `boolean` | — | 显式控制 active 点击反馈。 |
+| clickable | `boolean` | — | 显式控制 pressed 点击反馈。 |
 | arrowDirection | `'left' \| 'up' \| 'right' \| 'down'` | `'right'` | `isLink` arrow 方向。 |
 | border | `boolean` | `true` | 是否允许当前 Cell 显示底部分割线；`border={false}` 会禁用 divider。未设置 `divider` 时，CellGroup 最后一项不显示内部 divider，standalone Cell 不绘制 divider。 |
 | divider | `boolean` | — | 手动覆盖当前 Cell 的底部分割线显示状态，主要用于 RN 下无法获得 Web `:last-child` 语义的 standalone / 自定义布局场景；仍受 `border={false}` 限制。 |
@@ -128,7 +128,7 @@ divider 的优先级为 `border={false}` 禁用，其次是显式 `divider`，�
 
 ## 主题定制
 
-`theme.components.Cell` 继续负责 Cell 与 CellGroup 的共享视觉 token，包括背景、active 背景、horizontal/vertical padding、minHeight、divider、字号、icon、title/value 颜色，以及 `verticalGap`、`titleExtraGap`、`valueExtraGap`。
+`theme.components.Cell` 继续负责 Cell 与 CellGroup 的共享视觉 token，包括 `backgroundColor`、`pressedBackgroundColor`、horizontal/vertical padding、minHeight、divider、字号、icon、title/value 颜色，以及 `verticalGap`、`titleExtraGap`、`valueExtraGap`。
 
 ## 不支持的 API
 

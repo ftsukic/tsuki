@@ -2,7 +2,11 @@ import { forwardRef, useEffect, useState } from 'react'
 import { Platform, Pressable as NativePressable } from 'react-native'
 import { createAnimatedComponent } from 'react-native-reanimated'
 import { useInteraction, useInteractionPress } from './hooks'
-import type { InteractionPressableProps, InteractionPressableState } from './interface'
+import type {
+  InteractionPressableInternalProps,
+  InteractionPressableProps,
+  InteractionPressableState,
+} from './interface'
 
 // Pressable can supply a Reanimated style handle, so the native host must be
 // an animated component rather than a plain React Native Pressable.
@@ -10,7 +14,7 @@ const AnimatedPressable = createAnimatedComponent(NativePressable)
 
 export const InteractionPressable = forwardRef<
   React.ComponentRef<typeof NativePressable>,
-  InteractionPressableProps
+  InteractionPressableProps & InteractionPressableInternalProps
 >(function InteractionPressable(
   {
     accessibilityRole,
@@ -19,6 +23,7 @@ export const InteractionPressable = forwardRef<
     interactionId,
     onPress,
     onPressDebounceWait,
+    onPressedChange,
     style,
     ...pressableProps
   },
@@ -43,13 +48,17 @@ export const InteractionPressable = forwardRef<
 
   const getInteractionState = (pressed: boolean): InteractionPressableState =>
     Platform.OS === 'web' ? { pressed, hovered } : { pressed }
+  const testOnlyPressed = pressableProps.testOnly_pressed === true
+  const effectivePressed = !isDisabled && (active || testOnlyPressed)
 
   const resolvedStyle =
     typeof style === 'function'
-      ? style(
-          getInteractionState(!isDisabled && (active || pressableProps.testOnly_pressed === true)),
-        )
+      ? style(getInteractionState(!isDisabled && (active || testOnlyPressed)))
       : style
+
+  useEffect(() => {
+    onPressedChange?.(effectivePressed)
+  }, [effectivePressed, onPressedChange])
 
   const handlePressIn = (event: Parameters<NonNullable<typeof pressableProps.onPressIn>>[0]) => {
     if (!isDisabled) {
@@ -88,10 +97,9 @@ export const InteractionPressable = forwardRef<
       style={resolvedStyle}
     >
       {(state) => {
-        const effectivePressed = !isDisabled && (state.pressed || active)
         const interactionState: InteractionPressableState = {
           ...state,
-          pressed: effectivePressed,
+          pressed: !isDisabled && (state.pressed || active || testOnlyPressed),
         }
         return typeof children === 'function' ? children(interactionState) : children
       }}

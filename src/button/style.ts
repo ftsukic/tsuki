@@ -186,7 +186,7 @@ export function getButtonStyles(
       opacity: state.disabled
         ? token.disabledOpacity
         : variant === 'text' && state.pressed && !state.loading
-          ? token.activeOpacity
+          ? token.pressedOpacity
           : 1,
     },
     contentContainer: {

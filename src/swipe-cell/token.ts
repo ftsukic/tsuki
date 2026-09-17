@@ -15,6 +15,7 @@ export function getSwipeCellToken(token: AliasToken): SwipeCellToken {
     actionPaddingHorizontal: token.padding,
     actionFontSize: token.fontSize,
     actionLineHeight: token.lineHeight,
+    actionPressedOverlayColor: token.pressedOverlayColor,
     animationDuration: Math.max(0, token.motionDurationFast),
     fontFamily: token.fontFamily,
   }

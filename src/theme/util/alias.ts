@@ -2,7 +2,9 @@ import type { AliasToken, MapToken } from '../interface'
 export function createAliasToken(map: MapToken, overrides: Partial<AliasToken> = {}): AliasToken {
   return {
     ...map,
-    interactionActiveColor: map.colorFillTertiary,
+    pressedBackgroundColor: map.colorBgContainerPressed,
+    pressedOpacity: 0.6,
+    pressedOverlayColor: 'rgba(0, 0, 0, 0.1)',
     colorIcon: map.colorTextTertiary,
     colorTextPlaceholder: map.colorTextQuaternary,
     colorTextDisabled: map.colorTextQuaternary,

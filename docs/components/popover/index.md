@@ -103,7 +103,7 @@ Popover 不整体继承 `react-native-popover-view` 的 Props，也不提供第�
 
 通过 `ConfigProvider` 的 `theme.components.Popover` 覆盖 Popover token。Popover 的 `theme="light" | "dark"` 只选择 Popover 自身的视觉类型，颜色仍由当前 tsuki `AliasToken` 推导，因此外层 ConfigProvider 的 dark algorithm 和别的 token 覆盖仍然生效。
 
-Popover token 包括：`borderRadius`、`actionWidth`、`actionHeight`、`actionFontSize`、`actionLineHeight`、`actionIconSize`、`actionIconGap`、`lightBackgroundColor`、`lightTextColor`、`lightDisabledColor`、`lightDividerColor`、`darkBackgroundColor`、`darkTextColor`、`darkDisabledColor`、`darkDividerColor`、`pressedBackgroundColor`、`arrowWidth`、`arrowHeight`、`offset`、`screenMargin`、`overlayColor`、`animationDuration` 和 `fontFamily`。
+Popover token 包括：`borderRadius`、`actionWidth`、`actionHeight`、`actionFontSize`、`actionLineHeight`、`actionIconSize`、`actionIconGap`、`lightBackgroundColor`、`lightTextColor`、`lightDisabledColor`、`lightDividerColor`、`lightPressedBackgroundColor`、`darkBackgroundColor`、`darkTextColor`、`darkDisabledColor`、`darkDividerColor`、`darkPressedOverlayColor`、`arrowWidth`、`arrowHeight`、`offset`、`screenMargin`、`overlayColor`、`animationDuration` 和 `fontFamily`。light action 使用 surface pressed 背景，dark action 在原背景上显示专用 overlay。
 
 ### 无障碍
 

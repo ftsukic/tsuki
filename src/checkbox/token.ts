@@ -16,7 +16,7 @@ export function getCheckboxToken(token: AliasToken): CheckboxToken {
     labelColor: token.colorText,
     gap: token.paddingXS,
     groupGap: token.paddingXS,
-    activeOpacity: buttonToken.activeOpacity,
+    pressedOpacity: token.pressedOpacity,
     disabledOpacity: buttonToken.disabledOpacity,
     fontSize: buttonToken.contentFontSize,
     lineHeight: token.lineHeight,

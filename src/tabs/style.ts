@@ -104,11 +104,7 @@ export function getTabStyles(
     root: {
       ...base,
       backgroundColor,
-      opacity: state.disabled
-        ? token.disabledOpacity
-        : state.active || !state.pressed
-          ? 1
-          : token.activeOpacity,
+      opacity: state.disabled ? token.disabledOpacity : 1,
     },
     label: {
       color: getTabColor(token, type, state.active, state.disabled),

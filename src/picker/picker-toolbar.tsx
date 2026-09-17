@@ -61,7 +61,7 @@ export const PickerToolbar = forwardRef<View, PickerToolbarProps>(function Picke
         style={({ pressed }) => [
           resolved.toolbarButton,
           { alignItems: 'flex-start' },
-          pressed && { opacity: token.picker_toolbar_button_active_opacity },
+          pressed && { opacity: token.picker_toolbar_button_pressed_opacity },
           buttonStyle,
         ]}
         testID="picker-cancel"
@@ -81,7 +81,7 @@ export const PickerToolbar = forwardRef<View, PickerToolbarProps>(function Picke
         style={({ pressed }) => [
           resolved.toolbarButton,
           { alignItems: 'flex-end' },
-          pressed && { opacity: token.picker_toolbar_button_active_opacity },
+          pressed && { opacity: token.picker_toolbar_button_pressed_opacity },
           buttonStyle,
         ]}
         testID="picker-confirm"

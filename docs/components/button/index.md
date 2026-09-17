@@ -64,7 +64,7 @@ import { Button, Icon } from '@ftsukic/tsuki'
 | styles | `ButtonStyles` | — | `root`、`icon`、`label`、`contentContainer` 的语义样式；`content` 是 `label` 的兼容别名 |
 | onPressDebounceWait | `number` | — | 两次 `onPress` 之间的最小间隔，单位为毫秒 |
 
-`variant="text"` 默认不使用普通 Button 的最小高度、水平内边距或 `contentContainer` 最小高度，点击区域与可见 content 一致；按下时通过 `InteractionPressable` 提供文字透明度反馈，需要扩大点击区域时可显式传入 `style` 或 `hitSlop`。其他变体按下时显示由 `pressedOverlayColor` 控制的覆盖层。
+`variant="text"` 默认不使用普通 Button 的最小高度、水平内边距或 `contentContainer` 最小高度，点击区域与可见 content 一致；按下时通过通用 `Pressable` 提供 `pressedOpacity` 文字透明度反馈，需要扩大点击区域时可显式传入 `style` 或 `hitSlop`。其他变体按下时显示由 `pressedOverlayColor` 控制的覆盖层，默认值为 `rgba(0, 0, 0, 0.1)`。
 
 Button 继承 React Native `PressableProps`，但由组件管理 `children`、`style` 和 `disabled`。默认 `accessibilityRole` 为 `button`；icon-only `circle` 应设置 `accessibilityLabel`：
 
@@ -87,7 +87,7 @@ Button 继承 React Native `PressableProps`，但由组件管理 `children`、`s
 
 ### 主题定制
 
-通过 `ConfigProvider` 的 `theme.components.Button` 覆盖 Button token。形状相关的 token 包括 `borderRadius`、`heightXS`、`heightSM`、`height`、`heightLG` 以及各尺寸的 `paddingHorizontal`；`pressedOverlayColor` 控制普通变体的按下覆盖层；不要为 `circle` 额外定义专用宽高 token。
+通过 `ConfigProvider` 的 `theme.components.Button` 覆盖 Button token。形状相关的 token 包括 `borderRadius`、`heightXS`、`heightSM`、`height`、`heightLG` 以及各尺寸的 `paddingHorizontal`；`pressedOpacity` 控制 `text` 变体的按下透明度，`pressedOverlayColor` 控制实体变体的按下覆盖层；不要为 `circle` 额外定义专用宽高 token。
 
 ```tsx | pure
 import { Button, ConfigProvider } from '@ftsukic/tsuki'

@@ -1,7 +1,9 @@
 import type { MapToken } from './map'
 
 export interface AliasToken extends MapToken {
-  interactionActiveColor: string
+  pressedBackgroundColor: string
+  pressedOpacity: number
+  pressedOverlayColor: string
   colorIcon: string
   colorTextPlaceholder: string
   colorTextDisabled: string

@@ -41,7 +41,7 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
   size?: InputSize
   bordered?: boolean
   /** Keeps the normal border color while focused when set to false. */
-  activeBordered?: boolean
+  focusedBordered?: boolean
   clearable?: boolean
   clearTrigger?: InputClearTrigger
   formatter?: (value: string) => string

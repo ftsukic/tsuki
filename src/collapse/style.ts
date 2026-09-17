@@ -56,7 +56,9 @@ export function getCollapseStyles(
   return {
     header: {
       alignItems: 'center',
-      backgroundColor: state.pressed ? token.activeColor : token.contentBackgroundColor,
+      backgroundColor: state.pressed
+        ? token.headerPressedBackgroundColor
+        : token.contentBackgroundColor,
       flexDirection: 'row',
       minHeight: token.headerHeight,
       opacity: state.disabled ? token.disabledOpacity : 1,

@@ -127,8 +127,8 @@ if (result) {
 | Token | 默认来源 | 说明 |
 | --- | --- | --- |
 | backgroundColor | `colorBgContainer` | action、取消区域背景色 |
-| actionActiveBackgroundColor | `colorFillSecondary` | 可用 action 按下时的背景色；disabled/loading 不使用，并与取消间隔保持区分 |
-| cancelActiveBackgroundColor | `colorFillSecondary` | 取消内容与底部 safe-area 按下时的统一背景色 |
+| actionPressedBackgroundColor | `pressedBackgroundColor` | 可用 action 按下时的背景色；disabled/loading 不使用，并与取消间隔保持区分 |
+| cancelPressedBackgroundColor | `pressedBackgroundColor` | 取消内容与底部 safe-area 按下时的统一背景色 |
 | titleColor | `colorTextSecondary` | 标题颜色 |
 | actionColor | `colorText` | 普通 action 和取消文字颜色 |
 | descriptionColor | `colorTextSecondary` | description 颜色 |

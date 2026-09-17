@@ -146,6 +146,6 @@ type RadioLabelPosition = 'left' | 'right';
 </ConfigProvider>
 ```
 
-可覆盖的主要 token 包括 `indicatorSize`、`dotSize`、`borderWidth`、`borderRadius`、`borderColor`、`checkedColor`、`labelColor`、`disabledBorderColor`、`disabledBackgroundColor`、`disabledCheckedBackgroundColor`、`disabledMarkColor`、`disabledLabelColor`、`fontSize`、`lineHeight`、`gap`、`activeOpacity`、`disabledOpacity`，以及 button variant 的 `buttonHeight`、`buttonMinWidth`、`buttonPaddingHorizontal`、`buttonBorderRadius`、`buttonBackground`、`buttonFilledBackground`、`buttonDisabledBackground`、`buttonCheckedFilledBackground` 和 `buttonCheckedLabelColor`。
+可覆盖的主要 token 包括 `indicatorSize`、`dotSize`、`borderWidth`、`borderRadius`、`borderColor`、`checkedColor`、`labelColor`、`disabledBorderColor`、`disabledBackgroundColor`、`disabledCheckedBackgroundColor`、`disabledMarkColor`、`disabledLabelColor`、`fontSize`、`lineHeight`、`gap`、`pressedOpacity`、`disabledOpacity`，以及 button variant 的 `buttonHeight`、`buttonMinWidth`、`buttonPaddingHorizontal`、`buttonBorderRadius`、`buttonBackground`、`buttonFilledBackground`、`buttonDisabledBackground`、`buttonCheckedFilledBackground` 和 `buttonCheckedLabelColor`。
 
 Radio 暴露 `radio` 无障碍角色和 `selected`、`disabled` 状态；Group 暴露 `radiogroup` 角色。当前不提供多选、取消选中、动画或 options 与 children 混用能力。

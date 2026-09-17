@@ -47,7 +47,7 @@ export function getCheckboxStyles(
           disabledBackgroundColor: token.buttonDisabledBackground,
           disabledBorderColor: token.disabledColor,
           disabledLabelColor: token.disabledColor,
-          activeOpacity: token.activeOpacity,
+          pressedOpacity: token.pressedOpacity,
           disabledOpacity: token.disabledOpacity,
           fontSize: token.fontSize,
           fontFamily: token.fontFamily,
@@ -63,7 +63,7 @@ export function getCheckboxStyles(
       alignSelf: 'flex-start',
       columnGap: token.gap,
       flexDirection: 'row',
-      opacity: state.disabled ? 1 : state.pressed ? token.activeOpacity : 1,
+      opacity: state.disabled ? 1 : state.pressed ? token.pressedOpacity : 1,
     },
     indicator: {
       alignItems: 'center',

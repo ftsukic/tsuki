@@ -49,6 +49,11 @@ describe('theme', () => {
     expect(token.borderRadiusXS).toBe(1)
     expect(token.borderRadiusSM).toBe(2)
     expect(token.borderRadiusLG).toBe(8)
+    expect(token.colorBgContainer).toBe('#ffffff')
+    expect(token.colorBgContainerPressed).toBe('#F2F3F5')
+    expect(token.pressedBackgroundColor).toBe('#F2F3F5')
+    expect(token.pressedOpacity).toBe(0.6)
+    expect(token.pressedOverlayColor).toBe('rgba(0, 0, 0, 0.1)')
   })
 
   it('supports dark, alias, component, and composed algorithm overrides', () => {
@@ -67,6 +72,8 @@ describe('theme', () => {
     expect(composed.colorPrimary).toBe('#123456')
     expect(composed.colorText).toBe('#222222')
     expect(dark.colorBgContainer).toBe('#1F1F1F')
+    expect(dark.colorBgContainerPressed).toBe('#3A3A3C')
+    expect(dark.pressedBackgroundColor).toBe('#3A3A3C')
     expect(dark.colorBgBase).toBe('#141414')
     expect(dark.colorTextBase).toBe('#FFFFFF')
     expect(dark.colorShadow).toBe('rgba(0, 0, 0, 0.45)')
@@ -80,6 +87,20 @@ describe('theme', () => {
     expect(square.borderRadiusSM).toBe(0)
     expect(square.borderRadius).toBe(0)
     expect(square.borderRadiusLG).toBe(0)
+  })
+
+  it('allows overriding shared pressed alias tokens', () => {
+    const token = getDesignToken({
+      token: {
+        pressedBackgroundColor: '#e6f4ff',
+        pressedOpacity: 0.7,
+        pressedOverlayColor: 'rgba(0, 0, 0, 0.2)',
+      },
+    })
+
+    expect(token.pressedBackgroundColor).toBe('#e6f4ff')
+    expect(token.pressedOpacity).toBe(0.7)
+    expect(token.pressedOverlayColor).toBe('rgba(0, 0, 0, 0.2)')
   })
 
   it('inherits parent tokens and allows inherit false', async () => {

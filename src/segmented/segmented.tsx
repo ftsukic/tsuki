@@ -199,8 +199,8 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
           testID="segmented-thumb"
           pointerEvents="none"
           style={[
-            resolvedStyles.activeBackground,
-            semanticStyles?.activeBackground,
+            resolvedStyles.selectedBackground,
+            semanticStyles?.selectedBackground,
             {
               borderRadius:
                 shape === 'round' ? buttonToken.borderRadiusRound : buttonToken.borderRadius,
@@ -223,7 +223,7 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
               optionLayoutStyles.minHeight - buttonToken.borderWidth * 2,
             ),
           },
-          active ? { color: segmentedToken.activeColor } : undefined,
+          active ? { color: segmentedToken.selectedTextColor } : undefined,
           effectiveDisabled ? { color: segmentedToken.disabledColor } : undefined,
           semanticStyles?.label,
         ]

@@ -1,9 +1,9 @@
 import { Icon } from '../icon'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import type { InputToken } from '../theme'
 import { useCallback, useRef } from 'react'
 import type { ReactNode } from 'react'
-import { Pressable, View } from 'react-native'
+import { View } from 'react-native'
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native'
 import { Text } from '../text'
 
@@ -62,6 +62,7 @@ export function InputClear({
       onPressOut={handlePressOut}
       onResponderTerminate={handleResponderTerminate}
       pointerEvents={showClear || activePressRef.current ? 'auto' : 'none'}
+      pressStyle="opacity"
       style={style}
     >
       <Icon
@@ -87,12 +88,13 @@ export function InputPasswordToggle({
   onPress: () => void
 }) {
   return (
-    <InteractionPressable
+    <Pressable
       accessibilityRole="button"
       accessibilityLabel={visible ? '隐藏密码' : '显示密码'}
       disabled={disabled}
       hitSlop={token.paddingHorizontal / 2}
       onPress={onPress}
+      pressStyle="opacity"
       style={style}
     >
       <Icon
@@ -100,6 +102,6 @@ export function InputPasswordToggle({
         size={token.fontSizeLG}
         color={token.prefixColor}
       />
-    </InteractionPressable>
+    </Pressable>
   )
 }

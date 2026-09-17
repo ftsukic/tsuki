@@ -15,7 +15,7 @@ export default function InputTextareaFixture() {
         multiline
         rows={4}
         bordered
-        activeBordered={false}
+        focusedBordered={false}
         clearable
         clearTrigger="always"
         showWordLimit

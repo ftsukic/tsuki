@@ -461,7 +461,7 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
           interactionId={cellId}
           onPressIn={handleContentPressIn}
           onPress={close}
-          pressStyle="opacity"
+          pressStyle="none"
           testID={testID ? `${testID}-pressable` : undefined}
           style={({ pressed }) => getCellInteractionStyle(cellToken, { pressed, disabled: false })}
         >

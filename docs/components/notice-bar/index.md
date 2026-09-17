@@ -62,6 +62,8 @@ import { NoticeBar } from '@ftsukic/tsuki'
 
 NoticeBar 使用 `alert` 无障碍语义和 `polite` live region。关闭操作使用 `button` 语义并提供“关闭通知”标签；disabled 状态会写入 `accessibilityState.disabled`。
 
+只有传入 `onClick` 时，通知主体才有 pressed opacity 反馈；静态通知主体不会因触摸改变视觉。关闭操作独立使用 Alias 的 `pressedOpacity`，不受 `motion` 动画开关影响。
+
 组件只接受上表中的公开 Props，不转发原生 `ViewProps` 或 `PressableProps`，也不提供 `style`/`styles` 插槽。布局应由外层容器控制，颜色、字号、间距和动画总开关来自当前 `ConfigProvider` 的 Alias Token：默认使用 `colorWarningBg`、`colorWarning`、`padding`、`fontSize`、`lineHeightXL` 和 `motion`。
 
 `children` 为自定义 React 节点时，组件负责布局和滚动容器，节点自身负责文本样式与换行。`scrollable={false}` 的 primitive 文本使用尾部省略；`wrapable` 仅在不滚动时生效。

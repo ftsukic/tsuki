@@ -20,7 +20,7 @@ export interface ButtonToken {
   contentFontSize: number
   contentFontSizeLG: number
   borderWidth: number
-  activeOpacity: number
+  pressedOpacity: number
   pressedOverlayColor: string
   disabledOpacity: number
   iconGap: number
@@ -29,7 +29,7 @@ export interface ButtonToken {
 
 export interface CellToken {
   backgroundColor: string
-  activeColor: string
+  pressedBackgroundColor: string
   borderColor: string
   groupBackgroundColor: string
   groupBorderColor: string
@@ -82,7 +82,7 @@ export interface CollapseToken {
   iconColor: string
   iconSize: number
   iconGap: number
-  activeColor: string
+  headerPressedBackgroundColor: string
   disabledColor: string
   disabledOpacity: number
   contentPaddingVertical: number
@@ -122,6 +122,7 @@ export interface SwipeCellToken {
   actionPaddingHorizontal: number
   actionFontSize: number
   actionLineHeight: number
+  actionPressedOverlayColor: string
   animationDuration: number
   fontFamily: string
 }
@@ -168,7 +169,7 @@ export interface InputToken {
   textareaPaddingVertical: number
   backgroundColor: string
   borderColor: string
-  activeBorderColor: string
+  focusedBorderColor: string
   placeholderColor: string
   textColor: string
   disabledBackgroundColor: string
@@ -333,7 +334,7 @@ export interface RadioToken {
   fontSize: number
   lineHeight: number
   gap: number
-  activeOpacity: number
+  pressedOpacity: number
   disabledOpacity: number
   fontFamily: string
   buttonHeight: number
@@ -359,7 +360,7 @@ export interface CheckboxToken {
   labelColor: string
   gap: number
   groupGap: number
-  activeOpacity: number
+  pressedOpacity: number
   disabledOpacity: number
   fontSize: number
   lineHeight: number
@@ -393,15 +394,15 @@ export interface TabsToken {
   cardBackgroundColor: string
   cardActiveBackgroundColor: string
   cardActiveTextColor: string
-  activeOpacity: number
   disabledOpacity: number
   animationDuration: number
   fontFamily: string
 }
 
 export interface SegmentedToken {
-  activeBackgroundColor: string
-  activeColor: string
+  selectedBackgroundColor: string
+  selectedTextColor: string
+  pressedBackgroundColor: string
   backgroundColor: string
   borderColor: string
   borderWidth: number
@@ -475,7 +476,8 @@ export interface PopoverToken {
   darkTextColor: string
   darkDisabledColor: string
   darkDividerColor: string
-  pressedBackgroundColor: string
+  lightPressedBackgroundColor: string
+  darkPressedOverlayColor: string
   arrowWidth: number
   arrowHeight: number
   offset: number
@@ -493,7 +495,7 @@ export interface PickerToken {
   picker_item_line_height: number
   picker_text_color: string
   picker_disabled_text_color: string
-  picker_active_text_color: string
+  picker_toolbar_title_color: string
   picker_cancel_button_color: string
   picker_confirm_button_color: string
   picker_disabled_option_opacity: number
@@ -503,7 +505,7 @@ export interface PickerToken {
   picker_toolbar_button_font_size: number
   picker_toolbar_button_line_height: number
   picker_toolbar_padding_horizontal: number
-  picker_toolbar_button_active_opacity: number
+  picker_toolbar_button_pressed_opacity: number
   picker_border_width: number
   picker_item_padding_horizontal: number
   picker_swipe_duration: number
@@ -514,8 +516,8 @@ export interface PickerToken {
 
 export interface ActionSheetToken {
   backgroundColor: string
-  actionActiveBackgroundColor: string
-  cancelActiveBackgroundColor: string
+  actionPressedBackgroundColor: string
+  cancelPressedBackgroundColor: string
   titleColor: string
   actionColor: string
   descriptionColor: string
@@ -607,7 +609,7 @@ export interface SwitchToken {
   thumbColor: string
   loadingColor: string
   disabledOpacity: number
-  activeOpacity: number
+  pressedOpacity: number
   animationDuration: number
 }
 
@@ -658,7 +660,7 @@ export interface DropdownToken {
   disabledColor: string
   optionTextColor: string
   optionDisabledColor: string
-  optionPressedColor: string
+  optionPressedBackgroundColor: string
   titleFontSize: number
   titleLineHeight: number
   titleFontFamily: string

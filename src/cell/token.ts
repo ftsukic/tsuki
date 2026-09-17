@@ -8,7 +8,7 @@ export function getCellToken(token: AliasToken): CellToken {
   return {
     backgroundColor: token.colorBgContainer,
     groupBackgroundColor: token.colorBgContainer,
-    activeColor: token.interactionActiveColor,
+    pressedBackgroundColor: token.pressedBackgroundColor,
     borderColor: token.colorBorder,
     groupBorderColor: token.colorBorder,
     groupBorderWidth: token.lineWidthHairline,

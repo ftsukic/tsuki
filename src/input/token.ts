@@ -18,7 +18,7 @@ export function getInputToken(token: AliasToken): InputToken {
     textareaPaddingVertical: token.paddingXS,
     backgroundColor: token.colorBgContainer,
     borderColor: token.colorBorder,
-    activeBorderColor: token.colorPrimary,
+    focusedBorderColor: token.colorPrimary,
     placeholderColor: token.colorTextPlaceholder,
     textColor: token.colorText,
     disabledBackgroundColor: token.colorBgContainerDisabled,

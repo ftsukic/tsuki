@@ -103,7 +103,7 @@ import {
 
 ## FieldInput
 
-`FieldInput` 直接渲染 `Cell`，并把扁平的 Input props 传给嵌入的 `Input`。`value`、`defaultValue` 和字符串 `onChange` 属于 FieldInput；Input 的原生 `onChangeText` 不单独暴露。适配器默认使用 `bordered={false}`，由 Cell 提供字段的背景、分割线和 10 / 16 外部间距；单行 Input 会移除自身的重复内边距，多行 Textarea 保留自己的 `textarea` 内边距。显式传入 `bordered` 后仍可为嵌入的 Input 开启独立边框，`activeBordered` 默认保持 `false`。它保留 `password`、formatter、clearable、textarea、prefix/suffix 和 autoSize 能力。`FieldInput` 的 `center` 默认值为 `true`；传入 `center={false}` 可恢复非居中的 Cell 对齐行为。
+`FieldInput` 直接渲染 `Cell`，并把扁平的 Input props 传给嵌入的 `Input`。`value`、`defaultValue` 和字符串 `onChange` 属于 FieldInput；Input 的原生 `onChangeText` 不单独暴露。适配器默认使用 `bordered={false}`，由 Cell 提供字段的背景、分割线和 10 / 16 外部间距；单行 Input 会移除自身的重复内边距，多行 Textarea 保留自己的 `textarea` 内边距。显式传入 `bordered` 后仍可为嵌入的 Input 开启独立边框，`focusedBordered` 默认保持 `false`。它保留 `password`、formatter、clearable、textarea、prefix/suffix 和 autoSize 能力。`FieldInput` 的 `center` 默认值为 `true`；传入 `center={false}` 可恢复非居中的 Cell 对齐行为。
 
 ```tsx | pure
 <FieldInput

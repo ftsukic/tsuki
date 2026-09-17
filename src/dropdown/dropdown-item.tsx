@@ -185,7 +185,9 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
             style={({ pressed }) => [
               resolvedStyles.option,
               itemSemantic?.option,
-              pressed && !option.disabled ? { backgroundColor: token.optionPressedColor } : null,
+              pressed && !option.disabled
+                ? { backgroundColor: token.optionPressedBackgroundColor }
+                : null,
             ]}
           >
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>

@@ -17,7 +17,7 @@ export function getSwitchToken(token: AliasToken): SwitchToken {
     thumbColor: token.colorWhite,
     loadingColor: token.colorIcon,
     disabledOpacity: buttonToken.disabledOpacity,
-    activeOpacity: buttonToken.activeOpacity,
+    pressedOpacity: token.pressedOpacity,
     animationDuration: Math.max(0, token.motionDurationMid),
   }
 }

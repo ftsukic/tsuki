@@ -16,6 +16,7 @@ export interface ColorMapToken extends ColorPalettes {
   colorFillTertiary: string
   colorBgLayout: string
   colorBgContainer: string
+  colorBgContainerPressed: string
   colorBgElevated: string
   colorBgMask: string
   colorPrimaryBg: string

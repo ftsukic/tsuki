@@ -69,6 +69,7 @@ export function getPopoverStyles(
       justifyContent: 'center',
       minHeight: token.actionHeight,
       paddingHorizontal: token.actionIconGap,
+      position: 'relative',
       width: token.actionWidth,
     },
     actionIcon: {

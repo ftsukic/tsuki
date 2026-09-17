@@ -90,19 +90,19 @@ const [enabled, setEnabled] = useState(false)
 
 通过 `ConfigProvider` 的 `theme.components.Switch` 覆盖组件 token：
 
-| Token                          | 默认来源                | 说明                       |
-| ------------------------------ | ----------------------- | -------------------------- |
-| `smallWidth` / `smallHeight`   | `32` / `20`             | small 预设尺寸             |
-| `mediumWidth` / `mediumHeight` | `44` / `24`             | medium 预设尺寸            |
-| `largeWidth` / `largeHeight`   | `52` / `32`             | large 预设尺寸             |
-| `thumbInset`                   | `2`                     | thumb 与轨道边缘的间距     |
-| `activeColor`                  | `colorPrimary`          | 默认开启颜色               |
-| `inactiveColor`                | `colorFillSecondary`    | 默认关闭颜色               |
-| `thumbColor`                   | `colorWhite`            | thumb 颜色                 |
-| `loadingColor`                 | `colorIcon`             | loading 指示器颜色         |
-| `disabledOpacity`              | Button disabled opacity | 禁用透明度                 |
-| `activeOpacity`                | Button active opacity   | pressed/hovered 反馈透明度 |
-| `animationDuration`            | `motionDurationMid`     | thumb 动画时长             |
+| Token | 默认来源 | 说明 |
+| --- | --- | --- |
+| `smallWidth` / `smallHeight` | `32` / `20` | small 预设尺寸 |
+| `mediumWidth` / `mediumHeight` | `44` / `24` | medium 预设尺寸 |
+| `largeWidth` / `largeHeight` | `52` / `32` | large 预设尺寸 |
+| `thumbInset` | `2` | thumb 与轨道边缘的间距 |
+| `activeColor` | `colorPrimary` | 默认开启颜色 |
+| `inactiveColor` | `colorFillSecondary` | 默认关闭颜色 |
+| `thumbColor` | `colorWhite` | thumb 颜色 |
+| `loadingColor` | `colorIcon` | loading 指示器颜色 |
+| `disabledOpacity` | Button disabled opacity | 禁用透明度 |
+| `pressedOpacity` | `pressedOpacity` | pressed 反馈透明度；移动端不由 hovered 触发 |
+| `animationDuration` | `motionDurationMid` | thumb 动画时长 |
 
 ```tsx | pure
 import { ConfigProvider, Switch } from '@ftsukic/tsuki'

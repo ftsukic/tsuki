@@ -22,8 +22,9 @@ describe('Segmented', () => {
     const token = getDesignToken()
 
     expect(getSegmentedToken(token)).toEqual({
-      activeBackgroundColor: token.colorBgContainer,
-      activeColor: token.colorText,
+      selectedBackgroundColor: token.colorBgContainer,
+      selectedTextColor: token.colorText,
+      pressedBackgroundColor: token.pressedBackgroundColor,
       backgroundColor: token.colorFillTertiary,
       borderColor: token.colorBorder,
       borderWidth: token.lineWidth,
@@ -171,7 +172,7 @@ describe('Segmented', () => {
     )
 
     expect(defaultStyles.pressedOverlay).toMatchObject({
-      backgroundColor: 'rgba(0,0,0,0.1)',
+      backgroundColor: token.pressedBackgroundColor,
       borderRadius: token.borderRadius,
     })
     expect(roundStyles.pressedOverlay.borderRadius).toBe(999)

@@ -48,7 +48,7 @@ export function GridItem({
           alignSelf: 'stretch',
           aspectRatio: square ? 1 : undefined,
           backgroundColor:
-            pressed && onPress ? token.interactionActiveColor : token.colorBgContainer,
+            pressed && onPress ? token.pressedBackgroundColor : token.colorBgContainer,
           borderColor: border ? token.colorBorder : 'transparent',
           borderWidth: border ? 1 : 0,
           justifyContent: center ? 'center' : 'flex-start',

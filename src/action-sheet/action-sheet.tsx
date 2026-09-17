@@ -127,7 +127,7 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
             resolved.action,
             semantic?.action,
             index > 0 && { borderTopColor: token.dividerColor, borderTopWidth: 1 },
-            pressed && !disabled && { backgroundColor: token.actionActiveBackgroundColor },
+            pressed && !disabled && { backgroundColor: token.actionPressedBackgroundColor },
             disabled && { opacity: 0.45 },
           ]}
           testID={`action-sheet-action-${index}`}
@@ -215,7 +215,7 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
                         style={[
                           resolved.cancel,
                           semantic?.cancel,
-                          pressed && { backgroundColor: token.cancelActiveBackgroundColor },
+                          pressed && { backgroundColor: token.cancelPressedBackgroundColor },
                         ]}
                         testID="action-sheet-cancel-content"
                       >
@@ -224,7 +224,7 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
                       <View
                         style={{
                           backgroundColor: pressed
-                            ? token.cancelActiveBackgroundColor
+                            ? token.cancelPressedBackgroundColor
                             : token.backgroundColor,
                           height: bottomInset,
                         }}

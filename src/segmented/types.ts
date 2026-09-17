@@ -26,7 +26,7 @@ export interface SegmentedSemanticStyles {
   root?: StyleProp<ViewStyle>
   option?: StyleProp<ViewStyle>
   label?: StyleProp<TextStyle>
-  activeBackground?: StyleProp<ViewStyle>
+  selectedBackground?: StyleProp<ViewStyle>
 }
 
 export interface SegmentedProps extends Omit<ViewProps, 'children' | 'style'> {

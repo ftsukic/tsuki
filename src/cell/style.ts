@@ -33,7 +33,7 @@ export function getCellInteractionStyle(
   state: Pick<CellStyleState, 'pressed' | 'disabled'>,
 ): ViewStyle {
   return {
-    backgroundColor: state.pressed ? token.activeColor : undefined,
+    backgroundColor: state.pressed ? token.pressedBackgroundColor : undefined,
     opacity: state.disabled ? 0.4 : 1,
   }
 }
@@ -59,7 +59,8 @@ export function getCellStyles(
         pressed: hasInteraction && state.pressed,
         disabled: state.disabled,
       }),
-      backgroundColor: hasInteraction && state.pressed ? token.activeColor : token.backgroundColor,
+      backgroundColor:
+        hasInteraction && state.pressed ? token.pressedBackgroundColor : token.backgroundColor,
       position: 'relative',
     },
     row: {

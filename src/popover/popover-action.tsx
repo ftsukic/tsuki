@@ -1,11 +1,11 @@
 import { cloneElement, isValidElement } from 'react'
-import { View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import type { ReactNode } from 'react'
 import type { ColorValue, StyleProp, TextStyle } from 'react-native'
 import { Pressable } from '../pressable'
 import { Text } from '../text'
 import type { PopoverToken } from '../theme'
-import type { PopoverAction, PopoverSemanticStyles } from './types'
+import type { PopoverAction, PopoverSemanticStyles, PopoverTheme } from './types'
 import type { PopoverResolvedStyles } from './style'
 
 interface PopoverActionItemProps {
@@ -17,6 +17,7 @@ interface PopoverActionItemProps {
   textColor: ColorValue
   disabledColor: ColorValue
   token: PopoverToken
+  theme: PopoverTheme
 }
 
 interface ColorableElementProps {
@@ -95,6 +96,7 @@ export function PopoverActionItem({
   textColor,
   disabledColor,
   token,
+  theme,
 }: PopoverActionItemProps) {
   const disabled = action.disabled === true
   const actionColor = disabled ? disabledColor : (action.color ?? textColor)
@@ -112,16 +114,28 @@ export function PopoverActionItem({
       style={({ pressed }) => [
         styles.action,
         semantic?.action,
-        pressed && !disabled && { backgroundColor: token.pressedBackgroundColor },
+        theme === 'light' && pressed && !disabled
+          ? { backgroundColor: token.lightPressedBackgroundColor }
+          : undefined,
       ]}
       testID={`popover-action-${index}`}
     >
-      {action.icon !== undefined && action.icon !== null && action.icon !== false ? (
-        <View pointerEvents="none" style={[styles.actionIcon, semantic?.actionIcon]}>
-          {applyActionColor(action.icon, actionColor)}
-        </View>
-      ) : null}
-      {renderText(action.text, actionTextStyle, actionColor)}
+      {({ pressed }) => (
+        <>
+          {action.icon !== undefined && action.icon !== null && action.icon !== false ? (
+            <View pointerEvents="none" style={[styles.actionIcon, semantic?.actionIcon]}>
+              {applyActionColor(action.icon, actionColor)}
+            </View>
+          ) : null}
+          {renderText(action.text, actionTextStyle, actionColor)}
+          {theme === 'dark' && pressed && !disabled ? (
+            <View
+              pointerEvents="none"
+              style={[StyleSheet.absoluteFill, { backgroundColor: token.darkPressedOverlayColor }]}
+            />
+          ) : null}
+        </>
+      )}
     </Pressable>
   )
 }

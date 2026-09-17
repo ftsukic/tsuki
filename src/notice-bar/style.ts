@@ -1,5 +1,4 @@
 import type { TextStyle, ViewStyle } from 'react-native'
-import { getButtonToken } from '../button/token'
 import type { AliasToken } from '../theme'
 
 export type NoticeBarItemMode = 'measure' | 'scroll' | 'ellipsis' | 'wrap'
@@ -20,13 +19,13 @@ export function getNoticeBarStyles(
   wrapable: boolean,
   disabled: boolean,
   pressed = false,
+  clickable = false,
 ): NoticeBarResolvedStyles {
-  const buttonToken = getButtonToken(token)
   const height = token.controlHeightSM + token.paddingXXS * 2
   const lineHeight = token.lineHeightXL
-  const disabledOpacity = disabled ? buttonToken.disabledOpacity : 1
+  const disabledOpacity = disabled ? 0.4 : 1
   const rootOpacity = disabledOpacity
-  const contentOpacity = pressed && !disabled ? buttonToken.activeOpacity : 1
+  const contentOpacity = pressed && clickable && !disabled ? token.pressedOpacity : 1
   const contentFlow: ViewStyle = {
     alignItems: 'center',
     flexShrink: 1,

@@ -8,13 +8,21 @@ import {
   useRef,
   useState,
 } from 'react'
-import { BackHandler, Dimensions, FlatList, Platform, Pressable, View } from 'react-native'
+import {
+  BackHandler,
+  Dimensions,
+  FlatList,
+  Platform,
+  Pressable as NativePressable,
+  View,
+} from 'react-native'
 import type { LayoutChangeEvent, ListRenderItemInfo } from 'react-native'
 import { initialWindowMetrics, SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { scheduleOnRN } from 'react-native-worklets'
 import { Animated, useAnimatedStyle, useSharedValue, withTiming } from '../animation'
 import { GestureDetector } from '../gesture'
 import { Portal } from '../portal'
+import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
@@ -608,7 +616,7 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
           style={[resolved.overlay, semantic?.overlay, overlayTransitionStyle]}
         >
           {closeOnPressOverlay ? (
-            <Pressable
+            <NativePressable
               accessibilityLabel="Close image preview"
               onPress={() => requestClose('overlay')}
               style={{ flex: 1 }}
@@ -664,6 +672,7 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
                 },
                 semantic?.closeButton,
               ]}
+              pressStyle="opacity"
               testID="image-preview-close"
             >
               <Text style={[resolved.closeLabel, semantic?.closeLabel]}>×</Text>

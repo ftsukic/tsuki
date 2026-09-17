@@ -2,8 +2,9 @@ import type { AliasToken, SegmentedToken } from '../theme'
 
 export function getSegmentedToken(token: AliasToken): SegmentedToken {
   return {
-    activeBackgroundColor: token.colorBgContainer,
-    activeColor: token.colorText,
+    selectedBackgroundColor: token.colorBgContainer,
+    selectedTextColor: token.colorText,
+    pressedBackgroundColor: token.pressedBackgroundColor,
     backgroundColor: token.colorFillTertiary,
     borderColor: token.colorBorder,
     borderWidth: token.lineWidth,

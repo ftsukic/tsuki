@@ -65,6 +65,7 @@ function getNeutralColors(seed: SeedToken, dark: boolean) {
       colorFillTertiary: alphaColor('#FFFFFF', 0.08),
       colorBgLayout: '#141414',
       colorBgContainer: '#1F1F1F',
+      colorBgContainerPressed: '#3A3A3C',
       colorBgElevated: '#262626',
       colorBgMask: alphaColor('#000000', 0.65),
     }
@@ -87,6 +88,7 @@ function getNeutralColors(seed: SeedToken, dark: boolean) {
     colorFillTertiary: alphaColor(text, 0.04),
     colorBgLayout: solidColor(background, 4),
     colorBgContainer: solidColor(background, 0),
+    colorBgContainerPressed: '#F2F3F5',
     colorBgElevated: solidColor(background, 0),
     colorBgMask: alphaColor('#000000', 0.45),
   }

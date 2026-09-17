@@ -301,7 +301,7 @@ describe('Switch', () => {
     })
 
     expect(StyleSheet.flatten(screen.getByTestId('switch').props.style).opacity).toBe(
-      getSwitchToken(getDesignToken()).activeOpacity,
+      getSwitchToken(getDesignToken()).pressedOpacity,
     )
   })
 

@@ -165,8 +165,8 @@ export function getInputStyles(
       paddingHorizontal: metrics.paddingHorizontal,
       borderWidth: props.bordered ? token.borderWidth : 0,
       borderColor:
-        state.focused && props.activeBordered !== false
-          ? token.activeBorderColor
+        state.focused && props.focusedBordered !== false
+          ? token.focusedBorderColor
           : token.borderColor,
       borderRadius: props.bordered || !embedded ? token.borderRadius : 0,
       backgroundColor:

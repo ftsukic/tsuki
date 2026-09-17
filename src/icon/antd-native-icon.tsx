@@ -227,7 +227,7 @@ export function AntdNativeIcon({
       disabled={disabled}
       onPress={onPress}
       hitSlop={getIconHitSlop(resolvedSize, touchableSize, hitSlop)}
-      style={({ pressed }) => [resolvedStyle, pressed && { opacity: 0.6 }]}
+      style={({ pressed }) => [resolvedStyle, pressed && { opacity: token.pressedOpacity }]}
     >
       {touchBoundary}
     </InteractionPressable>

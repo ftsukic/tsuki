@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { Icon } from '../icon'
 import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import { useToken } from '../theme'
 import { NoticeBarContent } from './notice-bar-content'
 import { getNoticeBarStyles } from './style'
@@ -29,7 +30,7 @@ export function NoticeBar({
   const [shown, setShown] = useState(visibleProp)
   const content = children !== undefined ? children : text
   const effectiveVisible = shown && visibleProp
-  const styles = getNoticeBarStyles(token, wrapable, disabled)
+  const styles = getNoticeBarStyles(token, wrapable, disabled, false, onClick !== undefined)
 
   useEffect(() => {
     setShown(visibleProp)
@@ -57,7 +58,9 @@ export function NoticeBar({
         accessible
         disabled={disabled}
         onPress={onClick}
-        style={({ pressed }) => getNoticeBarStyles(token, wrapable, disabled, pressed).contentRoot}
+        style={({ pressed }) =>
+          getNoticeBarStyles(token, wrapable, disabled, pressed, onClick !== undefined).contentRoot
+        }
       >
         {isRenderable(leftIcon) ? <View style={styles.leftIcon}>{leftIcon}</View> : null}
         <NoticeBarContent
@@ -72,18 +75,16 @@ export function NoticeBar({
       </InteractionPressable>
       {isRenderable(resolvedRightIcon) ? (
         onClose ? (
-          <InteractionPressable
+          <Pressable
             accessibilityLabel="关闭通知"
             accessibilityRole="button"
             disabled={disabled}
             onPress={handleClose}
-            style={({ pressed }) => [
-              styles.rightIcon,
-              pressed && { opacity: token.motion ? 0.6 : 1 },
-            ]}
+            pressStyle="opacity"
+            style={styles.rightIcon}
           >
             {resolvedRightIcon}
-          </InteractionPressable>
+          </Pressable>
         ) : (
           <View style={styles.rightIcon}>{resolvedRightIcon}</View>
         )

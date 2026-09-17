@@ -1,27 +1,47 @@
-import { forwardRef, useState } from 'react'
+import { forwardRef, useCallback } from 'react'
 import { InteractionPressable } from '../interaction'
 import type { InteractionPressableProps, InteractionPressableState } from '../interaction'
-import { usePressAnimation } from './use-press-animation'
+import { useToken } from '../theme'
+import { usePressAnimationController } from './use-press-animation'
 import type { PressStyle } from './use-press-animation'
 
 export interface PressableProps extends InteractionPressableProps {
   /** Visual feedback applied while the press is active. */
   pressStyle?: PressStyle
+  /** Opacity used by the `opacity` press style. Defaults to the theme alias token. */
+  pressedOpacity?: number
+  /** Scale used by the `scale` press style. */
+  pressedScale?: number
 }
 
 export const Pressable = forwardRef<
   React.ComponentRef<typeof InteractionPressable>,
   PressableProps
 >(function Pressable(
-  { children, disabled = false, onPressIn, onPressOut, pressStyle = 'opacity', style, ...props },
+  {
+    children,
+    disabled = false,
+    pressStyle = 'opacity',
+    pressedOpacity,
+    pressedScale,
+    style,
+    testOnly_pressed,
+    ...props
+  },
   ref,
 ) {
-  const [pressed, setPressed] = useState(false)
-  const animatedStyle = usePressAnimation({
+  const { token } = useToken()
+  const { animatedStyle, setPressed } = usePressAnimationController({
     disabled,
-    pressed,
+    initialPressed: testOnly_pressed === true,
     pressStyle,
+    pressedOpacity: pressedOpacity ?? token.pressedOpacity,
+    pressedScale,
   })
+  const handlePressedChange = useCallback(
+    (nextPressed: boolean) => setPressed(nextPressed),
+    [setPressed],
+  )
   const interactionStyle =
     pressStyle === 'none'
       ? style
@@ -35,14 +55,8 @@ export const Pressable = forwardRef<
       {...props}
       ref={ref}
       disabled={disabled}
-      onPressIn={(event) => {
-        setPressed(true)
-        onPressIn?.(event)
-      }}
-      onPressOut={(event) => {
-        setPressed(false)
-        onPressOut?.(event)
-      }}
+      onPressedChange={handlePressedChange}
+      testOnly_pressed={testOnly_pressed}
       style={interactionStyle}
     >
       {children}

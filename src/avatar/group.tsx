@@ -3,7 +3,7 @@ import { useComponentToken } from '../theme'
 import { Avatar } from './avatar'
 import { getAvatarToken } from './token'
 import type { AvatarGroupProps, AvatarProps } from './interface'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import { Children, isValidElement } from 'react'
 import type { ReactElement } from 'react'
 import { View } from 'react-native'
@@ -82,10 +82,12 @@ export function AvatarGroup({
         )
       })}
       {overflowCount > 0 ? (
-        <InteractionPressable
+        <Pressable
+          disabled={!onOverflowPress}
           onPress={onOverflowPress}
           accessibilityRole={onOverflowPress ? 'button' : undefined}
           accessibilityLabel={`还有 ${overflowCount} 个头像`}
+          pressStyle="opacity"
           style={[
             {
               marginLeft: token.groupOverlapping,
@@ -110,7 +112,7 @@ export function AvatarGroup({
           >
             {`+${overflowCount}`}
           </Avatar>
-        </InteractionPressable>
+        </Pressable>
       ) : null}
     </View>
   )

@@ -145,18 +145,18 @@ Picker 不维护 Popup 的 draft/commit 生命周期；上例中的 `draft`、`c
 
 通过 `ConfigProvider` 的 `theme.components.Picker` 覆盖 token：
 
-| Token                                  | 默认来源               | 说明                       |
-| -------------------------------------- | ---------------------- | -------------------------- |
-| `picker_item_height`                   | `44`                   | 默认行高                   |
-| `picker_text_color`                    | `colorText`            | 选项文字颜色               |
-| `picker_active_text_color`             | `colorText`            | 选中项和操作按钮文字颜色   |
-| `picker_indicator_color`               | `colorBorderSecondary` | 选中框和 Toolbar 边框颜色  |
-| `picker_toolbar_button_active_opacity` | `0.6`                  | Toolbar 按钮按下时的透明度 |
-| `picker_mask_color`                    | `colorBgContainer`     | 上下渐隐遮罩颜色           |
-| `picker_visible_item_count`            | `6`                    | 默认可见行数               |
-| `picker_disabled_option_opacity`       | `0.3`                  | disabled option 的透明度   |
-| `picker_indicator_horizontal_inset`    | `16`                   | indicator 水平内缩         |
-| `picker_swipe_duration`                | `1000`                 | 手势 / 惯性吸附动画时长    |
+| Token                                   | 默认来源               | 说明                       |
+| --------------------------------------- | ---------------------- | -------------------------- |
+| `picker_item_height`                    | `44`                   | 默认行高                   |
+| `picker_text_color`                     | `colorText`            | 选项文字颜色               |
+| `picker_toolbar_title_color`            | `colorText`            | Toolbar 标题文字颜色       |
+| `picker_indicator_color`                | `colorBorderSecondary` | 选中框和 Toolbar 边框颜色  |
+| `picker_toolbar_button_pressed_opacity` | `pressedOpacity`       | Toolbar 按钮按下时的透明度 |
+| `picker_mask_color`                     | `colorBgContainer`     | 上下渐隐遮罩颜色           |
+| `picker_visible_item_count`             | `6`                    | 默认可见行数               |
+| `picker_disabled_option_opacity`        | `0.3`                  | disabled option 的透明度   |
+| `picker_indicator_horizontal_inset`     | `16`                   | indicator 水平内缩         |
+| `picker_swipe_duration`                 | `1000`                 | 手势 / 惯性吸附动画时长    |
 
 ## 无障碍与平台说明
 

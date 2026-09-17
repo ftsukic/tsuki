@@ -3,8 +3,8 @@ import type { ActionSheetToken, AliasToken } from '../theme'
 export function getActionSheetToken(token: AliasToken): ActionSheetToken {
   return {
     backgroundColor: token.colorBgContainer,
-    actionActiveBackgroundColor: token.colorFillSecondary,
-    cancelActiveBackgroundColor: token.colorFillSecondary,
+    actionPressedBackgroundColor: token.pressedBackgroundColor,
+    cancelPressedBackgroundColor: token.pressedBackgroundColor,
     titleColor: token.colorTextSecondary,
     actionColor: token.colorText,
     descriptionColor: token.colorTextSecondary,

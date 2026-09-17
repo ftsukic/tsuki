@@ -575,7 +575,7 @@ describe('SwipeCell', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
-  it('uses the Cell active background for the content press feedback', async () => {
+  it('uses the Cell pressed background for the content press feedback', async () => {
     await render(
       <TestProvider>
         <SwipeCell testID="pressed-content" rightAction="删除">
@@ -589,7 +589,7 @@ describe('SwipeCell', () => {
         pressed: true,
         disabled: false,
       }).backgroundColor,
-    ).toBe(getDesignToken().interactionActiveColor)
+    ).toBe(getDesignToken().pressedBackgroundColor)
   })
 
   it('closes the active cell when another library pressable is touched', async () => {

@@ -57,11 +57,7 @@ export function getSwitchStyles(
   return {
     root: {
       alignSelf: 'flex-start',
-      opacity: state.disabled
-        ? token.disabledOpacity
-        : state.pressed || state.hovered
-          ? token.activeOpacity
-          : 1,
+      opacity: state.disabled ? token.disabledOpacity : state.pressed ? token.pressedOpacity : 1,
     },
     track: {
       alignItems: 'center',

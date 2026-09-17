@@ -1,4 +1,5 @@
 import { forwardRef } from 'react'
+import { StyleSheet, View } from 'react-native'
 import { Pressable } from '../pressable'
 import { Text } from '../text'
 import { useComponentToken } from '../theme'
@@ -26,17 +27,30 @@ export const SwipeCellAction = forwardRef<
     <Pressable
       ref={ref}
       {...pressableProps}
-      pressStyle="opacity"
-      style={({ pressed }) => [
+      pressStyle="none"
+      style={(state) => [
         styles.action,
         {
           backgroundColor: backgroundColor ?? getSwipeCellActionBackgroundColor(token, color),
         },
         width !== undefined ? { width } : null,
-        typeof style === 'function' ? style({ pressed }) : style,
+        typeof style === 'function' ? style(state) : style,
       ]}
     >
-      {content}
+      {({ pressed }) => (
+        <>
+          {content}
+          {pressed && !pressableProps.disabled ? (
+            <View
+              pointerEvents="none"
+              style={[
+                StyleSheet.absoluteFill,
+                { backgroundColor: token.actionPressedOverlayColor },
+              ]}
+            />
+          ) : null}
+        </>
+      )}
     </Pressable>
   )
 })

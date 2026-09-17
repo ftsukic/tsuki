@@ -58,13 +58,13 @@ export function getPickerStyles(
       paddingHorizontal: token.picker_toolbar_padding_horizontal,
     },
     toolbarButtonLabel: {
-      color: token.picker_active_text_color,
+      color: token.picker_text_color,
       fontFamily: token.picker_font_family,
       fontSize: token.picker_toolbar_button_font_size,
       lineHeight: token.picker_toolbar_button_line_height,
     },
     toolbarTitle: {
-      color: token.picker_active_text_color,
+      color: token.picker_toolbar_title_color,
       fontFamily: token.picker_font_family,
       fontSize: token.picker_item_font_size,
       fontWeight: '600',

@@ -133,6 +133,6 @@ ref 方法复用同一套 `DropdownMenu` 状态，不会创建第二套 visible 
 </ConfigProvider>
 ```
 
-公开 token 包含 `menuHeight`、`menuBackgroundColor`、`titleColor`、`activeColor`、`disabledColor`、`optionTextColor`、`optionDisabledColor`、`optionPressedColor`、`titleFontSize`、`titleLineHeight`、`titleFontFamily`、`arrowSize`、`arrowGap`、`optionHeight`、`optionPaddingHorizontal`、`optionFontSize`、`optionLineHeight`、`optionIconSize`、`contentBackgroundColor`、`dividerColor`、`dividerWidth`、`shadowColor`、`shadowOpacity`、`shadowRadius`、`shadowOffset`、`elevation`、`overlayColor`、`animationDuration` 和 `zIndex`。
+公开 token 包含 `menuHeight`、`menuBackgroundColor`、`titleColor`、`activeColor`、`disabledColor`、`optionTextColor`、`optionDisabledColor`、`optionPressedBackgroundColor`、`titleFontSize`、`titleLineHeight`、`titleFontFamily`、`arrowSize`、`arrowGap`、`optionHeight`、`optionPaddingHorizontal`、`optionFontSize`、`optionLineHeight`、`optionIconSize`、`contentBackgroundColor`、`dividerColor`、`dividerWidth`、`shadowColor`、`shadowOpacity`、`shadowRadius`、`shadowOffset`、`elevation`、`overlayColor`、`animationDuration` 和 `zIndex`。`activeColor` 仍表示打开/选中状态，不是 pressed 反馈。
 
 组件不提供 Web DOM、`openIndex`、`defaultOpenIndex` 或第三方 popover/dropdown API；需要外部打开状态时使用 `DropdownMenuRef` 或由上层响应 `onChange`。

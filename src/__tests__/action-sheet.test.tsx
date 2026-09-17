@@ -207,14 +207,14 @@ describe('ActionSheet', () => {
     await view.unmount()
   })
 
-  it('uses dedicated active backgrounds without changing action height or dividers', async () => {
+  it('uses dedicated pressed backgrounds without changing action height or dividers', async () => {
     const view = await render(
       <ConfigProvider
         theme={{
           token: { motion: false },
           components: {
             ActionSheet: {
-              actionActiveBackgroundColor: '#e6f4ff',
+              actionPressedBackgroundColor: '#e6f4ff',
             },
           },
         }}
@@ -255,10 +255,10 @@ describe('ActionSheet', () => {
     const themeToken = getDesignToken()
     const actionSheetToken = getActionSheetToken(themeToken)
 
-    expect(actionSheetToken.actionActiveBackgroundColor).toBe(themeToken.colorFillSecondary)
-    expect(actionSheetToken.cancelActiveBackgroundColor).toBe(themeToken.colorFillSecondary)
+    expect(actionSheetToken.actionPressedBackgroundColor).toBe(themeToken.pressedBackgroundColor)
+    expect(actionSheetToken.cancelPressedBackgroundColor).toBe(themeToken.pressedBackgroundColor)
     expect(actionSheetToken.cancelGapColor).toBe(themeToken.colorBgLayout)
-    expect(actionSheetToken.actionActiveBackgroundColor).not.toBe(actionSheetToken.cancelGapColor)
+    expect(actionSheetToken.actionPressedBackgroundColor).not.toBe(actionSheetToken.cancelGapColor)
   })
 
   it('closes controlled sheets from actions, cancel, and the overlay', async () => {
@@ -511,7 +511,7 @@ describe('ActionSheet', () => {
     await view.unmount()
   })
 
-  it('applies cancel active background to the content and safe area and handles safe-area presses', async () => {
+  it('applies cancel pressed background to the content and safe area and handles safe-area presses', async () => {
     const onClose = jest.fn()
     const view = await render(
       <ConfigProvider
@@ -519,7 +519,7 @@ describe('ActionSheet', () => {
           token: { motion: false },
           components: {
             ActionSheet: {
-              cancelActiveBackgroundColor: '#e6f4ff',
+              cancelPressedBackgroundColor: '#e6f4ff',
             },
           },
         }}

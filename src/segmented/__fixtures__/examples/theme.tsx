@@ -11,8 +11,9 @@ export default function SegmentedThemeExample() {
       theme={{
         components: {
           Segmented: {
-            activeBackgroundColor: '#e6f4ff',
-            activeColor: '#0958d9',
+            selectedBackgroundColor: '#e6f4ff',
+            selectedTextColor: '#0958d9',
+            pressedBackgroundColor: '#f2f3f5',
             borderColor: '#91caff',
           },
         },

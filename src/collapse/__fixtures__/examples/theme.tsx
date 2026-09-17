@@ -10,7 +10,7 @@ export default function CollapseThemeExample() {
       theme={{
         components: {
           Collapse: {
-            activeColor: '#e6f4ff',
+            headerPressedBackgroundColor: '#e6f4ff',
             animationDuration: 220,
             headerHeight: 52,
           },

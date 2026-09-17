@@ -13,7 +13,7 @@ export function getCollapseToken(token: AliasToken): CollapseToken {
     iconColor: cellToken.iconColor,
     iconSize: cellToken.iconSize,
     iconGap: cellToken.iconGap,
-    activeColor: token.interactionActiveColor,
+    headerPressedBackgroundColor: token.pressedBackgroundColor,
     disabledColor: token.colorTextDisabled,
     disabledOpacity: 1,
     contentPaddingVertical: token.paddingSM,

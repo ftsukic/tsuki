@@ -20,7 +20,6 @@ export function getTabsToken(token: AliasToken): TabsToken {
     cardBackgroundColor: token.colorBgContainer,
     cardActiveBackgroundColor: token.colorPrimary,
     cardActiveTextColor: token.colorTextLightSolid,
-    activeOpacity: 0.6,
     disabledOpacity: 0.4,
     animationDuration: token.motionDurationFast,
     fontFamily: token.fontFamily,

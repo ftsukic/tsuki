@@ -61,7 +61,7 @@ describe('Empty', () => {
     const pressedOverlay = findPressedOverlay(view.toJSON())
     expect(pressedOverlay).toBeTruthy()
     expect(StyleSheet.flatten(pressedOverlay?.props.style)).toMatchObject({
-      backgroundColor: 'rgba(0,0,0,0.1)',
+      backgroundColor: 'rgba(0, 0, 0, 0.1)',
     })
 
     await act(async () => {

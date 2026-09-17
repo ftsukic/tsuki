@@ -90,7 +90,7 @@ describe('Grid', () => {
     expect(screen.getByTestId('disabled').props.accessibilityState?.disabled).toBe(true)
   })
 
-  it('uses the shared active color for pressed items', async () => {
+  it('uses the shared pressed background for pressed items', async () => {
     await render(
       <Grid>
         <Grid.Item testID="pressed" text="按下" onPress={() => {}} testOnly_pressed />
@@ -98,7 +98,7 @@ describe('Grid', () => {
     )
 
     const style = StyleSheet.flatten(screen.getByTestId('pressed').props.style)
-    expect(style.backgroundColor).toBe(getDesignToken().interactionActiveColor)
+    expect(style.backgroundColor).toBe(getDesignToken().pressedBackgroundColor)
   })
 
   it('keeps arbitrary children as item content without layout coupling', async () => {

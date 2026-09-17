@@ -4,7 +4,7 @@ import type { SegmentedShape } from './types'
 
 export interface SegmentedResolvedStyles {
   root: ViewStyle
-  activeBackground: ViewStyle
+  selectedBackground: ViewStyle
   option: ViewStyle
   label: TextStyle
   pressedOverlay: ViewStyle
@@ -32,8 +32,10 @@ export function getSegmentedStyles(
       padding: token.padding,
       position: 'relative',
     },
-    activeBackground: {
-      backgroundColor: disabled ? themeToken.colorBgContainerDisabled : token.activeBackgroundColor,
+    selectedBackground: {
+      backgroundColor: disabled
+        ? themeToken.colorBgContainerDisabled
+        : token.selectedBackgroundColor,
       borderRadius,
       bottom: token.padding,
       left: 0,
@@ -55,7 +57,7 @@ export function getSegmentedStyles(
       textAlign: 'center',
     },
     pressedOverlay: {
-      backgroundColor: buttonToken.pressedOverlayColor,
+      backgroundColor: token.pressedBackgroundColor,
       borderRadius,
       bottom: 0,
       left: 0,

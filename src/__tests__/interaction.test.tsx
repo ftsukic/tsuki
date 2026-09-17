@@ -222,12 +222,22 @@ describe('InteractionPressable', () => {
     await view.unmount()
   })
 
-  it('exposes a theme-overridable active color token', () => {
+  it('exposes theme-overridable pressed tokens', () => {
     const token = getDesignToken()
-    const overridden = getDesignToken({ token: { interactionActiveColor: '#123456' } })
+    const overridden = getDesignToken({
+      token: {
+        pressedBackgroundColor: '#123456',
+        pressedOpacity: 0.7,
+        pressedOverlayColor: 'rgba(0, 0, 0, 0.2)',
+      },
+    })
 
-    expect(token.interactionActiveColor).toBe(token.colorFillTertiary)
-    expect(overridden.interactionActiveColor).toBe('#123456')
+    expect(token.pressedBackgroundColor).toBe(token.colorBgContainerPressed)
+    expect(token.pressedOpacity).toBe(0.6)
+    expect(token.pressedOverlayColor).toBe('rgba(0, 0, 0, 0.1)')
+    expect(overridden.pressedBackgroundColor).toBe('#123456')
+    expect(overridden.pressedOpacity).toBe(0.7)
+    expect(overridden.pressedOverlayColor).toBe('rgba(0, 0, 0, 0.2)')
   })
 
   it('recognizes the configured pan axis and forwards gesture lifecycle callbacks', async () => {

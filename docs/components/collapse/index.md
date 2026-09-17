@@ -86,7 +86,7 @@ import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 | titleFontSize / titleLineHeight | Cell 字体 token | 标题字号和行高 |
 | titleColor | `colorText` | 标题颜色 |
 | iconColor / iconSize | `colorIcon` / `fontSizeLG` | 图标颜色和尺寸 |
-| activeColor | `interactionActiveColor` | Header 按压背景 |
+| headerPressedBackgroundColor | `pressedBackgroundColor` | Header 按压背景 |
 | disabledColor / disabledOpacity | `colorTextDisabled` / `1` | 禁用标题/箭头颜色；可用 `disabledOpacity` 自定义整行透明度 |
 | contentPaddingVertical / contentPaddingHorizontal | `paddingSM` / `padding` | 内容区域内边距 |
 | contentTextColor | `colorTextSecondary` | 内容文字颜色 |

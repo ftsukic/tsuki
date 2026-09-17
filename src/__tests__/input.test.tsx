@@ -225,11 +225,11 @@ describe('Input', () => {
     )
     const focusedStyle = getInputStyles(
       token,
-      { bordered: true, activeBordered: false, multiline: true },
+      { bordered: true, focusedBordered: false, multiline: true },
       { focused: true, disabled: false },
     )
 
-    expect(defaultFocusedStyle.shell.borderColor).toBe(token.activeBorderColor)
+    expect(defaultFocusedStyle.shell.borderColor).toBe(token.focusedBorderColor)
     expect(focusedStyle.shell).toMatchObject({
       borderColor: token.borderColor,
       borderWidth: token.borderWidth,

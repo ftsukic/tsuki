@@ -15,7 +15,7 @@ export default function FieldStatesFixture() {
         multiline
         rows={3}
         bordered
-        activeBordered={false}
+        focusedBordered={false}
         showWordLimit
         placeholder="请输入备注"
       />

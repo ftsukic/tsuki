@@ -88,7 +88,7 @@ import { Checkbox } from '@ftsukic/tsuki'
 
 ### Checkbox token
 
-通过 `ConfigProvider` 的 `theme.components.Checkbox` 覆盖 token。核心字段包括 `size`、`borderRadius`、`borderColor`、`checkedBackground`、`checkedIconColor`、`disabledColor`、`disabledBackground`、`labelColor`、`gap`、`groupGap`、`activeOpacity` 和 `disabledOpacity`；button variant 还使用 `buttonHeight`、`buttonMinWidth`、`buttonPaddingHorizontal`、`buttonBorderRadius`、`buttonBackground`、`buttonFilledBackground`、`buttonDisabledBackground` 和 `buttonCheckedFilledBackground`。
+通过 `ConfigProvider` 的 `theme.components.Checkbox` 覆盖 token。核心字段包括 `size`、`borderRadius`、`borderColor`、`checkedBackground`、`checkedIconColor`、`disabledColor`、`disabledBackground`、`labelColor`、`gap`、`groupGap`、`pressedOpacity` 和 `disabledOpacity`；button variant 还使用 `buttonHeight`、`buttonMinWidth`、`buttonPaddingHorizontal`、`buttonBorderRadius`、`buttonBackground`、`buttonFilledBackground`、`buttonDisabledBackground` 和 `buttonCheckedFilledBackground`。
 
 ```tsx | pure
 import { Checkbox, ConfigProvider } from '@ftsukic/tsuki'

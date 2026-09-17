@@ -20,7 +20,7 @@ export function getRadioToken(token: AliasToken): RadioToken {
     fontSize: buttonToken.contentFontSize,
     lineHeight: token.lineHeight,
     gap: token.paddingXS,
-    activeOpacity: buttonToken.activeOpacity,
+    pressedOpacity: token.pressedOpacity,
     disabledOpacity: buttonToken.disabledOpacity,
     fontFamily: buttonToken.fontFamily,
     buttonHeight: 32,

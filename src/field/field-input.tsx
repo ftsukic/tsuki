@@ -122,7 +122,7 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
             onChangeText={setValue}
             embedded
             bordered={inputControlProps.bordered ?? false}
-            activeBordered={inputControlProps.activeBordered ?? false}
+            focusedBordered={inputControlProps.focusedBordered ?? false}
             disabled={disabled}
             readOnly={readOnly}
             textAlign={inputControlProps.textAlign ?? resolvedValueAlign}

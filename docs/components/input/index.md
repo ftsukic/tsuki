@@ -55,7 +55,7 @@ import { Input } from '@ftsukic/tsuki'
 | placeholder | `string` | — | 占位文本 |
 | size | `'large' \| 'normal' \| 'small'` | `'normal'` | 输入字号、行高和内边距尺寸 |
 | bordered | `boolean` | `false` | 是否显示边框 |
-| activeBordered | `boolean` | `true` | 聚焦时是否使用高亮边框色；设为 `false` 保持普通边框色 |
+| focusedBordered | `boolean` | `true` | 聚焦时是否使用高亮边框色；设为 `false` 保持普通边框色 |
 | disabled | `boolean` | `false` | 禁止编辑、清除和密码切换，并使用 disabled token |
 | readOnly | `boolean` | `false` | 禁止编辑但保留普通展示样式 |
 | clearable | `boolean` | `false` | 单行输入有值时展示清除按钮；multiline 输入不显示 |

@@ -291,6 +291,7 @@ export function Popover(props: PopoverProps) {
                 semantic={semantic}
                 styles={resolved}
                 textColor={textColor}
+                theme={theme}
                 token={token}
               />
             </Fragment>
