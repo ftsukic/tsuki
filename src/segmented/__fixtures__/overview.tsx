@@ -40,7 +40,7 @@ export default function SegmentedOverview() {
         },
         {
           Component: SegmentedShapesExample,
-          description: '对比 default 和 round 两种整体形态。',
+          description: '对比 default、round 和单实例自定义圆角。',
           id: 'shapes',
           title: 'Shapes',
         },

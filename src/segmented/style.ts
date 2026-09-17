@@ -1,6 +1,5 @@
-import type { AliasToken, ButtonToken, SegmentedToken } from '../theme'
+import type { AliasToken, SegmentedToken } from '../theme'
 import type { TextStyle, ViewStyle } from 'react-native'
-import type { SegmentedShape } from './types'
 
 export interface SegmentedResolvedStyles {
   root: ViewStyle
@@ -12,21 +11,18 @@ export interface SegmentedResolvedStyles {
 
 export function getSegmentedStyles(
   themeToken: AliasToken,
-  buttonToken: ButtonToken,
   token: SegmentedToken,
-  shape: SegmentedShape,
+  resolvedBorderRadius: number,
   block: boolean,
   disabled: boolean,
 ): SegmentedResolvedStyles {
-  const borderRadius = shape === 'round' ? buttonToken.borderRadiusRound : buttonToken.borderRadius
-
   return {
     root: {
       alignSelf: block ? 'stretch' : 'flex-start',
       backgroundColor: disabled ? themeToken.colorBgContainerDisabled : token.backgroundColor,
       borderColor: token.borderColor,
       borderWidth: token.borderWidth,
-      borderRadius,
+      borderRadius: resolvedBorderRadius,
       flexDirection: 'row',
       overflow: 'hidden',
       padding: token.padding,
@@ -36,7 +32,7 @@ export function getSegmentedStyles(
       backgroundColor: disabled
         ? themeToken.colorBgContainerDisabled
         : token.selectedBackgroundColor,
-      borderRadius,
+      borderRadius: resolvedBorderRadius,
       bottom: token.padding,
       left: 0,
       position: 'absolute',
@@ -58,7 +54,7 @@ export function getSegmentedStyles(
     },
     pressedOverlay: {
       backgroundColor: token.pressedBackgroundColor,
-      borderRadius,
+      borderRadius: resolvedBorderRadius,
       bottom: 0,
       left: 0,
       position: 'absolute',

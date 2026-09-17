@@ -72,6 +72,7 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
     defaultValue,
     onChange,
     shape = 'default',
+    borderRadius,
     size = 'middle',
     block = false,
     disabled = false,
@@ -101,9 +102,11 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
   const activeThumbWidth = useRef(new Animated.Value(0)).current
   const activeThumbAnimation = useRef<Animated.CompositeAnimation | null>(null)
   const hasMeasuredActiveThumb = useRef(false)
+  const resolvedBorderRadius =
+    borderRadius ?? (shape === 'round' ? buttonToken.borderRadiusRound : buttonToken.borderRadius)
   const resolvedStyles = useMemo(
-    () => getSegmentedStyles(themeToken, buttonToken, segmentedToken, shape, block, disabled),
-    [block, buttonToken, disabled, segmentedToken, shape, themeToken],
+    () => getSegmentedStyles(themeToken, segmentedToken, resolvedBorderRadius, block, disabled),
+    [block, buttonToken, disabled, resolvedBorderRadius, segmentedToken, themeToken],
   )
   const segmentedProps = useMemo<SegmentedProps>(
     () => ({
@@ -112,6 +115,7 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
       defaultValue,
       onChange,
       shape,
+      borderRadius,
       size,
       block,
       disabled,
@@ -125,6 +129,7 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
       disabled,
       onChange,
       options,
+      borderRadius,
       selectedTextColor,
       shape,
       size,
@@ -216,8 +221,7 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
             resolvedStyles.selectedBackground,
             semanticStyles?.selectedBackground,
             {
-              borderRadius:
-                shape === 'round' ? buttonToken.borderRadiusRound : buttonToken.borderRadius,
+              borderRadius: resolvedBorderRadius,
               transform: [{ translateX: activeThumbX }],
               width: activeThumbWidth,
             },

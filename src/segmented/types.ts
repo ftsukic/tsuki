@@ -35,6 +35,7 @@ export interface SegmentedProps extends Omit<ViewProps, 'children' | 'style'> {
   defaultValue?: SegmentedValue
   onChange?: (value: SegmentedValue) => void
   shape?: SegmentedShape
+  borderRadius?: number
   size?: SegmentedSize
   block?: boolean
   disabled?: boolean

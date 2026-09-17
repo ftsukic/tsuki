@@ -37,7 +37,7 @@ import { Segmented } from '@ftsukic/tsuki'
 
 <code src="../../../src/segmented/__fixtures__/examples/custom-label.tsx" title="自定义标签" description="option 的 label 支持自定义 ReactNode。"></code>
 
-<code src="../../../src/segmented/__fixtures__/examples/shapes.tsx" title="形状" description="对比 default 和 round 两种整体圆角形态。"></code>
+<code src="../../../src/segmented/__fixtures__/examples/shapes.tsx" title="形状与自定义圆角" description="对比 default、round 和单实例自定义圆角。"></code>
 
 <code src="../../../src/segmented/__fixtures__/examples/theme.tsx" title="主题与语义样式" description="通过组件 token、单实例选中颜色和 styles 定制胶囊控件。"></code>
 
@@ -52,6 +52,7 @@ import { Segmented } from '@ftsukic/tsuki'
 | defaultValue | `string \| number` | 第一个可用 option | 非受控初始激活值 |
 | onChange | `(value: string \| number) => void` | — | 激活值变化时触发；重复点击当前项不会触发 |
 | shape | `'default' \| 'round'` | `'default'` | `default` 使用默认圆角；`round` 让外层容器和 selected thumb 使用胶囊圆角，option 本身不设置圆角 |
+| borderRadius | `number` | — | 当前实例的外层容器、selected thumb 和 pressed feedback 圆角；优先级高于 `shape` |
 | size | `'small' \| 'middle' \| 'large'` | `'middle'` | 控件尺寸 |
 | block | `boolean` | `false` | 占满父级宽度，并让各 option 等分 |
 | disabled | `boolean` | `false` | 禁用整个控件并覆盖 option 状态 |
@@ -89,7 +90,7 @@ interface SegmentedOption {
 
 `style` 和 `styles.root` 作用于根节点；`styles.option` 作用于每个完整点击项；`styles.label` 作用于文本 label；`styles.selectedBackground` 作用于动画 thumb。自定义 label 的内部样式由调用方控制。
 
-`shape="default"` 使用 Button 的 `borderRadius`，`shape="round"` 使用 `borderRadiusRound`；两种形态都只由外层容器和动画 thumb 控制圆角。`block` 会让 option 等分可用宽度。
+`shape="default"` 使用 Button 的 `borderRadius`，`shape="round"` 使用 `borderRadiusRound`；传入 `borderRadius` 后，当前实例的外层容器、selected thumb 和 pressed feedback 统一使用该值，并优先于 `shape`。`style={{ borderRadius }}` 只描述根节点，不会作为内部圆角来源。`block` 会让 option 等分可用宽度。
 
 ## 主题定制
 
