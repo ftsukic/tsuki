@@ -341,7 +341,23 @@ describe('Button', () => {
       alignSelf: 'flex-start',
       paddingHorizontal: 0,
     })
+    expect(getButtonStyle('text-block').width).toBeUndefined()
     expect(getButtonStyle('text-block').minHeight).toBeUndefined()
+  })
+
+  it('makes a standalone block button fill its parent width', async () => {
+    await render(
+      <ConfigProvider>
+        <Button testID="block-button" block>
+          Block
+        </Button>
+      </ConfigProvider>,
+    )
+
+    expect(getButtonStyle('block-button')).toMatchObject({
+      alignSelf: 'stretch',
+      width: '100%',
+    })
   })
 
   it('exposes Button.Group and inherits group size unless a child overrides it', async () => {
@@ -404,7 +420,10 @@ describe('Button', () => {
       </ConfigProvider>,
     )
 
-    expect(getButtonStyle('block-group')).toMatchObject({ alignSelf: 'stretch' })
+    expect(getButtonStyle('block-group')).toMatchObject({
+      alignSelf: 'stretch',
+      width: '100%',
+    })
     expect(getButtonStyle('block-first')).toMatchObject({ flex: 1, minWidth: 0 })
     expect(getButtonStyle('block-last')).toMatchObject({ flex: 1, minWidth: 0 })
   })

@@ -182,7 +182,7 @@ export function getButtonStyles(
       alignItems: 'center',
       justifyContent: 'center',
       alignSelf: isText ? 'flex-start' : props.block && !isCircle ? 'stretch' : 'auto',
-      width: isCircle ? size.height : undefined,
+      width: isCircle ? size.height : props.block && !isText ? '100%' : undefined,
       opacity: state.disabled
         ? token.disabledOpacity
         : variant === 'text' && state.pressed && !state.loading

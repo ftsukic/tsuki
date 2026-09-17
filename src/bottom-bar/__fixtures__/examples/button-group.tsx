@@ -13,7 +13,7 @@ export default function BottomBarButtonGroupFixture() {
         <Text>Button.Group 负责按钮之间的连接和等宽布局。</Text>
       </ScrollView>
       <BottomBar>
-        <Button.Group block style={styles.buttonGroup}>
+        <Button.Group block>
           <Button>取消</Button>
           <Button type="primary">确认</Button>
         </Button.Group>
@@ -37,9 +37,5 @@ const styles = StyleSheet.create({
     color: '#1f2937',
     fontSize: 20,
     fontWeight: '600',
-  },
-  buttonGroup: {
-    flex: 1,
-    minWidth: 0,
   },
 })

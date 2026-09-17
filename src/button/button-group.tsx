@@ -76,6 +76,7 @@ export function ButtonGroup({
             borderRadius,
             flexDirection: 'row',
             alignSelf: block ? 'stretch' : 'auto',
+            width: block ? '100%' : undefined,
           },
           style,
         ]}

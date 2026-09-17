@@ -21,7 +21,7 @@ export default function BottomBarCustomStyleFixture() {
           paddingHorizontal: 12,
         }}
       >
-        <Button style={styles.customButton} type="primary">
+        <Button block type="primary">
           保存
         </Button>
       </BottomBar>
@@ -44,8 +44,5 @@ const styles = StyleSheet.create({
     color: '#1f2937',
     fontSize: 20,
     fontWeight: '600',
-  },
-  customButton: {
-    flex: 1,
   },
 })
