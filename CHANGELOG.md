@@ -1,5 +1,11 @@
 # @ftsukic/tsuki
 
+## 0.0.7
+
+### Patch Changes
+
+- Improve Popover and ImagePreview interactions, unify pressed feedback tokens, and make block Buttons and Button.Groups fill available BottomBar width without business-side flex workarounds.
+
 ## 0.0.6
 
 ### Patch Changes
