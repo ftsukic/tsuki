@@ -33,28 +33,29 @@ import ComponentOverview28 from '../../src/notify/__fixtures__/overview'
 import ComponentOverview29 from '../../src/overlay/__fixtures__/overview'
 import ComponentOverview30 from '../../src/picker/__fixtures__/overview'
 import ComponentOverview31 from '../../src/picker-group/__fixtures__/overview'
-import ComponentOverview32 from '../../src/popup/__fixtures__/overview'
-import ComponentOverview33 from '../../src/portal/__fixtures__/overview'
-import ComponentOverview34 from '../../src/pressable/__fixtures__/overview'
-import ComponentOverview35 from '../../src/progress/__fixtures__/overview'
-import ComponentOverview36 from '../../src/provider/__fixtures__/overview'
-import ComponentOverview37 from '../../src/radio/__fixtures__/overview'
-import ComponentOverview38 from '../../src/search/__fixtures__/overview'
-import ComponentOverview39 from '../../src/segmented/__fixtures__/overview'
-import ComponentOverview40 from '../../src/skeleton/__fixtures__/overview'
-import ComponentOverview41 from '../../src/space/__fixtures__/overview'
-import ComponentOverview42 from '../../src/surface/__fixtures__/overview'
-import ComponentOverview43 from '../../src/swipe/__fixtures__/overview'
-import ComponentOverview44 from '../../src/swipe-cell/__fixtures__/overview'
-import ComponentOverview45 from '../../src/switch/__fixtures__/overview'
-import ComponentOverview46 from '../../src/tabs/__fixtures__/overview'
-import ComponentOverview47 from '../../src/tag/__fixtures__/overview'
-import ComponentOverview48 from '../../src/text/__fixtures__/overview'
-import ComponentOverview49 from '../../src/text-input/__fixtures__/overview'
-import ComponentOverview50 from '../../src/theme/__fixtures__/overview'
-import ComponentOverview51 from '../../src/time-picker/__fixtures__/overview'
-import ComponentOverview52 from '../../src/toast/__fixtures__/overview'
-import ComponentOverview53 from '../../src/watermark/__fixtures__/overview'
+import ComponentOverview32 from '../../src/popover/__fixtures__/overview'
+import ComponentOverview33 from '../../src/popup/__fixtures__/overview'
+import ComponentOverview34 from '../../src/portal/__fixtures__/overview'
+import ComponentOverview35 from '../../src/pressable/__fixtures__/overview'
+import ComponentOverview36 from '../../src/progress/__fixtures__/overview'
+import ComponentOverview37 from '../../src/provider/__fixtures__/overview'
+import ComponentOverview38 from '../../src/radio/__fixtures__/overview'
+import ComponentOverview39 from '../../src/search/__fixtures__/overview'
+import ComponentOverview40 from '../../src/segmented/__fixtures__/overview'
+import ComponentOverview41 from '../../src/skeleton/__fixtures__/overview'
+import ComponentOverview42 from '../../src/space/__fixtures__/overview'
+import ComponentOverview43 from '../../src/surface/__fixtures__/overview'
+import ComponentOverview44 from '../../src/swipe/__fixtures__/overview'
+import ComponentOverview45 from '../../src/swipe-cell/__fixtures__/overview'
+import ComponentOverview46 from '../../src/switch/__fixtures__/overview'
+import ComponentOverview47 from '../../src/tabs/__fixtures__/overview'
+import ComponentOverview48 from '../../src/tag/__fixtures__/overview'
+import ComponentOverview49 from '../../src/text/__fixtures__/overview'
+import ComponentOverview50 from '../../src/text-input/__fixtures__/overview'
+import ComponentOverview51 from '../../src/theme/__fixtures__/overview'
+import ComponentOverview52 from '../../src/time-picker/__fixtures__/overview'
+import ComponentOverview53 from '../../src/toast/__fixtures__/overview'
+import ComponentOverview54 from '../../src/watermark/__fixtures__/overview'
 
 export interface ComponentFixtureEntry {
   Component: ComponentType
@@ -296,153 +297,160 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   },
   {
     Component: ComponentOverview32,
+    component: 'popover',
+    description: 'Popover 的 action 菜单、定位、主题、触发器和自定义内容预览。',
+    id: 'popover',
+    title: 'Popover',
+  },
+  {
+    Component: ComponentOverview33,
     component: 'popup',
     description: 'Popup 通过 selector 汇总位置、交互、生命周期和主题示例，每次只挂载一个弹层。',
     id: 'popup',
     title: 'Popup',
   },
   {
-    Component: ComponentOverview33,
+    Component: ComponentOverview34,
     component: 'portal',
     description: 'Portal 通过 selector 汇总组件式和命令式挂载示例，每次只挂载一个 Portal 案例。',
     id: 'portal',
     title: 'Portal',
   },
   {
-    Component: ComponentOverview34,
+    Component: ComponentOverview35,
     component: 'pressable',
     description: '统一 Pressable 的 opacity、scale 和 none 点击反馈。',
     id: 'pressable',
     title: 'Pressable',
   },
   {
-    Component: ComponentOverview35,
+    Component: ComponentOverview36,
     component: 'progress',
     description: 'Progress supports tokenized line and circle indicators with animated updates.',
     id: 'progress',
     title: 'Progress',
   },
   {
-    Component: ComponentOverview36,
+    Component: ComponentOverview37,
     component: 'provider',
     description: 'Provider 汇总应用级主题和 Portal 上下文入口示例。',
     id: 'provider',
     title: 'Provider',
   },
   {
-    Component: ComponentOverview37,
+    Component: ComponentOverview38,
     component: 'radio',
     description: 'Radio 汇总独立选项、分组、button variant、禁用、形状、样式和主题示例。',
     id: 'radio',
     title: 'Radio',
   },
   {
-    Component: ComponentOverview38,
+    Component: ComponentOverview39,
     component: 'search',
     description: 'Search 汇总 Vant 风格输入、左右扩展和搜索行为场景。',
     id: 'search',
     title: 'Search',
   },
   {
-    Component: ComponentOverview39,
+    Component: ComponentOverview40,
     component: 'segmented',
     description: 'Segmented 汇总通知、筛选、尺寸、布局、形状和禁用示例。',
     id: 'segmented',
     title: 'Segmented',
   },
   {
-    Component: ComponentOverview40,
+    Component: ComponentOverview41,
     component: 'skeleton',
     description: 'Skeleton covers content shapes, avatars, loading state, themes and animation.',
     id: 'skeleton',
     title: 'Skeleton',
   },
   {
-    Component: ComponentOverview41,
+    Component: ComponentOverview42,
     component: 'space',
     description: 'Space 汇总横向、纵向、gap、换行和交叉轴对齐示例。',
     id: 'space',
     title: 'Space',
   },
   {
-    Component: ComponentOverview42,
+    Component: ComponentOverview43,
     component: 'surface',
     description: 'Surface provides a rounded visual container for related mobile content.',
     id: 'surface',
     title: 'Surface',
   },
   {
-    Component: ComponentOverview43,
+    Component: ComponentOverview44,
     component: 'swipe',
     description: 'Swipe component overview.',
     id: 'swipe',
     title: 'Swipe',
   },
   {
-    Component: ComponentOverview44,
+    Component: ComponentOverview45,
     component: 'swipe-cell',
     description: 'SwipeCell 的微信消息列表、多 action、协调、列表、ref、分组和主题示例。',
     id: 'swipe-cell',
     title: 'SwipeCell',
   },
   {
-    Component: ComponentOverview45,
+    Component: ComponentOverview46,
     component: 'switch',
     description: 'Switch supports tokenized sizes, custom values, loading and async confirmation.',
     id: 'switch',
     title: 'Switch',
   },
   {
-    Component: ComponentOverview46,
+    Component: ComponentOverview47,
     component: 'tabs',
     description: 'Tabs 汇总 line、card、禁用、横向滚动和受控切换示例。',
     id: 'tabs',
     title: 'Tabs',
   },
   {
-    Component: ComponentOverview47,
+    Component: ComponentOverview48,
     component: 'tag',
     description: 'Tag 汇总语义类型、形状、尺寸、关闭和自定义颜色示例。',
     id: 'tag',
     title: 'Tag',
   },
   {
-    Component: ComponentOverview48,
+    Component: ComponentOverview49,
     component: 'text',
     description: 'Text 汇总基础文本、语义、尺寸和字重示例。',
     id: 'text',
     title: 'Text',
   },
   {
-    Component: ComponentOverview49,
+    Component: ComponentOverview50,
     component: 'text-input',
     description: 'TextInput 展示 React Native 基础输入能力。',
     id: 'text-input',
     title: 'TextInput',
   },
   {
-    Component: ComponentOverview50,
+    Component: ComponentOverview51,
     component: 'theme',
     description: 'Theme 汇总亮暗算法和组件 token 覆盖示例。',
     id: 'theme',
     title: 'Theme',
   },
   {
-    Component: ComponentOverview51,
+    Component: ComponentOverview52,
     component: 'time-picker',
     description: 'TimePicker 的 Vant 时间范围、过滤和 Tsuki 步进示例。',
     id: 'time-picker',
     title: 'TimePicker',
   },
   {
-    Component: ComponentOverview52,
+    Component: ComponentOverview53,
     component: 'toast',
     description: 'Toast 通过 selector 汇总类型、位置、交互和主题示例，每次只挂载一个提示案例。',
     id: 'toast',
     title: 'Toast',
   },
   {
-    Component: ComponentOverview53,
+    Component: ComponentOverview54,
     component: 'watermark',
     description: 'Watermark 汇总文字、图片、平铺布局、语义样式和主题 token 示例。',
     id: 'watermark',

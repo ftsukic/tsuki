@@ -459,6 +459,32 @@ export interface PopupToken {
   zIndex: number
 }
 
+export interface PopoverToken {
+  borderRadius: number
+  actionWidth: number
+  actionHeight: number
+  actionFontSize: number
+  actionLineHeight: number
+  actionIconSize: number
+  actionIconGap: number
+  lightBackgroundColor: string
+  lightTextColor: string
+  lightDisabledColor: string
+  lightDividerColor: string
+  darkBackgroundColor: string
+  darkTextColor: string
+  darkDisabledColor: string
+  darkDividerColor: string
+  pressedBackgroundColor: string
+  arrowWidth: number
+  arrowHeight: number
+  offset: number
+  screenMargin: number
+  overlayColor: string
+  animationDuration: number
+  fontFamily: string
+}
+
 export interface PickerToken {
   picker_toolbar_height: number
   picker_item_height: number
@@ -680,6 +706,7 @@ export interface ComponentTokenOverrides {
   Dialog?: Partial<DialogToken>
   Overlay?: Partial<OverlayToken>
   Popup?: Partial<PopupToken>
+  Popover?: Partial<PopoverToken>
   Picker?: Partial<PickerToken>
   ActionSheet?: Partial<ActionSheetToken>
   Toast?: Partial<ToastToken>
@@ -716,6 +743,7 @@ export interface ComponentTokenMap {
   Dialog: DialogToken
   Overlay: OverlayToken
   Popup: PopupToken
+  Popover: PopoverToken
   Picker: PickerToken
   ActionSheet: ActionSheetToken
   Toast: ToastToken

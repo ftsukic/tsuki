@@ -24,6 +24,7 @@ order: 1
 - [Navbar](/components/navbar)
 - [NoticeBar](/components/notice-bar)、[Notify](/components/notify)
 - [Overlay](/components/overlay)、[Popup](/components/popup)、[Portal](/components/portal)
+- [Popover](/components/popover)
 - [Picker](/components/picker)、[PickerGroup](/components/picker-group)、[Progress](/components/progress)、[Provider](/components/provider)、[Radio](/components/radio)
 - [Segmented](/components/segmented)、[Surface](/components/surface)
 - [Search](/components/search)、[Tabs](/components/tabs)、[Text](/components/text)、[TextInput](/components/text-input)、[Theme](/components/theme)、[Toast](/components/toast)
