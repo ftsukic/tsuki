@@ -246,10 +246,10 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
           >
             {({ pressed }) => (
               <>
-                {renderOptionLabel(option.label, labelStyle)}
                 {pressed && !effectiveDisabled && !active ? (
                   <View pointerEvents="none" style={resolvedStyles.pressedOverlay} />
                 ) : null}
+                {renderOptionLabel(option.label, labelStyle)}
               </>
             )}
           </InteractionPressable>
