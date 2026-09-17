@@ -3,6 +3,9 @@ import { ImagePreview } from '../..'
 import { Button } from '../../../button'
 import { Image, View } from 'react-native'
 import type { ImageSourcePropType, ImageStyle, StyleProp } from 'react-native'
+import { Flex, Text } from '@ftsukic/tsuki'
+
+const IMAGES = ['https://picsum.photos/id/1025/900/900', 'https://picsum.photos/id/1015/900/1200']
 
 interface CustomImageProps {
   source: ImageSourcePropType
@@ -35,15 +38,17 @@ function CustomImage({ source, style, onLoadStart, onLoad, onLoadEnd, onError }:
 /** @title Custom image renderer @description Wrap React Native Image while forwarding ImagePreview's lifecycle context. */
 export default function CustomRenderer() {
   const [visible, setVisible] = useState(false)
+  const [toolbarPressCount, setToolbarPressCount] = useState(0)
 
   return (
     <View>
       <Button onPress={() => setVisible(true)}>打开自定义图片</Button>
       <ImagePreview
         visible={visible}
-        images={['https://picsum.photos/id/1025/900/900']}
+        images={IMAGES}
         closeable
-        showIndicators={false}
+        showIndex
+        showIndicators
         onRequestClose={() => setVisible(false)}
         onClosed={() => setVisible(false)}
         renderImage={(image, index, { source, style, onLoadStart, onLoad, onLoadEnd, onError }) => (
@@ -56,6 +61,14 @@ export default function CustomRenderer() {
             onLoadEnd={onLoadEnd}
             onError={onError}
           />
+        )}
+        renderToolbar={() => (
+          <Flex align="center" justify="flex-end" style={{ minHeight: 48, marginHorizontal: 20 }}>
+            <Text style={{ color: '#fff' }}>Toolbar</Text>
+            <Button onPress={() => setToolbarPressCount((count) => count + 1)}>
+              {toolbarPressCount > 0 ? `Clicked ${toolbarPressCount}` : 'Toolbar Action'}
+            </Button>
+          </Flex>
         )}
       />
     </View>

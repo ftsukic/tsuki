@@ -18,6 +18,7 @@ export function getImagePreviewStyles(token: ImagePreviewToken) {
     controls: {
       ...StyleSheet.absoluteFillObject,
       pointerEvents: 'box-none',
+      zIndex: 2,
     },
     bottomControls: {
       bottom: 0,

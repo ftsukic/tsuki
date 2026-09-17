@@ -10,7 +10,7 @@ import {
 } from 'react'
 import { BackHandler, Dimensions, FlatList, Platform, Pressable, View } from 'react-native'
 import type { LayoutChangeEvent, ListRenderItemInfo } from 'react-native'
-import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
+import { initialWindowMetrics, SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { scheduleOnRN } from 'react-native-worklets'
 import { Animated, useAnimatedStyle, useSharedValue, withTiming } from '../animation'
 import { GestureDetector } from '../gesture'
@@ -51,6 +51,7 @@ interface TransitionState {
 }
 
 type ImagePreviewPhase = 'closed' | 'opening' | 'open' | 'closing'
+type OpeningTransitionMode = 'none' | 'pending' | 'source'
 
 interface ImagePreviewContentProps extends ImagePreviewProps {
   internal?: boolean
@@ -72,6 +73,13 @@ function renderSlot(value: React.ReactNode, style?: object) {
   ) : (
     value
   )
+}
+
+function getOpeningTransitionMode(
+  sourceRect: ImagePreviewRect | null | undefined,
+  getSourceRect?: ImagePreviewProps['getSourceRect'],
+): OpeningTransitionMode {
+  return isValidRect(sourceRect) ? 'source' : getSourceRect ? 'pending' : 'none'
 }
 
 export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewContentProps>(
@@ -122,8 +130,13 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
     const token = useComponentToken('ImagePreview', getImagePreviewToken)
     const resolved = getImagePreviewStyles(token)
     const safeAreaInsets = useContext(SafeAreaInsetsContext)
-    const topInset = safeAreaInsetTop ? Math.max(0, safeAreaInsets?.top ?? 0) : 0
-    const bottomInset = safeAreaInsetBottom ? Math.max(0, safeAreaInsets?.bottom ?? 0) : 0
+    const fallbackInsets = initialWindowMetrics?.insets
+    const topInset = safeAreaInsetTop
+      ? Math.max(0, safeAreaInsets?.top ?? fallbackInsets?.top ?? 0)
+      : 0
+    const bottomInset = safeAreaInsetBottom
+      ? Math.max(0, safeAreaInsets?.bottom ?? fallbackInsets?.bottom ?? 0)
+      : 0
     const count = images.length
     const normalizedImages = useMemo(() => Array.from(images, normalizeImageSource), [images])
     const safeMinZoom = Number.isFinite(minZoom) && minZoom > 0 ? minZoom : 0.5
@@ -134,6 +147,9 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
     const normalizedStart = normalizeStartPosition(startPosition, count, loop)
     const [activeIndex, setActiveIndex] = useState(normalizedStart)
     const [transition, setTransition] = useState<TransitionState | null>(null)
+    const [openingTransitionMode, setOpeningTransitionMode] = useState<OpeningTransitionMode>(
+      visible ? getOpeningTransitionMode(sourceRect, getSourceRect) : 'none',
+    )
     const [phase, setPhase] = useState<ImagePreviewPhase>(visible ? 'opening' : 'closed')
     const [viewport, setViewport] = useState({
       width: Math.max(1, initialWindow.width),
@@ -326,6 +342,7 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
       closeCompletedRef.current = false
       phaseRef.current = 'closing'
       setPhase('closing')
+      setOpeningTransitionMode('none')
       setTransition(null)
       transitionProgressSV.value = 0
       const index = activeIndexRef.current
@@ -371,6 +388,7 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
       closeCompletedRef.current = false
       phaseRef.current = 'opening'
       setPhase('opening')
+      setOpeningTransitionMode(getOpeningTransitionMode(sourceRect, getSourceRect))
       setTransition(null)
       transitionProgressSV.value = 0
       onOpen?.()
@@ -378,7 +396,9 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
       if (lifecycle !== lifecycleRef.current || !visibleRef.current) return
       const duration =
         themeToken.motion === false ? 0 : Math.max(0, transitionDuration ?? token.animationDuration)
-      if (isValidRect(source)) {
+      const hasTransition = isValidRect(source)
+      setOpeningTransitionMode(hasTransition ? 'source' : 'none')
+      if (hasTransition) {
         setTransition({
           from: source,
           to: fullscreenRect(normalizedStart),
@@ -402,6 +422,8 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
       token.animationDuration,
       transitionDuration,
       transitionProgressSV,
+      getSourceRect,
+      sourceRect,
     ])
 
     useImperativeHandle(
@@ -453,17 +475,21 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
       }),
       [phase, transition, transitionProgressSV],
     )
-    const controlsOpacityStyle = useAnimatedStyle(
-      () => ({
-        opacity:
-          (phase === 'opening'
+    const controlsOpacityStyle = useAnimatedStyle(() => {
+      const transitionOpacity =
+        phase === 'closing'
+          ? 1 - transitionProgressSV.value
+          : phase === 'opening' && openingTransitionMode === 'source'
             ? transitionProgressSV.value
-            : phase === 'closing'
-              ? 1 - transitionProgressSV.value
-              : 1) * Math.max(0, 1 - Math.max(0, dismissTranslateY.value) / 50),
-      }),
-      [dismissTranslateY, phase, transitionProgressSV],
-    )
+            : phase === 'opening' && openingTransitionMode === 'pending'
+              ? 0
+              : 1
+      const gestureOpacity = Math.max(0, 1 - Math.max(0, dismissTranslateY.value) / 50)
+
+      return {
+        opacity: transitionOpacity * gestureOpacity,
+      }
+    }, [dismissTranslateY, openingTransitionMode, phase, transitionProgressSV])
     const overlayTransitionStyle = useAnimatedStyle(
       () => ({
         opacity:
@@ -570,28 +596,31 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
     ) : null
 
     return (
-      <GestureDetector gesture={gesture.gesture}>
-        <View
-          {...viewProps}
-          collapsable={false}
-          onLayout={handleLayout}
-          style={[resolved.root, semantic?.root, style]}
-          testID="image-preview"
+      <View
+        {...viewProps}
+        collapsable={false}
+        onLayout={handleLayout}
+        style={[resolved.root, semantic?.root, style]}
+        testID="image-preview"
+      >
+        <Animated.View
+          pointerEvents={closeOnPressOverlay ? 'auto' : 'none'}
+          style={[resolved.overlay, semantic?.overlay, overlayTransitionStyle]}
         >
+          {closeOnPressOverlay ? (
+            <Pressable
+              accessibilityLabel="Close image preview"
+              onPress={() => requestClose('overlay')}
+              style={{ flex: 1 }}
+              testID="image-preview-overlay"
+            />
+          ) : null}
+        </Animated.View>
+        <GestureDetector gesture={gesture.gesture}>
           <Animated.View
-            pointerEvents={closeOnPressOverlay ? 'auto' : 'none'}
-            style={[resolved.overlay, semantic?.overlay, overlayTransitionStyle]}
+            style={[resolved.pager, semantic?.pager, pagerOpacityStyle]}
+            testID="image-preview-pager-layer"
           >
-            {closeOnPressOverlay ? (
-              <Pressable
-                accessibilityLabel="Close image preview"
-                onPress={() => requestClose('overlay')}
-                style={{ flex: 1 }}
-                testID="image-preview-overlay"
-              />
-            ) : null}
-          </Animated.View>
-          <Animated.View style={[resolved.pager, semantic?.pager, pagerOpacityStyle]}>
             <GestureDetector gesture={nativeScrollGesture}>
               <FlatList
                 data={paging.data}
@@ -615,70 +644,75 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
               />
             </GestureDetector>
           </Animated.View>
-          {transitionImage}
-          <Animated.View
-            pointerEvents="box-none"
-            style={[resolved.controls, semantic?.controls, controlsOpacityStyle]}
-          >
-            {renderIndexContent}
-            {closeable ? (
-              <Pressable
-                accessibilityLabel="Close image preview"
-                accessibilityRole="button"
-                onPress={() => requestClose('close-icon')}
-                style={[
-                  resolved.closeButton,
-                  {
-                    top: topInset + Math.max(0, token.closeIconTop - 8),
-                  },
-                  semantic?.closeButton,
-                ]}
-                testID="image-preview-close"
-              >
-                <Text style={[resolved.closeLabel, semantic?.closeLabel]}>×</Text>
-              </Pressable>
-            ) : null}
-            <View
-              pointerEvents="box-none"
+        </GestureDetector>
+        {transitionImage}
+        <Animated.View
+          pointerEvents="box-none"
+          style={[resolved.controls, semantic?.controls, controlsOpacityStyle]}
+          testID="image-preview-controls"
+        >
+          {renderIndexContent}
+          {closeable ? (
+            <Pressable
+              accessibilityLabel="Close image preview"
+              accessibilityRole="button"
+              onPress={() => requestClose('close-icon')}
               style={[
-                resolved.bottomControls,
+                resolved.closeButton,
                 {
-                  paddingBottom: bottomInset,
+                  top: topInset + Math.max(0, token.closeIconTop - 8),
                 },
-                semantic?.bottomControls,
+                semantic?.closeButton,
               ]}
-              testID="image-preview-bottom-controls"
+              testID="image-preview-close"
             >
-              {showIndicators && count > 1 ? (
-                <View
-                  pointerEvents="none"
-                  style={[resolved.indicators, semantic?.indicators]}
-                  testID="image-preview-indicators"
-                >
-                  {Array.from({ length: count }, (_, index) => (
-                    <View
-                      key={index}
-                      style={[
-                        resolved.indicator,
-                        semantic?.indicator,
-                        index === activeIndex && [
-                          resolved.activeIndicator,
-                          semantic?.activeIndicator,
-                        ],
-                      ]}
-                    />
-                  ))}
-                </View>
-              ) : null}
-              {renderToolbar ? (
-                <View style={[resolved.toolbar, semantic?.toolbar]} testID="image-preview-toolbar">
-                  {renderSlot(renderToolbar({ index: activeIndex, total: count }))}
-                </View>
-              ) : null}
-            </View>
-          </Animated.View>
-        </View>
-      </GestureDetector>
+              <Text style={[resolved.closeLabel, semantic?.closeLabel]}>×</Text>
+            </Pressable>
+          ) : null}
+          <View
+            pointerEvents="box-none"
+            style={[
+              resolved.bottomControls,
+              {
+                paddingBottom: bottomInset,
+              },
+              semantic?.bottomControls,
+            ]}
+            testID="image-preview-bottom-controls"
+          >
+            {showIndicators && count > 1 ? (
+              <View
+                pointerEvents="none"
+                style={[resolved.indicators, semantic?.indicators]}
+                testID="image-preview-indicators"
+              >
+                {Array.from({ length: count }, (_, index) => (
+                  <View
+                    key={index}
+                    style={[
+                      resolved.indicator,
+                      semantic?.indicator,
+                      index === activeIndex && [
+                        resolved.activeIndicator,
+                        semantic?.activeIndicator,
+                      ],
+                    ]}
+                  />
+                ))}
+              </View>
+            ) : null}
+            {renderToolbar ? (
+              <View
+                pointerEvents="auto"
+                style={[resolved.toolbar, semantic?.toolbar]}
+                testID="image-preview-toolbar"
+              >
+                {renderSlot(renderToolbar({ index: activeIndex, total: count }))}
+              </View>
+            ) : null}
+          </View>
+        </Animated.View>
+      </View>
     )
   },
 )

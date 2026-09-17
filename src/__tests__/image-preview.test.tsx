@@ -1,7 +1,7 @@
 import React from 'react'
 import * as Reanimated from 'react-native-reanimated'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
-import { StyleSheet, Text } from 'react-native'
+import { Pressable, StyleSheet, Text } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import type { ImagePreviewRef, ImagePreviewRenderImageContext } from '..'
 import {
@@ -52,6 +52,19 @@ describe('ImagePreview', () => {
   it('renders empty images without an invalid index indicator', async () => {
     await renderWithHost(<ImagePreview visible images={[]} />)
     expect(screen.queryByText('1/0')).toBeNull()
+  })
+
+  it('does not render indicators for a single image', async () => {
+    await render(
+      <ImagePreviewContent
+        images={['single-image']}
+        showIndicators
+        transitionDuration={0}
+        visible
+      />,
+    )
+
+    expect(screen.queryByTestId('image-preview-indicators')).toBeNull()
   })
 
   it('applies the top safe area independently to the index and close button', async () => {
@@ -161,6 +174,95 @@ describe('ImagePreview', () => {
       bottom: expect.anything(),
       position: 'absolute',
     })
+  })
+
+  it('keeps custom toolbar presses inside the controls interaction surface', async () => {
+    const toolbarPress = jest.fn()
+    const onRequestClose = jest.fn()
+
+    await render(
+      <ImagePreviewContent
+        images={['toolbar-interaction']}
+        onRequestClose={onRequestClose}
+        renderToolbar={() => (
+          <Pressable onPress={toolbarPress} testID="toolbar-action">
+            <Text>Toolbar Action</Text>
+          </Pressable>
+        )}
+        visible
+      />,
+    )
+
+    const root = screen.getByTestId('image-preview')
+    const controls = screen.getByTestId('image-preview-controls')
+
+    expect(controls.parent).toBe(root)
+    expect(screen.getByTestId('image-preview-toolbar').props.pointerEvents).toBe('auto')
+
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.press(screen.getByTestId('toolbar-action'))
+
+    expect(toolbarPress).toHaveBeenCalledTimes(1)
+    expect(onRequestClose).not.toHaveBeenCalled()
+  })
+
+  it('keeps ordinary opening controls visible above the image layers', async () => {
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value) => value as never)
+
+    try {
+      await render(
+        <ImagePreviewContent
+          closeable
+          images={['controls']}
+          renderToolbar={() => <Text>操作</Text>}
+          transitionDuration={1000}
+          visible
+        />,
+      )
+
+      expect(
+        StyleSheet.flatten(screen.getByTestId('image-preview-controls').props.style),
+      ).toMatchObject({
+        opacity: 1,
+        zIndex: 2,
+      })
+    } finally {
+      timing.mockRestore()
+    }
+  })
+
+  it('keeps controls hidden until an async source transition is resolved', async () => {
+    let resolveSourceRect!: (value: null) => void
+    const getSourceRect = jest.fn(
+      () =>
+        new Promise<null>((resolve) => {
+          resolveSourceRect = resolve
+        }),
+    )
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value) => value as never)
+
+    try {
+      await render(
+        <ImagePreviewContent getSourceRect={getSourceRect} images={['async-source']} visible />,
+      )
+      await waitFor(() => expect(getSourceRect).toHaveBeenCalledWith(0))
+
+      expect(
+        StyleSheet.flatten(screen.getByTestId('image-preview-controls').props.style),
+      ).toMatchObject({ opacity: 0 })
+
+      await act(async () => resolveSourceRect(null))
+
+      expect(
+        StyleSheet.flatten(screen.getByTestId('image-preview-controls').props.style),
+      ).toMatchObject({ opacity: 1 })
+    } finally {
+      timing.mockRestore()
+    }
   })
 
   it('can disable only the bottom safe area inset', async () => {
@@ -370,6 +472,7 @@ describe('ImagePreview', () => {
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent.press(screen.getByTestId('image-preview-close'))
     expect(onRequestClose).toHaveBeenCalledWith('close-icon')
+    expect(onRequestClose).toHaveBeenCalledTimes(1)
 
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent.press(screen.getByTestId('image-preview-overlay'))

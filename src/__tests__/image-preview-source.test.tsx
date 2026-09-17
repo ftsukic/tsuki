@@ -79,6 +79,14 @@ describe('ImagePreview source rect lifecycle', () => {
     expect(gestureSource).toContain('Gesture.Native().enabled')
   })
 
+  it('keeps controls outside the image dismissal gesture scope', () => {
+    const source = readFileSync(join(__dirname, '../image-preview/image-preview.tsx'), 'utf8')
+
+    expect(source).toMatch(
+      /<GestureDetector gesture=\{gesture\.gesture\}>[\s\S]*?testID="image-preview-pager-layer"[\s\S]*?<\/GestureDetector>\s*\{transitionImage\}[\s\S]*?testID="image-preview-controls"/,
+    )
+  })
+
   it('publishes the active index only at momentum end', async () => {
     const onIndexChange = jest.fn()
     let paging!: ReturnType<typeof useImagePreviewPaging>
