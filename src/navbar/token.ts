@@ -9,6 +9,6 @@ export function getNavbarToken(token: AliasToken): NavbarToken {
     actionFontSize: token.fontSize,
     actionColor: token.colorPrimary,
     iconSize: token.fontSizeLG,
-    borderColor: token.colorBorder,
+    borderColor: token.colorBorderSecondary,
   }
 }

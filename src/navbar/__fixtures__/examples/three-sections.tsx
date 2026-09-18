@@ -1,15 +1,24 @@
-import { Navbar, NavbarAction, Text } from '../../..'
+import { useState } from 'react'
+import { Navbar } from '../../..'
+import { Text, View } from 'react-native'
 
 /**
  * @title Three sections
- * @description Keep a custom title centered while left and right actions use independent slots.
+ * @description Use single custom left and right slots with Navbar-level callbacks.
  */
 export default function NavbarThreeSectionsFixture() {
+  const [message, setMessage] = useState('')
+
   return (
-    <Navbar
-      left={<NavbarAction onPress={() => undefined}>返回</NavbarAction>}
-      title={<Text>群组信息</Text>}
-      right={<NavbarAction onPress={() => undefined}>更多</NavbarAction>}
-    />
+    <View>
+      <Navbar
+        left={<Text>返回</Text>}
+        onPressLeft={() => setMessage('点击了返回')}
+        title="群组信息"
+        right={<Text>更多</Text>}
+        onPressRight={() => setMessage('点击了更多')}
+      />
+      <Text>{message}</Text>
+    </View>
   )
 }

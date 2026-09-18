@@ -3,11 +3,12 @@ import { View } from 'react-native'
 
 /**
  * @title Two sections
- * @description Compose multiple independent actions in the left and right layout slots.
+ * @description Use multiple independent NavbarAction instances inside custom slots; do not also pass slot-level callbacks.
  */
 export default function NavbarTwoSectionsFixture() {
   return (
     <Navbar
+      title="群组信息"
       left={
         <View style={{ alignItems: 'center', flexDirection: 'row' }}>
           <NavbarAction onPress={() => undefined}>返回</NavbarAction>

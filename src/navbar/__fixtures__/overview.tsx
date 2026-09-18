@@ -1,5 +1,9 @@
 import { FixtureOverview } from '../../fixture-overview'
 import NavbarBasicExample from './examples/basic'
+import NavbarCustomLeftExample from './examples/custom-left'
+import NavbarCustomRightExample from './examples/custom-right'
+import NavbarFixedPlaceholderExample from './examples/fixed-placeholder'
+import NavbarFixedExample from './examples/fixed'
 import NavbarLeftArrowExample from './examples/left-arrow'
 import NavbarLeftTextExample from './examples/left-text'
 import NavbarLongActionsExample from './examples/long-actions'
@@ -7,13 +11,14 @@ import NavbarLongLeftTextExample from './examples/long-left-text'
 import NavbarLongRightActionExample from './examples/long-right-action'
 import NavbarLongTitleExample from './examples/long-title'
 import NavbarRightActionExample from './examples/right-action'
+import NavbarSafeAreaExample from './examples/safe-area'
 import NavbarTitleOnlyExample from './examples/title-only'
 import NavbarThreeSectionsExample from './examples/three-sections'
 import NavbarTwoSectionsExample from './examples/two-sections'
 
 /**
  * @title Navbar overview
- * @description Vant-style Navbar title, two-section and three-section layout examples.
+ * @description Vant-style Navbar layout, actions, fixed positioning, and safe-area examples.
  */
 export default function NavbarOverview() {
   return (
@@ -50,14 +55,26 @@ export default function NavbarOverview() {
           title: 'Right action',
         },
         {
+          Component: NavbarCustomLeftExample,
+          description: '展示自定义左侧内容仍由 Navbar 处理点击回调。',
+          id: 'custom-left',
+          title: 'Custom left',
+        },
+        {
+          Component: NavbarCustomRightExample,
+          description: '展示自定义右侧内容仍由 Navbar 处理点击回调。',
+          id: 'custom-right',
+          title: 'Custom right',
+        },
+        {
           Component: NavbarThreeSectionsExample,
-          description: '展示有标题时左右槽位与中心标题的独立布局。',
+          description: '展示单一 custom slot 与 Navbar 级回调组合。',
           id: 'three-sections',
           title: 'Three sections',
         },
         {
           Component: NavbarTwoSectionsExample,
-          description: '展示无标题时在左右槽位中组合多个独立 action。',
+          description: '展示一个 slot 内组合多个 NavbarAction 的 Tsuki 扩展。',
           id: 'two-sections',
           title: 'Two sections',
         },
@@ -84,6 +101,24 @@ export default function NavbarOverview() {
           description: '展示默认右侧文字的单行行为。',
           id: 'long-right-action',
           title: 'Long right action',
+        },
+        {
+          Component: NavbarFixedExample,
+          description: '展示 fixed 在 RN 中映射为顶部 absolute 定位。',
+          id: 'fixed',
+          title: 'Fixed',
+        },
+        {
+          Component: NavbarFixedPlaceholderExample,
+          description: '展示 fixed 与 placeholder 的组合。',
+          id: 'fixed-placeholder',
+          title: 'Fixed placeholder',
+        },
+        {
+          Component: NavbarSafeAreaExample,
+          description: '展示 safeAreaInsetTop 在内容区上方增加顶部安全区。',
+          id: 'safe-area',
+          title: 'Safe area',
         },
       ]}
       fullBleedExamples

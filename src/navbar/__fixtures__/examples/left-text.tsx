@@ -5,5 +5,5 @@ import { Navbar } from '../../..'
  * @description Add return text beside the default back arrow.
  */
 export default function NavbarLeftTextFixture() {
-  return <Navbar title="详情" leftText="返回" />
+  return <Navbar title="详情" leftArrow leftText="返回" onPressLeft={() => undefined} />
 }

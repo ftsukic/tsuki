@@ -5,5 +5,5 @@ import { Navbar } from '../../..'
  * @description Use the default Vant-style left arrow action with a custom icon size.
  */
 export default function NavbarLeftArrowFixture() {
-  return <Navbar title="返回" leftIconSize={20} onPressLeft={() => undefined} />
+  return <Navbar title="返回" leftArrow onPressLeft={() => undefined} />
 }

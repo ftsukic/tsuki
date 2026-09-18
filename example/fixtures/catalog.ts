@@ -254,7 +254,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview26,
     component: 'navbar',
-    description: 'Vant-style Navbar title, two-section and three-section layout examples.',
+    description: 'Vant-style Navbar layout, actions, fixed positioning, and safe-area examples.',
     id: 'navbar',
     title: 'Navbar',
   },

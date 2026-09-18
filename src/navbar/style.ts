@@ -4,17 +4,12 @@ import type { AliasToken, NavbarToken } from '../theme'
 export interface NavbarResolvedStyles {
   root: ViewStyle
   bar: ViewStyle
-  barCentered: ViewStyle
-  barSplit: ViewStyle
   left: ViewStyle
-  leftCentered: ViewStyle
-  leftSplit: ViewStyle
-  right: ViewStyle
-  rightCentered: ViewStyle
-  rightSplit: ViewStyle
   center: ViewStyle
   title: TextStyle
+  right: ViewStyle
   divider: ViewStyle
+  placeholder: ViewStyle
 }
 
 export function getNavbarStyles(token: NavbarToken, aliasToken: AliasToken): NavbarResolvedStyles {
@@ -28,39 +23,25 @@ export function getNavbarStyles(token: NavbarToken, aliasToken: AliasToken): Nav
       height: token.height,
       position: 'relative',
     },
-    barCentered: {
-      justifyContent: 'center',
-    },
-    barSplit: {
-      justifyContent: 'space-between',
-    },
     left: {
       alignItems: 'center',
+      bottom: 0,
       flexDirection: 'row',
       justifyContent: 'center',
-    },
-    leftCentered: {
-      bottom: 0,
       left: 0,
+      maxWidth: '20%',
       position: 'absolute',
       top: 0,
-    },
-    leftSplit: {
-      flexShrink: 1,
     },
     right: {
       alignItems: 'center',
+      bottom: 0,
       flexDirection: 'row',
       justifyContent: 'center',
-    },
-    rightCentered: {
-      bottom: 0,
+      maxWidth: '20%',
       position: 'absolute',
       right: 0,
       top: 0,
-    },
-    rightSplit: {
-      flexShrink: 1,
     },
     center: {
       alignItems: 'center',
@@ -75,10 +56,12 @@ export function getNavbarStyles(token: NavbarToken, aliasToken: AliasToken): Nav
       color: token.titleColor,
       flexShrink: 1,
       fontSize: token.titleFontSize,
-      fontWeight: '500',
+      fontWeight: '600',
       lineHeight: aliasToken.lineHeight,
+      maxWidth: '60%',
       textAlign: 'center',
     },
     divider: {},
+    placeholder: {},
   }
 }

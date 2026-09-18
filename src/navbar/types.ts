@@ -35,6 +35,10 @@ export interface NavbarProps extends Omit<ViewProps, 'children' | 'style'> {
   onPressLeft?: PressableProps['onPress']
   onPressRight?: PressableProps['onPress']
   border?: boolean
+  fixed?: boolean
+  placeholder?: boolean
+  zIndex?: number
+  safeAreaInsetTop?: boolean
   left?: ReactNode
   right?: ReactNode
   style?: StyleProp<ViewStyle>

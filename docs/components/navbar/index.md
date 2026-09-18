@@ -15,11 +15,11 @@ group:
 
 ## 介绍
 
-Navbar 提供 Vant 风格的顶部导航栏。组件根据是否传入 `title` 自动选择三槽居中布局或左右分栏布局，左右槽位中的最小交互单元是 `NavbarAction`。
+Navbar 提供 Vant 4 风格的顶部导航栏。它始终使用左侧、中心、右侧三个物理槽位：左右内容不参与标题定位，标题始终相对 Navbar 内容区居中。
 
 </section>
 
-<code src="../../../src/navbar/__fixtures__/overview.tsx" title="组件预览" description="Navbar 的基础标题、返回文字和右侧 action 用法。"></code>
+<code src="../../../src/navbar/__fixtures__/overview.tsx" title="组件预览" description="Navbar 的基础操作、固定定位、安全区和 custom slot 用法。"></code>
 
 ## 引入
 
@@ -29,90 +29,97 @@ import { Navbar, NavbarAction } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-<code src="../../../src/navbar/__fixtures__/examples/basic.tsx" title="Basic" description="展示 Vant 风格的居中标题。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/basic.tsx" title="基础用法" description="默认显示居中标题，不显示返回箭头。"></code>
 
-<code src="../../../src/navbar/__fixtures__/examples/title-only.tsx" title="Title only" description="展示只有标题的导航栏。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/title-only.tsx" title="仅标题" description="展示没有左右操作内容的导航栏。"></code>
 
-<code src="../../../src/navbar/__fixtures__/examples/left-arrow.tsx" title="Left arrow" description="展示默认的左侧返回箭头。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/left-arrow.tsx" title="返回按钮" description="通过 leftArrow 显示内置返回箭头。"></code>
 
-<code src="../../../src/navbar/__fixtures__/examples/left-text.tsx" title="Left text" description="展示返回箭头与返回文字。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/left-text.tsx" title="左侧文字" description="组合返回箭头和左侧文字。"></code>
 
-<code src="../../../src/navbar/__fixtures__/examples/right-action.tsx" title="Right action" description="展示单个 NavbarAction 的点击反馈。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/right-action.tsx" title="右侧按钮" description="使用 rightText 和 onPressRight 创建右侧操作。"></code>
 
-<code src="../../../src/navbar/__fixtures__/examples/three-sections.tsx" title="Three sections" description="展示有标题时左右槽位与中心标题的独立布局。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/custom-left.tsx" title="自定义左侧内容" description="替换左侧内容，同时保留 Navbar 级点击回调。"></code>
 
-<code src="../../../src/navbar/__fixtures__/examples/two-sections.tsx" title="Two sections" description="展示无标题时在左右槽位中组合多个独立 action。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/custom-right.tsx" title="自定义右侧内容" description="替换右侧内容，同时保留 Navbar 级点击回调。"></code>
 
-<code src="../../../src/navbar/__fixtures__/examples/long-title.tsx" title="Long title" description="展示长标题仍然保持居中。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/three-sections.tsx" title="三个槽位" description="使用单一 custom slot 和 Navbar 级回调。"></code>
 
-<code src="../../../src/navbar/__fixtures__/examples/long-actions.tsx" title="Long actions" description="展示左右 action 变长时的稳定布局。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/two-sections.tsx" title="多个 Action" description="在一个 custom slot 内组合多个独立 NavbarAction。"></code>
 
-<code src="../../../src/navbar/__fixtures__/examples/long-left-text.tsx" title="Long left text" description="展示默认左侧文字的单行行为。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/long-title.tsx" title="长标题" description="长标题单行显示并尾部省略，仍保持物理居中。"></code>
 
-<code src="../../../src/navbar/__fixtures__/examples/long-right-action.tsx" title="Long right action" description="展示默认右侧文字的单行行为。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/long-actions.tsx" title="长操作" description="左右操作变长时，标题中心和三槽定位保持稳定。"></code>
+
+<code src="../../../src/navbar/__fixtures__/examples/long-left-text.tsx" title="长左侧文字" description="展示左侧文字的单行行为。"></code>
+
+<code src="../../../src/navbar/__fixtures__/examples/long-right-action.tsx" title="长右侧操作" description="展示右侧文字的单行行为。"></code>
+
+<code src="../../../src/navbar/__fixtures__/examples/fixed.tsx" title="固定顶部" description="fixed 在 React Native 中使用 absolute top/left/right 定位。"></code>
+
+<code src="../../../src/navbar/__fixtures__/examples/fixed-placeholder.tsx" title="固定并占位" description="fixed 和 placeholder 组合时为页面内容保留 Navbar 高度。"></code>
+
+<code src="../../../src/navbar/__fixtures__/examples/safe-area.tsx" title="顶部安全区" description="safeAreaInsetTop 在 46 点内容区上方加入顶部 inset。"></code>
 
 ## 布局行为
 
-Navbar 根据 `title` 是否存在自动选择布局，不需要额外的 `layout` prop。
-
-当 `title` 存在（包括自定义 `ReactNode`）时，使用三槽布局：
+Navbar 的结构始终是：
 
 ```text
-| left (absolute) |       title       | right (absolute) |
+root
+└── bar
+    ├── left   absolute left
+    ├── center absolute full width
+    └── right  absolute right
 ```
 
-中心槽位是全宽的绝对定位层并禁用指针事件，因此标题的物理中心不受左右内容宽度影响。字符串标题由 Navbar 渲染为单行尾部省略的 `Text`；自定义标题节点由业务自行控制尺寸与文本行为。`left` 和 `right` 槽位使用 `position: absolute`、`top: 0`、`bottom: 0`，不附加 padding 或宽度限制。
+默认内容区高度为 `46`。left 和 right 槽位固定在两侧，默认最多使用约 `20%` 宽度；字符串 title 最多使用 `60%` 宽度，并以单行尾部省略显示。因此左右内容的宽度变化不会改变标题的物理中心。
+
+没有传入 title 时也不会切换成 space-between 两栏布局。中心槽位仍存在，只是不渲染标题内容。
 
 ```tsx
 <Navbar title="详情" rightText="更多" onPressRight={onMore} />
 ```
 
-当 `title` 未传入或为 `null` 时，使用普通的左右分栏流式布局：
+## 自定义 slot 和点击行为
 
-```text
-| left (flexShrink: 1) | right (flexShrink: 1) |
-```
-
-此时 bar 使用 `justifyContent: 'space-between'`。Navbar 不会改变自定义 `left`/`right` 节点的尺寸，也不会自动添加左右 padding；需要间距时由业务节点或 `styles.left`/`styles.right` 提供。
+left 和 right 只替换对应槽位的内容，不会自动取消 Navbar 级的 onPressLeft 或 onPressRight。传入 slot 级回调时，Navbar 会让整个 custom slot 成为一个可点击区域：
 
 ```tsx
-import { Navbar, NavbarAction } from '@ftsukic/tsuki'
-import { View } from 'react-native'
-
-function Example() {
-  return (
-    <Navbar
-      left={
-        <View style={{ paddingLeft: 12 }}>
-          <NavbarAction onPress={onBack}>返回</NavbarAction>
-        </View>
-      }
-      right={
-        <View style={{ flexDirection: 'row', gap: 16 }}>
-          <NavbarAction onPress={onAdd}>+</NavbarAction>
-          <NavbarAction onPress={onMore}>...</NavbarAction>
-        </View>
-      }
-    />
-  )
-}
+<Navbar
+  left={<Text>自定义返回</Text>}
+  onPressLeft={onBack}
+  right={<Text>自定义完成</Text>}
+  onPressRight={onDone}
+  title="编辑"
+/>
 ```
 
-Navbar 不提供 SearchBar、Tabs、Calendar 等业务内容 API。需要复杂中间内容时，应由业务页面自行组合其他布局。
-
-Navbar 不处理顶部 safe area。页面应使用 SafeArea 容器管理页面安全区域：
+一个 slot 需要多个独立操作时，使用多个 NavbarAction。这种情况下不要同时传入对应的 onPressLeft 或 onPressRight，以免 slot 级点击与内部操作重复：
 
 ```tsx
-import { SafeAreaView } from 'react-native-safe-area-context'
-
-function Page() {
-  return (
-    <SafeAreaView edges={['top']}>
-      <Navbar title="详情" />
-    </SafeAreaView>
-  )
-}
+<Navbar
+  right={
+    <View style={{ flexDirection: 'row' }}>
+      <NavbarAction onPress={onAdd}>
+        <Icon name="PlusOutlined" />
+      </NavbarAction>
+      <NavbarAction onPress={onMore}>
+        <Icon name="EllipsisOutlined" />
+      </NavbarAction>
+    </View>
+  }
+  title="详情"
+/>
 ```
+
+## fixed、placeholder 和安全区
+
+fixed 在 React Native 中映射为根 View 的 `position: 'absolute'`、`top: 0`、`left: 0`、`right: 0`，不是 Web 的 `position: fixed`。zIndex 默认是 `1`，并应用在真实 Navbar 根 View 上。
+
+只有 fixed && placeholder 时才渲染占位 View，占位高度为 `46 + topInset`。占位 View 不重复渲染 Navbar 内容，也不承载可访问性语义；placeholder 单独使用时不会增加第二份高度。
+
+safeAreaInsetTop 默认关闭。开启后，Navbar 使用最近的 SafeAreaProvider 顶部 inset，把 bar 放在 inset 下方；没有 provider 时 inset 按 `0` 处理。Navbar 的 height token 始终只表示 `46` 点内容区高度。
 
 ## API
 
@@ -120,31 +127,52 @@ function Page() {
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| title | `ReactNode` | — | 居中的导航标题 |
-| leftText | `ReactNode` | — | 默认左侧 action 的文字 |
-| rightText | `ReactNode` | — | 默认右侧 action 的文字 |
-| leftArrow | `boolean` | `true` | 是否显示 `LeftOutlined` |
-| leftIconSize | `number` | `Navbar` token 的 `iconSize` | 默认左侧返回图标尺寸；只作用于内置 `leftArrow`，不作用于自定义 `left` |
-| onPressLeft | `PressableProps['onPress']` | — | 默认返回区域的点击回调 |
-| onPressRight | `PressableProps['onPress']` | — | 默认右侧 action 的点击回调 |
-| border | `boolean` | `true` | 是否渲染底部分割线 |
-| left | `ReactNode` | — | 自定义左侧 action 内容；传入后覆盖默认返回内容 |
-| right | `ReactNode` | — | 自定义右侧 action 内容；传入后覆盖 `rightText` |
-| style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
-| styles | `NavbarStyles` | — | root、bar、left、title、right、divider 语义样式 |
+| title | `ReactNode` | — | 中心导航标题；字符串自动单行尾部省略 |
+| leftText | `ReactNode` | — | 默认左侧操作文字 |
+| rightText | `ReactNode` | — | 默认右侧操作文字 |
+| leftArrow | `boolean` | `false` | 是否显示内置 `LeftOutlined` |
+| leftIconSize | `number` | `Navbar` token 的 `iconSize` | 内置左箭头尺寸；Tsuki RN 扩展，只作用于内置箭头 |
+| onPressLeft | `PressableProps['onPress']` | — | 左侧默认内容或 custom left 整体的点击回调 |
+| onPressRight | `PressableProps['onPress']` | — | 右侧 `rightText` 或 custom right 整体的点击回调 |
+| border | `boolean` | `true` | 是否显示底部 hairline |
+| fixed | `boolean` | `false` | 是否使用 RN absolute 顶部定位 |
+| placeholder | `boolean` | `false` | 仅和 `fixed` 同时为 true 时保留占位高度 |
+| zIndex | `number` | `1` | 根 Navbar 的层级 |
+| safeAreaInsetTop | `boolean` | `false` | 是否把顶部 safe-area inset 放在 46 点内容区之前 |
+| left | `ReactNode` | — | 自定义左侧内容；传入后只替换内容，不自动取消 slot 回调 |
+| right | `ReactNode` | — | 自定义右侧内容；传入后只替换内容，不自动取消 slot 回调 |
+| style | `StyleProp<ViewStyle>` | — | 真实 Navbar 根 View 样式 |
+| styles | `NavbarStyles` | — | `root`、`bar`、`left`、`title`、`right`、`divider` 语义样式 |
 
-Navbar 继承 React Native `ViewProps`，但不接受 `content`、`children` 或 `contentAlign`。自定义 `left`/`right` 会直接渲染到对应槽位，不会再被 Navbar 包装成一个按钮；只有默认左侧返回内容和默认 `rightText` 会由 Navbar 创建 `NavbarAction`。箭头使用 `Icon`，底线使用 `Divider`。
+Navbar 继承 React Native ViewProps，但不接受 children。testID、ref 和 style 都作用于真实 Navbar 根 View。Navbar 不提供 layout、content、contentAlign、SearchBar、Tabs 或其他业务内容 API。
+
+### 无障碍语义
+
+Navbar 根节点本身是普通 View，不自动声明导航或按钮角色。默认左侧内容、rightText，以及传入 slot 级 onPressLeft/onPressRight 的 custom slot 会通过 NavbarAction 暴露 button 语义；没有 slot 级回调的 custom slot 保留业务节点自己的语义。中心标题使用 Text，fixed placeholder 明确不承载可访问性语义。
 
 ### NavbarAction
 
-`NavbarAction` 基于通用 `Pressable`，固定使用 opacity feedback，用于文本、icon 或自定义 action：
+NavbarAction 是 Tsuki RN 扩展，用于一个 left/right slot 内组合多个独立 action；普通的单个 custom slot 不需要用它包裹。它基于通用 Pressable，默认使用 opacity pressed feedback：
 
 ```tsx
 <NavbarAction onPress={onPress}>更多</NavbarAction>
 ```
 
-它支持 `onPress`、`disabled`、`testID`、`accessibilityLabel` 和 `style`。`style` 可以使用 `({ pressed }) => ...` 根据按压状态返回样式；不对外暴露 `pressStyle`，需要其他反馈方式时请直接在 Navbar 的自定义槽位中使用通用 `Pressable`。
+支持 onPress、disabled、testID、accessibilityLabel 和 style。style 可以使用 `({ pressed }) => ...` 根据按压状态返回样式；不对外暴露 pressStyle。
 
 ### Theme
 
-通过 `ConfigProvider` 的 `theme.components.Navbar` 覆盖 Navbar token。Navbar 提供 `height`、`paddingHorizontal`、`titleFontSize`、`titleColor`、`actionFontSize`、`actionColor`、`iconSize` 和 `borderColor`；其中 `paddingHorizontal` 为兼容保留，默认不会自动作用到 left/right slot。
+通过 ConfigProvider 的 theme.components.Navbar 覆盖 Navbar token。公开 token 包括：
+
+| Token               | 默认语义                               |
+| ------------------- | -------------------------------------- |
+| `height`            | `46`                                   |
+| `paddingHorizontal` | `16`                                   |
+| `titleFontSize`     | `16`                                   |
+| `actionFontSize`    | `14`                                   |
+| `iconSize`          | `16`                                   |
+| `actionColor`       | `#1989FA`                              |
+| `titleColor`        | 主题文本色                             |
+| `borderColor`       | 主题弱边框色（`colorBorderSecondary`） |
+
+默认按压反馈透明度、图标与文字间距等行为继续使用现有全局 token，暗色模式的背景、文字和边框也都来自主题 token。

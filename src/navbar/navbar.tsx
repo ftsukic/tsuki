@@ -1,6 +1,6 @@
-import { forwardRef } from 'react'
+import { forwardRef, useContext } from 'react'
 import { View } from 'react-native'
-import { Divider } from '../divider'
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { Icon } from '../icon'
 import { resolveStyles } from '../style'
 import { Text } from '../text'
@@ -54,13 +54,17 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
     title,
     left,
     right,
-    leftArrow = true,
+    leftArrow = false,
     leftIconSize,
     leftText,
     rightText,
     onPressLeft,
     onPressRight,
     border = true,
+    fixed = false,
+    placeholder = false,
+    zIndex = 1,
+    safeAreaInsetTop = false,
     style,
     styles,
     testID,
@@ -70,6 +74,8 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
 ) {
   const token = useComponentToken('Navbar', getNavbarToken)
   const { token: aliasToken } = useToken()
+  const safeAreaInsets = useContext(SafeAreaInsetsContext)
+  const topInset = safeAreaInsetTop ? Math.max(0, safeAreaInsets?.top ?? 0) : 0
   const props: NavbarProps = {
     title,
     left,
@@ -81,13 +87,16 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
     onPressLeft,
     onPressRight,
     border,
+    fixed,
+    placeholder,
+    zIndex,
+    safeAreaInsetTop,
     style,
     styles,
   }
   const idleState: NavbarStyleState = { pressed: false }
   const resolved = getNavbarStyles(token, aliasToken)
   const semantic = resolveStyles(styles, { props, state: idleState })
-  const hasCenter = title !== undefined && title !== null
   const leftTestID = testID === undefined ? undefined : `${testID}-left`
   const leftActionTestID = testID === undefined ? undefined : `${testID}-left-action`
   const rightTestID = testID === undefined ? undefined : `${testID}-right`
@@ -121,15 +130,27 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
 
   const leftContent =
     left !== undefined ? (
-      left
-    ) : (
+      onPressLeft === undefined ? (
+        left
+      ) : (
+        <NavbarAction testID={leftActionTestID} onPress={onPressLeft}>
+          {left}
+        </NavbarAction>
+      )
+    ) : leftArrow || leftText !== undefined ? (
       <NavbarAction testID={leftActionTestID} onPress={onPressLeft}>
         {renderDefaultLeft()}
       </NavbarAction>
-    )
+    ) : null
   const rightContent =
     right !== undefined ? (
-      right
+      onPressRight === undefined ? (
+        right
+      ) : (
+        <NavbarAction testID={rightActionTestID} onPress={onPressRight}>
+          {right}
+        </NavbarAction>
+      )
     ) : rightText !== undefined ? (
       <NavbarAction testID={rightActionTestID} onPress={onPressRight}>
         {rightText}
@@ -137,22 +158,27 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
     ) : null
 
   return (
-    <View ref={ref} {...viewProps} testID={testID} style={[resolved.root, semantic?.root, style]}>
+    <>
       <View
-        testID={testID === undefined ? undefined : `${testID}-bar`}
-        style={[resolved.bar, hasCenter ? resolved.barCentered : resolved.barSplit, semantic?.bar]}
+        ref={ref}
+        {...viewProps}
+        testID={testID}
+        style={[
+          resolved.root,
+          fixed && { left: 0, position: 'absolute', right: 0, top: 0 },
+          { zIndex },
+          semantic?.root,
+          style,
+          safeAreaInsetTop && { paddingTop: topInset },
+        ]}
       >
         <View
-          testID={leftTestID}
-          style={[
-            resolved.left,
-            hasCenter ? resolved.leftCentered : resolved.leftSplit,
-            semantic?.left,
-          ]}
+          testID={testID === undefined ? undefined : `${testID}-bar`}
+          style={[resolved.bar, semantic?.bar]}
         >
-          {leftContent}
-        </View>
-        {hasCenter ? (
+          <View testID={leftTestID} style={[resolved.left, semantic?.left]}>
+            {leftContent}
+          </View>
           <View
             testID={testID === undefined ? undefined : `${testID}-title`}
             pointerEvents="none"
@@ -160,27 +186,38 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
           >
             {renderTitle()}
           </View>
-        ) : null}
-        <View
-          testID={rightTestID}
-          style={[
-            resolved.right,
-            hasCenter ? resolved.rightCentered : resolved.rightSplit,
-            semantic?.right,
-          ]}
-        >
-          {rightContent}
+          <View testID={rightTestID} style={[resolved.right, semantic?.right]}>
+            {rightContent}
+          </View>
         </View>
+        {border ? (
+          <View
+            testID={testID === undefined ? undefined : `${testID}-divider`}
+            pointerEvents="none"
+            style={[
+              {
+                backgroundColor: token.borderColor,
+                bottom: 0,
+                height: aliasToken.lineWidthHairline,
+                left: 0,
+                position: 'absolute',
+                right: 0,
+              },
+              resolved.divider,
+              semantic?.divider,
+            ]}
+          />
+        ) : null}
       </View>
-      {border ? (
-        <Divider
-          testID={testID === undefined ? undefined : `${testID}-divider`}
-          color={token.borderColor}
-          thickness={aliasToken.lineWidthHairline}
-          style={[resolved.divider, semantic?.divider]}
+      {fixed && placeholder ? (
+        <View
+          testID={testID === undefined ? undefined : `${testID}-placeholder`}
+          accessible={false}
+          pointerEvents="none"
+          style={[resolved.placeholder, { height: token.height + topInset }]}
         />
       ) : null}
-    </View>
+    </>
   )
 })
 

@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet, Text, View } from 'react-native'
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { getDesignToken, Navbar, NavbarAction } from '..'
 import { getNavbarToken } from '../navbar/token'
 
@@ -24,29 +25,31 @@ async function press(testID: string) {
 }
 
 describe('Navbar', () => {
-  it('uses independent absolute slots when title exists', async () => {
+  it('defaults to no left arrow and always uses the fixed three-slot layout', async () => {
     const token = getNavbarToken(getDesignToken())
 
-    await render(<Navbar testID="navbar" title="标题" leftText="返回" rightText="完成" />)
+    await render(<Navbar testID="navbar" title="标题" />)
 
+    expect(screen.queryByTestId('icon-LeftOutlined')).toBeNull()
     expect(flattenStyle('navbar-bar')).toMatchObject({
       alignItems: 'center',
       flexDirection: 'row',
       height: token.height,
       position: 'relative',
-      justifyContent: 'center',
     })
     expect(flattenStyle('navbar-left')).toMatchObject({
       position: 'absolute',
       left: 0,
       top: 0,
       bottom: 0,
+      maxWidth: '20%',
     })
     expect(flattenStyle('navbar-right')).toMatchObject({
       position: 'absolute',
       right: 0,
       top: 0,
       bottom: 0,
+      maxWidth: '20%',
     })
     expect(flattenStyle('navbar-title')).toMatchObject({
       position: 'absolute',
@@ -58,9 +61,17 @@ describe('Navbar', () => {
       justifyContent: 'center',
     })
     expect(screen.getByTestId('navbar-title').props.pointerEvents).toBe('none')
+    expect(screen.getByText('标题').props).toMatchObject({
+      ellipsizeMode: 'tail',
+      numberOfLines: 1,
+    })
+    expect(StyleSheet.flatten(screen.getByText('标题').props.style)).toMatchObject({
+      fontWeight: '600',
+      maxWidth: '60%',
+    })
   })
 
-  it('uses a normal space-between row when title is absent', async () => {
+  it('keeps the three slots when title is absent', async () => {
     await render(
       <Navbar
         testID="navbar"
@@ -70,19 +81,14 @@ describe('Navbar', () => {
       />,
     )
 
-    expect(flattenStyle('navbar-bar')).toMatchObject({ justifyContent: 'space-between' })
-    expect(flattenStyle('navbar-left')).toMatchObject({ flexShrink: 1 })
-    expect(flattenStyle('navbar-right')).toMatchObject({ flexShrink: 1 })
-    expect(flattenStyle('navbar-left')).not.toHaveProperty('position', 'absolute')
-    expect(flattenStyle('navbar-right')).not.toHaveProperty('position', 'absolute')
-    expect(flattenStyle('navbar-left')).not.toHaveProperty('paddingHorizontal')
-    expect(flattenStyle('navbar-right')).not.toHaveProperty('paddingHorizontal')
-    expect(flattenStyle('navbar-left')).not.toHaveProperty('maxWidth')
-    expect(flattenStyle('navbar-right')).not.toHaveProperty('maxWidth')
-    expect(screen.queryByTestId('navbar-title')).toBeNull()
+    expect(flattenStyle('navbar-bar')).not.toHaveProperty('justifyContent', 'space-between')
+    expect(flattenStyle('navbar-left')).toMatchObject({ position: 'absolute', left: 0 })
+    expect(flattenStyle('navbar-right')).toMatchObject({ position: 'absolute', right: 0 })
+    expect(screen.getByTestId('navbar-title')).toBeTruthy()
+    expect(screen.queryByText('标题')).toBeNull()
   })
 
-  it('renders custom left and right nodes directly as slots', async () => {
+  it('renders custom left and right nodes directly when no slot callback is provided', async () => {
     const onAdd = jest.fn()
     const onMore = jest.fn()
 
@@ -123,6 +129,27 @@ describe('Navbar', () => {
     expect(onMore).toHaveBeenCalledTimes(1)
   })
 
+  it('keeps slot-level callbacks when custom left and right content is provided', async () => {
+    const onPressLeft = jest.fn()
+    const onPressRight = jest.fn()
+
+    await render(
+      <Navbar
+        testID="navbar"
+        left={<View testID="custom-left" />}
+        onPressLeft={onPressLeft}
+        right={<View testID="custom-right" />}
+        onPressRight={onPressRight}
+      />,
+    )
+
+    await press('navbar-left-action')
+    await press('navbar-right-action')
+
+    expect(onPressLeft).toHaveBeenCalledTimes(1)
+    expect(onPressRight).toHaveBeenCalledTimes(1)
+  })
+
   it('routes default left and right content through NavbarAction', async () => {
     const onPressLeft = jest.fn()
     const onPressRight = jest.fn()
@@ -145,46 +172,46 @@ describe('Navbar', () => {
     expect(onPressRight).toHaveBeenCalledTimes(1)
     expect(screen.getByTestId('navbar-left-action').props.accessibilityRole).toBe('button')
     expect(screen.getByTestId('navbar-right-action').props.accessibilityRole).toBe('button')
-    expect(screen.getByTestId('navbar-left').props.accessibilityRole).toBeUndefined()
     expect(flattenStyle('navbar-left-action')).toMatchObject({ flexDirection: 'row' })
   })
 
-  it('keeps the default back arrow and text in one horizontal content row', async () => {
-    await render(<Navbar testID="navbar" title="标题" leftText="返回" />)
-
-    expect(screen.getByTestId('icon-LeftOutlined').props.size).toBe(
-      getNavbarToken(getDesignToken()).iconSize,
-    )
-    expect(screen.getByText('返回')).toBeTruthy()
-    expect(flattenStyle('navbar-left-action')).toMatchObject({ flexDirection: 'row' })
-  })
-
-  it('allows overriding the default left arrow size without changing the action', async () => {
+  it('renders the built-in left arrow only when enabled', async () => {
     await render(
       <Navbar testID="navbar" title="标题" leftArrow leftIconSize={20} leftText="返回" />,
     )
 
     expect(screen.getByTestId('icon-LeftOutlined').props.size).toBe(20)
+    expect(screen.getByText('返回')).toBeTruthy()
     expect(flattenStyle('navbar-left-action')).toMatchObject({ flexDirection: 'row' })
   })
 
-  it('keeps text actions on one line with tail ellipsis', async () => {
-    await render(<Navbar testID="navbar" title="标题" rightText="保存并继续下一步" />)
+  it('keeps string actions and titles on one line with tail ellipsis', async () => {
+    await render(
+      <Navbar
+        testID="navbar"
+        title="这是一个很长的导航标题"
+        leftText="返回订单列表并继续浏览"
+        rightText="保存并继续下一步"
+      />,
+    )
 
+    expect(screen.getByText('返回订单列表并继续浏览').props).toMatchObject({
+      ellipsizeMode: 'tail',
+      numberOfLines: 1,
+    })
     expect(screen.getByText('保存并继续下一步').props).toMatchObject({
       ellipsizeMode: 'tail',
       numberOfLines: 1,
     })
-    expect(flattenStyle('navbar-right')).not.toHaveProperty('maxWidth')
-  })
-
-  it('keeps a string title on one line with tail ellipsis', async () => {
-    await render(<Navbar title="这是一个很长的导航标题" />)
-
     expect(screen.getByText('这是一个很长的导航标题').props).toMatchObject({
       ellipsizeMode: 'tail',
       numberOfLines: 1,
     })
+    expect(flattenStyle('navbar-left')).toHaveProperty('maxWidth', '20%')
+    expect(flattenStyle('navbar-right')).toHaveProperty('maxWidth', '20%')
+    expect(
+      StyleSheet.flatten(screen.getByText('这是一个很长的导航标题').props.style),
+    ).toHaveProperty('maxWidth', '60%')
   })
 
   it('supports a custom ReactNode title in the centered slot', async () => {
@@ -200,11 +227,10 @@ describe('Navbar', () => {
     expect(screen.getByTestId('navbar-title').props.pointerEvents).toBe('none')
   })
 
-  it('applies semantic left and right styles to slots', async () => {
+  it('applies semantic left and right styles to fixed slots', async () => {
     await render(
       <Navbar
         testID="navbar"
-        title={null}
         left={<View />}
         right={<View />}
         styles={{ left: { paddingLeft: 12 }, right: { paddingRight: 12 } }}
@@ -215,12 +241,77 @@ describe('Navbar', () => {
     expect(flattenStyle('navbar-right')).toMatchObject({ paddingRight: 12 })
   })
 
-  it('renders or omits the bottom border', async () => {
+  it('renders a bottom hairline without increasing the 46-point content height', async () => {
+    const token = getNavbarToken(getDesignToken())
+
+    await render(<Navbar testID="navbar" title="有分割线" />)
+
+    expect(flattenStyle('navbar-bar')).toMatchObject({ height: token.height })
+    expect(flattenStyle('navbar-divider')).toMatchObject({
+      backgroundColor: token.borderColor,
+      bottom: 0,
+      height: getDesignToken().lineWidthHairline,
+      left: 0,
+      position: 'absolute',
+      right: 0,
+    })
+    expect(screen.getByTestId('navbar-divider').props.pointerEvents).toBe('none')
+  })
+
+  it('uses the weak border token and can hide the hairline', async () => {
+    const token = getDesignToken()
     const { rerender } = await render(<Navbar testID="navbar" title="有分割线" />)
+
+    expect(getNavbarToken(token).borderColor).toBe(token.colorBorderSecondary)
     expect(screen.getByTestId('navbar-divider')).toBeTruthy()
 
     await rerender(<Navbar testID="navbar" title="无分割线" border={false} />)
     expect(screen.queryByTestId('navbar-divider')).toBeNull()
+  })
+
+  it('supports fixed positioning and zIndex on the real Navbar root', async () => {
+    await render(<Navbar testID="navbar" fixed zIndex={1200} title="固定" />)
+
+    expect(flattenStyle('navbar')).toMatchObject({
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      left: 0,
+      zIndex: 1200,
+    })
+    expect(screen.getByTestId('navbar')).toBeTruthy()
+    expect(screen.queryByTestId('navbar-placeholder')).toBeNull()
+  })
+
+  it('adds top safe-area space without changing the Navbar content token height', async () => {
+    const token = getNavbarToken(getDesignToken())
+
+    await render(
+      <SafeAreaInsetsContext.Provider value={{ bottom: 0, left: 0, right: 0, top: 24 }}>
+        <Navbar testID="with-inset" safeAreaInsetTop title="安全区" />
+        <Navbar testID="without-inset" safeAreaInsetTop={false} title="无安全区" />
+      </SafeAreaInsetsContext.Provider>,
+    )
+
+    expect(flattenStyle('with-inset')).toMatchObject({ paddingTop: 24 })
+    expect(flattenStyle('with-inset-bar')).toMatchObject({ height: token.height })
+    expect(flattenStyle('without-inset')).not.toHaveProperty('paddingTop')
+  })
+
+  it('creates a placeholder only for fixed Navbars and matches the safe-area height', async () => {
+    const token = getNavbarToken(getDesignToken())
+
+    await render(
+      <SafeAreaInsetsContext.Provider value={{ bottom: 0, left: 0, right: 0, top: 24 }}>
+        <Navbar testID="fixed" fixed placeholder safeAreaInsetTop title="固定占位" />
+        <Navbar testID="flow" placeholder title="普通流" />
+      </SafeAreaInsetsContext.Provider>,
+    )
+
+    expect(flattenStyle('fixed-placeholder')).toMatchObject({ height: token.height + 24 })
+    expect(screen.getByTestId('fixed-placeholder').props.pointerEvents).toBe('none')
+    expect(screen.getByTestId('fixed-placeholder').props.accessible).toBe(false)
+    expect(screen.queryByTestId('flow-placeholder')).toBeNull()
   })
 
   it('does not press a disabled NavbarAction', async () => {
