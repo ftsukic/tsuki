@@ -81,15 +81,37 @@ jobs:
         shell: bash
         run: |
           VERSION="$(node -p "require('./package.json').version")"
-          for attempt in 1 2 3 4 5; do
-            PUBLISHED_VERSION="$(npm view "@ftsukic/tsuki@${VERSION}" version 2>/dev/null || true)"
-            LATEST="$(npm view @ftsukic/tsuki dist-tags --json 2>/dev/null | node -e "let input=''; process.stdin.on('data', chunk => input += chunk).on('end', () => { try { process.stdout.write(JSON.parse(input).latest || '') } catch {} })" || true)"
+          MAX_ATTEMPTS=30
+          RETRY_DELAY_SECONDS=10
+          for ((attempt = 1; attempt <= MAX_ATTEMPTS; attempt++)); do
+            VERSION_ERROR_FILE="$(mktemp)"
+            VERSION_STATUS=0
+            PUBLISHED_VERSION="$(npm view "@ftsukic/tsuki@${VERSION}" version --registry=https://registry.npmjs.org --prefer-online 2>"$VERSION_ERROR_FILE")" || VERSION_STATUS=$?
+            VERSION_ERROR="$(<"$VERSION_ERROR_FILE")"
+            rm -f "$VERSION_ERROR_FILE"
+
+            LATEST_ERROR_FILE="$(mktemp)"
+            LATEST_STATUS=0
+            LATEST_JSON="$(npm view @ftsukic/tsuki dist-tags --json --registry=https://registry.npmjs.org --prefer-online 2>"$LATEST_ERROR_FILE")" || LATEST_STATUS=$?
+            LATEST_ERROR="$(<"$LATEST_ERROR_FILE")"
+            rm -f "$LATEST_ERROR_FILE"
+            LATEST="$(printf '%s' "$LATEST_JSON" | node -e "let input=''; process.stdin.on('data', chunk => input += chunk).on('end', () => { try { process.stdout.write(JSON.parse(input).latest || '') } catch {} })")"
+
+            if [ "$VERSION_STATUS" -ne 0 ] && ! printf '%s\n' "$VERSION_ERROR" | grep -Eiq 'E404|404 Not Found|is not in this registry'; then
+              echo "Registry version query failed (attempt ${attempt}/${MAX_ATTEMPTS}, version=${PUBLISHED_VERSION:-<none>}, latest=${LATEST:-<none>}): ${VERSION_ERROR:-exit status ${VERSION_STATUS}}"
+              exit "$VERSION_STATUS"
+            fi
+            if [ "$LATEST_STATUS" -ne 0 ] && ! printf '%s\n' "$LATEST_ERROR" | grep -Eiq 'E404|404 Not Found|is not in this registry'; then
+              echo "Registry dist-tags query failed (attempt ${attempt}/${MAX_ATTEMPTS}, version=${PUBLISHED_VERSION:-<none>}, latest=${LATEST:-<none>}): ${LATEST_ERROR:-exit status ${LATEST_STATUS}}"
+              exit "$LATEST_STATUS"
+            fi
+
             if [ "$PUBLISHED_VERSION" = "$VERSION" ] && [ "$LATEST" = "$VERSION" ]; then
               echo "Verified @ftsukic/tsuki@${VERSION} with latest dist-tag."
               exit 0
             fi
-            echo "Registry has not converged yet (attempt ${attempt}/5)."
-            if [ "$attempt" -lt 5 ]; then sleep 10; fi
+            echo "Registry has not converged yet (attempt ${attempt}/${MAX_ATTEMPTS}, version=${PUBLISHED_VERSION:-<none>}, latest=${LATEST:-<none>})."
+            if [ "$attempt" -lt "$MAX_ATTEMPTS" ]; then sleep "$RETRY_DELAY_SECONDS"; fi
           done
-          echo "Published package verification failed."
+          echo "Published package verification failed after ${MAX_ATTEMPTS} attempts (version=${PUBLISHED_VERSION:-<none>}, latest=${LATEST:-<none>})."
           exit 1

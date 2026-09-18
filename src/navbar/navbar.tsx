@@ -10,43 +10,10 @@ import { getNavbarStyles } from './style'
 import { getNavbarToken } from './token'
 import type { NavbarProps, NavbarStyleState } from './types'
 import type { ReactNode } from 'react'
-import type { StyleProp, TextStyle, ViewStyle } from 'react-native'
+import type { StyleProp, ViewStyle } from 'react-native'
 
 function isTextContent(value: ReactNode): value is string | number {
   return typeof value === 'string' || typeof value === 'number'
-}
-
-function NavbarBackContent({
-  arrow,
-  text,
-  textStyle,
-  iconSize,
-  iconColor,
-  gap,
-}: {
-  arrow: boolean
-  text: ReactNode
-  textStyle: TextStyle
-  iconSize: number
-  iconColor: string
-  gap: number
-}) {
-  return (
-    <View style={{ alignItems: 'center', flexDirection: 'row', flexShrink: 0, maxWidth: '100%' }}>
-      {arrow ? <Icon name="LeftOutlined" size={iconSize} color={iconColor} /> : null}
-      {isTextContent(text) ? (
-        <Text
-          ellipsizeMode="tail"
-          numberOfLines={1}
-          style={[textStyle, { flexShrink: 1, marginLeft: arrow ? gap : 0 }]}
-        >
-          {text}
-        </Text>
-      ) : (
-        text
-      )}
-    </View>
-  )
 }
 
 function NavbarSlot({
@@ -152,35 +119,39 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
   }
 
   const renderDefaultLeft = () => (
-    <NavbarBackContent
-      arrow={leftArrow}
-      iconColor={token.actionColor}
-      iconSize={leftIconSize ?? token.iconSize}
-      gap={aliasToken.paddingXXS}
-      text={leftText}
-      textStyle={leftTextStyle}
-    />
+    <>
+      {leftArrow ? (
+        <Icon
+          name="LeftOutlined"
+          size={leftIconSize ?? token.iconSize}
+          color={token.actionColor}
+          style={{ marginRight: aliasToken.paddingXXS }}
+        />
+      ) : null}
+      {leftText != null ? (
+        <Text ellipsizeMode="tail" numberOfLines={1} style={[leftTextStyle, { flexShrink: 1 }]}>
+          {leftText}
+        </Text>
+      ) : null}
+    </>
   )
 
-  const renderDefaultRight = () =>
-    isTextContent(rightText) ? (
-      <Text
-        ellipsizeMode="tail"
-        numberOfLines={1}
-        style={{
-          color: token.actionColor,
-          flexShrink: 0,
-          fontFamily: aliasToken.fontFamily,
-          fontSize: token.actionFontSize,
-          lineHeight: aliasToken.lineHeight,
-          maxWidth: '100%',
-        }}
-      >
-        {rightText}
-      </Text>
-    ) : (
-      rightText
-    )
+  const renderDefaultRight = () => (
+    <Text
+      ellipsizeMode="tail"
+      numberOfLines={1}
+      style={{
+        color: token.actionColor,
+        flexShrink: 0,
+        fontFamily: aliasToken.fontFamily,
+        fontSize: token.actionFontSize,
+        lineHeight: aliasToken.lineHeight,
+        maxWidth: '100%',
+      }}
+    >
+      {rightText}
+    </Text>
+  )
 
   const renderTitle = () =>
     isTextContent(title) ? (

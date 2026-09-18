@@ -752,6 +752,7 @@ describe('Input', () => {
       opacity: 0,
       width: 0,
       marginLeft: 0,
+      overflow: 'hidden',
     })
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent(screen.getByTestId('clear-input'), 'focus')
@@ -841,6 +842,24 @@ describe('Input', () => {
     const toggle = screen.getByLabelText('显示密码')
     const toggleStyle = StyleSheet.flatten(toggle.props.style)
     expect(toggleStyle.height).toBe(toggleStyle.width)
-    expect(toggle.props.hitSlop).toBe(8)
+    expect(toggle.props.hitSlop).toEqual({ top: 8, bottom: 8, left: 0, right: 8 })
+  })
+
+  it('keeps password clear and eye actions mounted with non-overlapping hit slop', async () => {
+    await render(
+      <Input testID="password-clear-input" type="password" defaultValue="secret" clearable />,
+    )
+
+    const clearButton = screen.getByLabelText('清除输入')
+    const eyeButton = screen.getByLabelText('显示密码')
+    expect(clearButton.props.pointerEvents).toBe('none')
+    expect(StyleSheet.flatten(clearButton.props.style)).toMatchObject({
+      opacity: 0,
+      width: 0,
+      marginLeft: 0,
+      overflow: 'hidden',
+    })
+    expect(clearButton.props.hitSlop).toEqual({ top: 16, bottom: 16, left: 16, right: 0 })
+    expect(eyeButton.props.hitSlop).toEqual({ top: 8, bottom: 8, left: 0, right: 8 })
   })
 })

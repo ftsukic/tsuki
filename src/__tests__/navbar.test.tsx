@@ -3,17 +3,32 @@ import { StyleSheet, Text, View } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { getDesignToken, Navbar, Pressable } from '..'
 import { getNavbarToken } from '../navbar/token'
-import type { NavbarStyleInfo } from '../navbar/types'
+import type { NavbarProps, NavbarStyleInfo } from '../navbar/types'
 
 jest.mock('../icon', () => {
   const React = jest.requireActual('react')
   const { Text: NativeText } = jest.requireActual('react-native')
 
   return {
-    Icon: ({ name, size }: { name: string; size?: number }) =>
-      React.createElement(NativeText, { testID: `icon-${name}`, size }),
+    Icon: ({ name, size, style }: { name: string; size?: number; style?: unknown }) =>
+      React.createElement(NativeText, { testID: `icon-${name}`, size, style }),
   }
 })
+
+const validNavbarTextProps: Pick<NavbarProps, 'leftText' | 'rightText'> = {
+  leftText: '返回',
+  rightText: '完成',
+}
+
+// @ts-expect-error Navbar leftText only accepts string.
+const invalidNavbarLeftTextProps: Pick<NavbarProps, 'leftText'> = { leftText: <Text>返回</Text> }
+
+// @ts-expect-error Navbar rightText only accepts string.
+const invalidNavbarRightTextProps: Pick<NavbarProps, 'rightText'> = { rightText: <Text>完成</Text> }
+
+void validNavbarTextProps
+void invalidNavbarLeftTextProps
+void invalidNavbarRightTextProps
 
 function flattenStyle(testID: string, pressed = false) {
   const style = screen.getByTestId(testID).props.style
@@ -112,6 +127,71 @@ describe('Navbar', () => {
     expect(screen.queryByTestId('left-only-right')).toBeNull()
     expect(screen.queryByTestId('right-only-left')).toBeNull()
     expect(screen.getByTestId('right-only-right')).toBeTruthy()
+    expect(flattenStyle('left-only-left')).not.toHaveProperty('justifyContent', 'center')
+    expect(flattenStyle('right-only-right')).not.toHaveProperty('justifyContent', 'center')
+  })
+
+  it('renders leftText as Navbar-owned single-line Text', async () => {
+    await render(<Navbar testID="navbar" leftText="返回" />)
+
+    expect(screen.getByTestId('navbar-left')).toBeTruthy()
+    expect(screen.getByText('返回').props).toMatchObject({
+      ellipsizeMode: 'tail',
+      numberOfLines: 1,
+    })
+  })
+
+  it('renders the left arrow and text as direct left slot children', async () => {
+    await render(<Navbar testID="navbar" leftArrow leftText="返回" />)
+
+    const leftSlot = screen.getByTestId('navbar-left')
+    expect(leftSlot.children).toHaveLength(2)
+    expect(leftSlot.children).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          props: expect.objectContaining({ testID: 'icon-LeftOutlined' }),
+        }),
+        expect.objectContaining({ props: expect.objectContaining({ children: '返回' }) }),
+      ]),
+    )
+    expect(screen.getByTestId('icon-LeftOutlined').props.style).toEqual({
+      marginRight: getDesignToken().paddingXXS,
+    })
+  })
+
+  it('renders only the arrow when leftArrow is enabled without leftText', async () => {
+    await render(<Navbar testID="navbar" leftArrow />)
+
+    const leftSlot = screen.getByTestId('navbar-left')
+    expect(leftSlot.children).toHaveLength(1)
+    expect(screen.getByTestId('icon-LeftOutlined')).toBeTruthy()
+    expect(screen.queryByText('返回')).toBeNull()
+  })
+
+  it('lets custom left content override the built-in arrow and text', async () => {
+    await render(
+      <Navbar testID="navbar" left={<View testID="custom" />} leftArrow leftText="返回" />,
+    )
+
+    expect(screen.getByTestId('custom')).toBeTruthy()
+    expect(screen.queryByTestId('icon-LeftOutlined')).toBeNull()
+    expect(screen.queryByText('返回')).toBeNull()
+  })
+
+  it('renders rightText as Navbar-owned Text and lets custom right override it', async () => {
+    const { rerender } = await render(<Navbar testID="navbar" rightText="完成" />)
+
+    expect(screen.getByText('完成').props).toMatchObject({
+      ellipsizeMode: 'tail',
+      numberOfLines: 1,
+    })
+
+    await rerender(
+      <Navbar testID="navbar" right={<View testID="custom-right" />} rightText="完成" />,
+    )
+
+    expect(screen.getByTestId('custom-right')).toBeTruthy()
+    expect(screen.queryByText('完成')).toBeNull()
   })
 
   it('renders custom left and right nodes directly when no slot callback is provided', async () => {

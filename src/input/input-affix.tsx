@@ -56,13 +56,18 @@ export function InputClear({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="清除输入"
-      hitSlop={token.paddingHorizontal}
+      hitSlop={{
+        top: token.paddingHorizontal,
+        bottom: token.paddingHorizontal,
+        left: token.paddingHorizontal,
+        right: 0,
+      }}
       onPress={handlePress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
       onResponderTerminate={handleResponderTerminate}
       pointerEvents={showClear || activePressRef.current ? 'auto' : 'none'}
-      pressStyle="opacity"
+      pressStyle={showClear ? 'opacity' : 'none'}
       style={style}
     >
       <Icon
@@ -92,7 +97,12 @@ export function InputPasswordToggle({
       accessibilityRole="button"
       accessibilityLabel={visible ? '隐藏密码' : '显示密码'}
       disabled={disabled}
-      hitSlop={token.paddingHorizontal / 2}
+      hitSlop={{
+        top: token.paddingHorizontal / 2,
+        bottom: token.paddingHorizontal / 2,
+        left: 0,
+        right: token.paddingHorizontal / 2,
+      }}
       onPress={onPress}
       pressStyle="opacity"
       style={style}

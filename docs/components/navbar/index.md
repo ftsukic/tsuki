@@ -41,9 +41,9 @@ import { Navbar, Pressable } from '@ftsukic/tsuki'
 
 <code src="../../../src/navbar/__fixtures__/examples/disabled-actions.tsx" title="禁用操作" description="左右操作独立禁用，但仍保留各自的布局区域。"></code>
 
-<code src="../../../src/navbar/__fixtures__/examples/custom-left.tsx" title="自定义左侧内容" description="替换左侧内容，同时保留 Navbar 级点击回调。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/custom-left.tsx" title="自定义左侧内容" description="使用 left 自定义渲染，并覆盖默认左侧内容。"></code>
 
-<code src="../../../src/navbar/__fixtures__/examples/custom-right.tsx" title="自定义右侧内容" description="替换右侧内容，同时保留 Navbar 级点击回调。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/custom-right.tsx" title="自定义右侧内容" description="使用 right 自定义渲染，并覆盖默认右侧文字。"></code>
 
 <code src="../../../src/navbar/__fixtures__/examples/three-sections.tsx" title="三个槽位" description="使用单一 custom slot 和 Navbar 级回调。"></code>
 
@@ -84,6 +84,12 @@ root
 ```
 
 ## 自定义 slot 和点击行为
+
+`leftText` 是默认左侧文本，由 Navbar 内部创建 `Text` 渲染；`rightText` 是默认右侧文本，同样由 Navbar 内部创建 `Text` 渲染。两者只接受 `string`，Navbar 负责文字颜色、字号、lineHeight，以及单行尾部省略。
+
+`left` 是自定义左侧 render，存在时覆盖 `leftArrow` 和 `leftText`；`right` 是自定义右侧 render，存在时覆盖 `rightText`。自定义节点由 Navbar 原样渲染，Navbar 不会向其中注入默认文字样式。
+
+当 `leftArrow` 和 `leftText` 同时存在时，左侧 slot 直接包含 `Icon` 和内部 `Text`，箭头与文本之间的间距作用于箭头本身。`leftArrow` 单独存在时只渲染 `Icon`。
 
 left 和 right 只替换对应槽位的内容，不会自动取消 Navbar 级的 onPressLeft 或 onPressRight。传入 slot 级回调时，Navbar 会让整个 custom slot 成为一个可点击区域：
 
@@ -150,8 +156,8 @@ safeAreaInsetTop 默认关闭。开启后，Navbar 使用最近的 SafeAreaProvi
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | title | `ReactNode` | — | 中心导航标题；字符串自动单行尾部省略 |
-| leftText | `ReactNode` | — | 默认左侧操作文字 |
-| rightText | `ReactNode` | — | 默认右侧操作文字 |
+| leftText | `string` | — | 默认左侧文本，由 Navbar 内部 `Text` 渲染 |
+| rightText | `string` | — | 默认右侧文本，由 Navbar 内部 `Text` 渲染 |
 | leftArrow | `boolean` | `false` | 是否显示内置 `LeftOutlined` |
 | leftIconSize | `number` | `Navbar` token 的 `iconSize` | 内置左箭头尺寸；Tsuki RN 扩展，只作用于内置箭头 |
 | leftDisabled | `boolean` | `false` | 是否禁用左侧操作；不影响 slot 是否因内容存在而渲染 |
@@ -163,8 +169,8 @@ safeAreaInsetTop 默认关闭。开启后，Navbar 使用最近的 SafeAreaProvi
 | placeholder | `boolean` | `false` | 仅和 `fixed` 同时为 true 时保留占位高度 |
 | zIndex | `number` | `1` | 根 Navbar 的层级 |
 | safeAreaInsetTop | `boolean` | `false` | 是否把顶部 safe-area inset 放在 46 点内容区之前 |
-| left | `ReactNode` | — | 自定义左侧内容；传入后只替换内容，不自动取消 slot 回调 |
-| right | `ReactNode` | — | 自定义右侧内容；传入后只替换内容，不自动取消 slot 回调 |
+| left | `ReactNode` | — | 自定义左侧 render；存在时覆盖 `leftArrow` 和 `leftText`，不自动取消 slot 回调 |
+| right | `ReactNode` | — | 自定义右侧 render；存在时覆盖 `rightText`，不自动取消 slot 回调 |
 | style | `StyleProp<ViewStyle>` | — | 真实 Navbar 根 View 样式 |
 | styles | `NavbarStyles` | — | `root`、`bar`、`left`、`title`、`titleText`、`right`、`divider` 语义样式 |
 

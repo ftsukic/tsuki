@@ -17,6 +17,13 @@ export default function DialogBasicExample() {
       >
         显示提示
       </Button>
+      <Button
+        onPress={() => {
+          void showDialog({ title: '标题' })
+        }}
+      >
+        标题
+      </Button>
     </View>
   )
 }

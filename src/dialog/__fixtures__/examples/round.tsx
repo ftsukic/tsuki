@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Button, Dialog } from '@ftsukic/tsuki'
+import { Button, Dialog, showDialog } from '@ftsukic/tsuki'
 import { useState } from 'react'
 import { View } from 'react-native'
 
@@ -22,6 +22,13 @@ export default function DialogRoundExample() {
         showCancelButton
         onShowChange={setShow}
       />
+      <Button
+        onPress={() =>
+          showDialog({ theme: 'round-button', title: '仅标题', showCancelButton: true })
+        }
+      >
+        标题
+      </Button>
     </View>
   )
 }

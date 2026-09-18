@@ -1,5 +1,11 @@
 # @ftsukic/tsuki
 
+## 0.0.10
+
+### Patch Changes
+
+- Align Navbar built-in text rendering and slot layout, prevent overlapping Input action hit areas, and add Dialog title-only examples.
+
 ## 0.0.9
 
 ### Patch Changes

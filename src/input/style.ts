@@ -233,6 +233,7 @@ export function getInputStyles(
       opacity: 0,
       width: 0,
       marginLeft: 0,
+      overflow: 'hidden',
     },
     wordLimit: {
       fontFamily: token.fontFamily,

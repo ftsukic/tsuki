@@ -22,8 +22,8 @@ export type NavbarStyles = StyleResolver<NavbarProps, NavbarStyleState, NavbarSe
 
 export interface NavbarProps extends Omit<ViewProps, 'children' | 'style'> {
   title?: ReactNode
-  leftText?: ReactNode
-  rightText?: ReactNode
+  leftText?: string
+  rightText?: string
   leftArrow?: boolean
   leftIconSize?: number
   leftDisabled?: boolean
