@@ -8,6 +8,7 @@ interface UseInputAutoSizeOptions {
   lineHeight: number
   verticalPadding: number
   wordLimitPadding: number
+  contentSizeIncludesPadding?: boolean
 }
 
 export function useInputAutoSize({
@@ -18,6 +19,7 @@ export function useInputAutoSize({
   lineHeight,
   verticalPadding,
   wordLimitPadding,
+  contentSizeIncludesPadding = true,
 }: UseInputAutoSizeOptions) {
   const [contentHeight, setContentHeight] = useState<number>()
   const minHeight = lineHeight * minRows + verticalPadding + wordLimitPadding
@@ -40,12 +42,19 @@ export function useInputAutoSize({
         setContentHeight(undefined)
         return
       }
-      const normalizedHeight = Math.ceil(nextHeight)
+      let normalizedHeight: number
+
+      if (contentSizeIncludesPadding) {
+        normalizedHeight = Math.ceil(nextHeight)
+      } else {
+        const measuredRows = Math.max(1, Math.round(nextHeight / lineHeight))
+        normalizedHeight = measuredRows * lineHeight + verticalPadding + wordLimitPadding
+      }
       setContentHeight((previousHeight) =>
         previousHeight === normalizedHeight ? previousHeight : normalizedHeight,
       )
     },
-    [enabled, value],
+    [contentSizeIncludesPadding, enabled, lineHeight, value, verticalPadding, wordLimitPadding],
   )
 
   const inputStyle = useMemo(

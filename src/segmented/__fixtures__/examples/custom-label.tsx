@@ -9,6 +9,7 @@ export default function SegmentedCustomLabelExample() {
   return (
     <View style={{ gap: 12 }}>
       <Segmented
+        block
         defaultValue="list"
         options={[
           { label: <Text>列表</Text>, value: 'list' },

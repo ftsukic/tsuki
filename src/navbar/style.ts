@@ -5,9 +5,8 @@ export interface NavbarResolvedStyles {
   root: ViewStyle
   bar: ViewStyle
   left: ViewStyle
-  center: ViewStyle
-  titleWrapper: ViewStyle
-  title: TextStyle
+  title: ViewStyle
+  titleText: TextStyle
   right: ViewStyle
   divider: ViewStyle
   placeholder: ViewStyle
@@ -44,26 +43,20 @@ export function getNavbarStyles(token: NavbarToken, aliasToken: AliasToken): Nav
       right: 0,
       top: 0,
     },
-    center: {
-      alignItems: 'center',
-      bottom: 0,
-      justifyContent: 'center',
-      left: 0,
-      position: 'absolute',
-      right: 0,
-      top: 0,
-    },
-    titleWrapper: {
-      alignItems: 'center',
-      alignSelf: 'center',
-      maxWidth: '60%',
-    },
     title: {
-      color: token.titleColor,
+      alignItems: 'center',
       flexShrink: 1,
+      justifyContent: 'center',
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      maxWidth: '60%',
+      overflow: 'hidden',
+    },
+    titleText: {
+      color: token.titleColor,
       fontSize: token.titleFontSize,
       fontWeight: '600',
-      lineHeight: aliasToken.lineHeight,
+      lineHeight: aliasToken.lineHeightLG,
       textAlign: 'center',
     },
     divider: {},

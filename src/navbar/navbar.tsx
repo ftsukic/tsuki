@@ -10,13 +10,7 @@ import { getNavbarStyles } from './style'
 import { getNavbarToken } from './token'
 import type { NavbarProps, NavbarStyleState } from './types'
 import type { ReactNode } from 'react'
-import type { TextStyle } from 'react-native'
-
-const NAVBAR_SLOT_ACTION_STYLE = {
-  alignItems: 'center' as const,
-  flexDirection: 'row' as const,
-  justifyContent: 'center' as const,
-}
+import type { StyleProp, TextStyle, ViewStyle } from 'react-native'
 
 function isTextContent(value: ReactNode): value is string | number {
   return typeof value === 'string' || typeof value === 'number'
@@ -55,21 +49,36 @@ function NavbarBackContent({
   )
 }
 
-function renderNavbarSlotAction(
-  content: ReactNode,
-  onPress: NavbarProps['onPressLeft'],
-  testID?: string,
-) {
-  return onPress === undefined ? (
-    content
-  ) : (
+function NavbarSlot({
+  children,
+  disabled = false,
+  onPress,
+  style,
+  testID,
+}: {
+  children: ReactNode
+  disabled?: boolean
+  onPress?: NavbarProps['onPressLeft']
+  style: StyleProp<ViewStyle>
+  testID?: string
+}) {
+  if (onPress === undefined) {
+    return (
+      <View testID={testID} style={style}>
+        {children}
+      </View>
+    )
+  }
+
+  return (
     <Pressable
       testID={testID}
+      disabled={disabled}
       onPress={onPress}
       pressStyle="opacity"
-      style={NAVBAR_SLOT_ACTION_STYLE}
+      style={style}
     >
-      {content}
+      {children}
     </Pressable>
   )
 }
@@ -81,6 +90,8 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
     right,
     leftArrow = false,
     leftIconSize,
+    leftDisabled = false,
+    rightDisabled = false,
     leftText,
     rightText,
     onPressLeft,
@@ -107,6 +118,8 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
     right,
     leftArrow,
     leftIconSize,
+    leftDisabled,
+    rightDisabled,
     leftText,
     rightText,
     onPressLeft,
@@ -119,13 +132,18 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
     style,
     styles,
   }
-  const idleState: NavbarStyleState = { pressed: false }
+  const state: NavbarStyleState = { leftDisabled, rightDisabled }
   const resolved = getNavbarStyles(token, aliasToken)
-  const semantic = resolveStyles(styles, { props, state: idleState })
+  const semantic = resolveStyles(styles, { props, state })
   const leftTestID = testID === undefined ? undefined : `${testID}-left`
-  const leftActionTestID = testID === undefined ? undefined : `${testID}-left-action`
   const rightTestID = testID === undefined ? undefined : `${testID}-right`
-  const rightActionTestID = testID === undefined ? undefined : `${testID}-right-action`
+  const hasCustomLeft = left !== undefined && left !== null
+  const hasDefaultLeft = leftArrow || (leftText !== undefined && leftText !== null)
+  const hasLeftContent = hasCustomLeft || hasDefaultLeft
+  const hasCustomRight = right !== undefined && right !== null
+  const hasDefaultRight = rightText !== undefined && rightText !== null
+  const hasRightContent = hasCustomRight || hasDefaultRight
+  const hasTitle = title !== undefined && title !== null
   const leftTextStyle = {
     color: token.actionColor,
     fontFamily: aliasToken.fontFamily,
@@ -166,25 +184,19 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
 
   const renderTitle = () =>
     isTextContent(title) ? (
-      <Text ellipsizeMode="tail" style={[resolved.title, semantic?.title]} numberOfLines={1}>
+      <Text
+        ellipsizeMode="tail"
+        style={[resolved.titleText, semantic?.titleText]}
+        numberOfLines={1}
+      >
         {title}
       </Text>
     ) : (
       title
     )
 
-  const leftContent =
-    left !== undefined
-      ? renderNavbarSlotAction(left, onPressLeft, leftActionTestID)
-      : leftArrow || leftText !== undefined
-        ? renderNavbarSlotAction(renderDefaultLeft(), onPressLeft, leftActionTestID)
-        : null
-  const rightContent =
-    right !== undefined
-      ? renderNavbarSlotAction(right, onPressRight, rightActionTestID)
-      : rightText !== undefined
-        ? renderNavbarSlotAction(renderDefaultRight(), onPressRight, rightActionTestID)
-        : null
+  const leftContent = hasCustomLeft ? left : hasDefaultLeft ? renderDefaultLeft() : null
+  const rightContent = hasCustomRight ? right : hasDefaultRight ? renderDefaultRight() : null
 
   return (
     <>
@@ -205,24 +217,35 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
           testID={testID === undefined ? undefined : `${testID}-bar`}
           style={[resolved.bar, semantic?.bar]}
         >
-          <View testID={leftTestID} style={[resolved.left, semantic?.left]}>
-            {leftContent}
-          </View>
-          <View
-            testID={testID === undefined ? undefined : `${testID}-title`}
-            pointerEvents="none"
-            style={resolved.center}
-          >
+          {hasLeftContent ? (
+            <NavbarSlot
+              testID={leftTestID}
+              disabled={leftDisabled}
+              onPress={onPressLeft}
+              style={[resolved.left, semantic?.left]}
+            >
+              {leftContent}
+            </NavbarSlot>
+          ) : null}
+          {hasTitle ? (
             <View
-              testID={testID === undefined ? undefined : `${testID}-title-wrapper`}
-              style={resolved.titleWrapper}
+              testID={testID === undefined ? undefined : `${testID}-title`}
+              pointerEvents="none"
+              style={[resolved.title, semantic?.title]}
             >
               {renderTitle()}
             </View>
-          </View>
-          <View testID={rightTestID} style={[resolved.right, semantic?.right]}>
-            {rightContent}
-          </View>
+          ) : null}
+          {hasRightContent ? (
+            <NavbarSlot
+              testID={rightTestID}
+              disabled={rightDisabled}
+              onPress={onPressRight}
+              style={[resolved.right, semantic?.right]}
+            >
+              {rightContent}
+            </NavbarSlot>
+          ) : null}
         </View>
         {border ? (
           <View

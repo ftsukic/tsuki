@@ -364,6 +364,53 @@ describe('Input', () => {
     expect(screen.getByTestId('clamped-auto-size').props.scrollEnabled).toBe(true)
   })
 
+  it('normalizes Harmony multiline autoSize content heights before clamping', async () => {
+    const previousPlatformOS = Platform.OS
+    ;(Platform as unknown as { OS: string }).OS = 'harmony'
+
+    try {
+      await render(
+        <Input
+          testID="harmony-auto-size"
+          multiline
+          autoSize={{ minRows: 1, maxRows: 3 }}
+          defaultValue="x"
+        />,
+      )
+
+      const measurementInput = getMeasurementInput('harmony-auto-size')
+      const measurements: Array<[number, number, boolean]> = [
+        [Number('20.168067932128906'), 36, false],
+        [Number('40.33613586425781'), 56, false],
+        [Number('60.50420379638672'), 76, false],
+        [Number('80.67227172851562'), 76, true],
+        [Number('60.50420379638672'), 76, false],
+        [Number('40.33613586425781'), 56, false],
+        [Number('20.168067932128906'), 36, false],
+      ]
+
+      for (const [height, expectedHeight, expectedScrollEnabled] of measurements) {
+        // eslint-disable-next-line testing-library/no-await-sync-events
+        await fireEvent(measurementInput, 'contentSizeChange', {
+          nativeEvent: { contentSize: { width: 200, height } },
+        })
+
+        await waitFor(() => {
+          expect(getInputStyle('harmony-auto-size')).toMatchObject({
+            height: expectedHeight,
+            minHeight: 36,
+            maxHeight: 76,
+          })
+          expect(screen.getByTestId('harmony-auto-size').props.scrollEnabled).toBe(
+            expectedScrollEnabled,
+          )
+        })
+      }
+    } finally {
+      ;(Platform as unknown as { OS: string }).OS = previousPlatformOS
+    }
+  })
+
   it('shrinks when content size decreases', async () => {
     await render(
       <Input

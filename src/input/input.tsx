@@ -2,7 +2,7 @@ import { useComponentToken } from '../theme'
 import { resolveStyles } from '../style'
 import type { TextInputInstance, TextInputProps } from '../text-input'
 import { forwardRef, useCallback, useMemo, useState } from 'react'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 import type { InputProps, InputStyleState } from './types'
 import { getInputMetrics, getInputStyles, getTextareaMetrics } from './style'
 import { getInputToken } from './token'
@@ -177,6 +177,7 @@ export const Input = forwardRef<TextInputInstance, InputProps & InputInternalPro
     lineHeight: metrics.lineHeight,
     verticalPadding: metrics.paddingVertical * 2,
     wordLimitPadding,
+    contentSizeIncludesPadding: String(Platform.OS) !== 'harmony',
   })
 
   const handleFocus = useCallback(

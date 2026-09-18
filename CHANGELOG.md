@@ -1,5 +1,12 @@
 # @ftsukic/tsuki
 
+## 0.0.8
+
+### Patch Changes
+
+- 修复 HarmonyOS 下 Input multiline autoSize 未计入 textarea padding，导致多行输入高度增长不足及滚动阈值不准确的问题。
+- 对齐 Navbar 的 Vant 风格标题与左右操作布局，补充操作禁用和语义样式能力；同时支持 Segmented 单实例圆角、选中文字颜色和 block 布局。
+
 ## 0.0.7
 
 ### Patch Changes

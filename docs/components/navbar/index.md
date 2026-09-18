@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-Navbar 提供 Vant 4 风格的顶部导航栏。它始终使用左侧、中心、右侧三个物理槽位：左右内容不参与标题定位，标题始终相对 Navbar 内容区居中。
+Navbar 提供 Vant 4 风格的顶部导航栏。它使用左侧、标题、右侧三个可选布局区域：左右内容固定在两侧，标题通过自身的左右 auto margin 保持居中。
 
 </section>
 
@@ -24,7 +24,7 @@ Navbar 提供 Vant 4 风格的顶部导航栏。它始终使用左侧、中心�
 ## 引入
 
 ```tsx | pure
-import { Navbar, NavbarAction } from '@ftsukic/tsuki'
+import { Navbar, Pressable } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
@@ -39,13 +39,15 @@ import { Navbar, NavbarAction } from '@ftsukic/tsuki'
 
 <code src="../../../src/navbar/__fixtures__/examples/right-action.tsx" title="右侧按钮" description="使用 rightText 和 onPressRight 创建右侧操作。"></code>
 
+<code src="../../../src/navbar/__fixtures__/examples/disabled-actions.tsx" title="禁用操作" description="左右操作独立禁用，但仍保留各自的布局区域。"></code>
+
 <code src="../../../src/navbar/__fixtures__/examples/custom-left.tsx" title="自定义左侧内容" description="替换左侧内容，同时保留 Navbar 级点击回调。"></code>
 
 <code src="../../../src/navbar/__fixtures__/examples/custom-right.tsx" title="自定义右侧内容" description="替换右侧内容，同时保留 Navbar 级点击回调。"></code>
 
 <code src="../../../src/navbar/__fixtures__/examples/three-sections.tsx" title="三个槽位" description="使用单一 custom slot 和 Navbar 级回调。"></code>
 
-<code src="../../../src/navbar/__fixtures__/examples/two-sections.tsx" title="多个 Action" description="在一个 custom slot 内组合多个独立 NavbarAction。"></code>
+<code src="../../../src/navbar/__fixtures__/examples/two-sections.tsx" title="多个 Action" description="在一个 custom slot 内组合多个独立 Pressable。"></code>
 
 <code src="../../../src/navbar/__fixtures__/examples/long-title.tsx" title="长标题" description="长标题单行显示并尾部省略，仍保持物理居中。"></code>
 
@@ -67,15 +69,15 @@ Navbar 的结构始终是：
 
 ```text
 root
-└── bar
-    ├── left   absolute left
-    ├── center absolute full width
-    └── right  absolute right
+└── bar (relative / normal flex row)
+    ├── left   optional / absolute left
+    ├── title  optional / normal flow / margin auto / maxWidth 60%
+    └── right  optional / absolute right
 ```
 
-默认内容区高度为 `46`。left 和 right 槽位固定在两侧，并由槽位本身提供默认 `16` 点水平内边距；title（包括自定义 ReactNode）最大宽度为 `60%`，并以单行尾部省略显示。左右内容按自身宽度布局，不参与标题居中计算。Navbar 的边缘 inset 属于 left/right slot，不会因为是否传入 `onPressLeft` 或 `onPressRight` 而变化。
+默认内容区高度为 `46`。title 存在时处于 bar 的正常布局流中，通过左右 `auto` margin 居中，最大宽度为 `60%`，并由容器隐藏溢出。字符串 title 由 Navbar 渲染为单行尾部省略；自定义 ReactNode 只共享 title 容器的 margin auto、`maxWidth: '60%'` 和 overflow 约束，其内部文本换行和省略行为由业务节点自行控制。left 和 right 只有存在实际内容时才渲染，固定在两侧，并由 slot 本身提供默认 `16` 点水平内边距；这些边缘 inset 不会因为是否传入 `onPressLeft` 或 `onPressRight` 而变化。
 
-没有传入 title 时也不会切换成 space-between 两栏布局。中心槽位仍存在，只是不渲染标题内容。
+没有传入 title 时也不会切换成 space-between 两栏布局，title 节点不会渲染。没有 leftArrow、leftText 或自定义 left 时不会渲染 left 节点；没有 rightText 或自定义 right 时不会渲染 right 节点。仅传 `onPressLeft`/`onPressRight` 也不会创建空点击区域。
 
 ```tsx
 <Navbar title="详情" rightText="更多" onPressRight={onMore} />
@@ -95,22 +97,42 @@ left 和 right 只替换对应槽位的内容，不会自动取消 Navbar 级的
 />
 ```
 
-一个 slot 需要多个独立操作时，使用多个 NavbarAction。这种情况下不要同时传入对应的 onPressLeft 或 onPressRight，以免 slot 级点击与内部操作重复：
+一个 slot 需要多个独立操作时，在 custom slot 内组合多个通用 `Pressable`。这种情况下不要同时传入对应的 `onPressLeft` 或 `onPressRight`，以免 slot 级点击与内部操作重复：
 
 ```tsx
 <Navbar
   right={
     <View style={{ flexDirection: 'row' }}>
-      <NavbarAction onPress={onAdd}>
+      <Pressable onPress={onAdd}>
         <Icon name="PlusOutlined" />
-      </NavbarAction>
-      <NavbarAction onPress={onMore}>
+      </Pressable>
+      <Pressable onPress={onMore}>
         <Icon name="EllipsisOutlined" />
-      </NavbarAction>
+      </Pressable>
     </View>
   }
   title="详情"
 />
+```
+
+## 语义样式
+
+`styles.title` 控制 title 容器，包括 auto margin、最大宽度和布局样式；`styles.titleText` 只控制 Navbar 自动生成的字符串标题 Text：
+
+```tsx
+<Navbar
+  title="详情"
+  styles={{
+    title: { maxWidth: '80%' },
+    titleText: { fontSize: 18 },
+  }}
+/>
+```
+
+使用 custom ReactNode title 时，`styles.title` 仍然作用于 title 容器，但 `styles.titleText` 不会注入 custom 节点；内部文字的换行、省略和视觉样式由业务节点自行控制：
+
+```tsx
+<Navbar title={<Text>详情</Text>} styles={{ title: { marginLeft: 24 } }} />
 ```
 
 ## fixed、placeholder 和安全区
@@ -132,6 +154,8 @@ safeAreaInsetTop 默认关闭。开启后，Navbar 使用最近的 SafeAreaProvi
 | rightText | `ReactNode` | — | 默认右侧操作文字 |
 | leftArrow | `boolean` | `false` | 是否显示内置 `LeftOutlined` |
 | leftIconSize | `number` | `Navbar` token 的 `iconSize` | 内置左箭头尺寸；Tsuki RN 扩展，只作用于内置箭头 |
+| leftDisabled | `boolean` | `false` | 是否禁用左侧操作；不影响 slot 是否因内容存在而渲染 |
+| rightDisabled | `boolean` | `false` | 是否禁用右侧操作；不影响 slot 是否因内容存在而渲染 |
 | onPressLeft | `PressableProps['onPress']` | — | 左侧默认内容或 custom left 整体的点击回调 |
 | onPressRight | `PressableProps['onPress']` | — | 右侧 `rightText` 或 custom right 整体的点击回调 |
 | border | `boolean` | `true` | 是否显示底部 hairline |
@@ -142,23 +166,13 @@ safeAreaInsetTop 默认关闭。开启后，Navbar 使用最近的 SafeAreaProvi
 | left | `ReactNode` | — | 自定义左侧内容；传入后只替换内容，不自动取消 slot 回调 |
 | right | `ReactNode` | — | 自定义右侧内容；传入后只替换内容，不自动取消 slot 回调 |
 | style | `StyleProp<ViewStyle>` | — | 真实 Navbar 根 View 样式 |
-| styles | `NavbarStyles` | — | `root`、`bar`、`left`、`title`、`right`、`divider` 语义样式 |
+| styles | `NavbarStyles` | — | `root`、`bar`、`left`、`title`、`titleText`、`right`、`divider` 语义样式 |
 
-Navbar 继承 React Native ViewProps，但不接受 children。testID、ref 和 style 都作用于真实 Navbar 根 View。Navbar 不提供 layout、content、contentAlign、SearchBar、Tabs 或其他业务内容 API。
+Navbar 继承 React Native ViewProps，但不接受 children。testID、ref 和 style 都作用于真实 Navbar 根 View。`styles.title` 控制 title 容器；`styles.titleText` 只控制内置字符串标题 Text。Navbar 不提供 layout、content、contentAlign、SearchBar、Tabs 或其他业务内容 API。
 
 ### 无障碍语义
 
-Navbar 根节点本身是普通 View，不自动声明导航或按钮角色。配置了 slot 级 `onPressLeft`/`onPressRight` 的默认内容或 custom slot 会通过内部 Pressable 暴露 button 语义；没有 slot 级回调的 custom slot 保留业务节点自己的语义。中心标题使用 Text，fixed placeholder 明确不承载可访问性语义。
-
-### NavbarAction
-
-NavbarAction 是 Tsuki RN 扩展，用于一个 left/right slot 内组合多个独立 action；普通的单个 custom slot 不需要用它包裹。它基于通用 Pressable，默认使用 opacity pressed feedback：
-
-```tsx
-<NavbarAction onPress={onPress}>更多</NavbarAction>
-```
-
-支持 onPress、disabled、testID、accessibilityLabel 和 style。style 可以使用 `({ pressed }) => ...` 根据按压状态返回样式；不对外暴露 pressStyle。
+Navbar 根节点本身是普通 View，不自动声明导航或按钮角色。配置了 slot 级 `onPressLeft`/`onPressRight` 的默认内容或 custom slot 会让整个 slot 成为 Pressable 并暴露 button 语义；`leftDisabled`/`rightDisabled` 会保留对应 slot 并交由 Pressable 暴露 disabled 状态，但不会响应点击。没有 slot 级回调的 custom slot 保留业务节点自己的语义。中心标题使用 Text，fixed placeholder 明确不承载可访问性语义。
 
 ### Theme
 

@@ -2,6 +2,7 @@ import { FixtureOverview } from '../../fixture-overview'
 import NavbarBasicExample from './examples/basic'
 import NavbarCustomLeftExample from './examples/custom-left'
 import NavbarCustomRightExample from './examples/custom-right'
+import NavbarDisabledActionsExample from './examples/disabled-actions'
 import NavbarFixedPlaceholderExample from './examples/fixed-placeholder'
 import NavbarFixedExample from './examples/fixed'
 import NavbarLeftArrowExample from './examples/left-arrow'
@@ -50,9 +51,15 @@ export default function NavbarOverview() {
         },
         {
           Component: NavbarRightActionExample,
-          description: '展示单个 NavbarAction 的点击反馈。',
+          description: '展示单个 slot 回调的点击反馈。',
           id: 'right-action',
           title: 'Right action',
+        },
+        {
+          Component: NavbarDisabledActionsExample,
+          description: '展示左右操作独立禁用但仍保留布局。',
+          id: 'disabled-actions',
+          title: 'Disabled actions',
         },
         {
           Component: NavbarCustomLeftExample,
@@ -74,7 +81,7 @@ export default function NavbarOverview() {
         },
         {
           Component: NavbarTwoSectionsExample,
-          description: '展示一个 slot 内组合多个 NavbarAction 的 Tsuki 扩展。',
+          description: '展示一个 slot 内组合多个通用 Pressable。',
           id: 'two-sections',
           title: 'Two sections',
         },

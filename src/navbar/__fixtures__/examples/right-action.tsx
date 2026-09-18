@@ -4,7 +4,7 @@ import { Text, View } from 'react-native'
 
 /**
  * @title Right action
- * @description Render one clickable right action with NavbarAction feedback.
+ * @description Render one clickable right action with slot-level Pressable feedback.
  */
 export default function NavbarRightActionFixture() {
   const [message, setMessage] = useState('')

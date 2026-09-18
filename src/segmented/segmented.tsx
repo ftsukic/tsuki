@@ -106,7 +106,7 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
     borderRadius ?? (shape === 'round' ? buttonToken.borderRadiusRound : buttonToken.borderRadius)
   const resolvedStyles = useMemo(
     () => getSegmentedStyles(themeToken, segmentedToken, resolvedBorderRadius, block, disabled),
-    [block, buttonToken, disabled, resolvedBorderRadius, segmentedToken, themeToken],
+    [block, disabled, resolvedBorderRadius, segmentedToken, themeToken],
   )
   const segmentedProps = useMemo<SegmentedProps>(
     () => ({

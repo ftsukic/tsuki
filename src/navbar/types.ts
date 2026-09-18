@@ -4,27 +4,21 @@ import type { PressableProps } from '../pressable'
 import type { StyleInfo, StyleResolver } from '../style'
 
 export interface NavbarStyleState {
-  pressed: boolean
+  leftDisabled: boolean
+  rightDisabled: boolean
 }
 
 export interface NavbarSemanticStyles {
   root?: StyleProp<ViewStyle>
   bar?: StyleProp<ViewStyle>
   left?: StyleProp<ViewStyle>
-  title?: StyleProp<TextStyle>
+  title?: StyleProp<ViewStyle>
+  titleText?: StyleProp<TextStyle>
   right?: StyleProp<ViewStyle>
   divider?: StyleProp<ViewStyle>
 }
 
 export type NavbarStyles = StyleResolver<NavbarProps, NavbarStyleState, NavbarSemanticStyles>
-
-export interface NavbarActionProps extends Omit<
-  PressableProps,
-  'children' | 'pressStyle' | 'style'
-> {
-  children?: ReactNode
-  style?: PressableProps['style']
-}
 
 export interface NavbarProps extends Omit<ViewProps, 'children' | 'style'> {
   title?: ReactNode
@@ -32,6 +26,8 @@ export interface NavbarProps extends Omit<ViewProps, 'children' | 'style'> {
   rightText?: ReactNode
   leftArrow?: boolean
   leftIconSize?: number
+  leftDisabled?: boolean
+  rightDisabled?: boolean
   onPressLeft?: PressableProps['onPress']
   onPressRight?: PressableProps['onPress']
   border?: boolean
