@@ -73,7 +73,7 @@ root
     └── right  absolute right
 ```
 
-默认内容区高度为 `46`。left 和 right 槽位固定在两侧，默认最多使用约 `20%` 宽度；字符串 title 最多使用 `60%` 宽度，并以单行尾部省略显示。因此左右内容的宽度变化不会改变标题的物理中心。
+默认内容区高度为 `46`。left 和 right 槽位固定在两侧，并由槽位本身提供默认 `16` 点水平内边距；title（包括自定义 ReactNode）最大宽度为 `60%`，并以单行尾部省略显示。左右内容按自身宽度布局，不参与标题居中计算。Navbar 的边缘 inset 属于 left/right slot，不会因为是否传入 `onPressLeft` 或 `onPressRight` 而变化。
 
 没有传入 title 时也不会切换成 space-between 两栏布局。中心槽位仍存在，只是不渲染标题内容。
 
@@ -148,7 +148,7 @@ Navbar 继承 React Native ViewProps，但不接受 children。testID、ref 和 
 
 ### 无障碍语义
 
-Navbar 根节点本身是普通 View，不自动声明导航或按钮角色。默认左侧内容、rightText，以及传入 slot 级 onPressLeft/onPressRight 的 custom slot 会通过 NavbarAction 暴露 button 语义；没有 slot 级回调的 custom slot 保留业务节点自己的语义。中心标题使用 Text，fixed placeholder 明确不承载可访问性语义。
+Navbar 根节点本身是普通 View，不自动声明导航或按钮角色。配置了 slot 级 `onPressLeft`/`onPressRight` 的默认内容或 custom slot 会通过内部 Pressable 暴露 button 语义；没有 slot 级回调的 custom slot 保留业务节点自己的语义。中心标题使用 Text，fixed placeholder 明确不承载可访问性语义。
 
 ### NavbarAction
 

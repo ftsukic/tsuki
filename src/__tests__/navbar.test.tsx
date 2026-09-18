@@ -42,15 +42,17 @@ describe('Navbar', () => {
       left: 0,
       top: 0,
       bottom: 0,
-      maxWidth: '20%',
+      paddingHorizontal: token.paddingHorizontal,
     })
     expect(flattenStyle('navbar-right')).toMatchObject({
       position: 'absolute',
       right: 0,
       top: 0,
       bottom: 0,
-      maxWidth: '20%',
+      paddingHorizontal: token.paddingHorizontal,
     })
+    expect(flattenStyle('navbar-left')).not.toHaveProperty('maxWidth')
+    expect(flattenStyle('navbar-right')).not.toHaveProperty('maxWidth')
     expect(flattenStyle('navbar-title')).toMatchObject({
       position: 'absolute',
       left: 0,
@@ -67,8 +69,9 @@ describe('Navbar', () => {
     })
     expect(StyleSheet.flatten(screen.getByText('标题').props.style)).toMatchObject({
       fontWeight: '600',
-      maxWidth: '60%',
     })
+    expect(flattenStyle('navbar-title-wrapper')).toMatchObject({ maxWidth: '60%' })
+    expect(StyleSheet.flatten(screen.getByText('标题').props.style)).not.toHaveProperty('maxWidth')
   })
 
   it('keeps the three slots when title is absent', async () => {
@@ -150,7 +153,8 @@ describe('Navbar', () => {
     expect(onPressRight).toHaveBeenCalledTimes(1)
   })
 
-  it('routes default left and right content through NavbarAction', async () => {
+  it('renders default left and right content through internal slot actions', async () => {
+    const token = getNavbarToken(getDesignToken())
     const onPressLeft = jest.fn()
     const onPressRight = jest.fn()
 
@@ -172,7 +176,15 @@ describe('Navbar', () => {
     expect(onPressRight).toHaveBeenCalledTimes(1)
     expect(screen.getByTestId('navbar-left-action').props.accessibilityRole).toBe('button')
     expect(screen.getByTestId('navbar-right-action').props.accessibilityRole).toBe('button')
+    expect(flattenStyle('navbar-left')).toMatchObject({
+      paddingHorizontal: token.paddingHorizontal,
+    })
+    expect(flattenStyle('navbar-right')).toMatchObject({
+      paddingHorizontal: token.paddingHorizontal,
+    })
     expect(flattenStyle('navbar-left-action')).toMatchObject({ flexDirection: 'row' })
+    expect(flattenStyle('navbar-left-action')).not.toHaveProperty('paddingHorizontal')
+    expect(flattenStyle('navbar-right-action')).not.toHaveProperty('paddingHorizontal')
   })
 
   it('renders the built-in left arrow only when enabled', async () => {
@@ -182,7 +194,7 @@ describe('Navbar', () => {
 
     expect(screen.getByTestId('icon-LeftOutlined').props.size).toBe(20)
     expect(screen.getByText('返回')).toBeTruthy()
-    expect(flattenStyle('navbar-left-action')).toMatchObject({ flexDirection: 'row' })
+    expect(flattenStyle('navbar-left')).toMatchObject({ paddingHorizontal: 16 })
   })
 
   it('keeps string actions and titles on one line with tail ellipsis', async () => {
@@ -207,11 +219,68 @@ describe('Navbar', () => {
       ellipsizeMode: 'tail',
       numberOfLines: 1,
     })
-    expect(flattenStyle('navbar-left')).toHaveProperty('maxWidth', '20%')
-    expect(flattenStyle('navbar-right')).toHaveProperty('maxWidth', '20%')
+    expect(flattenStyle('navbar-left')).not.toHaveProperty('maxWidth')
+    expect(flattenStyle('navbar-right')).not.toHaveProperty('maxWidth')
     expect(
       StyleSheet.flatten(screen.getByText('这是一个很长的导航标题').props.style),
-    ).toHaveProperty('maxWidth', '60%')
+    ).not.toHaveProperty('maxWidth')
+    expect(flattenStyle('navbar-title-wrapper')).toHaveProperty('maxWidth', '60%')
+  })
+
+  it('keeps custom slot layout identical with or without a slot callback', async () => {
+    const token = getNavbarToken(getDesignToken())
+    const onPressLeft = jest.fn()
+    const onPressRight = jest.fn()
+    const leftContent = <View testID="custom-left" style={{ height: 24, width: 48 }} />
+    const rightContent = <View testID="custom-right" style={{ height: 24, width: 56 }} />
+
+    const { rerender } = await render(
+      <Navbar testID="navbar" left={leftContent} right={rightContent} />,
+    )
+
+    const leftSlotStyle = flattenStyle('navbar-left')
+    const rightSlotStyle = flattenStyle('navbar-right')
+    const leftNodeStyle = StyleSheet.flatten(screen.getByTestId('custom-left').props.style)
+    const rightNodeStyle = StyleSheet.flatten(screen.getByTestId('custom-right').props.style)
+
+    expect(leftSlotStyle).toMatchObject({
+      paddingHorizontal: token.paddingHorizontal,
+    })
+    expect(rightSlotStyle).toMatchObject({
+      paddingHorizontal: token.paddingHorizontal,
+    })
+    expect(screen.queryByTestId('navbar-left-action')).toBeNull()
+    expect(screen.queryByTestId('navbar-right-action')).toBeNull()
+
+    await rerender(
+      <Navbar
+        testID="navbar"
+        left={<View testID="custom-left" style={{ height: 24, width: 48 }} />}
+        onPressLeft={onPressLeft}
+        right={<View testID="custom-right" style={{ height: 24, width: 56 }} />}
+        onPressRight={onPressRight}
+      />,
+    )
+
+    expect(flattenStyle('navbar-left')).toEqual(leftSlotStyle)
+    expect(flattenStyle('navbar-right')).toEqual(rightSlotStyle)
+    expect(StyleSheet.flatten(screen.getByTestId('custom-left').props.style)).toEqual(leftNodeStyle)
+    expect(StyleSheet.flatten(screen.getByTestId('custom-right').props.style)).toEqual(
+      rightNodeStyle,
+    )
+    expect(flattenStyle('navbar-left')).toMatchObject({
+      paddingHorizontal: token.paddingHorizontal,
+    })
+    expect(flattenStyle('navbar-right')).toMatchObject({
+      paddingHorizontal: token.paddingHorizontal,
+    })
+    expect(flattenStyle('navbar-left-action')).not.toHaveProperty('paddingHorizontal')
+    expect(flattenStyle('navbar-right-action')).not.toHaveProperty('paddingHorizontal')
+
+    await press('navbar-left-action')
+    await press('navbar-right-action')
+    expect(onPressLeft).toHaveBeenCalledTimes(1)
+    expect(onPressRight).toHaveBeenCalledTimes(1)
   })
 
   it('supports a custom ReactNode title in the centered slot', async () => {
@@ -225,6 +294,7 @@ describe('Navbar', () => {
 
     expect(screen.getByTestId('custom-title')).toBeTruthy()
     expect(screen.getByTestId('navbar-title').props.pointerEvents).toBe('none')
+    expect(flattenStyle('navbar-title-wrapper')).toMatchObject({ maxWidth: '60%' })
   })
 
   it('applies semantic left and right styles to fixed slots', async () => {

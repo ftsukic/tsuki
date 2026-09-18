@@ -6,6 +6,7 @@ export interface NavbarResolvedStyles {
   bar: ViewStyle
   left: ViewStyle
   center: ViewStyle
+  titleWrapper: ViewStyle
   title: TextStyle
   right: ViewStyle
   divider: ViewStyle
@@ -29,7 +30,7 @@ export function getNavbarStyles(token: NavbarToken, aliasToken: AliasToken): Nav
       flexDirection: 'row',
       justifyContent: 'center',
       left: 0,
-      maxWidth: '20%',
+      paddingHorizontal: token.paddingHorizontal,
       position: 'absolute',
       top: 0,
     },
@@ -38,7 +39,7 @@ export function getNavbarStyles(token: NavbarToken, aliasToken: AliasToken): Nav
       bottom: 0,
       flexDirection: 'row',
       justifyContent: 'center',
-      maxWidth: '20%',
+      paddingHorizontal: token.paddingHorizontal,
       position: 'absolute',
       right: 0,
       top: 0,
@@ -52,13 +53,17 @@ export function getNavbarStyles(token: NavbarToken, aliasToken: AliasToken): Nav
       right: 0,
       top: 0,
     },
+    titleWrapper: {
+      alignItems: 'center',
+      alignSelf: 'center',
+      maxWidth: '60%',
+    },
     title: {
       color: token.titleColor,
       flexShrink: 1,
       fontSize: token.titleFontSize,
       fontWeight: '600',
       lineHeight: aliasToken.lineHeight,
-      maxWidth: '60%',
       textAlign: 'center',
     },
     divider: {},

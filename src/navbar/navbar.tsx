@@ -2,15 +2,21 @@ import { forwardRef, useContext } from 'react'
 import { View } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { Icon } from '../icon'
+import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
-import { NavbarAction } from './navbar-action'
 import { getNavbarStyles } from './style'
 import { getNavbarToken } from './token'
 import type { NavbarProps, NavbarStyleState } from './types'
 import type { ReactNode } from 'react'
 import type { TextStyle } from 'react-native'
+
+const NAVBAR_SLOT_ACTION_STYLE = {
+  alignItems: 'center' as const,
+  flexDirection: 'row' as const,
+  justifyContent: 'center' as const,
+}
 
 function isTextContent(value: ReactNode): value is string | number {
   return typeof value === 'string' || typeof value === 'number'
@@ -46,6 +52,25 @@ function NavbarBackContent({
         text
       )}
     </View>
+  )
+}
+
+function renderNavbarSlotAction(
+  content: ReactNode,
+  onPress: NavbarProps['onPressLeft'],
+  testID?: string,
+) {
+  return onPress === undefined ? (
+    content
+  ) : (
+    <Pressable
+      testID={testID}
+      onPress={onPress}
+      pressStyle="opacity"
+      style={NAVBAR_SLOT_ACTION_STYLE}
+    >
+      {content}
+    </Pressable>
   )
 }
 
@@ -119,6 +144,26 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
     />
   )
 
+  const renderDefaultRight = () =>
+    isTextContent(rightText) ? (
+      <Text
+        ellipsizeMode="tail"
+        numberOfLines={1}
+        style={{
+          color: token.actionColor,
+          flexShrink: 0,
+          fontFamily: aliasToken.fontFamily,
+          fontSize: token.actionFontSize,
+          lineHeight: aliasToken.lineHeight,
+          maxWidth: '100%',
+        }}
+      >
+        {rightText}
+      </Text>
+    ) : (
+      rightText
+    )
+
   const renderTitle = () =>
     isTextContent(title) ? (
       <Text ellipsizeMode="tail" style={[resolved.title, semantic?.title]} numberOfLines={1}>
@@ -129,33 +174,17 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
     )
 
   const leftContent =
-    left !== undefined ? (
-      onPressLeft === undefined ? (
-        left
-      ) : (
-        <NavbarAction testID={leftActionTestID} onPress={onPressLeft}>
-          {left}
-        </NavbarAction>
-      )
-    ) : leftArrow || leftText !== undefined ? (
-      <NavbarAction testID={leftActionTestID} onPress={onPressLeft}>
-        {renderDefaultLeft()}
-      </NavbarAction>
-    ) : null
+    left !== undefined
+      ? renderNavbarSlotAction(left, onPressLeft, leftActionTestID)
+      : leftArrow || leftText !== undefined
+        ? renderNavbarSlotAction(renderDefaultLeft(), onPressLeft, leftActionTestID)
+        : null
   const rightContent =
-    right !== undefined ? (
-      onPressRight === undefined ? (
-        right
-      ) : (
-        <NavbarAction testID={rightActionTestID} onPress={onPressRight}>
-          {right}
-        </NavbarAction>
-      )
-    ) : rightText !== undefined ? (
-      <NavbarAction testID={rightActionTestID} onPress={onPressRight}>
-        {rightText}
-      </NavbarAction>
-    ) : null
+    right !== undefined
+      ? renderNavbarSlotAction(right, onPressRight, rightActionTestID)
+      : rightText !== undefined
+        ? renderNavbarSlotAction(renderDefaultRight(), onPressRight, rightActionTestID)
+        : null
 
   return (
     <>
@@ -184,7 +213,12 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
             pointerEvents="none"
             style={resolved.center}
           >
-            {renderTitle()}
+            <View
+              testID={testID === undefined ? undefined : `${testID}-title-wrapper`}
+              style={resolved.titleWrapper}
+            >
+              {renderTitle()}
+            </View>
           </View>
           <View testID={rightTestID} style={[resolved.right, semantic?.right]}>
             {rightContent}
