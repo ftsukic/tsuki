@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { useState } from 'react'
 import { StyleSheet, Text } from 'react-native'
 import * as Reanimated from 'react-native-reanimated'
@@ -6,6 +6,8 @@ import {
   closeDialog,
   ConfigProvider,
   Dialog,
+  getDialogToken,
+  getDesignToken,
   PortalHost,
   resetDialogDefaultOptions,
   setDialogDefaultOptions,
@@ -13,7 +15,7 @@ import {
   showDialog,
 } from '..'
 import type { ReactNode } from 'react'
-import type { TestInstance } from 'test-renderer'
+import type { JsonElement, JsonNode, TestInstance } from 'test-renderer'
 
 function AppProvider({ children }: { children?: ReactNode }) {
   return (
@@ -27,6 +29,32 @@ function findOverlay(view: {
   container: { queryAll: (predicate: (node: TestInstance) => boolean) => TestInstance[] }
 }) {
   return view.container.queryAll((node) => node.props.accessibilityElementsHidden === true)[0]
+}
+
+function findJsonNodeByTestID(node: JsonNode | null, testID: string): JsonElement | undefined {
+  if (node === null || typeof node === 'string') return undefined
+  if (node.props.testID === testID) return node
+
+  for (const child of node.children) {
+    const found = findJsonNodeByTestID(child, testID)
+    if (found) return found
+  }
+
+  return undefined
+}
+
+function findPressedOverlays(node: JsonNode | null): JsonElement[] {
+  if (node === null || typeof node === 'string') return []
+
+  return [
+    ...(node.props.pointerEvents === 'none' ? [node] : []),
+    ...node.children.flatMap((child) => findPressedOverlays(child)),
+  ]
+}
+
+async function firePressState(instance: TestInstance, eventName: 'pressIn' | 'pressOut') {
+  fireEvent(instance, eventName)
+  await Promise.resolve()
 }
 
 describe('Dialog', () => {
@@ -118,7 +146,7 @@ describe('Dialog', () => {
       flex: 1,
       minWidth: 0,
       minHeight: footerStyle.height,
-      borderLeftWidth: 1,
+      borderLeftWidth: StyleSheet.hairlineWidth,
     })
     expect(StyleSheet.flatten(cancelButton.props.style).borderLeftWidth).toBeUndefined()
     expect(StyleSheet.flatten(screen.getByText('取消').props.style)).toMatchObject({
@@ -127,6 +155,130 @@ describe('Dialog', () => {
     expect(StyleSheet.flatten(screen.getByText('确认').props.style)).toMatchObject({
       textAlign: 'center',
     })
+
+    await view.unmount()
+  })
+
+  it('uses Dialog token feedback for default actions and isolates each pressed half', async () => {
+    const dialogToken = getDialogToken(getDesignToken())
+    const view = await render(
+      <AppProvider>
+        <Dialog show message="确认操作" showCancelButton />
+      </AppProvider>,
+    )
+
+    const footer = screen.getByTestId('dialog-cancel-button').parent
+    expect(StyleSheet.flatten(footer?.props.style)).toMatchObject({
+      borderTopWidth: StyleSheet.hairlineWidth,
+    })
+    expect(
+      StyleSheet.flatten(screen.getByTestId('dialog-confirm-button').props.style),
+    ).toMatchObject({
+      backgroundColor: 'transparent',
+      borderRadius: 0,
+      minHeight: dialogToken.buttonHeight,
+      opacity: 1,
+      borderLeftWidth: StyleSheet.hairlineWidth,
+    })
+    expect(StyleSheet.flatten(screen.getByText('取消').props.style)).toMatchObject({
+      color: dialogToken.cancelButtonColor,
+      fontSize: dialogToken.buttonFontSize,
+    })
+    expect(StyleSheet.flatten(screen.getByText('确认').props.style)).toMatchObject({
+      color: dialogToken.confirmButtonColor,
+      fontSize: dialogToken.buttonFontSize,
+    })
+
+    await firePressState(screen.getByTestId('dialog-cancel-button'), 'pressIn')
+    const cancelButton = findJsonNodeByTestID(view.toJSON(), 'dialog-cancel-button')
+    const confirmButton = findJsonNodeByTestID(view.toJSON(), 'dialog-confirm-button')
+    const cancelOverlays = findPressedOverlays(cancelButton ?? null)
+    expect(cancelOverlays).toHaveLength(1)
+    expect(StyleSheet.flatten(cancelOverlays[0].props.style).backgroundColor).toBe(
+      dialogToken.buttonPressedOverlayColor,
+    )
+    expect(StyleSheet.flatten(screen.getByTestId('dialog-cancel-button').props.style).opacity).toBe(
+      1,
+    )
+    expect(StyleSheet.flatten(screen.getByText('取消').props.style)).not.toHaveProperty(
+      'opacity',
+      0.6,
+    )
+    expect(findPressedOverlays(confirmButton ?? null)).toHaveLength(0)
+
+    await firePressState(screen.getByTestId('dialog-cancel-button'), 'pressOut')
+    await firePressState(screen.getByTestId('dialog-confirm-button'), 'pressIn')
+    expect(
+      findPressedOverlays(findJsonNodeByTestID(view.toJSON(), 'dialog-cancel-button') ?? null),
+    ).toHaveLength(0)
+    expect(
+      findPressedOverlays(findJsonNodeByTestID(view.toJSON(), 'dialog-confirm-button') ?? null),
+    ).toHaveLength(1)
+
+    await view.unmount()
+  })
+
+  it('uses Dialog disabled opacity for disabled and loading actions', async () => {
+    const dialogToken = getDialogToken(getDesignToken())
+    let resolveClose!: (allowed: boolean) => void
+    const view = await render(
+      <AppProvider>
+        <Dialog
+          show
+          message="确认操作"
+          showCancelButton
+          cancelButtonDisabled
+          beforeClose={() => new Promise<boolean>((resolve) => (resolveClose = resolve))}
+        />
+      </AppProvider>,
+    )
+
+    expect(StyleSheet.flatten(screen.getByTestId('dialog-cancel-button').props.style).opacity).toBe(
+      dialogToken.buttonDisabledOpacity,
+    )
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => fireEvent.press(screen.getByTestId('dialog-confirm-button')))
+    await waitFor(() =>
+      expect(
+        StyleSheet.flatten(screen.getByTestId('dialog-confirm-button').props.style).opacity,
+      ).toBe(dialogToken.buttonDisabledOpacity),
+    )
+    resolveClose(false)
+    await waitFor(() =>
+      expect(screen.getByTestId('dialog-confirm-button').props.accessibilityState?.disabled).toBe(
+        false,
+      ),
+    )
+    await view.unmount()
+  })
+
+  it('keeps round-button feedback on Button without a Dialog overlay', async () => {
+    const buttonOverlayColor = '#654321'
+    const dialogOverlayColor = '#123456'
+    const view = await render(
+      <ConfigProvider
+        theme={{
+          token: { motion: false },
+          components: {
+            Button: { pressedOverlayColor: buttonOverlayColor },
+            Dialog: { buttonPressedOverlayColor: dialogOverlayColor },
+          },
+        }}
+      >
+        <PortalHost>
+          <Dialog show theme="round-button" message="确认操作" showCancelButton />
+        </PortalHost>
+      </ConfigProvider>,
+    )
+
+    await firePressState(screen.getByTestId('dialog-confirm-button'), 'pressIn')
+    const confirmButton = findJsonNodeByTestID(view.toJSON(), 'dialog-confirm-button')
+    const overlays = findPressedOverlays(confirmButton ?? null)
+    expect(overlays).toHaveLength(1)
+    expect(StyleSheet.flatten(overlays[0].props.style).backgroundColor).toBe(buttonOverlayColor)
+    expect(
+      StyleSheet.flatten(screen.getByTestId('dialog-confirm-button').props.style).opacity,
+    ).toBe(1)
 
     await view.unmount()
   })
@@ -162,6 +314,7 @@ describe('Dialog', () => {
     const cancelButton = screen.getByTestId('dialog-cancel-button')
     const confirmButton = screen.getByTestId('dialog-confirm-button')
     const footer = cancelButton.parent
+    const themeToken = getDesignToken()
 
     expect(confirmButton.parent).toBe(footer)
     expect(footer?.children).toHaveLength(2)
@@ -177,8 +330,94 @@ describe('Dialog', () => {
       flex: 1,
       minWidth: 0,
       minHeight: expect.any(Number),
+      backgroundColor: themeToken.colorPrimary,
+      borderColor: themeToken.colorPrimary,
+    })
+    expect(StyleSheet.flatten(cancelButton.props.style)).toMatchObject({
+      backgroundColor: themeToken.colorBgContainer,
+      borderColor: themeToken.colorBorder,
+    })
+    expect(StyleSheet.flatten(cancelButton.props.style).backgroundColor).not.toBe(
+      themeToken.colorText,
+    )
+    expect(StyleSheet.flatten(screen.getByText('取消').props.style)).toMatchObject({
+      color: themeToken.colorText,
+    })
+    expect(StyleSheet.flatten(screen.getByText('确认').props.style)).toMatchObject({
+      color: themeToken.colorTextLightSolid,
     })
     expect(StyleSheet.flatten(confirmButton.props.style).borderLeftWidth).toBeUndefined()
+
+    await view.unmount()
+  })
+
+  it('applies round button colors only to labels', async () => {
+    const themeToken = getDesignToken()
+    const cancelColor = '#722ed1'
+    const confirmColor = '#eb2f96'
+    const view = await render(
+      <AppProvider>
+        <Dialog
+          show
+          theme="round-button"
+          message="确认操作"
+          showCancelButton
+          cancelButtonColor={cancelColor}
+          confirmButtonColor={confirmColor}
+        />
+      </AppProvider>,
+    )
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId('dialog-cancel-button').props.style),
+    ).toMatchObject({
+      backgroundColor: themeToken.colorBgContainer,
+      borderColor: themeToken.colorBorder,
+    })
+    expect(
+      StyleSheet.flatten(screen.getByTestId('dialog-confirm-button').props.style),
+    ).toMatchObject({
+      backgroundColor: themeToken.colorPrimary,
+      borderColor: themeToken.colorPrimary,
+    })
+    expect(StyleSheet.flatten(screen.getByText('取消').props.style)).toMatchObject({
+      color: cancelColor,
+    })
+    expect(StyleSheet.flatten(screen.getByText('确认').props.style)).toMatchObject({
+      color: confirmColor,
+    })
+
+    await view.unmount()
+  })
+
+  it('keeps round semantic action styles on Button roots', async () => {
+    const cancelBackground = '#111111'
+    const confirmBackground = '#222222'
+    const view = await render(
+      <AppProvider>
+        <Dialog
+          show
+          theme="round-button"
+          message="确认操作"
+          showCancelButton
+          styles={{
+            cancel: { backgroundColor: cancelBackground },
+            confirm: { backgroundColor: confirmBackground },
+          }}
+        />
+      </AppProvider>,
+    )
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId('dialog-cancel-button').props.style),
+    ).toMatchObject({
+      backgroundColor: cancelBackground,
+    })
+    expect(
+      StyleSheet.flatten(screen.getByTestId('dialog-confirm-button').props.style),
+    ).toMatchObject({
+      backgroundColor: confirmBackground,
+    })
 
     await view.unmount()
   })

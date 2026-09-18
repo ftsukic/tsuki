@@ -4,7 +4,7 @@ import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import { ButtonGroupContext } from './context'
 import { ButtonGroup, getButtonGroupConnectedStyle } from './button-group'
-import { getButtonStyles } from './style'
+import { getButtonStyles, shouldUseButtonOverlay } from './style'
 import { getButtonToken } from './token'
 import type { ButtonProps, ButtonStyleState } from './types'
 import { Fragment, forwardRef, isValidElement, useContext } from 'react'
@@ -43,6 +43,8 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
       size,
       color,
       variant,
+      pressFeedback,
+      pressedOverlayColor,
       shape,
       plain = false,
       block = false,
@@ -80,6 +82,8 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
       size: mergedSize,
       color,
       variant: resolvedVariant,
+      pressFeedback,
+      pressedOverlayColor,
       shape: mergedShape,
       plain,
       block,
@@ -99,7 +103,6 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
       onPress,
       onPressDebounceWait,
     }
-
     return (
       <Pressable
         ref={ref}
@@ -159,12 +162,12 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
                   </View>
                 ) : null}
               </View>
-              {pressed && !isDisabled && resolvedVariant !== 'text' ? (
+              {pressed && !isDisabled && shouldUseButtonOverlay(buttonProps) ? (
                 <View
                   pointerEvents="none"
                   style={[
                     StyleSheet.absoluteFill,
-                    { backgroundColor: buttonToken.pressedOverlayColor },
+                    { backgroundColor: pressedOverlayColor ?? buttonToken.pressedOverlayColor },
                   ]}
                 />
               ) : null}

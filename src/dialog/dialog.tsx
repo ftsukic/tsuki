@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
-import { ScrollView, useWindowDimensions, View } from 'react-native'
+import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native'
 import { Button } from '../button'
 import { PopupContent } from '../popup/popup'
 import { Portal } from '../portal'
@@ -177,28 +177,38 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
     const disabled =
       loading || closingAction !== null || (confirm ? confirmButtonDisabled : cancelButtonDisabled)
     const text = confirm ? confirmButtonText : cancelButtonText
-    const color = confirm
-      ? (confirmButtonColor ?? token.confirmButtonColor)
-      : (cancelButtonColor ?? token.cancelButtonColor)
     const isRound = theme === 'round-button'
+    const textColor = confirm
+      ? (confirmButtonColor ?? (isRound ? undefined : token.confirmButtonColor))
+      : (cancelButtonColor ?? (isRound ? undefined : token.cancelButtonColor))
+    const buttonStyles = isRound
+      ? textColor === undefined
+        ? undefined
+        : { label: { color: textColor } }
+      : {
+          root: { opacity: disabled ? token.buttonDisabledOpacity : 1 },
+          label: { color: textColor, fontSize: token.buttonFontSize },
+        }
 
     return (
       <Button
         key={action}
         testID={`dialog-${action}-button`}
         variant={isRound ? 'solid' : 'text'}
-        type={isRound ? (confirm ? 'danger' : 'warning') : 'default'}
+        type={isRound ? (confirm ? 'primary' : 'default') : 'default'}
+        pressFeedback={isRound ? undefined : 'overlay'}
+        pressedOverlayColor={isRound ? undefined : token.buttonPressedOverlayColor}
         round={isRound}
         square={!isRound}
-        color={color}
         loading={loading}
         disabled={disabled}
         accessibilityLabel={isTextContent(text) ? String(text) : undefined}
+        styles={buttonStyles}
         style={[
           confirm ? resolved.confirm : resolved.cancel,
           confirm ? semantic?.confirm : semantic?.cancel,
           confirm && showCancelButton && showConfirmButton && theme === 'default'
-            ? { borderLeftWidth: 1, borderLeftColor: token.dividerColor }
+            ? { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: token.dividerColor }
             : null,
         ]}
         onPress={() => requestClose(action)}

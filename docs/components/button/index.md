@@ -35,6 +35,8 @@ import { Button, Icon } from '@ftsukic/tsuki'
 
 <code src="../../../src/button/__fixtures__/examples/group.tsx" title="Button.Group" description="展示连接按钮组、统一尺寸、视觉变体、显式尺寸覆盖和单按钮组。"></code>
 
+<code src="../../../src/button/__fixtures__/examples/press-feedback.tsx" title="按下反馈" description="比较 text Button 默认透明度反馈和显式 overlay 配置。"></code>
+
 ## API
 
 ### Button
@@ -46,6 +48,8 @@ import { Button, Icon } from '@ftsukic/tsuki'
 | size | `'large' \| 'normal' \| 'small' \| 'mini'` | `'normal'` | 按钮尺寸；`circle` 直接使用对应的高度 token |
 | color | `ColorValue` | — | 自定义前景色和实心背景/边框色 |
 | variant | `'solid' \| 'filled' \| 'outline' \| 'dashed' \| 'text'` | `'solid'` | 视觉变体 |
+| pressFeedback | `'opacity' \| 'overlay'` | 按变体决定 | 显式选择按下反馈；不传时 `text` 使用透明度，其余变体使用覆盖层 |
+| pressedOverlayColor | `ColorValue` | Button token | `pressFeedback="overlay"` 时覆盖层的颜色 |
 | shape | `'default' \| 'round' \| 'square' \| 'circle'` | `'default'` | 按钮形状；显式 `shape` 优先于旧的形状 boolean |
 | plain | `boolean` | `false` | 兼容写法，等价于 `variant="outline"`；显式 `variant` 优先 |
 | block | `boolean` | `false` | 非 `circle` 且非 `text` 按钮占满父级可用宽度；`text` 变体仍按可见内容尺寸布局 |
@@ -64,7 +68,7 @@ import { Button, Icon } from '@ftsukic/tsuki'
 | styles | `ButtonStyles` | — | `root`、`icon`、`label`、`contentContainer` 的语义样式；`content` 是 `label` 的兼容别名 |
 | onPressDebounceWait | `number` | — | 两次 `onPress` 之间的最小间隔，单位为毫秒 |
 
-`variant="text"` 默认不使用普通 Button 的最小高度、水平内边距或 `contentContainer` 最小高度，点击区域与可见 content 一致；按下时通过通用 `Pressable` 提供 `pressedOpacity` 文字透明度反馈，需要扩大点击区域时可显式传入 `style` 或 `hitSlop`。其他变体按下时显示由 `pressedOverlayColor` 控制的覆盖层，默认值为 `rgba(0, 0, 0, 0.1)`。
+`variant="text"` 默认不使用普通 Button 的最小高度、水平内边距或 `contentContainer` 最小高度，点击区域与可见 content 一致；按下时通过通用 `Pressable` 提供 `pressedOpacity` 文字透明度反馈，需要扩大点击区域时可显式传入 `style` 或 `hitSlop`。其他变体按下时显示由 `pressedOverlayColor` 控制的覆盖层，默认值为 `rgba(0, 0, 0, 0.1)`；需要让文本按钮也使用覆盖层时，显式设置 `pressFeedback="overlay"`。
 
 Button 继承 React Native `PressableProps`，但由组件管理 `children`、`style` 和 `disabled`。默认 `accessibilityRole` 为 `button`；icon-only `circle` 应设置 `accessibilityLabel`：
 

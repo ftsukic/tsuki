@@ -435,6 +435,9 @@ export interface DialogToken {
   messageMaxHeightRatio: number
   buttonHeight: number
   roundButtonHeight: number
+  buttonFontSize: number
+  buttonPressedOverlayColor: string
+  buttonDisabledOpacity: number
   confirmButtonColor: string
   cancelButtonColor: string
   dividerColor: string

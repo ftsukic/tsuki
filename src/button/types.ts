@@ -16,6 +16,7 @@ export type ButtonIconPosition = 'left' | 'right'
 export type ButtonShape = 'default' | 'round' | 'square' | 'circle'
 export type ButtonGroupShape = Extract<ButtonShape, 'default' | 'round'>
 export type ButtonVariant = 'solid' | 'filled' | 'outline' | 'dashed' | 'text'
+export type ButtonPressFeedback = 'opacity' | 'overlay'
 
 export interface ButtonStyleState {
   pressed: boolean
@@ -40,6 +41,10 @@ export interface ButtonProps extends Omit<PressableProps, 'children' | 'style' |
   size?: ButtonSize
   color?: ColorValue
   variant?: ButtonVariant
+  /** Explicitly choose the active press feedback; omitted keeps variant defaults. */
+  pressFeedback?: ButtonPressFeedback
+  /** Override the overlay color used when `pressFeedback="overlay"`. */
+  pressedOverlayColor?: ColorValue
   shape?: ButtonShape
   /** @deprecated Use `variant="outline"` instead. */
   plain?: boolean

@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native'
 import type { TextStyle, ViewStyle } from 'react-native'
 import type { DialogProps, DialogStyleState } from './types'
 import type { DialogToken } from '../theme'
@@ -85,7 +86,7 @@ export function getDialogStyles(
       : {
           flexDirection: 'row',
           height: footerHeight,
-          borderTopWidth: 1,
+          borderTopWidth: StyleSheet.hairlineWidth,
           borderTopColor: token.dividerColor,
         },
     cancel: {

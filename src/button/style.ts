@@ -122,6 +122,13 @@ function resolveVariant(props: ButtonProps): ButtonVariant {
   return props.variant ?? (props.plain ? 'outline' : 'solid')
 }
 
+export function shouldUseButtonOverlay(props: ButtonProps): boolean {
+  const variant = resolveVariant(props)
+  return (
+    props.pressFeedback === 'overlay' || (props.pressFeedback === undefined && variant !== 'text')
+  )
+}
+
 export function getButtonStyles(
   themeToken: AliasToken,
   token: ButtonToken,
@@ -137,6 +144,7 @@ export function getButtonStyles(
   const isSolid = variant === 'solid'
   const isBorderless = variant === 'filled' || variant === 'text'
   const isText = variant === 'text'
+  const usesOverlay = shouldUseButtonOverlay(props)
   const color = isSolid
     ? props.color !== undefined
       ? themeToken.colorTextLightSolid
@@ -185,7 +193,7 @@ export function getButtonStyles(
       width: isCircle ? size.height : props.block && !isText ? '100%' : undefined,
       opacity: state.disabled
         ? token.disabledOpacity
-        : variant === 'text' && state.pressed && !state.loading
+        : !usesOverlay && state.pressed && !state.loading
           ? token.pressedOpacity
           : 1,
     },

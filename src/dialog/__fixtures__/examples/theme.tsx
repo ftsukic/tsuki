@@ -18,6 +18,9 @@ export default function DialogThemeExample() {
           Dialog: {
             backgroundColor: '#172b3a',
             borderRadius: 20,
+            buttonDisabledOpacity: 0.7,
+            buttonFontSize: 18,
+            buttonPressedOverlayColor: '#52c41a',
             messageColor: '#d9f7be',
             titleColor: '#ffffff',
           },
@@ -30,6 +33,8 @@ export default function DialogThemeExample() {
           show={show}
           title="主题 Dialog"
           message="组件 token 和 semantic styles 可以同时使用。"
+          showCancelButton
+          cancelButtonDisabled
           onShowChange={setShow}
           styles={{
             message: { fontWeight: '600' },

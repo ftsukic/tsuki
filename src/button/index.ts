@@ -5,6 +5,7 @@ export type {
   ButtonGroupProps,
   ButtonGroupShape,
   ButtonIconPosition,
+  ButtonPressFeedback,
   ButtonProps,
   ButtonShape,
   ButtonSemanticStyles,

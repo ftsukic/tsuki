@@ -148,6 +148,6 @@ resetDialogDefaultOptions(): void
 </ConfigProvider>
 ```
 
-可覆盖的主要 token 包括 `width`、`smallScreenWidth`、`backgroundColor`、`overlayColor`、`borderRadius`、`titleColor`、`messageColor`、`fontSize`、`titleFontSize`、`titleLineHeight`、`messageLineHeight`、`headerFontWeight`、标题和正文间距、`messageMaxHeightRatio`、按钮高度与颜色、分隔线颜色、footer 间距、`animationDuration` 和 `zIndex`。
+可覆盖的主要 token 包括 `width`、`smallScreenWidth`、`backgroundColor`、`overlayColor`、`borderRadius`、`titleColor`、`messageColor`、`fontSize`、`titleFontSize`、`titleLineHeight`、`messageLineHeight`、`headerFontWeight`、标题和正文间距、`messageMaxHeightRatio`、`buttonHeight`、`roundButtonHeight`、`buttonFontSize`、`buttonPressedOverlayColor`、`buttonDisabledOpacity`、按钮颜色、分隔线颜色、footer 间距、`animationDuration` 和 `zIndex`。默认按钮高度为 `48`，默认按钮使用 Dialog 自己的按下覆盖层和 `0.5` 禁用透明度；`round-button` 继续使用 Button 的实体按钮反馈。
 
 当前不支持 Vant 的 `allowHtml`、`teleport`、`closeOnPopstate`、`lockScroll`、`keyboardEnabled`、prompt 输入框和 Web transition/class API；React Native 自定义内容请使用 `ReactNode`。

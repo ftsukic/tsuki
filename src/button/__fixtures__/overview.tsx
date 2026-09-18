@@ -1,5 +1,6 @@
 import { FixtureOverview } from '../../fixture-overview'
 import ButtonGroupFixture from './examples/group'
+import ButtonPressFeedbackFixture from './examples/press-feedback'
 import ButtonShapesFixture from './examples/shapes'
 import ButtonVariantsFixture from './examples/variants'
 
@@ -23,6 +24,12 @@ export default function ButtonOverview() {
             'Show connected horizontal button groups, inherited sizes and child overrides.',
           id: 'group',
           title: 'Button groups',
+        },
+        {
+          Component: ButtonPressFeedbackFixture,
+          description: 'Compare default text opacity feedback with the explicit overlay option.',
+          id: 'press-feedback',
+          title: 'Press feedback',
         },
         {
           Component: ButtonShapesFixture,
