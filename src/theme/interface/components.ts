@@ -420,6 +420,7 @@ export interface DialogToken {
   borderRadius: number
   titleColor: string
   messageColor: string
+  messageHasTitleColor: string
   fontSize: number
   titleFontSize: number
   titleLineHeight: number
@@ -428,7 +429,9 @@ export interface DialogToken {
   headerPaddingTop: number
   headerPaddingHorizontal: number
   headerPaddingBottom: number
-  headerIsolatedPaddingVertical: number
+  headerIsolatedPaddingTop: number
+  headerIsolatedPaddingBottom: number
+  headerIsolatedPaddingHorizontal: number
   messagePaddingHorizontal: number
   messagePaddingTop: number
   messagePaddingBottom: number
@@ -441,6 +444,7 @@ export interface DialogToken {
   confirmButtonColor: string
   cancelButtonColor: string
   dividerColor: string
+  dividerWidth: number
   buttonGap: number
   footerPaddingHorizontal: number
   footerPaddingVertical: number

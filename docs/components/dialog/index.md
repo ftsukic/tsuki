@@ -62,6 +62,8 @@ import {
 
 <code src="../../../src/dialog/__fixtures__/examples/interactions.tsx" title="遮罩与禁用" description="展示遮罩关闭和按钮禁用行为。"></code>
 
+<code src="../../../src/dialog/__fixtures__/examples/layout.tsx" title="内容布局" description="分别展示仅标题、仅正文和标题加正文三种默认布局。"></code>
+
 <code src="../../../src/dialog/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 Dialog token 和 semantic styles 定制视觉。"></code>
 
 ## API
@@ -97,6 +99,10 @@ import {
 组件继承 React Native `ViewProps`，除 `children` 和 `style` 外透传到弹窗面板。`style` 只作用于面板；`styles.root` 也是面板样式，`styles.host` 作用于 Portal 宿主层。
 
 `children` 使用 `undefined` 判断是否覆盖 `message`，因此传入 `null` 可以主动清空正文。字符串和数字标题/正文会自动应用主题样式，自定义 ReactNode 需要自行控制样式。正文超过视口高度的 `60%` 时可以滚动。
+
+标题和正文按可见内容决定结构：`undefined`、`null`、`false` 和空字符串不会渲染，数字 `0` 会渲染。仅有标题时只保留独立 header，仅有正文时只保留正文区域，同时提供标题和正文时使用标准 header 加正文布局。
+
+`styles` resolver 的 `state` 会提供 `show`、`theme`、`titleVisible`、`bodyVisible`、`titleOnly`、`messageOnly`、`titleWithMessage`、`closingAction`、`confirmLoading` 和 `cancelLoading`，可据此对三种内容布局分别定制样式。
 
 Dialog 使用无障碍 `alert` 和 modal 语义，遮罩不会进入无障碍导航。打开和关闭动画由主题 `motion` 控制；设置 `motion: false` 会立即完成生命周期。
 
@@ -148,6 +154,6 @@ resetDialogDefaultOptions(): void
 </ConfigProvider>
 ```
 
-可覆盖的主要 token 包括 `width`、`smallScreenWidth`、`backgroundColor`、`overlayColor`、`borderRadius`、`titleColor`、`messageColor`、`fontSize`、`titleFontSize`、`titleLineHeight`、`messageLineHeight`、`headerFontWeight`、标题和正文间距、`messageMaxHeightRatio`、`buttonHeight`、`roundButtonHeight`、`buttonFontSize`、`buttonPressedOverlayColor`、`buttonDisabledOpacity`、按钮颜色、分隔线颜色、footer 间距、`animationDuration` 和 `zIndex`。默认按钮高度为 `48`，默认按钮使用 Dialog 自己的按下覆盖层和 `0.5` 禁用透明度；`round-button` 继续使用 Button 的实体按钮反馈。
+可覆盖的主要 token 包括 `width`、`smallScreenWidth`、`backgroundColor`、`overlayColor`、`borderRadius`、`titleColor`、`messageColor`、`messageHasTitleColor`、`fontSize`、`titleFontSize`、`titleLineHeight`、`messageLineHeight`、`headerFontWeight`、`headerPaddingTop`、`headerPaddingBottom`、`headerPaddingHorizontal`、`headerIsolatedPaddingTop`、`headerIsolatedPaddingBottom`、`headerIsolatedPaddingHorizontal`、正文间距、`messageMaxHeightRatio`、`buttonHeight`、`roundButtonHeight`、`buttonFontSize`、`buttonPressedOverlayColor`、`buttonDisabledOpacity`、按钮颜色、`dividerColor`、`dividerWidth`、footer 间距、`animationDuration` 和 `zIndex`。默认按钮高度为 `48`，字号为 `16`，默认按钮使用 Dialog 自己的按下覆盖层和 `0.5` 禁用透明度；`round-button` 继续使用 Button 的实体按钮反馈。
 
 当前不支持 Vant 的 `allowHtml`、`teleport`、`closeOnPopstate`、`lockScroll`、`keyboardEnabled`、prompt 输入框和 Web transition/class API；React Native 自定义内容请使用 `ReactNode`。

@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native'
+import { ScrollView, useWindowDimensions, View } from 'react-native'
 import { Button } from '../button'
 import { PopupContent } from '../popup/popup'
 import { Portal } from '../portal'
@@ -9,10 +9,7 @@ import { useComponentToken, useToken } from '../theme'
 import type { DialogAction, DialogProps, DialogStyleState } from './types'
 import { getDialogStyles } from './style'
 import { getDialogToken } from './token'
-
-function isRenderable(value: unknown): boolean {
-  return value !== undefined && value !== null && value !== false
-}
+import { getDialogLayoutState } from './utils'
 
 function isTextContent(value: unknown): value is string | number {
   return typeof value === 'string' || typeof value === 'number'
@@ -78,6 +75,10 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
     if (!show) setClosingAction(null)
   }, [show])
 
+  const body = children !== undefined ? children : message
+  const { titleVisible, bodyVisible, titleOnly, messageOnly, titleWithMessage } =
+    getDialogLayoutState(title, body)
+
   const dialogProps: DialogProps = {
     ...props,
     show,
@@ -112,6 +113,11 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
   const state: DialogStyleState = {
     show,
     theme,
+    titleVisible,
+    bodyVisible,
+    titleOnly,
+    messageOnly,
+    titleWithMessage,
     closingAction,
     confirmLoading: closingAction === 'confirm',
     cancelLoading: closingAction === 'cancel',
@@ -164,7 +170,6 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
     if (showRef.current && closingAction === null) onShowChangeRef.current?.(false)
   }, [closingAction])
 
-  const body = children !== undefined ? children : message
   const bodyNode = isTextContent(body) ? (
     <Text style={[resolved.message, semantic?.message]}>{body}</Text>
   ) : (
@@ -208,7 +213,7 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
           confirm ? resolved.confirm : resolved.cancel,
           confirm ? semantic?.confirm : semantic?.cancel,
           confirm && showCancelButton && showConfirmButton && theme === 'default'
-            ? { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: token.dividerColor }
+            ? { borderLeftWidth: token.dividerWidth, borderLeftColor: token.dividerColor }
             : null,
         ]}
         onPress={() => requestClose(action)}
@@ -249,8 +254,8 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
         accessibilityViewIsModal
         style={[resolved.panel, semantic?.root, style]}
       >
-        {isRenderable(title) ? (
-          <View style={resolved.header}>
+        {titleOnly || titleWithMessage ? (
+          <View testID="dialog-header" style={resolved.header}>
             {isTextContent(title) ? (
               <Text style={[resolved.title, semantic?.header]}>{title}</Text>
             ) : (
@@ -258,8 +263,9 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
             )}
           </View>
         ) : null}
-        {isRenderable(body) ? (
+        {messageOnly || titleWithMessage ? (
           <ScrollView
+            testID="dialog-content"
             style={[resolved.content, semantic?.content]}
             showsVerticalScrollIndicator={false}
             accessibilityRole="none"

@@ -122,7 +122,113 @@ describe('Dialog', () => {
     await view.unmount()
   })
 
+  it('uses isolated layout for an imperative title-only Dialog', async () => {
+    const dialogToken = getDialogToken(getDesignToken())
+    const view = await render(<AppProvider />)
+    let pending!: Promise<unknown>
+
+    await act(async () => {
+      pending = showDialog({ title: '仅标题' })
+    })
+
+    const header = screen.getByTestId('dialog-header')
+    expect(screen.queryByTestId('dialog-content')).toBeNull()
+    expect(StyleSheet.flatten(header.props.style)).toMatchObject({
+      paddingTop: dialogToken.headerIsolatedPaddingTop,
+      paddingBottom: dialogToken.headerIsolatedPaddingBottom,
+      paddingHorizontal: dialogToken.headerIsolatedPaddingHorizontal,
+    })
+
+    await act(async () => closeDialog())
+    await expect(pending).resolves.toBeUndefined()
+    await view.unmount()
+  })
+
+  it('uses content-only layout and primary message color for an imperative message-only Dialog', async () => {
+    const dialogToken = getDialogToken(getDesignToken())
+    const view = await render(<AppProvider />)
+    let pending!: Promise<unknown>
+
+    await act(async () => {
+      pending = showDialog({ message: '仅正文' })
+    })
+
+    expect(screen.queryByTestId('dialog-header')).toBeNull()
+    const content = screen.getByTestId('dialog-content')
+    expect(StyleSheet.flatten(content.props.style)).toMatchObject({
+      paddingTop: dialogToken.messagePaddingHorizontal,
+    })
+    expect(StyleSheet.flatten(screen.getByText('仅正文').props.style)).toMatchObject({
+      color: dialogToken.messageColor,
+    })
+
+    await act(async () => closeDialog())
+    await expect(pending).resolves.toBeUndefined()
+    await view.unmount()
+  })
+
+  it('keeps the header and content branches for a title-and-message Dialog', async () => {
+    const dialogToken = getDialogToken(getDesignToken())
+    const view = await render(
+      <AppProvider>
+        <Dialog show title="标题" message="正文" />
+      </AppProvider>,
+    )
+
+    expect(screen.getByTestId('dialog-header')).toBeTruthy()
+    const content = screen.getByTestId('dialog-content')
+    expect(StyleSheet.flatten(screen.getByTestId('dialog-header').props.style)).toMatchObject({
+      paddingTop: dialogToken.headerPaddingTop,
+      paddingBottom: dialogToken.headerPaddingBottom,
+      paddingHorizontal: dialogToken.headerPaddingHorizontal,
+    })
+    expect(StyleSheet.flatten(content.props.style)).toMatchObject({
+      paddingTop: dialogToken.messagePaddingTop,
+    })
+    expect(StyleSheet.flatten(screen.getByText('正文').props.style)).toMatchObject({
+      color: dialogToken.messageHasTitleColor,
+    })
+
+    await view.unmount()
+  })
+
+  it('treats empty title and message values as absent content', async () => {
+    const { unmount: unmountTitleOnly } = await render(
+      <AppProvider>
+        <Dialog show title="标题" message="" />
+      </AppProvider>,
+    )
+    expect(screen.getByTestId('dialog-header')).toBeTruthy()
+    expect(screen.queryByTestId('dialog-content')).toBeNull()
+    await unmountTitleOnly()
+
+    const { unmount: unmountMessageOnly } = await render(
+      <AppProvider>
+        <Dialog show title="" message="正文" />
+      </AppProvider>,
+    )
+    expect(screen.queryByTestId('dialog-header')).toBeNull()
+    expect(screen.getByTestId('dialog-content')).toBeTruthy()
+    await unmountMessageOnly()
+  })
+
+  it('keeps numeric zero as renderable title and message content', async () => {
+    const view = await render(
+      <AppProvider>
+        <Dialog show title={0} message={1} />
+      </AppProvider>,
+    )
+
+    expect(screen.getByTestId('dialog-header')).toBeTruthy()
+    expect(screen.getByTestId('dialog-content')).toBeTruthy()
+    expect(screen.getByText('0')).toBeTruthy()
+    expect(screen.getByText('1')).toBeTruthy()
+
+    await view.unmount()
+  })
+
   it('renders default dialog actions as direct, equally sized footer children', async () => {
+    const dialogToken = getDialogToken(getDesignToken())
     const view = await render(
       <AppProvider>
         <Dialog show message="确认操作" showCancelButton />
@@ -146,7 +252,7 @@ describe('Dialog', () => {
       flex: 1,
       minWidth: 0,
       minHeight: footerStyle.height,
-      borderLeftWidth: StyleSheet.hairlineWidth,
+      borderLeftWidth: dialogToken.dividerWidth,
     })
     expect(StyleSheet.flatten(cancelButton.props.style).borderLeftWidth).toBeUndefined()
     expect(StyleSheet.flatten(screen.getByText('取消').props.style)).toMatchObject({
@@ -169,8 +275,12 @@ describe('Dialog', () => {
 
     const footer = screen.getByTestId('dialog-cancel-button').parent
     expect(StyleSheet.flatten(footer?.props.style)).toMatchObject({
-      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopWidth: dialogToken.dividerWidth,
     })
+    expect(StyleSheet.flatten(screen.getByRole('alert').props.style)).toMatchObject({
+      borderRadius: dialogToken.borderRadius,
+    })
+    expect(dialogToken.borderRadius).toBe(16)
     expect(
       StyleSheet.flatten(screen.getByTestId('dialog-confirm-button').props.style),
     ).toMatchObject({
@@ -178,7 +288,7 @@ describe('Dialog', () => {
       borderRadius: 0,
       minHeight: dialogToken.buttonHeight,
       opacity: 1,
-      borderLeftWidth: StyleSheet.hairlineWidth,
+      borderLeftWidth: dialogToken.dividerWidth,
     })
     expect(StyleSheet.flatten(screen.getByText('取消').props.style)).toMatchObject({
       color: dialogToken.cancelButtonColor,

@@ -17,8 +17,6 @@ interface DialogRecord {
 let currentRecord: DialogRecord | null = null
 
 const defaultOptions: DialogOptions = {
-  title: '',
-  message: '',
   theme: 'default',
   messageAlign: 'center',
   showConfirmButton: true,

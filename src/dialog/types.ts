@@ -19,6 +19,11 @@ export type DialogBeforeClose = (action: DialogAction) => boolean | void | Promi
 export interface DialogStyleState {
   show: boolean
   theme: DialogTheme
+  titleVisible: boolean
+  bodyVisible: boolean
+  titleOnly: boolean
+  messageOnly: boolean
+  titleWithMessage: boolean
   closingAction: DialogAction | null
   confirmLoading: boolean
   cancelLoading: boolean

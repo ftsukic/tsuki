@@ -1,4 +1,3 @@
-import { StyleSheet } from 'react-native'
 import type { TextStyle, ViewStyle } from 'react-native'
 import type { DialogProps, DialogStyleState } from './types'
 import type { DialogToken } from '../theme'
@@ -15,22 +14,29 @@ export interface DialogResolvedStyles {
   confirm: ViewStyle
 }
 
-function isRenderable(value: unknown): boolean {
-  return value !== undefined && value !== null && value !== false
-}
-
 export function getDialogStyles(
   token: DialogToken,
   props: DialogProps,
-  _state: DialogStyleState,
+  state: DialogStyleState,
   bodyMaxHeight: number,
 ): DialogResolvedStyles {
-  const titleVisible = isRenderable(props.title)
-  const body = props.children !== undefined ? props.children : props.message
-  const bodyVisible = isRenderable(body)
+  const { titleVisible, titleOnly, messageOnly, titleWithMessage } = state
   const roundButtons = props.theme === 'round-button'
   const buttonHeight = roundButtons ? token.roundButtonHeight : token.buttonHeight
   const footerHeight = roundButtons ? buttonHeight + token.footerPaddingVertical * 2 : buttonHeight
+  const headerPadding: ViewStyle = titleOnly
+    ? {
+        paddingHorizontal: token.headerIsolatedPaddingHorizontal,
+        paddingTop: token.headerIsolatedPaddingTop,
+        paddingBottom: token.headerIsolatedPaddingBottom,
+      }
+    : titleWithMessage
+      ? {
+          paddingHorizontal: token.headerPaddingHorizontal,
+          paddingTop: token.headerPaddingTop,
+          paddingBottom: token.headerPaddingBottom,
+        }
+      : {}
 
   return {
     popupPanel: {
@@ -46,13 +52,7 @@ export function getDialogStyles(
     header: {
       alignItems: 'center',
       justifyContent: 'center',
-      paddingHorizontal: token.headerPaddingHorizontal,
-      paddingTop:
-        titleVisible && bodyVisible ? token.headerPaddingTop : token.headerIsolatedPaddingVertical,
-      paddingBottom:
-        titleVisible && bodyVisible
-          ? token.headerPaddingBottom
-          : token.headerIsolatedPaddingVertical,
+      ...headerPadding,
     },
     title: {
       fontFamily: token.fontFamily,
@@ -65,12 +65,12 @@ export function getDialogStyles(
     content: {
       maxHeight: bodyMaxHeight,
       paddingHorizontal: token.messagePaddingHorizontal,
-      paddingTop: titleVisible ? token.messagePaddingTop : token.messagePaddingHorizontal,
+      paddingTop: messageOnly ? token.messagePaddingHorizontal : token.messagePaddingTop,
       paddingBottom: token.messagePaddingBottom,
     },
     message: {
       fontFamily: token.fontFamily,
-      color: token.messageColor,
+      color: titleVisible ? token.messageHasTitleColor : token.messageColor,
       fontSize: token.fontSize,
       lineHeight: token.messageLineHeight,
       textAlign: props.messageAlign ?? 'center',
@@ -86,7 +86,7 @@ export function getDialogStyles(
       : {
           flexDirection: 'row',
           height: footerHeight,
-          borderTopWidth: StyleSheet.hairlineWidth,
+          borderTopWidth: token.dividerWidth,
           borderTopColor: token.dividerColor,
         },
     cancel: {

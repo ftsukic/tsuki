@@ -5,6 +5,7 @@ import DialogConfirmExample from './examples/confirm'
 import DialogControlledExample from './examples/controlled'
 import DialogCustomExample from './examples/custom'
 import DialogInteractionsExample from './examples/interactions'
+import DialogLayoutExample from './examples/layout'
 import DialogRoundExample from './examples/round'
 import DialogThemeExample from './examples/theme'
 
@@ -54,6 +55,12 @@ export default function DialogOverview() {
           description: 'closeOnClickOverlay 开启后可点击遮罩关闭，也可以分别禁用确认和取消按钮。',
           id: 'interactions',
           title: '遮罩与禁用',
+        },
+        {
+          Component: DialogLayoutExample,
+          description: '分别查看仅标题、仅正文和标题加正文时的默认布局与颜色层级。',
+          id: 'layout',
+          title: '内容布局',
         },
         {
           Component: DialogRoundExample,
