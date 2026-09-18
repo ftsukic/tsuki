@@ -1,5 +1,11 @@
 # @ftsukic/tsuki
 
+## 0.0.9
+
+### Patch Changes
+
+- Align Dialog layouts and default action press feedback with the Vant interaction contract.
+
 ## 0.0.8
 
 ### Patch Changes
