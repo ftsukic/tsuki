@@ -1,5 +1,11 @@
 # @ftsukic/tsuki
 
+## 0.0.11
+
+### Patch Changes
+
+- 633d17c: Add the Vant-style Badge `content`, `max`, `showZero`, `position`, and standalone APIs, update the default visual baseline, and preserve `count`/`overflowCount` compatibility aliases.
+
 ## 0.0.10
 
 ### Patch Changes
