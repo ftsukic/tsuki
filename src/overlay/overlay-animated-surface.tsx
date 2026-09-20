@@ -5,7 +5,7 @@ import { Easing } from 'react-native-reanimated'
 import { useAnimatedTransition } from '../motion'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
-import type { OverlayProps } from './interface'
+import type { OverlayProps } from './types'
 import { getOverlayToken } from './token'
 import { OverlaySurface } from './overlay-surface'
 

@@ -8,7 +8,7 @@ import { useComponentToken, useToken } from '../theme'
 import { LoadingIndicator } from './loading-indicator'
 import { getLoadingStyles } from './style'
 import { getLoadingToken } from './token'
-import type { LoadingProps } from './interface'
+import type { LoadingProps } from './types'
 
 function isPrimitiveText(value: ReactNode): value is string | number {
   return typeof value === 'string' || typeof value === 'number'

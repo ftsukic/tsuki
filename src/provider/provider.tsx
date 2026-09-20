@@ -7,7 +7,7 @@ import { SwipeCellManager } from '../swipe-cell/manager'
 import { ConfigProvider } from '../theme'
 import { GestureProvider } from './gesture-provider'
 import { SafeAreaProvider } from './safe-area-provider'
-import type { ProviderProps } from './interface'
+import type { ProviderProps } from './types'
 
 export const Provider = memo(function Provider({
   children,

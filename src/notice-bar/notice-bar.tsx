@@ -6,7 +6,7 @@ import { Pressable } from '../pressable'
 import { useToken } from '../theme'
 import { NoticeBarContent } from './notice-bar-content'
 import { getNoticeBarStyles } from './style'
-import type { NoticeBarProps } from './interface'
+import type { NoticeBarProps } from './types'
 
 function isRenderable(value: unknown): boolean {
   return value !== undefined && value !== null && value !== false

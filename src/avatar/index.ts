@@ -21,4 +21,4 @@ export type {
   AvatarStyleInfo,
   AvatarStyleState,
   AvatarStyles,
-} from './interface'
+} from './types'

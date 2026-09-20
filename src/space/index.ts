@@ -1,2 +1,2 @@
 export { Space } from './space'
-export type { SpaceProps } from './interface'
+export type { SpaceProps } from './types'

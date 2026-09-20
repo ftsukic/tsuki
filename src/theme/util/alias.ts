@@ -1,4 +1,4 @@
-import type { AliasToken, MapToken } from '../interface'
+import type { AliasToken, MapToken } from '../types'
 export function createAliasToken(map: MapToken, overrides: Partial<AliasToken> = {}): AliasToken {
   return {
     ...map,

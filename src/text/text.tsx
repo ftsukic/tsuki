@@ -3,7 +3,7 @@ import { Text as NativeText } from 'react-native'
 import type { Text as NativeTextInstance } from 'react-native'
 import { useToken } from '../theme'
 import { getTextStyles } from './style'
-import type { TextProps } from './interface'
+import type { TextProps } from './types'
 
 export const Text = forwardRef<NativeTextInstance, TextProps>(function Text(
   { children, type = 'default', size = 'normal', weight, style, ...props },

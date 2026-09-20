@@ -4,7 +4,7 @@ import { View } from 'react-native'
 import { useToken } from '../theme'
 import { useGridContext } from './context'
 import { Text } from '../text'
-import type { GridItemProps } from './interface'
+import type { GridItemProps } from './types'
 
 function isVisible(value: ReactNode): boolean {
   return value !== null && value !== undefined && value !== false

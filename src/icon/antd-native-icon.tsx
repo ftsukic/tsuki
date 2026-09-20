@@ -1,7 +1,7 @@
 import { useToken } from '../theme'
 import { useIconSize } from './context'
 import { InteractionPressable } from '../interaction'
-import type { AntdNativeIconProps } from './interface'
+import type { AntdNativeIconProps } from './types'
 import type { AbstractNode, IconDefinition } from '@ant-design/icons-svg/lib/types'
 import { memo, type ReactNode } from 'react'
 import type { ColorValue, PressableProps, StyleProp, ViewStyle } from 'react-native'

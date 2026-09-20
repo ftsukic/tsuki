@@ -1,4 +1,4 @@
-import type { FontMapToken } from '../../interface'
+import type { FontMapToken } from '../../types'
 
 export function genFontMapToken(fontSize: number): FontMapToken {
   const size = Math.max(1, Math.round(fontSize))

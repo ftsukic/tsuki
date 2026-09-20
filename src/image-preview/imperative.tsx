@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { mountPortal, unmountPortal, updatePortal } from '../portal'
 import type { PortalKey } from '../portal'
-import { ImagePreviewContent } from './image-preview'
+import { ImagePreviewContent } from './image-preview-content'
 import type { ImagePreviewCloseReason, ImagePreviewImperativeOptions } from './types'
 
 interface ImagePreviewRecord {

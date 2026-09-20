@@ -1,4 +1,5 @@
-export { SwipeCell, SwipeCellGroup } from './swipe-cell'
+export { SwipeCell } from './swipe-cell'
+export { SwipeCellGroup } from './swipe-cell-group'
 export { SwipeCellAction } from './swipe-cell-action'
 export { getSwipeCellToken } from './token'
 export { useSwipeCellController } from './swipe-cell'

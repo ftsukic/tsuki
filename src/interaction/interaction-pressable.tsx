@@ -6,7 +6,7 @@ import type {
   InteractionPressableInternalProps,
   InteractionPressableProps,
   InteractionPressableState,
-} from './interface'
+} from './types'
 
 // Pressable can supply a Reanimated style handle, so the native host must be
 // an animated component rather than a plain React Native Pressable.

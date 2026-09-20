@@ -1,4 +1,5 @@
-export { ImagePreview, ImagePreviewContent } from './image-preview'
+export { ImagePreview } from './image-preview'
+export { ImagePreviewContent } from './image-preview-content'
 export { ImagePreviewItem } from './image-preview-item'
 export { ImagePreviewTransition } from './image-preview-transition'
 export {

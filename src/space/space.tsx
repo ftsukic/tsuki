@@ -1,5 +1,5 @@
 import { Flex } from '../flex'
-import type { SpaceProps } from './interface'
+import type { SpaceProps } from './types'
 
 export function Space({
   align,

@@ -1,3 +1,3 @@
 export { Empty } from './empty'
 export { getEmptyToken } from './token'
-export type { EmptyProps } from './interface'
+export type { EmptyProps } from './types'

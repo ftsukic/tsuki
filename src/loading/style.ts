@@ -1,5 +1,5 @@
 import type { TextStyle, ViewStyle } from 'react-native'
-import type { LoadingProps, LoadingStyleState } from './interface'
+import type { LoadingProps, LoadingStyleState } from './types'
 import type { LoadingToken } from '../theme'
 
 export interface LoadingResolvedStyles {

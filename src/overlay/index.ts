@@ -6,4 +6,4 @@ export type {
   OverlayStyleInfo,
   OverlayStyleState,
   OverlayStyles,
-} from './interface'
+} from './types'

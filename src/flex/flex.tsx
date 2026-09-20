@@ -1,5 +1,5 @@
 import { View } from 'react-native'
-import type { FlexProps } from './interface'
+import type { FlexProps } from './types'
 
 export function Flex({
   align,

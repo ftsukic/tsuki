@@ -7,7 +7,7 @@ import { OverlaySurface } from '../overlay/overlay-surface'
 import { Portal } from '../portal'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
-import type { PopupProps } from './interface'
+import type { PopupProps } from './types'
 import { getPopupStyles } from './style'
 import { getPopupToken } from './token'
 

@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react'
-import type { GridContextValue } from './interface'
+import type { GridContextValue } from './types'
 
 export const defaultGridContext: GridContextValue = {
   border: true,

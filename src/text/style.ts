@@ -1,6 +1,6 @@
 import type { TextStyle } from 'react-native'
 import type { AliasToken } from '../theme'
-import type { TextSize, TextType } from './interface'
+import type { TextSize, TextType } from './types'
 
 export function getTextStyles(
   token: AliasToken,

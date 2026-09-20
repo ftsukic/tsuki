@@ -16,4 +16,4 @@ export type {
   UseInteractionPressOptions,
   UsePanGestureOptions,
   UsePanGestureResult,
-} from './interface'
+} from './types'

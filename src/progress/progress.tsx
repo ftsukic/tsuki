@@ -6,7 +6,7 @@ import { Text } from '../text'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import { ProgressCircle } from './progress-circle'
-import type { ProgressProps } from './interface'
+import type { ProgressProps } from './types'
 import { getProgressStyles } from './style'
 import { getProgressToken } from './token'
 

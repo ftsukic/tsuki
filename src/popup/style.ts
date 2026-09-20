@@ -1,6 +1,6 @@
 import { StyleSheet } from 'react-native'
 import type { StyleProp, ViewStyle } from 'react-native'
-import type { PopupPosition } from './interface'
+import type { PopupPosition } from './types'
 import type { PopupToken } from '../theme'
 
 export interface PopupResolvedStyles {

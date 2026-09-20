@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import type { ReactNode } from 'react'
-import type { PortalMethods } from './interface'
+import type { PortalMethods } from './types'
 
 interface PortalConsumerProps {
   manager: PortalMethods | null

@@ -7,4 +7,4 @@ export type {
   SkeletonStyleInfo,
   SkeletonStyleState,
   SkeletonStyles,
-} from './interface'
+} from './types'

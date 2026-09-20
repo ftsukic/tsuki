@@ -2,7 +2,7 @@ import { Children, useMemo } from 'react'
 import { View } from 'react-native'
 import { GridContext, getGridContextValue } from './context'
 import { GridItem } from './grid-item'
-import type { GridProps } from './interface'
+import type { GridProps } from './types'
 
 export function normalizeColumnNum(columnNum: number): number {
   if (!Number.isFinite(columnNum)) return 4

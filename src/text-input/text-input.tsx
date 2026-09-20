@@ -1,6 +1,6 @@
 import { forwardRef } from 'react'
 import { TextInput as NativeTextInput } from 'react-native'
-import type { TextInputInstance, TextInputProps } from './interface'
+import type { TextInputInstance, TextInputProps } from './types'
 
 /** Stable native input boundary used by Input and other compound components. */
 export const TextInput = forwardRef<TextInputInstance, TextInputProps>(

@@ -4,7 +4,7 @@ import { View } from 'react-native'
 import { Col } from './col'
 import RowContext, { type RowContextValue, type RowSpace } from './context'
 import { normalizeGutter, normalizeOffset, normalizeSpan } from './normalize'
-import type { ColProps, RowProps } from './interface'
+import type { ColProps, RowProps } from './types'
 
 interface LogicalRow {
   indices: number[]

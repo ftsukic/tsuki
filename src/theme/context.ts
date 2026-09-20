@@ -1,8 +1,8 @@
 import { createContext } from 'react'
-import type { MappingAlgorithm } from './interface'
-import type { AliasToken } from './interface/alias'
-import type { ComponentTokenOverrides } from './interface/components'
-import type { SeedToken } from './interface/seed'
+import type { MappingAlgorithm } from './types'
+import type { AliasToken } from './types/alias'
+import type { ComponentTokenOverrides } from './types/components'
+import type { SeedToken } from './types/seed'
 
 export interface ThemeValue {
   seed: SeedToken

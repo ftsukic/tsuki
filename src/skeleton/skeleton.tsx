@@ -4,7 +4,7 @@ import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import { getSkeletonStyles } from './style'
 import { getSkeletonToken } from './token'
-import type { SkeletonProps } from './interface'
+import type { SkeletonProps } from './types'
 
 function normalizeRowCount(row: number | undefined): number {
   return Number.isFinite(row) ? Math.max(0, Math.floor(row as number)) : 0

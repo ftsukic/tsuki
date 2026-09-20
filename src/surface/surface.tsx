@@ -1,6 +1,6 @@
 import { View } from 'react-native'
 import { useToken } from '../theme'
-import type { SurfaceProps } from './interface'
+import type { SurfaceProps } from './types'
 
 export function Surface({
   background,

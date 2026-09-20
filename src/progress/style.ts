@@ -1,5 +1,5 @@
 import type { TextStyle, ViewStyle } from 'react-native'
-import type { ProgressProps, ProgressStyleState } from './interface'
+import type { ProgressProps, ProgressStyleState } from './types'
 import type { ProgressToken } from '../theme'
 
 export interface ProgressResolvedStyles {

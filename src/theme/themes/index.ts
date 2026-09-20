@@ -1,10 +1,10 @@
-import type { MappingAlgorithm, MapToken, SeedToken } from '../interface'
+import type { MappingAlgorithm, MapToken, SeedToken } from '../types'
 import defaultAlgorithm from './default'
 
 export { default as defaultAlgorithm } from './default'
 export { default as darkAlgorithm } from './dark'
 export { defaultSeed, defaultPresetColors } from './seed'
-export type { MappingAlgorithm } from '../interface'
+export type { MappingAlgorithm } from '../types'
 
 export function composeAlgorithms(algorithms: readonly MappingAlgorithm[]): MappingAlgorithm {
   return (seed: SeedToken): MapToken => {

@@ -2,7 +2,7 @@ import { Component } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { PortalContext } from './context'
 import { PortalManager } from './portal-manager'
-import type { PortalHostProps, PortalKey, PortalMethods } from './interface'
+import type { PortalHostProps, PortalKey, PortalMethods } from './types'
 import type { ReactNode } from 'react'
 
 let activeManager: PortalMethods | null = null

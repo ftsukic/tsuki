@@ -1,7 +1,7 @@
 import { View } from 'react-native'
 import { useRow } from './context'
 import { normalizeOffset, normalizeSpan } from './normalize'
-import type { ColProps } from './interface'
+import type { ColProps } from './types'
 
 export function Col({ offset = 0, span = 24, style, ...restProps }: ColProps) {
   const { spaces } = useRow()

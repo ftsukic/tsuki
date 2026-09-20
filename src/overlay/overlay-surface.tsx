@@ -7,7 +7,7 @@ import type { AnimatedStyle } from 'react-native-reanimated'
 import { Animated } from '../motion'
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
-import type { OverlayProps } from './interface'
+import type { OverlayProps } from './types'
 import { getOverlayToken } from './token'
 
 export interface OverlaySurfaceProps extends Omit<OverlayProps, 'duration' | 'onClosed'> {

@@ -8,4 +8,4 @@ export type {
   ProgressStyleState,
   ProgressStyles,
   ProgressType,
-} from './interface'
+} from './types'

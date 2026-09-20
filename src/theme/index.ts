@@ -1,3 +1,3 @@
-export * from './interface'
+export * from './types'
 export * from './config-provider'
 export * from './themes'

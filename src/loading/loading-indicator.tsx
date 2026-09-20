@@ -2,7 +2,7 @@ import { memo, useEffect, useRef } from 'react'
 import { Animated, Easing, Platform, View } from 'react-native'
 import type { ColorValue } from 'react-native'
 import { Circle, Svg } from 'react-native-svg'
-import type { LoadingType } from './interface'
+import type { LoadingType } from './types'
 
 interface LoadingIndicatorProps {
   type: LoadingType

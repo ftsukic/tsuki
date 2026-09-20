@@ -7,4 +7,4 @@ export type {
   LoadingStyleState,
   LoadingStyles,
   LoadingType,
-} from './interface'
+} from './types'

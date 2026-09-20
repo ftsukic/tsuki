@@ -1,5 +1,4 @@
 import {
-  createContext,
   forwardRef,
   isValidElement,
   useCallback,
@@ -24,23 +23,15 @@ import { useComponentToken, useToken } from '../theme'
 import { SwipeCellAction } from './swipe-cell-action'
 import { getSwipeCellStyles } from './style'
 import { getSwipeCellToken } from './token'
-import { useSwipeCellManager } from './context'
+import { SwipeCellGroupContext, useSwipeCellManager } from './context'
 import type { SwipeCellHandle } from './manager'
 import type {
   SwipeCellActionItem,
   SwipeCellActionProps,
-  SwipeCellGroupProps,
   SwipeCellProps,
   SwipeCellRef,
   SwipeCellSide,
 } from './types'
-
-interface SwipeCellGroupContextValue {
-  register: (id: string, close: () => void) => () => void
-  requestOpen: (id: string) => void
-}
-
-const SwipeCellGroupContext = createContext<SwipeCellGroupContextValue | null>(null)
 
 const SWIPE_DISTANCE = 4
 const SWIPE_VELOCITY = 500
@@ -500,35 +491,6 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
 })
 
 SwipeCell.displayName = 'SwipeCell'
-
-export function SwipeCellGroup({ children, style, ...viewProps }: SwipeCellGroupProps) {
-  const cellsRef = useRef(new Map<string, () => void>())
-  const register = useCallback((id: string, close: () => void) => {
-    cellsRef.current.set(id, close)
-    return () => {
-      cellsRef.current.delete(id)
-    }
-  }, [])
-  const requestOpen = useCallback((id: string) => {
-    cellsRef.current.forEach((closeCell, cellId) => {
-      if (cellId !== id) closeCell()
-    })
-  }, [])
-  const contextValue = useMemo<SwipeCellGroupContextValue>(
-    () => ({ register, requestOpen }),
-    [register, requestOpen],
-  )
-
-  return (
-    <SwipeCellGroupContext.Provider value={contextValue}>
-      <View {...viewProps} style={style}>
-        {children}
-      </View>
-    </SwipeCellGroupContext.Provider>
-  )
-}
-
-SwipeCellGroup.displayName = 'SwipeCellGroup'
 
 export function useSwipeCellController() {
   const manager = useSwipeCellManager()

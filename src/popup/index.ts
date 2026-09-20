@@ -7,4 +7,4 @@ export type {
   PopupStyleInfo,
   PopupStyleState,
   PopupStyles,
-} from './interface'
+} from './types'

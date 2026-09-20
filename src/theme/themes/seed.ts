@@ -1,5 +1,5 @@
-import type { PresetColorTokens } from '../interface'
-import type { SeedToken } from '../interface'
+import type { PresetColorTokens } from '../types'
+import type { SeedToken } from '../types'
 
 export const defaultPresetColors: PresetColorTokens = {
   blue: '#1989FA',

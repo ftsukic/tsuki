@@ -1,5 +1,5 @@
 import { useToken } from '../theme'
-import type { DividerProps } from './interface'
+import type { DividerProps } from './types'
 import { View } from 'react-native'
 
 export function Divider({

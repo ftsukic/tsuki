@@ -4,7 +4,7 @@ import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
 import { EmptyImage } from './empty-image'
 import { getEmptyToken } from './token'
-import type { EmptyProps } from './interface'
+import type { EmptyProps } from './types'
 
 function isRenderable(value: unknown): boolean {
   return value !== undefined && value !== null && value !== false && value !== ''

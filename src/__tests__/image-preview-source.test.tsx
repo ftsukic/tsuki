@@ -68,7 +68,10 @@ describe('ImagePreview source rect lifecycle', () => {
   })
 
   it('does not import or render the Swipe pager', () => {
-    const source = readFileSync(join(__dirname, '../image-preview/image-preview.tsx'), 'utf8')
+    const source = readFileSync(
+      join(__dirname, '../image-preview/image-preview-content.tsx'),
+      'utf8',
+    )
     const gestureSource = readFileSync(
       join(__dirname, '../image-preview/useImagePreviewGesture.ts'),
       'utf8',
@@ -80,7 +83,10 @@ describe('ImagePreview source rect lifecycle', () => {
   })
 
   it('keeps controls outside the image dismissal gesture scope', () => {
-    const source = readFileSync(join(__dirname, '../image-preview/image-preview.tsx'), 'utf8')
+    const source = readFileSync(
+      join(__dirname, '../image-preview/image-preview-content.tsx'),
+      'utf8',
+    )
 
     expect(source).toMatch(
       /<GestureDetector gesture=\{gesture\.gesture\}>[\s\S]*?testID="image-preview-pager-layer"[\s\S]*?<\/GestureDetector>\s*\{transitionImage\}[\s\S]*?testID="image-preview-controls"/,

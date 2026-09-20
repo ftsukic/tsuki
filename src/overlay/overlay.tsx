@@ -1,7 +1,7 @@
 import { forwardRef } from 'react'
 import type { View } from 'react-native'
 import { Portal } from '../portal'
-import type { OverlayProps } from './interface'
+import type { OverlayProps } from './types'
 import { OverlayAnimatedSurface } from './overlay-animated-surface'
 
 export const Overlay = forwardRef<View, OverlayProps>(function Overlay(props, ref) {

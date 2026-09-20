@@ -1,6 +1,6 @@
 import { AntdNativeIcon } from './antd-native-icon'
 import { iconDefinitions, type IconName } from './icon-definitions'
-import type { AntdNativeIconProps } from './interface'
+import type { AntdNativeIconProps } from './types'
 import type { IconDefinition } from '@ant-design/icons-svg/lib/types'
 import { memo } from 'react'
 

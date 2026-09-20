@@ -1,2 +1,2 @@
 export { TextInput } from './text-input'
-export type { TextInputInstance, TextInputProps } from './interface'
+export type { TextInputInstance, TextInputProps } from './types'

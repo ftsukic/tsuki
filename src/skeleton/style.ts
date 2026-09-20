@@ -1,5 +1,5 @@
 import type { ViewStyle } from 'react-native'
-import type { SkeletonProps, SkeletonStyleState } from './interface'
+import type { SkeletonProps, SkeletonStyleState } from './types'
 import type { SkeletonToken } from '../theme'
 
 export interface SkeletonResolvedStyles {

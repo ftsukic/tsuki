@@ -1,13 +1,13 @@
-import type { MappingAlgorithm } from './interface'
-import type { AliasToken } from './interface/alias'
+import type { MappingAlgorithm } from './types'
+import type { AliasToken } from './types/alias'
 import type {
   ComponentTokenFactory,
   ComponentTokenMap,
   ComponentTokenName,
   ComponentTokenOverrides,
-} from './interface/components'
-import type { MapToken } from './interface/map'
-import type { SeedToken } from './interface/seed'
+} from './types/components'
+import type { MapToken } from './types/map'
+import type { SeedToken } from './types/seed'
 import { ThemeContext } from './context'
 import type { ThemeValue } from './context'
 import { composeAlgorithms, defaultAlgorithm } from './themes'

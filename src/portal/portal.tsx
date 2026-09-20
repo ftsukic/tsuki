@@ -3,7 +3,7 @@ import { PortalContext } from './context'
 import { PortalConsumer } from './portal-consumer'
 import { PortalHost } from './portal-host'
 import { ThemeContext } from '../theme/context'
-import type { PortalProps } from './interface'
+import type { PortalProps } from './types'
 
 export class Portal extends Component<PortalProps> {
   static displayName = 'Portal'

@@ -9,7 +9,7 @@ import type {
   UseInteractionPressOptions,
   UsePanGestureOptions,
   UsePanGestureResult,
-} from './interface'
+} from './types'
 
 export function useInteractionPress({
   disabled = false,
