@@ -13,9 +13,9 @@ import type {
 import { DateTimePicker } from '../date-time-picker'
 import { Popup } from '../popup'
 import { resolveStyles } from '../style'
-import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
 import { renderFieldFeedback, resolveFieldStatus } from './feedback'
+import { createPickerDisplayOptions, renderFieldPickerValue } from './picker-value'
 import { createFieldCellStyles, getFieldStyles } from './style'
 import { getFieldToken } from './token'
 import type { FieldCellProps, FieldStatus, FieldStyles, FieldTitleAlign } from './types'
@@ -52,25 +52,6 @@ export interface FieldDateTimePickerProps
   formatValue?: FieldDateTimePickerFormatValue
   pickerStyle?: DateTimePickerProps['style']
   pickerStyles?: DateTimePickerProps['styles']
-}
-
-function renderSelectorValue(
-  value: ReactNode,
-  type: 'default' | 'tertiary',
-  valueAlign: NonNullable<FieldDateTimePickerProps['valueAlign']>,
-) {
-  if (typeof value === 'string' || typeof value === 'number') {
-    return (
-      <Text type={type} numberOfLines={1} style={{ textAlign: valueAlign }}>
-        {value}
-      </Text>
-    )
-  }
-  return value
-}
-
-function createDisplayOptions(values: DateTimePickerValue): DateTimePickerOption[] {
-  return values.map((value) => ({ text: String(value), value }))
 }
 
 function formatDisplayValue(
@@ -167,7 +148,7 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
     cellStyles,
   })
   const hasSelection = (currentValue?.length ?? 0) > 0
-  const displayOptions = createDisplayOptions(currentValue ?? [])
+  const displayOptions = createPickerDisplayOptions(currentValue ?? [])
   const selectedDisplay = hasSelection
     ? (formatValue?.(displayOptions, currentValue ?? []) ??
       formatDisplayValue(columnsType, currentValue ?? []))
@@ -180,7 +161,7 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
         label={label}
         value={
           <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.control]}>
-            {renderSelectorValue(
+            {renderFieldPickerValue(
               selectedDisplay,
               hasSelection ? 'default' : 'tertiary',
               resolvedValueAlign,

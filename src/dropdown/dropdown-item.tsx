@@ -16,7 +16,7 @@ import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
-import { DropdownItemPositionContext, DropdownMenuContext, sameDropdownValue } from './context'
+import { DropdownItemPositionContext, DropdownMenuContext } from './context'
 import { getDropdownItemStyles } from './style'
 import { getDropdownToken } from './token'
 import type { DropdownItemProps, DropdownItemRef, DropdownOption } from './types'
@@ -37,7 +37,7 @@ function renderText(
 }
 
 function findOption(options: DropdownOption[] | undefined, value: DropdownItemProps['value']) {
-  return options?.find((option) => sameDropdownValue(option.value, value))
+  return options?.find((option) => Object.is(option.value, value))
 }
 
 export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(function DropdownItem(
@@ -145,7 +145,7 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
 
   const handleOptionPress = (option: DropdownOption) => {
     if (option.disabled) return
-    if (value === undefined && !sameDropdownValue(internalValue, option.value)) {
+    if (value === undefined && !Object.is(internalValue, option.value)) {
       setInternalValue(option.value)
     }
     onChange?.(option.value)
@@ -167,7 +167,7 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
       ]}
     >
       {options.map((option, optionIndex) => {
-        const selected = sameDropdownValue(currentValue, option.value)
+        const selected = Object.is(currentValue, option.value)
         const optionTextColor = option.disabled
           ? token.optionDisabledColor
           : selected

@@ -10,11 +10,6 @@ export const DEFAULT_DATE_TIME_FIELDS: DateTimeFields = {
   second: 0,
 }
 
-export function isLeapYear(year: number): boolean {
-  const normalizedYear = Math.trunc(year)
-  return normalizedYear % 4 === 0 && (normalizedYear % 100 !== 0 || normalizedYear % 400 === 0)
-}
-
 export function getDaysInMonth(year: number, month: number): number {
   const normalizedYear = Math.trunc(year)
   const normalizedMonth = Math.trunc(month)
@@ -132,10 +127,4 @@ export function selectedValuesToPickerValues(
     const value = Number(values[index])
     return Number.isFinite(value) ? Math.trunc(value) : Number.NaN
   })
-}
-
-export function fieldsKey(fields: DateTimeFields): string {
-  return [fields.year, fields.month, fields.day, fields.hour, fields.minute, fields.second].join(
-    ':',
-  )
 }

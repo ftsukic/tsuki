@@ -53,10 +53,6 @@ export function cacheImageDimensions(uri: string | null, dimensions: ImageDimens
   imageDimensionsCache.set(uri, dimensions)
 }
 
-export function clearImageDimensionsCache() {
-  imageDimensionsCache.clear()
-}
-
 export function normalizeStartPosition(index: number | undefined, count: number, loop = true) {
   if (count <= 0 || !Number.isFinite(index)) return 0
   const value = Math.trunc(index as number)

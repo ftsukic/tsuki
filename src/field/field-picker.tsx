@@ -9,9 +9,9 @@ import type { PickerOption, PickerProps, PickerValue } from '../picker'
 import { Popup } from '../popup'
 import { resolvePickerState } from '../picker/utils'
 import { resolveStyles } from '../style'
-import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
 import { renderFieldFeedback, resolveFieldStatus } from './feedback'
+import { renderFieldPickerValue } from './picker-value'
 import { createFieldCellStyles, getFieldStyles } from './style'
 import { getFieldToken } from './token'
 import type { FieldCellProps, FieldStatus, FieldStyles, FieldTitleAlign } from './types'
@@ -48,21 +48,6 @@ export interface FieldPickerProps extends FieldCellProps, PickerAdapterProps {
   formatValue?: FieldPickerFormatValue
   pickerStyle?: PickerProps['style']
   pickerStyles?: PickerProps['styles']
-}
-
-function renderSelectorValue(
-  value: ReactNode,
-  type: 'default' | 'tertiary',
-  valueAlign: NonNullable<FieldPickerProps['valueAlign']>,
-) {
-  if (typeof value === 'string' || typeof value === 'number') {
-    return (
-      <Text type={type} numberOfLines={1} style={{ textAlign: valueAlign }}>
-        {value}
-      </Text>
-    )
-  }
-  return value
 }
 
 export function FieldPicker(props: FieldPickerProps) {
@@ -168,7 +153,7 @@ export function FieldPicker(props: FieldPickerProps) {
         label={label}
         value={
           <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.control]}>
-            {renderSelectorValue(
+            {renderFieldPickerValue(
               selectedDisplay,
               hasSelection && selectedState.options.length > 0 ? 'default' : 'tertiary',
               resolvedValueAlign,

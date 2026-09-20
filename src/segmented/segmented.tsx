@@ -4,7 +4,6 @@ import { Animated, Easing, View } from 'react-native'
 import type { LayoutChangeEvent, StyleProp, TextStyle, View as ViewComponent } from 'react-native'
 import { getButtonToken } from '../button/token'
 import { InteractionPressable } from '../interaction'
-import { useControllableSelection } from '../selection/state'
 import { resolveStyles } from '../style'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
@@ -94,8 +93,11 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
     normalizedOptions.some((option) => Object.is(option.value, defaultValue))
       ? defaultValue
       : firstValue
-  const selection = useControllableSelection({ value, defaultValue: initialValue, onChange })
-  const activeValue = selection.value
+  const [uncontrolledValue, setUncontrolledValue] = useState<SegmentedOption['value'] | undefined>(
+    initialValue,
+  )
+  const isControlled = value !== undefined
+  const activeValue = isControlled ? value : uncontrolledValue
   const activeIndex = normalizedOptions.findIndex((option) => Object.is(option.value, activeValue))
   const [itemLayouts, setItemLayouts] = useState<readonly OptionLayout[]>([])
   const activeThumbX = useRef(new Animated.Value(0)).current
@@ -200,9 +202,11 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
   const selectOption = useCallback(
     (option: SegmentedOption) => {
       if (disabled || option.disabled) return
-      selection.select(option.value)
+      if (Object.is(activeValue, option.value)) return
+      if (!isControlled) setUncontrolledValue(option.value)
+      onChange?.(option.value)
     },
-    [disabled, selection],
+    [activeValue, disabled, isControlled, onChange],
   )
 
   return (

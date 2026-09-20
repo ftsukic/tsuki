@@ -24,10 +24,6 @@ export interface InputResolvedStyles {
   textareaInput: TextStyle
 }
 
-export interface InputPasswordStyles {
-  passwordToggle: ViewStyle
-}
-
 export interface InputMetrics {
   fontSize: number
   lineHeight: number
@@ -98,19 +94,6 @@ export function getTextareaMetrics(token: InputToken, size: InputProps['size']):
     token.textareaPaddingHorizontal,
     token.textareaPaddingVertical,
   )
-}
-
-export function getInputPasswordStyles(token: InputToken): InputPasswordStyles {
-  return {
-    passwordToggle: {
-      width: token.fontSizeLG,
-      height: token.fontSizeLG,
-      flexShrink: 0,
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginLeft: token.paddingHorizontal / 2,
-    },
-  }
 }
 
 export function getInputStyles(
@@ -244,7 +227,14 @@ export function getInputStyles(
       right: metrics.paddingHorizontal,
       bottom: metrics.paddingVertical,
     },
-    passwordToggle: getInputPasswordStyles(token).passwordToggle,
+    passwordToggle: {
+      width: token.fontSizeLG,
+      height: token.fontSizeLG,
+      flexShrink: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginLeft: token.paddingHorizontal / 2,
+    },
     singleShell: {
       alignItems: 'center',
       paddingVertical: singleMetrics.paddingVertical,

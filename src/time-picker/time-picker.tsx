@@ -8,7 +8,7 @@ import {
 import type { PickerOption, PickerRef, PickerSelection, PickerValue } from '../picker/types'
 import { createDateTimeColumns, normalizeDateTimePickerValues } from '../picker/date-time/columns'
 import type { DateTimeColumnsConfig } from '../picker/date-time/columns'
-import { normalizeColumnTypes, timeColumnTypes } from '../picker/date-time/normalize'
+import { normalizeColumnTypes } from '../picker/date-time/normalize'
 import {
   DEFAULT_DATE_TIME_FIELDS,
   pickerValuesToFields,
@@ -23,6 +23,7 @@ import type {
 } from './types'
 
 const DEFAULT_COLUMNS = ['hour', 'minute'] as const
+const ALLOWED_COLUMNS = ['hour', 'minute', 'second'] as const
 const EMPTY_SELECTION: TimePickerSelection = { indexes: [], options: [], values: [] }
 
 export const TimePicker = forwardRef<TimePickerRef, TimePickerProps>(function TimePicker(
@@ -53,7 +54,7 @@ export const TimePicker = forwardRef<TimePickerRef, TimePickerProps>(function Ti
   ref,
 ) {
   const resolvedColumns = useMemo(
-    () => normalizeColumnTypes(columnsType, timeColumnTypes(), 'TimePicker'),
+    () => normalizeColumnTypes(columnsType, ALLOWED_COLUMNS, 'TimePicker'),
     [columnsType],
   )
   const baseFields = useMemo(

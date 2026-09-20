@@ -1,10 +1,9 @@
-import { forwardRef, useCallback, useEffect, useRef } from 'react'
+import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 import { Animated, Easing, Platform } from 'react-native'
 import { Loading } from '../loading'
 import { InteractionPressable } from '../interaction'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
-import { useControllableValue } from './state'
 import {
   getSwitchDimensions,
   getSwitchStyles,
@@ -45,11 +44,18 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
   const token = useComponentToken('Switch', getSwitchToken)
   const resolvedSize = resolveSwitchSize(size)
   const dimensions = getSwitchDimensions(token, resolvedSize)
-  const [currentValue, setValue] = useControllableValue({
-    value,
-    defaultValue: defaultValue !== undefined ? defaultValue : inactiveValue,
-    onChange,
-  })
+  const isControlled = value !== undefined
+  const [uncontrolledValue, setUncontrolledValue] = useState<ActiveValueT | InactiveValueT>(
+    defaultValue !== undefined ? defaultValue : inactiveValue,
+  )
+  const currentValue = isControlled ? (value as ActiveValueT | InactiveValueT) : uncontrolledValue
+  const setValue = useCallback(
+    (nextValue: ActiveValueT | InactiveValueT) => {
+      if (!isControlled) setUncontrolledValue(nextValue)
+      onChange?.(nextValue)
+    },
+    [isControlled, onChange],
+  )
   const active = Object.is(currentValue, activeValue)
   const activeRef = useRef(active)
   activeRef.current = active

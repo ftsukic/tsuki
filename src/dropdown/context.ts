@@ -1,7 +1,7 @@
 import { createContext } from 'react'
 import type { ReactNode } from 'react'
 import type { StyleProp, ViewStyle } from 'react-native'
-import type { DropdownMenuProps, DropdownMenuStyles, DropdownValue } from './types'
+import type { DropdownMenuProps, DropdownMenuStyles } from './types'
 
 export interface DropdownItemRegistration {
   id: symbol
@@ -45,10 +45,3 @@ export interface DropdownMenuContextValue {
 export const DropdownMenuContext = createContext<DropdownMenuContextValue | undefined>(undefined)
 
 export const DropdownItemPositionContext = createContext<number | null>(null)
-
-export function sameDropdownValue(
-  left: DropdownValue | undefined,
-  right: DropdownValue | undefined,
-) {
-  return Object.is(left, right)
-}

@@ -8,9 +8,9 @@ import type { DatePickerOption, DatePickerProps, DatePickerValue } from '../date
 import { DatePicker } from '../date-picker'
 import { Popup } from '../popup'
 import { resolveStyles } from '../style'
-import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
 import { renderFieldFeedback, resolveFieldStatus } from './feedback'
+import { createPickerDisplayOptions, renderFieldPickerValue } from './picker-value'
 import { createFieldCellStyles, getFieldStyles } from './style'
 import { getFieldToken } from './token'
 import type { FieldCellProps, FieldStatus, FieldStyles, FieldTitleAlign } from './types'
@@ -47,25 +47,6 @@ export interface FieldDatePickerProps extends FieldCellProps, DatePickerAdapterP
   formatValue?: FieldDatePickerFormatValue
   pickerStyle?: DatePickerProps['style']
   pickerStyles?: DatePickerProps['styles']
-}
-
-function renderSelectorValue(
-  value: ReactNode,
-  type: 'default' | 'tertiary',
-  valueAlign: NonNullable<FieldDatePickerProps['valueAlign']>,
-) {
-  if (typeof value === 'string' || typeof value === 'number') {
-    return (
-      <Text type={type} numberOfLines={1} style={{ textAlign: valueAlign }}>
-        {value}
-      </Text>
-    )
-  }
-  return value
-}
-
-function createDisplayOptions(values: DatePickerValue): DatePickerOption[] {
-  return values.map((value) => ({ text: String(value), value }))
 }
 
 export function FieldDatePicker(props: FieldDatePickerProps) {
@@ -154,7 +135,7 @@ export function FieldDatePicker(props: FieldDatePickerProps) {
     cellStyles,
   })
   const hasSelection = (currentValue?.length ?? 0) > 0
-  const displayOptions = createDisplayOptions(currentValue ?? [])
+  const displayOptions = createPickerDisplayOptions(currentValue ?? [])
   const selectedDisplay = hasSelection
     ? (formatValue?.(displayOptions, currentValue ?? []) ?? (currentValue ?? []).join('-'))
     : placeholder
@@ -167,7 +148,7 @@ export function FieldDatePicker(props: FieldDatePickerProps) {
         label={label}
         value={
           <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.control]}>
-            {renderSelectorValue(
+            {renderFieldPickerValue(
               selectedDisplay,
               hasSelection ? 'default' : 'tertiary',
               resolvedValueAlign,

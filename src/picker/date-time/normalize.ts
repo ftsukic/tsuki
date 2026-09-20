@@ -1,7 +1,5 @@
-import type { DateTimeColumnType, DateTimeFields } from './types'
+import type { DateTimeFields } from './types'
 
-const DATE_COLUMN_TYPES = ['year', 'month', 'day'] as const
-const TIME_COLUMN_TYPES = ['hour', 'minute', 'second'] as const
 const DATE_TIME_ORDER = ['year', 'month', 'day', 'hour', 'minute', 'second'] as const
 
 export function normalizeColumnTypes<T extends string>(
@@ -82,12 +80,4 @@ export function parseTime(value?: string): DateTimeFields | undefined {
   const second = Number(match[3])
   if (hour > 23 || minute > 59 || second > 59) return undefined
   return { day: 1, hour, minute, month: 1, second, year: 1970 }
-}
-
-export function dateColumnTypes(): readonly DateTimeColumnType[] {
-  return DATE_COLUMN_TYPES
-}
-
-export function timeColumnTypes(): readonly DateTimeColumnType[] {
-  return TIME_COLUMN_TYPES
 }

@@ -1,6 +1,6 @@
 import { Children, useMemo } from 'react'
 import { View } from 'react-native'
-import { GridContext, getGridContextValue } from './context'
+import { GridContext } from './context'
 import { GridItem } from './grid-item'
 import type { GridProps } from './types'
 
@@ -28,14 +28,13 @@ export function GridComponent({
   const resolvedGutter = normalizeGutter(gutter)
   const halfGutter = resolvedGutter / 2
   const context = useMemo(
-    () =>
-      getGridContextValue({
-        border,
-        center,
-        columnNum: resolvedColumnNum,
-        gutter: resolvedGutter,
-        square,
-      }),
+    () => ({
+      border,
+      center,
+      columnNum: resolvedColumnNum,
+      gutter: resolvedGutter,
+      square,
+    }),
     [border, center, resolvedGutter, resolvedColumnNum, square],
   )
   const items = Children.toArray(children)

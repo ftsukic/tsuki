@@ -13,14 +13,4 @@ const GridContext = createContext<GridContextValue>(defaultGridContext)
 
 export const useGridContext = () => useContext(GridContext)
 
-export function getGridContextValue({
-  border,
-  center,
-  columnNum,
-  gutter,
-  square,
-}: GridContextValue): GridContextValue {
-  return { border, center, columnNum, gutter, square }
-}
-
 export { GridContext }
