@@ -8,7 +8,7 @@ import {
   normalizeStartPosition,
   shouldAcceptFocalPoint,
   shouldDismiss,
-} from '../image-preview'
+} from '../image-preview/utils'
 
 describe('ImagePreview utilities', () => {
   it('normalizes string and metadata image sources', () => {

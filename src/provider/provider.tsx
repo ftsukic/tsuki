@@ -1,7 +1,7 @@
 import { memo, useRef } from 'react'
 
 import { Portal } from '../portal'
-import { InteractionCoordinator } from '../interaction'
+import { InteractionCoordinator } from '../interaction/interaction-coordinator'
 import { SwipeCellContext } from '../swipe-cell/context'
 import { SwipeCellManager } from '../swipe-cell/manager'
 import { ConfigProvider } from '../theme'

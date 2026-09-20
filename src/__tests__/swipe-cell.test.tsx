@@ -12,12 +12,12 @@ import {
   SwipeCell,
   SwipeCellAction,
   SwipeCellGroup,
-  SwipeCellManager,
   useInteraction,
   useSwipeCellController,
 } from '..'
 import { getCellInteractionStyle } from '../cell/style'
 import { getCellToken } from '../cell/token'
+import { SwipeCellManager } from '../swipe-cell/manager'
 import type { SwipeCellRef } from '../swipe-cell'
 
 async function layoutAction(testID: string, side: 'left' | 'right', width: number) {

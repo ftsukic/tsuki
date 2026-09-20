@@ -1,5 +1,5 @@
 import { forwardRef, useCallback } from 'react'
-import { InteractionPressable } from '../interaction'
+import { InteractionPressableInternal } from '../interaction/interaction-pressable-internal'
 import type { InteractionPressableProps, InteractionPressableState } from '../interaction'
 import { useToken } from '../theme'
 import { usePressAnimationController } from './usePressAnimation'
@@ -15,7 +15,7 @@ export interface PressableProps extends InteractionPressableProps {
 }
 
 export const Pressable = forwardRef<
-  React.ComponentRef<typeof InteractionPressable>,
+  React.ComponentRef<typeof InteractionPressableInternal>,
   PressableProps
 >(function Pressable(
   {
@@ -51,7 +51,7 @@ export const Pressable = forwardRef<
         ]
 
   return (
-    <InteractionPressable
+    <InteractionPressableInternal
       {...props}
       ref={ref}
       disabled={disabled}
@@ -60,7 +60,7 @@ export const Pressable = forwardRef<
       style={interactionStyle}
     >
       {children}
-    </InteractionPressable>
+    </InteractionPressableInternal>
   )
 })
 

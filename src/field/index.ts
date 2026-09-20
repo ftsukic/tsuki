@@ -6,7 +6,10 @@ export { FieldPicker } from './field-picker'
 export { FieldDatePicker } from './field-date-picker'
 export { FieldTimePicker } from './field-time-picker'
 export { FieldDateTimePicker } from './field-date-time-picker'
-export { getFieldStatusColor, getFieldStyles, getFieldToken } from './style'
+export { getFieldToken } from './style'
+
+// Legacy style-helper exports retained for compatibility. Internal code should use ./style.
+export { getFieldStatusColor, getFieldStyles } from './style'
 export type {
   FieldCellProps,
   FieldTitleAlign,

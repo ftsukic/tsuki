@@ -20,6 +20,12 @@
 - Public callback 使用 `onXxx`（`onChange`、`onPress`、`onConfirm`、`onCancel`、`onOpen`、`onClose`、`onVisibleChange`）。Internal event function 使用 `handleXxx`；不得将其暴露为 public prop。
 - Public component 必须保留或定义有意义的 React Native accessibility semantic，包括 platform 支持的 role、state、label 和 action。不要为了简化 internal implementation 而牺牲 accessibility behavior。
 
+## Naming compatibility exception
+
+- 当既有 public API 已经是稳定的 consumer-facing contract、有现有 docs / fixtures / tests / upstream compatibility 依据，且 rename 会形成 breaking change 时，可以保留不符合默认命名模板的名称。
+- Compatibility exception 不得通过新增第二个同义 prop 来解决；保留原名称后，不再并行引入新的 public alias。
+- `Cell.isLink`、`Dialog.closeOnClickOverlay`、`Toast.closeOnClickOverlay` 和 `ActionSheetAction.callback` 都属于既有 compatibility contract。本 Rule 不要求、普通 refactor 也不得直接 rename 它们。
+
 ## Ref 与 compound API
 
 - Public imperative ref type 使用 `FooRef`，方法使用明确的 action，例如 `open()`、`close()`、`confirm()`、`cancel()`、`focus()` 和 `blur()`。
@@ -30,3 +36,5 @@
 
 - 组件 barrel 和 `src/index.ts` 中现有的 export 都是兼容面。它们的存在不代表未来 API design 应继续采用同样模式。
 - 如果不可避免地调整 public API，应使用 `deprecated -> compatibility adapter -> major-version removal` 的顺序，并提供明确文档和聚焦回归覆盖。不要让 internal refactor 意外破坏 consumer。
+- Internal prop、implementation-only callback 和 layout bridge 不得因为 exported React component 的 generic intersection 意外成为新的 Public API。
+- 如果 internal-looking prop 已经进入 public component type，必须先保留带清晰注释的 deprecated compatibility adapter，再将 internal implementation 解耦，留待 future major removal；普通 refactor 不得直接删除它。

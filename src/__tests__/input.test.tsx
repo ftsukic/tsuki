@@ -1,9 +1,10 @@
 import { ConfigProvider, Input, getDesignToken } from '..'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
-import { useState, type ForwardedRef } from 'react'
+import { useState, type ComponentProps, type ForwardedRef } from 'react'
 import { Platform, StyleSheet } from 'react-native'
 import { getInputStyles, getTextareaMetrics } from '../input/style'
 import { getInputToken } from '../input/token'
+import type { InputProps } from '../input'
 
 const mockTextInputFocus = jest.fn()
 
@@ -25,6 +26,16 @@ jest.mock('../text-input', () => {
 })
 
 describe('Input', () => {
+  it('keeps embedded as a legacy component compatibility prop, not InputProps', () => {
+    const inputPropsHasEmbedded: 'embedded' extends keyof InputProps ? true : false = false
+    const inputComponentPropsHaveEmbedded: 'embedded' extends keyof ComponentProps<typeof Input>
+      ? true
+      : false = true
+
+    expect(inputPropsHasEmbedded).toBe(false)
+    expect(inputComponentPropsHaveEmbedded).toBe(true)
+  })
+
   function getInputStyle(testID: string) {
     return StyleSheet.flatten(screen.getByTestId(testID).props.style)
   }

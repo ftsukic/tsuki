@@ -1,7 +1,8 @@
 import { InteractionPressable, getDesignToken, usePanGesture } from '..'
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet, Text } from 'react-native'
-import type { PanGestureAxis, PanGestureState } from '../interaction'
+import type { InteractionPressableProps, PanGestureAxis, PanGestureState } from '../interaction'
+import type { ComponentProps } from 'react'
 
 const press = (instance: Parameters<typeof fireEvent.press>[0]) => fireEvent.press(instance)
 
@@ -92,6 +93,20 @@ function shouldClaim(
 }
 
 describe('InteractionPressable', () => {
+  it('keeps the pressed bridge as a legacy component compatibility prop, not InteractionPressableProps', () => {
+    const interactionPropsHaveBridge: 'onPressedChange' extends keyof InteractionPressableProps
+      ? true
+      : false = false
+    const interactionComponentPropsHaveBridge: 'onPressedChange' extends keyof ComponentProps<
+      typeof InteractionPressable
+    >
+      ? true
+      : false = true
+
+    expect(interactionPropsHaveBridge).toBe(false)
+    expect(interactionComponentPropsHaveBridge).toBe(true)
+  })
+
   it('invokes onPress and exposes the button accessibility role', async () => {
     const onPress = jest.fn()
     await render(

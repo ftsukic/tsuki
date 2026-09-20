@@ -31,11 +31,6 @@ export interface InteractionPressableProps extends Omit<
   style?: StyleProp<ViewStyle> | ((state: InteractionPressableState) => StyleProp<ViewStyle>)
 }
 
-export interface InteractionPressableInternalProps {
-  /** Internal bridge for visual primitives that consume the pressed fact. */
-  onPressedChange?: (pressed: boolean) => void
-}
-
 export interface UseInteractionPressOptions {
   disabled?: boolean
   onPress?: PressableProps['onPress']

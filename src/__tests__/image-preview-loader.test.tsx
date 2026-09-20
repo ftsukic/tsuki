@@ -1,7 +1,7 @@
 import React from 'react'
 import { act, render, screen, waitFor } from '@testing-library/react-native'
 import { Image } from 'react-native'
-import { normalizeImageSource } from '../image-preview'
+import { normalizeImageSource } from '../image-preview/utils'
 import { ImagePreviewItem } from '../image-preview/image-preview-item'
 import {
   useImagePreviewLoader,

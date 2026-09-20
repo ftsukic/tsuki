@@ -6,6 +6,9 @@
 - 已由组件 barrel 或根 `src/index.ts` 导出的 API 是当前兼容面。internal refactor 不得删除、重命名或将这些 export 降级为 `internal`。现有 export 不自动代表未来新增 API 的推荐方式。
 - 新的 root export 必须有清晰、稳定的公共用途。不得仅为了跨组件复用而提升 private helper、hook、context、state object、column generator、normalization function 或 implementation-only component。
 - public barrel 中不得包含 implementation detail。`index.ts` 只导出 public component、public type 和明确设计为 public 的 helper，不放实现逻辑。
+- internal implementation 和 tests 优先从真实 private path 获取 helper、context、manager、hook 和其他 support module，不要把 public barrel 当作内部依赖入口。
+- 不得仅为测试方便把 helper、context 或 manager 提升为 public export；这会把实现能力变成需要长期维护的 compatibility debt。
+- 普通 refactor 不得删除已有 export。兼容期内应保留现有 export，同时让 internal code 改用真实 private path、让 tests 直接验证 private path；未来 major 再单独评估是否移除。
 
 ## import 与 dependency direction
 
@@ -21,6 +24,7 @@
 - 添加或修改 export 前，检查受影响的 component barrel、`src/index.ts`、package exports 和当前 consumer/tests。
 - 不要把 public export 当作测试或跨组件访问 internal 的捷径。应调整 import boundary，或通过 public behavior 测试。
 - 当 legacy export 不够理想但仍需支持时，保留它并记录 compatibility decision；不要在无关 refactor 中静默改变其形状。
+- 已经意外公开的 internal capability 仍属于当前兼容面；边界收敛应先停止内部继续依赖 public barrel，再通过明确的 major 变更评估删除，而不是在普通 refactor 中直接删除。
 
 ## Review 边界
 

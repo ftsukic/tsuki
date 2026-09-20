@@ -23,6 +23,8 @@ export type {
   ImagePreviewStyleState,
   ImagePreviewStyles,
 } from './types'
+
+// Legacy utility exports retained for compatibility. Internal code and tests should use ./utils.
 export {
   calculateFocalPointTranslation,
   clampTranslation,

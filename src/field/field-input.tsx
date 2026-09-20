@@ -4,7 +4,7 @@ import type { DimensionValue } from 'react-native'
 import type { CellProps, CellStyles } from '../cell'
 import { Cell } from '../cell'
 import type { InputProps, InputStyleState, InputStyles } from '../input'
-import { Input } from '../input'
+import { InputInternal } from '../input/input-internal'
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import type { TextInputInstance } from '../text-input'
@@ -116,7 +116,7 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
         titleExtra={titleExtra}
         label={label}
         value={
-          <Input
+          <InputInternal
             {...inputControlProps}
             value={currentValue ?? ''}
             onChangeText={setValue}

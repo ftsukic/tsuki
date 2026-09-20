@@ -1,14 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react-native'
 import { act } from '@testing-library/react-native'
 import { Animated, StyleSheet } from 'react-native'
-import {
-  ConfigProvider,
-  Switch,
-  getDesignToken,
-  getSwitchDimensions,
-  getSwitchToken,
-  getSwitchTranslateX,
-} from '..'
+import { ConfigProvider, Switch, getDesignToken, getSwitchToken } from '..'
+import { getSwitchDimensions, getSwitchTranslateX } from '../switch/style'
 
 async function press(testID: string) {
   fireEvent.press(screen.getByTestId(testID))

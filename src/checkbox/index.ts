@@ -5,6 +5,8 @@ export const CheckboxWithGroup = Object.assign(Checkbox, { Group: CheckboxGroup 
 export { CheckboxWithGroup as Checkbox }
 export { CheckboxGroup }
 export { getCheckboxToken } from './token'
+
+// Legacy state-hook exports retained for compatibility. Internal code should use ./state.
 export { useCheckboxGroup, useCheckboxState } from './state'
 export type {
   CheckboxGroupProps,
