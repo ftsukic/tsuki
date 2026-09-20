@@ -5,7 +5,8 @@ import { Cell } from '../cell'
 import { Switch } from '../switch'
 import type { SwitchProps } from '../switch'
 import { useComponentToken } from '../theme'
-import { createFieldCellStyles, getFieldToken } from './style'
+import { createFieldCellStyles } from './style'
+import { getFieldToken } from './token'
 import type { FieldCellProps, FieldTitleAlign } from './types'
 
 type SwitchAdapterProps<ActiveValueT, InactiveValueT> = Omit<

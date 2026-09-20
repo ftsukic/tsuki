@@ -12,7 +12,8 @@ import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
-import { getTagStyles, getTagToken } from './style'
+import { getTagStyles } from './style'
+import { getTagToken } from './token'
 import type { TagProps, TagStyleState } from './types'
 
 function renderChild(child: ReactNode, labelStyle: StyleProp<TextStyle>) {

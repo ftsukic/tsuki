@@ -1,11 +1,7 @@
 import { cleanup, render, screen } from '@testing-library/react-native'
 import { StyleSheet, Text } from 'react-native'
-import {
-  Animated,
-  getTransitionStyle,
-  useAnimatedTransition,
-  useTransitionProgress,
-} from '../motion'
+import { Animated, useAnimatedTransition, useTransitionProgress } from '../motion'
+import { getTransitionStyle } from '../motion/transition'
 import type { MotionTransitionType } from '../motion'
 
 function TransitionHarness({

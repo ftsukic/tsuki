@@ -1,5 +1,5 @@
 export { Tag } from './tag'
-export { getTagToken } from './style'
+export { getTagToken } from './token'
 export type {
   TagProps,
   TagSemanticStyles,
