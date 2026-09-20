@@ -26,6 +26,7 @@ export function getCheckboxStyles(
 ): CheckboxResolvedStyles {
   const isButton = props.variant === 'button'
   const size = props.iconSize ?? token.size
+  const active = state.checked || state.indeterminate
   const checkedBackground = state.disabled ? token.disabledBackground : token.checkedBackground
   const buttonStyles = isButton
     ? getSelectionButtonStyles(
@@ -69,12 +70,12 @@ export function getCheckboxStyles(
       alignItems: 'center',
       backgroundColor: state.disabled
         ? token.disabledBackground
-        : state.checked
+        : active
           ? checkedBackground
           : 'transparent',
       borderColor: state.disabled
         ? token.disabledColor
-        : state.checked
+        : active
           ? token.checkedBackground
           : token.borderColor,
       borderRadius: getIndicatorRadius(token, props, size),

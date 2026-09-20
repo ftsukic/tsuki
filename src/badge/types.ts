@@ -5,6 +5,7 @@ import type { StyleInfo, StyleResolver } from '../style'
 export type BadgeStatus = 'success' | 'processing' | 'default' | 'error' | 'warning'
 export type BadgeSize = 'small' | 'medium'
 export type BadgeOffset = readonly [number, number]
+export type BadgePosition = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left'
 
 export interface BadgeStyleState {
   visible: boolean
@@ -23,16 +24,21 @@ export type BadgeStyles = StyleResolver<BadgeProps, BadgeStyleState, BadgeSemant
 export interface BadgeProps extends Omit<ViewProps, 'children' | 'style'> {
   children?: ReactNode
   color?: ColorValue
-  count?: ReactNode
+  content?: ReactNode
   dot?: boolean
+  max?: number
   offset?: BadgeOffset
-  overflowCount?: number
+  position?: BadgePosition
   showZero?: boolean
+  style?: StyleProp<ViewStyle>
+  styles?: BadgeStyles
+  /** @deprecated Use content instead. */
+  count?: ReactNode
+  /** @deprecated Use max instead. */
+  overflowCount?: number
   size?: BadgeSize
   status?: BadgeStatus
   text?: ReactNode
-  style?: StyleProp<ViewStyle>
-  styles?: BadgeStyles
 }
 
 export type BadgeStyleInfo = StyleInfo<BadgeProps, BadgeStyleState>

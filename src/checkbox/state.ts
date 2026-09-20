@@ -65,5 +65,16 @@ export function useCheckboxGroup({
     [disabled, isControlled, onChange, selectedValue],
   )
 
-  return useMemo(() => ({ disabled, selectedValue, toggle }), [disabled, selectedValue, toggle])
+  const setSelectedValue = useCallback(
+    (nextValue: CheckboxValue[]) => {
+      if (!isControlled) setUncontrolledValue(nextValue)
+      onChange?.(nextValue)
+    },
+    [isControlled, onChange],
+  )
+
+  return useMemo(
+    () => ({ disabled, selectedValue, setSelectedValue, toggle }),
+    [disabled, selectedValue, setSelectedValue, toggle],
+  )
 }

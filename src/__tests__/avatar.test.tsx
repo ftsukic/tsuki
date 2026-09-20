@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import { Avatar, ConfigProvider, Icon } from '..'
+import type { AvatarGroupStyleState } from '..'
 import { StyleSheet, Text } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
 
@@ -167,6 +168,7 @@ describe('Avatar.Group', () => {
           testID="group"
           size="large"
           shape="square"
+          borderRadius={8}
           maxCount={2}
           onOverflowPress={onOverflowPress}
         >
@@ -181,8 +183,7 @@ describe('Avatar.Group', () => {
     )
 
     const firstStyle = StyleSheet.flatten(screen.getByTestId('first').props.style)
-    expect(firstStyle).toMatchObject({ width: 40, height: 40, borderWidth: 1 })
-    expect(firstStyle.borderRadius).toBeGreaterThan(0)
+    expect(firstStyle).toMatchObject({ width: 40, height: 40, borderWidth: 1, borderRadius: 8 })
     expect(StyleSheet.flatten(screen.getByTestId('second').props.style)).toMatchObject({
       width: 24,
       height: 24,
@@ -192,5 +193,69 @@ describe('Avatar.Group', () => {
     const overflow = screen.getByLabelText('还有 2 个头像')
     fireEvent.press(overflow)
     expect(onOverflowPress).toHaveBeenCalledTimes(1)
+  })
+
+  it('applies group radius and semantic styles to the overflow avatar', async () => {
+    const view = await render(
+      <ConfigProvider>
+        <Avatar.Group
+          shape="square"
+          borderRadius={8}
+          maxCount={1}
+          styles={{
+            overflowAvatar: { backgroundColor: '#ff0000' },
+            overflowText: { color: '#ffffff' },
+          }}
+        >
+          <Avatar>A</Avatar>
+          <Avatar>B</Avatar>
+        </Avatar.Group>
+      </ConfigProvider>,
+    )
+
+    const overflow = screen.getByLabelText('还有 1 个头像')
+    expect(StyleSheet.flatten(overflow.props.style)).toMatchObject({ borderRadius: 8 })
+
+    const overflowAvatar = findNodes(view.toJSON(), 'View').find((node) => {
+      const style = StyleSheet.flatten(node.props.style)
+      return style.backgroundColor === '#ff0000'
+    })
+    expect(overflowAvatar).toBeDefined()
+    expect(StyleSheet.flatten(overflowAvatar?.props.style)).toMatchObject({
+      backgroundColor: '#ff0000',
+      borderRadius: 8,
+    })
+    expect(StyleSheet.flatten(screen.getByText('+1').props.style)).toMatchObject({
+      color: '#ffffff',
+    })
+  })
+
+  it('hides overflow without rendering the overflow node and preserves resolver state', async () => {
+    const resolverStates: AvatarGroupStyleState[] = []
+    const styles = ({ state }: { state: AvatarGroupStyleState }) => {
+      resolverStates.push(state)
+      return {}
+    }
+    await render(
+      <ConfigProvider>
+        <Avatar.Group maxCount={2} showOverflow={false} styles={styles}>
+          <Avatar testID="first">A</Avatar>
+          <Avatar testID="second">B</Avatar>
+          <Avatar testID="third">C</Avatar>
+          <Avatar testID="fourth">D</Avatar>
+        </Avatar.Group>
+      </ConfigProvider>,
+    )
+
+    expect(screen.getByTestId('first')).toBeTruthy()
+    expect(screen.getByTestId('second')).toBeTruthy()
+    expect(screen.queryByTestId('third')).toBeNull()
+    expect(screen.queryByTestId('fourth')).toBeNull()
+    expect(screen.queryByLabelText('还有 2 个头像')).toBeNull()
+    expect(screen.queryByText('+2')).toBeNull()
+    expect(resolverStates).toContainEqual({
+      visibleCount: 2,
+      overflowCount: 2,
+    })
   })
 })

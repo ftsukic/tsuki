@@ -28,6 +28,7 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
       children,
       name,
       checked,
+      indeterminate = false,
       defaultChecked = false,
       disabled = false,
       iconSize,
@@ -91,6 +92,7 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
       children,
       name,
       checked: isChecked,
+      indeterminate,
       defaultChecked,
       disabled: effectiveDisabled,
       iconSize,
@@ -112,7 +114,7 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
         accessibilityRole={pressableProps.accessibilityRole ?? 'checkbox'}
         accessibilityState={{
           ...pressableProps.accessibilityState,
-          checked: isChecked,
+          checked: indeterminate ? 'mixed' : isChecked,
           disabled: effectiveDisabled,
         }}
         disabled={effectiveDisabled}
@@ -121,6 +123,7 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
         style={({ pressed }) => {
           const state: CheckboxStyleState = {
             checked: isChecked,
+            indeterminate,
             disabled: effectiveDisabled,
             pressed,
           }
@@ -132,6 +135,7 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
         {({ pressed }) => {
           const state: CheckboxStyleState = {
             checked: isChecked,
+            indeterminate,
             disabled: effectiveDisabled,
             pressed,
           }
@@ -156,7 +160,13 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
             <>
               {labelPosition === 'left' ? label : null}
               <View style={[resolved.indicator, semantic?.indicator]}>
-                {isChecked ? (
+                {indeterminate ? (
+                  <Icon
+                    name="MinusOutlined"
+                    size={resolved.checkSize}
+                    color={resolved.checkColor}
+                  />
+                ) : isChecked ? (
                   <Icon
                     name="CheckOutlined"
                     size={resolved.checkSize}

@@ -11,6 +11,7 @@ export type CheckboxDirection = 'vertical' | 'horizontal'
 
 export interface CheckboxStyleState {
   checked: boolean
+  indeterminate: boolean
   disabled: boolean
   pressed: boolean
 }
@@ -34,6 +35,7 @@ export interface CheckboxProps extends Omit<
   children?: ReactNode
   name?: CheckboxValue
   checked?: boolean
+  indeterminate?: boolean
   defaultChecked?: boolean
   disabled?: boolean
   iconSize?: number
@@ -70,4 +72,13 @@ export interface CheckboxGroupProps extends Omit<ViewProps, 'children' | 'style'
   buttonColumns?: number
   onChange?: (value: CheckboxValue[]) => void
   style?: StyleProp<ViewStyle>
+}
+
+export interface CheckboxGroupToggleAllOptions {
+  checked?: boolean
+  skipDisabled?: boolean
+}
+
+export interface CheckboxGroupRef {
+  toggleAll(options?: boolean | CheckboxGroupToggleAllOptions): void
 }

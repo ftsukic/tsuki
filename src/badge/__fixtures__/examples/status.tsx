@@ -2,7 +2,7 @@ import React from 'react'
 
 /**
  * @title 状态点
- * @description status 用于展示成功、处理中、默认、错误和警告状态，也可以附带文字。
+ * @description status/text 作为兼容扩展展示成功、处理中、默认、错误和警告状态。
  */
 import { Badge } from '@ftsukic/tsuki'
 import { View } from 'react-native'

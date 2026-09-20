@@ -1,5 +1,7 @@
 import { Checkbox, CheckboxGroup, ConfigProvider, getDesignToken } from '..'
-import { fireEvent, render, screen } from '@testing-library/react-native'
+import type { CheckboxGroupRef, CheckboxGroupToggleAllOptions } from '..'
+import { act, fireEvent, render, screen } from '@testing-library/react-native'
+import { createRef } from 'react'
 import { StyleSheet, View } from 'react-native'
 import type { JsonElement } from 'test-renderer'
 import { getCheckboxStyles } from '../checkbox/style'
@@ -11,6 +13,16 @@ async function press(target: Parameters<typeof fireEvent.press>[0]) {
 }
 
 const styleOf = (testID: string) => StyleSheet.flatten(screen.getByTestId(testID).props.style)
+
+async function toggleAll(
+  ref: { current: CheckboxGroupRef | null },
+  options?: boolean | CheckboxGroupToggleAllOptions,
+) {
+  await act(async () => {
+    ref.current?.toggleAll(options)
+    await Promise.resolve()
+  })
+}
 
 function findNodes(
   node: JsonElement | null,
@@ -73,6 +85,137 @@ describe('Checkbox', () => {
     expect(toJSON()).toBeTruthy()
   })
 
+  it('renders indeterminate as a mixed checked indicator', async () => {
+    const view = await render(
+      <ConfigProvider>
+        <Checkbox testID="indeterminate" indeterminate>
+          Indeterminate
+        </Checkbox>
+      </ConfigProvider>,
+    )
+
+    expect(screen.getByTestId('indeterminate').props.accessibilityState).toMatchObject({
+      checked: 'mixed',
+      disabled: false,
+    })
+    const token = getCheckboxToken(getDesignToken())
+    expect(
+      findNodes(view.toJSON(), (node) => {
+        const style = StyleSheet.flatten(node.props.style)
+        return (
+          style?.backgroundColor === token.checkedBackground &&
+          style?.borderColor === token.checkedBackground
+        )
+      }),
+    ).toHaveLength(1)
+    expect(
+      findNodes(view.toJSON(), (node) => node.type === 'RNSVGPath').map((node) => node.props.d),
+    ).toContain(
+      'M872 474H152c-4.4 0-8 3.6-8 8v60c0 4.4 3.6 8 8 8h720c4.4 0 8-3.6 8-8v-60c0-4.4-3.6-8-8-8z',
+    )
+  })
+
+  it('prioritizes the indeterminate icon while preserving checked', async () => {
+    const view = await render(
+      <ConfigProvider>
+        <Checkbox testID="checked-indeterminate" checked indeterminate>
+          Checked and indeterminate
+        </Checkbox>
+      </ConfigProvider>,
+    )
+
+    expect(screen.getByTestId('checked-indeterminate').props.accessibilityState?.checked).toBe(
+      'mixed',
+    )
+    const paths = findNodes(view.toJSON(), (node) => node.type === 'RNSVGPath').map(
+      (node) => node.props.d,
+    )
+    expect(paths).toEqual([
+      'M872 474H152c-4.4 0-8 3.6-8 8v60c0 4.4 3.6 8 8 8h720c4.4 0 8-3.6 8-8v-60c0-4.4-3.6-8-8-8z',
+    ])
+  })
+
+  it('keeps checked boolean toggle semantics for a controlled indeterminate checkbox', async () => {
+    const uncheckedChange = jest.fn()
+    const checkedChange = jest.fn()
+    await render(
+      <ConfigProvider>
+        <Checkbox checked={false} indeterminate onChange={uncheckedChange}>
+          Indeterminate unchecked
+        </Checkbox>
+        <Checkbox checked indeterminate onChange={checkedChange}>
+          Indeterminate checked
+        </Checkbox>
+      </ConfigProvider>,
+    )
+
+    await press(screen.getByText('Indeterminate unchecked'))
+    await press(screen.getByText('Indeterminate checked'))
+
+    expect(uncheckedChange).toHaveBeenCalledWith(true)
+    expect(checkedChange).toHaveBeenCalledWith(false)
+    expect(
+      screen.getByText('Indeterminate unchecked').parent?.props.accessibilityState?.checked,
+    ).toBe('mixed')
+    expect(
+      screen.getByText('Indeterminate checked').parent?.props.accessibilityState?.checked,
+    ).toBe('mixed')
+  })
+
+  it('uses disabled mixed styling and blocks disabled indeterminate presses', async () => {
+    const onChange = jest.fn()
+    const view = await render(
+      <ConfigProvider>
+        <Checkbox testID="disabled-indeterminate" disabled indeterminate onChange={onChange}>
+          Disabled indeterminate
+        </Checkbox>
+      </ConfigProvider>,
+    )
+
+    await press(screen.getByText('Disabled indeterminate'))
+
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByTestId('disabled-indeterminate').props.accessibilityState).toMatchObject({
+      checked: 'mixed',
+      disabled: true,
+    })
+    const token = getCheckboxToken(getDesignToken())
+    expect(
+      findNodes(view.toJSON(), (node) => {
+        const style = StyleSheet.flatten(node.props.style)
+        return (
+          style?.backgroundColor === token.disabledBackground &&
+          style?.borderColor === token.disabledColor
+        )
+      }),
+    ).toHaveLength(1)
+  })
+
+  it('passes indeterminate to semantic style state', async () => {
+    let receivedState:
+      { checked: boolean; indeterminate: boolean; disabled: boolean; pressed: boolean } | undefined
+
+    await render(
+      <ConfigProvider>
+        <Checkbox
+          checked
+          indeterminate
+          styles={({ state }) => {
+            receivedState = state
+            return {}
+          }}
+        />
+      </ConfigProvider>,
+    )
+
+    expect(receivedState).toEqual({
+      checked: true,
+      indeterminate: true,
+      disabled: false,
+      pressed: false,
+    })
+  })
+
   it('uses the checkbox component tokens for checked and disabled styles', () => {
     const aliasToken = getDesignToken()
     const token = getCheckboxToken(aliasToken)
@@ -81,6 +224,7 @@ describe('Checkbox', () => {
       { shape: 'square' },
       {
         checked: true,
+        indeterminate: false,
         disabled: false,
         pressed: false,
       },
@@ -90,6 +234,7 @@ describe('Checkbox', () => {
       { shape: 'square' },
       {
         checked: true,
+        indeterminate: false,
         disabled: true,
         pressed: false,
       },
@@ -114,7 +259,7 @@ describe('Checkbox', () => {
     const rightStyles = getCheckboxStyles(
       token,
       { labelPosition: 'right' },
-      { checked: false, disabled: false, pressed: false },
+      { checked: false, indeterminate: false, disabled: false, pressed: false },
     )
     expect(rightStyles.root.columnGap).toBe(token.gap)
     expect(rightStyles.label.marginLeft).toBeUndefined()
@@ -123,7 +268,7 @@ describe('Checkbox', () => {
       getCheckboxStyles(
         token,
         { labelPosition: 'left' },
-        { checked: false, disabled: false, pressed: false },
+        { checked: false, indeterminate: false, disabled: false, pressed: false },
       ).root.columnGap,
     ).toBe(token.gap)
   })
@@ -153,6 +298,7 @@ describe('Checkbox', () => {
       { buttonVariant, variant: 'button' },
       {
         checked: true,
+        indeterminate: false,
         disabled: false,
         pressed: false,
       },
@@ -426,5 +572,217 @@ describe('CheckboxGroup', () => {
         return style?.flexBasis === '20%'
       }),
     ).toHaveLength(8)
+  })
+
+  it('supports imperative true, false, and per-item reverse operations', async () => {
+    const ref = createRef<CheckboxGroupRef>()
+    const onChange = jest.fn()
+
+    await render(
+      <ConfigProvider>
+        <Checkbox.Group ref={ref} defaultValue={['a']} onChange={onChange}>
+          <Checkbox testID="toggle-a" name="a">
+            A
+          </Checkbox>
+          <Checkbox testID="toggle-b" name="b">
+            B
+          </Checkbox>
+          <Checkbox testID="toggle-c" name="c">
+            C
+          </Checkbox>
+        </Checkbox.Group>
+      </ConfigProvider>,
+    )
+
+    await toggleAll(ref, true)
+    expect(onChange).toHaveBeenLastCalledWith(['a', 'b', 'c'])
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(screen.getByTestId('toggle-a').props.accessibilityState?.checked).toBe(true)
+    expect(screen.getByTestId('toggle-b').props.accessibilityState?.checked).toBe(true)
+    expect(screen.getByTestId('toggle-c').props.accessibilityState?.checked).toBe(true)
+
+    await toggleAll(ref, false)
+    expect(onChange).toHaveBeenLastCalledWith([])
+    expect(onChange).toHaveBeenCalledTimes(2)
+    expect(screen.getByTestId('toggle-a').props.accessibilityState?.checked).toBe(false)
+    expect(screen.getByTestId('toggle-b').props.accessibilityState?.checked).toBe(false)
+    expect(screen.getByTestId('toggle-c').props.accessibilityState?.checked).toBe(false)
+
+    await toggleAll(ref)
+    expect(onChange).toHaveBeenLastCalledWith(['a', 'b', 'c'])
+    expect(onChange).toHaveBeenCalledTimes(3)
+  })
+
+  it('reverses each item independently instead of treating toggleAll as a select-all switch', async () => {
+    const ref = createRef<CheckboxGroupRef>()
+    const onChange = jest.fn()
+
+    await render(
+      <ConfigProvider>
+        <Checkbox.Group ref={ref} defaultValue={['a', 'c']} onChange={onChange}>
+          <Checkbox name="a">A</Checkbox>
+          <Checkbox name="b">B</Checkbox>
+          <Checkbox name="c">C</Checkbox>
+        </Checkbox.Group>
+      </ConfigProvider>,
+    )
+
+    await toggleAll(ref)
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenCalledWith(['b'])
+  })
+
+  it('supports skipDisabled for enabled items and includes disabled items by default', async () => {
+    const ref = createRef<CheckboxGroupRef>()
+    const onChange = jest.fn()
+
+    await render(
+      <ConfigProvider>
+        <Checkbox.Group ref={ref} defaultValue={['b']} onChange={onChange}>
+          <Checkbox testID="skip-a" name="a">
+            A
+          </Checkbox>
+          <Checkbox testID="skip-b" name="b" disabled>
+            B
+          </Checkbox>
+          <Checkbox testID="skip-c" name="c">
+            C
+          </Checkbox>
+        </Checkbox.Group>
+      </ConfigProvider>,
+    )
+
+    await toggleAll(ref, { checked: true, skipDisabled: true })
+    expect(onChange).toHaveBeenLastCalledWith(['a', 'b', 'c'])
+    await toggleAll(ref, { checked: false, skipDisabled: true })
+    expect(onChange).toHaveBeenLastCalledWith(['b'])
+    expect(screen.getByTestId('skip-b').props.accessibilityState?.checked).toBe(true)
+
+    await toggleAll(ref, true)
+    expect(onChange).toHaveBeenLastCalledWith(['a', 'b', 'c'])
+    expect(onChange).toHaveBeenCalledTimes(3)
+  })
+
+  it('supports reverse operations with skipDisabled and preserves disabled values', async () => {
+    const ref = createRef<CheckboxGroupRef>()
+    const onChange = jest.fn()
+
+    await render(
+      <ConfigProvider>
+        <Checkbox.Group ref={ref} defaultValue={['a', 'b']} onChange={onChange}>
+          <Checkbox name="a">A</Checkbox>
+          <Checkbox name="b" disabled>
+            B
+          </Checkbox>
+          <Checkbox name="c">C</Checkbox>
+        </Checkbox.Group>
+      </ConfigProvider>,
+    )
+
+    await toggleAll(ref, { skipDisabled: true })
+
+    expect(onChange).toHaveBeenCalledWith(['b', 'c'])
+  })
+
+  it('allows imperative updates for a disabled group while skipDisabled preserves all items', async () => {
+    const ref = createRef<CheckboxGroupRef>()
+    const onChange = jest.fn()
+
+    await render(
+      <ConfigProvider>
+        <Checkbox.Group ref={ref} disabled defaultValue={['b']} onChange={onChange}>
+          <Checkbox testID="group-disabled-a" name="a">
+            A
+          </Checkbox>
+          <Checkbox testID="group-disabled-b" name="b">
+            B
+          </Checkbox>
+        </Checkbox.Group>
+      </ConfigProvider>,
+    )
+
+    await press(screen.getByText('A'))
+    expect(onChange).not.toHaveBeenCalled()
+
+    await toggleAll(ref, { checked: true, skipDisabled: true })
+    expect(onChange).toHaveBeenCalledWith(['b'])
+    expect(screen.getByTestId('group-disabled-a').props.accessibilityState?.checked).toBe(false)
+    expect(screen.getByTestId('group-disabled-b').props.accessibilityState?.checked).toBe(true)
+
+    await toggleAll(ref, true)
+    expect(onChange).toHaveBeenLastCalledWith(['a', 'b'])
+    expect(screen.getByTestId('group-disabled-a').props.accessibilityState?.checked).toBe(true)
+  })
+
+  it('keeps controlled rendered state unchanged while reporting one next value', async () => {
+    const ref = createRef<CheckboxGroupRef>()
+    const onChange = jest.fn()
+
+    await render(
+      <ConfigProvider>
+        <Checkbox.Group ref={ref} value={['a']} onChange={onChange}>
+          <Checkbox testID="controlled-a" name="a">
+            A
+          </Checkbox>
+          <Checkbox testID="controlled-b" name="b">
+            B
+          </Checkbox>
+        </Checkbox.Group>
+      </ConfigProvider>,
+    )
+
+    await toggleAll(ref, true)
+
+    expect(onChange).toHaveBeenCalledTimes(1)
+    expect(onChange).toHaveBeenCalledWith(['a', 'b'])
+    expect(screen.getByTestId('controlled-a').props.accessibilityState?.checked).toBe(true)
+    expect(screen.getByTestId('controlled-b').props.accessibilityState?.checked).toBe(false)
+  })
+
+  it('supports toggleAll for options-generated checkboxes', async () => {
+    const ref = createRef<CheckboxGroupRef>()
+
+    await render(
+      <ConfigProvider>
+        <Checkbox.Group
+          ref={ref}
+          options={[
+            { value: 'one', label: 'One' },
+            { value: 'two', label: 'Two' },
+            { value: 'locked', label: 'Locked', disabled: true },
+          ]}
+        />
+      </ConfigProvider>,
+    )
+
+    await toggleAll(ref, { checked: true, skipDisabled: true })
+
+    expect(screen.getByText('One').parent?.props.accessibilityState?.checked).toBe(true)
+    expect(screen.getByText('Two').parent?.props.accessibilityState?.checked).toBe(true)
+    expect(screen.getByText('Locked').parent?.props.accessibilityState?.checked).toBe(false)
+  })
+
+  it('preserves unknown values, render order, and value uniqueness', async () => {
+    const ref = createRef<CheckboxGroupRef>()
+    const onChange = jest.fn()
+
+    await render(
+      <ConfigProvider>
+        <Checkbox.Group
+          ref={ref}
+          value={['external', 'c', 'external', 'a', 'a']}
+          onChange={onChange}
+        >
+          <Checkbox name="a">A</Checkbox>
+          <Checkbox name="b">B</Checkbox>
+          <Checkbox name="c">C</Checkbox>
+        </Checkbox.Group>
+      </ConfigProvider>,
+    )
+
+    await toggleAll(ref, true)
+
+    expect(onChange).toHaveBeenCalledWith(['external', 'a', 'b', 'c'])
   })
 })

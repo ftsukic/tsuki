@@ -54,6 +54,8 @@ export interface AvatarGroupSemanticStyles {
   root?: StyleProp<ViewStyle>
   item?: StyleProp<ViewStyle>
   overflow?: StyleProp<ViewStyle>
+  overflowAvatar?: StyleProp<ViewStyle>
+  overflowText?: StyleProp<TextStyle>
 }
 
 export type AvatarGroupStyles = StyleResolver<
@@ -66,7 +68,9 @@ export interface AvatarGroupProps extends Omit<ViewProps, 'children' | 'style'> 
   children?: ReactNode
   size?: AvatarSize
   shape?: AvatarShape
+  borderRadius?: number
   maxCount?: number
+  showOverflow?: boolean
   onOverflowPress?: PressableProps['onPress']
   style?: StyleProp<ViewStyle>
   styles?: AvatarGroupStyles

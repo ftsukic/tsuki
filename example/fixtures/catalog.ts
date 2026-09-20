@@ -83,7 +83,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview2,
     component: 'badge',
-    description: 'Badge 汇总数字、红点、状态和主题样式示例。',
+    description: 'Badge 汇总数字、红点、四角定位、standalone 和主题样式示例。',
     id: 'badge',
     title: 'Badge',
   },
@@ -111,7 +111,8 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview6,
     component: 'checkbox',
-    description: 'Checkbox 汇总基础状态、多选分组、options、button variant 和主题定制示例。',
+    description:
+      'Checkbox 汇总基础状态、多选分组、全选半选、options、button variant 和主题定制示例。',
     id: 'checkbox',
     title: 'Checkbox',
   },

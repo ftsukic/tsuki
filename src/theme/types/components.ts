@@ -251,6 +251,7 @@ export interface BadgeToken {
   paddingHorizontalSM: number
   fontSize: number
   fontSizeSM: number
+  fontWeight: TextStyle['fontWeight']
   color: string
   textColor: string
   statusTextColor: string

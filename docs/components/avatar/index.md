@@ -59,17 +59,19 @@ Avatar 继承 React Native `ViewProps`，但由组件管理 `children` 和 `styl
 
 ### Avatar.Group
 
-| 属性            | 类型                        | 默认值 | 说明                                    |
-| --------------- | --------------------------- | ------ | --------------------------------------- |
-| children        | `ReactNode`                 | —      | 直接子级 Avatar；其他节点会被忽略       |
-| size            | `AvatarSize`                | —      | 子头像默认尺寸，子头像显式设置优先      |
-| shape           | `AvatarShape`               | —      | 子头像默认形状，子头像显式设置优先      |
-| maxCount        | `number`                    | —      | 最多显示的头像数量，超出部分合并为 `+N` |
-| onOverflowPress | `PressableProps['onPress']` | —      | 点击 `+N` 溢出头像                      |
-| style           | `StyleProp<ViewStyle>`      | —      | 根 View 样式                            |
-| styles          | `AvatarGroupStyles`         | —      | `root / item / overflow` 语义样式       |
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| children | `ReactNode` | — | 直接子级 Avatar；其他节点会被忽略 |
+| size | `AvatarSize` | — | 子头像默认尺寸，子头像显式设置优先 |
+| shape | `AvatarShape` | — | 子头像默认形状，子头像显式设置优先 |
+| borderRadius | `number` | — | Group 默认圆角，子 Avatar 显式 `borderRadius` 优先 |
+| maxCount | `number` | — | 最多显示的头像数量，超出部分合并为 `+N` |
+| showOverflow | `boolean` | `true` | `maxCount` 超出时是否显示 `+N` overflow Avatar |
+| onOverflowPress | `PressableProps['onPress']` | — | 点击 `+N` 溢出头像 |
+| style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
+| styles | `AvatarGroupStyles` | — | `root / item / overflow / overflowAvatar / overflowText` 语义样式 |
 
-Group 使用主题中的 `groupOverlapping`、`groupBorderColor` 和 `groupBorderWidth` 控制叠放效果。当前不提供 Web Popover；如需查看完整列表，应在 `onOverflowPress` 中调用宿主应用的导航或弹层。
+Group 使用主题中的 `groupOverlapping`、`groupBorderColor` 和 `groupBorderWidth` 控制叠放效果。当前不提供 Web Popover；如需查看完整列表，应在 `onOverflowPress` 中调用宿主应用的导航或弹层。 `styles.overflow` 控制 `+N` 外层 Pressable，`styles.overflowAvatar` 控制内部 Avatar，`styles.overflowText` 控制 `+N` 文本。
 
 ### 与 Web API 的差异
 

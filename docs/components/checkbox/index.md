@@ -15,11 +15,11 @@ group:
 
 ## 介绍
 
-Checkbox 用于多选，使用边框、主题色背景和 `CheckOutlined` 图标表达选中状态。组件支持独立受控/非受控状态、`Checkbox.Group` 子节点和 `options` 多选，以及不包装 `Button` 的 `variant="button"` 样式。button variant 隐藏 indicator，默认使用内容自适应宽度；在 Field 或显式等宽 Group 中可使用 Grid 等宽换行，并保留 Checkbox 的多选切换行为。
+Checkbox 用于多选，使用边框、主题色背景、`CheckOutlined` 和 `MinusOutlined` 图标表达已选与半选状态。组件支持独立受控/非受控状态、`Checkbox.Group` 子节点和 `options` 多选，以及不包装 `Button` 的 `variant="button"` 样式。`checked` 与 `indeterminate` 是独立状态；button variant 隐藏 indicator，默认使用内容自适应宽度；在 Field 或显式等宽 Group 中可使用 Grid 等宽换行，并保留 Checkbox 的多选切换行为。
 
 </section>
 
-<code src="../../../src/checkbox/__fixtures__/overview.tsx" title="组件预览" description="Checkbox 的基础、多选分组、button variant 和主题示例。"></code>
+<code src="../../../src/checkbox/__fixtures__/overview.tsx" title="组件预览" description="Checkbox 的基础、多选分组、全选半选、button variant 和主题示例。"></code>
 
 ## 引入
 
@@ -32,6 +32,8 @@ import { Checkbox } from '@ftsukic/tsuki'
 <code src="../../../src/checkbox/__fixtures__/examples/basic.tsx" title="基础状态" description="受控、非受控、禁用、左右标签和 shape。"></code>
 
 <code src="../../../src/checkbox/__fixtures__/examples/group.tsx" title="Checkbox.Group" description="使用 name 管理多个选项并通过 onChange 得到数组值。"></code>
+
+<code src="../../../src/checkbox/__fixtures__/examples/check-all.tsx" title="全选与半选" description="通过 Checkbox.indeterminate 与 Checkbox.Group.toggleAll 组合实现全选状态。"></code>
 
 <code src="../../../src/checkbox/__fixtures__/examples/options.tsx" title="options 分组" description="使用 options 配置数组快速生成结构一致的多选项。"></code>
 
@@ -48,6 +50,7 @@ import { Checkbox } from '@ftsukic/tsuki'
 | children | `ReactNode` | — | 标签内容；字符串和数字使用库内文本样式，自定义节点由调用方控制 |
 | name | `string \| number` | — | `Checkbox.Group` 中的选项名；Group 子 Checkbox 必须提供 |
 | checked | `boolean` | — | 独立 Checkbox 的受控选中状态；在 Group 中由 Group 的 `value` 决定 |
+| indeterminate | `boolean` | `false` | 是否显示半选状态；仅控制展示，不改变 `checked` 和 `onChange` 的 boolean 语义 |
 | defaultChecked | `boolean` | `false` | 独立 Checkbox 的非受控初始状态 |
 | disabled | `boolean` | `false` | 禁用点击和状态变化；Group 的 `disabled` 会覆盖子项 |
 | onChange | `(checked: boolean) => void` | — | 状态切换后回调；受控组件仍由上层更新 `checked` |
@@ -60,7 +63,7 @@ import { Checkbox } from '@ftsukic/tsuki'
 | styles | `CheckboxStyles` | — | `root`、`indicator`、`label` 三个语义样式插槽，也支持函数形式 |
 | onPressDebounceWait | `number` | — | 两次点击之间的最小间隔，单位为毫秒 |
 
-组件继承 React Native `PressableProps`，但由组件管理 `children`、`style`、`disabled` 和 `onPress` 的状态分发。整个 Checkbox 区域（包括 label）都可以点击；disabled 时不响应。默认无障碍角色为 `checkbox`，并同步 `accessibilityState.checked` 与 `accessibilityState.disabled`。
+组件继承 React Native `PressableProps`，但由组件管理 `children`、`style`、`disabled` 和 `onPress` 的状态分发。整个 Checkbox 区域（包括 label）都可以点击；disabled 时不响应。默认无障碍角色为 `checkbox`，并同步 `accessibilityState.disabled`；`indeterminate` 时 `accessibilityState.checked` 为 `'mixed'`，否则为真实的 boolean `checked` 状态。半选 Checkbox 点击时仍按 `checked` 的 boolean 状态切换，`indeterminate` 由调用方控制，不会自动清除。
 
 ### Checkbox.Group
 
@@ -84,7 +87,29 @@ import { Checkbox } from '@ftsukic/tsuki'
 
 `options` 和 `children` 只能选择一种声明方式；同时传入时开发环境会提示错误，并以 `children` 为渲染来源。`options` 中的 `value` 会作为生成 Checkbox 的 `name`，每个 `value` 应保持唯一，`label` 作为标签，`disabled` 只禁用对应选项。Group 子项缺少 `name` 时不会参与选择，并在开发环境提示配置错误。Group 不提供 `multiple` 或 `max` 兼容层。
 
+Checkbox.Group 不自动管理“全选 Checkbox”的 `checked` 或 `indeterminate`。调用方应根据 `value` 和可选择项自行计算，再组合 `Checkbox.indeterminate` 与 Group 的 `toggleAll` 实例方法。
+
 `variant="button"` 配合 `buttonVariant` 可以使用 Button 的 `solid`、`filled`、`outline`、`dashed` 和 `text` 视觉变体。button 选项默认高度为 `buttonHeight`，并保证最小宽度为 `buttonMinWidth`。配合 `buttonLayout="equal"` 时，Group 使用 Grid 作为纯布局容器。横向 `buttonColumns={5}` 时，8 个按钮会按 5+3 换行，并保持两行按钮宽度一致；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；默认 `buttonLayout="intrinsic"` 仍是内容自适应宽度。
+
+#### 实例方法
+
+通过 `CheckboxGroupRef` 获取 Group ref 后，可以使用 `toggleAll` 批量更新选中值：
+
+```tsx | pure
+import { useRef } from 'react'
+import type { CheckboxGroupRef } from '@ftsukic/tsuki'
+
+const groupRef = useRef<CheckboxGroupRef>(null)
+
+groupRef.current?.toggleAll(true) // 全选
+groupRef.current?.toggleAll(false) // 全不选
+groupRef.current?.toggleAll() // 每项独立反选
+groupRef.current?.toggleAll({ checked: true, skipDisabled: true }) // 只全选 enabled 项
+```
+
+`toggleAll` 也接受不带 `checked` 的对象，此时会对 enabled 项逐项反选；`skipDisabled` 默认是 `false`，因此显式传入 `true` 才会跳过 disabled 项。一次调用最多触发一次 Group `onChange`。受控 Group 仍由调用方更新 `value`，非受控 Group 会更新自身状态。Group disabled 不影响 imperative `toggleAll`；只有 `skipDisabled: true` 时才会保留所有有效 disabled 项的原值。
+
+`styles` 函数收到的状态包含 `checked`、`indeterminate`、`disabled` 和 `pressed`。`variant="button"` 仍只使用真实 `checked` 决定按钮 checked / unchecked 样式；`indeterminate` 会继续传给 styles resolver，并不会引入新的 button 半选视觉。
 
 ### Checkbox token
 

@@ -12,7 +12,9 @@ export function AvatarGroup({
   children,
   size,
   shape,
+  borderRadius,
   maxCount,
+  showOverflow = true,
   onOverflowPress,
   style,
   styles,
@@ -26,6 +28,18 @@ export function AvatarGroup({
 
   const groupSize = size ?? avatars[0]?.props.size ?? 'medium'
   const groupShape = shape ?? avatars[0]?.props.shape ?? 'circle'
+  const resolvedGroupSize =
+    typeof groupSize === 'number'
+      ? Number.isFinite(groupSize) && groupSize > 0
+        ? groupSize
+        : token.containerSize
+      : groupSize === 'small'
+        ? token.containerSizeSM
+        : groupSize === 'large'
+          ? token.containerSizeLG
+          : token.containerSize
+  const resolvedOverflowRadius =
+    borderRadius ?? (groupShape === 'circle' ? resolvedGroupSize / 2 : token.borderRadius)
 
   const normalizedMaxCount =
     maxCount === undefined || !Number.isFinite(maxCount)
@@ -40,7 +54,9 @@ export function AvatarGroup({
       children,
       size,
       shape,
+      borderRadius,
       maxCount,
+      showOverflow,
       onOverflowPress,
       style,
       styles,
@@ -77,11 +93,12 @@ export function AvatarGroup({
             key={avatar.key ?? index}
             size={avatar.props.size ?? groupSize}
             shape={avatar.props.shape ?? groupShape}
+            borderRadius={avatar.props.borderRadius ?? borderRadius}
             style={avatarStyle}
           />
         )
       })}
-      {overflowCount > 0 ? (
+      {showOverflow && overflowCount > 0 ? (
         <Pressable
           disabled={!onOverflowPress}
           onPress={onOverflowPress}
@@ -91,16 +108,7 @@ export function AvatarGroup({
           style={[
             {
               marginLeft: token.groupOverlapping,
-              borderRadius:
-                groupShape === 'circle'
-                  ? (typeof groupSize === 'number' && groupSize > 0
-                      ? groupSize
-                      : groupSize === 'small'
-                        ? token.containerSizeSM
-                        : groupSize === 'large'
-                          ? token.containerSizeLG
-                          : token.containerSize) / 2
-                  : token.borderRadius,
+              borderRadius: resolvedOverflowRadius,
             },
             semantic?.overflow,
           ]}
@@ -108,7 +116,11 @@ export function AvatarGroup({
           <Avatar
             size={groupSize}
             shape={groupShape}
-            style={{ backgroundColor: token.groupBorderColor }}
+            borderRadius={borderRadius}
+            styles={{
+              root: [{ backgroundColor: token.groupBorderColor }, semantic?.overflowAvatar],
+              text: semantic?.overflowText,
+            }}
           >
             {`+${overflowCount}`}
           </Avatar>

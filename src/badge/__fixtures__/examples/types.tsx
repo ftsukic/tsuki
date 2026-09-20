@@ -1,8 +1,8 @@
 import React from 'react'
 
 /**
- * @title 数字、红点和溢出
- * @description count 支持数字、多字符胶囊、99+ / 999+ 溢出值和自定义节点。
+ * @title 数字、红点和独立展示
+ * @description content 支持数字、胶囊、显式 max、零值、红点和 standalone 展示。
  */
 import { Avatar, Badge } from '@ftsukic/tsuki'
 import { Text, View } from 'react-native'
@@ -13,28 +13,30 @@ export default function Example() {
   return (
     <View style={{ gap: 16 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-        <Badge count={1}>{avatar}</Badge>
-        <Badge count={9}>{avatar}</Badge>
-        <Badge count={10}>{avatar}</Badge>
-        <Badge count={99}>{avatar}</Badge>
-        <Badge count={100} overflowCount={99}>
+        <Badge content={1}>{avatar}</Badge>
+        <Badge content={9}>{avatar}</Badge>
+        <Badge content={10}>{avatar}</Badge>
+        <Badge content={99}>{avatar}</Badge>
+        <Badge content={100}>{avatar}</Badge>
+        <Badge content={100} max={99}>
           {avatar}
         </Badge>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
         <Badge dot>{avatar}</Badge>
-        <Badge size="small" count={9}>
+        <Badge content={0}>{avatar}</Badge>
+        <Badge content={0} showZero={false}>
           {avatar}
         </Badge>
-        <Badge count={10} />
-        <Badge count={99} />
-        <Badge count={<Text style={{ color: '#ffffff' }}>!</Text>}>{avatar}</Badge>
+        <Badge content={<Text style={{ color: '#ffffff' }}>!</Text>}>{avatar}</Badge>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
-        <Badge count={1000} overflowCount={999}>
-          {avatar}
-        </Badge>
-        <Badge count={<Text style={{ color: '#ffffff' }}>New</Text>}>{avatar}</Badge>
+        <Badge content={1} />
+        <Badge content={10} />
+        <Badge content={99} />
+        <Badge content={100} />
+        <Badge content={100} max={99} />
+        <Badge dot />
       </View>
     </View>
   )

@@ -1,7 +1,7 @@
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import { getBadgeToken } from './token'
-import type { BadgeProps, BadgeStatus } from './types'
+import type { BadgePosition, BadgeProps, BadgeStatus } from './types'
 import { forwardRef, isValidElement, useState } from 'react'
 import { View } from 'react-native'
 import type {
@@ -13,24 +13,29 @@ import type {
 } from 'react-native'
 import { Text } from '../text'
 
-function isRenderable(value: BadgeProps['children'] | BadgeProps['count']): boolean {
+function isRenderable(value: BadgeProps['children']): boolean {
   return value !== undefined && value !== null && value !== false
 }
 
-function isZero(value: BadgeProps['count']): boolean {
+function isZero(value: BadgeProps['content']): boolean {
   return typeof value === 'number' && value === 0
 }
 
-function getTextContent(value: BadgeProps['count']): string | undefined {
+function getTextContent(value: BadgeProps['content']): string | undefined {
   if (typeof value === 'string' || typeof value === 'number') return String(value)
   if (Array.isArray(value)) {
     const parts = value.map(getTextContent)
     return parts.every((part) => part !== undefined) ? parts.join('') : undefined
   }
-  if (isValidElement<{ children?: BadgeProps['count'] }>(value)) {
+  if (isValidElement<{ children?: BadgeProps['content'] }>(value)) {
     return getTextContent(value.props.children)
   }
   return undefined
+}
+
+function resolveMax(max: BadgeProps['max'], overflowCount: BadgeProps['overflowCount']) {
+  const value = max !== undefined ? max : overflowCount
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : undefined
 }
 
 function resolveStatusColor(status: BadgeStatus, token: ReturnType<typeof getBadgeToken>) {
@@ -50,7 +55,7 @@ function resolveStatusColor(status: BadgeStatus, token: ReturnType<typeof getBad
 }
 
 function renderValue(
-  value: BadgeProps['count'] | BadgeProps['text'],
+  value: BadgeProps['content'] | BadgeProps['text'],
   style: StyleProp<TextStyle>,
   singleLine = false,
   wrapCustom = false,
@@ -74,17 +79,32 @@ function renderValue(
   return value
 }
 
+function getIndicatorPositionStyle(position: BadgePosition): ViewStyle {
+  switch (position) {
+    case 'top-left':
+      return { position: 'absolute', top: 0, left: 0 }
+    case 'bottom-right':
+      return { position: 'absolute', bottom: 0, right: 0 }
+    case 'bottom-left':
+      return { position: 'absolute', bottom: 0, left: 0 }
+    case 'top-right':
+    default:
+      return { position: 'absolute', top: 0, right: 0 }
+  }
+}
+
 function getIndicatorTransform(
-  anchorWidth: number | undefined,
-  anchorHeight: number | undefined,
+  position: BadgePosition,
+  width: number,
+  height: number,
   offset: BadgeProps['offset'],
-): ViewStyle['transform'] | undefined {
-  if (anchorWidth === undefined && anchorHeight === undefined && offset === undefined)
-    return undefined
+): ViewStyle['transform'] {
+  const translateX = position.endsWith('right') ? width / 2 : -width / 2
+  const translateY = position.startsWith('top') ? -height / 2 : height / 2
 
   return [
-    { translateX: (anchorWidth ?? 0) + (offset?.[0] ?? 0) },
-    { translateY: (anchorHeight ?? 0) + (offset?.[1] ?? 0) },
+    { translateX: translateX + (offset?.[0] ?? 0) },
+    { translateY: translateY + (offset?.[1] ?? 0) },
   ]
 }
 
@@ -92,12 +112,15 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
   {
     children,
     color,
+    content,
     count,
     dot = false,
+    max,
     offset,
-    overflowCount = 99,
-    showZero = false,
-    size = 'medium',
+    overflowCount,
+    position = 'top-right',
+    showZero = true,
+    size,
     status,
     text,
     style,
@@ -108,15 +131,15 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
 ) {
   const token = useComponentToken('Badge', getBadgeToken)
   const hasChildren = isRenderable(children)
-  const hasCount = isRenderable(count)
+  const resolvedContent = content !== undefined ? content : count
+  const resolvedMax = resolveMax(max, overflowCount)
+  const hasContent = isRenderable(resolvedContent)
   const hasStatusText = Boolean(status && isRenderable(text))
-  const normalizedOverflowCount =
-    Number.isFinite(overflowCount) && overflowCount > 0 ? overflowCount : 99
-  const showCount = !status && !dot && hasCount && (!isZero(count) || showZero)
-  const visible = Boolean(status || dot || showCount)
-  const height = size === 'small' ? token.heightSM : token.height
-  const minWidth = size === 'small' ? token.minWidthSM : token.minWidth
-  const paddingHorizontal = size === 'small' ? token.paddingHorizontalSM : token.paddingHorizontal
+  const showContent = !status && !dot && hasContent && (!isZero(resolvedContent) || showZero)
+  const visible = Boolean(status || dot || showContent)
+  const height = size === 'medium' ? token.height : token.heightSM
+  const minWidth = size === 'medium' ? token.minWidth : token.minWidthSM
+  const paddingHorizontal = size === 'medium' ? token.paddingHorizontal : token.paddingHorizontalSM
   const fontSize = size === 'small' ? token.fontSizeSM : token.fontSize
   const indicatorColor = color ?? (status ? resolveStatusColor(status, token) : token.color)
   const [indicatorLayout, setIndicatorLayout] = useState<
@@ -127,10 +150,13 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
       ...viewProps,
       children,
       color,
+      content,
       count,
       dot,
+      max,
       offset,
       overflowCount,
+      position,
       showZero,
       size,
       status,
@@ -141,30 +167,35 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
     state: { visible, hasChildren },
   })
 
-  const countValue =
-    typeof count === 'number' && count > normalizedOverflowCount
-      ? `${normalizedOverflowCount}+`
-      : count
-  const countValueText = getTextContent(countValue)
-  const countMinWidth = countValueText
-    ? Math.max(minWidth, countValueText.length * fontSize)
+  const contentValue =
+    typeof resolvedContent === 'number' &&
+    resolvedMax !== undefined &&
+    resolvedContent > resolvedMax
+      ? `${resolvedMax}+`
+      : resolvedContent
+  const contentValueText = getTextContent(contentValue)
+  const contentMinWidth = contentValueText
+    ? Math.max(minWidth, contentValueText.length * fontSize)
     : minWidth
 
-  const defaultAnchorWidth = dot || (status && !hasStatusText) ? token.dotSize : height
-  const defaultAnchorHeight = dot
+  const defaultIndicatorWidth = dot || (status && !hasStatusText) ? token.dotSize : height
+  const defaultIndicatorHeight = dot
     ? token.dotSize
     : status
       ? hasStatusText
         ? token.fontSize + 4
         : token.dotSize
       : height
-  const indicatorTransform = getIndicatorTransform(
-    hasChildren ? (indicatorLayout?.width ?? defaultAnchorWidth) / 2 : undefined,
-    hasChildren ? -(indicatorLayout?.height ?? defaultAnchorHeight) / 2 : undefined,
-    offset,
-  )
+  const indicatorTransform = hasChildren
+    ? getIndicatorTransform(
+        position,
+        indicatorLayout?.width ?? defaultIndicatorWidth,
+        indicatorLayout?.height ?? defaultIndicatorHeight,
+        offset,
+      )
+    : undefined
   const indicatorPosition: ViewStyle = hasChildren
-    ? { position: 'absolute', top: 0, right: 0 }
+    ? getIndicatorPositionStyle(position)
     : { alignSelf: 'flex-start' }
 
   const handleIndicatorLayout = (event: LayoutChangeEvent) => {
@@ -188,7 +219,7 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
     height: dot ? token.dotSize : height,
     justifyContent: 'center',
     minHeight: dot ? token.dotSize : height,
-    minWidth: dot ? token.dotSize : countMinWidth,
+    minWidth: dot ? token.dotSize : contentMinWidth,
     transform: indicatorTransform,
   }
   const statusIndicatorStyle: ViewStyle = {
@@ -224,10 +255,10 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
               : {
                   ...countIndicatorStyle,
                   borderRadius: dot ? token.dotSize / 2 : Math.min(token.borderRadius, height / 2),
-                  borderWidth: dot || !hasChildren ? 0 : token.borderWidth,
+                  borderWidth: dot ? 0 : token.borderWidth,
                   borderColor: token.borderColor,
                   backgroundColor: indicatorColor,
-                  paddingHorizontal: showCount ? paddingHorizontal : 0,
+                  paddingHorizontal: showContent ? paddingHorizontal : 0,
                   ...(dot
                     ? {
                         width: token.dotSize,
@@ -267,12 +298,13 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
             </>
           ) : dot ? null : (
             renderValue(
-              countValue,
+              contentValue,
               [
                 {
                   color: token.textColor,
                   fontFamily: token.fontFamily,
                   fontSize,
+                  fontWeight: token.fontWeight,
                   includeFontPadding: false,
                   lineHeight: height,
                   overflow: 'visible',
