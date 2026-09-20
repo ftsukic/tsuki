@@ -8,7 +8,7 @@ import {
   updatePortal,
   useToken,
 } from '..'
-import type { PortalManager } from '../portal/manager'
+import type { PortalManager } from '../portal/portal-manager'
 import { StyleSheet, Text, View } from 'react-native'
 import type { ReactNode } from 'react'
 

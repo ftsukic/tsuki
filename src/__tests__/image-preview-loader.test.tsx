@@ -6,7 +6,7 @@ import { ImagePreviewItem } from '../image-preview/image-preview-item'
 import {
   useImagePreviewLoader,
   type ImagePreviewLoader,
-} from '../image-preview/use-image-preview-loader'
+} from '../image-preview/useImagePreviewLoader'
 
 const images = [
   'https://example.com/a.jpg',

@@ -45,9 +45,9 @@ import {
   normalizeImageSource,
   normalizeStartPosition,
 } from './utils'
-import { useImagePreviewGesture } from './use-image-preview-gesture'
-import { useImagePreviewLoader } from './use-image-preview-loader'
-import { useImagePreviewPaging } from './use-image-preview-paging'
+import { useImagePreviewGesture } from './useImagePreviewGesture'
+import { useImagePreviewLoader } from './useImagePreviewLoader'
+import { useImagePreviewPaging } from './useImagePreviewPaging'
 
 const initialWindow = Dimensions.get('window')
 

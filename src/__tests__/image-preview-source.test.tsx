@@ -4,7 +4,7 @@ import React from 'react'
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { ImagePreview, PortalHost } from '..'
-import { useImagePreviewPaging } from '../image-preview/use-image-preview-paging'
+import { useImagePreviewPaging } from '../image-preview/useImagePreviewPaging'
 
 describe('ImagePreview source rect lifecycle', () => {
   it('resolves the current active index when closing', async () => {
@@ -70,7 +70,7 @@ describe('ImagePreview source rect lifecycle', () => {
   it('does not import or render the Swipe pager', () => {
     const source = readFileSync(join(__dirname, '../image-preview/image-preview.tsx'), 'utf8')
     const gestureSource = readFileSync(
-      join(__dirname, '../image-preview/use-image-preview-gesture.ts'),
+      join(__dirname, '../image-preview/useImagePreviewGesture.ts'),
       'utf8',
     )
     expect(source).not.toContain("from '../swipe'")

@@ -1,3 +1,3 @@
 export { Portal } from './portal'
-export { PortalHost, mountPortal, unmountPortal, updatePortal } from './host'
+export { PortalHost, mountPortal, unmountPortal, updatePortal } from './portal-host'
 export type { PortalHostProps, PortalKey, PortalProps } from './interface'

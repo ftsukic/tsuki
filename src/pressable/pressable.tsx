@@ -2,8 +2,8 @@ import { forwardRef, useCallback } from 'react'
 import { InteractionPressable } from '../interaction'
 import type { InteractionPressableProps, InteractionPressableState } from '../interaction'
 import { useToken } from '../theme'
-import { usePressAnimationController } from './use-press-animation'
-import type { PressStyle } from './use-press-animation'
+import { usePressAnimationController } from './usePressAnimation'
+import type { PressStyle } from './usePressAnimation'
 
 export interface PressableProps extends InteractionPressableProps {
   /** Visual feedback applied while the press is active. */

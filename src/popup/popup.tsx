@@ -3,7 +3,7 @@ import { BackHandler, Platform, StyleSheet, View, useWindowDimensions } from 're
 import { Easing } from 'react-native-reanimated'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { Animated, motionPresets, useAnimatedStyle, useTransitionProgress } from '../motion'
-import { OverlaySurface } from '../overlay/surface'
+import { OverlaySurface } from '../overlay/overlay-surface'
 import { Portal } from '../portal'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'

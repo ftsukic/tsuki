@@ -4,9 +4,9 @@ export {
   State as GestureHandlerState,
 } from 'react-native-gesture-handler'
 export { GestureBoundary } from './gesture-boundary'
-export { usePanGesture } from './use-pan-gesture'
-export { useSwipeGesture } from './use-swipe-gesture'
-export { useTapGesture } from './use-tap-gesture'
+export { usePanGesture } from './usePanGesture'
+export { useSwipeGesture } from './useSwipeGesture'
+export { useTapGesture } from './useTapGesture'
 export {
   GESTURE_DEFAULT_MAX_DISTANCE,
   GESTURE_DEFAULT_MIN_DISTANCE,

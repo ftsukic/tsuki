@@ -5,7 +5,7 @@ import type { DimensionValue, LayoutChangeEvent, StyleProp, TextStyle } from 're
 import { Text } from '../text'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
-import { ProgressCircle } from './circle'
+import { ProgressCircle } from './progress-circle'
 import type { ProgressProps } from './interface'
 import { getProgressStyles } from './style'
 import { getProgressToken } from './token'

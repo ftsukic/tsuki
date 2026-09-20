@@ -9,7 +9,7 @@ import {
 } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { Animated } from '../motion'
-import { OverlaySurface } from '../overlay/surface'
+import { OverlaySurface } from '../overlay/overlay-surface'
 import { Portal } from '../portal'
 import { useComponentToken, useToken } from '../theme'
 import { getDropdownToken } from './token'

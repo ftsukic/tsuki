@@ -7,7 +7,7 @@ import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import type { OverlayProps } from './interface'
 import { getOverlayToken } from './token'
-import { OverlaySurface } from './surface'
+import { OverlaySurface } from './overlay-surface'
 
 export interface OverlayAnimatedSurfaceProps extends OverlayProps {
   pressableStyle?: StyleProp<ViewStyle>

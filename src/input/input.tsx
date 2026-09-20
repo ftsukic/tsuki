@@ -9,8 +9,8 @@ import { getInputToken } from './token'
 import { InputSingle } from './input-single'
 import { InputTextarea } from './input-textarea'
 import { renderInputAffix } from './input-affix'
-import { useInputAutoSize } from './use-input-auto-size'
-import { useInputValue } from './use-input-value'
+import { useInputAutoSize } from './useInputAutoSize'
+import { useInputValue } from './useInputValue'
 
 interface InputInternalProps {
   /** Internal layout mode used by FieldInput. */

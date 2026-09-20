@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { createRef } from 'react'
 import { ConfigProvider, getDesignToken, Overlay, PortalHost } from '..'
-import { OverlaySurface } from '../overlay/surface'
+import { OverlaySurface } from '../overlay/overlay-surface'
 import type { ReactNode } from 'react'
 import { Pressable, StyleSheet, Text } from 'react-native'
 import type { View } from 'react-native'

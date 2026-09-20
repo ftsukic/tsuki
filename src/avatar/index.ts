@@ -1,5 +1,5 @@
 import { Avatar } from './avatar'
-import { AvatarGroup } from './group'
+import { AvatarGroup } from './avatar-group'
 
 export const AvatarWithGroup = Object.assign(Avatar, { Group: AvatarGroup })
 export { AvatarWithGroup as Avatar }

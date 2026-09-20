@@ -7,7 +7,7 @@ import type { CheckboxGroupProps, CheckboxValue } from '../checkbox'
 import { useComponentToken } from '../theme'
 import { createFieldCellStyles, getFieldToken } from './style'
 import type { FieldCellProps, FieldTitleAlign } from './types'
-import { useFieldValue } from './use-field-value'
+import { useFieldValue } from './useFieldValue'
 
 type CheckboxAdapterProps = Omit<
   CheckboxGroupProps,

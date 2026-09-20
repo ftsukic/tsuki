@@ -4,7 +4,7 @@ import {
   GESTURE_DEFAULT_SWIPE_THRESHOLD,
   GESTURE_DEFAULT_SWIPE_VELOCITY_THRESHOLD,
 } from './constants'
-import { usePanGesture } from './use-pan-gesture'
+import { usePanGesture } from './usePanGesture'
 import type { UseSwipeGestureOptions, UseSwipeGestureResult } from './types'
 
 export function useSwipeGesture({

@@ -13,7 +13,7 @@ import { useComponentToken, useToken } from '../theme'
 import { renderFieldFeedback, resolveFieldStatus } from './feedback'
 import { createFieldCellStyles, getFieldStyles, getFieldToken } from './style'
 import type { FieldCellProps, FieldStatus, FieldStyles, FieldTitleAlign } from './types'
-import { useFieldValue } from './use-field-value'
+import { useFieldValue } from './useFieldValue'
 
 type DatePickerAdapterProps = Omit<
   DatePickerProps,

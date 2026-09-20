@@ -1,7 +1,7 @@
 import { Component } from 'react'
 import { PortalContext } from './context'
-import { PortalConsumer } from './consumer'
-import { PortalHost } from './host'
+import { PortalConsumer } from './portal-consumer'
+import { PortalHost } from './portal-host'
 import { ThemeContext } from '../theme/context'
 import type { PortalProps } from './interface'
 

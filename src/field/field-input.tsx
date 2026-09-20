@@ -10,7 +10,7 @@ import { useComponentToken } from '../theme'
 import type { TextInputInstance } from '../text-input'
 import { createFieldCellStyles, getFieldToken } from './style'
 import type { FieldCellProps, FieldTitleAlign } from './types'
-import { useFieldValue } from './use-field-value'
+import { useFieldValue } from './useFieldValue'
 
 type InputAdapterProps = Omit<
   InputProps,

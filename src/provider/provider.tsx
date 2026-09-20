@@ -5,7 +5,8 @@ import { InteractionCoordinator } from '../interaction'
 import { SwipeCellContext } from '../swipe-cell/context'
 import { SwipeCellManager } from '../swipe-cell/manager'
 import { ConfigProvider } from '../theme'
-import { GestureProvider, SafeAreaProvider } from './capabilities'
+import { GestureProvider } from './gesture-provider'
+import { SafeAreaProvider } from './safe-area-provider'
 import type { ProviderProps } from './interface'
 
 export const Provider = memo(function Provider({
@@ -32,7 +33,3 @@ export const Provider = memo(function Provider({
 })
 
 Provider.displayName = 'Provider'
-
-export type { ProviderProps } from './interface'
-export { GestureProvider, SafeAreaProvider } from './capabilities'
-export type { GestureProviderProps, SafeAreaProviderProps } from './capabilities'
