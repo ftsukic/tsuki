@@ -1,5 +1,11 @@
 # @ftsukic/tsuki
 
+## 0.0.12
+
+### Patch Changes
+
+- b5083ee: Unify component interactions on the public Pressable primitive, add background and overlay pressed styles, and align press feedback and disabled behavior across the affected components, fixtures, tests, and documentation.
+
 ## 0.0.11
 
 ### Patch Changes
