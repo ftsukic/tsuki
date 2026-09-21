@@ -89,7 +89,6 @@ export function getActionSheetStyles(token: ActionSheetToken): ActionSheetResolv
     },
     cancel: {
       alignItems: 'center',
-      backgroundColor: token.backgroundColor,
       justifyContent: 'center',
       overflow: 'hidden',
       paddingHorizontal: token.actionPaddingHorizontal,

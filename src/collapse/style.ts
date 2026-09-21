@@ -4,7 +4,6 @@ import type { CollapseToken } from '../theme'
 export interface CollapseItemStyleState {
   active: boolean
   disabled: boolean
-  pressed: boolean
 }
 
 export interface CollapseResolvedStyles {
@@ -56,9 +55,7 @@ export function getCollapseStyles(
   return {
     header: {
       alignItems: 'center',
-      backgroundColor: state.pressed
-        ? token.headerPressedBackgroundColor
-        : token.contentBackgroundColor,
+      backgroundColor: token.contentBackgroundColor,
       flexDirection: 'row',
       minHeight: token.headerHeight,
       opacity: state.disabled ? token.disabledOpacity : 1,

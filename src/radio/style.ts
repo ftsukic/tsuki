@@ -46,7 +46,6 @@ export function getRadioStyles(
             disabledBackgroundColor: token.buttonDisabledBackground,
             disabledBorderColor: token.disabledBorderColor,
             disabledLabelColor: token.disabledLabelColor,
-            pressedOpacity: token.pressedOpacity,
             disabledOpacity: token.disabledOpacity,
             fontSize: token.fontSize,
             fontFamily: token.fontFamily,
@@ -61,7 +60,6 @@ export function getRadioStyles(
       flexDirection: 'row',
       alignItems: 'center',
       alignSelf: 'flex-start',
-      opacity: state.disabled || !state.pressed ? 1 : token.pressedOpacity,
     },
     indicator: {
       width: token.indicatorSize,

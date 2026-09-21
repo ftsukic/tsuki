@@ -8,7 +8,11 @@ import { Avatar, Badge } from '@ftsukic/tsuki'
 import { Text, View } from 'react-native'
 
 export default function Example() {
-  const avatar = <Avatar style={{ backgroundColor: '#1989FA' }}>A</Avatar>
+  const avatar = (
+    <Avatar style={{ backgroundColor: '#1989FA' }} borderRadius={12}>
+      A
+    </Avatar>
+  )
 
   return (
     <View style={{ gap: 16 }}>

@@ -28,22 +28,11 @@ export interface CellResolvedStyles {
   divider: ViewStyle
 }
 
-export function getCellInteractionStyle(
-  token: CellToken,
-  state: Pick<CellStyleState, 'pressed' | 'disabled'>,
-): ViewStyle {
-  return {
-    backgroundColor: state.pressed ? token.pressedBackgroundColor : undefined,
-    opacity: state.disabled ? 0.4 : 1,
-  }
-}
-
 export function getCellStyles(
   token: CellToken,
   props: CellProps,
   state: CellStyleState,
 ): CellResolvedStyles {
-  const hasInteraction = isCellInteractive(props)
   const valueAlign = props.valueAlign ?? (props.vertical ? 'left' : 'right')
   const valueAlignItems =
     valueAlign === 'left' ? 'flex-start' : valueAlign === 'center' ? 'center' : 'flex-end'
@@ -55,12 +44,8 @@ export function getCellStyles(
 
   return {
     root: {
-      ...getCellInteractionStyle(token, {
-        pressed: hasInteraction && state.pressed,
-        disabled: state.disabled,
-      }),
-      backgroundColor:
-        hasInteraction && state.pressed ? token.pressedBackgroundColor : token.backgroundColor,
+      backgroundColor: token.backgroundColor,
+      opacity: state.disabled ? 0.4 : 1,
       position: 'relative',
     },
     row: {

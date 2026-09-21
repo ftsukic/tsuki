@@ -4,7 +4,7 @@ import { Text, View } from 'react-native'
 
 /**
  * @title PickerToolbar
- * @description Toolbar 可独立使用，默认隐藏 divider，并通过统一的 InteractionPressable 提供取消和确认操作。
+ * @description Toolbar 可独立使用，默认隐藏 divider，并通过统一的 Pressable 提供取消和确认操作。
  */
 export default function PickerToolbarExample() {
   const [message, setMessage] = useState('')

@@ -1,10 +1,35 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { StyleSheet, Text } from 'react-native'
+import type { JsonElement, JsonNode } from 'test-renderer'
 import { ConfigProvider, getDesignToken } from '..'
 import { Pressable } from '../pressable'
 
 function flattenStyle(testID: string) {
   return StyleSheet.flatten(screen.getByTestId(testID).props.style)
+}
+
+function findNodeByTestID(node: JsonNode | null, testID: string): JsonElement | undefined {
+  if (node === null || typeof node === 'string') return undefined
+  if (node.props.testID === testID) return node
+
+  for (const child of node.children) {
+    const found = findNodeByTestID(child, testID)
+    if (found) return found
+  }
+
+  return undefined
+}
+
+function findPressedLayer(node: JsonNode | null): JsonElement | undefined {
+  if (node === null || typeof node === 'string') return undefined
+  if (node.props.pointerEvents === 'none') return node
+
+  for (const child of node.children) {
+    const layer = findPressedLayer(child)
+    if (layer) return layer
+  }
+
+  return undefined
 }
 
 describe('Pressable', () => {
@@ -63,6 +88,143 @@ describe('Pressable', () => {
     expect(flattenStyle('scale').transform).toEqual([{ scale: 0.9 }])
     expect(flattenStyle('none')).toMatchObject({ opacity: 0.8 })
     expect(flattenStyle('none')).not.toHaveProperty('transform')
+  })
+
+  it('keeps background feedback on the root and overlay feedback above content', async () => {
+    const view = await render(
+      <>
+        <Pressable
+          testID="background-idle"
+          pressStyle="background"
+          pressedBackgroundColor="#123456"
+          style={{ backgroundColor: '#ffffff' }}
+        >
+          <Text>background</Text>
+        </Pressable>
+        <Pressable
+          testID="background-default"
+          pressStyle="background"
+          pressedBackgroundColor="#123456"
+          testOnly_pressed
+          style={{
+            backgroundColor: '#ffffff',
+            borderRadius: 12,
+            borderWidth: 1,
+            padding: 8,
+          }}
+        >
+          <Text testID="background-default-child">background</Text>
+        </Pressable>
+        <Pressable
+          testID="background-pressed-style"
+          pressStyle="background"
+          pressedBackgroundColor="#123456"
+          pressedStyle={{ backgroundColor: '#abcdef', borderColor: '#ff0000' }}
+          testOnly_pressed
+          style={{ backgroundColor: '#ffffff', borderRadius: 12, borderWidth: 1, padding: 8 }}
+        >
+          <Text>background</Text>
+        </Pressable>
+        <Pressable
+          testID="overlay"
+          pressStyle="overlay"
+          pressedOverlayColor="#654321"
+          pressedStyle={{ backgroundColor: '#abcdef', borderRadius: 10 }}
+          testOnly_pressed
+        >
+          <Text testID="overlay-child">overlay</Text>
+        </Pressable>
+        <Pressable
+          testID="overlay-user-style"
+          pressStyle="overlay"
+          testOnly_pressed
+          style={{ borderRadius: 12, overflow: 'visible' }}
+        />
+      </>,
+    )
+
+    const backgroundRoot = findNodeByTestID(view.toJSON(), 'background-default')
+    const backgroundLayer = findPressedLayer(backgroundRoot ?? null)
+    const backgroundChild = findNodeByTestID(backgroundRoot ?? null, 'background-default-child')
+    const backgroundIdle = findNodeByTestID(view.toJSON(), 'background-idle')
+    const backgroundPressedStyle = findNodeByTestID(view.toJSON(), 'background-pressed-style')
+    const overlayRoot = findNodeByTestID(view.toJSON(), 'overlay')
+    const overlayLayer = findPressedLayer(overlayRoot ?? null)
+    const overlayChild = findNodeByTestID(overlayRoot ?? null, 'overlay-child')
+    const overlayUserStyle = findNodeByTestID(view.toJSON(), 'overlay-user-style')
+
+    expect(backgroundRoot).toBeTruthy()
+    expect(backgroundLayer).toBeUndefined()
+    expect(StyleSheet.flatten(backgroundIdle?.props.style)).toMatchObject({
+      backgroundColor: '#ffffff',
+    })
+    expect(StyleSheet.flatten(backgroundRoot?.props.style)).toMatchObject({
+      backgroundColor: '#123456',
+      borderRadius: 12,
+      borderWidth: 1,
+      padding: 8,
+    })
+    if (!backgroundRoot || !backgroundChild) {
+      throw new Error('Expected background root and child')
+    }
+    expect(backgroundRoot.children.indexOf(backgroundChild)).toBeGreaterThanOrEqual(0)
+    expect(StyleSheet.flatten(backgroundPressedStyle?.props.style)).toMatchObject({
+      backgroundColor: '#abcdef',
+      borderColor: '#ff0000',
+      borderRadius: 12,
+      borderWidth: 1,
+      padding: 8,
+    })
+
+    expect(overlayLayer).toBeTruthy()
+    expect(StyleSheet.flatten(overlayLayer?.props.style)).toMatchObject({
+      backgroundColor: '#abcdef',
+      borderRadius: 10,
+    })
+    expect(overlayLayer?.props.pointerEvents).toBe('none')
+    if (!overlayRoot || !overlayLayer || !overlayChild) {
+      throw new Error('Expected overlay layer and child')
+    }
+    expect(overlayRoot.children.indexOf(overlayLayer)).toBeGreaterThan(
+      overlayRoot.children.indexOf(overlayChild),
+    )
+    expect(StyleSheet.flatten(overlayRoot.props.style)).toMatchObject({
+      overflow: 'hidden',
+    })
+    expect(StyleSheet.flatten(overlayUserStyle?.props.style)).toMatchObject({
+      overflow: 'visible',
+      borderRadius: 12,
+    })
+  })
+
+  it('does not render static feedback layers when disabled', async () => {
+    const view = await render(
+      <>
+        <Pressable disabled pressStyle="background" testID="background-disabled" testOnly_pressed />
+        <Pressable disabled pressStyle="overlay" testID="overlay-disabled" testOnly_pressed />
+      </>,
+    )
+
+    expect(
+      findPressedLayer(findNodeByTestID(view.toJSON(), 'background-disabled') ?? null),
+    ).toBeUndefined()
+    expect(
+      findPressedLayer(findNodeByTestID(view.toJSON(), 'overlay-disabled') ?? null),
+    ).toBeUndefined()
+  })
+
+  it('lets user root style override animated feedback', async () => {
+    await render(
+      <Pressable
+        testID="user-style"
+        pressStyle="opacity"
+        pressedOpacity={0.4}
+        style={{ opacity: 0.8 }}
+        testOnly_pressed
+      />,
+    )
+
+    expect(flattenStyle('user-style').opacity).toBe(0.8)
   })
 
   it('suppresses visual feedback when disabled', async () => {

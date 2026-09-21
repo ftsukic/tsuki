@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
 import { Animated, Easing, Platform } from 'react-native'
 import { Loading } from '../loading'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import {
@@ -13,7 +13,7 @@ import {
 import { getSwitchToken } from './token'
 import type { SwitchProps, SwitchStyleState } from './types'
 
-type SwitchRef = React.ComponentRef<typeof InteractionPressable>
+type SwitchRef = React.ComponentRef<typeof Pressable>
 
 const switchEasing = Easing.bezier(0.3, 1.05, 0.4, 1.05)
 // Vant's background-color transition does not specify a timing function, so
@@ -178,7 +178,7 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
   }, [activeValue, beforeChange, disabled, inactiveValue, loading, onPress, setValue])
 
   return (
-    <InteractionPressable
+    <Pressable
       ref={ref}
       {...pressableProps}
       accessibilityRole="switch"
@@ -190,6 +190,8 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
       }}
       disabled={disabled || loading}
       onPress={handlePress}
+      pressStyle="opacity"
+      pressedOpacity={token.pressedOpacity}
       style={({ hovered, pressed }) => {
         const state: SwitchStyleState = {
           active,
@@ -292,7 +294,7 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
           </Animated.View>
         )
       }}
-    </InteractionPressable>
+    </Pressable>
   )
 }
 

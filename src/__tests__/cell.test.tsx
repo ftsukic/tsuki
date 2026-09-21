@@ -649,21 +649,59 @@ describe('Cell', () => {
         { isLink: true },
         { pressed: true, disabled: false },
       ).root.backgroundColor,
-    ).toBe(pressedBackgroundColor)
+    ).toBe(getCellToken(getDesignToken()).backgroundColor)
     expect(
       getCellStyles(
         getCellToken(getDesignToken()),
         { isLink: true, clickable: false },
         { pressed: true, disabled: false },
       ).root.backgroundColor,
-    ).not.toBe(pressedBackgroundColor)
+    ).toBe(getCellToken(getDesignToken()).backgroundColor)
     expect(
       getCellStyles(
         getCellToken(getDesignToken()),
         { clickable: true },
         { pressed: true, disabled: false },
       ).root.backgroundColor,
-    ).toBe(pressedBackgroundColor)
+    ).toBe(getCellToken(getDesignToken()).backgroundColor)
+
+    const view = await render(
+      <ConfigProvider theme={{ token: { pressedBackgroundColor } }}>
+        <Cell
+          testID="normal-styled"
+          title="正常"
+          onPress={() => {}}
+          style={{ backgroundColor: '#ffffff' }}
+        />
+        <Cell
+          testID="pressed-styled"
+          title="按下样式"
+          onPress={() => {}}
+          style={{ backgroundColor: '#ffffff' }}
+          testOnly_pressed
+        />
+        <Cell testID="pressed" title="按下" onPress={() => {}} testOnly_pressed />
+        <Cell testID="not-clickable-pressed" title="静态" clickable={false} testOnly_pressed />
+        <Cell testID="disabled-pressed" title="禁用" disabled onPress={() => {}} testOnly_pressed />
+      </ConfigProvider>,
+    )
+
+    expect(nodeStyle(cellNode(view.toJSON(), 'normal-styled')).backgroundColor).toBe('#ffffff')
+    expect(nodeStyle(cellNode(view.toJSON(), 'pressed-styled')).backgroundColor).toBe(
+      pressedBackgroundColor,
+    )
+    expect(nodeStyle(cellNode(view.toJSON(), 'pressed')).backgroundColor).toBe(
+      pressedBackgroundColor,
+    )
+    expect(nodeStyle(cellNode(view.toJSON(), 'not-clickable-pressed')).backgroundColor).toBe(
+      getCellToken(getDesignToken()).backgroundColor,
+    )
+    expect(nodeStyle(cellNode(view.toJSON(), 'disabled-pressed')).backgroundColor).toBe(
+      getCellToken(getDesignToken()).backgroundColor,
+    )
+    expect(
+      findNodes(cellNode(view.toJSON(), 'pressed'), (node) => node.props.pointerEvents === 'none'),
+    ).toHaveLength(0)
   })
 
   it('keeps Cell press behavior and dividers after Interaction migration', async () => {

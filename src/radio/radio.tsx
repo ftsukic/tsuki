@@ -1,7 +1,7 @@
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import { Icon } from '../icon'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import { RadioGroupContext } from './context'
 import type { RadioProps, RadioStyleState } from './types'
 import { getRadioStyles } from './style'
@@ -21,154 +21,148 @@ function warnMissingValue() {
   }
 }
 
-export const Radio = forwardRef<React.ComponentRef<typeof InteractionPressable>, RadioProps>(
-  function Radio(
-    {
-      children,
-      value,
-      checked,
-      defaultChecked = false,
-      disabled = false,
-      shape = 'round',
-      variant,
-      buttonVariant,
-      labelPosition = 'right',
-      checkedColor,
-      style,
-      styles,
-      onPress,
-      onChange,
-      ...pressableProps
-    },
-    ref,
-  ) {
-    const group = useContext(RadioGroupContext)
-    const token = useComponentToken('Radio', getRadioToken)
-    const [uncontrolledChecked, setUncontrolledChecked] = useState(defaultChecked)
-    const warnedMissingValue = useRef(false)
-    const isControlled = checked !== undefined
-    const effectiveDisabled = disabled || !!group?.disabled
-    const resolvedVariant = variant ?? group?.variant ?? 'default'
-    const resolvedButtonVariant = buttonVariant ?? group?.buttonVariant ?? 'solid'
-    const buttonLayout = group?.buttonLayout ?? 'intrinsic'
-    const isChecked = group
-      ? value !== undefined && Object.is(group.value, value)
-      : isControlled
-        ? checked
-        : uncontrolledChecked
-
-    useEffect(() => {
-      if (group && value === undefined && !warnedMissingValue.current) {
-        warnedMissingValue.current = true
-        warnMissingValue()
-      }
-    }, [group, value])
-
-    const handlePress = useCallback<NonNullable<RadioProps['onPress']>>(
-      (event) => {
-        if (effectiveDisabled) return
-
-        onPress?.(event)
-
-        if (group) {
-          if (value === undefined) return
-
-          if (group.select(value)) onChange?.(true)
-          return
-        }
-
-        if (isChecked) return
-        if (!isControlled) setUncontrolledChecked(true)
-        onChange?.(true)
-      },
-      [effectiveDisabled, group, isChecked, isControlled, onChange, onPress, value],
-    )
-
-    const radioProps: RadioProps = {
-      children,
-      value,
-      checked: isChecked,
-      defaultChecked,
-      disabled: effectiveDisabled,
-      shape,
-      variant: resolvedVariant,
-      buttonVariant: resolvedButtonVariant,
-      labelPosition,
-      checkedColor,
-      style,
-      styles,
-      onChange,
-    }
-
-    return (
-      <InteractionPressable
-        ref={ref}
-        {...pressableProps}
-        accessibilityRole={pressableProps.accessibilityRole ?? 'radio'}
-        accessibilityState={{
-          ...pressableProps.accessibilityState,
-          selected: isChecked,
-          disabled: effectiveDisabled,
-        }}
-        disabled={effectiveDisabled}
-        onPress={handlePress}
-        style={({ pressed }) => {
-          const state: RadioStyleState = {
-            checked: isChecked,
-            disabled: effectiveDisabled,
-            pressed,
-          }
-          const resolved = getRadioStyles(token, radioProps, state, buttonLayout)
-          const semantic = resolveStyles(styles, { props: radioProps, state })
-          return [resolved.root, semantic?.root, style]
-        }}
-      >
-        {({ pressed }) => {
-          const state: RadioStyleState = {
-            checked: isChecked,
-            disabled: effectiveDisabled,
-            pressed,
-          }
-          const resolved = getRadioStyles(token, radioProps, state, buttonLayout)
-          const semantic = resolveStyles(styles, { props: radioProps, state })
-          const label = isTextContent(children) ? (
-            <Text
-              numberOfLines={
-                resolvedVariant === 'button' && buttonLayout === 'equal' ? 1 : undefined
-              }
-              style={[resolved.label, semantic?.label]}
-            >
-              {children}
-            </Text>
-          ) : children !== undefined && children !== null && typeof children !== 'boolean' ? (
-            <View style={semantic?.label}>{children}</View>
-          ) : null
-
-          if (resolvedVariant === 'button') return label
-
-          return (
-            <>
-              {labelPosition === 'left' ? label : null}
-              <View style={[resolved.indicator, semantic?.indicator]}>
-                {shape === 'dot' ? (
-                  isChecked ? (
-                    <View style={resolved.dot} />
-                  ) : null
-                ) : isChecked ? (
-                  <Icon
-                    name="CheckOutlined"
-                    size={resolved.checkSize}
-                    color={resolved.checkColor}
-                  />
-                ) : null}
-              </View>
-              {labelPosition === 'right' ? label : null}
-            </>
-          )
-        }}
-      </InteractionPressable>
-    )
+export const Radio = forwardRef<React.ComponentRef<typeof Pressable>, RadioProps>(function Radio(
+  {
+    children,
+    value,
+    checked,
+    defaultChecked = false,
+    disabled = false,
+    shape = 'round',
+    variant,
+    buttonVariant,
+    labelPosition = 'right',
+    checkedColor,
+    style,
+    styles,
+    onPress,
+    onChange,
+    ...pressableProps
   },
-)
+  ref,
+) {
+  const group = useContext(RadioGroupContext)
+  const token = useComponentToken('Radio', getRadioToken)
+  const [uncontrolledChecked, setUncontrolledChecked] = useState(defaultChecked)
+  const warnedMissingValue = useRef(false)
+  const isControlled = checked !== undefined
+  const effectiveDisabled = disabled || !!group?.disabled
+  const resolvedVariant = variant ?? group?.variant ?? 'default'
+  const resolvedButtonVariant = buttonVariant ?? group?.buttonVariant ?? 'solid'
+  const buttonLayout = group?.buttonLayout ?? 'intrinsic'
+  const isChecked = group
+    ? value !== undefined && Object.is(group.value, value)
+    : isControlled
+      ? checked
+      : uncontrolledChecked
+
+  useEffect(() => {
+    if (group && value === undefined && !warnedMissingValue.current) {
+      warnedMissingValue.current = true
+      warnMissingValue()
+    }
+  }, [group, value])
+
+  const handlePress = useCallback<NonNullable<RadioProps['onPress']>>(
+    (event) => {
+      if (effectiveDisabled) return
+
+      onPress?.(event)
+
+      if (group) {
+        if (value === undefined) return
+
+        if (group.select(value)) onChange?.(true)
+        return
+      }
+
+      if (isChecked) return
+      if (!isControlled) setUncontrolledChecked(true)
+      onChange?.(true)
+    },
+    [effectiveDisabled, group, isChecked, isControlled, onChange, onPress, value],
+  )
+
+  const radioProps: RadioProps = {
+    children,
+    value,
+    checked: isChecked,
+    defaultChecked,
+    disabled: effectiveDisabled,
+    shape,
+    variant: resolvedVariant,
+    buttonVariant: resolvedButtonVariant,
+    labelPosition,
+    checkedColor,
+    style,
+    styles,
+    onChange,
+  }
+
+  return (
+    <Pressable
+      ref={ref}
+      {...pressableProps}
+      accessibilityRole={pressableProps.accessibilityRole ?? 'radio'}
+      accessibilityState={{
+        ...pressableProps.accessibilityState,
+        selected: isChecked,
+        disabled: effectiveDisabled,
+      }}
+      disabled={effectiveDisabled}
+      onPress={handlePress}
+      pressStyle="opacity"
+      pressedOpacity={token.pressedOpacity}
+      style={({ pressed }) => {
+        const state: RadioStyleState = {
+          checked: isChecked,
+          disabled: effectiveDisabled,
+          pressed,
+        }
+        const resolved = getRadioStyles(token, radioProps, state, buttonLayout)
+        const semantic = resolveStyles(styles, { props: radioProps, state })
+        return [resolved.root, semantic?.root, style]
+      }}
+    >
+      {({ pressed }) => {
+        const state: RadioStyleState = {
+          checked: isChecked,
+          disabled: effectiveDisabled,
+          pressed,
+        }
+        const resolved = getRadioStyles(token, radioProps, state, buttonLayout)
+        const semantic = resolveStyles(styles, { props: radioProps, state })
+        const label = isTextContent(children) ? (
+          <Text
+            numberOfLines={resolvedVariant === 'button' && buttonLayout === 'equal' ? 1 : undefined}
+            style={[resolved.label, semantic?.label]}
+          >
+            {children}
+          </Text>
+        ) : children !== undefined && children !== null && typeof children !== 'boolean' ? (
+          <View style={semantic?.label}>{children}</View>
+        ) : null
+
+        if (resolvedVariant === 'button') return label
+
+        return (
+          <>
+            {labelPosition === 'left' ? label : null}
+            <View style={[resolved.indicator, semantic?.indicator]}>
+              {shape === 'dot' ? (
+                isChecked ? (
+                  <View style={resolved.dot} />
+                ) : null
+              ) : isChecked ? (
+                <Icon name="CheckOutlined" size={resolved.checkSize} color={resolved.checkColor} />
+              ) : null}
+            </View>
+            {labelPosition === 'right' ? label : null}
+          </>
+        )
+      }}
+    </Pressable>
+  )
+})
 
 Radio.displayName = 'Radio'

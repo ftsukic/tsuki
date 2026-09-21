@@ -88,7 +88,7 @@ const swipeCell = useSwipeCellController()
 <FlatList onScrollBeginDrag={swipeCell.closeCurrent} />
 ```
 
-React Native 没有 Web DOM 的全局 click-outside 事件。页面中的自定义原生 `Pressable` 或滚动事件仍应显式调用 `swipeCell.closeCurrent()`；组件库的 `InteractionPressable` 会自动接入 coordinator。
+React Native 没有 Web DOM 的全局 click-outside 事件。页面中的自定义原生 `Pressable` 或滚动事件仍应显式调用 `swipeCell.closeCurrent()`；组件库的 `Pressable` 会自动接入 coordinator。
 
 ### SwipeCellActionItem
 

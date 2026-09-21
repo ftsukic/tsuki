@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-ActionSheet 用于从底部展示一组操作。它复用 Popup 的 bottom 定位、底部安全区、滑入动画和 Overlay 遮罩，并使用统一的 `InteractionPressable` 提供点击反馈。
+ActionSheet 用于从底部展示一组操作。它复用 Popup 的 bottom 定位、底部安全区、滑入动画和 Overlay 遮罩，并使用统一的 `Pressable` 提供点击反馈。
 
 </section>
 
@@ -77,7 +77,7 @@ import { ActionSheet, ConfigProvider, PortalHost, Provider, showActionSheet } fr
 
 ActionSheet 不会直接修改 `visible`。action、取消按钮和默认遮罩点击都会先触发 action 回调（如果有），再触发 `onClose`；父组件需要在回调中设置 `visible={false}`。设置 `closeOnAction={false}` 后 action 仍会执行，但不触发关闭请求。
 
-`safeAreaInsetBottom` 仅在 bottom Popup 面板上生效；有取消按钮时，底部安全区与取消内容共用一个 `InteractionPressable`，取消按压背景会连续覆盖两者；没有取消按钮时安全区作为 actions surface 的独立 View 追加。没有 `SafeAreaProvider` 或 bottom inset 时高度按 `0` 处理。
+`safeAreaInsetBottom` 仅在 bottom Popup 面板上生效；有取消按钮时，底部安全区与取消内容共用一个 `Pressable`，取消按压背景会连续覆盖两者；没有取消按钮时安全区作为 actions surface 的独立 View 追加。没有 `SafeAreaProvider` 或 bottom inset 时高度按 `0` 处理。
 
 ### ActionSheetAction
 
@@ -90,7 +90,7 @@ ActionSheet 不会直接修改 `visible`。action、取消按钮和默认遮罩�
 | disabled | `boolean`          | `false` | 禁用点击并使用禁用视觉                       |
 | callback | `(action) => void` | —       | action 点击回调；disabled/loading 时不会触发 |
 
-每个 action 都是完整的 `InteractionPressable` 点击区域，默认无障碍角色为 `button`，disabled/loading 会同步 `accessibilityState`。标题不参与操作导航；面板标记为 modal。当前不支持 action 级别的 `style`、`accessibilityLabel` 或额外 Pressable props；需要自定义内容时使用 `name` 和 `subname` 的 ReactNode。
+每个 action 都是完整的 `Pressable` 点击区域，默认无障碍角色为 `button`，disabled/loading 会同步 `accessibilityState`。标题不参与操作导航；面板标记为 modal。当前不支持 action 级别的 `style`、`accessibilityLabel` 或额外 Pressable props；需要自定义内容时使用 `name` 和 `subname` 的 ReactNode。
 
 ActionSheet 级别的 `onSelect` 接收 `(action, index)`，在 action 的 `callback(action)` 之后触发；它不会被 `closeOnAction` 替代。
 

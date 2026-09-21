@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import { Animated, Easing, View } from 'react-native'
 import type { LayoutChangeEvent, StyleProp, TextStyle, View as ViewComponent } from 'react-native'
 import { getButtonToken } from '../button/token'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
@@ -251,13 +251,16 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
         ]
 
         return (
-          <InteractionPressable
+          <Pressable
             key={`${String(option.value)}-${index}`}
             accessibilityRole="radio"
             accessibilityState={{ disabled: effectiveDisabled, selected: active }}
             disabled={effectiveDisabled}
             onLayout={(event) => setItemLayout(index, event)}
             onPress={() => selectOption(option)}
+            pressStyle={!active && !effectiveDisabled ? 'background' : 'none'}
+            pressedBackgroundColor={segmentedToken.pressedBackgroundColor}
+            pressedStyle={resolvedStyles.optionPressed}
             style={[
               resolvedStyles.option,
               optionLayoutStyles,
@@ -266,15 +269,8 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
               semanticStyles?.option,
             ]}
           >
-            {({ pressed }) => (
-              <>
-                {pressed && !effectiveDisabled && !active ? (
-                  <View pointerEvents="none" style={resolvedStyles.pressedOverlay} />
-                ) : null}
-                {renderOptionLabel(option.label, labelStyle)}
-              </>
-            )}
-          </InteractionPressable>
+            {renderOptionLabel(option.label, labelStyle)}
+          </Pressable>
         )
       })}
     </View>

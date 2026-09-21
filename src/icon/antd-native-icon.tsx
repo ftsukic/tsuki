@@ -1,6 +1,6 @@
 import { useToken } from '../theme'
 import { useIconSize } from './context'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import type { AntdNativeIconProps } from './types'
 import type { AbstractNode, IconDefinition } from '@ant-design/icons-svg/lib/types'
 import { memo, type ReactNode } from 'react'
@@ -223,14 +223,16 @@ export function AntdNativeIcon({
   if (!onPress) return <View style={resolvedStyle}>{touchBoundary}</View>
 
   return (
-    <InteractionPressable
+    <Pressable
       disabled={disabled}
       onPress={onPress}
       hitSlop={getIconHitSlop(resolvedSize, touchableSize, hitSlop)}
-      style={({ pressed }) => [resolvedStyle, pressed && { opacity: token.pressedOpacity }]}
+      pressStyle="opacity"
+      pressedOpacity={token.pressedOpacity}
+      style={resolvedStyle}
     >
       {touchBoundary}
-    </InteractionPressable>
+    </Pressable>
   )
 }
 

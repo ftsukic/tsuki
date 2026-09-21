@@ -1,5 +1,5 @@
 import { Icon } from '../icon'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import { CheckboxGroupContext } from './context'
@@ -22,7 +22,7 @@ function warnMissingName() {
   }
 }
 
-export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressable>, CheckboxProps>(
+export const Checkbox = forwardRef<React.ComponentRef<typeof Pressable>, CheckboxProps>(
   function Checkbox(
     {
       children,
@@ -108,7 +108,7 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
     }
 
     return (
-      <InteractionPressable
+      <Pressable
         ref={ref}
         {...pressableProps}
         accessibilityRole={pressableProps.accessibilityRole ?? 'checkbox'}
@@ -120,6 +120,8 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
         disabled={effectiveDisabled}
         onPress={handlePress}
         onPressDebounceWait={onPressDebounceWait}
+        pressStyle="opacity"
+        pressedOpacity={checkboxToken.pressedOpacity}
         style={({ pressed }) => {
           const state: CheckboxStyleState = {
             checked: isChecked,
@@ -178,7 +180,7 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof InteractionPressabl
             </>
           )
         }}
-      </InteractionPressable>
+      </Pressable>
     )
   },
 )

@@ -1,13 +1,13 @@
 import React from 'react'
-import { act, cleanup, render, screen, userEvent } from '@testing-library/react-native'
+import { act, cleanup, fireEvent, render, screen, userEvent } from '@testing-library/react-native'
 import { Pressable, StyleSheet, Text } from 'react-native'
 import * as Reanimated from 'react-native-reanimated'
 import { State } from 'react-native-gesture-handler'
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils'
+import type { TestInstance } from 'test-renderer'
 import {
   Cell,
   ConfigProvider,
-  getDesignToken,
   Provider,
   SwipeCell,
   SwipeCellAction,
@@ -15,8 +15,6 @@ import {
   useInteraction,
   useSwipeCellController,
 } from '..'
-import { getCellInteractionStyle } from '../cell/style'
-import { getCellToken } from '../cell/token'
 import { SwipeCellManager } from '../swipe-cell/manager'
 import type { SwipeCellRef } from '../swipe-cell'
 
@@ -54,6 +52,24 @@ function getTranslation(testID: string) {
     return (value as { __getValue: () => number }).__getValue()
   }
   return value
+}
+
+function findPressedLayer(node: TestInstance, backgroundColor: string): TestInstance | undefined {
+  if (
+    node.props.pointerEvents === 'none' &&
+    StyleSheet.flatten(node.props.style)?.backgroundColor === backgroundColor
+  ) {
+    return node
+  }
+
+  for (const child of node.children) {
+    if (typeof child !== 'string') {
+      const layer = findPressedLayer(child, backgroundColor)
+      if (layer) return layer
+    }
+  }
+
+  return undefined
 }
 
 function CloseCurrentButton() {
@@ -575,21 +591,61 @@ describe('SwipeCell', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
-  it('uses the Cell pressed background for the content press feedback', async () => {
-    await render(
-      <TestProvider>
+  it('shares Cell background feedback while keeping action overlay feedback separate', async () => {
+    const pressedBackgroundColor = '#123456'
+    const pressedOverlayColor = '#654321'
+    const view = await render(
+      <ConfigProvider
+        theme={{
+          token: {
+            motion: false,
+            pressedBackgroundColor,
+            pressedOverlayColor,
+          },
+        }}
+      >
+        <Cell testID="pressed-cell" title="Cell" onPress={() => {}} testOnly_pressed />
         <SwipeCell testID="pressed-content" rightAction="删除">
           <Text>内容</Text>
         </SwipeCell>
-      </TestProvider>,
+      </ConfigProvider>,
     )
 
-    expect(
-      getCellInteractionStyle(getCellToken(getDesignToken()), {
-        pressed: true,
-        disabled: false,
-      }).backgroundColor,
-    ).toBe(getDesignToken().pressedBackgroundColor)
+    expect(StyleSheet.flatten(screen.getByTestId('pressed-cell').props.style)).toMatchObject({
+      backgroundColor: pressedBackgroundColor,
+    })
+
+    const content = screen.getByTestId('pressed-content-pressable')
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {
+      fireEvent(content, 'pressIn')
+      await Promise.resolve()
+    })
+    expect(StyleSheet.flatten(content.props.style)).toMatchObject({
+      backgroundColor: pressedBackgroundColor,
+    })
+    expect(findPressedLayer(content, pressedOverlayColor)).toBeUndefined()
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {
+      fireEvent(content, 'pressOut')
+      await Promise.resolve()
+    })
+
+    const action = screen.getByText('删除').parent
+    if (!action) throw new Error('Expected SwipeCell action pressable')
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {
+      fireEvent(action, 'pressIn')
+      await Promise.resolve()
+    })
+    expect(findPressedLayer(action, pressedOverlayColor)).toBeTruthy()
+    expect(findPressedLayer(action, pressedBackgroundColor)).toBeUndefined()
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => {
+      fireEvent(action, 'pressOut')
+      await Promise.resolve()
+    })
+    await view.unmount()
   })
 
   it('closes the active cell when another library pressable is touched', async () => {

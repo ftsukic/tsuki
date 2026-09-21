@@ -16,7 +16,6 @@ import { GestureDetector, Gesture } from '../gesture'
 import { Animated, useAnimatedStyle, useSharedValue, withSpring } from '../animation'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useInteraction } from '../interaction'
-import { getCellInteractionStyle } from '../cell/style'
 import { getCellToken } from '../cell/token'
 import { Pressable } from '../pressable'
 import { useComponentToken, useToken } from '../theme'
@@ -452,9 +451,9 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
           interactionId={cellId}
           onPressIn={handleContentPressIn}
           onPress={close}
-          pressStyle="none"
+          pressStyle="background"
+          pressedBackgroundColor={cellToken.pressedBackgroundColor}
           testID={testID ? `${testID}-pressable` : undefined}
-          style={({ pressed }) => getCellInteractionStyle(cellToken, { pressed, disabled: false })}
         >
           {children}
         </Pressable>

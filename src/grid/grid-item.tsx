@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import { View } from 'react-native'
 import { useToken } from '../theme'
 import { useGridContext } from './context'
@@ -36,19 +36,20 @@ export function GridItem({
   const hasText = isVisible(content)
 
   return (
-    <InteractionPressable
+    <Pressable
       {...pressableProps}
       accessibilityRole={pressableProps.accessibilityRole ?? (onPress ? 'button' : undefined)}
       disabled={isDisabled}
       onPress={onPress}
       onPressDebounceWait={onPressDebounceWait}
-      style={({ pressed }) => [
+      pressStyle={onPress ? 'background' : 'none'}
+      pressedBackgroundColor={token.pressedBackgroundColor}
+      style={[
         {
           alignItems: center ? 'center' : 'flex-start',
           alignSelf: 'stretch',
           aspectRatio: square ? 1 : undefined,
-          backgroundColor:
-            pressed && onPress ? token.pressedBackgroundColor : token.colorBgContainer,
+          backgroundColor: token.colorBgContainer,
           borderColor: border ? token.colorBorder : 'transparent',
           borderWidth: border ? 1 : 0,
           justifyContent: center ? 'center' : 'flex-start',
@@ -59,13 +60,11 @@ export function GridItem({
         style,
       ]}
     >
-      {() => (
-        <>
-          {hasIcon ? <View style={{ marginBottom: hasText ? 6 : 0 }}>{icon}</View> : null}
-          {renderText(content, token.colorText, token.fontFamily)}
-        </>
-      )}
-    </InteractionPressable>
+      <>
+        {hasIcon ? <View style={{ marginBottom: hasText ? 6 : 0 }}>{icon}</View> : null}
+        {renderText(content, token.colorText, token.fontFamily)}
+      </>
+    </Pressable>
   )
 }
 

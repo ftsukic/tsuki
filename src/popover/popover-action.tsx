@@ -1,5 +1,5 @@
 import { cloneElement, isValidElement } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { View } from 'react-native'
 import type { ReactNode } from 'react'
 import type { ColorValue, StyleProp, TextStyle } from 'react-native'
 import { Pressable } from '../pressable'
@@ -110,32 +110,20 @@ export function PopoverActionItem({
       onPress={() => {
         onSelect(action, index)
       }}
-      pressStyle="none"
-      style={({ pressed }) => [
-        styles.action,
-        semantic?.action,
-        theme === 'light' && pressed && !disabled
-          ? { backgroundColor: token.lightPressedBackgroundColor }
-          : undefined,
-      ]}
+      pressStyle={theme === 'light' ? 'background' : 'overlay'}
+      pressedBackgroundColor={token.lightPressedBackgroundColor}
+      pressedOverlayColor={token.darkPressedOverlayColor}
+      style={[styles.action, semantic?.action]}
       testID={`popover-action-${index}`}
     >
-      {({ pressed }) => (
-        <>
-          {action.icon !== undefined && action.icon !== null && action.icon !== false ? (
-            <View pointerEvents="none" style={[styles.actionIcon, semantic?.actionIcon]}>
-              {applyActionColor(action.icon, actionColor)}
-            </View>
-          ) : null}
-          {renderText(action.text, actionTextStyle, actionColor)}
-          {theme === 'dark' && pressed && !disabled ? (
-            <View
-              pointerEvents="none"
-              style={[StyleSheet.absoluteFill, { backgroundColor: token.darkPressedOverlayColor }]}
-            />
-          ) : null}
-        </>
-      )}
+      <>
+        {action.icon !== undefined && action.icon !== null && action.icon !== false ? (
+          <View pointerEvents="none" style={[styles.actionIcon, semantic?.actionIcon]}>
+            {applyActionColor(action.icon, actionColor)}
+          </View>
+        ) : null}
+        {renderText(action.text, actionTextStyle, actionColor)}
+      </>
     </Pressable>
   )
 }

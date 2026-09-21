@@ -151,6 +151,27 @@ describe('Collapse', () => {
     expect(screen.getByTestId('disabled').props.accessibilityState?.expanded).toBe(false)
   })
 
+  it('keeps the normal header surface and replaces it with pressed feedback', async () => {
+    const pressedBackgroundColor = '#123456'
+    const collapseToken = getCollapseToken(getDesignToken())
+
+    await render(
+      <ConfigProvider theme={{ token: { pressedBackgroundColor } }}>
+        <Collapse>
+          <CollapseItem testID="normal" name="normal" title="正常" />
+          <CollapseItem testID="pressed" name="pressed" title="按下" testOnly_pressed />
+        </Collapse>
+      </ConfigProvider>,
+    )
+
+    expect(StyleSheet.flatten(screen.getByTestId('normal').props.style).backgroundColor).toBe(
+      collapseToken.contentBackgroundColor,
+    )
+    expect(StyleSheet.flatten(screen.getByTestId('pressed').props.style).backgroundColor).toBe(
+      pressedBackgroundColor,
+    )
+  })
+
   it('supports numeric names and themed outer borders', async () => {
     const view = await render(
       <ConfigProvider theme={{ components: { Collapse: { headerHeight: 52 } } }}>
@@ -176,12 +197,10 @@ describe('Collapse', () => {
     const styles = getCollapseStyles(collapseToken, {
       active: false,
       disabled: false,
-      pressed: false,
     })
     const disabledStyles = getCollapseStyles(collapseToken, {
       active: false,
       disabled: true,
-      pressed: false,
     })
 
     expect(collapseToken.headerHeight).toBe(cellToken.minHeight)

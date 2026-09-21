@@ -209,7 +209,7 @@ describe('Radio', () => {
     expect(token.disabledMarkColor).toBe(aliasToken.colorTextDisabled)
     expect(token.disabledOpacity).toBe(0.4)
 
-    expect(disabledUnchecked.root.opacity).toBe(1)
+    expect(disabledUnchecked.root).not.toHaveProperty('opacity')
     expect(disabledUnchecked.indicator).toMatchObject({
       backgroundColor: token.disabledBackgroundColor,
       borderColor: token.disabledBorderColor,
@@ -224,7 +224,7 @@ describe('Radio', () => {
     })
     expect(disabledRoundChecked.checkColor).toBe(token.disabledMarkColor)
     expect(disabledSquareChecked.checkColor).toBe(token.disabledMarkColor)
-    expect(disabledDotChecked.root.opacity).toBe(1)
+    expect(disabledDotChecked.root).not.toHaveProperty('opacity')
     expect(disabledDotChecked.indicator).toMatchObject({
       backgroundColor: token.disabledBackgroundColor,
       borderColor: token.disabledBorderColor,

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { View } from 'react-native'
 import { Icon } from '../icon'
-import { InteractionPressable } from '../interaction'
 import { Pressable } from '../pressable'
 import { useToken } from '../theme'
 import { NoticeBarContent } from './notice-bar-content'
@@ -30,7 +29,7 @@ export function NoticeBar({
   const [shown, setShown] = useState(visibleProp)
   const content = children !== undefined ? children : text
   const effectiveVisible = shown && visibleProp
-  const styles = getNoticeBarStyles(token, wrapable, disabled, false, onClick !== undefined)
+  const styles = getNoticeBarStyles(token, wrapable, disabled)
 
   useEffect(() => {
     setShown(visibleProp)
@@ -52,15 +51,15 @@ export function NoticeBar({
 
   return (
     <View accessibilityLiveRegion="polite" style={styles.root}>
-      <InteractionPressable
+      <Pressable
         accessibilityRole="alert"
         accessibilityState={{ disabled }}
         accessible
         disabled={disabled}
         onPress={onClick}
-        style={({ pressed }) =>
-          getNoticeBarStyles(token, wrapable, disabled, pressed, onClick !== undefined).contentRoot
-        }
+        pressStyle={onClick ? 'opacity' : 'none'}
+        pressedOpacity={token.pressedOpacity}
+        style={styles.contentRoot}
       >
         {isRenderable(leftIcon) ? <View style={styles.leftIcon}>{leftIcon}</View> : null}
         <NoticeBarContent
@@ -72,7 +71,7 @@ export function NoticeBar({
           styles={styles}
           wrapable={wrapable}
         />
-      </InteractionPressable>
+      </Pressable>
       {isRenderable(resolvedRightIcon) ? (
         onClose ? (
           <Pressable

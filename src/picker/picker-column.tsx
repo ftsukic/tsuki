@@ -11,7 +11,7 @@ import {
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native'
 import { View } from 'react-native'
 import { Gesture, GestureDetector } from '../gesture'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
 import { scheduleOnRN } from 'react-native-worklets'
@@ -89,11 +89,12 @@ const PickerColumnItem = memo(function PickerColumnItem({
   const disabled = columnDisabled || item.disabled === true
 
   return (
-    <InteractionPressable
+    <Pressable
       accessibilityRole="radio"
       accessibilityState={{ disabled, selected: index === selectedIndex }}
       disabled={disabled}
       onPress={() => onPress(index)}
+      pressStyle="none"
       style={[
         styles.item,
         itemStyle,
@@ -104,7 +105,7 @@ const PickerColumnItem = memo(function PickerColumnItem({
       <Text numberOfLines={1} style={[styles.itemLabel, itemLabelStyle]}>
         {item.text}
       </Text>
-    </InteractionPressable>
+    </Pressable>
   )
 })
 

@@ -141,7 +141,6 @@ export const CollapseItem = forwardRef<ViewComponent, CollapseItemProps>(functio
   const resolvedStyles = getCollapseStyles(token, {
     active,
     disabled,
-    pressed: false,
   })
 
   return (
@@ -156,11 +155,9 @@ export const CollapseItem = forwardRef<ViewComponent, CollapseItemProps>(functio
         }}
         disabled={disabled}
         onPress={() => context.toggle(name)}
-        pressStyle="none"
-        style={({ pressed }) => [
-          getCollapseStyles(token, { active, disabled, pressed }).header,
-          style,
-        ]}
+        pressStyle="background"
+        pressedBackgroundColor={token.headerPressedBackgroundColor}
+        style={[resolvedStyles.header, style]}
       >
         {icon ? <View style={resolvedStyles.icon}>{icon}</View> : null}
         {typeof title === 'string' || typeof title === 'number' ? (

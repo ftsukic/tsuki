@@ -26,7 +26,6 @@ export interface SelectionButtonStyleToken {
   disabledBackgroundColor: ColorValue
   disabledBorderColor: ColorValue
   disabledLabelColor: ColorValue
-  pressedOpacity: number
   disabledOpacity: number
   fontSize: number
   fontFamily: string
@@ -100,7 +99,7 @@ export function getSelectionButtonStyles(
       justifyContent: 'center',
       minHeight: token.height,
       minWidth: token.minWidth,
-      opacity: state.disabled ? token.disabledOpacity : state.pressed ? token.pressedOpacity : 1,
+      ...(state.disabled ? { opacity: token.disabledOpacity } : {}),
       paddingHorizontal: token.paddingHorizontal,
     },
     label: {

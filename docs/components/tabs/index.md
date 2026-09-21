@@ -92,7 +92,7 @@ Tabs 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`
 | style | `StyleProp<ViewStyle>` | — | 当前 Tab 的 Pressable 样式 |
 | 其他 PressableProps | React Native `PressableProps` | — | 例如 `testID`、`accessibilityLabel`、`hitSlop` 和 `onPressIn` |
 
-`Tab` 是声明式子项，交互由 Tabs 内部的 `InteractionPressable` 提供。整个 Tab 区域都可以点击；disabled 时不会触发 `onChange`。没有 `name` 时使用当前 index，适合无受控需求的导航场景。
+`Tab` 是声明式子项，交互由 Tabs 内部的 `Pressable` 提供。整个 Tab 区域都可以点击；disabled 时不会触发 `onChange`。没有 `name` 时使用当前 index，适合无受控需求的导航场景。
 
 Tab 的 `children` 不要求存在。没有任何 pane 内容时，Tabs 只渲染导航，不生成空内容区域。`lazyRender` 默认为 visit-once：pane 首次激活前不渲染，激活后保持挂载；设为 `false` 时所有 pane 一开始都挂载。`swipeable` 只在存在内容时启用横向手势，不会把 navigation-only Tab 变成空页面。
 
@@ -148,4 +148,4 @@ Tab 标题和 line indicator 的切换动画默认始终开启，scrollable/shri
 </ConfigProvider>
 ```
 
-Tabs 使用主题 token 和 `InteractionPressable`，不提供 Web 专属的 `className`、HTML 属性或 DOM API；不包含路由绑定和强制内容面板 API。
+Tabs 使用主题 token 和 `Pressable`，不提供 Web 专属的 `className`、HTML 属性或 DOM API；不包含路由绑定和强制内容面板 API。

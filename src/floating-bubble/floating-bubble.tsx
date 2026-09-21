@@ -410,13 +410,13 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
               disabled={disabled}
               onLayout={handleLayout}
               onPress={onPress}
-              pressStyle="none"
-              style={({ pressed }) => [
+              pressStyle="opacity"
+              pressedOpacity={token.pressedOpacity}
+              style={[
                 resolvedStyles.root,
                 semantic?.root,
                 style,
                 animatedStyle,
-                pressed && !disabled ? { opacity: token.pressedOpacity } : undefined,
                 ready ? undefined : { opacity: 0 },
               ]}
             >

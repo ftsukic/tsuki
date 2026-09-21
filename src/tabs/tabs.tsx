@@ -18,7 +18,7 @@ import type {
   View as ViewComponent,
   ViewStyle,
 } from 'react-native'
-import { InteractionPressable } from '../interaction'
+import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
@@ -156,7 +156,7 @@ function TabHeader({
   ).label
 
   return (
-    <InteractionPressable
+    <Pressable
       {...pressableProps}
       accessibilityRole={accessibilityRole ?? 'tab'}
       accessibilityState={{ ...accessibilityState, disabled, selected: active }}
@@ -166,6 +166,7 @@ function TabHeader({
         userOnLayout?.(event)
       }}
       onPress={() => context.select(item.value)}
+      pressStyle="none"
       style={({ pressed }) => [
         getTabStyles(token, type, { active, disabled, pressed }, baseStyle).root,
         semanticStyles?.tab,
@@ -177,7 +178,7 @@ function TabHeader({
       ) : (
         title
       )}
-    </InteractionPressable>
+    </Pressable>
   )
 }
 

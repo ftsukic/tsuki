@@ -8,7 +8,7 @@ import { getButtonStyles, shouldUseButtonOverlay } from './style'
 import { getButtonToken } from './token'
 import type { ButtonProps, ButtonStyleState } from './types'
 import { Fragment, forwardRef, isValidElement, useContext } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { View } from 'react-native'
 import type { ReactNode } from 'react'
 import { Text } from '../text'
 
@@ -109,7 +109,9 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
         {...pressableProps}
         accessibilityRole={pressableProps.accessibilityRole ?? 'button'}
         disabled={isDisabled}
-        pressStyle="none"
+        pressStyle={shouldUseButtonOverlay(buttonProps) ? 'overlay' : 'opacity'}
+        pressedOpacity={buttonToken.pressedOpacity}
+        pressedOverlayColor={pressedOverlayColor ?? buttonToken.pressedOverlayColor}
         onPress={onPress}
         onPressDebounceWait={onPressDebounceWait}
         style={({ pressed }) => {
@@ -162,15 +164,6 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
                   </View>
                 ) : null}
               </View>
-              {pressed && !isDisabled && shouldUseButtonOverlay(buttonProps) ? (
-                <View
-                  pointerEvents="none"
-                  style={[
-                    StyleSheet.absoluteFill,
-                    { backgroundColor: pressedOverlayColor ?? buttonToken.pressedOverlayColor },
-                  ]}
-                />
-              ) : null}
             </>
           )
         }}

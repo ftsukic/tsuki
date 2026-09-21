@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { Animated, StyleSheet } from 'react-native'
 import { getButtonToken } from '../button/token'
 import { getSegmentedStyles } from '../segmented/style'
@@ -226,7 +226,7 @@ describe('Segmented', () => {
     expect(thumbs[3].props.pointerEvents).toBe('none')
   })
 
-  it('uses one radius for the root, selected background, and pressed feedback', () => {
+  it('uses one radius for the root, selected background, and pressed option', () => {
     const token = getDesignToken()
     const buttonToken = getButtonToken(token)
     const segmentedToken = getSegmentedToken(token)
@@ -236,9 +236,91 @@ describe('Segmented', () => {
 
       expect(styles.root.borderRadius).toBe(borderRadius)
       expect(styles.selectedBackground.borderRadius).toBe(borderRadius)
-      expect(styles.pressedOverlay).toMatchObject({
-        backgroundColor: token.pressedBackgroundColor,
-        borderRadius,
+      expect(styles.optionPressed.borderRadius).toBe(borderRadius)
+    }
+  })
+
+  it('uses Pressable background feedback only for enabled inactive options', async () => {
+    const token = getDesignToken()
+    const buttonToken = getButtonToken(token)
+    const segmentedToken = getSegmentedToken(token)
+
+    await render(
+      <Segmented
+        defaultValue="active"
+        options={[
+          { label: 'Active', value: 'active' },
+          { label: 'Inactive', value: 'inactive' },
+          { label: 'Disabled', value: 'disabled', disabled: true },
+        ]}
+      />,
+    )
+
+    const [active, inactive, disabled] = screen.getAllByRole('radio')
+    expect(StyleSheet.flatten(inactive.props.style).backgroundColor).toBeUndefined()
+
+    fireEvent(inactive, 'pressIn')
+    await waitFor(() => {
+      expect(StyleSheet.flatten(screen.getAllByRole('radio')[1].props.style)).toMatchObject({
+        backgroundColor: segmentedToken.pressedBackgroundColor,
+        borderRadius: buttonToken.borderRadius,
+      })
+    })
+
+    fireEvent(inactive, 'pressOut')
+    await waitFor(() => {
+      expect(StyleSheet.flatten(screen.getAllByRole('radio')[1].props.style).backgroundColor).toBe(
+        undefined,
+      )
+    })
+
+    fireEvent(active, 'pressIn')
+    await waitFor(() => {
+      expect(StyleSheet.flatten(screen.getAllByRole('radio')[0].props.style).backgroundColor).toBe(
+        undefined,
+      )
+    })
+    fireEvent(active, 'pressOut')
+    fireEvent(disabled, 'pressIn')
+    await waitFor(() => {
+      const radios = screen.getAllByRole('radio')
+      expect(StyleSheet.flatten(radios[1].props.style).backgroundColor).toBeUndefined()
+      expect(StyleSheet.flatten(radios[0].props.style).backgroundColor).toBeUndefined()
+      expect(StyleSheet.flatten(radios[2].props.style).backgroundColor).toBeUndefined()
+    })
+  })
+
+  it('keeps the pressed radius aligned with default, round, and custom options', async () => {
+    const token = getDesignToken()
+    const buttonToken = getButtonToken(token)
+    const segmentedToken = getSegmentedToken(token)
+
+    await render(
+      <>
+        <Segmented defaultValue="active" options={['active', 'inactive']} />
+        <Segmented defaultValue="active" shape="round" options={['active', 'inactive']} />
+        <Segmented defaultValue="active" borderRadius={12} options={['active', 'inactive']} />
+      </>,
+    )
+
+    for (const [index, radius] of [
+      [1, buttonToken.borderRadius],
+      [3, buttonToken.borderRadiusRound],
+      [5, 12],
+    ] as const) {
+      fireEvent(screen.getAllByRole('radio')[index], 'pressIn')
+      await waitFor(() => {
+        expect(StyleSheet.flatten(screen.getAllByRole('radio')[index].props.style)).toMatchObject({
+          backgroundColor: segmentedToken.pressedBackgroundColor,
+          borderRadius: radius,
+        })
+      })
+
+      fireEvent(screen.getAllByRole('radio')[index], 'pressOut')
+      await waitFor(() => {
+        const style = StyleSheet.flatten(screen.getAllByRole('radio')[index].props.style)
+        expect(style.backgroundColor).toBeUndefined()
+        expect(style.borderRadius).toBeUndefined()
       })
     }
   })

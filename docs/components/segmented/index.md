@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-Segmented 是互斥选择型分段控制器，适合通知已读状态、筛选条件和页面模式。它使用统一的 `InteractionPressable` 点击反馈，并通过滑动 thumb 表示选中状态。
+Segmented 是互斥选择型分段控制器，适合通知已读状态、筛选条件和页面模式。它使用统一的 `Pressable` 点击反馈，并通过滑动 thumb 表示选中状态。
 
 </section>
 
@@ -72,7 +72,7 @@ interface SegmentedOption {
 
 字符串 option 等价于 `{ label: option, value: option }`。对象 option 的 `value` 应保持唯一；`label` 可以是自定义 ReactNode。
 
-根节点默认角色为 `radiogroup`，每个 option 使用 `radio` 角色并同步 `selected` 和 `disabled` 状态。每个完整 option 都是 `InteractionPressable` 点击区域，不只文本可点击。
+根节点默认角色为 `radiogroup`，每个 option 使用 `radio` 角色并同步 `selected` 和 `disabled` 状态。每个完整 option 都是 `Pressable` 点击区域，不只文本可点击。
 
 `value` 无匹配项时不会自动修正，也不会触发回调。未传 `value` 或 `defaultValue` 时选中第一个可用 option；所有 option 都禁用时仍展示列表，但没有可用的切换行为。
 

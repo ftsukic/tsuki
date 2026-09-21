@@ -4,14 +4,18 @@ import { Pressable } from '../../..'
 
 /**
  * @title Press feedback
- * @description 验证 opacity 和 scale 两种统一点击反馈。
+ * @description 验证 opacity、scale、background、overlay 和 none 五种统一点击反馈。
  */
 export default function PressableExample() {
   const [count, setCount] = useState(0)
 
   return (
     <View style={styles.page}>
-      <Text style={styles.description}>点击任意按钮，观察 pressed feedback。次数：{count}</Text>
+      <Text style={styles.description}>
+        点击任意按钮，观察 pressed feedback。background 改变根节点背景，overlay
+        在内容上方覆盖且遵循根节点圆角。次数：
+        {count}
+      </Text>
       <View style={styles.row}>
         <Pressable
           pressStyle="opacity"
@@ -26,6 +30,22 @@ export default function PressableExample() {
           style={styles.scaleButton}
         >
           <Text style={styles.buttonText}>scale</Text>
+        </Pressable>
+        <Pressable
+          pressStyle="background"
+          pressedBackgroundColor="#fee4e2"
+          onPress={() => setCount((value) => value + 1)}
+          style={styles.backgroundButton}
+        >
+          <Text style={styles.darkButtonText}>background</Text>
+        </Pressable>
+        <Pressable
+          pressStyle="overlay"
+          pressedOverlayColor="rgba(0, 0, 0, 0.18)"
+          onPress={() => setCount((value) => value + 1)}
+          style={styles.overlayButton}
+        >
+          <Text style={styles.buttonText}>overlay</Text>
         </Pressable>
       </View>
       <Pressable
@@ -51,6 +71,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 12,
   },
   opacityButton: {
@@ -69,6 +90,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 14,
   },
+  backgroundButton: {
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    borderColor: '#f04438',
+    borderRadius: 10,
+    borderWidth: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
+  overlayButton: {
+    alignItems: 'center',
+    backgroundColor: '#7f56d9',
+    borderRadius: 10,
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+  },
   noneButton: {
     alignItems: 'center',
     alignSelf: 'flex-start',
@@ -81,6 +120,10 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#ffffff',
+    fontWeight: '600',
+  },
+  darkButtonText: {
+    color: '#b42318',
     fontWeight: '600',
   },
   noneText: {

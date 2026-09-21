@@ -2,6 +2,7 @@
 // Internal code should import the real implementation path.
 export { InteractionCoordinator } from './interaction-coordinator'
 
+/** @deprecated Use `Pressable` from the package root instead. */
 export { InteractionPressable } from './interaction-pressable'
 export { useInteraction, useInteractionPress, usePanGesture } from './hooks'
 

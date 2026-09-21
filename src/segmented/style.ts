@@ -5,8 +5,8 @@ export interface SegmentedResolvedStyles {
   root: ViewStyle
   selectedBackground: ViewStyle
   option: ViewStyle
+  optionPressed: ViewStyle
   label: TextStyle
-  pressedOverlay: ViewStyle
 }
 
 export function getSegmentedStyles(
@@ -47,19 +47,13 @@ export function getSegmentedStyles(
       position: 'relative',
       zIndex: 1,
     },
+    optionPressed: {
+      borderRadius: resolvedBorderRadius,
+    },
     label: {
       color: disabled ? token.disabledColor : themeToken.colorText,
       fontFamily: token.fontFamily,
       textAlign: 'center',
-    },
-    pressedOverlay: {
-      backgroundColor: token.pressedBackgroundColor,
-      borderRadius: resolvedBorderRadius,
-      bottom: 0,
-      left: 0,
-      position: 'absolute',
-      right: 0,
-      top: 0,
     },
   }
 }

@@ -19,7 +19,7 @@ Checkbox 用于多选，使用边框、主题色背景、`CheckOutlined` 和 `Mi
 
 </section>
 
-<code src="../../../src/checkbox/__fixtures__/overview.tsx" title="组件预览" description="Checkbox 的基础、多选分组、全选半选、button variant 和主题示例。"></code>
+<code src="../../../src/checkbox/__fixtures__/overview.tsx" title="组件预览" description="Checkbox 的基础、多选分组、全选半选、FlashList 大列表、button variant 和主题示例。"></code>
 
 ## 引入
 
@@ -34,6 +34,8 @@ import { Checkbox } from '@ftsukic/tsuki'
 <code src="../../../src/checkbox/__fixtures__/examples/group.tsx" title="Checkbox.Group" description="使用 name 管理多个选项并通过 onChange 得到数组值。"></code>
 
 <code src="../../../src/checkbox/__fixtures__/examples/check-all.tsx" title="全选与半选" description="通过 Checkbox.indeterminate 与 Checkbox.Group.toggleAll 组合实现全选状态。"></code>
+
+<code src="../../../src/checkbox/__fixtures__/examples/flash-list.tsx" title="FlashList 全选" description="在 FlashList 大列表中使用外部 selection 管理选中状态，并通过 Cell 整行点击和 indeterminate 实现全选。"></code>
 
 <code src="../../../src/checkbox/__fixtures__/examples/options.tsx" title="options 分组" description="使用 options 配置数组快速生成结构一致的多选项。"></code>
 
@@ -59,7 +61,7 @@ import { Checkbox } from '@ftsukic/tsuki'
 | labelPosition | `'left' \| 'right'` | `'right'` | 标签相对于 checkbox 指示器的位置 |
 | variant | `'default' \| 'button'` | `'default'` | `button` 隐藏 indicator，使用按钮边框和背景，但仍由 Checkbox 自己渲染和管理状态；宽度由内容和水平 padding 撑开 |
 | buttonVariant | `ButtonVariant` | `'solid'` | `variant="button"` 时使用的 Button 视觉变体；不影响普通 Checkbox |
-| style | `StyleProp<ViewStyle>` | — | 根 `InteractionPressable` 节点样式，优先级高于默认样式和 `styles.root` |
+| style | `StyleProp<ViewStyle>` | — | 根 `Pressable` 节点样式，优先级高于默认样式和 `styles.root` |
 | styles | `CheckboxStyles` | — | `root`、`indicator`、`label` 三个语义样式插槽，也支持函数形式 |
 | onPressDebounceWait | `number` | — | 两次点击之间的最小间隔，单位为毫秒 |
 
@@ -88,6 +90,8 @@ import { Checkbox } from '@ftsukic/tsuki'
 `options` 和 `children` 只能选择一种声明方式；同时传入时开发环境会提示错误，并以 `children` 为渲染来源。`options` 中的 `value` 会作为生成 Checkbox 的 `name`，每个 `value` 应保持唯一，`label` 作为标签，`disabled` 只禁用对应选项。Group 子项缺少 `name` 时不会参与选择，并在开发环境提示配置错误。Group 不提供 `multiple` 或 `max` 兼容层。
 
 Checkbox.Group 不自动管理“全选 Checkbox”的 `checked` 或 `indeterminate`。调用方应根据 `value` 和可选择项自行计算，再组合 `Checkbox.indeterminate` 与 Group 的 `toggleAll` 实例方法。
+
+在 FlashList 等虚拟化列表中，不建议依赖 `Checkbox.Group` 枚举 children 来表达完整 selection domain。推荐将 selection 保存在列表外部，给每个 Checkbox 传受控 `checked`，并通过 `FlashList.extraData` 通知列表 selection 发生变化。全选和半选状态应基于完整业务数据计算，而不是当前已经渲染的 item。本页的 `FlashList 全选` demo 采用 disabled item 不参与全选、并保持原选中状态的业务策略；这不是 Checkbox 的强制 contract。
 
 `variant="button"` 配合 `buttonVariant` 可以使用 Button 的 `solid`、`filled`、`outline`、`dashed` 和 `text` 视觉变体。button 选项默认高度为 `buttonHeight`，并保证最小宽度为 `buttonMinWidth`。配合 `buttonLayout="equal"` 时，Group 使用 Grid 作为纯布局容器。横向 `buttonColumns={5}` 时，8 个按钮会按 5+3 换行，并保持两行按钮宽度一致；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；默认 `buttonLayout="intrinsic"` 仍是内容自适应宽度。
 

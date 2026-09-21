@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react'
 import { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated'
 
-export type PressStyle = 'opacity' | 'scale' | 'none'
+export type PressStyle = 'opacity' | 'scale' | 'background' | 'overlay' | 'none'
 
 export interface UsePressAnimationOptions {
   pressed: boolean

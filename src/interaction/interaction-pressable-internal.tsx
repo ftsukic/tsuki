@@ -7,10 +7,12 @@ import type { InteractionPressableProps, InteractionPressableState } from './typ
 interface InteractionPressableInternalProps extends InteractionPressableProps {
   /** Internal bridge for visual primitives that consume the pressed fact. */
   onPressedChange?: (pressed: boolean) => void
+  /** Use an animated native host when the caller supplies a Reanimated style. */
+  useAnimatedHost?: boolean
 }
 
-// Pressable can supply a Reanimated style handle, so the native host must be
-// an animated component rather than a plain React Native Pressable.
+// Pressable can supply a Reanimated style handle, so only its animated
+// feedback path needs an animated native host.
 const AnimatedPressable = createAnimatedComponent(NativePressable)
 
 export const InteractionPressableInternal = forwardRef<
@@ -26,6 +28,7 @@ export const InteractionPressableInternal = forwardRef<
     onPressDebounceWait,
     onPressedChange,
     style,
+    useAnimatedHost = false,
     ...pressableProps
   },
   ref,
@@ -84,8 +87,10 @@ export const InteractionPressableInternal = forwardRef<
     pressableProps.onHoverOut?.(event)
   }
 
+  const PressableHost = useAnimatedHost ? AnimatedPressable : NativePressable
+
   return (
-    <AnimatedPressable
+    <PressableHost
       ref={ref}
       {...pressableProps}
       accessibilityRole={accessibilityRole ?? (onPress ? 'button' : undefined)}
@@ -104,7 +109,7 @@ export const InteractionPressableInternal = forwardRef<
         }
         return typeof children === 'function' ? children(interactionState) : children
       }}
-    </AnimatedPressable>
+    </PressableHost>
   )
 })
 

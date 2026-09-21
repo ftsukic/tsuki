@@ -112,7 +112,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
     Component: ComponentOverview6,
     component: 'checkbox',
     description:
-      'Checkbox 汇总基础状态、多选分组、全选半选、options、button variant 和主题定制示例。',
+      'Checkbox 汇总基础状态、多选分组、全选半选、FlashList 大列表、options、button variant 和主题定制示例。',
     id: 'checkbox',
     title: 'Checkbox',
   },
@@ -320,7 +320,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview35,
     component: 'pressable',
-    description: '统一 Pressable 的 opacity、scale 和 none 点击反馈。',
+    description: '统一 Pressable 的 opacity、scale、background、overlay 和 none 点击反馈。',
     id: 'pressable',
     title: 'Pressable',
   },

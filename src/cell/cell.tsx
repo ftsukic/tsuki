@@ -104,7 +104,8 @@ export const Cell = forwardRef<React.ComponentRef<typeof Pressable>, CellProps>(
       ref={ref}
       {...pressableProps}
       disabled={isDisabled}
-      pressStyle="none"
+      pressStyle={hasInteraction ? 'background' : 'none'}
+      pressedBackgroundColor={cellToken.pressedBackgroundColor}
       accessibilityRole={
         hasInteraction || Boolean(onPress) ? 'button' : pressableProps.accessibilityRole
       }

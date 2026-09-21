@@ -231,9 +231,7 @@ describe('ActionSheet', () => {
     const regularStyle = pressableStyle('action-sheet-action-0', false)
     await firePressState(screen.getByTestId('action-sheet-action-0'), 'pressIn')
     const pressedStyle = pressableStyle('action-sheet-action-0', true)
-    expect(pressedStyle).toMatchObject({
-      backgroundColor: '#e6f4ff',
-    })
+    expect(pressedStyle).toMatchObject({ backgroundColor: '#e6f4ff' })
     expect(regularStyle).not.toHaveProperty('height')
     await firePressState(screen.getByTestId('action-sheet-action-0'), 'pressOut')
 
@@ -483,7 +481,6 @@ describe('ActionSheet', () => {
       overflow: 'hidden',
     })
     expect(StyleSheet.flatten(screen.getByTestId('action-sheet-safe-area').props.style)).toEqual({
-      backgroundColor: '#ffffff',
       height: 20,
     })
     expect(
@@ -534,15 +531,10 @@ describe('ActionSheet', () => {
 
     const cancelButton = screen.getByTestId('action-sheet-cancel-button')
     await firePressState(cancelButton, 'pressIn')
-    expect(
-      StyleSheet.flatten(screen.getByTestId('action-sheet-cancel-content').props.style),
-    ).toMatchObject({
+    expect(pressableStyle('action-sheet-cancel-button', true)).toMatchObject({
       backgroundColor: '#e6f4ff',
     })
-    expect(
-      StyleSheet.flatten(screen.getByTestId('action-sheet-safe-area').props.style),
-    ).toMatchObject({
-      backgroundColor: '#e6f4ff',
+    expect(StyleSheet.flatten(screen.getByTestId('action-sheet-safe-area').props.style)).toEqual({
       height: 20,
     })
     await firePressState(cancelButton, 'pressOut')

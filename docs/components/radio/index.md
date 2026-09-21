@@ -71,10 +71,10 @@ type RadioLabelPosition = 'left' | 'right';
 | labelPosition | `'left' \| 'right'` | `'right'` | 标签相对于指示器的位置 |
 | checkedColor | `ColorValue` | 主题主色 | 选中指示器颜色 |
 | onChange | `(checked: boolean) => void` | — | 独立 Radio 选中状态改变时触发 |
-| style | `StyleProp<ViewStyle>` | — | 根 `InteractionPressable` 样式 |
+| style | `StyleProp<ViewStyle>` | — | 根 `Pressable` 样式 |
 | styles | `RadioStyles` | — | `root / indicator / label` 语义样式 |
 
-组件继承 React Native `PressableProps`，`children`、`style` 和 `disabled` 除外。`style` 始终作用于根 `InteractionPressable`；`styles` 可以是对象或函数，函数接收 `{ props, state: { checked, disabled, pressed } }`。
+组件继承 React Native `PressableProps`，`children`、`style` 和 `disabled` 除外。`style` 始终作用于根 `Pressable`；`styles` 可以是对象或函数，函数接收 `{ props, state: { checked, disabled, pressed } }`。
 
 独立 Radio 只有在从未选中变为选中时触发 `onChange(true)`；再次点击已选中项不会取消选中。需要取消选中时，由上层通过受控 `checked` 改变状态。
 

@@ -93,10 +93,14 @@ describe('Grid', () => {
   it('uses the shared pressed background for pressed items', async () => {
     await render(
       <Grid>
+        <Grid.Item testID="normal" text="正常" onPress={() => {}} />
         <Grid.Item testID="pressed" text="按下" onPress={() => {}} testOnly_pressed />
       </Grid>,
     )
 
+    expect(StyleSheet.flatten(screen.getByTestId('normal').props.style).backgroundColor).toBe(
+      getDesignToken().colorBgContainer,
+    )
     const style = StyleSheet.flatten(screen.getByTestId('pressed').props.style)
     expect(style.backgroundColor).toBe(getDesignToken().pressedBackgroundColor)
   })

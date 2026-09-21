@@ -181,14 +181,9 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
             accessibilityState={{ disabled: option.disabled, selected }}
             disabled={option.disabled}
             onPress={() => handleOptionPress(option)}
-            pressStyle="none"
-            style={({ pressed }) => [
-              resolvedStyles.option,
-              itemSemantic?.option,
-              pressed && !option.disabled
-                ? { backgroundColor: token.optionPressedBackgroundColor }
-                : null,
-            ]}
+            pressStyle="background"
+            pressedBackgroundColor={token.optionPressedBackgroundColor}
+            style={[resolvedStyles.option, itemSemantic?.option]}
           >
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
               {option.icon ? (

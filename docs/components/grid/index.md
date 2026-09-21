@@ -63,7 +63,7 @@ Grid 的内部布局容器和 item wrapper 自己处理 gutter，不依赖 Layou
 | onPress | `PressableProps['onPress']` | — | 点击回调；传入后默认 role 为 `button`。 |
 | style | `StyleProp<ViewStyle>` | — | Grid.Item 根交互节点样式，最后合并，可覆盖默认样式。 |
 
-Grid.Item 继承对应的 `InteractionPressable` 和 React Native 属性，Grid 只统一 `border`、`center`、`square`。未传 `onPress` 时不会自动增加 button 语义。
+Grid.Item 继承 React Native `PressableProps`，Grid 只统一 `border`、`center`、`square`。未传 `onPress` 时不会自动增加 button 语义。
 
 ### 无障碍与主题
 

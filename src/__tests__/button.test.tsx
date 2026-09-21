@@ -608,7 +608,8 @@ describe('Button', () => {
 
     const button = screen.getByTestId('pressed')
     const rootStyle = StyleSheet.flatten(button.props.style)
-    expect(rootStyle).toMatchObject({ opacity: 1, overflow: 'hidden', position: 'relative' })
+    expect(rootStyle).toMatchObject({ overflow: 'hidden', position: 'relative' })
+    expect(rootStyle).not.toHaveProperty('opacity')
 
     const overlay = findOverlay(toJSON())
     if (!overlay) throw new Error('Pressed Button overlay was not rendered')

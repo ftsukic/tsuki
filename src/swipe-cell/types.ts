@@ -1,6 +1,11 @@
 import type { Key, ReactNode } from 'react'
-import type { ColorValue, PressableProps, StyleProp, ViewProps, ViewStyle } from 'react-native'
-import type { InteractionPressableProps } from '../interaction'
+import type {
+  ColorValue,
+  PressableProps as NativePressableProps,
+  StyleProp,
+  ViewProps,
+  ViewStyle,
+} from 'react-native'
 
 export type SwipeCellSide = 'left' | 'right'
 
@@ -16,7 +21,7 @@ export interface SwipeCellActionItem {
   textColor?: ColorValue
   width?: number
   disabled?: boolean
-  onPress?: PressableProps['onPress']
+  onPress?: NativePressableProps['onPress']
 }
 
 export interface SwipeCellRef {
@@ -24,13 +29,15 @@ export interface SwipeCellRef {
   close: () => void
 }
 
-export interface SwipeCellActionProps extends Omit<InteractionPressableProps, 'style'> {
+export interface SwipeCellActionProps extends Omit<NativePressableProps, 'children' | 'style'> {
   children?: ReactNode
+  interactionId?: string
+  onPressDebounceWait?: number
   color?: SwipeCellActionColor
   backgroundColor?: ColorValue
   textColor?: ColorValue
   width?: number
-  style?: PressableProps['style']
+  style?: NativePressableProps['style']
 }
 
 export interface SwipeCellProps extends Omit<ViewProps, 'children' | 'style'> {
@@ -41,8 +48,8 @@ export interface SwipeCellProps extends Omit<ViewProps, 'children' | 'style'> {
   rightActions?: SwipeCellActionItem[]
   leftAction?: ReactNode
   rightAction?: ReactNode
-  onLeftActionPress?: PressableProps['onPress']
-  onRightActionPress?: PressableProps['onPress']
+  onLeftActionPress?: NativePressableProps['onPress']
+  onRightActionPress?: NativePressableProps['onPress']
   closeOnActionPress?: boolean
   style?: StyleProp<ViewStyle>
   contentStyle?: StyleProp<ViewStyle>

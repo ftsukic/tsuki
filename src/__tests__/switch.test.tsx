@@ -1,5 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react-native'
-import { act } from '@testing-library/react-native'
+import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import { Animated, StyleSheet } from 'react-native'
 import { ConfigProvider, Switch, getDesignToken, getSwitchToken } from '..'
 import { getSwitchDimensions, getSwitchTranslateX } from '../switch/style'
@@ -277,7 +276,7 @@ describe('Switch', () => {
           },
         }}
       >
-        <Switch testID="switch" />
+        <Switch testID="switch" testOnly_pressed />
       </ConfigProvider>,
     )
 
@@ -285,13 +284,6 @@ describe('Switch', () => {
       backgroundColor: 'rgba(101, 67, 33, 1)',
       height: 24,
       width: 44,
-    })
-
-    await act(async () => {
-      screen.getByTestId('switch').props.onResponderGrant({
-        nativeEvent: {},
-        persist: () => undefined,
-      })
     })
 
     expect(StyleSheet.flatten(screen.getByTestId('switch').props.style).opacity).toBe(

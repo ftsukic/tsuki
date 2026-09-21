@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { StyleProp, ViewProps, ViewStyle } from 'react-native'
-import type { InteractionPressableProps } from '../interaction'
+import type { PressableProps } from 'react-native'
 
 export interface GridProps extends ViewProps {
   children?: ReactNode
@@ -12,13 +12,12 @@ export interface GridProps extends ViewProps {
 }
 
 export interface GridItemProps
-  extends
-    Omit<ViewProps, 'children' | 'style'>,
-    Omit<InteractionPressableProps, 'children' | 'style'> {
+  extends Omit<ViewProps, 'children' | 'style'>, Omit<PressableProps, 'children' | 'style'> {
   children?: ReactNode
   icon?: ReactNode
   text?: ReactNode
   style?: StyleProp<ViewStyle>
+  onPressDebounceWait?: number
 }
 
 export interface GridContextValue {

@@ -2,13 +2,14 @@ import { FixtureOverview } from '../../fixture-overview'
 import BasicExample from './examples/basic'
 import ButtonExample from './examples/button'
 import CheckAllExample from './examples/check-all'
+import FlashListExample from './examples/flash-list'
 import GroupExample from './examples/group'
 import OptionsExample from './examples/options'
 import ThemeExample from './examples/theme'
 
 /**
  * @title Checkbox overview
- * @description Checkbox 汇总基础状态、多选分组、全选半选、options、button variant 和主题定制示例。
+ * @description Checkbox 汇总基础状态、多选分组、全选半选、FlashList 大列表、options、button variant 和主题定制示例。
  */
 export default function CheckboxOverview() {
   return (
@@ -31,6 +32,13 @@ export default function CheckboxOverview() {
           description: '通过 Checkbox.indeterminate 与 Checkbox.Group.toggleAll 组合实现全选状态。',
           id: 'check-all',
           title: '全选与半选',
+        },
+        {
+          Component: FlashListExample,
+          description:
+            '在 FlashList 大列表中通过外部 selection、Cell 整行点击和 indeterminate 实现全选。',
+          id: 'flash-list',
+          title: 'FlashList 全选',
         },
         {
           Component: OptionsExample,

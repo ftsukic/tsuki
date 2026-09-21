@@ -387,8 +387,8 @@ describe('Dialog', () => {
     expect(overlays).toHaveLength(1)
     expect(StyleSheet.flatten(overlays[0].props.style).backgroundColor).toBe(buttonOverlayColor)
     expect(
-      StyleSheet.flatten(screen.getByTestId('dialog-confirm-button').props.style).opacity,
-    ).toBe(1)
+      StyleSheet.flatten(screen.getByTestId('dialog-confirm-button').props.style),
+    ).not.toHaveProperty('opacity')
 
     await view.unmount()
   })

@@ -144,7 +144,6 @@ export function getButtonStyles(
   const isSolid = variant === 'solid'
   const isBorderless = variant === 'filled' || variant === 'text'
   const isText = variant === 'text'
-  const usesOverlay = shouldUseButtonOverlay(props)
   const color = isSolid
     ? props.color !== undefined
       ? themeToken.colorTextLightSolid
@@ -191,11 +190,7 @@ export function getButtonStyles(
       justifyContent: 'center',
       alignSelf: isText ? 'flex-start' : props.block && !isCircle ? 'stretch' : 'auto',
       width: isCircle ? size.height : props.block && !isText ? '100%' : undefined,
-      opacity: state.disabled
-        ? token.disabledOpacity
-        : !usesOverlay && state.pressed && !state.loading
-          ? token.pressedOpacity
-          : 1,
+      ...(state.disabled ? { opacity: token.disabledOpacity } : {}),
     },
     contentContainer: {
       flexDirection: 'row',

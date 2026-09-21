@@ -113,7 +113,8 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
           accessibilityRole="button"
           accessibilityState={{ busy: action.loading === true, disabled }}
           disabled={disabled}
-          pressStyle="none"
+          pressStyle="background"
+          pressedBackgroundColor={token.actionPressedBackgroundColor}
           onPress={() => {
             try {
               action.callback?.(action)
@@ -123,11 +124,10 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
               if (closeOnAction) requestClose('action')
             }
           }}
-          style={({ pressed }) => [
+          style={[
             resolved.action,
             semantic?.action,
             index > 0 && { borderTopColor: token.dividerColor, borderTopWidth: 1 },
-            pressed && !disabled && { backgroundColor: token.actionPressedBackgroundColor },
             disabled && { opacity: 0.45 },
           ]}
           testID={`action-sheet-action-${index}`}
@@ -198,7 +198,8 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
               >
                 <Pressable
                   accessibilityRole="button"
-                  pressStyle="none"
+                  pressStyle="background"
+                  pressedBackgroundColor={token.cancelPressedBackgroundColor}
                   onPress={() => {
                     try {
                       onCancelAction?.()
@@ -209,29 +210,20 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
                   style={resolved.cancelPressable}
                   testID="action-sheet-cancel-button"
                 >
-                  {({ pressed }) => (
-                    <>
-                      <View
-                        style={[
-                          resolved.cancel,
-                          semantic?.cancel,
-                          pressed && { backgroundColor: token.cancelPressedBackgroundColor },
-                        ]}
-                        testID="action-sheet-cancel-content"
-                      >
-                        {renderContent(cancelText, [resolved.cancelLabel, semantic?.cancelLabel])}
-                      </View>
-                      <View
-                        style={{
-                          backgroundColor: pressed
-                            ? token.cancelPressedBackgroundColor
-                            : token.backgroundColor,
-                          height: bottomInset,
-                        }}
-                        testID="action-sheet-safe-area"
-                      />
-                    </>
-                  )}
+                  <>
+                    <View
+                      style={[resolved.cancel, semantic?.cancel]}
+                      testID="action-sheet-cancel-content"
+                    >
+                      {renderContent(cancelText, [resolved.cancelLabel, semantic?.cancelLabel])}
+                    </View>
+                    <View
+                      style={{
+                        height: bottomInset,
+                      }}
+                      testID="action-sheet-safe-area"
+                    />
+                  </>
                 </Pressable>
               </View>
             </>

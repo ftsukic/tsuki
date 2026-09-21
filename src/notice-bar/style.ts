@@ -18,14 +18,11 @@ export function getNoticeBarStyles(
   token: AliasToken,
   wrapable: boolean,
   disabled: boolean,
-  pressed = false,
-  clickable = false,
 ): NoticeBarResolvedStyles {
   const height = token.controlHeightSM + token.paddingXXS * 2
   const lineHeight = token.lineHeightXL
   const disabledOpacity = disabled ? 0.4 : 1
   const rootOpacity = disabledOpacity
-  const contentOpacity = pressed && clickable && !disabled ? token.pressedOpacity : 1
   const contentFlow: ViewStyle = {
     alignItems: 'center',
     flexShrink: 1,
@@ -52,7 +49,6 @@ export function getNoticeBarStyles(
       flex: 1,
       flexDirection: 'row',
       minWidth: 0,
-      opacity: contentOpacity,
       ...(wrapable ? {} : { height }),
     },
     leftIcon: {
