@@ -291,7 +291,7 @@ describe('Checkbox', () => {
   it.each([
     ['solid', getCheckboxToken(getDesignToken()).checkedIconColor],
     ['filled', getCheckboxToken(getDesignToken()).checkedBackground],
-    ['outline', getCheckboxToken(getDesignToken()).checkedBackground],
+    ['outlined', getCheckboxToken(getDesignToken()).checkedBackground],
   ] as const)('uses the shared checked label style for %s buttons', (buttonVariant, color) => {
     const styles = getCheckboxStyles(
       getCheckboxToken(getDesignToken()),

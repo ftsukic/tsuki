@@ -10,13 +10,20 @@ import type {
 import type { StyleInfo, StyleResolver } from '../style'
 import type { LoadingType } from '../loading'
 
-export type ButtonType = 'default' | 'primary' | 'success' | 'warning' | 'danger'
+export type ButtonType = 'default' | 'primary' | 'dashed' | 'text'
 export type ButtonSize = 'large' | 'normal' | 'small' | 'mini'
 export type ButtonIconPosition = 'left' | 'right'
 export type ButtonShape = 'default' | 'round' | 'square' | 'circle'
 export type ButtonGroupShape = Extract<ButtonShape, 'default' | 'round'>
-export type ButtonVariant = 'solid' | 'filled' | 'outline' | 'dashed' | 'text'
+export type ButtonVariant = 'solid' | 'filled' | 'outlined' | 'dashed' | 'text'
 export type ButtonPressFeedback = 'opacity' | 'overlay'
+
+export type ButtonSemanticColor = 'default' | 'primary' | 'success' | 'warning' | 'danger'
+
+type ButtonSemanticShortcut =
+  | { danger?: boolean; success?: false; warning?: false }
+  | { danger?: false; success?: boolean; warning?: false }
+  | { danger?: false; success?: false; warning?: boolean }
 
 export interface ButtonStyleState {
   pressed: boolean
@@ -27,27 +34,22 @@ export interface ButtonStyleState {
 export interface ButtonSemanticStyles {
   root?: StyleProp<ViewStyle>
   icon?: StyleProp<ViewStyle>
-  label?: StyleProp<TextStyle>
-  contentContainer?: StyleProp<ViewStyle>
-  /** @deprecated Use `label` for text content. */
   content?: StyleProp<TextStyle>
 }
 
 export type ButtonStyles = StyleResolver<ButtonProps, ButtonStyleState, ButtonSemanticStyles>
 
-export interface ButtonProps extends Omit<PressableProps, 'children' | 'style' | 'disabled'> {
+interface ButtonBaseProps extends Omit<PressableProps, 'children' | 'style' | 'disabled'> {
   children?: ReactNode
   type?: ButtonType
   size?: ButtonSize
-  color?: ColorValue
+  color?: ButtonSemanticColor | ColorValue
   variant?: ButtonVariant
-  /** Explicitly choose the active press feedback; omitted keeps variant defaults. */
+  /** 显式选择按下反馈；未设置时使用当前变体的默认反馈。 */
   pressFeedback?: ButtonPressFeedback
-  /** Override the overlay color used when `pressFeedback="overlay"`. */
+  /** 覆盖 `pressFeedback="overlay"` 时使用的遮罩颜色。 */
   pressedOverlayColor?: ColorValue
   shape?: ButtonShape
-  /** @deprecated Use `variant="outline"` instead. */
-  plain?: boolean
   block?: boolean
   round?: boolean
   square?: boolean
@@ -55,7 +57,6 @@ export interface ButtonProps extends Omit<PressableProps, 'children' | 'style' |
   hairline?: boolean
   disabled?: boolean
   loading?: boolean
-  loadingText?: ReactNode
   loadingType?: LoadingType
   loadingSize?: number
   icon?: ReactNode
@@ -64,6 +65,8 @@ export interface ButtonProps extends Omit<PressableProps, 'children' | 'style' |
   styles?: ButtonStyles
   onPressDebounceWait?: number
 }
+
+export type ButtonProps = ButtonBaseProps & ButtonSemanticShortcut
 
 export type ButtonStyleInfo = StyleInfo<ButtonProps, ButtonStyleState>
 

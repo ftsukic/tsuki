@@ -49,7 +49,7 @@ export function getSelectionButtonStyles(
 ): SelectionButtonResolvedStyles {
   const isBorderless = token.variant === 'filled' || token.variant === 'text'
   const isTransparent =
-    token.variant === 'outline' || token.variant === 'dashed' || token.variant === 'text'
+    token.variant === 'outlined' || token.variant === 'dashed' || token.variant === 'text'
   const backgroundColor = state.disabled
     ? isTransparent
       ? 'transparent'

@@ -15,7 +15,7 @@ export function getButtonGroupConnectedStyle(
   if (position === undefined) return undefined
 
   const marginLeft = borderWidth > 0 ? -borderWidth : 0
-  const blockStyle = block ? { flex: 1, minWidth: 0 } : {}
+  const blockStyle = block ? { flex: 1, flexBasis: 0, flexShrink: 1, minWidth: 0 } : {}
 
   if (position === 'only') return block ? blockStyle : undefined
 

@@ -313,7 +313,7 @@ describe('Radio', () => {
   it('inherits the Button visual variant through the group and lets children override it', async () => {
     await render(
       <ConfigProvider>
-        <Radio.Group variant="button" buttonVariant="outline" defaultValue="outline">
+        <Radio.Group variant="button" buttonVariant="outlined" defaultValue="outline">
           <Radio testID="outline-radio" value="outline">
             Outline
           </Radio>

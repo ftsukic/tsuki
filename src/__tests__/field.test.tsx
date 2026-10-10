@@ -380,7 +380,7 @@ describe('FieldRadio', () => {
       <FieldRadio
         label="样式"
         variant="button"
-        buttonVariant="outline"
+        buttonVariant="outlined"
         options={[{ value: 'outline', label: 'Outline' }]}
       />,
     )

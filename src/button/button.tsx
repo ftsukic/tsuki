@@ -7,7 +7,7 @@ import { ButtonGroup, getButtonGroupConnectedStyle } from './button-group'
 import { getButtonStyles, shouldUseButtonOverlay } from './style'
 import { getButtonToken } from './token'
 import type { ButtonProps, ButtonStyleState } from './types'
-import { Fragment, forwardRef, isValidElement, useContext } from 'react'
+import { Fragment, forwardRef, isValidElement, useContext, useEffect } from 'react'
 import { View } from 'react-native'
 import type { ReactNode } from 'react'
 import { Text } from '../text'
@@ -40,13 +40,15 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
     {
       children,
       type = 'default',
+      danger,
+      success,
+      warning,
       size,
       color,
       variant,
       pressFeedback,
       pressedOverlayColor,
       shape,
-      plain = false,
       block = false,
       round = false,
       square = false,
@@ -54,7 +56,6 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
       hairline = false,
       disabled = false,
       loading = false,
-      loadingText,
       loadingType = 'circular',
       loadingSize,
       icon,
@@ -75,17 +76,19 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
       shape ?? (circle ? 'circle' : square ? 'square' : round ? 'round' : undefined)
     const mergedShape = explicitShape ?? groupContext.shape ?? 'default'
     const isDisabled = disabled || loading
-    const resolvedVariant = variant ?? (plain ? 'outline' : groupContext.variant)
-    const buttonProps: ButtonProps = {
+    const resolvedVariant = variant ?? groupContext.variant
+    const buttonProps = {
       children,
       type,
+      danger,
+      success,
+      warning,
       size: mergedSize,
       color,
       variant: resolvedVariant,
       pressFeedback,
       pressedOverlayColor,
       shape: mergedShape,
-      plain,
       block,
       round,
       square,
@@ -93,7 +96,6 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
       hairline,
       disabled,
       loading,
-      loadingText,
       loadingType,
       loadingSize,
       icon,
@@ -102,7 +104,14 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
       styles,
       onPress,
       onPressDebounceWait,
-    }
+    } as ButtonProps
+    useEffect(() => {
+      if (__DEV__ && [danger, success, warning].filter(Boolean).length > 1) {
+        console.warn(
+          'Button: danger, success and warning are mutually exclusive; using danger > warning > success.',
+        )
+      }
+    }, [danger, success, warning])
     return (
       <Pressable
         ref={ref}
@@ -130,40 +139,32 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
           const state: ButtonStyleState = { pressed, disabled: isDisabled, loading }
           const resolved = getButtonStyles(themeToken, buttonToken, buttonProps, state)
           const semantic = resolveStyles(styles, { props: buttonProps, state })
-          const content = loading ? loadingText : children
+          const content = children
           const renderedContent = renderViewContent(content, (text) => (
-            <Text style={[resolved.label, semantic?.label, semantic?.content]}>{text}</Text>
+            <Text style={[resolved.content, semantic?.content]}>{text}</Text>
           ))
+
+          const iconNode = loading ? (
+            <View style={[resolved.icon, semantic?.icon]}>
+              <Loading
+                color={resolved.iconColor}
+                size={loadingSize ?? resolved.content.fontSize ?? buttonToken.contentFontSize}
+                type={loadingType}
+              />
+            </View>
+          ) : icon ? (
+            <View style={[resolved.icon, semantic?.icon]}>
+              {renderViewContent(icon, (text) => (
+                <Text>{text}</Text>
+              ))}
+            </View>
+          ) : null
 
           return (
             <>
-              <View style={[resolved.contentContainer, semantic?.contentContainer]}>
-                {icon && iconPosition === 'left' ? (
-                  <View style={[resolved.icon, semantic?.icon]}>
-                    {renderViewContent(icon, (text) => (
-                      <Text>{text}</Text>
-                    ))}
-                  </View>
-                ) : null}
-                {loading ? (
-                  <View style={[resolved.icon, semantic?.icon]}>
-                    <Loading
-                      color={resolved.iconColor}
-                      size={loadingSize ?? resolved.label.fontSize ?? buttonToken.contentFontSize}
-                      type={loadingType}
-                      style={resolved.loadingIcon}
-                    />
-                  </View>
-                ) : null}
-                {content !== undefined ? renderedContent : null}
-                {icon && iconPosition === 'right' ? (
-                  <View style={[resolved.icon, semantic?.icon]}>
-                    {renderViewContent(icon, (text) => (
-                      <Text>{text}</Text>
-                    ))}
-                  </View>
-                ) : null}
-              </View>
+              {iconPosition === 'left' ? iconNode : null}
+              {renderedContent}
+              {iconPosition === 'right' ? iconNode : null}
             </>
           )
         }}

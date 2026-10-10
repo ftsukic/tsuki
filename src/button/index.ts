@@ -8,6 +8,7 @@ export type {
   ButtonPressFeedback,
   ButtonProps,
   ButtonShape,
+  ButtonSemanticColor,
   ButtonSemanticStyles,
   ButtonSize,
   ButtonStyleInfo,

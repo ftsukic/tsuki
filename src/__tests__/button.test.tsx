@@ -1,4 +1,5 @@
 import { Button, ButtonGroup, ConfigProvider, getButtonToken, getDesignToken } from '..'
+import type { ButtonProps } from '../button'
 import { fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet, Text } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
@@ -117,7 +118,14 @@ describe('Button', () => {
     const onPress = jest.fn()
     await render(
       <ConfigProvider>
-        <Button testID="button" type="primary" size="mini" plain round onPress={onPress}>
+        <Button
+          testID="button"
+          type="primary"
+          size="mini"
+          variant="outlined"
+          round
+          onPress={onPress}
+        >
           立即保存
         </Button>
       </ConfigProvider>,
@@ -130,22 +138,71 @@ describe('Button', () => {
     expect(onPress).toHaveBeenCalledTimes(1)
   })
 
-  it('renders loading text and disables interaction', async () => {
+  it('preserves children while loading and disables interaction', async () => {
     const onPress = jest.fn()
     await render(
       <ConfigProvider>
-        <Button testID="loading" loading loadingText="提交中" onPress={onPress}>
+        <Button testID="loading" loading onPress={onPress}>
           提交
         </Button>
       </ConfigProvider>,
     )
 
     const button = screen.getByTestId('loading')
-    expect(screen.getByText('提交中')).toBeTruthy()
+    expect(screen.getByText('提交')).toBeTruthy()
     expect(button.props.accessibilityState?.disabled).toBe(true)
     fireEvent.press(button)
     expect(onPress).not.toHaveBeenCalled()
   })
+
+  it.each(['left', 'right'] as const)(
+    'replaces the icon with Loading on the %s with a single content gap',
+    async (iconPosition) => {
+      const view = await render(
+        <ConfigProvider>
+          <Button loading iconPosition={iconPosition} icon={<Text testID="original-icon">+</Text>}>
+            提交
+          </Button>
+        </ConfigProvider>,
+      )
+      expect(screen.queryByTestId('original-icon')).toBeNull()
+      const progressbar = screen.getByRole('progressbar')
+      const gap = getButtonToken(getDesignToken()).iconGap
+      const tree = view.toJSON()
+      const findLoadingParent = (node: JsonNode | null): JsonElement | undefined => {
+        if (node === null || typeof node === 'string') return undefined
+        if (
+          node.children.some(
+            (child) => typeof child !== 'string' && child.props.accessibilityRole === 'progressbar',
+          )
+        )
+          return node
+        for (const child of node.children) {
+          const found = findLoadingParent(child)
+          if (found) return found
+        }
+        return undefined
+      }
+      const parent = findLoadingParent(tree)
+      expect(parent).toBeTruthy()
+      expect(StyleSheet.flatten(parent!.props.style)).toMatchObject({
+        marginLeft: iconPosition === 'right' ? gap : 0,
+        marginRight: iconPosition === 'left' ? gap : 0,
+      })
+      expect(StyleSheet.flatten(progressbar.props.style).marginRight).toBeUndefined()
+      const findRow = (node: JsonNode | null): JsonElement | undefined => {
+        if (node === null || typeof node === 'string') return undefined
+        if (node.children.includes(parent!)) return node
+        for (const child of node.children) {
+          const found = findRow(child)
+          if (found) return found
+        }
+        return undefined
+      }
+      const row = findRow(tree)
+      expect(row?.children[iconPosition === 'left' ? 0 : 1]).toBe(parent)
+    },
+  )
 
   it('uses Loading for spinner buttons and honors loadingSize', async () => {
     const view = await render(
@@ -172,27 +229,28 @@ describe('Button', () => {
 
   it('resolves semantic styles as an object or function', async () => {
     const styles = jest.fn(({ props, state }) => ({
-      root: { marginTop: state.pressed ? 2 : 1, opacity: props.variant === 'outline' ? 0.9 : 1 },
+      root: { marginTop: state.pressed ? 2 : 1, opacity: props.variant === 'outlined' ? 0.9 : 1 },
     }))
     await render(
       <ConfigProvider>
-        <Button testID="styled" plain styles={styles}>
+        <Button testID="styled" variant="outlined" styles={styles}>
           样式
         </Button>
       </ConfigProvider>,
     )
 
     expect(styles).toHaveBeenCalled()
-    expect(styles.mock.calls.some(([info]) => info.props.variant === 'outline')).toBe(true)
+    expect(styles.mock.calls.some(([info]) => info.props.variant === 'outlined')).toBe(true)
     expect(screen.getByTestId('styled')).toBeTruthy()
   })
 
-  it('applies semantic label and content container styles to their matching nodes', async () => {
-    const { toJSON } = await render(
+  it('merges content typography and root layout styles', async () => {
+    await render(
       <ConfigProvider>
         <Button
           testID="semantic-slots"
-          styles={{ label: { fontWeight: '600' }, contentContainer: { paddingHorizontal: 20 } }}
+          style={{ paddingHorizontal: 20 }}
+          styles={{ content: { fontWeight: '600' } }}
         >
           语义样式
         </Button>
@@ -203,29 +261,113 @@ describe('Button', () => {
     const label = screen.getByText('语义样式')
     expect(StyleSheet.flatten(label.props.style)).toMatchObject({ fontWeight: '600' })
 
-    const tree = toJSON()
-    const contentContainer = tree?.children.find(
-      (child): child is JsonElement =>
-        child !== null && typeof child !== 'string' && child.type === 'View',
-    )
-    if (!contentContainer) throw new Error('Button content container was not rendered')
-    expect(StyleSheet.flatten(contentContainer.props.style)).toMatchObject({
+    expect(StyleSheet.flatten(button.props.style)).toMatchObject({
       paddingHorizontal: 20,
     })
     expect(button).toBeTruthy()
   })
 
-  it('supports visual variants and maps plain to outline', async () => {
+  it.each([
+    ['default', 'solid', 1],
+    ['primary', 'solid', 1],
+    ['dashed', 'dashed', 1],
+    ['text', 'solid', 0],
+  ] as const)('maps type %s to its default appearance', async (type, borderStyle, borderWidth) => {
+    await render(
+      <ConfigProvider>
+        <Button testID="mapped" type={type}>
+          操作
+        </Button>
+      </ConfigProvider>,
+    )
+    expect(getButtonStyle('mapped')).toMatchObject({ borderStyle, borderWidth })
+    if (type === 'default')
+      expect(getButtonStyle('mapped').backgroundColor).toBe(getDesignToken().colorBgContainer)
+    if (type === 'primary')
+      expect(getButtonStyle('mapped').backgroundColor).toBe(getDesignToken().colorPrimary)
+    if (type === 'text') expect(getButtonStyle('mapped').backgroundColor).toBe('transparent')
+  })
+
+  it.each(['danger', 'success', 'warning'] as const)(
+    'uses %s without changing the type appearance',
+    async (shortcut) => {
+      const props = { [shortcut]: true }
+      await render(
+        <ConfigProvider>
+          <Button testID="shortcut" {...props}>
+            边框
+          </Button>
+          <Button testID="shortcut-solid" type="primary" {...props}>
+            实心
+          </Button>
+        </ConfigProvider>,
+      )
+      const token = getDesignToken()
+      const color =
+        shortcut === 'danger'
+          ? token.colorError
+          : shortcut === 'success'
+            ? token.colorSuccess
+            : token.colorWarning
+      expect(getButtonStyle('shortcut')).toMatchObject({
+        borderColor: color,
+        backgroundColor: 'transparent',
+      })
+      expect(StyleSheet.flatten(screen.getByText('边框').props.style).color).toBe(color)
+      expect(getButtonStyle('shortcut-solid').backgroundColor).toBe(color)
+    },
+  )
+
+  it('lets explicit color and variant override shortcuts and group defaults', async () => {
+    await render(
+      <ConfigProvider>
+        <ButtonGroup variant="filled">
+          <Button testID="overrides" type="primary" danger color="success" variant="text">
+            完成
+          </Button>
+          <Button testID="custom-overrides" danger color="#7232DD" variant="solid">
+            自定义
+          </Button>
+        </ButtonGroup>
+      </ConfigProvider>,
+    )
+    expect(getButtonStyle('overrides')).toMatchObject({
+      borderWidth: 0,
+      backgroundColor: 'transparent',
+    })
+    expect(StyleSheet.flatten(screen.getByText('完成').props.style).color).toBe(
+      getDesignToken().colorSuccess,
+    )
+    expect(getButtonStyle('custom-overrides').backgroundColor).toBe('#7232DD')
+  })
+
+  it('warns about conflicting dynamic shortcuts and prioritizes danger', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {})
+    try {
+      // @ts-expect-error JavaScript callers can bypass mutually exclusive shortcut types.
+      const conflicting: ButtonProps = { danger: true, success: true, warning: true }
+      await render(
+        <ConfigProvider>
+          <Button testID="conflicting" {...conflicting}>
+            冲突
+          </Button>
+        </ConfigProvider>,
+      )
+      expect(warn).toHaveBeenCalledWith(expect.stringContaining('mutually exclusive'))
+      expect(getButtonStyle('conflicting').borderColor).toBe(getDesignToken().colorError)
+    } finally {
+      warn.mockRestore()
+    }
+  })
+
+  it('supports visual variants', async () => {
     await render(
       <ConfigProvider>
         <Button testID="solid" type="primary" variant="solid">
           实心
         </Button>
-        <Button testID="outline" type="primary" variant="outline">
+        <Button testID="outline" type="primary" variant="outlined">
           细边框
-        </Button>
-        <Button testID="plain" type="primary" plain>
-          兼容
         </Button>
         <Button testID="dashed" type="primary" variant="dashed">
           虚线
@@ -236,7 +378,7 @@ describe('Button', () => {
         <Button testID="text" type="primary" variant="text">
           文字
         </Button>
-        <Button testID="default-outline" variant="outline">
+        <Button testID="default-outline" variant="outlined">
           默认细边框
         </Button>
         <Button testID="default-filled" variant="filled">
@@ -253,11 +395,6 @@ describe('Button', () => {
 
     expect(getStyle('solid')).toMatchObject({ borderStyle: 'solid', borderWidth: 1 })
     expect(outlineStyle).toMatchObject({ borderStyle: 'solid', borderWidth: 1 })
-    expect(getStyle('plain')).toMatchObject({
-      backgroundColor: outlineStyle.backgroundColor,
-      borderColor: outlineStyle.borderColor,
-      borderWidth: outlineStyle.borderWidth,
-    })
     expect(getStyle('dashed')).toMatchObject({ borderStyle: 'dashed', borderWidth: 1 })
     expect(getStyle('filled')).toMatchObject({ borderWidth: 0 })
     expect(getStyle('text')).toMatchObject({ backgroundColor: 'transparent', borderWidth: 0 })
@@ -281,18 +418,12 @@ describe('Button', () => {
     const rootStyle = getButtonStyle('text-content-sized')
     const labelStyle = StyleSheet.flatten(screen.getByText('文字按钮').props.style)
     const tree = toJSON()
-    const contentContainer = tree?.children.find(
-      (child): child is JsonElement =>
-        child !== null && typeof child !== 'string' && child.type === 'View',
-    )
 
     expect(rootStyle.minHeight).toBeUndefined()
     expect(rootStyle.paddingHorizontal).toBe(0)
     expect(rootStyle.alignSelf).toBe('flex-start')
     expect(labelStyle.lineHeight).toBe(getDesignToken().lineHeight)
-    if (!contentContainer) throw new Error('Text Button content container was not rendered')
-    expect(StyleSheet.flatten(contentContainer.props.style).minHeight).toBeUndefined()
-    expect(contentContainer.children).toHaveLength(2)
+    expect(tree?.children).toHaveLength(2)
   })
 
   it('uses the matching typography line height for each text button size', async () => {
@@ -328,7 +459,7 @@ describe('Button', () => {
     )
   })
 
-  it('keeps a text button content-sized when block is true', async () => {
+  it('makes a block text button fill its parent without adding control height', async () => {
     await render(
       <ConfigProvider>
         <Button testID="text-block" variant="text" block>
@@ -338,10 +469,10 @@ describe('Button', () => {
     )
 
     expect(getButtonStyle('text-block')).toMatchObject({
-      alignSelf: 'flex-start',
+      alignSelf: 'stretch',
       paddingHorizontal: 0,
+      width: '100%',
     })
-    expect(getButtonStyle('text-block').width).toBeUndefined()
     expect(getButtonStyle('text-block').minHeight).toBeUndefined()
   })
 
@@ -391,7 +522,7 @@ describe('Button', () => {
   it('inherits group variant unless a child overrides it', async () => {
     await render(
       <ConfigProvider>
-        <ButtonGroup variant="outline">
+        <ButtonGroup variant="outlined">
           <Button testID="group-inherited-variant">Inherited outline</Button>
           <Button testID="group-explicit-variant" variant="solid">
             Explicit solid
@@ -401,7 +532,7 @@ describe('Button', () => {
     )
 
     expect(getButtonStyle('group-inherited-variant')).toMatchObject({
-      backgroundColor: 'transparent',
+      backgroundColor: getDesignToken().colorBgContainer,
       borderWidth: 1,
     })
     expect(getButtonStyle('group-explicit-variant')).toMatchObject({
@@ -415,7 +546,9 @@ describe('Button', () => {
       <ConfigProvider>
         <ButtonGroup testID="block-group" block>
           <Button testID="block-first">First</Button>
-          <Button testID="block-last">Last</Button>
+          <Button testID="block-last" type="primary">
+            Confirm the changes
+          </Button>
         </ButtonGroup>
       </ConfigProvider>,
     )
@@ -424,8 +557,18 @@ describe('Button', () => {
       alignSelf: 'stretch',
       width: '100%',
     })
-    expect(getButtonStyle('block-first')).toMatchObject({ flex: 1, minWidth: 0 })
-    expect(getButtonStyle('block-last')).toMatchObject({ flex: 1, minWidth: 0 })
+    expect(getButtonStyle('block-first')).toMatchObject({
+      flex: 1,
+      flexBasis: 0,
+      flexShrink: 1,
+      minWidth: 0,
+    })
+    expect(getButtonStyle('block-last')).toMatchObject({
+      flex: 1,
+      flexBasis: 0,
+      flexShrink: 1,
+      minWidth: 0,
+    })
   })
 
   it('applies the group shape to buttons without overriding explicit child shapes', async () => {
@@ -541,23 +684,25 @@ describe('Button', () => {
         <Button testID="primary-solid" type="primary">
           Primary solid
         </Button>
-        <Button testID="success-solid" type="success">
+        <Button testID="success-solid" type="primary" success>
           Success solid
         </Button>
-        <Button testID="warning-solid" type="warning">
+        <Button testID="warning-solid" type="primary" warning>
           Warning solid
         </Button>
-        <Button testID="danger-solid" type="danger">
+        <Button testID="danger-solid" type="primary" danger>
           Danger solid
         </Button>
-        <Button testID="default-solid">Default solid</Button>
-        <Button testID="custom-solid" color={customColor}>
+        <Button testID="default-solid" variant="solid">
+          Default solid
+        </Button>
+        <Button testID="custom-solid" color={customColor} variant="solid">
           Custom solid
         </Button>
-        <Button testID="primary-outline" type="primary" variant="outline">
+        <Button testID="primary-outline" type="primary" variant="outlined">
           Primary outline
         </Button>
-        <Button testID="custom-outline" color={customColor} variant="outline">
+        <Button testID="custom-outline" color={customColor} variant="outlined">
           Custom outline
         </Button>
         <Button testID="custom-text" color={customColor} variant="text">
@@ -629,7 +774,13 @@ describe('Button', () => {
     const { toJSON } = await render(
       <ConfigProvider>
         {types.map((type) => (
-          <Button key={type} testID={`${type}-pressed`} type={type} testOnly_pressed>
+          <Button
+            key={type}
+            testID={`${type}-pressed`}
+            color={type}
+            variant="solid"
+            testOnly_pressed
+          >
             {type}
           </Button>
         ))}
@@ -817,14 +968,14 @@ describe('Button', () => {
   it('keeps a loading circle fixed and round', async () => {
     await render(
       <ConfigProvider>
-        <Button testID="loading-circle" size="large" circle loading loadingText="加载中">
+        <Button testID="loading-circle" size="large" circle loading>
           提交
         </Button>
       </ConfigProvider>,
     )
 
     const style = StyleSheet.flatten(screen.getByTestId('loading-circle').props.style)
-    expect(screen.getByText('加载中')).toBeTruthy()
+    expect(screen.getByText('提交')).toBeTruthy()
     expect(style.width).toBe(style.height)
     expect(style.paddingHorizontal).toBe(0)
     expect(style.borderRadius).toBe(style.height / 2)

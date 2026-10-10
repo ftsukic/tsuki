@@ -189,10 +189,10 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
     const buttonStyles = isRound
       ? textColor === undefined
         ? undefined
-        : { label: { color: textColor } }
+        : { content: { color: textColor } }
       : {
           root: { opacity: disabled ? token.buttonDisabledOpacity : 1 },
-          label: { color: textColor, fontSize: token.buttonFontSize },
+          content: { color: textColor, fontSize: token.buttonFontSize },
         }
 
     return (

@@ -1,15 +1,13 @@
 import { StyleSheet } from 'react-native'
 import type { ColorValue, TextStyle, ViewStyle } from 'react-native'
 import { alphaColor } from '../theme/util/colors'
-import type { ButtonProps, ButtonStyleState, ButtonVariant } from './types'
+import type { ButtonProps, ButtonStyleState, ButtonVariant, ButtonSemanticColor } from './types'
 import type { AliasToken, ButtonToken } from '../theme'
 
 export interface ButtonResolvedStyles {
   root: ViewStyle
-  contentContainer: ViewStyle
-  label: TextStyle
+  content: TextStyle
   icon: ViewStyle
-  loadingIcon: ViewStyle
   iconColor: ColorValue
 }
 
@@ -61,7 +59,7 @@ function getSizeStyles(
   }
 }
 
-interface ButtonTypeColors {
+interface ButtonColorStyles {
   semanticColor: string
   solidForegroundColor: string
   backgroundColor: string
@@ -69,11 +67,8 @@ interface ButtonTypeColors {
   filledBackgroundColor: string
 }
 
-function getTypeColors(
-  token: AliasToken,
-  type: NonNullable<ButtonProps['type']>,
-): ButtonTypeColors {
-  switch (type) {
+function getColorStyles(token: AliasToken, color: ButtonSemanticColor): ButtonColorStyles {
+  switch (color) {
     case 'primary':
       return {
         semanticColor: token.colorPrimary,
@@ -119,7 +114,16 @@ function getTypeColors(
 }
 
 function resolveVariant(props: ButtonProps): ButtonVariant {
-  return props.variant ?? (props.plain ? 'outline' : 'solid')
+  return (
+    props.variant ??
+    (props.type === 'primary'
+      ? 'solid'
+      : props.type === 'dashed'
+        ? 'dashed'
+        : props.type === 'text'
+          ? 'text'
+          : 'outlined')
+  )
 }
 
 export function shouldUseButtonOverlay(props: ButtonProps): boolean {
@@ -138,31 +142,46 @@ export function getButtonStyles(
   const size = getSizeStyles(token, themeToken, props.size ?? 'normal')
   const shape = resolveShape(props)
   const isCircle = shape === 'circle'
-  const type = props.type ?? 'default'
-  const colors = getTypeColors(themeToken, type)
+  const semanticColors: readonly string[] = ['default', 'primary', 'success', 'warning', 'danger']
+  const isSemanticColor = typeof props.color === 'string' && semanticColors.includes(props.color)
+  const semanticColor: ButtonSemanticColor = isSemanticColor
+    ? (props.color as ButtonSemanticColor)
+    : props.danger
+      ? 'danger'
+      : props.warning
+        ? 'warning'
+        : props.success
+          ? 'success'
+          : props.type === 'primary'
+            ? 'primary'
+            : 'default'
+  const customColor = isSemanticColor ? undefined : props.color
+  const colors = getColorStyles(themeToken, semanticColor)
   const variant = resolveVariant(props)
   const isSolid = variant === 'solid'
   const isBorderless = variant === 'filled' || variant === 'text'
   const isText = variant === 'text'
   const color = isSolid
-    ? props.color !== undefined
+    ? customColor !== undefined
       ? themeToken.colorTextLightSolid
       : colors.solidForegroundColor
-    : (props.color ?? colors.semanticColor)
+    : (customColor ?? colors.semanticColor)
   const backgroundColor = isSolid
-    ? (props.color ?? colors.backgroundColor)
+    ? (customColor ?? colors.backgroundColor)
     : variant === 'filled'
-      ? typeof props.color === 'string'
-        ? alphaColor(props.color, 0.1)
+      ? typeof customColor === 'string'
+        ? alphaColor(customColor, 0.1)
         : colors.filledBackgroundColor
-      : 'transparent'
-  const borderColor = props.color ?? colors.borderColor
+      : variant === 'outlined' && semanticColor === 'default' && customColor === undefined
+        ? themeToken.colorBgContainer
+        : 'transparent'
+  const borderColor = customColor ?? colors.borderColor
   const borderWidth = isBorderless
     ? 0
     : props.hairline
       ? StyleSheet.hairlineWidth
       : token.borderWidth
-  const content = state.loading ? props.loadingText : props.children
+  const content = props.children
   const hasContent = content !== undefined && content !== null
   const radius =
     shape === 'circle'
@@ -188,17 +207,11 @@ export function getButtonStyles(
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'center',
-      alignSelf: isText ? 'flex-start' : props.block && !isCircle ? 'stretch' : 'auto',
-      width: isCircle ? size.height : props.block && !isText ? '100%' : undefined,
+      alignSelf: props.block && !isCircle ? 'stretch' : isText ? 'flex-start' : 'auto',
+      width: isCircle ? size.height : props.block ? '100%' : undefined,
       ...(state.disabled ? { opacity: token.disabledOpacity } : {}),
     },
-    contentContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: isText && !isCircle ? undefined : size.height - token.borderWidth * 2,
-    },
-    label: {
+    content: {
       fontFamily: token.fontFamily,
       color,
       fontSize: size.fontSize,
@@ -213,9 +226,6 @@ export function getButtonStyles(
       marginLeft: isCircle ? 0 : props.iconPosition === 'right' && hasContent ? token.iconGap : 0,
       alignItems: 'center',
       justifyContent: 'center',
-    },
-    loadingIcon: {
-      marginRight: isCircle || !content ? 0 : token.iconGap,
     },
     iconColor: color,
   }
