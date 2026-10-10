@@ -22,7 +22,6 @@ export * from './layout'
 export * from './icon'
 export * from './input'
 export * from './image-preview'
-export * from './interaction'
 export * from './motion'
 export * from './pressable'
 export * from './loading'
@@ -54,14 +53,12 @@ export * from './text-input'
 export * from './theme'
 export * from './toast'
 export * from './provider'
-// Keep interaction.usePanGesture as the legacy responder API while exposing
-// the Gesture Handler implementation under an unambiguous root name.
-export { usePanGesture as useGesturePan } from './gesture'
 export {
   Gesture,
   GestureBoundary,
   GestureDetector,
   GestureHandlerState,
+  usePanGesture,
   useSwipeGesture,
   useTapGesture,
 } from './gesture'
@@ -75,8 +72,8 @@ export type {
   PanGestureHandlerEventPayload,
   PanGestureSharedValues,
   PanGestureStartHandler,
-  UsePanGestureOptions as GesturePanOptions,
-  UsePanGestureResult as GesturePanResult,
+  UsePanGestureOptions,
+  UsePanGestureResult,
   UseSwipeGestureOptions,
   UseSwipeGestureResult,
   UseTapGestureOptions,

@@ -10,8 +10,8 @@ import {
 } from 'react'
 import { Animated, Easing, ScrollView, useWindowDimensions, View } from 'react-native'
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
-import { usePanGesture } from '../interaction'
-import type { PanGestureState } from '../interaction'
+import { useResponderPanGesture } from '../gesture/useResponderPanGesture'
+import type { ResponderPanState } from '../gesture/useResponderPanGesture'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { Portal } from '../portal'
 import { resolveStyles } from '../style'
@@ -226,21 +226,24 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       setDragging(true)
     }, [])
 
-    const shouldClaimGesture = useCallback((source: DragSource, gestureState: PanGestureState) => {
-      const config = configRef.current
-      if (!config.draggable) return false
-      if (source === 'header') return true
-      if (!config.contentDraggable) return false
+    const shouldClaimGesture = useCallback(
+      (source: DragSource, gestureState: ResponderPanState) => {
+        const config = configRef.current
+        if (!config.draggable) return false
+        if (source === 'header') return true
+        if (!config.contentDraggable) return false
 
-      if (config.placement === 'top' && currentHeightRef.current >= config.maxHeight) {
-        return false
-      }
+        if (config.placement === 'top' && currentHeightRef.current >= config.maxHeight) {
+          return false
+        }
 
-      return (
-        currentHeightRef.current < config.maxHeight ||
-        (scrollOffsetRef.current <= 0 && gestureState.distance > 0 && maxScrollRef.current <= 0)
-      )
-    }, [])
+        return (
+          currentHeightRef.current < config.maxHeight ||
+          (scrollOffsetRef.current <= 0 && gestureState.distance > 0 && maxScrollRef.current <= 0)
+        )
+      },
+      [],
+    )
 
     const updateDrag = useCallback(
       (distance: number) => {
@@ -288,7 +291,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       }
     }, [animateToHeight, requestControlledHeightReconcile, setVisualHeight])
 
-    const headerResponder = usePanGesture({
+    const headerResponder = useResponderPanGesture({
       axis: 'vertical',
       shouldActivate: (gestureState) => shouldClaimGesture('header', gestureState),
       onStart: beginDrag,
@@ -296,7 +299,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       onEnd: finishDrag,
     })
 
-    const contentResponder = usePanGesture({
+    const contentResponder = useResponderPanGesture({
       axis: 'vertical',
       shouldActivate: (gestureState) => shouldClaimGesture('content', gestureState),
       onStart: beginDrag,

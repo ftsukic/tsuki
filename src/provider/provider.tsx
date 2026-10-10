@@ -1,8 +1,7 @@
 import { memo, useMemo, useRef } from 'react'
 
 import { Portal } from '../portal'
-import { InteractionCoordinator } from '../interaction/interaction-coordinator'
-import { SwipeCellContext } from '../swipe-cell/context'
+import { SwipeCellContext, SwipeCellPressContext } from '../swipe-cell/context'
 import { SwipeCellManager } from '../swipe-cell/manager'
 import { ConfigProvider } from '../theme'
 import { definedValues } from '../theme/resolve-theme'
@@ -29,9 +28,9 @@ export const Provider = memo(function Provider({
       <GestureProvider enabled={gesture}>
         <ConfigProvider theme={resolvedTheme}>
           <SwipeCellContext.Provider value={swipeCellManager}>
-            <InteractionCoordinator manager={swipeCellManager}>
+            <SwipeCellPressContext.Provider value={null}>
               <Portal.Host>{children}</Portal.Host>
-            </InteractionCoordinator>
+            </SwipeCellPressContext.Provider>
           </SwipeCellContext.Provider>
         </ConfigProvider>
       </GestureProvider>

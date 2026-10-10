@@ -13,6 +13,10 @@ export type {
   SwipeCellActionProps,
   SwipeCellGroupProps,
   SwipeCellProps,
+  SwipeCellSemanticStyles,
+  SwipeCellStyles,
+  SwipeCellStyleInfo,
+  SwipeCellStyleState,
   SwipeCellRef,
   SwipeCellSide,
 } from './types'

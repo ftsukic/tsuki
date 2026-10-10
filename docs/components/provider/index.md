@@ -21,7 +21,7 @@ group:
 
 <code src="../../../src/provider/__fixtures__/examples/safe-area.tsx" title="启用安全区根节点" description="通过 safeArea 选项为安全区内容提供 SafeAreaProvider。"></code>
 
-Provider 组合 `SafeAreaProvider`、`GestureHandlerRootView`、`ConfigProvider`、`SwipeCellManager`、`InteractionCoordinator` 和 `PortalHost`。`GestureHandlerRootView` 默认启用，以便 SwipeCell 等手势组件开箱即用；通过 `gesture={false}` 可以显式关闭。通过 `theme` 传入全局主题配置，并使用 `children` 渲染应用内容。设置 `safeArea` 后，会增加对应的安全区根节点。
+Provider 组合 `SafeAreaProvider`、`GestureHandlerRootView`、`ConfigProvider`、`SwipeCellManager` 和 `PortalHost`。`GestureHandlerRootView` 默认启用，以便 SwipeCell 等手势组件开箱即用；通过 `gesture={false}` 可以显式关闭。通过 `theme` 传入全局主题配置，并使用 `children` 渲染应用内容。设置 `safeArea` 后，会增加对应的安全区根节点。
 
 ## API
 
@@ -33,4 +33,4 @@ Provider 组合 `SafeAreaProvider`、`GestureHandlerRootView`、`ConfigProvider`
 | `safeArea` | 是否提供 Safe Area 根节点           | `boolean`      | `false`      |
 | `children` | 应用内容                            | `ReactNode`    | —            |
 
-Provider 是推荐的应用级入口，会按可选 `SafeAreaProvider` → 默认 `GestureHandlerRootView` → `ConfigProvider` → `SwipeCellManager` → `InteractionCoordinator` → `PortalHost` 的顺序组合上下文。`gesture={false}` 可在宿主已经提供根节点时关闭内部 root。`KeyboardProvider` 和导航等其它业务运行时能力仍应由宿主应用组合。浮层组件必须挂在该 Provider 或显式 `PortalHost` 下，Provider 没有独立 `style` 或 `styles` API。
+Provider 是推荐的应用级入口，会按可选 `SafeAreaProvider` → 默认 `GestureHandlerRootView` → `ConfigProvider` → `SwipeCellManager` → `PortalHost` 的顺序组合上下文。`gesture={false}` 可在宿主已经提供根节点时关闭内部 root。`KeyboardProvider` 和导航等其它业务运行时能力仍应由宿主应用组合。浮层组件必须挂在该 Provider 或显式 `PortalHost` 下，Provider 没有独立 `style` 或 `styles` API。

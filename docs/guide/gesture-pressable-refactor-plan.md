@@ -120,3 +120,30 @@ package build（含发布源码声明检查）、本次变更 ESLint、Example t
 额外运行 `release:check-package` 未通过：`npm pack` 的 prepare/Husky 日志混入 JSON 输出，现有校验脚本解析失败；未修改发布脚本。
 
 未执行：Dumi、原生构建/设备交互、Harmony 宿主验收。Web export 与 Mock 测试不能替代原生验收。
+
+## 2026-10-10 Pressable 归属收敛
+
+本阶段取代上述按压 API 兼容策略：删除 `InteractionPressable`、`useInteractionPress` 和按压专属旧类型，不提供适配。使用 `Pressable`、`PressableProps` 与 `PressableState`。唯一按压 Hook、点击抑制与 animated host 归入 `src/pressable/`，旧 effect 通知桥接删除。现有反馈控制器与样式行为保留。
+
+Interaction 当前仅保留协调和 responder；`interactionId` 与 SwipeCell 协调链路暂时保留，Gesture 入口不变。验证结果以本次实际执行记录为准。
+
+## 2026-10-10 SwipeCell 协调收敛
+
+删除 InteractionCoordinator、useInteraction 及其协调类型，移除 Pressable 和 SwipeCellAction 的 interactionId。Provider 仅提供 SwipeCellManager；Pressable 使用 SwipeCell 私有按压协调 Hook，内容与操作区提供归属，Portal 和 Popover 浮层清除归属。保留 Group、无 Provider 和嵌套 Provider 的既有范围，以及公开 useSwipeCellController。Interaction 仅剩 responder，尚未迁移 Gesture。
+
+## 2026-10-10 Interaction 模块移除
+
+本节为上述分阶段历史记录的最终 API 状态：src/interaction 已删除。FloatingPanel 使用 src/gesture/useResponderPanGesture 的私有 responder，轴向识别、激活条件与释放/终止回调保持原样，未改用 RNGH。
+
+公共 usePanGesture 统一为 RNGH：使用 direction 而非 axis，返回 gesture、translateX、translateY、progress 而非 panHandlers。删除 useGesturePan、GesturePanOptions、GesturePanResult 与 responder 专属类型；公共参数和返回类型统一为 UsePanGestureOptions / UsePanGestureResult。
+
+```tsx | pure
+import { usePanGesture } from '@ftsukic/tsuki'
+import type { UsePanGestureOptions, UsePanGestureResult } from '@ftsukic/tsuki'
+
+const options: UsePanGestureOptions = { direction: 'horizontal', maxDistance: 120 }
+const pan: UsePanGestureResult = usePanGesture(options)
+// 将 pan.gesture 传给 GestureDetector；位移值用于 useAnimatedStyle。
+```
+
+Pressable、SwipeCell 和 Gesture 分别拥有按压、协调与手势能力，无兼容入口。源码、测试和构建验证不代表原生设备验收。

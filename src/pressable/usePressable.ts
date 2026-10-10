@@ -1,36 +1,33 @@
 import { useEffect, useRef, useState } from 'react'
 import { Platform } from 'react-native'
-import { useInteraction, useInteractionPress } from './hooks'
-import type { InteractionPressableProps, InteractionPressableState } from './types'
+import { useSwipeCellPress } from '../swipe-cell/useSwipeCellPress'
+import { usePressHandler } from './usePressHandler'
+import type { PressableProps, PressableState } from './types'
 
-interface InteractionPressableOptions extends InteractionPressableProps {
-  /** Legacy post-commit notification. */
-  onPressedChange?: (pressed: boolean) => void
+interface PressableOptions extends PressableProps {
   /** Private synchronous visual bridge; never forwarded to the native host. */
   onPressFeedbackChange?: (pressed: boolean) => void
 }
 
 /** One pressed fact for render props, styles, coordination and visual feedback. */
-export function useInteractionPressable({
+export function usePressable({
   accessibilityRole,
   children,
   disabled = false,
-  interactionId,
   onPress,
   onPressDebounceWait,
-  onPressedChange,
   onPressFeedbackChange,
   style,
   ...props
-}: InteractionPressableOptions) {
+}: PressableOptions) {
   const isDisabled = disabled === true
   const [active, setActive] = useState(false)
   const [hovered, setHovered] = useState(false)
-  const interaction = useInteraction()
-  const handlePress = useInteractionPress({ disabled: isDisabled, onPress, onPressDebounceWait })
+  const notifyPress = useSwipeCellPress()
+  const handlePress = usePressHandler({ disabled: isDisabled, onPress, onPressDebounceWait })
   const testOnlyPressed = props.testOnly_pressed === true
   const pressed = !isDisabled && (active || testOnlyPressed)
-  const state: InteractionPressableState =
+  const state: PressableState =
     Platform.OS === 'web' ? { pressed, hovered: !isDisabled && hovered } : { pressed }
   const lastFeedback = useRef<{ pressed: boolean; callback: typeof onPressFeedbackChange } | null>(
     null,
@@ -49,9 +46,6 @@ export function useInteractionPressable({
     }
   }, [isDisabled])
   useEffect(() => {
-    onPressedChange?.(pressed)
-  }, [onPressedChange, pressed])
-  useEffect(() => {
     // Configuration and testOnly_pressed changes do not have a native press event.
     const previous = lastFeedback.current
     if (previous?.pressed !== pressed || previous.callback !== onPressFeedbackChange) {
@@ -64,7 +58,7 @@ export function useInteractionPressable({
     if (!isDisabled) {
       notifyFeedback(true)
       setActive(true)
-      interaction.notifyPress(interactionId)
+      notifyPress()
     }
     props.onPressIn?.(event)
   }

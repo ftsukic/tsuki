@@ -1,7 +1,7 @@
 import { forwardRef, useCallback, useRef } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { AnimatedPressableHost } from '../interaction/interaction-pressable-host'
-import { useInteractionPressable } from '../interaction/useInteractionPressable'
+import { AnimatedPressableHost } from './pressable-host'
+import { usePressable } from './usePressable'
 import { useToken } from '../theme'
 import { usePressAnimationController } from './usePressAnimationController'
 import type { PressableProps } from './types'
@@ -27,7 +27,7 @@ export const Pressable = forwardRef<
   const { token } = useToken()
   const feedback = useRef<((pressed: boolean) => void) | null>(null)
   const handleFeedbackChange = useCallback((pressed: boolean) => feedback.current?.(pressed), [])
-  const interaction = useInteractionPressable({
+  const interaction = usePressable({
     ...props,
     onPressFeedbackChange: handleFeedbackChange,
   })

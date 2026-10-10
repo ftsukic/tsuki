@@ -1,3 +1,4 @@
+import { SwipeCellPressContext } from '../swipe-cell/context'
 import { useMotionConfig } from '../motion/useMotionConfig'
 import NativePopover from 'react-native-popover-view'
 import type { ComponentProps, ReactElement, ReactNode } from 'react'
@@ -333,7 +334,7 @@ export function Popover(props: PopoverProps) {
         placement={placement as unknown as NativePopoverProps['placement']}
         popoverStyle={popoverStyle}
       >
-        {popupContent}
+        <SwipeCellPressContext.Provider value={null}>{popupContent}</SwipeCellPressContext.Provider>
       </NativePopover>
     </>
   )

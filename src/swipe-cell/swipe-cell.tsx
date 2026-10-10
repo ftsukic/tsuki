@@ -26,14 +26,14 @@ import {
 } from '../motion/gesture'
 import { useMotionConfig } from '../motion/useMotionConfig'
 import { scheduleOnRN } from 'react-native-worklets'
-import { useInteraction } from '../interaction'
 import { getCellToken } from '../cell/token'
 import { Pressable } from '../pressable'
 import { useComponentToken } from '../theme'
+import { resolveStyles } from '../style'
 import { SwipeCellAction } from './swipe-cell-action'
 import { getSwipeCellStyles } from './style'
 import { getSwipeCellToken } from './token'
-import { SwipeCellGroupContext, useSwipeCellManager } from './context'
+import { SwipeCellGroupContext, SwipeCellPressContext, useSwipeCellManager } from './context'
 import type { SwipeCellHandle } from './manager'
 import type {
   SwipeCellActionItem,
@@ -71,14 +71,10 @@ function mergeActionPress(
   onPress: PressableProps['onPress'],
   close: () => void,
   closeOnActionPress: boolean,
-  interactionId: string,
 ): ReactNode {
   if (!isValidElement<SwipeCellActionProps>(action) || action.type !== SwipeCellAction) {
     return (
-      <SwipeCellAction
-        interactionId={interactionId}
-        onPress={wrapActionPress(onPress, close, closeOnActionPress)}
-      >
+      <SwipeCellAction onPress={wrapActionPress(onPress, close, closeOnActionPress)}>
         {action}
       </SwipeCellAction>
     )
@@ -88,7 +84,6 @@ function mergeActionPress(
   return (
     <SwipeCellAction
       {...action.props}
-      interactionId={interactionId}
       onPress={wrapActionPress(
         (event) => {
           actionOnPress?.(event)
@@ -105,12 +100,10 @@ function renderActionItems(
   actions: SwipeCellActionItem[],
   close: () => void,
   closeOnActionPress: boolean,
-  interactionId: string,
 ) {
   return actions.map((action, index) => (
     <SwipeCellAction
       key={action.key ?? index}
-      interactionId={interactionId}
       color={action.color}
       backgroundColor={action.backgroundColor}
       textColor={action.textColor}
@@ -137,8 +130,7 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     closeOnActionPress = true,
     overshoot = false,
     style,
-    contentStyle,
-    actionStyle,
+    styles,
     onOpen,
     onClose,
     testID,
@@ -151,7 +143,6 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   const resolvedStyles = useMemo(() => getSwipeCellStyles(token), [token])
   const group = useContext(SwipeCellGroupContext)
   const manager = useSwipeCellManager()
-  const interaction = useInteraction()
   const generatedId = useId()
   const cellId = explicitId ?? generatedId
   const translation = useSharedValue(0)
@@ -194,10 +185,9 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
       const wasOpen = phaseRef.current !== 'closed'
       phaseRef.current = 'closed'
       manager?.release(cellId)
-      interaction.clear(cellId)
       if (wasOpen) onClose?.()
     },
-    [animationToken, cellId, interaction, manager, onClose],
+    [animationToken, cellId, manager, onClose],
   )
 
   const settleTo = useCallback(
@@ -243,10 +233,9 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     [animationToken, translation],
   )
 
-  const releaseOrClear = useCallback(() => {
+  const releaseOwnership = useCallback(() => {
     manager?.release(cellId)
-    interaction.clear(cellId)
-  }, [cellId, interaction, manager])
+  }, [cellId, manager])
 
   const close = useCallback(() => {
     pendingOpenRef.current = null
@@ -263,9 +252,8 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   const handle = useMemo<SwipeCellHandle>(() => ({ id: cellId, close }), [cellId, close])
 
   const claim = useCallback(() => {
-    if (manager) manager.claim(handle)
-    else interaction.requestOpen(cellId, close)
-  }, [cellId, close, handle, interaction, manager])
+    manager?.claim(handle)
+  }, [handle, manager])
 
   const open = useCallback(
     (side: SwipeCellSide = 'right') => {
@@ -419,9 +407,8 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
       close()
       return
     }
-    if (manager) manager.closeOthers(cellId)
-    else interaction.notifyPress(cellId)
-  }, [cellId, close, interaction, manager])
+    manager?.closeOthers(cellId)
+  }, [cellId, close, manager])
 
   useEffect(() => {
     if (!hasLeftAction) {
@@ -454,65 +441,96 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   useEffect(() => {
     return () => {
       animationToken.value += 1
-      releaseOrClear()
+      releaseOwnership()
     }
-  }, [animationToken, releaseOrClear])
+  }, [animationToken, releaseOwnership])
 
   useImperativeHandle(ref, () => ({ open, close }), [close, open])
 
   const renderedLeftActions =
     leftActions !== undefined
-      ? renderActionItems(leftActions, close, closeOnActionPress, cellId)
-      : mergeActionPress(leftAction, onLeftActionPress, close, closeOnActionPress, cellId)
+      ? renderActionItems(leftActions, close, closeOnActionPress)
+      : mergeActionPress(leftAction, onLeftActionPress, close, closeOnActionPress)
   const renderedRightActions =
     resolvedRightActions !== undefined
-      ? renderActionItems(resolvedRightActions, close, closeOnActionPress, cellId)
-      : mergeActionPress(rightAction, onRightActionPress, close, closeOnActionPress, cellId)
+      ? renderActionItems(resolvedRightActions, close, closeOnActionPress)
+      : mergeActionPress(rightAction, onRightActionPress, close, closeOnActionPress)
+
+  const semantic = resolveStyles(styles, {
+    props: {
+      ...viewProps,
+      id: explicitId,
+      children,
+      actions,
+      leftActions,
+      rightActions,
+      leftAction,
+      rightAction,
+      onLeftActionPress,
+      onRightActionPress,
+      closeOnActionPress,
+      overshoot,
+      style,
+      styles,
+      onOpen,
+      onClose,
+      testID,
+    },
+    state: { left: hasLeftAction, right: hasRightAction },
+  })
+
+  const actionOwner = useMemo(() => ({ id: cellId }), [cellId])
+  const contentOwner = useMemo(
+    () => ({ id: cellId, onPressIn: handleContentPressIn }),
+    [cellId, handleContentPressIn],
+  )
 
   const renderedContent = (
-    <GestureDetector gesture={pan}>
-      <Animated.View
-        onTouchStart={handleContentPressIn}
-        testID={testID ? `${testID}-content` : undefined}
-        style={[resolvedStyles.content, contentStyle, animatedContentStyle]}
-      >
-        <Pressable
-          interactionId={cellId}
-          onPressIn={handleContentPressIn}
-          onPress={close}
-          pressStyle="background"
-          pressedBackgroundColor={cellToken.pressedBackgroundColor}
-          testID={testID ? `${testID}-pressable` : undefined}
+    <SwipeCellPressContext.Provider value={contentOwner}>
+      <GestureDetector gesture={pan}>
+        <Animated.View
+          onTouchStart={handleContentPressIn}
+          testID={testID ? `${testID}-content` : undefined}
+          style={[resolvedStyles.content, semantic?.content, animatedContentStyle]}
         >
-          {children}
-        </Pressable>
-      </Animated.View>
-    </GestureDetector>
+          <Pressable
+            onPress={close}
+            pressStyle="background"
+            pressedBackgroundColor={cellToken.pressedBackgroundColor}
+            testID={testID ? `${testID}-pressable` : undefined}
+          >
+            {children}
+          </Pressable>
+        </Animated.View>
+      </GestureDetector>
+    </SwipeCellPressContext.Provider>
   )
 
   return (
-    <View {...viewProps} testID={testID} style={[resolvedStyles.root, style]}>
-      <View pointerEvents="box-none" style={[resolvedStyles.actions, actionStyle]}>
-        {hasLeftAction ? (
-          <View
-            testID={testID ? `${testID}-left-action` : undefined}
-            onLayout={(event) => handleActionLayout('left', event)}
-            style={resolvedStyles.actionSlot}
-          >
-            {renderedLeftActions}
-          </View>
-        ) : null}
-        <View style={{ flex: 1 }} />
-        {hasRightAction ? (
-          <View
-            testID={testID ? `${testID}-right-action` : undefined}
-            onLayout={(event) => handleActionLayout('right', event)}
-            style={resolvedStyles.actionSlot}
-          >
-            {renderedRightActions}
-          </View>
-        ) : null}
-      </View>
+    <View {...viewProps} testID={testID} style={[resolvedStyles.root, semantic?.root, style]}>
+      <SwipeCellPressContext.Provider value={actionOwner}>
+        <View pointerEvents="box-none" style={[resolvedStyles.actions, semantic?.actions]}>
+          {hasLeftAction ? (
+            <View
+              testID={testID ? `${testID}-left-action` : undefined}
+              onLayout={(event) => handleActionLayout('left', event)}
+              style={resolvedStyles.actionSlot}
+            >
+              {renderedLeftActions}
+            </View>
+          ) : null}
+          <View style={{ flex: 1 }} />
+          {hasRightAction ? (
+            <View
+              testID={testID ? `${testID}-right-action` : undefined}
+              onLayout={(event) => handleActionLayout('right', event)}
+              style={resolvedStyles.actionSlot}
+            >
+              {renderedRightActions}
+            </View>
+          ) : null}
+        </View>
+      </SwipeCellPressContext.Provider>
       {renderedContent}
     </View>
   )
@@ -522,11 +540,9 @@ SwipeCell.displayName = 'SwipeCell'
 
 export function useSwipeCellController() {
   const manager = useSwipeCellManager()
-  const interaction = useInteraction()
   const closeCurrent = useCallback(() => {
-    if (manager) manager.closeActive()
-    else interaction.closeCurrent()
-  }, [interaction, manager])
+    manager?.closeActive()
+  }, [manager])
   return useMemo(
     () => ({
       closeCurrent,

@@ -1,3 +1,5 @@
+/* RNTL 14 fireEvent returns a Promise; the lint plugin still assumes sync events. */
+/* eslint testing-library/no-await-sync-events: "off" */
 import React from 'react'
 import { act, cleanup, fireEvent, render, screen, userEvent } from '@testing-library/react-native'
 import { Pressable, StyleSheet, Text } from 'react-native'
@@ -9,10 +11,10 @@ import {
   Cell,
   ConfigProvider,
   Provider,
+  Portal,
   SwipeCell,
   SwipeCellAction,
   SwipeCellGroup,
-  useInteraction,
   useSwipeCellController,
 } from '..'
 import { SwipeCellManager } from '../swipe-cell/manager'
@@ -40,7 +42,7 @@ function TestProvider({ children }: { children: React.ReactNode }) {
   return <ConfigProvider theme={{ seed: { motion: false } }}>{children}</ConfigProvider>
 }
 
-function InteractionProvider({ children }: { children: React.ReactNode }) {
+function SwipeCellProvider({ children }: { children: React.ReactNode }) {
   return <Provider theme={{ seed: { motion: false } }}>{children}</Provider>
 }
 
@@ -532,7 +534,7 @@ describe('SwipeCell', () => {
     const firstClose = jest.fn()
     const secondOpen = jest.fn()
     await render(
-      <InteractionProvider>
+      <SwipeCellProvider>
         <SwipeCell
           ref={firstRef}
           testID="provider-first"
@@ -549,7 +551,7 @@ describe('SwipeCell', () => {
         >
           <Text>第二项</Text>
         </SwipeCell>
-      </InteractionProvider>,
+      </SwipeCellProvider>,
     )
 
     await layoutAction('provider-first', 'right', 100)
@@ -597,11 +599,8 @@ describe('SwipeCell', () => {
     const view = await render(
       <ConfigProvider
         theme={{
-          token: {
-            motion: false,
-            pressedBackgroundColor,
-            pressedOverlayColor,
-          },
+          seed: { motion: false },
+          token: { pressedBackgroundColor, pressedOverlayColor },
         }}
       >
         <Cell testID="pressed-cell" title="Cell" onPress={() => {}} testOnly_pressed />
@@ -673,7 +672,7 @@ describe('SwipeCell', () => {
     const onClose = jest.fn()
     const user = userEvent.setup()
     await render(
-      <InteractionProvider>
+      <SwipeCellProvider>
         <CloseCurrentButton />
         <SwipeCell
           ref={ref}
@@ -683,7 +682,7 @@ describe('SwipeCell', () => {
         >
           <Text>内容</Text>
         </SwipeCell>
-      </InteractionProvider>,
+      </SwipeCellProvider>,
     )
 
     await layoutAction('controller', 'right', 100)
@@ -693,28 +692,147 @@ describe('SwipeCell', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
-  it('clears an unmounted cell from the coordinator', async () => {
-    const close = jest.fn()
-    let closeCurrent!: () => void
-
-    function Probe() {
-      const interaction = useInteraction()
-      closeCurrent = interaction.closeCurrent
-      React.useEffect(() => {
-        interaction.requestOpen('unmounted-cell', close)
-        return () => interaction.clear('unmounted-cell')
-      }, [interaction])
-      return null
-    }
-
+  it('releases an unmounted cell from the manager', async () => {
+    const ref = React.createRef<SwipeCellRef>()
+    const onClose = jest.fn()
     const view = await render(
-      <InteractionProvider>
-        <Probe />
-      </InteractionProvider>,
+      <SwipeCellProvider>
+        <CloseCurrentButton />
+        <SwipeCell ref={ref} testID="unmounted-cell" rightAction="删除" onClose={onClose} />
+      </SwipeCellProvider>,
     )
-    await view.unmount()
-    closeCurrent()
+    await layoutAction('unmounted-cell', 'right', 100)
+    await act(async () => ref.current?.open())
+    await view.rerender(
+      <SwipeCellProvider>
+        <CloseCurrentButton />
+      </SwipeCellProvider>,
+    )
+    await fireEvent.press(screen.getByTestId('close-current'))
+    expect(onClose).not.toHaveBeenCalled()
+  })
+  it('keeps custom action presses in their cell and ignores disabled outside presses', async () => {
+    const ref = React.createRef<SwipeCellRef>()
+    const onClose = jest.fn()
+    const onOpen = jest.fn()
+    await render(
+      <SwipeCellProvider>
+        <SwipeCell
+          onOpen={onOpen}
+          ref={ref}
+          testID="owned-action"
+          onClose={onClose}
+          closeOnActionPress={false}
+          rightAction={<Cell testID="nested-action" title="操作" />}
+        />
+        <Cell testID="disabled-outside" title="禁用" disabled />
+      </SwipeCellProvider>,
+    )
+    await layoutAction('owned-action', 'right', 100)
+    await act(async () => ref.current?.open())
+    await fireEvent(screen.getByTestId('nested-action'), 'pressIn')
+    await fireEvent(screen.getByTestId('disabled-outside'), 'pressIn')
+    expect(onOpen).toHaveBeenCalledTimes(1)
+    expect(onClose).not.toHaveBeenCalled()
+  })
 
-    expect(close).not.toHaveBeenCalled()
+  it('closes the active cell on a nested content press', async () => {
+    const ref = React.createRef<SwipeCellRef>()
+    const onClose = jest.fn()
+    await render(
+      <SwipeCellProvider>
+        <SwipeCell ref={ref} testID="nested-content" onClose={onClose} rightAction="删除">
+          <Cell testID="content-child" title="内容" />
+        </SwipeCell>
+      </SwipeCellProvider>,
+    )
+    await layoutAction('nested-content', 'right', 100)
+    await act(async () => ref.current?.open())
+    await userEvent.setup().press(screen.getByTestId('content-child'))
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('clears cell ownership in Portal content even when the host is inside an action', async () => {
+    const ref = React.createRef<SwipeCellRef>()
+    const onClose = jest.fn()
+    await render(
+      <SwipeCellProvider>
+        <SwipeCell
+          ref={ref}
+          testID="portal-owner"
+          onClose={onClose}
+          closeOnActionPress={false}
+          rightAction={
+            <Portal.Host>
+              <Portal>
+                <Cell testID="floating-action" title="浮层" />
+              </Portal>
+            </Portal.Host>
+          }
+        />
+      </SwipeCellProvider>,
+    )
+    await layoutAction('portal-owner', 'right', 100)
+    await act(async () => ref.current?.open())
+    await fireEvent(screen.getByTestId('floating-action'), 'pressIn')
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('isolates nested Provider managers and outside presses', async () => {
+    const outer = React.createRef<SwipeCellRef>()
+    const inner = React.createRef<SwipeCellRef>()
+    const outerClose = jest.fn()
+    const innerClose = jest.fn()
+    await render(
+      <SwipeCellProvider>
+        <SwipeCell ref={outer} testID="outer-owner" onClose={outerClose} rightAction="删除" />
+        <SwipeCellProvider>
+          <SwipeCell ref={inner} testID="inner-owner" onClose={innerClose} rightAction="删除" />
+          <Cell testID="inner-outside" title="内部" />
+        </SwipeCellProvider>
+        <Cell testID="outer-outside" title="外部" />
+      </SwipeCellProvider>,
+    )
+    await layoutAction('outer-owner', 'right', 100)
+    await layoutAction('inner-owner', 'right', 100)
+    await act(async () => {
+      outer.current?.open()
+      inner.current?.open()
+    })
+    expect(outerClose).not.toHaveBeenCalled()
+    await fireEvent(screen.getByTestId('inner-outside'), 'pressIn')
+    expect(innerClose).toHaveBeenCalledTimes(1)
+    expect(outerClose).not.toHaveBeenCalled()
+    await fireEvent(screen.getByTestId('outer-outside'), 'pressIn')
+    expect(outerClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not introduce global coordination without a Provider', async () => {
+    const first = React.createRef<SwipeCellRef>()
+    const second = React.createRef<SwipeCellRef>()
+    const onClose = jest.fn()
+    const onOpen = jest.fn()
+    await render(
+      <TestProvider>
+        <SwipeCell
+          onOpen={onOpen}
+          ref={first}
+          testID="standalone-first"
+          onClose={onClose}
+          rightAction="删除"
+        />
+        <SwipeCell onOpen={onOpen} ref={second} testID="standalone-second" rightAction="删除" />
+        <Cell testID="standalone-outside" title="外部" />
+      </TestProvider>,
+    )
+    await layoutAction('standalone-first', 'right', 100)
+    await layoutAction('standalone-second', 'right', 100)
+    await act(async () => {
+      first.current?.open()
+      second.current?.open()
+    })
+    await fireEvent(screen.getByTestId('standalone-outside'), 'pressIn')
+    expect(onOpen).toHaveBeenCalledTimes(2)
+    expect(onClose).not.toHaveBeenCalled()
   })
 })

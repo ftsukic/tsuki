@@ -1,3 +1,6 @@
+import * as Tsuki from '..'
+import { usePanGesture as gesturePan } from '../gesture'
+import type { UsePanGestureOptions, UsePanGestureResult } from '..'
 import { Animated } from '../animation'
 import React from 'react'
 import { render, screen } from '@testing-library/react-native'
@@ -8,11 +11,12 @@ import {
   usePanGesture,
   useSwipeGesture,
   useTapGesture,
-} from '../gesture'
+} from '..'
 import { withSpring, withTiming } from '../animation'
 
 function GestureHarness() {
-  const pan = usePanGesture({ direction: 'horizontal' })
+  const options: UsePanGestureOptions = { direction: 'horizontal' }
+  const pan: UsePanGestureResult = usePanGesture(options)
   const swipe = useSwipeGesture({ maxDistance: 120 })
   const tap = useTapGesture()
 
@@ -32,6 +36,12 @@ describe('gesture and animation foundations', () => {
     expect(typeof Gesture.Pan).toBe('function')
     expect(GestureDetector).toBeTruthy()
     expect(GestureHandlerState.END).toBeTruthy()
+    expect(Tsuki.usePanGesture).toBe(gesturePan)
+    expect(Tsuki).not.toHaveProperty('useGesturePan')
+    expect(Tsuki).not.toHaveProperty('InteractionPressable')
+    expect(Tsuki).not.toHaveProperty('InteractionCoordinator')
+    expect(Tsuki).not.toHaveProperty('useInteraction')
+    expect(Tsuki).not.toHaveProperty('useInteractionPress')
   })
 
   it('re-exports the Reanimated runtime and animation helpers', () => {

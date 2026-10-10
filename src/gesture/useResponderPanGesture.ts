@@ -1,45 +1,49 @@
-import { useCallback, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { PanResponder } from 'react-native'
-import type { GestureResponderEvent, PanResponderGestureState } from 'react-native'
-import { useContext } from 'react'
-import { InteractionContext } from './context'
-import type {
-  InteractionPressHandler,
-  PanGestureState,
-  UseInteractionPressOptions,
-  UsePanGestureOptions,
-  UsePanGestureResult,
-} from './types'
+import type { GestureResponderEvent, PanResponderGestureState, ViewProps } from 'react-native'
+type ResponderPanAxis = 'horizontal' | 'vertical'
 
-export function useInteractionPress({
-  disabled = false,
-  onPress,
-  onPressDebounceWait,
-}: UseInteractionPressOptions): InteractionPressHandler {
-  const lastPressTime = useRef(0)
-
-  return useCallback<InteractionPressHandler>(
-    (event) => {
-      if (!onPress || disabled) return
-
-      const now = Date.now()
-      if (onPressDebounceWait !== undefined && now - lastPressTime.current < onPressDebounceWait) {
-        return
-      }
-
-      lastPressTime.current = now
-      onPress(event)
-    },
-    [disabled, onPress, onPressDebounceWait],
-  )
+export interface ResponderPanState {
+  axis: ResponderPanAxis
+  /** Signed displacement along the configured axis. */
+  distance: number
+  /** Signed velocity along the configured axis. */
+  velocity: number
 }
 
-export function useInteraction() {
-  return useContext(InteractionContext)
+type ResponderPanCallback = (state: ResponderPanState) => void
+type ResponderPanShouldActivate = (state: ResponderPanState) => boolean
+
+type ResponderPanHandlers = Pick<
+  ViewProps,
+  | 'onMoveShouldSetResponder'
+  | 'onMoveShouldSetResponderCapture'
+  | 'onResponderGrant'
+  | 'onResponderMove'
+  | 'onResponderRelease'
+  | 'onResponderTerminate'
+  | 'onResponderTerminationRequest'
+  | 'onStartShouldSetResponder'
+  | 'onStartShouldSetResponderCapture'
+>
+
+interface ResponderPanOptions {
+  axis: ResponderPanAxis
+  enabled?: boolean
+  /** Minimum primary-axis displacement required to claim the responder. */
+  distance?: number
+  shouldActivate?: ResponderPanShouldActivate
+  onStart?: ResponderPanCallback
+  onChange?: ResponderPanCallback
+  onEnd?: ResponderPanCallback
+}
+
+interface ResponderPanResult {
+  panHandlers: ResponderPanHandlers
 }
 
 function isGestureOnAxis(
-  axis: UsePanGestureOptions['axis'],
+  axis: ResponderPanOptions['axis'],
   distance: number,
   gestureState: PanResponderGestureState,
 ) {
@@ -49,10 +53,10 @@ function isGestureOnAxis(
   return Math.abs(primaryDistance) > Math.abs(crossDistance) && Math.abs(primaryDistance) > distance
 }
 
-function getPanGestureState(
-  axis: UsePanGestureOptions['axis'],
+function getResponderPanState(
+  axis: ResponderPanOptions['axis'],
   gestureState: PanResponderGestureState,
-): PanGestureState {
+): ResponderPanState {
   return {
     axis,
     distance: axis === 'horizontal' ? gestureState.dx : gestureState.dy,
@@ -60,7 +64,7 @@ function getPanGestureState(
   }
 }
 
-export function usePanGesture({
+export function useResponderPanGesture({
   axis,
   enabled = true,
   distance = 2,
@@ -68,7 +72,7 @@ export function usePanGesture({
   onStart,
   onChange,
   onEnd,
-}: UsePanGestureOptions): UsePanGestureResult {
+}: ResponderPanOptions): ResponderPanResult {
   const enabledRef = useRef(enabled)
   const shouldActivateRef = useRef(shouldActivate)
   const onStartRef = useRef(onStart)
@@ -92,7 +96,7 @@ export function usePanGesture({
         return false
       }
 
-      const panGestureState = getPanGestureState(axis, gestureState)
+      const panGestureState = getResponderPanState(axis, gestureState)
       return shouldActivateRef.current?.(panGestureState) ?? true
     }
 
@@ -103,19 +107,19 @@ export function usePanGesture({
       onMoveShouldSetPanResponderCapture: shouldSetPanResponder,
       onPanResponderGrant: (_, gestureState) => {
         activeRef.current = true
-        onStartRef.current?.(getPanGestureState(axis, gestureState))
+        onStartRef.current?.(getResponderPanState(axis, gestureState))
       },
       onPanResponderMove: (_, gestureState) =>
-        onChangeRef.current?.(getPanGestureState(axis, gestureState)),
+        onChangeRef.current?.(getResponderPanState(axis, gestureState)),
       onPanResponderRelease: (_, gestureState) => {
         if (!activeRef.current) return
         activeRef.current = false
-        onEndRef.current?.(getPanGestureState(axis, gestureState))
+        onEndRef.current?.(getResponderPanState(axis, gestureState))
       },
       onPanResponderTerminate: (_, gestureState) => {
         if (!activeRef.current) return
         activeRef.current = false
-        onEndRef.current?.(getPanGestureState(axis, gestureState))
+        onEndRef.current?.(getResponderPanState(axis, gestureState))
       },
       onPanResponderTerminationRequest: () => false,
     })

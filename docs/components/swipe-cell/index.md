@@ -70,8 +70,7 @@ import { SwipeCell, SwipeCellAction, SwipeCellGroup, useSwipeCellController } fr
 | onRightActionPress | `PressableProps['onPress']` | — | `rightAction` 不是 `SwipeCellAction` 时的点击回调 |
 | closeOnActionPress | `boolean` | `true` | action 点击后是否自动关闭当前 cell |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式，优先级高于默认样式 |
-| contentStyle | `StyleProp<ViewStyle>` | — | 主体 Animated.View 样式 |
-| actionStyle | `StyleProp<ViewStyle>` | — | action 背景层样式 |
+| styles | `SwipeCellStyles` | — | root、content、actions 语义样式；支持对象或函数 |
 | ref | `SwipeCellRef` | — | 暴露 `open(side?)` 和 `close()` |
 | onOpen | `() => void` | — | action 完成展开后的回调 |
 | onClose | `() => void` | — | action 完成关闭后的回调 |
@@ -172,3 +171,7 @@ ref.current?.close()
 可覆盖的 token 包括 `backgroundColor`、`actionBackgroundColor`、`actionDefaultBackgroundColor`、`actionPrimaryBackgroundColor`、`actionSuccessBackgroundColor`、`actionWarningBackgroundColor`、`actionDangerBackgroundColor`、`actionTextColor`、`actionHeight`、`actionMinWidth`、`actionPaddingHorizontal`、`actionFontSize`、`actionLineHeight`、`actionPressedOverlayColor`、`animationDuration` 和 `fontFamily`。主题的 `motion: false` 会跳过吸附动画并直接设置目标位置。
 
 当前不实现 Vant Web 专属的 DOM、`beforeClose`、`name`、`stopPropagation` 或浏览器事件 API。
+
+### 按压协调边界
+
+最近的 Provider 提供 SwipeCellManager，嵌套 Provider 各自协调。内容按下关闭自身，操作区按下保留自身，操作完成是否关闭由 `closeOnActionPress` 决定；外部库内 Pressable 按下关闭当前展开项，disabled 不通知。内容及自定义操作中的库内 Pressable 自动读取所属 cell，无需 `interactionId`。Portal 与 Popover 浮层内容清除所属 cell。自定义 React Native Modal 会继承调用处 Context，不属于库内浮层边界；需要外部按压语义时，应通过库内 Portal 承载。没有 Provider 时不提供全局单开或外部按压关闭，Group 仍提供组内打开互斥。

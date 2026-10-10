@@ -7,6 +7,26 @@ import type {
   ViewStyle,
 } from 'react-native'
 
+import type { StyleInfo, StyleResolver } from '../style'
+
+export interface SwipeCellStyleState {
+  left: boolean
+  right: boolean
+}
+
+export interface SwipeCellSemanticStyles {
+  root?: StyleProp<ViewStyle>
+  content?: StyleProp<ViewStyle>
+  actions?: StyleProp<ViewStyle>
+}
+
+export type SwipeCellStyles = StyleResolver<
+  SwipeCellProps,
+  SwipeCellStyleState,
+  SwipeCellSemanticStyles
+>
+export type SwipeCellStyleInfo = StyleInfo<SwipeCellProps, SwipeCellStyleState>
+
 export type SwipeCellSide = 'left' | 'right'
 
 export type SwipeCellActionColor = 'default' | 'primary' | 'success' | 'warning' | 'danger'
@@ -31,7 +51,6 @@ export interface SwipeCellRef {
 
 export interface SwipeCellActionProps extends Omit<NativePressableProps, 'children' | 'style'> {
   children?: ReactNode
-  interactionId?: string
   onPressDebounceWait?: number
   color?: SwipeCellActionColor
   backgroundColor?: ColorValue
@@ -54,8 +73,7 @@ export interface SwipeCellProps extends Omit<ViewProps, 'children' | 'style'> {
   /** Apply resistance beyond the measured action width. Defaults to false. */
   overshoot?: boolean
   style?: StyleProp<ViewStyle>
-  contentStyle?: StyleProp<ViewStyle>
-  actionStyle?: StyleProp<ViewStyle>
+  styles?: SwipeCellStyles
   onOpen?: () => void
   onClose?: () => void
 }
