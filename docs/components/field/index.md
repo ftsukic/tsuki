@@ -97,9 +97,10 @@ import {
 | border | `boolean` | `true` | 映射到 `Cell.border`。 |
 | divider | `boolean` | — | 映射到 `Cell.divider`；仍受 `border={false}` 限制。 |
 | style | `StyleProp<ViewStyle>` | — | Cell 根节点样式。 |
-| cellStyles | `CellStyles` | — | 直接传给 Cell 的语义样式；用于 Cell 区域定制。 |
+| cellProps | `Pick<CellProps, 'styles'>` | — | Cell 的样式配置。 |
+| styles | `FieldStyles` | — | root、label、content、help、helpItem、extra 语义样式。 |
 
-`titleWidth`、`titleAlign` 只是在具体适配器调用 Cell 时生成 Cell styles，不会创建隐藏的 Field 布局层。`vertical`、`center`、分割线、箭头和外围布局均由 Cell 负责。FieldRadio 和 FieldCheckbox 不提供反馈节点或 Field 语义 `styles`，只保留 `cellStyles` 定制 Cell 区域。
+`titleWidth`、`titleAlign` 只是在具体适配器调用 Cell 时生成 Cell styles，不会创建隐藏的 Field 布局层。`vertical`、`center`、分割线、箭头和外围布局均由 Cell 负责。FieldRadio 和 FieldCheckbox 提供 root、label、content 样式，不渲染反馈节点。
 
 ## FieldInput
 
@@ -116,13 +117,13 @@ import {
 />
 ```
 
-`inputStyle` 和 `inputStyles` 只作用于 embedded Input；`cellStyles` 作用于 Cell。FieldInput 不支持 `description`、`errorMessage`、`status` 或 Field 语义 `styles`；需要反馈内容时，应组合 `Cell` 与自定义 control。ref 为 Input 的 `TextInputInstance`。
+`inputProps.style` 和 `inputProps.styles` 只作用于 embedded Input；`cellProps.styles` 作用于 Cell。FieldInput 不支持 `description`、`errorMessage`、`status`；需要反馈内容时，应组合 `Cell` 与自定义 control。ref 为 Input 的 `TextInputInstance`。
 
 ## FieldRadio
 
 `FieldRadio` 直接将 `Radio.Group` 放入 Cell 的 value 区域，值类型为 `RadioValue`。它暴露 `options`、`children`、`variant`、`buttonVariant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Radio.Group 的其他 View props（`style` 由 Cell 保留）。当选项为 `button` variant 时默认使用 Grid 等宽布局，每行默认最多 5 个，超出后换行；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonVariant` 可透传 Button 的视觉变体；`buttonLayout="intrinsic"` 可恢复内容宽度。`readOnly` 会阻止 group 交互，但不会给 Radio 套用 disabled 视觉。
 
-`FieldRadio` 不支持 `description`、`errorMessage`、`status` 或 Field 语义 `styles`；需要反馈内容时，应组合 `Cell` 与自定义 control。
+`FieldRadio` 不支持 `description`、`errorMessage`、`status`；需要反馈内容时，应组合 `Cell` 与自定义 control。
 
 ```tsx | pure
 <FieldRadio
@@ -143,7 +144,7 @@ button 选项可以设置每行列数；例如文档中的 FieldRadio fixture �
 
 `FieldCheckbox` 直接将 `Checkbox.Group` 放入 Cell 的 value 区域，值类型为 `readonly CheckboxValue[]`。它暴露 `options`、`children`、`variant`、`buttonVariant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Checkbox.Group 的其他 View props。`variant="button"` 时默认使用 Grid 等宽布局，每行默认最多 5 个，超出后换行；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonVariant` 可透传 Button 的视觉变体；`buttonLayout="intrinsic"` 可恢复内容宽度。`disabled` 会同时下传到 Cell 与 group；`readOnly` 只阻止交互。
 
-`FieldCheckbox` 不支持 `description`、`errorMessage`、`status` 或 Field 语义 `styles`；需要反馈内容时，应组合 `Cell` 与自定义 control。
+`FieldCheckbox` 不支持 `description`、`errorMessage`、`status`；需要反馈内容时，应组合 `Cell` 与自定义 control。
 
 ```tsx | pure
 <FieldCheckbox title="通知方式" value={channels} onChange={setChannels}>
@@ -171,11 +172,10 @@ button 选项可以设置每行列数；例如文档中的 FieldRadio fixture �
 | loading | `boolean` | `false` | 显示 Switch loading，并禁止切换 |
 | size | `'small' \| 'medium' \| 'large' \| number` | `'medium'` | Switch 尺寸 |
 | activeColor / inactiveColor | `ColorValue` | Switch token | 开启/关闭时的轨道颜色 |
-| switchStyle | `StyleProp<ViewStyle>` | — | 只作用于 Switch 根 Pressable |
-| switchStyles | `SwitchStyles<ActiveValueT, InactiveValueT>` | — | 只作用于 Switch 的 root、track、thumb、loading 插槽 |
+| switchProps | `Pick<SwitchProps, 'style' \| 'styles'>` | — | Switch 的根节点及语义样式配置。 |
 | switchOnPress | `() => void` | — | Switch 自身的点击回调；Field 的 `onPress` 保留给 Cell 行 |
 
-FieldSwitch 继承 Switch 可安全使用的 React Native `PressableProps`，例如 accessibility props、`testID`、`hitSlop` 和 `pointerEvents`；`children`、Switch 原始 `style`、`disabled` 和 `onPress` 由适配器分别管理或重命名。它不提供 Field 语义 `styles`，也不支持 Web 专属属性、`checked` 或 `defaultChecked` 别名。
+FieldSwitch 继承 Switch 可安全使用的 React Native `PressableProps`，例如 accessibility props、`testID`、`hitSlop` 和 `pointerEvents`；`children`、Switch 原始 `style`、`disabled` 和 `onPress` 由适配器分别管理或重命名。它支持 root、label、content 语义样式，不支持 Web 专属属性、`checked` 或 `defaultChecked` 别名。
 
 ```tsx | pure
 <FieldSwitch
@@ -187,7 +187,7 @@ FieldSwitch 继承 Switch 可安全使用的 React Native `PressableProps`，例
 />
 ```
 
-`disabled` 会同时传给 Cell 和 Switch，并产生禁用无障碍状态；`readOnly` 只阻止 Switch 交互，不使用 disabled，也不产生 disabled 视觉。Switch 自身的样式通过 `switchStyle` 和 `switchStyles` 传入；FieldSwitch 的 `style` 仍只作用于 Cell。Field 的 `onPress` 仍是 Cell 行点击回调；如需 Switch 自身的回调，使用 `switchOnPress`。Cell 行点击不会自动切换 Switch。
+`disabled` 会同时传给 Cell 和 Switch，并产生禁用无障碍状态；`readOnly` 只阻止 Switch 交互，不使用 disabled，也不产生 disabled 视觉。Switch 自身的样式通过 `switchProps.style` 和 `switchProps.styles` 传入；FieldSwitch 的 `style` 仍只作用于 Cell。Field 的 `onPress` 仍是 Cell 行点击回调；如需 Switch 自身的回调，使用 `switchOnPress`。Cell 行点击不会自动切换 Switch。
 
 FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessibility props、`testID`、`hitSlop` 和 `pointerEvents`。只读状态会将 Switch 的 `pointerEvents` 设为 `none`，但不会改变其 `accessibilityState.disabled`。
 
@@ -207,7 +207,7 @@ FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessi
 />
 ```
 
-`pickerStyle` 和 `pickerStyles` 只作用于 Picker；Popup 的 `visible` 以及 Picker 的 `onChange`、`onConfirm` 和 `onCancel` 均由适配器管理。没有已选值或选项时显示 `placeholder`。Picker 本身不接收 Popup props。
+`pickerProps.style` 和 `pickerProps.styles` 只作用于 Picker；Popup 的 `visible` 以及 Picker 的 `onChange`、`onConfirm` 和 `onCancel` 均由适配器管理。没有已选值或选项时显示 `placeholder`。Picker 本身不接收 Popup props。
 
 ## FieldDatePicker
 
@@ -225,7 +225,7 @@ FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessi
 />
 ```
 
-默认显示值按日期列值以 `-` 连接，例如 `2026-09-13`；`formatValue` 可自定义 Cell 显示，参数为选项和值。`pickerStyle` 和 `pickerStyles` 只作用于 DatePicker，`cellStyles` 和 `styles` 的作用范围与 FieldPicker 相同。它不复制 DatePicker 的日期计算，也不提供 FieldTimePicker、FieldDateTimePicker 或日期范围能力。
+默认显示值按日期列值以 `-` 连接，例如 `2026-09-13`；`formatValue` 可自定义 Cell 显示，参数为选项和值。`pickerProps.style` 和 `pickerProps.styles` 只作用于 DatePicker，`cellProps.styles` 和 `styles` 的作用范围与 FieldPicker 相同。它不复制 DatePicker 的日期计算，也不提供 FieldTimePicker、FieldDateTimePicker 或日期范围能力。
 
 ## FieldTimePicker
 
@@ -235,7 +235,7 @@ FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessi
 <FieldTimePicker title="时间" defaultValue={['09', '30']} />
 ```
 
-`formatValue` 可自定义 Cell 显示；`pickerStyle` 和 `pickerStyles` 只作用于 TimePicker。
+`formatValue` 可自定义 Cell 显示；`pickerProps.style` 和 `pickerProps.styles` 只作用于 TimePicker。
 
 ## FieldDateTimePicker
 
@@ -245,11 +245,20 @@ FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessi
 <FieldDateTimePicker title="日期时间" defaultValue={['2026', '09', '13', '13', '30']} />
 ```
 
-`formatValue` 可自定义 Cell 显示；`pickerStyle` 和 `pickerStyles` 只作用于 DateTimePicker。两个适配器都遵循确认提交、取消恢复、遮罩关闭等同取消的 Field 语义。
+`formatValue` 可自定义 Cell 显示；`pickerProps.style` 和 `pickerProps.styles` 只作用于 DateTimePicker。两个适配器都遵循确认提交、取消恢复、遮罩关闭等同取消的 Field 语义。
+
+## 下层组件样式配置
+
+| 适配器      | 配置                       | 作用范围                     |
+| ----------- | -------------------------- | ---------------------------- |
+| 所有 Field  | cellProps.styles           | Cell 语义样式                |
+| FieldInput  | inputProps.style / styles  | Input 根节点和语义样式       |
+| FieldSwitch | switchProps.style / styles | Switch 根节点和语义样式      |
+| Picker 系列 | pickerProps.style / styles | 对应 Picker 根节点和语义样式 |
 
 ## 语义样式与主题
 
-FieldPicker 的 `styles` 提供表单区域语义插槽：`control`、`feedback`、`description` 和 `error`。FieldInput、FieldRadio、FieldCheckbox、FieldSwitch 不渲染反馈，也不提供 Field 语义 `styles`。Cell 区域使用 `cellStyles`，Input 使用 `inputStyle`/`inputStyles`，Switch 使用 `switchStyle`/`switchStyles`，Picker 使用 `pickerStyle`/`pickerStyles`，各自边界互不重叠。
+所有 Field 适配器支持 `styles.root`、`styles.label`、`styles.content`。Picker 适配器还渲染 `help` 反馈容器、`extra` 描述文本、`helpItem` 错误文本。下层 Cell、Input、Switch、Picker 的定制分别通过 `cellProps.styles`、`inputProps`、`switchProps`、`pickerProps` 传入；这些配置只开放 style/styles。
 
 `theme.components.Field` 仍表示 Field 系列表单 Cell 组合的主题 token，支持 `defaultTitleWidth`、`titleGap`、`descriptionGap`、`errorGap`、`descriptionColor`、`warningColor` 和 `errorColor`。它不产生运行时 `Field` 组件。
 

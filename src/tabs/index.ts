@@ -3,6 +3,7 @@ export { Tabs } from './tabs'
 export { getTabsToken } from './token'
 export type {
   TabProps,
+  TabSemanticStyles,
   TabsProps,
   TabsSemanticStyles,
   TabsStyleInfo,

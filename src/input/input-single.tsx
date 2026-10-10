@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useRef, type ReactNode } from 'react'
-import { Pressable, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import type { TextInputInstance } from '../text-input'
 import type { TextInputProps } from '../text-input'
 import { TextInput } from '../text-input'
@@ -7,11 +7,12 @@ import { InputClear, InputPasswordToggle, renderInputAffix } from './input-affix
 import type { InputResolvedStyles } from './style'
 import type { InputSemanticStyles } from './types'
 import type { InputToken } from '../theme'
-import type { StyleProp, TextStyle } from 'react-native'
+import type { StyleProp, TextStyle, ViewStyle } from 'react-native'
 
 export interface InputSingleProps {
   coreProps: TextInputProps
   disabled: boolean
+  rootStyle?: StyleProp<ViewStyle>
   token: InputToken
   styles: InputResolvedStyles
   semantic?: InputSemanticStyles
@@ -31,6 +32,7 @@ export const InputSingle = forwardRef<TextInputInstance, InputSingleProps>(funct
   {
     coreProps,
     disabled,
+    rootStyle,
     token,
     styles,
     semantic,
@@ -74,12 +76,22 @@ export const InputSingle = forwardRef<TextInputInstance, InputSingleProps>(funct
     inputRef.current?.focus()
   }, [disabled])
 
+  const customRoot = StyleSheet.flatten(rootStyle)
+  const rootHeight = customRoot?.height ?? customRoot?.minHeight
+  const rootPadding = customRoot?.paddingVertical ?? styles.singleShell.paddingVertical
+  const verticalPadding = typeof rootPadding === 'number' ? rootPadding : 0
+  const contentHeight =
+    typeof rootHeight === 'number' ? Math.max(0, rootHeight - verticalPadding * 2) : undefined
+
   return (
-    <Pressable
-      onPress={handleShellPress}
-      style={[styles.shell, styles.singleShell, semantic?.shell]}
-    >
-      <View style={[styles.content, styles.singleContent, semantic?.content]}>
+    <Pressable onPress={handleShellPress} style={[styles.shell, styles.singleShell, rootStyle]}>
+      <View
+        style={[
+          styles.content,
+          styles.singleContent,
+          contentHeight === undefined ? undefined : { minHeight: contentHeight },
+        ]}
+      >
         {renderInputAffix(prefix, [styles.prefix, semantic?.prefix] as StyleProp<TextStyle>, true)}
         <TextInput
           {...coreProps}

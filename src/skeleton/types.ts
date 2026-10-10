@@ -14,11 +14,11 @@ export interface SkeletonStyleState {
 
 export interface SkeletonSemanticStyles {
   root?: StyleProp<ViewStyle>
-  placeholder?: StyleProp<ViewStyle>
+  header?: StyleProp<ViewStyle>
   avatar?: StyleProp<ViewStyle>
-  content?: StyleProp<ViewStyle>
+  section?: StyleProp<ViewStyle>
   title?: StyleProp<ViewStyle>
-  rows?: StyleProp<ViewStyle>
+  paragraph?: StyleProp<ViewStyle>
   row?: StyleProp<ViewStyle>
 }
 

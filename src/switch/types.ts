@@ -15,7 +15,7 @@ export interface SwitchStyleState {
 export interface SwitchSemanticStyles {
   root?: StyleProp<ViewStyle>
   track?: StyleProp<ViewStyle>
-  thumb?: StyleProp<ViewStyle>
+  indicator?: StyleProp<ViewStyle>
   loading?: StyleProp<ViewStyle>
 }
 

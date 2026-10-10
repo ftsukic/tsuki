@@ -33,9 +33,9 @@ export function renderFieldFeedback(
   if (!isVisible(description) && !isVisible(errorMessage)) return null
 
   return (
-    <View style={[resolved.feedback, semantic?.feedback]}>
-      {renderFeedback(description, [resolved.description, semantic?.description])}
-      {renderFeedback(errorMessage, [resolved.error, semantic?.error])}
+    <View style={[resolved.feedback, semantic?.help]}>
+      {renderFeedback(description, [resolved.description, semantic?.extra])}
+      {renderFeedback(errorMessage, [resolved.error, semantic?.helpItem])}
     </View>
   )
 }

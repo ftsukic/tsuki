@@ -22,17 +22,17 @@ export interface ActionSheetStyleState {
 }
 
 export interface ActionSheetSemanticStyles {
-  host?: StyleProp<ViewStyle>
-  overlay?: StyleProp<ViewStyle>
+  mask?: StyleProp<ViewStyle>
+  wrapper?: StyleProp<ViewStyle>
+  container?: StyleProp<ViewStyle>
   root?: StyleProp<ViewStyle>
-  actions?: StyleProp<ViewStyle>
+  body?: StyleProp<ViewStyle>
   header?: StyleProp<ViewStyle>
   title?: StyleProp<TextStyle>
-  action?: StyleProp<ViewStyle>
-  name?: StyleProp<TextStyle>
-  subname?: StyleProp<TextStyle>
-  cancelGap?: StyleProp<ViewStyle>
-  cancelPanel?: StyleProp<ViewStyle>
+  item?: StyleProp<ViewStyle>
+  label?: StyleProp<TextStyle>
+  description?: StyleProp<TextStyle>
+  footer?: StyleProp<ViewStyle>
   cancel?: StyleProp<ViewStyle>
   cancelLabel?: StyleProp<TextStyle>
 }
@@ -52,7 +52,6 @@ export interface ActionSheetProps extends Omit<ViewProps, 'children' | 'style'> 
   closeOnPressOverlay?: boolean
   overlay?: boolean
   safeAreaInsetBottom?: boolean
-  overlayStyle?: StyleProp<ViewStyle>
   zIndex?: number
   style?: StyleProp<ViewStyle>
   styles?: ActionSheetStyles

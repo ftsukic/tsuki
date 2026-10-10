@@ -43,7 +43,6 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
       closeOnPressOverlay = true,
       overlay = true,
       safeAreaInsetBottom = true,
-      overlayStyle,
       zIndex = token.zIndex,
       style,
       styles,
@@ -99,12 +98,12 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
       const nameStyle = [
         resolved.name,
         { color: disabled ? token.disabledColor : actionColor },
-        semantic?.name,
+        semantic?.label,
       ]
       const subnameStyle = [
         resolved.subname,
         { color: disabled ? token.disabledColor : token.descriptionColor },
-        semantic?.subname,
+        semantic?.description,
       ]
 
       return (
@@ -126,7 +125,7 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
           }}
           style={[
             resolved.action,
-            semantic?.action,
+            semantic?.item,
             index > 0 && { borderTopColor: token.dividerColor, borderTopWidth: 1 },
             disabled && { opacity: 0.45 },
           ]}
@@ -162,9 +161,13 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
         destroyOnClosed
         duration={token.animationDuration}
         zIndex={zIndex}
-        overlayStyle={overlayStyle}
-        style={[resolved.popupPanel]}
-        styles={{ root: semantic?.host, overlay: semantic?.overlay }}
+        style={style}
+        styles={{
+          root: semantic?.root,
+          mask: semantic?.mask,
+          wrapper: semantic?.wrapper,
+          container: resolved.popupPanel,
+        }}
         onOpened={onOpened}
         onClosed={onClosed}
       >
@@ -172,9 +175,9 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
           ref={ref}
           {...viewProps}
           accessibilityViewIsModal
-          style={[resolved.root, semantic?.root, style]}
+          style={[resolved.root, semantic?.container]}
         >
-          <View testID="action-sheet-actions" style={[resolved.actions, semantic?.actions]}>
+          <View testID="action-sheet-actions" style={[resolved.actions, semantic?.body]}>
             {hasTitle ? (
               <View
                 accessibilityRole="header"
@@ -188,12 +191,9 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
           </View>
           {hasCancel ? (
             <>
+              <View style={[resolved.cancelGap]} testID="action-sheet-cancel-gap" />
               <View
-                style={[resolved.cancelGap, semantic?.cancelGap]}
-                testID="action-sheet-cancel-gap"
-              />
-              <View
-                style={[resolved.cancelPanel, semantic?.cancelPanel]}
+                style={[resolved.cancelPanel, semantic?.footer]}
                 testID="action-sheet-cancel-panel"
               >
                 <Pressable

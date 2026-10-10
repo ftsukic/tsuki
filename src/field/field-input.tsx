@@ -1,7 +1,7 @@
 import { forwardRef, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import type { DimensionValue } from 'react-native'
-import type { CellProps, CellStyles } from '../cell'
+import type { CellProps } from '../cell'
 import { Cell } from '../cell'
 import type { InputProps, InputStyleState, InputStyles } from '../input'
 import { InputInternal } from '../input/input-internal'
@@ -10,7 +10,7 @@ import { useComponentToken } from '../theme'
 import type { TextInputInstance } from '../text-input'
 import { createFieldCellStyles } from './style'
 import { getFieldToken } from './token'
-import type { FieldCellProps, FieldTitleAlign } from './types'
+import type { FieldCellProps, FieldStyles, FieldTitleAlign } from './types'
 import { useFieldValue } from './useFieldValue'
 
 type InputAdapterProps = Omit<
@@ -37,10 +37,10 @@ export interface FieldInputProps extends FieldCellProps, InputAdapterProps {
   readOnly?: boolean
   titleWidth?: DimensionValue
   titleAlign?: FieldTitleAlign
+  styles?: FieldStyles<FieldInputProps>
   style?: CellProps['style']
-  cellStyles?: CellStyles
-  inputStyle?: InputProps['style']
-  inputStyles?: InputStyles
+  cellProps?: Pick<CellProps, 'styles'>
+  inputProps?: Pick<InputProps, 'style' | 'styles'>
 }
 
 function createEmbeddedInputStyles(
@@ -51,14 +51,13 @@ function createEmbeddedInputStyles(
     const custom = resolveStyles(inputStyles, { props, state })
 
     return {
+      ...custom,
       root: [{ width: '100%', flex: 1 }, custom?.root],
-      shell: custom?.shell,
-      content: custom?.content,
       input: [{ textAlign: props.textAlign ?? valueAlign }, custom?.input],
       prefix: custom?.prefix,
       suffix: custom?.suffix,
       clear: custom?.clear,
-      wordLimit: custom?.wordLimit,
+      count: custom?.count,
       addonBefore: custom?.addonBefore,
       addonAfter: custom?.addonAfter,
     }
@@ -91,12 +90,16 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
       onPress,
       border,
       divider,
+      styles,
       style,
-      inputStyle,
-      inputStyles,
-      cellStyles,
+      inputProps: inputConfig,
+      cellProps,
       ...inputControlProps
     } = props
+    const inputStyle = inputConfig?.style
+    const inputStyles = inputConfig?.styles
+    const cellStyles = cellProps?.styles
+    const semantic = resolveStyles(styles, { props, state: { status: 'default' as const } })
     const fieldToken = useComponentToken('Field', getFieldToken)
     const resolvedValueAlign = valueAlign ?? (vertical ? 'left' : 'right')
     const { currentValue, setValue } = useFieldValue({ value, defaultValue, onChange })
@@ -109,6 +112,7 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
       titleAlign,
       vertical,
       cellStyles,
+      semantic,
     })
 
     return (
@@ -128,7 +132,7 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
             readOnly={readOnly}
             textAlign={inputControlProps.textAlign ?? resolvedValueAlign}
             ref={ref}
-            style={inputStyle}
+            style={[semantic?.content, inputStyle]}
             styles={embeddedInputStyles}
           />
         }

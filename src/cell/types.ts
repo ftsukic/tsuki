@@ -12,19 +12,16 @@ export interface CellStyleState {
 
 export interface CellSemanticStyles {
   root?: StyleProp<ViewStyle>
-  row?: StyleProp<ViewStyle>
-  main?: StyleProp<ViewStyle>
-  titleArea?: StyleProp<ViewStyle>
-  titleRow?: StyleProp<ViewStyle>
+  header?: StyleProp<ViewStyle>
   icon?: StyleProp<ViewStyle>
   title?: StyleProp<TextStyle>
   titleExtra?: StyleProp<TextStyle>
-  label?: StyleProp<TextStyle>
-  valueArea?: StyleProp<ViewStyle>
-  value?: StyleProp<TextStyle>
+  description?: StyleProp<TextStyle>
+  body?: StyleProp<ViewStyle>
+  content?: StyleProp<TextStyle>
   valueExtra?: StyleProp<TextStyle>
   extra?: StyleProp<TextStyle>
-  suffix?: StyleProp<ViewStyle>
+  actions?: StyleProp<ViewStyle>
   required?: StyleProp<TextStyle>
   divider?: StyleProp<ViewStyle>
 }

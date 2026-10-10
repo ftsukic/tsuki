@@ -55,7 +55,7 @@ import { Tag } from '@ftsukic/tsuki'
 | onClose | `() => void` | — | 点击关闭图标时触发；组件不会自动卸载 |
 | disabled | `boolean` | `false` | 降低透明度并禁用关闭图标 |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式，优先级高于 `styles.root` |
-| styles | `TagStyles` | — | `root`、`content`、`label`、`close`、`icon` 语义样式 |
+| styles | `TagStyles` | — | `root`、`content`、`close` 语义样式；支持对象或函数。 |
 
 Tag 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`。Tag 默认不是 Button，不提供 `onPress`、pressed 状态或 Button 反馈；需要点击时请由外层 `Pressable` 包裹。
 

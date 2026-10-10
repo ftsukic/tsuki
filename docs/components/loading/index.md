@@ -60,7 +60,7 @@ import { Loading } from '@ftsukic/tsuki'
 
 Loading 根节点使用无障碍 `progressbar` 角色，并将 `accessibilityState.busy` 设为 `true`。`style` 只作用于根节点；`styles.indicator` 作用于指示器容器，`styles.text` 作用于 primitive `children` 的库内 `Text` 节点。
 
-`circular` 通过 `react-native-svg` 的 `Circle` 和 `strokeDasharray` 绘制缺口圆环；`spinner` 通过八个径向条段绘制，静态外观与 `circular` 不同。两者共享 `size`、`color`，并在主题 `motion` 开启时旋转；`theme.token.motion=false` 时不会启动持续动画。
+`circular` 通过 `react-native-svg` 的 `Circle` 和 `strokeDasharray` 绘制缺口圆环；`spinner` 通过八个径向条段绘制，静态外观与 `circular` 不同。两者共享 `size`、`color`，并在主题 `motion` 开启时旋转；`theme.seed.motion=false` 时不会启动持续动画。
 
 动画时长默认由 `Loading` component token 的 `animationDuration` 控制，也可通过 `duration` 覆盖；0 或负值不启动动画。
 

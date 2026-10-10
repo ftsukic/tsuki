@@ -14,10 +14,11 @@ export interface TabsStyleState {
 
 export interface TabsSemanticStyles {
   root?: StyleProp<ViewStyle>
-  nav?: StyleProp<ViewStyle>
-  tab?: StyleProp<ViewStyle>
+  header?: StyleProp<ViewStyle>
+  item?: StyleProp<ViewStyle>
   label?: StyleProp<TextStyle>
   indicator?: StyleProp<ViewStyle>
+  body?: StyleProp<ViewStyle>
   content?: StyleProp<ViewStyle>
 }
 
@@ -38,13 +39,19 @@ export interface TabsProps extends Omit<ViewProps, 'children' | 'style'> {
 
 export type TabsStyles = StyleResolver<TabsProps, TabsStyleState, TabsSemanticStyles>
 
+export interface TabSemanticStyles {
+  root?: StyleProp<ViewStyle>
+  label?: StyleProp<TextStyle>
+  content?: StyleProp<ViewStyle>
+}
+
 export interface TabProps extends Omit<
   PressableProps,
   'children' | 'disabled' | 'onPress' | 'style'
 > {
   name?: TabsValue
   title: ReactNode
-  titleStyle?: StyleProp<TextStyle>
+  styles?: TabSemanticStyles
   disabled?: boolean
   children?: ReactNode
   style?: StyleProp<ViewStyle>

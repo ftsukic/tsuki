@@ -78,18 +78,17 @@ import {
 | duration | `number` | `2000` | 自动关闭毫秒数；`0` 表示不自动关闭，负数按 `0` 处理 |
 | loadingType | `'circular' \| 'spinner'` | `'circular'` | `type="loading"` 时的指示器类型 |
 | overlay | `boolean` | `false` | 是否显示全屏遮罩 |
-| overlayStyle | `StyleProp<ViewStyle>` | — | 遮罩样式 |
 | forbidClick | `boolean` | `false` | 是否拦截遮罩层下方触摸 |
 | closeOnClick | `boolean` | `false` | 是否点击提示本身关闭 |
 | closeOnClickOverlay | `boolean` | `false` | 是否点击遮罩关闭；需要 `overlay` |
 | zIndex | `number` | 主题值 | 根宿主层级 |
 | style | `StyleProp<ViewStyle>` | — | 提示气泡 root 样式 |
-| styles | `ToastStyles` | — | `root / message / icon / loading / overlay / host` 语义样式 |
+| styles | `ToastStyles` | — | `root`、`content`、`icon`、`loading`、`mask`、`wrapper`、`container` 语义样式；支持对象或函数。 |
 | onShowChange | `(show: boolean) => void` | — | 显示状态变化回调；自动关闭和点击关闭传入 `false` |
 | onOpened | `() => void` | — | 入场动画完成后回调 |
 | onClose | `() => void` | — | 关闭动画完成并卸载前回调 |
 
-组件继承 React Native `ViewProps`，`style` 只作用于提示气泡，其他 View props 透传到气泡 root。`styles` 可以是对象或函数；函数接收 `{ props, state: { show, type, position } }`。组件使用无障碍 `alert` 语义和 `polite` live region。
+组件继承 React Native `ViewProps`，`style` 和 `styles.root` 作用于全屏根节点，`styles.container` 作用于提示气泡，其他 View props 透传到气泡 root。`styles` 可以是对象或函数；函数接收 `{ props, state: { show, type, position } }`。组件使用无障碍 `alert` 语义和 `polite` live region。
 
 ### PortalHost 与命令式 API
 

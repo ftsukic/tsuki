@@ -22,7 +22,7 @@ export default function FieldThemeFixture() {
         defaultValue={['shanghai']}
         columns={cities}
         errorMessage="请选择城市"
-        styles={{ description: { fontStyle: 'italic' } }}
+        styles={{ extra: { fontStyle: 'italic' } }}
       />
     </ConfigProvider>
   )

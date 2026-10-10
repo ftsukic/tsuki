@@ -78,8 +78,7 @@ import { DropdownItem, DropdownMenu } from '@ftsukic/tsuki'
 | onClosed | `() => void` | — | 面板关闭动画完成并卸载后回调；切换到其他 item 时，在旧 item 不再作为面板内容后回调 |
 | closeOnSelect | `boolean` | `true` | 选择 option 后是否关闭面板；自定义内容需要自行调用 ref 关闭 |
 | style | `StyleProp<ViewStyle>` | — | 触发器根节点样式 |
-| contentStyle | `StyleProp<ViewStyle>` | — | 当前面板根节点样式 |
-| styles | `DropdownItemStyles` | — | `content`、`option`、`optionText`、`optionIcon`、`overlay` 语义样式 |
+| styles | `DropdownItemStyles` | — | `root`、`popup` 语义样式；支持对象或函数。 |
 | testID | `string` | — | 触发器测试标识；options 行使用 `dropdown-option-{index}-{optionIndex}` 形式的内部标识 |
 
 ### DropdownOption
@@ -95,7 +94,7 @@ interface DropdownOption {
 
 禁用 option 不会触发 `onChange` 或关闭面板。`DropdownItem` 的触发器和 option 都使用 `accessibilityRole="button"`；触发器暴露 `expanded`/`disabled`，option 暴露 `selected`/`disabled`。
 
-DropdownItem 的 styles resolver 只描述触发器自身的 `active`、`disabled`、`index` 状态。option 的 `selected`、`pressed` 和 `disabled` 按每一行独立计算；`styles.option` 与 `styles.optionText` 是静态样式覆盖，不会把所有 option 误判为 selected。
+DropdownItem 的 styles resolver 只描述触发器自身的 `active`、`disabled`、`index` 状态。option 的 `selected`、`pressed` 和 `disabled` 按每一行独立计算；`styles.popup.listItem` 与 `styles.popup.listItemLabel` 是静态样式覆盖，不会把所有 option 误判为 selected。
 
 ## Ref API
 

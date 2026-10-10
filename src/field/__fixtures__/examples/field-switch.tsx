@@ -35,9 +35,11 @@ export default function FieldSwitchFixture() {
         />
         <FieldSwitch
           title="Switch 样式"
-          switchStyles={({ state }) => ({
-            root: { opacity: state.active ? 1 : 0.8 },
-          })}
+          switchProps={{
+            styles: ({ state }) => ({
+              root: { opacity: state.active ? 1 : 0.8 },
+            }),
+          }}
         />
         <FieldSwitch
           title="确认开启"

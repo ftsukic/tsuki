@@ -1,3 +1,4 @@
+import { resolveStyles } from '../style/resolve-styles'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { useEffect, useState } from 'react'
 import { Button, ConfigProvider, Popup, PortalHost } from '..'
@@ -374,7 +375,7 @@ describe('Popup', () => {
           onClosed={onClosed}
           testID="motion-panel"
           styles={({ state }) => ({
-            panel: { borderWidth: state.position === 'bottom' ? 1 : 2 },
+            container: { borderWidth: state.position === 'bottom' ? 1 : 2 },
           })}
         >
           <Text>motion popup</Text>
@@ -396,7 +397,7 @@ describe('Popup', () => {
           onClosed={onClosed}
           testID="motion-panel"
           styles={({ state }) => ({
-            panel: { borderWidth: state.position === 'bottom' ? 1 : 2 },
+            container: { borderWidth: state.position === 'bottom' ? 1 : 2 },
           })}
         >
           <Text>motion popup</Text>
@@ -435,7 +436,7 @@ describe('Popup', () => {
           duration={240}
           testID="motion-panel"
           styles={({ state }) => ({
-            panel: { borderWidth: state.position === 'bottom' ? 1 : 2 },
+            container: { borderWidth: state.position === 'bottom' ? 1 : 2 },
           })}
         >
           <Text>motion popup</Text>
@@ -521,14 +522,23 @@ describe('Popup', () => {
           <Popup
             visible
             round
-            style={{ width: 100 }}
-            overlayStyle={{ opacity: 0.2 }}
+
             testID="styled-panel"
-            styles={({ state }) => ({
-              panel: { borderWidth: state.visible ? 1 : 0 },
-              root: { marginTop: 4 },
-              overlay: { borderWidth: 2 },
-            })}
+            styles={(info) => {
+              const custom = resolveStyles(
+                ({ state }) => ({
+                  container: { borderWidth: state.visible ? 1 : 0 },
+                  root: { marginTop: 4 },
+                  mask: { borderWidth: 2 },
+                }),
+                info,
+              )
+              return {
+                ...custom,
+                container: [custom?.container, { width: 100 }],
+                mask: [custom?.mask, { opacity: 0.2 }],
+              }
+            }}
           >
             <Text>styled popup</Text>
           </Popup>

@@ -62,7 +62,7 @@ import { Checkbox } from '@ftsukic/tsuki'
 | variant | `'default' \| 'button'` | `'default'` | `button` 隐藏 indicator，使用按钮边框和背景，但仍由 Checkbox 自己渲染和管理状态；宽度由内容和水平 padding 撑开 |
 | buttonVariant | `ButtonVariant` | `'solid'` | `variant="button"` 时使用的 Button 视觉变体；不影响普通 Checkbox |
 | style | `StyleProp<ViewStyle>` | — | 根 `Pressable` 节点样式，优先级高于默认样式和 `styles.root` |
-| styles | `CheckboxStyles` | — | `root`、`indicator`、`label` 三个语义样式插槽，也支持函数形式 |
+| styles | `CheckboxStyles` | — | `root`、`icon`、`label` 语义样式；支持对象或函数。 |
 | onPressDebounceWait | `number` | — | 两次点击之间的最小间隔，单位为毫秒 |
 
 组件继承 React Native `PressableProps`，但由组件管理 `children`、`style`、`disabled` 和 `onPress` 的状态分发。整个 Checkbox 区域（包括 label）都可以点击；disabled 时不响应。默认无障碍角色为 `checkbox`，并同步 `accessibilityState.disabled`；`indeterminate` 时 `accessibilityState.checked` 为 `'mixed'`，否则为真实的 boolean `checked` 状态。半选 Checkbox 点击时仍按 `checked` 的 boolean 状态切换，`indeterminate` 由调用方控制，不会自动清除。

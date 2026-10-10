@@ -6,10 +6,11 @@ import { Text } from '../text'
 import { TextInput } from '../text-input'
 import type { InputSemanticStyles } from './types'
 import type { InputResolvedStyles } from './style'
-import type { StyleProp, TextStyle } from 'react-native'
+import type { StyleProp, TextStyle, ViewStyle } from 'react-native'
 
 export interface InputTextareaProps {
   coreProps: TextInputProps
+  rootStyle?: StyleProp<ViewStyle>
   autoSize: boolean
   rows: number
   styles: InputResolvedStyles
@@ -26,6 +27,7 @@ export const InputTextarea = forwardRef<TextInputInstance, InputTextareaProps>(
   function InputTextarea(
     {
       coreProps,
+      rootStyle,
       autoSize,
       rows,
       styles,
@@ -39,7 +41,7 @@ export const InputTextarea = forwardRef<TextInputInstance, InputTextareaProps>(
     },
     ref,
   ) {
-    const shellStyle = StyleSheet.flatten([styles.shell, styles.textareaShell, semantic?.shell])
+    const shellStyle = StyleSheet.flatten([styles.shell, styles.textareaShell, rootStyle])
     const shellHorizontalPadding =
       typeof shellStyle.paddingHorizontal === 'number' ? shellStyle.paddingHorizontal : 0
     const {
@@ -51,7 +53,7 @@ export const InputTextarea = forwardRef<TextInputInstance, InputTextareaProps>(
     } = coreProps
 
     return (
-      <View style={[styles.shell, styles.textareaShell, semantic?.shell]}>
+      <View style={[styles.shell, styles.textareaShell, rootStyle]}>
         <TextInput
           {...coreProps}
           ref={ref}
@@ -108,7 +110,7 @@ export const InputTextarea = forwardRef<TextInputInstance, InputTextareaProps>(
           />
         ) : null}
         {wordLimit !== undefined ? (
-          <Text style={[styles.wordLimit, semantic?.wordLimit]}>
+          <Text style={[styles.wordLimit, semantic?.count]}>
             {value.length}/{wordLimit}
           </Text>
         ) : null}

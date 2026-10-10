@@ -46,13 +46,13 @@ import { Skeleton } from '@ftsukic/tsuki'
 | round | `boolean` | `false` | 仅控制标题和段落是否使用胶囊圆角 |
 | animate | `boolean` | `true` | 是否启用呼吸动画 |
 | style | `StyleProp<ViewStyle>` | — | root 样式，优先级高于默认样式和 `styles.root` |
-| styles | `SkeletonStyles` | — | root、placeholder、avatar、content、title、rows、row 语义样式 |
+| styles | `SkeletonStyles` | — | `root`、`header`、`avatar`、`section`、`title`、`paragraph`、`row` 语义样式；支持对象或函数。 |
 
 Skeleton 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`。loading 状态默认使用 `accessibilityRole="progressbar"` 和 `accessibilityState.busy=true`，显式传入的 accessibility props 优先；非 loading 状态不强制 root 的无障碍语义。
 
 ### 主题定制
 
-通过 `ConfigProvider theme.components.Skeleton` 覆盖 `backgroundColor`、尺寸、间距、圆角和动画 token。背景色默认派生自当前主题的 `colorFillSecondary`，因此会随明暗主题变化。`theme.token.motion=false` 会完全禁用动画。
+通过 `ConfigProvider theme.components.Skeleton` 覆盖 `backgroundColor`、尺寸、间距、圆角和动画 token。背景色默认派生自当前主题的 `colorFillSecondary`，因此会随明暗主题变化。`theme.seed.motion=false` 会完全禁用动画。
 
 Skeleton 不支持 shimmer、SVG、LinearGradient、DOM API，也不提供 `rowStyles(index)` 等额外公开 API。
 

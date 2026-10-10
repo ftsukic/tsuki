@@ -150,7 +150,7 @@ export const Radio = forwardRef<React.ComponentRef<typeof Pressable>, RadioProps
         return (
           <>
             {labelPosition === 'left' ? label : null}
-            <View style={[resolved.indicator, semantic?.indicator]}>
+            <View style={[resolved.indicator, semantic?.icon]}>
               {shape === 'dot' ? (
                 isChecked ? (
                   <MotionView

@@ -9,7 +9,7 @@ export default function ShrinkTabsExample() {
   return (
     <View style={{ gap: 16 }}>
       <Tabs shrink defaultValue="overview">
-        <Tab name="overview" title="概览" titleStyle={{ fontWeight: '700' }}>
+        <Tab name="overview" title="概览" styles={{ label: { fontWeight: '700' } }}>
           <Text>内容宽度由标题和水平内边距决定。</Text>
         </Tab>
         <Tab name="activity" title="最近活动">

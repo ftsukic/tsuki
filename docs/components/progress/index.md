@@ -62,11 +62,11 @@ import { Progress } from '@ftsukic/tsuki'
 | strokeLinecap | `'round' \| 'square'` | `'round'` | 进度端点形状；同时作用于条形和环形描边 |
 | size | `number` | `progress_circle_size` | 环形直径；条形模式忽略此属性 |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
-| styles | `ProgressStyles` | — | `root`、`track`、`portion`、`pivot`、`circle`、`circleLabel` 语义样式 |
+| styles | `ProgressStyles` | — | `root`、`rail`、`track`、`indicatorContainer`、`body`、`indicator` 语义样式；支持对象或函数。 |
 
 Progress 继承 React Native `ViewProps`，但由组件管理 `children`、`style`、`accessibilityRole` 和 `accessibilityValue`。根节点使用 `progressbar` 语义，并将 `min`、`max`、`now` 分别设置为 `0`、`100` 和归一化后的 percentage。
 
-`style` 只作用于根 View。`styles` 可以传入语义样式对象，也可以传入接收 `{ props, state }` 的 resolver 函数；可用插槽为 `root`、`track`、`portion`、`pivot`、`circle` 和 `circleLabel`。组件不提供 `disabled`、`loading`、children 进度内容、Web DOM 属性或自定义 SVG path API。
+`style` 只作用于根 View。`styles` 可以传入语义样式对象，也可以传入接收 `{ props, state }` 的 resolver 函数；可用插槽为 `root`、`body`、`rail`、`track`、`indicator` 和 `indicatorContainer`。组件不提供 `disabled`、`loading`、children 进度内容、Web DOM 属性或自定义 SVG path API。
 
 条形结构为 `Progress → track → portion`，根节点宽度为 `100%`。首次渲染直接显示当前值；percentage 更新时使用组件 token 中的动画时长和 `Easing.out(Easing.cubic)` 平滑过渡。`strokeLinecap="round"` 使用进度高度的一半作为圆角，`square` 使用直角。环形模式使用 `react-native-svg` 的两个 `Circle`，从顶部开始顺时针绘制，不依赖额外 SVG path 库。
 

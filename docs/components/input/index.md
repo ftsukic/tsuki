@@ -73,7 +73,7 @@ import { Input } from '@ftsukic/tsuki'
 | `prefix` / `suffix` | `ReactNode` | — | 输入前后内容；password 模式由可见性按钮占用 suffix |
 | `addonBefore` / `addonAfter` | `ReactNode` | — | 输入框外侧内容 |
 | style | `StyleProp<ViewStyle>` | — | Input 根节点样式 |
-| styles | `InputStyles` | — | root、input、prefix、suffix、clear、wordLimit、addonBefore、addonAfter 语义插槽 |
+| styles | `InputStyles` | — | `root`、`input`、`prefix`、`suffix`、`clear`、`count`、`addonBefore`、`addonAfter` 语义样式；支持对象或函数。 |
 
 Input 继承 React Native `TextInputProps` 的键盘、光标、选择、提交和无障碍属性；组件管理 `value`、`editable`、`multiline`、`onChange`、`onChangeText` 和 `style`。默认 accessibility role 由原生 TextInput 提供，不额外生成 label；调用方应提供 `accessibilityLabel` 或关联的可见 label。`type="number"` 不会执行 number conversion，因此 `0`、`001` 等输入保持原样。password 模式保留 `suffix` 位置给可见性切换按钮，不支持同时注入另一个 password suffix。
 
@@ -81,7 +81,7 @@ Input 继承 React Native `TextInputProps` 的键盘、光标、选择、提交�
 
 ## 主题定制
 
-Input 使用 `theme.components.Input`。单行输入默认 `normal` 尺寸为 `fontSize: 14`、`lineHeight: 24`、`paddingVertical: 10`、`paddingHorizontal: 16`；多行 Textarea 使用独立的基础文本度量，默认 `lineHeight: 20`、`paddingVertical: 8`、`paddingHorizontal: 16`。字号、行高、内边距、边框、圆角、占位文本色、禁用色、清除按钮和密码按钮均从 Input token 派生。Input 不提供固定 `height` token；整体高度由 lineHeight 与内边距自然形成，需要特殊固定尺寸时，可通过 `styles.shell` 显式覆盖，由业务自行承担固定高度布局。
+Input 使用 `theme.components.Input`。单行输入默认 `normal` 尺寸为 `fontSize: 14`、`lineHeight: 24`、`paddingVertical: 10`、`paddingHorizontal: 16`；多行 Textarea 使用独立的基础文本度量，默认 `lineHeight: 20`、`paddingVertical: 8`、`paddingHorizontal: 16`。字号、行高、内边距、边框、圆角、占位文本色、禁用色、清除按钮和密码按钮均从 Input token 派生。Input 不提供固定 `height` token；整体高度由 lineHeight 与内边距自然形成，需要特殊固定尺寸时，可通过 `styles.root` 显式覆盖，由业务自行承担固定高度布局。
 
 ```tsx | pure
 import { ConfigProvider, Input } from '@ftsukic/tsuki'

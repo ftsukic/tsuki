@@ -22,7 +22,7 @@ export default function Example() {
       <Checkbox shape="square" labelPosition="left">
         方形且标签在左侧
       </Checkbox>
-      <Checkbox shape="square" styles={{ indicator: { borderRadius: 4 } }}>
+      <Checkbox shape="square" styles={{ icon: { borderRadius: 4 } }}>
         <Flex>
           <Text>自定义render</Text>
           <Button variant="text" type="primary">

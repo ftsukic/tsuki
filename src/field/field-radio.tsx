@@ -1,12 +1,13 @@
 import type { ReactNode } from 'react'
 import type { DimensionValue } from 'react-native'
-import type { CellProps, CellStyles } from '../cell'
+import type { CellProps } from '../cell'
 import { Cell } from '../cell'
 import { useComponentToken } from '../theme'
+import { resolveStyles } from '../style'
 import { createFieldCellStyles } from './style'
 import { getFieldToken } from './token'
 import { useFieldValue } from './useFieldValue'
-import type { FieldCellProps, FieldTitleAlign } from './types'
+import type { FieldCellProps, FieldStyles, FieldTitleAlign } from './types'
 import { Radio } from '../radio'
 import type { RadioDirection, RadioGroupProps, RadioOption, RadioValue } from '../radio'
 
@@ -26,8 +27,9 @@ export interface FieldRadioProps extends FieldCellProps, RadioAdapterProps {
   readOnly?: boolean
   titleWidth?: DimensionValue
   titleAlign?: FieldTitleAlign
+  styles?: FieldStyles<FieldRadioProps>
   style?: CellProps['style']
-  cellStyles?: CellStyles
+  cellProps?: Pick<CellProps, 'styles'>
   children?: ReactNode
   options?: readonly RadioOption[]
   direction?: RadioDirection
@@ -66,11 +68,14 @@ export function FieldRadio(props: FieldRadioProps) {
     onPress,
     border,
     divider,
+    styles,
     style,
-    cellStyles,
+    cellProps,
     ...groupProps
   } = props
+  const cellStyles = cellProps?.styles
 
+  const semantic = resolveStyles(styles, { props, state: { status: 'default' as const } })
   const fieldToken = useComponentToken('Field', getFieldToken)
   const { currentValue, setValue } = useFieldValue({ value, defaultValue, onChange })
   const resolvedCellStyles = createFieldCellStyles(fieldToken, {
@@ -78,6 +83,7 @@ export function FieldRadio(props: FieldRadioProps) {
     titleAlign,
     vertical,
     cellStyles,
+    semantic,
   })
 
   return (
@@ -88,6 +94,7 @@ export function FieldRadio(props: FieldRadioProps) {
       value={
         <Radio.Group
           {...groupProps}
+          style={semantic?.content}
           options={options}
           value={currentValue}
           onChange={setValue}

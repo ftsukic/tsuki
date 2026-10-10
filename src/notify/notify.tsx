@@ -15,6 +15,7 @@ import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { Animated, useTransitionProgress } from '../motion'
 import { Portal } from '../portal'
 import { Text } from '../text'
+import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import type { NotifyMethods, NotifyProps } from './types'
 import { getNotifyToken } from './token'
@@ -44,7 +45,7 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
     duration = 0,
     safeAreaInsetTop = true,
     style,
-    textStyle,
+    styles,
     onClosed,
     ...props
   },
@@ -146,12 +147,35 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
     onTransitionEnd: handleTransitionEnd,
   })
 
+  const semantic = resolveStyles(styles, {
+    props: {
+      ...props,
+      children,
+      message,
+      type,
+      color,
+      backgroundColor,
+      visible: visibleProp,
+      duration,
+      safeAreaInsetTop,
+      style,
+      styles,
+      onClosed,
+    },
+    state: { visible },
+  })
+
   if (!rendered) return null
 
   return (
     <View
       pointerEvents="box-none"
-      style={[StyleSheet.absoluteFill, { zIndex: themeToken.zIndexPopupBase }]}
+      style={[
+        StyleSheet.absoluteFill,
+        { zIndex: themeToken.zIndexPopupBase },
+        semantic?.root,
+        style,
+      ]}
     >
       <Animated.View
         {...props}
@@ -169,7 +193,7 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
               paddingHorizontal: token.paddingHorizontal,
               width: '100%',
             },
-            style,
+            semantic?.container,
           ]}
         >
           {typeof content === 'string' || typeof content === 'number' ? (
@@ -181,7 +205,7 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
                   fontSize: token.fontSize,
                   lineHeight: token.lineHeight,
                 },
-                textStyle,
+                semantic?.content,
               ]}
             >
               {content}

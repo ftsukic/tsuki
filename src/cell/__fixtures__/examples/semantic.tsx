@@ -13,8 +13,8 @@ export default function CellSemanticFixture() {
       styles={({ state }) => ({
         root: { paddingHorizontal: 20 },
         title: { color: state.disabled ? '#999999' : '#111111' },
-        value: { color: '#1989FA' },
-        suffix: { width: 24 },
+        content: { color: '#1989FA' },
+        actions: { width: 24 },
       })}
     />
   )

@@ -55,4 +55,4 @@ Text 不提供 `Heading1`~`Heading5`、Web `linkDecoration`、hover 或 focus to
 </ConfigProvider>
 ```
 
-`Text` 使用当前主题的 `fontFamily`；需要修改全局字体时配置 `theme.token.fontFamily`，单个文本仍可通过 `style.fontFamily` 覆盖。
+`Text` 使用当前主题的 `fontFamily`；需要修改全局字体时配置 `theme.seed.fontFamily`，单个文本仍可通过 `style.fontFamily` 覆盖。

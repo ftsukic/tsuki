@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import type { StyleProp, TextStyle, ViewProps, ViewStyle } from 'react-native'
 import type { StyleInfo, StyleResolver } from '../style'
+import type { PickerToolbarSemanticStyles } from './picker-toolbar'
 
 export type PickerValue = string | number
 
@@ -41,15 +42,11 @@ export interface PickerStyleStateData {
 
 export interface PickerSemanticStyles {
   root?: StyleProp<ViewStyle>
-  container?: StyleProp<ViewStyle>
-  toolbar?: StyleProp<ViewStyle>
-  toolbarButton?: StyleProp<ViewStyle>
-  toolbarButtonLabel?: StyleProp<TextStyle>
-  toolbarTitle?: StyleProp<TextStyle>
-  columns?: StyleProp<ViewStyle>
+  toolbar?: PickerToolbarSemanticStyles
+  body?: StyleProp<ViewStyle>
   column?: StyleProp<ViewStyle>
   item?: StyleProp<ViewStyle>
-  itemLabel?: StyleProp<TextStyle>
+  itemContent?: StyleProp<TextStyle>
   mask?: StyleProp<ViewStyle>
   indicator?: StyleProp<ViewStyle>
   loading?: StyleProp<ViewStyle>

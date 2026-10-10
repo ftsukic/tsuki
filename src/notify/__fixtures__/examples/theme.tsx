@@ -5,7 +5,7 @@ import { StyleSheet, View } from 'react-native'
 
 /**
  * @title 主题和单次样式
- * @description 通过 Notify token 统一定制通知，并用 color、backgroundColor 和 textStyle 覆盖单次实例。
+ * @description 通过 Notify token 统一定制通知，并用 color、backgroundColor 和 styles 覆盖单次实例。
  */
 export default function NotifyThemeExample() {
   const [visible, setVisible] = useState(false)
@@ -32,8 +32,8 @@ export default function NotifyThemeExample() {
           message="这是主题化的通知"
           backgroundColor="#334e68"
           color="#ffffff"
-          style={styles.notify}
-          textStyle={styles.notifyText}
+
+          styles={{ content: styles.notifyText, container: styles.notify }}
           onClosed={() => setVisible(false)}
         />
         <Button variant="outlined" disabled={!visible} onPress={() => setVisible(false)}>

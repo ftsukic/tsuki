@@ -96,7 +96,7 @@ import { Cell } from '@ftsukic/tsuki'
 | valueLines | `number` | — | 只应用于 primitive value。 |
 | disabled | `boolean` | `false` | 禁用 Pressable 交互并应用 disabled opacity。 |
 | style | `StyleProp<ViewStyle>` | — | 根 Pressable 样式。 |
-| styles | `CellStyles` | — | 语义样式插槽。 |
+| styles | `CellStyles` | — | `root`、`header`、`icon`、`title`、`titleExtra`、`description`、`body`、`content`、`valueExtra`、`extra`、`actions`、`required`、`divider` 语义样式；支持对象或函数。 |
 | onPressDebounceWait | `number` | — | 两次 `onPress` 之间的最小间隔，单位为毫秒。 |
 
 Cell 继承 React Native `PressableProps`，但由 Cell 管理 `children`、`style` 和 `disabled`；`onPress`、`testID`、无障碍和其他 Pressable 属性仍可使用。交互 Cell 默认 `accessibilityRole="button"`。`disabled` 时不触发 `onPress`。
@@ -105,7 +105,7 @@ Cell 的内部结构固定为 `row -> icon + main + extra + suffix`。horizontal
 
 ### CellStyles
 
-`styles` 可使用 `root`、`row`、`main`、`titleArea`、`titleRow`、`title`、`titleExtra`、`label`、`valueArea`、`value`、`valueExtra`、`extra`、`icon`、`required`、`suffix`、`divider`。`title/value/titleExtra/valueExtra/label/extra` 是文本插槽时使用 `TextStyle`；容器插槽使用 `ViewStyle`。自定义 ReactNode 的内部样式仍由调用方负责。
+`styles` 可使用 `root`, `header`, `icon`, `title`, `titleExtra`, `description`, `body`, `content`, `valueExtra`, `extra`, `actions`, `required`, `divider`。title、content、description、titleExtra、valueExtra、extra 使用 TextStyle；其他插槽使用 ViewStyle。自定义 ReactNode 的内部样式由调用方负责。
 
 ### Cell.Group
 

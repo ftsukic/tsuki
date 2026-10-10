@@ -510,10 +510,8 @@ describe('Dialog', () => {
           theme="round-button"
           message="确认操作"
           showCancelButton
-          styles={{
-            cancel: { backgroundColor: cancelBackground },
-            confirm: { backgroundColor: confirmBackground },
-          }}
+          cancelButtonProps={{ style: { backgroundColor: cancelBackground } }}
+          confirmButtonProps={{ style: { backgroundColor: confirmBackground } }}
         />
       </AppProvider>,
     )

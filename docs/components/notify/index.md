@@ -65,8 +65,8 @@ Notify 使用 Portal 渲染。受控组件和命令式 API 都需要当前应用
 | visible | `boolean` | `true` | 是否显示；受控关闭时由父组件更新为 `false` |
 | duration | `number` | `0` | 自动关闭毫秒数；`0` 或负数不自动关闭 |
 | safeAreaInsetTop | `boolean` | `true` | 是否将 `SafeAreaInsetsContext` 的 `top` inset 加入通知顶部内边距 |
-| style | `StyleProp<ViewStyle>` | — | 通知内容根 View 样式 |
-| textStyle | `StyleProp<TextStyle>` | — | 字符串或数字 `message` 的文字样式 |
+| style | `StyleProp<ViewStyle>` | — | 通知外层根 View 样式 |
+| styles | `NotifyStyles` | — | root、container、content 语义样式；支持对象或函数 |
 | onClosed | `() => void` | — | 关闭动画完成并卸载内容后调用 |
 
 组件继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`；其他 View props 会透传到通知的动画容器。`ref` 指向 `NotifyMethods`，不指向原生 View。`style` 只作用于通知内容根 View；自定义 `children` 需要自行负责其内部文字样式。
@@ -133,4 +133,4 @@ closeNotify()
 
 支持的 Notify token：`primaryBackgroundColor`、`successBackgroundColor`、`errorBackgroundColor`、`warningBackgroundColor`、`textColor`、`fontFamily`、`fontSize`、`lineHeight`、`paddingHorizontal` 和 `paddingVertical`。
 
-当前不提供 `styles` 插槽、位置切换、遮罩、图标、loading 状态或 Web 专用的 `teleport`、`className`、HTML 字符串和 transition API；需要复杂内容时传入 ReactNode `children`。顶部安全区适配依赖宿主提供 `SafeAreaProvider`，不会由 Notify 自行创建。
+当前不提供位置切换、遮罩、图标、loading 状态或 Web 专用的 `teleport`、`className`、HTML 字符串和 transition API；需要复杂内容时传入 ReactNode `children`。顶部安全区适配依赖宿主提供 `SafeAreaProvider`，不会由 Notify 自行创建。

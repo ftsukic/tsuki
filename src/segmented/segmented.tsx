@@ -194,7 +194,6 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
           pointerEvents="none"
           style={[
             resolvedStyles.selectedBackground,
-            semanticStyles?.selectedBackground,
             {
               borderRadius: resolvedBorderRadius,
             },
@@ -236,7 +235,7 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
               optionLayoutStyles,
               block ? { flex: 1 } : undefined,
               effectiveDisabled ? { opacity: buttonToken.disabledOpacity } : undefined,
-              semanticStyles?.option,
+              semanticStyles?.item,
             ]}
           >
             {renderOptionLabel(option.label, labelStyle)}

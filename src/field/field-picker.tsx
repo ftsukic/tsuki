@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { View } from 'react-native'
 import type { DimensionValue } from 'react-native'
-import type { CellProps, CellStyles } from '../cell'
+import type { CellProps } from '../cell'
 import { Cell } from '../cell'
 import { Picker } from '../picker'
 import type { PickerOption, PickerProps, PickerValue } from '../picker'
@@ -42,12 +42,11 @@ export interface FieldPickerProps extends FieldCellProps, PickerAdapterProps {
   errorMessage?: ReactNode
   status?: FieldStatus
   style?: CellProps['style']
-  cellStyles?: CellStyles
+  cellProps?: Pick<CellProps, 'styles'>
   styles?: FieldStyles<FieldPickerProps>
   placeholder?: ReactNode
   formatValue?: FieldPickerFormatValue
-  pickerStyle?: PickerProps['style']
-  pickerStyles?: PickerProps['styles']
+  pickerProps?: Pick<PickerProps, 'style' | 'styles'>
 }
 
 export function FieldPicker(props: FieldPickerProps) {
@@ -55,8 +54,7 @@ export function FieldPicker(props: FieldPickerProps) {
     columns,
     placeholder = '请选择',
     formatValue,
-    pickerStyle,
-    pickerStyles,
+    pickerProps: pickerConfig,
     title,
     titleExtra,
     label,
@@ -85,9 +83,12 @@ export function FieldPicker(props: FieldPickerProps) {
     divider,
     style,
     styles,
-    cellStyles,
+    cellProps,
     ...pickerProps
   } = props
+  const pickerStyle = pickerConfig?.style
+  const pickerStyles = pickerConfig?.styles
+  const cellStyles = cellProps?.styles
   const [visible, setVisible] = useState(false)
   const [draftValues, setDraftValues] = useState<readonly PickerValue[]>([])
   const { token } = useToken()
@@ -136,6 +137,7 @@ export function FieldPicker(props: FieldPickerProps) {
     titleAlign,
     vertical,
     cellStyles,
+    semantic,
   })
   const hasSelection = (currentValue?.length ?? 0) > 0
   const selectedState = resolvePickerState(columns, currentValue ?? [])
@@ -152,7 +154,7 @@ export function FieldPicker(props: FieldPickerProps) {
         titleExtra={titleExtra}
         label={label}
         value={
-          <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.control]}>
+          <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.content]}>
             {renderFieldPickerValue(
               selectedDisplay,
               hasSelection && selectedState.options.length > 0 ? 'default' : 'tertiary',

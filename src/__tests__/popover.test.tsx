@@ -1,6 +1,7 @@
+import type { SwipeCellRef } from '../swipe-cell'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
-import { memo, type ReactNode } from 'react'
-import { Button, ConfigProvider, Icon, Popover } from '..'
+import { createRef, memo, type ReactNode } from 'react'
+import { Button, ConfigProvider, Icon, Popover, Provider, SwipeCell } from '..'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { StyleSheet, Text, View } from 'react-native'
 
@@ -68,6 +69,45 @@ describe('Popover', () => {
     await cleanup()
     jest.useRealTimers()
     jest.clearAllMocks()
+  })
+
+  it('keeps its trigger in a cell action but clears ownership for floating content', async () => {
+    const ref = createRef<SwipeCellRef>()
+    const onOpen = jest.fn()
+    const onClose = jest.fn()
+    await renderWithSafeArea(
+      <Provider motion={{ enabled: false }}>
+        <SwipeCell
+          ref={ref}
+          testID="popover-owner"
+          onOpen={onOpen}
+          onClose={onClose}
+          closeOnActionPress={false}
+          rightAction={
+            <Popover
+              visible
+              trigger="manual"
+              content={<Button testID="floating-button">浮层</Button>}
+            >
+              <Button testID="owned-trigger">触发器</Button>
+            </Popover>
+          }
+        />
+      </Provider>,
+    )
+    await act(async () => {
+      screen.getByTestId('popover-owner-right-action').props.onLayout({
+        nativeEvent: { layout: { width: 100, height: 48, x: 0, y: 0 } },
+      })
+      ref.current?.open()
+    })
+    expect(onOpen).toHaveBeenCalledTimes(1)
+    const triggerPress = fireEvent(screen.getByTestId('owned-trigger'), 'pressIn')
+    await triggerPress
+    expect(onClose).not.toHaveBeenCalled()
+    const contentPress = fireEvent(screen.getByTestId('floating-button'), 'pressIn')
+    await contentPress
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('is closed by default and opens from a Button child', async () => {
@@ -523,11 +563,11 @@ describe('Popover', () => {
         defaultVisible
         style={{ margin: 6 }}
         styles={({ state }) => ({
-          action: { minHeight: state.visible ? 52 : 0 },
-          actionIcon: { backgroundColor: '#eeeeee' },
-          actionText: { fontWeight: '700' },
-          actions: { padding: 2 },
-          content: { borderWidth: 2 },
+          item: { minHeight: state.visible ? 52 : 0 },
+          itemIcon: { backgroundColor: '#eeeeee' },
+          itemContent: { fontWeight: '700' },
+          list: { padding: 2 },
+          container: { borderWidth: 2 },
           divider: { opacity: 0.5 },
           reference: { opacity: 0.8 },
         })}

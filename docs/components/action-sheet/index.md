@@ -63,17 +63,16 @@ import { ActionSheet, ConfigProvider, PortalHost, Provider, showActionSheet } fr
 | closeOnPressOverlay | `boolean` | `true` | 点击遮罩是否发出关闭请求 |
 | overlay | `boolean` | `true` | 是否渲染全屏遮罩 |
 | safeAreaInsetBottom | `boolean` | `true` | 是否在面板根部追加底部安全区；有取消按钮时安全区属于取消按钮的按压区域 |
-| overlayStyle | `StyleProp<ViewStyle>` | — | 遮罩样式；遮罩透明度仍参与动画 |
 | zIndex | `number` | 主题 `zIndex` | 浮层宿主层级 |
 | style | `StyleProp<ViewStyle>` | — | 面板 root 样式 |
-| styles | `ActionSheetStyles` | — | `host / overlay / root / actions / header / title / action / name / subname / cancelGap / cancelPanel / cancel / cancelLabel` 语义样式 |
+| styles | `ActionSheetStyles` | — | `mask`、`wrapper`、`container`、`root`、`body`、`header`、`title`、`item`、`label`、`description`、`footer`、`cancel`、`cancelLabel` 语义样式；支持对象或函数。 |
 | onClose | `() => void` | — | 关闭请求回调；调用方应更新 `visible={false}` |
 | onSelect | `(action, index) => void` | — | action 选中回调；接收当前 action 和其索引 |
 | onPressOverlay | `(event) => void` | — | 点击遮罩回调 |
 | onOpened | `() => void` | — | 打开动画完成后回调 |
 | onClosed | `() => void` | — | 关闭动画完成后回调 |
 
-组件继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`；其余 View props 会透传到面板 root，ref 也指向该节点。`style` 只作用于面板，`styles.host` 作用于 Popup 宿主，`styles.overlay` 作用于遮罩，其他 slots 作用于对应内部节点。
+组件继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`；其余 View props 会透传到面板 root，ref 也指向该节点。`style` 和 `styles.root` 作用于全屏根节点，`styles.container` 作用于面板，`styles.mask` 作用于遮罩，其他 slots 作用于对应内部节点。
 
 ActionSheet 不会直接修改 `visible`。action、取消按钮和默认遮罩点击都会先触发 action 回调（如果有），再触发 `onClose`；父组件需要在回调中设置 `visible={false}`。设置 `closeOnAction={false}` 后 action 仍会执行，但不触发关闭请求。
 
@@ -151,7 +150,7 @@ if (result) {
 | zIndex | `zIndexPopupBase` | 浮层层级 |
 | fontFamily | `fontFamily` | 文字字体 |
 
-`theme.token.motion=false` 时 Popup 动画时长强制为 `0`，但打开/关闭生命周期仍然触发。ActionSheet 使用 Popup 的 bottom translateY 动画，并由同一个 transition progress 驱动 Overlay opacity；底部 safe-area 纳入取消 pressable，使取消内容与安全区共享 pressed 背景色；组件不单独提供 transition API。
+`theme.seed.motion=false` 时 Popup 动画时长强制为 `0`，但打开/关闭生命周期仍然触发。ActionSheet 使用 Popup 的 bottom translateY 动画，并由同一个 transition progress 驱动 Overlay opacity；底部 safe-area 纳入取消 pressable，使取消内容与安全区共享 pressed 背景色；组件不单独提供 transition API。
 
 ## 动画
 

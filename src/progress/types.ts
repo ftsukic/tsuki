@@ -13,11 +13,11 @@ export interface ProgressStyleState {
 
 export interface ProgressSemanticStyles {
   root?: StyleProp<ViewStyle>
+  rail?: StyleProp<ViewStyle>
   track?: StyleProp<ViewStyle>
-  portion?: StyleProp<ViewStyle>
-  pivot?: StyleProp<ViewStyle>
-  circle?: StyleProp<ViewStyle>
-  circleLabel?: StyleProp<TextStyle>
+  indicatorContainer?: StyleProp<ViewStyle>
+  body?: StyleProp<ViewStyle>
+  indicator?: StyleProp<TextStyle>
 }
 
 export type ProgressStyles = StyleResolver<

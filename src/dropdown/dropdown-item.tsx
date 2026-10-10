@@ -56,7 +56,6 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
     onClosed,
     closeOnSelect = true,
     style,
-    contentStyle,
     styles,
     testID,
     ...viewProps
@@ -87,7 +86,6 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
   const itemProps: DropdownItemProps = {
     children,
     closeOnSelect,
-    contentStyle,
     defaultValue,
     disabled,
     onChange,
@@ -162,6 +160,7 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
       showsVerticalScrollIndicator={false}
       style={[
         resolvedStyles.content,
+        itemSemantic?.popup?.list,
         context.panelMaxHeight ? { maxHeight: context.panelMaxHeight } : null,
       ]}
     >
@@ -182,7 +181,7 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
             onPress={() => handleOptionPress(option)}
             pressStyle="background"
             pressedBackgroundColor={token.optionPressedBackgroundColor}
-            style={[resolvedStyles.option, itemSemantic?.option]}
+            style={[resolvedStyles.option, itemSemantic?.popup?.listItem]}
           >
             <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
               {option.icon ? (
@@ -190,7 +189,7 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
                   style={[
                     resolvedStyles.optionIcon,
                     { marginRight: token.caretGap },
-                    itemSemantic?.optionIcon,
+                    itemSemantic?.popup?.listItemIcon,
                   ]}
                 >
                   {option.icon}
@@ -198,7 +197,11 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
               ) : null}
               {renderText(
                 option.text,
-                [resolvedStyles.optionText, { color: optionTextColor }, itemSemantic?.optionText],
+                [
+                  resolvedStyles.optionText,
+                  { color: optionTextColor },
+                  itemSemantic?.popup?.listItemLabel,
+                ],
                 `dropdown-option-${index}-${optionIndex}-text`,
               )}
             </View>
@@ -211,7 +214,7 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
                 style={[
                   resolvedStyles.optionIcon,
                   { marginLeft: token.caretGap },
-                  itemSemantic?.optionIcon,
+                  itemSemantic?.popup?.listItemIcon,
                 ]}
               />
             ) : null}
@@ -227,7 +230,7 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
   useEffect(() => {
     updateItem(idRef.current, {
       content,
-      contentStyle: [itemSemantic?.content, contentStyle],
+      contentStyle: itemSemantic?.popup?.root,
       estimatedHeight:
         children == null && options
           ? Math.min(options.length * token.optionHeight, context.panelMaxHeight ?? Infinity)
@@ -236,7 +239,7 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
       onClosed,
       onOpen,
       onOpened,
-      overlayStyle: itemSemantic?.overlay,
+      overlayStyle: itemSemantic?.popup?.mask,
       metadata: [
         title,
         value,
@@ -244,7 +247,6 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
         currentValue,
         options,
         children,
-        contentStyle,
         onChange,
         onClose,
         onClosed,
@@ -256,12 +258,11 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
   }, [
     children,
     content,
-    contentStyle,
     context.panelMaxHeight,
     currentValue,
     defaultValue,
-    itemSemantic?.content,
-    itemSemantic?.overlay,
+    itemSemantic?.popup?.root,
+    itemSemantic?.popup?.mask,
     onChange,
     onClose,
     onClosed,
@@ -283,7 +284,7 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
       disabled={disabled}
       onPress={toggle}
       pressStyle="none"
-      style={() => [resolvedStyles.item, menuSemantic?.item, style]}
+      style={() => [resolvedStyles.item, menuSemantic?.item, itemSemantic?.root, style]}
     >
       {renderText(
         resolvedTitle,

@@ -22,7 +22,7 @@ export default function TabsThemeExample() {
         <Tabs
           defaultValue="updates"
           styles={({ state }) => ({
-            content: {
+            body: {
               backgroundColor: state.activeIndex === 0 ? '#f0f5ff' : '#f6ffed',
               padding: 12,
             },

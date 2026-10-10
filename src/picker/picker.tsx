@@ -238,20 +238,17 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
     <View
       {...viewProps}
       ref={undefined}
-      style={[resolved.root, semantic?.root, semantic?.container, style]}
+      style={[resolved.root, semantic?.root, style]}
       testID={testID ?? 'picker'}
     >
       {showToolbar && !group ? (
         <PickerToolbar
-          buttonLabelStyle={semantic?.toolbarButtonLabel}
-          buttonStyle={semantic?.toolbarButton}
           cancelButtonText={cancelButtonText}
           confirmButtonText={confirmButtonText}
           onCancel={handleCancel}
           onConfirm={handleConfirm}
           showDivider={showToolbarDivider}
-          style={semantic?.toolbar}
-          titleStyle={semantic?.toolbarTitle}
+          styles={semantic?.toolbar}
           testID="picker-toolbar"
           title={title}
         />
@@ -260,7 +257,7 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
         <View
           accessibilityElementsHidden={loading || undefined}
           importantForAccessibility={loading ? 'no-hide-descendants' : undefined}
-          style={[resolved.columns, semantic?.columns]}
+          style={[resolved.columns, semantic?.body]}
           testID="picker-columns"
         >
           {resolvedState.columns.map((column, columnIndex) => (
@@ -269,7 +266,7 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
               columnIndex={columnIndex}
               disabled={loading || column.items.length === 0}
               itemHeight={itemHeightValue}
-              itemLabelStyle={semantic?.itemLabel}
+              itemLabelStyle={semantic?.itemContent}
               itemStyle={semantic?.item}
               items={column.items}
               swipeDuration={swipeDuration ?? token.picker_swipe_duration}

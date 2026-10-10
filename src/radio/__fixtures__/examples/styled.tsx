@@ -14,7 +14,7 @@ export default function Example() {
       labelPosition="left"
       styles={({ state }) => ({
         root: { padding: 8, borderRadius: 8, backgroundColor: '#f5f8ff' },
-        indicator: { borderWidth: state.checked ? 2 : 1 },
+        icon: { borderWidth: state.checked ? 2 : 1 },
         label: { color: '#1989fa', fontWeight: '600' },
       })}
     >

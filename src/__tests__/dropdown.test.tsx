@@ -851,8 +851,10 @@ describe('Dropdown', () => {
             onClose={lifecycle.close}
             onClosed={lifecycle.closed}
             styles={({ state }) => ({
-              content: { padding: 8 },
-              optionText: { fontWeight: state.active ? '700' : '400' },
+              popup: {
+                root: { padding: 8 },
+                listItemLabel: { fontWeight: state.active ? '700' : '400' },
+              },
             })}
           >
             <View testID="custom-content" onLayout={() => undefined}>

@@ -133,9 +133,9 @@ function ProgressComponent({
         style={[resolved.root, semantic?.root, style]}
       >
         <ProgressCircle
-          circleStyle={[resolved.circle, semantic?.circle]}
+          circleStyle={[resolved.circle, semantic?.body]}
           color={color ?? token.progress_color}
-          labelStyle={[resolved.circleLabel, semantic?.circleLabel]}
+          labelStyle={[resolved.circleLabel, semantic?.indicator]}
           percentage={animatedPercentage}
           pivotText={pivotText}
           showPivot={showPivot}
@@ -159,8 +159,8 @@ function ProgressComponent({
       accessibilityValue={accessibilityValue}
       style={[resolved.root, semantic?.root, style]}
     >
-      <View style={[resolved.track, semantic?.track]}>
-        <View style={[resolved.portion, semantic?.portion, { width: portionWidth }]} />
+      <View style={[resolved.track, semantic?.rail]}>
+        <View style={[resolved.portion, semantic?.track, { width: portionWidth }]} />
         {showPivot ? (
           <View
             onLayout={handlePivotLayout}
@@ -171,7 +171,7 @@ function ProgressComponent({
                 left: pivotLeft,
                 transform: pivotWidth === undefined ? undefined : [{ translateX: -pivotWidth / 2 }],
               },
-              semantic?.pivot,
+              semantic?.indicatorContainer,
             ]}
           >
             {renderPivot(resolvedPivotText, [
@@ -180,6 +180,7 @@ function ProgressComponent({
                 fontSize: token.progress_pivot_font_size,
                 lineHeight: token.progress_pivot_font_size + 4,
               },
+              semantic?.indicator,
             ])}
           </View>
         ) : null}

@@ -24,7 +24,7 @@ export interface RadioStyleState {
 
 export interface RadioSemanticStyles {
   root?: StyleProp<ViewStyle>
-  indicator?: StyleProp<ViewStyle>
+  icon?: StyleProp<ViewStyle>
   label?: StyleProp<TextStyle>
 }
 

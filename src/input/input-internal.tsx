@@ -236,7 +236,7 @@ export const InputInternal = forwardRef<TextInputInstance, InputInternalProps>(
     }
 
     return (
-      <View style={[resolved.root, semantic?.root, style]}>
+      <View style={resolved.root}>
         <View style={resolved.addonGroup}>
           {renderInputAffix(addonBefore, [
             resolved.addon,
@@ -247,6 +247,7 @@ export const InputInternal = forwardRef<TextInputInstance, InputInternalProps>(
             <InputTextarea
               ref={ref}
               coreProps={coreProps}
+              rootStyle={[semantic?.root, style]}
               autoSize={isAutoSize}
               rows={Math.max(1, rows)}
               styles={resolved}
@@ -262,6 +263,7 @@ export const InputInternal = forwardRef<TextInputInstance, InputInternalProps>(
             <InputSingle
               ref={ref}
               coreProps={coreProps}
+              rootStyle={[semantic?.root, style]}
               disabled={isDisabled}
               token={token}
               styles={resolved}

@@ -2,7 +2,7 @@ import type { DimensionValue, TextStyle, ViewStyle } from 'react-native'
 import type { CellStyles } from '../cell'
 import { resolveStyles } from '../style'
 import type { AliasToken, FieldToken } from '../theme'
-import type { FieldStatus, FieldStyleState, FieldTitleAlign } from './types'
+import type { FieldStatus, FieldStyleState, FieldTitleAlign, FieldSemanticStyles } from './types'
 
 export interface FieldResolvedStyles {
   control: ViewStyle
@@ -16,6 +16,7 @@ export interface FieldCellStyleOptions {
   titleAlign?: FieldTitleAlign
   vertical?: boolean
   cellStyles?: CellStyles
+  semantic?: FieldSemanticStyles
 }
 
 export function getFieldStatusColor(token: FieldToken, status: FieldStatus): string {
@@ -57,7 +58,13 @@ export function getFieldStyles(
 
 export function createFieldCellStyles(
   fieldToken: FieldToken,
-  { titleWidth, titleAlign = 'left', vertical = false, cellStyles }: FieldCellStyleOptions,
+  {
+    titleWidth,
+    titleAlign = 'left',
+    vertical = false,
+    cellStyles,
+    semantic,
+  }: FieldCellStyleOptions,
 ): CellStyles {
   return (info) => {
     const custom = resolveStyles(cellStyles, info)
@@ -65,7 +72,8 @@ export function createFieldCellStyles(
 
     return {
       ...custom,
-      titleArea: [
+      root: [semantic?.root, custom?.root],
+      header: [
         vertical
           ? {
               width: '100%',
@@ -79,17 +87,17 @@ export function createFieldCellStyles(
               flexBasis: 'auto',
               marginRight: fieldToken.titleGap,
             },
-        custom?.titleArea,
+        custom?.header,
       ],
-      title: [{ textAlign: titleAlign }, custom?.title],
-      valueArea: [
+      title: [{ textAlign: titleAlign }, semantic?.label, custom?.title],
+      body: [
         vertical
           ? { width: '100%' }
           : {
               flex: 1,
               minWidth: 0,
             },
-        custom?.valueArea,
+        custom?.body,
       ],
     }
   }

@@ -206,7 +206,7 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
           >
             <Animated.View
               testID="switch-thumb"
-              style={[resolved.thumb, semantic?.thumb, animatedThumbStyle]}
+              style={[resolved.thumb, semantic?.indicator, animatedThumbStyle]}
             >
               {loading ? (
                 <Loading

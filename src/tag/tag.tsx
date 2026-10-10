@@ -81,8 +81,8 @@ export const Tag = forwardRef<ViewComponent, TagProps>(function Tag(
       accessibilityState={disabled ? { ...accessibilityState, disabled: true } : accessibilityState}
       style={[resolved.root, semantic?.root, style]}
     >
-      <View style={[resolved.content, semantic?.content]}>
-        {Children.map(children, (child) => renderChild(child, semantic?.label ?? resolved.label))}
+      <View style={resolved.content}>
+        {Children.map(children, (child) => renderChild(child, [resolved.label, semantic?.content]))}
         {closeable ? (
           <Pressable
             accessibilityLabel="关闭标签"
@@ -98,7 +98,7 @@ export const Tag = forwardRef<ViewComponent, TagProps>(function Tag(
               name="CloseOutlined"
               color={resolved.iconColor}
               size={resolved.iconSize}
-              style={[resolved.icon, semantic?.icon]}
+              style={[resolved.icon]}
             />
           </Pressable>
         ) : null}

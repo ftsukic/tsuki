@@ -26,14 +26,14 @@ jest.mock('../text-input', () => {
 })
 
 describe('Input', () => {
-  it('keeps embedded as a legacy component compatibility prop, not InputProps', () => {
+  it('does not expose the private embedded layout mode', () => {
     const inputPropsHasEmbedded: 'embedded' extends keyof InputProps ? true : false = false
     const inputComponentPropsHaveEmbedded: 'embedded' extends keyof ComponentProps<typeof Input>
       ? true
-      : false = true
+      : false = false
 
     expect(inputPropsHasEmbedded).toBe(false)
-    expect(inputComponentPropsHaveEmbedded).toBe(true)
+    expect(inputComponentPropsHaveEmbedded).toBe(false)
   })
 
   function getInputStyle(testID: string) {

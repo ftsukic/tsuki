@@ -133,12 +133,12 @@ export const Cell = forwardRef<React.ComponentRef<typeof Pressable>, CellProps>(
 
         return (
           <>
-            <View style={[resolved.row, semantic?.row]}>
+            <View style={[resolved.row]}>
               {icon ? <View style={[resolved.icon, semantic?.icon]}>{icon}</View> : null}
-              <View style={[resolved.main, semantic?.main]}>
+              <View style={[resolved.main]}>
                 {hasTitleArea ? (
-                  <View style={[resolved.titleArea, semantic?.titleArea]}>
-                    <View style={[resolved.titleRow, semantic?.titleRow]}>
+                  <View style={[resolved.titleArea, semantic?.header]}>
+                    <View style={[resolved.titleRow]}>
                       {required ? (
                         <Text style={[resolved.required, semantic?.required]}>*</Text>
                       ) : null}
@@ -159,15 +159,17 @@ export const Cell = forwardRef<React.ComponentRef<typeof Pressable>, CellProps>(
                     {hasLabel
                       ? renderText(
                           label,
-                          semantic?.label ? [resolved.label, semantic.label] : resolved.label,
+                          semantic?.description
+                            ? [resolved.label, semantic.description]
+                            : resolved.label,
                         )
                       : null}
                   </View>
                 ) : null}
                 {hasValueArea ? (
-                  <View style={[resolved.valueArea, semantic?.valueArea]}>
+                  <View style={[resolved.valueArea, semantic?.body]}>
                     {hasValue
-                      ? renderText(value, [resolved.value, semantic?.value], valueLines)
+                      ? renderText(value, [resolved.value, semantic?.content], valueLines)
                       : null}
                     {hasValueExtra ? (
                       <View style={resolved.valueExtraContainer}>
@@ -191,7 +193,7 @@ export const Cell = forwardRef<React.ComponentRef<typeof Pressable>, CellProps>(
                 </View>
               ) : null}
               {isLink ? (
-                <View style={[resolved.suffix, semantic?.suffix]}>
+                <View style={[resolved.suffix, semantic?.actions]}>
                   <Icon
                     name={ARROW_ICONS[arrowDirection]}
                     size={cellToken.iconSize}

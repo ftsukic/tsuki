@@ -18,7 +18,7 @@ export interface CheckboxStyleState {
 
 export interface CheckboxSemanticStyles {
   root?: StyleProp<ViewStyle>
-  indicator?: StyleProp<ViewStyle>
+  icon?: StyleProp<ViewStyle>
   label?: StyleProp<TextStyle>
 }
 

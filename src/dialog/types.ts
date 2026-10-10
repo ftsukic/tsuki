@@ -8,6 +8,7 @@ import type {
   ViewStyle,
 } from 'react-native'
 import type { StyleInfo, StyleResolver } from '../style'
+import type { ButtonProps } from '../button'
 
 export type DialogAction = 'confirm' | 'cancel'
 export type DialogTheme = 'default' | 'round-button'
@@ -30,15 +31,15 @@ export interface DialogStyleState {
 }
 
 export interface DialogSemanticStyles {
-  host?: StyleProp<ViewStyle>
-  overlay?: StyleProp<ViewStyle>
+  mask?: StyleProp<ViewStyle>
   root?: StyleProp<ViewStyle>
-  header?: StyleProp<TextStyle>
-  content?: StyleProp<ViewStyle>
+  wrapper?: StyleProp<ViewStyle>
+  container?: StyleProp<ViewStyle>
+  header?: StyleProp<ViewStyle>
+  title?: StyleProp<TextStyle>
+  body?: StyleProp<ViewStyle>
   message?: StyleProp<TextStyle>
   footer?: StyleProp<ViewStyle>
-  cancel?: StyleProp<ViewStyle>
-  confirm?: StyleProp<ViewStyle>
 }
 
 export type DialogStyles = StyleResolver<DialogProps, DialogStyleState, DialogSemanticStyles>
@@ -60,8 +61,9 @@ export interface DialogProps extends Omit<ViewProps, 'children' | 'style'> {
   confirmButtonText?: ReactNode
   confirmButtonColor?: ColorValue
   confirmButtonDisabled?: boolean
+  confirmButtonProps?: Pick<ButtonProps, 'style' | 'styles'>
+  cancelButtonProps?: Pick<ButtonProps, 'style' | 'styles'>
   overlay?: boolean
-  overlayStyle?: StyleProp<ViewStyle>
   closeOnClickOverlay?: boolean
   zIndex?: number
   beforeClose?: DialogBeforeClose

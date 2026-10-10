@@ -17,10 +17,8 @@ export interface TagStyleState {
 
 export interface TagSemanticStyles {
   root?: StyleProp<ViewStyle>
-  content?: StyleProp<ViewStyle>
-  label?: StyleProp<TextStyle>
+  content?: StyleProp<TextStyle>
   close?: StyleProp<ViewStyle>
-  icon?: StyleProp<ViewStyle>
 }
 
 export type TagStyles = StyleResolver<TagProps, TagStyleState, TagSemanticStyles>

@@ -221,9 +221,10 @@ describe('Toast', () => {
             forbidClick
             message="顶部提示"
             overlay
-            overlayStyle={{ backgroundColor: '#010203' }}
+
             position="top"
             testID="toast"
+            styles={{ mask: { backgroundColor: '#010203' } }}
           />
         </PortalHost>
       </ConfigProvider>,

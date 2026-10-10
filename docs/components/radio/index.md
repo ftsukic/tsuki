@@ -41,7 +41,7 @@ import { Radio } from '@ftsukic/tsuki'
 
 <code src="../../../src/radio/__fixtures__/examples/disabled.tsx" title="禁用状态" description="Radio、options 选项和整个 Radio.Group 都支持禁用。"></code>
 
-<code src="../../../src/radio/__fixtures__/examples/styled.tsx" title="自定义内容与语义样式" description="children 支持自定义节点，styles 覆盖 root、indicator 和 label。"></code>
+<code src="../../../src/radio/__fixtures__/examples/styled.tsx" title="自定义内容与语义样式" description="children 支持自定义节点，styles 覆盖 root、icon 和 label。"></code>
 
 <code src="../../../src/radio/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 theme.components.Radio 统一覆盖组件 token。"></code>
 
@@ -72,7 +72,7 @@ type RadioLabelPosition = 'left' | 'right';
 | checkedColor | `ColorValue` | 主题主色 | 选中指示器颜色 |
 | onChange | `(checked: boolean) => void` | — | 独立 Radio 选中状态改变时触发 |
 | style | `StyleProp<ViewStyle>` | — | 根 `Pressable` 样式 |
-| styles | `RadioStyles` | — | `root / indicator / label` 语义样式 |
+| styles | `RadioStyles` | — | `root`、`icon`、`label` 语义样式；支持对象或函数。 |
 
 组件继承 React Native `PressableProps`，`children`、`style` 和 `disabled` 除外。`style` 始终作用于根 `Pressable`；`styles` 可以是对象或函数，函数接收 `{ props, state: { checked, disabled, pressed } }`。
 
@@ -124,7 +124,7 @@ type RadioLabelPosition = 'left' | 'right';
 </Radio>
 ```
 
-`style` 和 `styles.root` 都作用于根节点，`style` 的优先级更高；`styles.indicator` 只覆盖指示器容器，`styles.label` 只覆盖文本标签。自定义 `children` 节点的内部样式由调用方控制。
+`style` 和 `styles.root` 都作用于根节点，`style` 的优先级更高；`styles.icon` 只覆盖指示器容器，`styles.label` 只覆盖文本标签。自定义 `children` 节点的内部样式由调用方控制。
 
 ## 主题定制
 

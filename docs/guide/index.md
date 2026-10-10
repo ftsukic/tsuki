@@ -12,6 +12,8 @@ group:
 
 Tsuki 是一个面向 React Native 和 Expo 的 UI 组件库。
 
+组件节点定制与破坏性迁移请参阅 [语义结构与样式](/guide/semantic-styles)。
+
 ## 安装
 
 ```bash
@@ -124,7 +126,7 @@ import { Button, ConfigProvider } from '@ftsukic/tsuki'
 
 export function ThemedButton() {
   return (
-    <ConfigProvider theme={{ token: { colorPrimary: '#7232dd' } }}>
+    <ConfigProvider theme={{ seed: { colorPrimary: '#7232dd' } }}>
       <Button type="primary">自定义主题</Button>
     </ConfigProvider>
   )

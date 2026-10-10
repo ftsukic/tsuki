@@ -31,7 +31,7 @@ export default function PopupThemeExample() {
           closeOnPressOverlay
           onRequestClose={() => setVisible(false)}
           styles={{
-            panel: { borderWidth: 1, borderColor: '#486581' },
+            container: { borderWidth: 1, borderColor: '#486581' },
             root: { padding: 4 },
           }}
         >

@@ -1,13 +1,14 @@
 import type { ReactNode } from 'react'
 import type { DimensionValue } from 'react-native'
-import type { CellProps, CellStyles } from '../cell'
+import type { CellProps } from '../cell'
 import { Cell } from '../cell'
 import { Switch } from '../switch'
 import type { SwitchProps } from '../switch'
 import { useComponentToken } from '../theme'
+import { resolveStyles } from '../style'
 import { createFieldCellStyles } from './style'
 import { getFieldToken } from './token'
-import type { FieldCellProps, FieldTitleAlign } from './types'
+import type { FieldCellProps, FieldStyles, FieldTitleAlign } from './types'
 
 type SwitchAdapterProps<ActiveValueT, InactiveValueT> = Omit<
   SwitchProps<ActiveValueT, InactiveValueT>,
@@ -36,11 +37,11 @@ export interface FieldSwitchProps<ActiveValueT = boolean, InactiveValueT = boole
   readOnly?: boolean
   titleWidth?: DimensionValue
   titleAlign?: FieldTitleAlign
+  styles?: FieldStyles<FieldSwitchProps<ActiveValueT, InactiveValueT>>
   style?: CellProps['style']
-  cellStyles?: CellStyles
+  cellProps?: Pick<CellProps, 'styles'>
   switchOnPress?: SwitchProps<ActiveValueT, InactiveValueT>['onPress']
-  switchStyle?: SwitchProps<ActiveValueT, InactiveValueT>['style']
-  switchStyles?: SwitchProps<ActiveValueT, InactiveValueT>['styles']
+  switchProps?: Pick<SwitchProps<ActiveValueT, InactiveValueT>, 'style' | 'styles'>
 }
 
 export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT = boolean>(
@@ -60,8 +61,7 @@ export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT =
     disabled = false,
     readOnly = false,
     switchOnPress,
-    switchStyle,
-    switchStyles,
+    switchProps: switchConfig,
     pointerEvents,
     valueExtra,
     extra,
@@ -77,18 +77,24 @@ export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT =
     onPress,
     border,
     divider,
+    styles,
     style,
-    cellStyles,
+    cellProps,
     onPressDebounceWait,
     ...switchProps
   } = props
+  const switchStyle = switchConfig?.style
+  const switchStyles = switchConfig?.styles
+  const cellStyles = cellProps?.styles
 
+  const semantic = resolveStyles(styles, { props, state: { status: 'default' as const } })
   const fieldToken = useComponentToken('Field', getFieldToken)
   const resolvedCellStyles = createFieldCellStyles(fieldToken, {
     titleWidth,
     titleAlign,
     vertical,
     cellStyles,
+    semantic,
   })
 
   return (
@@ -109,7 +115,7 @@ export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT =
           onChange={onChange}
           beforeChange={beforeChange}
           pointerEvents={readOnly ? 'none' : pointerEvents}
-          style={switchStyle}
+          style={[semantic?.content, switchStyle]}
           styles={switchStyles}
         />
       }

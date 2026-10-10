@@ -68,14 +68,13 @@ Popup 推荐挂载在应用根节点的 `Provider` 内：
 | destroyOnClosed | `boolean` | `false` | 关闭动画完成后是否卸载 children |
 | zIndex | `number` | 主题 `zIndex` | Popup 宿主层级 |
 | style | `StyleProp<ViewStyle>` | — | 面板样式 |
-| overlayStyle | `StyleProp<ViewStyle>` | — | 遮罩样式，`opacity` 会作为动画终点透明度 |
-| styles | `PopupStyles` | — | `root / panel / overlay` 语义样式 |
+| styles | `PopupStyles` | — | `root`、`container`、`mask`、`wrapper` 语义样式；支持对象或函数。 |
 | onOpen | `() => void` | — | 开始打开动画时回调 |
 | onOpened | `() => void` | — | 打开动画完成时回调 |
 | onClose | `() => void` | — | 开始关闭动画时回调 |
 | onClosed | `() => void` | — | 关闭动画完成时回调 |
 
-组件还继承 React Native `ViewProps`（`children` 和 `style` 除外），其余 View props 会透传到面板，并且 ref 指向面板 root。`style` 只作用于面板；`styles.root` 作用于全屏宿主，`styles.panel` 作用于面板，`styles.overlay` 作用于遮罩。
+组件还继承 React Native `ViewProps`（`children` 和 `style` 除外），其余 View props 会透传到面板，并且 ref 指向面板 root。`style` 和 `styles.root` 作用于全屏根节点；`styles.wrapper` 作用于定位层，`styles.container` 作用于面板，`styles.mask` 作用于遮罩。
 
 Popup 不会自动修改 `visible`。`closeOnPressOverlay` 和 Android 返回键都只是发出 `onRequestClose`，需要由父组件设置 `visible={false}`。未提供 `onRequestClose` 时 Android 返回键返回 `false`，继续交给更底层的返回处理器。
 
@@ -99,7 +98,7 @@ Popup 不会自动修改 `visible`。`closeOnPressOverlay` 和 Android 返回键
 | animationDuration | `motionDurationSlow` | 动画时长，单位毫秒；默认与 Vant 的 `0.3s` 过渡一致 |
 | zIndex            | `zIndexPopupBase`    | Popup 宿主默认层级                                 |
 
-`theme.token.motion=false` 时动画时长强制为 `0`，但生命周期回调仍按打开/关闭顺序触发。`styles` 支持对象或函数；函数接收 `{ props, state: { visible, position, rendered } }`。
+`theme.seed.motion=false` 时动画时长强制为 `0`，但生命周期回调仍按打开/关闭顺序触发。`styles` 支持对象或函数；函数接收 `{ props, state: { visible, position, rendered } }`。
 
 ## 动画
 

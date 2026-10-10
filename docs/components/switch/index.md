@@ -54,7 +54,7 @@ import { Switch } from '@ftsukic/tsuki'
 | onChange | `(value) => void` | — | 切换确认通过后调用；受控模式下由父组件更新 `value` |
 | beforeChange | `(value) => boolean \| Promise<boolean>` | — | 返回 `false` 或解析为 `false` 时取消切换 |
 | style | `StyleProp<ViewStyle>` | — | 根 Pressable 样式 |
-| styles | `SwitchStyles` | — | `root`、`track`、`thumb`、`loading` 语义样式 |
+| styles | `SwitchStyles` | — | `root`、`track`、`indicator`、`loading` 语义样式；支持对象或函数。 |
 
 `Switch` 继承 React Native `PressableProps`，但由组件管理 `children`、`style`、`disabled` 和 `onPress`。根节点使用 `accessibilityRole="switch"`，并同步 `checked`、`disabled` 和 `busy` 无障碍状态。`loading` 与 `disabled` 都会阻止点击。
 

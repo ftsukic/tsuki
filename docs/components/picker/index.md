@@ -86,7 +86,7 @@ interface PickerOption {
 | `onConfirm` | `(values, options) => void` | — | Toolbar 确认回调，不重复触发 `onChange` |
 | `onCancel` | `() => void` | — | Toolbar 取消回调；Popup 的关闭和 draft 回滚由调用方负责 |
 | `style` | `StyleProp<ViewStyle>` | — | Picker 根 View 样式 |
-| `styles` | `PickerStyles` | — | `root`、`container`、`toolbar`、`columns`、`column`、`item`、`itemLabel`、`mask`、`indicator` 和 `loading` 语义样式 |
+| `styles` | `PickerStyles` | — | `root`、`toolbar`、`body`、`column`、`item`、`itemContent`、`mask`、`indicator`、`loading` 语义样式；支持对象或函数。 |
 
 Picker 继承 React Native `ViewProps`，但不接受 `children` 和被组件接管的 `style`。弹层状态和关闭策略由 Popup 或业务组合层管理。
 
@@ -133,7 +133,7 @@ Picker 不维护 Popup 的 draft/commit 生命周期；上例中的 `draft`、`c
 
 ### PickerToolbarProps
 
-`PickerToolbar` 可独立使用，支持 `title`、`cancelButtonText`、`confirmButtonText`、`showDivider`、`titleStyle`、`onCancel`、`onConfirm`、`style`、`buttonStyle`、`buttonLabelStyle` 和 `testID`。取消和确认按钮分别位于左右两侧，标题保持居中。
+`PickerToolbar` 可独立使用，支持 `title`、`cancelButtonText`、`confirmButtonText`、`showDivider`、`onCancel`、`onConfirm`、`style`、`styles` 和 `testID`。`styles` 提供 root、title、item、itemContent；Picker 的 `styles.toolbar` 使用同一结构。取消和确认按钮分别位于左右两侧，标题保持居中。
 
 ### 命令式 API
 

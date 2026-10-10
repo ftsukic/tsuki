@@ -612,7 +612,7 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
       >
         <Animated.View
           pointerEvents={closeOnPressOverlay ? 'auto' : 'none'}
-          style={[resolved.overlay, semantic?.overlay, overlayTransitionStyle]}
+          style={[resolved.overlay, semantic?.mask, overlayTransitionStyle]}
         >
           {closeOnPressOverlay ? (
             <NativePressable
@@ -669,12 +669,12 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
                 {
                   top: topInset + Math.max(0, token.closeIconTop - 8),
                 },
-                semantic?.closeButton,
+                semantic?.close,
               ]}
               pressStyle="opacity"
               testID="image-preview-close"
             >
-              <Text style={[resolved.closeLabel, semantic?.closeLabel]}>×</Text>
+              <Text style={[resolved.closeLabel, semantic?.closeContent]}>×</Text>
             </Pressable>
           ) : null}
           <View

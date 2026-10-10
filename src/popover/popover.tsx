@@ -49,8 +49,9 @@ function mergeLongPressHandlers(
   }
 }
 
-function renderContent(value: ReactNode): ReactNode {
-  if (typeof value === 'string' || typeof value === 'number') return <Text>{value}</Text>
+function renderContent(value: ReactNode, style: PopoverSemanticStyles['content']): ReactNode {
+  if (typeof value === 'string' || typeof value === 'number')
+    return <Text style={style}>{value}</Text>
   return value
 }
 
@@ -221,12 +222,12 @@ export function Popover(props: PopoverProps) {
     ? Math.max(0, requestedDuration as number)
     : token.animationDuration
   const animationDuration = motion.duration(normalizedDuration)
-  const contentStyle = [resolved.content, semantic?.content]
-  const popoverStyle = [resolved.popover, semantic?.content, style]
+  const contentStyle = [resolved.content, semantic?.container]
+  const popoverStyle = [resolved.popover, semantic?.root, style]
   const actionsStyle = [
     resolved.actions,
     actionsDirection === 'horizontal' ? { width: token.actionWidth * actions.length } : null,
-    semantic?.actions,
+    semantic?.list,
   ]
   const { disabledColor, textColor } = getPopoverThemeColors(token, theme)
 
@@ -274,7 +275,7 @@ export function Popover(props: PopoverProps) {
   const popupContent = (
     <View testID="popover-content" style={contentStyle}>
       {content !== undefined ? (
-        renderContent(content)
+        renderContent(content, semantic?.content)
       ) : (
         <View testID="popover-actions" style={actionsStyle}>
           {actions.map((action, index) => (
@@ -321,7 +322,10 @@ export function Popover(props: PopoverProps) {
           height: showArrow ? token.arrowHeight : 0,
           width: showArrow ? token.arrowWidth : 0,
         }}
-        backgroundStyle={{ backgroundColor: overlay ? token.overlayColor : 'transparent' }}
+        backgroundStyle={[
+          { backgroundColor: overlay ? token.overlayColor : 'transparent' },
+          semantic?.mask,
+        ]}
         displayAreaInsets={safeAreaDisplayInsets}
         from={sourceRef as unknown as NativePopoverProps['from']}
         isVisible={currentVisible}

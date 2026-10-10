@@ -1,13 +1,14 @@
 import type { ReactNode } from 'react'
 import type { DimensionValue } from 'react-native'
-import type { CellProps, CellStyles } from '../cell'
+import type { CellProps } from '../cell'
 import { Cell } from '../cell'
 import { Checkbox } from '../checkbox'
 import type { CheckboxGroupProps, CheckboxValue } from '../checkbox'
 import { useComponentToken } from '../theme'
+import { resolveStyles } from '../style'
 import { createFieldCellStyles } from './style'
 import { getFieldToken } from './token'
-import type { FieldCellProps, FieldTitleAlign } from './types'
+import type { FieldCellProps, FieldStyles, FieldTitleAlign } from './types'
 import { useFieldValue } from './useFieldValue'
 
 type CheckboxAdapterProps = Omit<
@@ -26,8 +27,9 @@ export interface FieldCheckboxProps extends FieldCellProps, CheckboxAdapterProps
   readOnly?: boolean
   titleWidth?: DimensionValue
   titleAlign?: FieldTitleAlign
+  styles?: FieldStyles<FieldCheckboxProps>
   style?: CellProps['style']
-  cellStyles?: CellStyles
+  cellProps?: Pick<CellProps, 'styles'>
   children?: ReactNode
   direction?: 'vertical' | 'horizontal'
   gap?: number
@@ -64,11 +66,14 @@ export function FieldCheckbox(props: FieldCheckboxProps) {
     onPress,
     border,
     divider,
+    styles,
     style,
-    cellStyles,
+    cellProps,
     ...groupProps
   } = props
+  const cellStyles = cellProps?.styles
 
+  const semantic = resolveStyles(styles, { props, state: { status: 'default' as const } })
   const fieldToken = useComponentToken('Field', getFieldToken)
   const { currentValue, setValue } = useFieldValue<readonly CheckboxValue[]>({
     value,
@@ -80,6 +85,7 @@ export function FieldCheckbox(props: FieldCheckboxProps) {
     titleAlign,
     vertical,
     cellStyles,
+    semantic,
   })
 
   return (
@@ -90,6 +96,7 @@ export function FieldCheckbox(props: FieldCheckboxProps) {
       value={
         <Checkbox.Group
           {...groupProps}
+          style={semantic?.content}
           value={currentValue}
           onChange={setValue}
           disabled={disabled}

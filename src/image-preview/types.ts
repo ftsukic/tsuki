@@ -59,13 +59,13 @@ export interface ImagePreviewStyleState {
 
 export interface ImagePreviewSemanticStyles {
   root?: StyleProp<ViewStyle>
-  overlay?: StyleProp<ViewStyle>
+  mask?: StyleProp<ViewStyle>
   pager?: StyleProp<ViewStyle>
   controls?: StyleProp<ViewStyle>
   bottomControls?: StyleProp<ViewStyle>
   index?: StyleProp<TextStyle>
-  closeButton?: StyleProp<ViewStyle>
-  closeLabel?: StyleProp<TextStyle>
+  close?: StyleProp<ViewStyle>
+  closeContent?: StyleProp<TextStyle>
   indicators?: StyleProp<ViewStyle>
   indicator?: StyleProp<ViewStyle>
   activeIndicator?: StyleProp<ViewStyle>

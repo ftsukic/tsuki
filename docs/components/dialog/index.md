@@ -89,14 +89,15 @@ import {
 | `confirmButtonDisabled` | `boolean` | `false` | 是否禁用确认按钮 |
 | `cancelButtonDisabled` | `boolean` | `false` | 是否禁用取消按钮 |
 | `overlay` | `boolean` | `true` | 是否显示遮罩 |
-| `overlayStyle` | `StyleProp<ViewStyle>` | — | 遮罩样式 |
 | `closeOnClickOverlay` | `boolean` | `false` | 点击遮罩是否关闭；关闭不触发 `beforeClose` |
 | `zIndex` | `number` | 主题值 | 浮层层级 |
 | `beforeClose` | `(action) => boolean \| void \| Promise<boolean \| void>` | — | 关闭前拦截，只有返回 `false` 才阻止关闭 |
 | `style` | `StyleProp<ViewStyle>` | — | 弹窗面板 root 样式 |
-| `styles` | `DialogStyles` | — | `host / overlay / root / header / content / message / footer / cancel / confirm` |
+| `confirmButtonProps` | `Pick<ButtonProps, 'style' \| 'styles'>` | — | 确认按钮样式 |
+| `cancelButtonProps` | `Pick<ButtonProps, 'style' \| 'styles'>` | — | 取消按钮样式 |
+| `styles` | `DialogStyles` | — | `mask`、`root`、`wrapper`、`container`、`header`、`title`、`body`、`message`、`footer` 语义样式；支持对象或函数。 |
 
-组件继承 React Native `ViewProps`，除 `children` 和 `style` 外透传到弹窗面板。`style` 只作用于面板；`styles.root` 也是面板样式，`styles.host` 作用于 Portal 宿主层。
+组件继承 React Native `ViewProps`，除 `children` 和 `style` 外透传到弹窗面板。`style` 和 `styles.root` 作用于全屏根节点；`styles.container` 作用于面板，`styles.header` 作用于标题容器，`styles.title` 作用于标题文字。确认和取消按钮通过 `confirmButtonProps`、`cancelButtonProps` 配置各自的 `style` / `styles`。
 
 `children` 使用 `undefined` 判断是否覆盖 `message`，因此传入 `null` 可以主动清空正文。字符串和数字标题/正文会自动应用主题样式，自定义 ReactNode 需要自行控制样式。正文超过视口高度的 `60%` 时可以滚动。
 

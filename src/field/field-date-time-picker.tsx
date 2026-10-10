@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { View } from 'react-native'
 import type { DimensionValue } from 'react-native'
-import type { CellProps, CellStyles } from '../cell'
+import type { CellProps } from '../cell'
 import { Cell } from '../cell'
 import type {
   DateTimePickerColumnType,
@@ -46,12 +46,11 @@ export interface FieldDateTimePickerProps
   errorMessage?: ReactNode
   status?: FieldStatus
   style?: CellProps['style']
-  cellStyles?: CellStyles
+  cellProps?: Pick<CellProps, 'styles'>
   styles?: FieldStyles<FieldDateTimePickerProps>
   placeholder?: ReactNode
   formatValue?: FieldDateTimePickerFormatValue
-  pickerStyle?: DateTimePickerProps['style']
-  pickerStyles?: DateTimePickerProps['styles']
+  pickerProps?: Pick<DateTimePickerProps, 'style' | 'styles'>
 }
 
 function formatDisplayValue(
@@ -72,8 +71,7 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
   const {
     placeholder = '请选择日期时间',
     formatValue,
-    pickerStyle,
-    pickerStyles,
+    pickerProps: pickerConfig,
     title,
     titleExtra,
     label,
@@ -102,10 +100,13 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
     divider,
     style,
     styles,
-    cellStyles,
+    cellProps,
     columnsType: columnsTypeProp,
     ...dateTimePickerProps
   } = props
+  const pickerStyle = pickerConfig?.style
+  const pickerStyles = pickerConfig?.styles
+  const cellStyles = cellProps?.styles
   const columnsType = columnsTypeProp ?? ['year', 'month', 'day', 'hour', 'minute']
   const [visible, setVisible] = useState(false)
   const [draftValue, setDraftValue] = useState<DateTimePickerValue>([])
@@ -146,6 +147,7 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
     titleAlign,
     vertical,
     cellStyles,
+    semantic,
   })
   const hasSelection = (currentValue?.length ?? 0) > 0
   const displayOptions = createPickerDisplayOptions(currentValue ?? [])
@@ -160,7 +162,7 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
         titleExtra={titleExtra}
         label={label}
         value={
-          <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.control]}>
+          <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.content]}>
             {renderFieldPickerValue(
               selectedDisplay,
               hasSelection ? 'default' : 'tertiary',

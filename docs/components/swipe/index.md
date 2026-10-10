@@ -50,7 +50,7 @@ import { Swipe } from '@ftsukic/tsuki'
 | renderIndicator | `(info) => ReactNode` | — | 自定义指示器；`info.total` 不包含 loop clone |
 | onChange | `(index) => void` | — | 逻辑页码改变后调用一次 |
 | style | `StyleProp<ViewStyle>` | — | 根节点样式 |
-| styles | `SwipeStyles` | — | 语义样式 |
+| styles | `SwipeStyles` | — | `root`、`track`、`item`、`indicators`、`indicator`、`activeIndicator` 语义样式；支持对象或函数。 |
 
 Swipe 继承其他 React Native `ViewProps`。不提供 Web CSS、`teleport`、DOM ref 或 `className` API。
 

@@ -309,7 +309,7 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
                   ref={inputRef}
                   returnKeyType="send"
                   style={styles.input}
-                  styles={{ shell: styles.inputShell, input: styles.inputText }}
+                  styles={{ root: styles.inputShell, input: styles.inputText }}
                   value={draft}
                 />
               </View>

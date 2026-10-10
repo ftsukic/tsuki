@@ -35,8 +35,9 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
     confirmButtonText = '确认',
     confirmButtonColor,
     confirmButtonDisabled = false,
+    confirmButtonProps,
+    cancelButtonProps,
     overlay = true,
-    overlayStyle,
     closeOnClickOverlay = false,
     zIndex = token.zIndex,
     beforeClose,
@@ -97,8 +98,9 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
     confirmButtonText,
     confirmButtonColor,
     confirmButtonDisabled,
+    confirmButtonProps,
+    cancelButtonProps,
     overlay,
-    overlayStyle,
     closeOnClickOverlay,
     zIndex,
     beforeClose,
@@ -186,6 +188,7 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
     const textColor = confirm
       ? (confirmButtonColor ?? (isRound ? undefined : token.confirmButtonColor))
       : (cancelButtonColor ?? (isRound ? undefined : token.cancelButtonColor))
+    const actionProps = confirm ? confirmButtonProps : cancelButtonProps
     const buttonStyles = isRound
       ? textColor === undefined
         ? undefined
@@ -208,13 +211,20 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
         loading={loading}
         disabled={disabled}
         accessibilityLabel={isTextContent(text) ? String(text) : undefined}
-        styles={buttonStyles}
+        styles={(info) => {
+          const custom = resolveStyles(actionProps?.styles, info)
+          return {
+            ...custom,
+            root: [buttonStyles?.root, custom?.root],
+            content: [buttonStyles?.content, custom?.content],
+          }
+        }}
         style={[
           confirm ? resolved.confirm : resolved.cancel,
-          confirm ? semantic?.confirm : semantic?.cancel,
           confirm && showCancelButton && showConfirmButton && theme === 'default'
             ? { borderLeftWidth: token.dividerWidth, borderLeftColor: token.dividerColor }
             : null,
+          actionProps?.style,
         ]}
         onPress={() => requestClose(action)}
       >
@@ -240,9 +250,13 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
       destroyOnClosed
       duration={themeToken.motion ? token.animationDuration : 0}
       zIndex={zIndex}
-      overlayStyle={[{ backgroundColor: token.overlayColor }, overlayStyle]}
-      style={[resolved.popupPanel, { backgroundColor: 'transparent' }]}
-      styles={{ root: semantic?.host, overlay: semantic?.overlay }}
+      style={style}
+      styles={{
+        root: semantic?.root,
+        mask: [{ backgroundColor: token.overlayColor }, semantic?.mask],
+        wrapper: semantic?.wrapper,
+        container: [resolved.popupPanel, { backgroundColor: 'transparent' }],
+      }}
       onOpened={onOpened}
       onClosed={onClose}
     >
@@ -252,12 +266,12 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
         accessible
         accessibilityRole="alert"
         accessibilityViewIsModal
-        style={[resolved.panel, semantic?.root, style]}
+        style={[resolved.panel, semantic?.container]}
       >
         {titleOnly || titleWithMessage ? (
-          <View testID="dialog-header" style={resolved.header}>
+          <View testID="dialog-header" style={[resolved.header, semantic?.header]}>
             {isTextContent(title) ? (
-              <Text style={[resolved.title, semantic?.header]}>{title}</Text>
+              <Text style={[resolved.title, semantic?.title]}>{title}</Text>
             ) : (
               title
             )}
@@ -266,7 +280,7 @@ export const DialogContent = forwardRef<View, DialogProps>(function DialogConten
         {messageOnly || titleWithMessage ? (
           <ScrollView
             testID="dialog-content"
-            style={[resolved.content, semantic?.content]}
+            style={[resolved.content, semantic?.body]}
             showsVerticalScrollIndicator={false}
             accessibilityRole="none"
           >

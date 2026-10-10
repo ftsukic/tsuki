@@ -26,11 +26,14 @@ export interface PopoverStyleState {
 
 export interface PopoverSemanticStyles {
   reference?: StyleProp<ViewStyle>
-  content?: StyleProp<ViewStyle>
-  actions?: StyleProp<ViewStyle>
-  action?: StyleProp<ViewStyle>
-  actionIcon?: StyleProp<ViewStyle>
-  actionText?: StyleProp<TextStyle>
+  root?: StyleProp<ViewStyle>
+  container?: StyleProp<ViewStyle>
+  content?: StyleProp<TextStyle>
+  mask?: StyleProp<ViewStyle>
+  list?: StyleProp<ViewStyle>
+  item?: StyleProp<ViewStyle>
+  itemIcon?: StyleProp<ViewStyle>
+  itemContent?: StyleProp<TextStyle>
   divider?: StyleProp<ViewStyle>
 }
 

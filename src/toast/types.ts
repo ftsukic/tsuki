@@ -18,11 +18,12 @@ export interface ToastStyleState {
 
 export interface ToastSemanticStyles {
   root?: StyleProp<ViewStyle>
-  message?: StyleProp<TextStyle>
+  content?: StyleProp<TextStyle>
   icon?: StyleProp<ViewStyle>
   loading?: StyleProp<ViewStyle>
-  overlay?: StyleProp<ViewStyle>
-  host?: StyleProp<ViewStyle>
+  mask?: StyleProp<ViewStyle>
+  wrapper?: StyleProp<ViewStyle>
+  container?: StyleProp<ViewStyle>
 }
 
 export type ToastStyles = StyleResolver<ToastProps, ToastStyleState, ToastSemanticStyles>
@@ -36,7 +37,6 @@ export interface ToastOptions {
   duration?: number
   loadingType?: LoadingType
   overlay?: boolean
-  overlayStyle?: StyleProp<ViewStyle>
   forbidClick?: boolean
   closeOnClick?: boolean
   closeOnClickOverlay?: boolean

@@ -140,7 +140,7 @@ function TabHeader({
     onLayout: userOnLayout,
     style,
     title,
-    titleStyle,
+    styles: itemStyles,
     ...pressableProps
   } = item.element.props
   void children
@@ -172,12 +172,13 @@ function TabHeader({
       pressStyle="none"
       style={({ pressed }) => [
         getTabStyles(token, type, { active, disabled, pressed }, baseStyle).root,
-        semanticStyles?.tab,
+        semanticStyles?.item,
+        itemStyles?.root,
         style,
       ]}
     >
       {typeof title === 'string' || typeof title === 'number' ? (
-        <Text style={[labelStyle, semanticStyles?.label, titleStyle]}>{title}</Text>
+        <Text style={[labelStyle, semanticStyles?.label, itemStyles?.label]}>{title}</Text>
       ) : (
         title
       )}
@@ -437,7 +438,7 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
   const navigation = (
     <View
       onLayout={handleNavLayout}
-      style={[resolvedStyles.nav, semanticStyles?.nav]}
+      style={[resolvedStyles.nav, semanticStyles?.header]}
       testID="tabs-nav"
     >
       {resolvedScrollable ? (
@@ -473,13 +474,16 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
       loop={false}
       lazyRender={lazyRender}
       showIndicators={false}
-      style={[resolvedStyles.content, semanticStyles?.content]}
+      style={[resolvedStyles.content, semanticStyles?.body]}
       testID={contentTestID}
       touchable={swipeable}
       onChange={handleSwipeChange}
     >
       {items.map((item) => (
-        <Swipe.Item key={item.element.key ?? item.index}>
+        <Swipe.Item
+          key={item.element.key ?? item.index}
+          style={[semanticStyles?.content, item.element.props.styles?.content]}
+        >
           {hasContent(item.element.props.children)
             ? renderTextContent(item.element.props.children)
             : null}

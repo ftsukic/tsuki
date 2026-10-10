@@ -2,7 +2,7 @@ import { useCallback, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { View } from 'react-native'
 import type { DimensionValue } from 'react-native'
-import type { CellProps, CellStyles } from '../cell'
+import type { CellProps } from '../cell'
 import { Cell } from '../cell'
 import type { DatePickerOption, DatePickerProps, DatePickerValue } from '../date-picker'
 import { DatePicker } from '../date-picker'
@@ -41,20 +41,18 @@ export interface FieldDatePickerProps extends FieldCellProps, DatePickerAdapterP
   errorMessage?: ReactNode
   status?: FieldStatus
   style?: CellProps['style']
-  cellStyles?: CellStyles
+  cellProps?: Pick<CellProps, 'styles'>
   styles?: FieldStyles<FieldDatePickerProps>
   placeholder?: ReactNode
   formatValue?: FieldDatePickerFormatValue
-  pickerStyle?: DatePickerProps['style']
-  pickerStyles?: DatePickerProps['styles']
+  pickerProps?: Pick<DatePickerProps, 'style' | 'styles'>
 }
 
 export function FieldDatePicker(props: FieldDatePickerProps) {
   const {
     placeholder = '请选择日期',
     formatValue,
-    pickerStyle,
-    pickerStyles,
+    pickerProps: pickerConfig,
     title,
     titleExtra,
     label,
@@ -83,10 +81,13 @@ export function FieldDatePicker(props: FieldDatePickerProps) {
     divider,
     style,
     styles,
-    cellStyles,
+    cellProps,
     columnsType,
     ...datePickerProps
   } = props
+  const pickerStyle = pickerConfig?.style
+  const pickerStyles = pickerConfig?.styles
+  const cellStyles = cellProps?.styles
   const [visible, setVisible] = useState(false)
   const [draftValue, setDraftValue] = useState<DatePickerValue>([])
   const { token } = useToken()
@@ -133,6 +134,7 @@ export function FieldDatePicker(props: FieldDatePickerProps) {
     titleAlign,
     vertical,
     cellStyles,
+    semantic,
   })
   const hasSelection = (currentValue?.length ?? 0) > 0
   const displayOptions = createPickerDisplayOptions(currentValue ?? [])
@@ -147,7 +149,7 @@ export function FieldDatePicker(props: FieldDatePickerProps) {
         titleExtra={titleExtra}
         label={label}
         value={
-          <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.control]}>
+          <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.content]}>
             {renderFieldPickerValue(
               selectedDisplay,
               hasSelection ? 'default' : 'tertiary',

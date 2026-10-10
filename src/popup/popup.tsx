@@ -29,7 +29,6 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
     lazyRender = true,
     destroyOnClosed = false,
     zIndex = token.zIndex,
-    overlayStyle,
     style,
     styles,
     onOpen,
@@ -181,10 +180,10 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
     props,
     state: { visible, position: effectivePosition, rendered },
   })
-  const panelResolvedStyle = StyleSheet.flatten([semantic?.panel, style])
+  const panelResolvedStyle = StyleSheet.flatten(semantic?.container)
   const panelOpacity =
     typeof panelResolvedStyle?.opacity === 'number' ? panelResolvedStyle.opacity : 1
-  const overlayResolvedStyle = StyleSheet.flatten([semantic?.overlay, overlayStyle])
+  const overlayResolvedStyle = StyleSheet.flatten(semantic?.mask)
   const overlayOpacity =
     typeof overlayResolvedStyle?.opacity === 'number' ? overlayResolvedStyle.opacity : 1
   const motionPreset = useMemo(() => {
@@ -240,7 +239,7 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
     <View
       collapsable={false}
       pointerEvents={visible ? (overlay ? 'auto' : 'box-none') : 'none'}
-      style={[resolvedStyles.root, { zIndex }, semantic?.root]}
+      style={[resolvedStyles.root, { zIndex }, semantic?.root, style]}
     >
       {overlay ? (
         <OverlaySurface
@@ -250,11 +249,14 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
           zIndex={zIndex}
           onPress={handleOverlayPress}
           animatedStyle={animatedOverlayStyle}
-          style={[resolvedStyles.overlay, semantic?.overlay, overlayStyle]}
-          pressableStyle={[semantic?.overlay, overlayStyle]}
+          style={[resolvedStyles.overlay, semantic?.mask]}
+          pressableStyle={semantic?.mask}
         />
       ) : null}
-      <View pointerEvents="box-none" style={[resolvedStyles.container, { zIndex: zIndex + 1 }]}>
+      <View
+        pointerEvents="box-none"
+        style={[resolvedStyles.container, { zIndex: zIndex + 1 }, semantic?.wrapper]}
+      >
         <Animated.View
           ref={ref}
           {...viewProps}
@@ -262,8 +264,7 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
           style={[
             resolvedStyles.panel,
             { zIndex: zIndex + 1 },
-            semantic?.panel,
-            style,
+            semantic?.container,
             bottomInset > 0 ? { paddingBottom: bottomInset } : null,
             animatedPanelStyle,
           ]}

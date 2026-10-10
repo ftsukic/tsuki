@@ -12,8 +12,9 @@ export interface PopupStyleState {
 
 export interface PopupSemanticStyles {
   root?: StyleProp<ViewStyle>
-  panel?: StyleProp<ViewStyle>
-  overlay?: StyleProp<ViewStyle>
+  container?: StyleProp<ViewStyle>
+  mask?: StyleProp<ViewStyle>
+  wrapper?: StyleProp<ViewStyle>
 }
 
 export type PopupStyles = StyleResolver<PopupProps, PopupStyleState, PopupSemanticStyles>
@@ -33,7 +34,6 @@ export interface PopupProps extends Omit<ViewProps, 'children' | 'style'> {
   destroyOnClosed?: boolean
   zIndex?: number
   style?: StyleProp<ViewStyle>
-  overlayStyle?: StyleProp<ViewStyle>
   styles?: PopupStyles
   onOpen?: () => void
   onOpened?: () => void

@@ -27,12 +27,18 @@ export interface DropdownMenuSemanticStyles {
   arrow?: StyleProp<ViewStyle>
 }
 
+export interface DropdownPopupSemanticStyles {
+  root?: StyleProp<ViewStyle>
+  list?: StyleProp<ViewStyle>
+  listItem?: StyleProp<ViewStyle>
+  listItemLabel?: StyleProp<TextStyle>
+  listItemIcon?: StyleProp<ViewStyle>
+  mask?: StyleProp<ViewStyle>
+}
+
 export interface DropdownItemSemanticStyles {
-  content?: StyleProp<ViewStyle>
-  option?: StyleProp<ViewStyle>
-  optionText?: StyleProp<TextStyle>
-  optionIcon?: StyleProp<ViewStyle>
-  overlay?: StyleProp<ViewStyle>
+  root?: StyleProp<ViewStyle>
+  popup?: DropdownPopupSemanticStyles
 }
 
 export type DropdownMenuStyles = StyleResolver<
@@ -86,7 +92,6 @@ export interface DropdownItemProps extends Omit<ViewProps, 'children' | 'style'>
   onClosed?: () => void
   closeOnSelect?: boolean
   style?: StyleProp<ViewStyle>
-  contentStyle?: StyleProp<ViewStyle>
   styles?: DropdownItemStyles
   testID?: string
 }

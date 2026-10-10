@@ -11,15 +11,15 @@ export default function PopoverSemanticFixture() {
       <Popover
         actions={[{ text: '强调操作' }, { text: '次要操作' }]}
         styles={({ state }) => ({
-          action: { minHeight: state.visible ? 50 : 44 },
-          actionText: { fontWeight: '600' },
-          content: { borderColor: '#1989fa', borderWidth: 1 },
+          item: { minHeight: state.visible ? 50 : 44 },
+          itemContent: { fontWeight: '600' },
+          container: { borderColor: '#1989fa', borderWidth: 1 },
           reference: { opacity: state.visible ? 1 : 0.82 },
         })}
       >
         <Button>语义样式</Button>
       </Popover>
-      <Text style={styles.caption}>reference、content、action 和 actionText 可独立定制。</Text>
+      <Text style={styles.caption}>reference、container、item 和 itemContent 可独立定制。</Text>
     </View>
   )
 }

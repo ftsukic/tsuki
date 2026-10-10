@@ -64,7 +64,7 @@ import { ImagePreview, showImagePreview } from '@ftsukic/tsuki'
 | onOpen / onOpened | `() => void` | — | 打开开始、打开动画结束 |
 | onClose / onClosed | `() => void` / `() => void` | — | visible 从 true 变为 false 后关闭开始、关闭动画结束；关闭请求的 reason 只通过 `onRequestClose` 提供 |
 | style | `StyleProp<ViewStyle>` | — | fullscreen root 样式 |
-| styles | `ImagePreviewStyles` | — | `root`、`overlay`、`pager`、`controls`、`bottomControls`、`index`、`closeButton`、`closeLabel`、`indicators`、`indicator`、`activeIndicator`、`toolbar` 语义样式 |
+| styles | `ImagePreviewStyles` | — | `root`、`mask`、`pager`、`controls`、`bottomControls`、`index`、`close`、`closeContent`、`indicators`、`indicator`、`activeIndicator`、`toolbar` 语义样式；支持对象或函数。 |
 
 ImagePreview 继承 React Native `ViewProps`，不提供 Popup、Web DOM、CSS `className` 或自动滚动查找缩略图的 API。字符串图片会转换为 `{ uri: value }`。
 

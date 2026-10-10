@@ -31,10 +31,12 @@ export interface FieldStyleState {
 }
 
 export interface FieldSemanticStyles {
-  control?: StyleProp<ViewStyle>
-  feedback?: StyleProp<ViewStyle>
-  description?: StyleProp<TextStyle>
-  error?: StyleProp<TextStyle>
+  root?: StyleProp<ViewStyle>
+  label?: StyleProp<TextStyle>
+  content?: StyleProp<ViewStyle>
+  help?: StyleProp<ViewStyle>
+  helpItem?: StyleProp<TextStyle>
+  extra?: StyleProp<TextStyle>
 }
 
 export type FieldStyles<Props = unknown> = StyleResolver<

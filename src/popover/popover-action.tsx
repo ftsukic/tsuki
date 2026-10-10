@@ -12,7 +12,7 @@ interface PopoverActionItemProps {
   action: PopoverAction
   index: number
   onSelect: (action: PopoverAction, index: number) => void
-  semantic?: Pick<PopoverSemanticStyles, 'action' | 'actionIcon' | 'actionText'>
+  semantic?: Pick<PopoverSemanticStyles, 'item' | 'itemIcon' | 'itemContent'>
   styles: Pick<PopoverResolvedStyles, 'action' | 'actionIcon' | 'actionText'>
   textColor: ColorValue
   disabledColor: ColorValue
@@ -100,7 +100,7 @@ export function PopoverActionItem({
 }: PopoverActionItemProps) {
   const disabled = action.disabled === true
   const actionColor = disabled ? disabledColor : (action.color ?? textColor)
-  const actionTextStyle = [styles.actionText, { color: actionColor }, semantic?.actionText]
+  const actionTextStyle = [styles.actionText, { color: actionColor }, semantic?.itemContent]
 
   return (
     <Pressable
@@ -113,12 +113,12 @@ export function PopoverActionItem({
       pressStyle={theme === 'light' ? 'background' : 'overlay'}
       pressedBackgroundColor={token.lightPressedBackgroundColor}
       pressedOverlayColor={token.darkPressedOverlayColor}
-      style={[styles.action, semantic?.action]}
+      style={[styles.action, semantic?.item]}
       testID={`popover-action-${index}`}
     >
       <>
         {action.icon !== undefined && action.icon !== null && action.icon !== false ? (
-          <View pointerEvents="none" style={[styles.actionIcon, semantic?.actionIcon]}>
+          <View pointerEvents="none" style={[styles.actionIcon, semantic?.itemIcon]}>
             {applyActionColor(action.icon, actionColor)}
           </View>
         ) : null}

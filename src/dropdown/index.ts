@@ -6,6 +6,7 @@ export type {
   DropdownItemProps,
   DropdownItemRef,
   DropdownItemSemanticStyles,
+  DropdownPopupSemanticStyles,
   DropdownItemStyleState,
   DropdownItemStyles,
   DropdownMenuProps,

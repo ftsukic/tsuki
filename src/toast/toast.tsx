@@ -52,7 +52,6 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
     duration = token.duration,
     loadingType = 'circular',
     overlay = false,
-    overlayStyle,
     forbidClick = false,
     closeOnClick = false,
     closeOnClickOverlay = false,
@@ -203,9 +202,8 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
               paddingVertical: token.defaultPaddingVertical,
               width: token.defaultWidth,
             },
+        semantic?.container,
         animatedStyle,
-        semantic?.root,
-        style,
       ]}
     >
       {iconNode}
@@ -222,7 +220,7 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
                 marginTop: iconNode ? token.iconTextGap : 0,
                 textAlign: 'center',
               },
-              semantic?.message,
+              semantic?.content,
             ]}
           >
             {messageNode}
@@ -237,7 +235,7 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
   return (
     <View
       pointerEvents={show ? (intercepts ? 'auto' : 'box-none') : 'none'}
-      style={[StyleSheet.absoluteFill, { zIndex }, semantic?.host]}
+      style={[StyleSheet.absoluteFill, { zIndex }, semantic?.root, style]}
     >
       {overlay ? (
         <Pressable
@@ -246,14 +244,16 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
           style={[
             StyleSheet.absoluteFillObject,
             { backgroundColor: token.overlayColor },
-            overlayStyle,
-            semantic?.overlay,
+            semantic?.mask,
           ]}
         />
       ) : forbidClick ? (
         <View pointerEvents="auto" style={StyleSheet.absoluteFillObject} />
       ) : null}
-      <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, positionStyle]}>
+      <View
+        pointerEvents="box-none"
+        style={[StyleSheet.absoluteFill, positionStyle, semantic?.wrapper]}
+      >
         {closeOnClick ? (
           <Pressable onPress={() => onShowChange?.(false)}>{bubble}</Pressable>
         ) : (

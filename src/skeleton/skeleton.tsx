@@ -76,16 +76,20 @@ function SkeletonComponent({
       style={[resolved.root, semantic?.root, style]}
     >
       {loading ? (
-        <Animated.View style={[resolved.placeholder, semantic?.placeholder, animatedStyle]}>
+        <Animated.View style={[resolved.placeholder, animatedStyle]}>
           <View style={[avatar ? { flexDirection: 'row', alignItems: 'flex-start' } : null]}>
-            {avatar ? <View style={[resolved.avatar, semantic?.avatar]} /> : null}
-            <View style={[resolved.content, semantic?.content]}>
+            {avatar ? (
+              <View style={semantic?.header}>
+                <View style={[resolved.avatar, semantic?.avatar]} />
+              </View>
+            ) : null}
+            <View style={[resolved.content, semantic?.section]}>
               {title ? <View style={[resolved.title, semantic?.title]} /> : null}
               {rowCount > 0 ? (
                 <View
                   style={[
                     resolved.rows,
-                    semantic?.rows,
+                    semantic?.paragraph,
                     title ? { marginTop: token.titleRowGap } : null,
                   ]}
                 >

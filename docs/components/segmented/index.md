@@ -58,7 +58,7 @@ import { Segmented } from '@ftsukic/tsuki'
 | disabled | `boolean` | `false` | 禁用整个控件并覆盖 option 状态 |
 | selectedTextColor | `string` | — | 仅覆盖当前实例选中 option 的文字颜色；禁用 option 仍使用 `disabledColor` |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
-| styles | `SegmentedStyles` | — | `root`、`option`、`label`、`selectedBackground` 语义样式 |
+| styles | `SegmentedStyles` | — | `root`、`item`、`label` 语义样式；支持对象或函数。 |
 
 ### SegmentedOption
 
@@ -88,7 +88,7 @@ interface SegmentedOption {
 /
 ```
 
-`style` 和 `styles.root` 作用于根节点；`styles.option` 作用于每个完整点击项；`styles.label` 作用于文本 label；`styles.selectedBackground` 作用于动画 thumb。自定义 label 的内部样式由调用方控制。
+`style` 和 `styles.root` 作用于根节点；`styles.item` 作用于每个完整点击项；`styles.label` 作用于文本 label；动画 thumb 由 token 控制。自定义 label 的内部样式由调用方控制。
 
 `shape="default"` 使用 Button 的 `borderRadius`，`shape="round"` 使用 `borderRadiusRound`；传入 `borderRadius` 后，当前实例的外层容器、selected thumb 和 pressed feedback 统一使用该值，并优先于 `shape`。`style={{ borderRadius }}` 只描述根节点，不会作为内部圆角来源。`block` 会让 option 等分可用宽度。
 

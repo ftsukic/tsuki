@@ -45,7 +45,7 @@ import { Popover } from '@ftsukic/tsuki'
 
 <code src="../../../src/popover/__fixtures__/examples/custom-content.tsx" title="自定义内容" description="使用 content 替换 action 菜单，并从自定义内容内部关闭浮层。"></code>
 
-<code src="../../../src/popover/__fixtures__/examples/semantic.tsx" title="语义样式" description="通过 semantic styles 定制 reference、content 和 action 插槽。"></code>
+<code src="../../../src/popover/__fixtures__/examples/semantic.tsx" title="语义样式" description="通过 semantic styles 定制 reference、container 和 item 插槽。"></code>
 
 <code src="../../../src/popover/__fixtures__/examples/theme-token.tsx" title="主题 token" description="通过 ConfigProvider 覆盖 Popover component token。"></code>
 
@@ -72,7 +72,7 @@ import { Popover } from '@ftsukic/tsuki'
 | closeOnPressOutside | `boolean` | `true` | 点击浮层外部后是否关闭 |
 | duration | `number` | `300` | 打开和关闭动画时长，单位为毫秒；全局关闭 motion 时为 `0` |
 | style | `StyleProp<ViewStyle>` | — | popup content 根节点样式；不会作用于 trigger wrapper |
-| styles | `PopoverStyles` | — | `reference`、`content`、`actions`、`action`、`actionIcon`、`actionText`、`divider` 语义样式 |
+| styles | `PopoverStyles` | — | `reference`、`root`、`container`、`content`、`mask`、`list`、`item`、`itemIcon`、`itemContent`、`divider` 语义样式；支持对象或函数。 |
 | onSelect | `(action, index) => void` | — | action 被选择后的回调；禁用 action 不触发 |
 | onVisibleChange | `(visible) => void` | — | 所有内部打开/关闭请求的状态回调 |
 | onOpen | `() => void` | — | 打开动画开始时触发 |
@@ -97,7 +97,7 @@ Popover 不整体继承 `react-native-popover-view` 的 Props，也不提供第�
 
 ### semantic styles
 
-`styles.content` 和 `style` 作用于 popup content 根节点；`style` 优先级更高。`styles.reference` 是唯一用于 trigger wrapper 的语义槽位，普通 `style` 不会改变 children 的布局或点击边界。
+`styles.root` 和 `style` 作用于原生弹出边界；`style` 优先级更高。`styles.container` 作用于内部内容容器，`styles.content` 作用于字符串或数字内容，`styles.mask` 作用于背景遮罩。`styles.reference` 是唯一用于 trigger wrapper 的语义槽位，普通 `style` 不会改变 children 的布局或点击边界。
 
 ### 主题定制
 

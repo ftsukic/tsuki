@@ -47,7 +47,7 @@ import { Tabs } from '@ftsukic/tsuki'
 
 <code src="../../../src/tabs/__fixtures__/examples/scrollable.tsx" title="横向滚动" description="scrollable 适合较多 Tab 的横向导航。"></code>
 
-<code src="../../../src/tabs/__fixtures__/examples/shrink.tsx" title="Shrink 布局" description="shrink 让标题按内容布局，并支持 titleStyle。"></code>
+<code src="../../../src/tabs/__fixtures__/examples/shrink.tsx" title="Shrink 布局" description="shrink 让标题按内容布局，并支持 styles.label。"></code>
 
 <code src="../../../src/tabs/__fixtures__/examples/controlled.tsx" title="受控切换" description="使用 value 和 onChange 由页面统一管理激活值。"></code>
 
@@ -76,7 +76,7 @@ import { Tabs } from '@ftsukic/tsuki'
 | shrink | `boolean` | `false` | 按标题内容布局 Tab，并启用横向滚动；等价于 `scrollable |  | shrink` 的导航行为，激活项变化时会自动滚动到可见区域 |
 | lazyRender | `boolean` | `true` | 首次激活前不渲染 pane；首次激活后保持挂载，后续切换不卸载 |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
-| styles | `TabsStyles` | — | `root`、`nav`、`tab`、`label`、`indicator`、`content` 语义样式 |
+| styles | `TabsStyles` | — | `root`、`header`、`item`、`label`、`indicator`、`body`、`content` 语义样式；支持对象或函数。 |
 
 Tabs 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`。根节点默认无障碍角色为 `tablist`，每个 Tab 默认角色为 `tab`，并同步 `selected` 和 `disabled` 状态。
 
@@ -86,7 +86,7 @@ Tabs 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`
 | --- | --- | --- | --- |
 | name | `string \| number` | 内部 index | Tab 的选择值；受控使用时应提供稳定值 |
 | title | `ReactNode` | — | 导航标题；字符串和数字使用库内 `Text` 样式 |
-| titleStyle | `StyleProp<TextStyle>` | — | 字符串或数字标题的文字样式 |
+| styles | `TabSemanticStyles` | — | 当前项的 root、label、content 样式 |
 | disabled | `boolean` | `false` | 禁止点击和状态变化 |
 | children | `ReactNode` | — | 可选内容；由 Tabs 的 `lazyRender` 决定首次渲染时机 |
 | style | `StyleProp<ViewStyle>` | — | 当前 Tab 的 Pressable 样式 |
@@ -116,7 +116,7 @@ Tab 标题和 line indicator 的切换动画默认始终开启，scrollable/shri
 </Tabs>
 ```
 
-`style` 和 `styles.root` 作用于根节点；`styles.nav` 作用于导航容器；`styles.tab`、`styles.label`、`styles.indicator` 和 `styles.content` 作用于对应内部节点。Tab 自身的 `style` 作用于该项的完整点击区域。
+`style` 和 `styles.root` 作用于根节点；`styles.header` 作用于导航容器；`styles.item`、`styles.label`、`styles.indicator` 作用于标题区，`styles.body` 作用于内容区域，`styles.content` 作用于每个内容页。Tab 自身的 `style` 作用于该项的完整点击区域。
 
 ## 主题定制
 

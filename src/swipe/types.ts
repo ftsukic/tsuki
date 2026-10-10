@@ -21,12 +21,12 @@ export interface SwipeStyleState {
 }
 
 export interface SwipeSemanticStyles {
-  root?: ViewStyle
-  track?: ViewStyle
-  item?: ViewStyle
-  indicators?: ViewStyle
-  indicator?: ViewStyle
-  activeIndicator?: ViewStyle
+  root?: StyleProp<ViewStyle>
+  track?: StyleProp<ViewStyle>
+  item?: StyleProp<ViewStyle>
+  indicators?: StyleProp<ViewStyle>
+  indicator?: StyleProp<ViewStyle>
+  activeIndicator?: StyleProp<ViewStyle>
 }
 
 export type SwipeStyles = StyleResolver<SwipeProps, SwipeStyleState, SwipeSemanticStyles>

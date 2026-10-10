@@ -24,11 +24,11 @@ export default function ProgressThemeExample() {
         <Progress
           percentage={76}
           styles={{
-            pivot: { paddingHorizontal: 8 },
-            track: { height: 10 },
+            indicatorContainer: { paddingHorizontal: 8 },
+            rail: { height: 10 },
           }}
         />
-        <Progress percentage={76} styles={{ circleLabel: { fontWeight: '700' } }} type="circle" />
+        <Progress percentage={76} styles={{ indicator: { fontWeight: '700' } }} type="circle" />
       </View>
     </ConfigProvider>
   )

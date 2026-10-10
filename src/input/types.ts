@@ -25,11 +25,9 @@ export interface InputSemanticStyles {
   prefix?: StyleProp<TextStyle>
   suffix?: StyleProp<TextStyle>
   clear?: StyleProp<ViewStyle>
-  wordLimit?: StyleProp<TextStyle>
+  count?: StyleProp<TextStyle>
   addonBefore?: StyleProp<TextStyle>
   addonAfter?: StyleProp<TextStyle>
-  shell?: StyleProp<ViewStyle>
-  content?: StyleProp<ViewStyle>
 }
 
 export type InputStyles = StyleResolver<InputProps, InputStyleState, InputSemanticStyles>
