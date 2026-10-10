@@ -1,5 +1,6 @@
+import * as Reanimated from 'react-native-reanimated'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
-import { Animated, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { getButtonToken } from '../button/token'
 import { getSegmentedStyles } from '../segmented/style'
 import { ConfigProvider, Segmented, getDesignToken, getSegmentedToken } from '..'
@@ -326,13 +327,7 @@ describe('Segmented', () => {
   })
 
   it('animates both thumb position and width when the selected item changes', async () => {
-    const timing = jest.spyOn(Animated, 'timing').mockImplementation(() => {
-      return {
-        reset: jest.fn(),
-        start: jest.fn(),
-        stop: jest.fn(),
-      } as unknown as Animated.CompositeAnimation
-    })
+    const timing = jest.spyOn(Reanimated, 'withTiming').mockImplementation((value) => value)
 
     await render(
       <Segmented
@@ -354,23 +349,21 @@ describe('Segmented', () => {
 
     expect(timing).toHaveBeenNthCalledWith(
       1,
-      expect.anything(),
+      48,
       expect.objectContaining({
         duration: getDesignToken().motionDurationMid,
         easing: expect.any(Function),
-        toValue: 48,
-        useNativeDriver: false,
       }),
+      undefined,
     )
     expect(timing).toHaveBeenNthCalledWith(
       2,
-      expect.anything(),
+      120,
       expect.objectContaining({
         duration: getDesignToken().motionDurationMid,
         easing: expect.any(Function),
-        toValue: 120,
-        useNativeDriver: false,
       }),
+      undefined,
     )
 
     timing.mockClear()
@@ -378,20 +371,20 @@ describe('Segmented', () => {
 
     expect(timing).toHaveBeenNthCalledWith(
       1,
-      expect.anything(),
-      expect.objectContaining({ toValue: 168, useNativeDriver: false }),
+      168,
+      expect.objectContaining({ duration: getDesignToken().motionDurationMid }),
+      undefined,
     )
     expect(timing).toHaveBeenNthCalledWith(
       2,
-      expect.anything(),
-      expect.objectContaining({ toValue: 72, useNativeDriver: false }),
+      72,
+      expect.objectContaining({ duration: getDesignToken().motionDurationMid }),
+      undefined,
     )
-
-    timing.mockRestore()
   })
 
   it('does not animate a disabled control', async () => {
-    const timing = jest.spyOn(Animated, 'timing')
+    const timing = jest.spyOn(Reanimated, 'withTiming')
 
     await render(<Segmented disabled options={['one', 'two']} />)
     await measure(0, 0, 60)
@@ -401,6 +394,5 @@ describe('Segmented', () => {
     await press(screen.getAllByRole('radio')[1])
 
     expect(timing).not.toHaveBeenCalled()
-    timing.mockRestore()
   })
 })

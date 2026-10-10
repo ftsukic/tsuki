@@ -9,6 +9,14 @@ jest.mock('react-native-reanimated', () => {
     createAnimatedComponent: (Component) => Component,
     useAnimatedStyle: jest.fn((updater) => updater()),
     withTiming: jest.fn(actual.withTiming),
+    withSpring: jest.fn(actual.withSpring),
+    // Controlled timing spies return numeric endpoints. Keep loop consumers
+    // compatible with those endpoints while real animation objects use Reanimated.
+    withRepeat: jest.fn((animation, ...args) =>
+      animation && (typeof animation === 'object' || typeof animation === 'function')
+        ? actual.withRepeat(animation, ...args)
+        : (animation ?? 0),
+    ),
   }
 })
 require('react-native-reanimated').setUpTests()

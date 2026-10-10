@@ -70,6 +70,7 @@ export type {
   PanGestureChangeHandler,
   PanGestureEndEvent,
   PanGestureEndHandler,
+  PanGestureFinalizeEvent,
   PanGestureEvent,
   PanGestureHandlerEventPayload,
   PanGestureSharedValues,

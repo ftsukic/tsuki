@@ -13,12 +13,23 @@ import {
 import { View } from 'react-native'
 import type { GestureResponderEvent, LayoutChangeEvent, PressableProps } from 'react-native'
 import { GestureDetector, Gesture } from '../gesture'
-import { Animated, useAnimatedStyle, useSharedValue, withSpring } from '../animation'
+import Animated, {
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated'
+import {
+  resolveSwipeOffset,
+  resolveSwipeTarget,
+  snapGesture,
+  SWIPE_PRESET,
+} from '../motion/gesture'
+import { useMotionConfig } from '../motion/useMotionConfig'
 import { scheduleOnRN } from 'react-native-worklets'
 import { useInteraction } from '../interaction'
 import { getCellToken } from '../cell/token'
 import { Pressable } from '../pressable'
-import { useComponentToken, useToken } from '../theme'
+import { useComponentToken } from '../theme'
 import { SwipeCellAction } from './swipe-cell-action'
 import { getSwipeCellStyles } from './style'
 import { getSwipeCellToken } from './token'
@@ -31,9 +42,6 @@ import type {
   SwipeCellRef,
   SwipeCellSide,
 } from './types'
-
-const SWIPE_DISTANCE = 4
-const SWIPE_VELOCITY = 500
 
 function isVisibleAction(action: ReactNode) {
   return action !== null && action !== undefined && action !== false
@@ -127,6 +135,7 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     onLeftActionPress,
     onRightActionPress,
     closeOnActionPress = true,
+    overshoot = false,
     style,
     contentStyle,
     actionStyle,
@@ -139,7 +148,6 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
 ) {
   const token = useComponentToken('SwipeCell', getSwipeCellToken)
   const cellToken = useComponentToken('Cell', getCellToken)
-  const { token: themeToken } = useToken()
   const resolvedStyles = useMemo(() => getSwipeCellStyles(token), [token])
   const group = useContext(SwipeCellGroupContext)
   const manager = useSwipeCellManager()
@@ -151,7 +159,6 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   const leftActionWidth = useSharedValue(0)
   const rightActionWidth = useSharedValue(0)
   const animationToken = useSharedValue(0)
-  const animationTokenRef = useRef(0)
   const currentOffsetRef = useRef(0)
   const actionWidthsRef = useRef({ left: 0, right: 0 })
   const pendingOpenRef = useRef<SwipeCellSide | null>(null)
@@ -164,60 +171,70 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     resolvedRightActions !== undefined
       ? resolvedRightActions.length > 0
       : isVisibleAction(rightAction)
-  const animationEnabled = themeToken.motion && token.animationDuration > 0
+  const motion = useMotionConfig()
+  const animationEnabled = motion.duration(token.animationDuration) > 0
+  const durationScale = motion.durationScale
 
   const completeOpen = useCallback(
-    (side: SwipeCellSide, offset: number) => {
+    (side: SwipeCellSide, offset: number, completionToken: number) => {
+      if (animationToken.value !== completionToken) return
       currentOffsetRef.current = offset
       openSideRef.current = side
       phaseRef.current = 'open'
       onOpen?.()
     },
-    [onOpen],
+    [animationToken, onOpen],
   )
 
-  const completeClose = useCallback(() => {
-    currentOffsetRef.current = 0
-    openSideRef.current = null
-    const wasOpen = phaseRef.current !== 'closed'
-    phaseRef.current = 'closed'
-    manager?.release(cellId)
-    interaction.clear(cellId)
-    if (wasOpen) onClose?.()
-  }, [cellId, interaction, manager, onClose])
+  const completeClose = useCallback(
+    (completionToken: number) => {
+      if (animationToken.value !== completionToken) return
+      currentOffsetRef.current = 0
+      openSideRef.current = null
+      const wasOpen = phaseRef.current !== 'closed'
+      phaseRef.current = 'closed'
+      manager?.release(cellId)
+      interaction.clear(cellId)
+      if (wasOpen) onClose?.()
+    },
+    [animationToken, cellId, interaction, manager, onClose],
+  )
 
   const settleTo = useCallback(
     (offset: number, side: SwipeCellSide | null) => {
-      const nextToken = animationTokenRef.current + 1
-      animationTokenRef.current = nextToken
+      const nextToken = animationToken.value + 1
       animationToken.value = nextToken
 
       if (!animationEnabled) {
         translation.value = offset
-        if (side) completeOpen(side, offset)
-        else completeClose()
+        if (side) completeOpen(side, offset, nextToken)
+        else completeClose(nextToken)
         return
       }
 
       if (side) phaseRef.current = 'opening'
       else phaseRef.current = 'closing'
 
-      translation.value = withSpring(offset, undefined, (finished) => {
-        'worklet'
-        if (!finished || animationToken.value !== nextToken) return
-        if (side) scheduleOnRN(completeOpen, side, offset)
-        else scheduleOnRN(completeClose)
-      })
+      translation.value = snapGesture(
+        offset,
+        animationEnabled,
+        (finished) => {
+          'worklet'
+          if (!finished || animationToken.value !== nextToken) return
+          if (side) scheduleOnRN(completeOpen, side, offset, nextToken)
+          else scheduleOnRN(completeClose, nextToken)
+        },
+        durationScale,
+      )
     },
-    [animationEnabled, animationToken, completeClose, completeOpen, translation],
+    [animationEnabled, animationToken, completeClose, completeOpen, durationScale, translation],
   )
 
   const syncOpenOffset = useCallback(
     (side: SwipeCellSide, width: number) => {
       if (openSideRef.current !== side || phaseRef.current === 'closed') return
 
-      const nextToken = animationTokenRef.current + 1
-      animationTokenRef.current = nextToken
+      const nextToken = animationToken.value + 1
       animationToken.value = nextToken
       const nextOffset = getOffset(side, width)
       translation.value = nextOffset
@@ -300,48 +317,53 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   const pan = useMemo(() => {
     const gesture = Gesture.Pan()
       .enabled(hasLeftAction || hasRightAction)
-      .activeOffsetX([-SWIPE_DISTANCE, SWIPE_DISTANCE])
-      .failOffsetY([-SWIPE_DISTANCE, SWIPE_DISTANCE])
+      .activeOffsetX([-SWIPE_PRESET.activationDistance, SWIPE_PRESET.activationDistance])
+      .failOffsetY([-SWIPE_PRESET.activationDistance, SWIPE_PRESET.activationDistance])
       .onStart(() => {
         'worklet'
         animationToken.value += 1
+        cancelAnimation(translation)
         gestureStartX.value = translation.value
         scheduleOnRN(claim)
       })
       .onUpdate((event) => {
         'worklet'
-        const minimum = -rightActionWidth.value
-        const maximum = leftActionWidth.value
-        translation.value = Math.min(
-          maximum,
-          Math.max(minimum, gestureStartX.value + event.translationX),
+        translation.value = resolveSwipeOffset(
+          gestureStartX.value + event.translationX,
+          leftActionWidth.value,
+          rightActionWidth.value,
+          overshoot,
         )
       })
       .onEnd((event, success) => {
         'worklet'
-        const minimum = -rightActionWidth.value
-        const maximum = leftActionWidth.value
-        const offset = Math.min(
-          maximum,
-          Math.max(minimum, gestureStartX.value + event.translationX),
+        const offset = gestureStartX.value + event.translationX
+        const targetOffset = resolveSwipeTarget(
+          offset,
+          event.velocityX,
+          leftActionWidth.value,
+          rightActionWidth.value,
         )
-        const openingLeft =
-          offset > 0 && (offset > leftActionWidth.value / 2 || event.velocityX >= SWIPE_VELOCITY)
-        const openingRight =
-          offset < 0 &&
-          (Math.abs(offset) > rightActionWidth.value / 2 || event.velocityX <= -SWIPE_VELOCITY)
+        const openingLeft = targetOffset > 0
+        const openingRight = targetOffset < 0
 
         if (!success || (!openingLeft && !openingRight)) {
           animationToken.value += 1
           const nextToken = animationToken.value
           if (!animationEnabled) {
             translation.value = 0
-            scheduleOnRN(completeClose)
+            scheduleOnRN(completeClose, nextToken)
           } else {
-            translation.value = withSpring(0, undefined, (finished) => {
-              'worklet'
-              if (finished && animationToken.value === nextToken) scheduleOnRN(completeClose)
-            })
+            translation.value = snapGesture(
+              0,
+              animationEnabled,
+              (finished) => {
+                'worklet'
+                if (finished && animationToken.value === nextToken)
+                  scheduleOnRN(completeClose, nextToken)
+              },
+              durationScale,
+            )
           }
           return
         }
@@ -352,14 +374,19 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         const nextToken = animationToken.value
         if (!animationEnabled) {
           translation.value = target
-          scheduleOnRN(completeOpen, side, target)
+          scheduleOnRN(completeOpen, side, target, nextToken)
         } else {
-          translation.value = withSpring(target, undefined, (finished) => {
-            'worklet'
-            if (finished && animationToken.value === nextToken) {
-              scheduleOnRN(completeOpen, side, target)
-            }
-          })
+          translation.value = snapGesture(
+            target,
+            animationEnabled,
+            (finished) => {
+              'worklet'
+              if (finished && animationToken.value === nextToken) {
+                scheduleOnRN(completeOpen, side, target, nextToken)
+              }
+            },
+            durationScale,
+          )
         }
       })
 
@@ -369,6 +396,7 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   }, [
     animationEnabled,
     animationToken,
+    durationScale,
     claim,
     completeClose,
     completeOpen,
@@ -377,6 +405,7 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     hasRightAction,
     leftActionWidth,
     rightActionWidth,
+    overshoot,
     testID,
     translation,
   ])

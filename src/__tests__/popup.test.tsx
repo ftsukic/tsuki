@@ -41,7 +41,7 @@ describe('Popup', () => {
 
     expect(flattenStyle(screen.getByTestId('closed-center'))).toMatchObject({
       opacity: 0,
-      transform: [{ scale: 0.8 }],
+      transform: [{ scale: 0.96 }],
     })
     await view.unmount()
   })

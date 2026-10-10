@@ -1,4 +1,5 @@
-import { Animated, StyleSheet, Text } from 'react-native'
+import * as Reanimated from 'react-native-reanimated'
+import { StyleSheet, Text } from 'react-native'
 import { ConfigProvider, Skeleton, getDesignToken, getSkeletonToken } from '..'
 import { render, screen } from '@testing-library/react-native'
 
@@ -61,7 +62,7 @@ describe('Skeleton', () => {
   })
 
   it('does not start the loop when motion is disabled', async () => {
-    const loop = jest.spyOn(Animated, 'loop')
+    const loop = jest.spyOn(Reanimated, 'withRepeat').mockClear()
     await render(
       <ConfigProvider theme={{ token: { motion: false } }}>
         <Skeleton row={1} />

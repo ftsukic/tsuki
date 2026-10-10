@@ -1,3 +1,5 @@
+import { MOTION_SCALE } from '../motion/token'
+import { MotionView } from '../motion/motion-view'
 import { Icon } from '../icon'
 import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
@@ -169,11 +171,18 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof Pressable>, Checkbo
                     color={resolved.checkColor}
                   />
                 ) : isChecked ? (
-                  <Icon
-                    name="CheckOutlined"
-                    size={resolved.checkSize}
-                    color={resolved.checkColor}
-                  />
+                  <MotionView
+                    pointerEvents="none"
+                    initial={{ opacity: 0, scale: MOTION_SCALE.selection }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    spring="normal"
+                  >
+                    <Icon
+                      name="CheckOutlined"
+                      size={resolved.checkSize}
+                      color={resolved.checkColor}
+                    />
+                  </MotionView>
                 ) : null}
               </View>
               {labelPosition === 'right' ? label : null}

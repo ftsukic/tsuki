@@ -25,6 +25,7 @@ export interface InteractionPressableProps extends Omit<
   children?: React.ReactNode | ((state: InteractionPressableState) => React.ReactNode)
   disabled?: boolean
   onPress?: PressableProps['onPress']
+  /** Leading time window in milliseconds that suppresses repeated presses. */
   onPressDebounceWait?: number
   /** Identifies a press that belongs to the current interaction owner. */
   interactionId?: string
@@ -34,6 +35,7 @@ export interface InteractionPressableProps extends Omit<
 export interface UseInteractionPressOptions {
   disabled?: boolean
   onPress?: PressableProps['onPress']
+  /** Leading time window in milliseconds that suppresses repeated presses. */
   onPressDebounceWait?: number
 }
 

@@ -1,3 +1,4 @@
+import { useMotionConfig } from '../motion/useMotionConfig'
 import NativePopover from 'react-native-popover-view'
 import type { ComponentProps, ReactElement, ReactNode } from 'react'
 import { Fragment, cloneElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -6,7 +7,7 @@ import type { PressableProps, View as NativeView } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Text } from '../text'
 import { resolveStyles } from '../style'
-import { useComponentToken, useToken } from '../theme'
+import { useComponentToken } from '../theme'
 import { getPopoverStyles, getPopoverThemeColors } from './style'
 import { PopoverActionItem } from './popover-action'
 import { getPopoverToken } from './token'
@@ -95,7 +96,7 @@ export function Popover(props: PopoverProps) {
     onClose,
     onClosed,
   } = props
-  const { token: themeToken } = useToken()
+  const motion = useMotionConfig()
   const token = useComponentToken('Popover', getPopoverToken)
   const safeAreaInsets = useSafeAreaInsets()
   const isControlled = visible !== undefined
@@ -218,7 +219,7 @@ export function Popover(props: PopoverProps) {
   const normalizedDuration = Number.isFinite(requestedDuration)
     ? Math.max(0, requestedDuration as number)
     : token.animationDuration
-  const animationDuration = themeToken.motion ? normalizedDuration : 0
+  const animationDuration = motion.duration(normalizedDuration)
   const contentStyle = [resolved.content, semantic?.content]
   const popoverStyle = [resolved.popover, semantic?.content, style]
   const actionsStyle = [

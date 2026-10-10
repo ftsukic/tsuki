@@ -1,3 +1,4 @@
+import { OVERLAY_PRESETS, overlayAnimation } from '../motion/presets'
 import {
   forwardRef,
   isValidElement,
@@ -10,9 +11,8 @@ import {
   useState,
 } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { Easing } from 'react-native-reanimated'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
-import { Animated, motionPresets, useTransitionProgress } from '../motion'
+import { Animated, useTransitionProgress } from '../motion'
 import { Portal } from '../portal'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
@@ -106,7 +106,7 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
   const enteringConfig = useMemo(
     () => ({
       duration: animationDuration,
-      easing: Easing.out(Easing.ease),
+      ...overlayAnimation(animationDuration, true),
       mode: 'timing' as const,
     }),
     [animationDuration],
@@ -114,7 +114,7 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
   const leavingConfig = useMemo(
     () => ({
       duration: animationDuration,
-      easing: Easing.in(Easing.ease),
+      ...overlayAnimation(animationDuration, false),
       mode: 'timing' as const,
     }),
     [animationDuration],
@@ -138,7 +138,7 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
   }, [])
   const { animatedStyle } = useTransitionProgress({
     visible,
-    preset: motionPresets.popupTop,
+    preset: OVERLAY_PRESETS.popupTop,
     distance: 100,
     opacity: 1,
     entering: enteringConfig,

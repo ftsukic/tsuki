@@ -1,3 +1,4 @@
+import { MOTION_LOOP_DURATION } from '../motion/token'
 import type { AliasToken, LoadingToken } from '../theme'
 
 export function getLoadingToken(token: AliasToken): LoadingToken {
@@ -7,6 +8,6 @@ export function getLoadingToken(token: AliasToken): LoadingToken {
     textColor: token.colorTextSecondary,
     textFontSize: token.fontSizeSM,
     textGap: token.marginXS,
-    animationDuration: 1000,
+    animationDuration: MOTION_LOOP_DURATION.spin,
   }
 }

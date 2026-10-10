@@ -1,17 +1,15 @@
+import { ReduceMotion } from 'react-native-reanimated'
+import { animateValue } from '../motion/animation'
+import { overlayAnimation } from '../motion/presets'
+import { useMotionConfig } from '../motion/useMotionConfig'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
-import { Easing } from 'react-native-reanimated'
-import {
-  cancelAnimation,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated'
+import { cancelAnimation, useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { Animated } from '../motion'
 import { OverlaySurface } from '../overlay/overlay-surface'
 import { Portal } from '../portal'
-import { useComponentToken, useToken } from '../theme'
+import { useComponentToken } from '../theme'
 import { getDropdownToken } from './token'
 import type { DropdownDirection } from './types'
 import type { DropdownItemRegistration } from './context'
@@ -58,12 +56,12 @@ export function DropdownPopup({
   activeItem,
   onRequestClose,
 }: DropdownPopupProps) {
-  const { token: themeToken } = useToken()
+  const motion = useMotionConfig()
   const token = useComponentToken('Dropdown', getDropdownToken)
   const normalizedDuration = Number.isFinite(duration)
     ? Math.max(0, duration as number)
     : token.animationDuration
-  const animationDuration = themeToken.motion ? normalizedDuration : 0
+  const animationDuration = motion.duration(normalizedDuration)
   const [displayItem, setDisplayItem] = useState<DropdownItemRegistration | undefined>(activeItem)
   const [transitionState, setTransitionState] = useState<TransitionState>(
     activeItem ? 'opening' : 'closed',
@@ -211,19 +209,22 @@ export function DropdownPopup({
       else cycle.overlayStarted = true
 
       cancelAnimation(progress)
-      if (!themeToken.motion || animationDuration === 0 || progress.value === target) {
+      if (animationDuration === 0 || progress.value === target) {
         progress.value = target
         finishAnimation(id, channel, true)
         return
       }
 
-      const easing = target === 1 ? Easing.out(Easing.ease) : Easing.in(Easing.ease)
-      progress.value = withTiming(target, { duration: animationDuration, easing }, (finished) => {
-        'worklet'
-        if (finished) scheduleOnRN(finishAnimation, id, channel, true)
-      })
+      progress.value = animateValue(
+        target,
+        { ...overlayAnimation(animationDuration, target === 1), reduceMotion: ReduceMotion.Never },
+        (finished) => {
+          'worklet'
+          if (finished) scheduleOnRN(finishAnimation, id, channel, true)
+        },
+      )
     },
-    [animationDuration, finishAnimation, overlayProgress, panelProgress, themeToken.motion],
+    [animationDuration, finishAnimation, overlayProgress, panelProgress],
   )
 
   useLayoutEffect(() => {

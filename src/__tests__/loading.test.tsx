@@ -1,4 +1,5 @@
-import { Animated, StyleSheet, Text, View } from 'react-native'
+import * as Reanimated from 'react-native-reanimated'
+import { StyleSheet, Text, View } from 'react-native'
 import { ConfigProvider, getDesignToken, getLoadingToken, Loading } from '..'
 import { render, screen } from '@testing-library/react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
@@ -133,55 +134,43 @@ describe('Loading', () => {
   })
 
   it('uses Loading token duration when duration is omitted', async () => {
-    const timing = jest.spyOn(Animated, 'timing')
+    const timing = jest.spyOn(Reanimated, 'withTiming')
     const view = await render(
       <ConfigProvider theme={{ components: { Loading: { animationDuration: 240 } } }}>
         <Loading />
       </ConfigProvider>,
     )
 
-    expect(timing).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ duration: 240 }),
-    )
+    expect(timing).toHaveBeenCalledWith(1, expect.objectContaining({ duration: 240 }), undefined)
     await view.unmount()
-    timing.mockRestore()
   })
 
   it('uses a valid duration prop instead of the Loading token duration', async () => {
-    const timing = jest.spyOn(Animated, 'timing')
+    const timing = jest.spyOn(Reanimated, 'withTiming')
     const view = await render(
       <ConfigProvider theme={{ components: { Loading: { animationDuration: 240 } } }}>
         <Loading duration={480} />
       </ConfigProvider>,
     )
 
-    expect(timing).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ duration: 480 }),
-    )
+    expect(timing).toHaveBeenCalledWith(1, expect.objectContaining({ duration: 480 }), undefined)
     await view.unmount()
-    timing.mockRestore()
   })
 
   it('falls back to the Loading token for a non-finite duration prop', async () => {
-    const timing = jest.spyOn(Animated, 'timing')
+    const timing = jest.spyOn(Reanimated, 'withTiming')
     const view = await render(
       <ConfigProvider theme={{ components: { Loading: { animationDuration: 240 } } }}>
         <Loading duration={Number.NaN} />
       </ConfigProvider>,
     )
 
-    expect(timing).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ duration: 240 }),
-    )
+    expect(timing).toHaveBeenCalledWith(1, expect.objectContaining({ duration: 240 }), undefined)
     await view.unmount()
-    timing.mockRestore()
   })
 
   it('does not start a continuous animation for a non-positive duration', async () => {
-    const loop = jest.spyOn(Animated, 'loop')
+    const loop = jest.spyOn(Reanimated, 'withRepeat').mockClear()
     const view = await render(
       <View>
         <Loading duration={0} />
@@ -195,7 +184,7 @@ describe('Loading', () => {
   })
 
   it('does not start a continuous animation when motion is disabled', async () => {
-    const loop = jest.spyOn(Animated, 'loop')
+    const loop = jest.spyOn(Reanimated, 'withRepeat').mockClear()
     await renderWithoutMotion(<Loading />)
     expect(loop).not.toHaveBeenCalled()
     loop.mockRestore()

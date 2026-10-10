@@ -1,6 +1,9 @@
+import Animated, { useAnimatedStyle } from 'react-native-reanimated'
+import { useMotionValue } from '../motion/useMotionValue'
+import { LAYOUT_PRESET } from '../motion/presets'
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Animated, Easing, View } from 'react-native'
+import { View } from 'react-native'
 import type { LayoutChangeEvent, StyleProp, TextStyle, View as ViewComponent } from 'react-native'
 import { getButtonToken } from '../button/token'
 import { Pressable } from '../pressable'
@@ -100,9 +103,6 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
   const activeValue = isControlled ? value : uncontrolledValue
   const activeIndex = normalizedOptions.findIndex((option) => Object.is(option.value, activeValue))
   const [itemLayouts, setItemLayouts] = useState<readonly OptionLayout[]>([])
-  const activeThumbX = useRef(new Animated.Value(0)).current
-  const activeThumbWidth = useRef(new Animated.Value(0)).current
-  const activeThumbAnimation = useRef<Animated.CompositeAnimation | null>(null)
   const hasMeasuredActiveThumb = useRef(false)
   const resolvedBorderRadius =
     borderRadius ?? (shape === 'round' ? buttonToken.borderRadiusRound : buttonToken.borderRadius)
@@ -158,46 +158,17 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
 
   const activeLayout = activeIndex >= 0 ? itemLayouts[activeIndex] : undefined
 
+  const shouldAnimate = hasMeasuredActiveThumb.current && !disabled && themeToken.motion
+  const config = { ...LAYOUT_PRESET, duration: segmentedToken.animationDuration }
+  const activeThumbX = useMotionValue(activeLayout?.x ?? 0, config, 0, shouldAnimate)
+  const activeThumbWidth = useMotionValue(activeLayout?.width ?? 0, config, 0, shouldAnimate)
+  const animatedThumbStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: activeThumbX.value }],
+    width: activeThumbWidth.value,
+  }))
   useEffect(() => {
-    if (!activeLayout) return
-
-    activeThumbAnimation.current?.stop()
-    const shouldAnimate = hasMeasuredActiveThumb.current && !disabled && themeToken.motion
-
-    if (!shouldAnimate) {
-      activeThumbX.setValue(activeLayout.x)
-      activeThumbWidth.setValue(activeLayout.width)
-      hasMeasuredActiveThumb.current = true
-      return
-    }
-
-    const easing = Easing.bezier(0.645, 0.045, 0.355, 1)
-    const animation = Animated.parallel([
-      Animated.timing(activeThumbX, {
-        duration: segmentedToken.animationDuration,
-        easing,
-        toValue: activeLayout.x,
-        useNativeDriver: false,
-      }),
-      Animated.timing(activeThumbWidth, {
-        duration: segmentedToken.animationDuration,
-        easing,
-        toValue: activeLayout.width,
-        useNativeDriver: false,
-      }),
-    ])
-    activeThumbAnimation.current = animation
-    animation.start()
-
-    return () => animation.stop()
-  }, [activeLayout, activeThumbWidth, activeThumbX, disabled, segmentedToken, themeToken.motion])
-
-  useEffect(
-    () => () => {
-      activeThumbAnimation.current?.stop()
-    },
-    [],
-  )
+    if (activeLayout) hasMeasuredActiveThumb.current = true
+  }, [activeLayout])
 
   const selectOption = useCallback(
     (option: SegmentedOption) => {
@@ -226,9 +197,8 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
             semanticStyles?.selectedBackground,
             {
               borderRadius: resolvedBorderRadius,
-              transform: [{ translateX: activeThumbX }],
-              width: activeThumbWidth,
             },
+            animatedThumbStyle,
           ]}
         />
       ) : null}

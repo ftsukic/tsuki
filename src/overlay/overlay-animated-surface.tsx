@@ -1,8 +1,8 @@
+import { overlayAnimation } from '../motion/presets'
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { StyleSheet } from 'react-native'
 import type { View, StyleProp, ViewStyle } from 'react-native'
-import { Easing } from 'react-native-reanimated'
-import { useAnimatedTransition } from '../motion'
+import { useAnimatedTransition } from '../motion/useAnimatedTransition'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import type { OverlayProps } from './types'
@@ -55,7 +55,7 @@ export const OverlayAnimatedSurface = forwardRef<View, OverlayAnimatedSurfacePro
     const enteringConfig = useMemo(
       () => ({
         duration: animationDuration,
-        easing: Easing.out(Easing.ease),
+        ...overlayAnimation(animationDuration, true),
         mode: 'timing' as const,
       }),
       [animationDuration],
@@ -63,7 +63,7 @@ export const OverlayAnimatedSurface = forwardRef<View, OverlayAnimatedSurfacePro
     const leavingConfig = useMemo(
       () => ({
         duration: animationDuration,
-        easing: Easing.in(Easing.ease),
+        ...overlayAnimation(animationDuration, false),
         mode: 'timing' as const,
       }),
       [animationDuration],

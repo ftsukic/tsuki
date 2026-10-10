@@ -5,6 +5,7 @@ import { presetColors } from '../types'
 import { alphaColor, solidColor } from '../util/colors'
 import { genFontMapToken } from './shared/font'
 import { genControlHeight, genRadius, genSizeMapToken } from './shared/size'
+import { MOTION_DURATION } from '../../motion/token'
 
 type Palette = [string, string, string, string, string, string, string, string, string, string]
 
@@ -127,9 +128,9 @@ export function deriveMapToken(seed: SeedToken, dark = false): MapToken {
     ...genRadius(seed.borderRadius),
     lineWidthBold: seed.lineWidth + 1,
     lineWidthHairline: StyleSheet.hairlineWidth,
-    motionDurationFast: 100,
-    motionDurationMid: 200,
-    motionDurationSlow: 300,
+    motionDurationFast: MOTION_DURATION.fastest,
+    motionDurationMid: MOTION_DURATION.normal,
+    motionDurationSlow: MOTION_DURATION.slow,
   }
 
   return map

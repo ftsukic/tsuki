@@ -33,6 +33,13 @@ export default function SegmentedThemeExample() {
           selectedTextColor 用于单实例覆盖选中项文字颜色；selected thumb 默认使用
           colorBgContainer，semantic styles 控制局部样式。
         </Text>
+        <Segmented
+          block
+          size="large"
+          defaultValue="list"
+          selectedTextColor="#1677ff"
+          options={['list', 'board']}
+        />
       </View>
     </ConfigProvider>
   )

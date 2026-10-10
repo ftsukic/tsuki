@@ -14,13 +14,16 @@ export const Provider = memo(function Provider({
   gesture = true,
   safeArea = false,
   theme,
+  motion,
 }: ProviderProps) {
   const swipeCellManager = useRef(new SwipeCellManager()).current
 
   return (
     <SafeAreaProvider enabled={safeArea}>
       <GestureProvider enabled={gesture}>
-        <ConfigProvider theme={theme}>
+        <ConfigProvider
+          theme={motion ? { ...theme, motion: { ...theme?.motion, ...motion } } : theme}
+        >
           <SwipeCellContext.Provider value={swipeCellManager}>
             <InteractionCoordinator manager={swipeCellManager}>
               <Portal.Host>{children}</Portal.Host>

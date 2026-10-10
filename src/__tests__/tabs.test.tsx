@@ -406,9 +406,6 @@ describe('Tabs', () => {
         callback?.(true)
         return value as never
       })
-    const indicatorTiming = jest
-      .spyOn(Animated, 'timing')
-      .mockImplementation(() => ({ start: jest.fn(), stop: jest.fn() }) as never)
     const renderTabs = (animated = false, value: 'date' | 'time' = 'date') => (
       <Tabs animated={animated} value={value} onChange={() => undefined}>
         <Tab name="date" title="日期">
@@ -430,28 +427,35 @@ describe('Tabs', () => {
       await Promise.resolve()
     })
     timing.mockClear()
-    indicatorTiming.mockClear()
     await view.rerender(renderTabs(false, 'time'))
     await Promise.resolve()
-    expect(timing).not.toHaveBeenCalled()
-    expect(indicatorTiming).toHaveBeenCalled()
+    expect(timing.mock.calls.filter(([, , callback]) => callback !== undefined)).toHaveLength(0)
+    expect(
+      timing.mock.calls.some(
+        ([, config, callback]) => config?.duration === 100 && callback === undefined,
+      ),
+    ).toBe(true)
 
-    indicatorTiming.mockClear()
     await view.rerender(renderTabs(true, 'date'))
     timing.mockClear()
     await view.rerender(renderTabs(true, 'time'))
     await Promise.resolve()
-    expect(timing).toHaveBeenCalled()
-    expect(indicatorTiming).toHaveBeenCalled()
+    expect(timing.mock.calls.some(([, , callback]) => callback !== undefined)).toBe(true)
+    expect(
+      timing.mock.calls.some(
+        ([, config, callback]) => config?.duration === 100 && callback === undefined,
+      ),
+    ).toBe(true)
 
     timing.mockClear()
-    indicatorTiming.mockClear()
     await view.rerender(renderTabs(false))
     await Promise.resolve()
-    expect(timing).not.toHaveBeenCalled()
-    expect(indicatorTiming).toHaveBeenCalled()
-    indicatorTiming.mockRestore()
-    timing.mockRestore()
+    expect(timing.mock.calls.filter(([, , callback]) => callback !== undefined)).toHaveLength(0)
+    expect(
+      timing.mock.calls.some(
+        ([, config, callback]) => config?.duration === 100 && callback === undefined,
+      ),
+    ).toBe(true)
   })
 
   it('disables header and content motion when the theme disables motion', async () => {

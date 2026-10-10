@@ -1,5 +1,8 @@
+import Animated from 'react-native-reanimated'
+import { useTransitionProgress } from '../motion/useTransitionProgress'
+import { OVERLAY_PRESETS } from '../motion/presets'
 import { forwardRef, isValidElement, useEffect, useMemo, useRef, useState } from 'react'
-import { Animated, Easing, Platform, Pressable, StyleSheet, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import type { IconDefinition } from '@ant-design/icons-svg/lib/types'
 import { Icon } from '../icon'
 import { isIconName } from '../icon/icon-definitions'
@@ -61,8 +64,6 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
     onOpened,
     ...viewProps
   } = props
-  const opacity = useRef(new Animated.Value(0)).current
-  const animation = useRef<Animated.CompositeAnimation | null>(null)
   const renderedRef = useRef(show)
   const onCloseRef = useRef(onClose)
   const onOpenedRef = useRef(onOpened)
@@ -74,7 +75,6 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
   const normalizedDuration = Number.isFinite(duration) ? Math.max(0, duration) : 0
   const normalizedIconSize = Number.isFinite(iconSize) && iconSize > 0 ? iconSize : token.iconSize
   const animationDuration = themeToken.motion ? Math.max(0, token.animationDuration) : 0
-  const scale = useRef(new Animated.Value(0.8)).current
   const hasCustomIcon = isRenderable(icon)
   const hasIcon = hasCustomIcon || type === 'success' || type === 'fail'
   const textMode = type === 'text' && !hasIcon
@@ -91,87 +91,29 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
     return () => clearTimeout(timer)
   }, [message, normalizedDuration, show, type])
 
+  const showRef = useRef(show)
+  showRef.current = show
   useEffect(() => {
-    animation.current?.stop()
-
     if (show) {
       renderedRef.current = true
       setRendered(true)
-      if (animationDuration === 0) {
-        opacity.setValue(1)
-        scale.setValue(1)
-        onOpenedRef.current?.()
-        return
-      }
-
-      opacity.setValue(0)
-      scale.setValue(0.8)
-      const nextAnimation = Animated.parallel([
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: animationDuration,
-          easing: Easing.out(Easing.cubic),
-          isInteraction: false,
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-        Animated.timing(scale, {
-          toValue: 1,
-          duration: animationDuration,
-          easing: Easing.out(Easing.cubic),
-          isInteraction: false,
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-      ])
-      animation.current = nextAnimation
-      nextAnimation.start(({ finished }) => {
-        if (finished) onOpenedRef.current?.()
-      })
-      return () => nextAnimation.stop()
     }
-
-    if (!renderedRef.current) return
-    if (animationDuration === 0) {
-      opacity.setValue(0)
-      scale.setValue(0.9)
-      renderedRef.current = false
-      setRendered(false)
-      onCloseRef.current?.()
-      return
-    }
-
-    const nextAnimation = Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: animationDuration,
-        easing: Easing.in(Easing.cubic),
-        isInteraction: false,
-        useNativeDriver: Platform.OS !== 'web',
-      }),
-      Animated.timing(scale, {
-        toValue: 0.9,
-        duration: animationDuration,
-        easing: Easing.in(Easing.cubic),
-        isInteraction: false,
-        useNativeDriver: Platform.OS !== 'web',
-      }),
-    ])
-    animation.current = nextAnimation
-    nextAnimation.start(({ finished }) => {
-      if (finished) {
+  }, [show])
+  const { animatedStyle } = useTransitionProgress({
+    visible: show,
+    preset: OVERLAY_PRESETS.toast,
+    entering: { duration: animationDuration },
+    leaving: { duration: animationDuration },
+    onTransitionEnd: (entered) => {
+      if (showRef.current !== entered) return
+      if (entered) onOpenedRef.current?.()
+      else if (renderedRef.current) {
         renderedRef.current = false
         setRendered(false)
         onCloseRef.current?.()
       }
-    })
-    return () => nextAnimation.stop()
-  }, [animationDuration, opacity, scale, show])
-
-  useEffect(
-    () => () => {
-      animation.current?.stop()
     },
-    [],
-  )
+  })
 
   const positionStyle = useMemo(() => {
     switch (position) {
@@ -248,8 +190,6 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
           borderRadius: token.borderRadius,
           justifyContent: 'center',
           maxWidth: token.maxWidth,
-          opacity,
-          transform: [{ scale }],
         },
         textMode
           ? {
@@ -263,6 +203,7 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
               paddingVertical: token.defaultPaddingVertical,
               width: token.defaultWidth,
             },
+        animatedStyle,
         semantic?.root,
         style,
       ]}
@@ -295,7 +236,7 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
 
   return (
     <View
-      pointerEvents={intercepts ? 'auto' : 'box-none'}
+      pointerEvents={show ? (intercepts ? 'auto' : 'box-none') : 'none'}
       style={[StyleSheet.absoluteFill, { zIndex }, semantic?.host]}
     >
       {overlay ? (

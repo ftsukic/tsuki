@@ -1,5 +1,6 @@
+import * as Reanimated from 'react-native-reanimated'
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
-import { Animated, StyleSheet } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { ConfigProvider, Switch, getDesignToken, getSwitchToken } from '..'
 import { getSwitchDimensions, getSwitchTranslateX } from '../switch/style'
 
@@ -9,18 +10,6 @@ async function press(testID: string) {
 }
 
 describe('Switch', () => {
-  beforeEach(() => {
-    jest.spyOn(Animated, 'timing').mockImplementation(
-      () =>
-        ({
-          _isUsingNativeDriver: jest.fn(() => false),
-          reset: jest.fn(),
-          start: jest.fn(),
-          stop: jest.fn(),
-        }) as unknown as Animated.CompositeAnimation,
-    )
-  })
-
   afterEach(() => {
     jest.restoreAllMocks()
   })
@@ -292,17 +281,23 @@ describe('Switch', () => {
   })
 
   it('animates state changes with the component motion token', async () => {
+    const timing = jest.spyOn(Reanimated, 'withTiming')
+    const spring = jest.spyOn(Reanimated, 'withSpring')
     await render(<Switch testID="switch" />)
     await press('switch')
 
-    expect(Animated.timing).toHaveBeenCalledWith(
-      expect.anything(),
+    expect(timing).toHaveBeenCalledWith(
+      1,
       expect.objectContaining({
         duration: getSwitchToken(getDesignToken()).animationDuration,
         easing: expect.any(Function),
-        toValue: 1,
-        useNativeDriver: false,
       }),
+      undefined,
+    )
+    expect(spring).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ damping: 20, stiffness: 240, mass: 1 }),
+      undefined,
     )
   })
 })

@@ -86,10 +86,10 @@ export function getCollapseStyles(
       width: token.iconSize,
     },
     contentWrapper: {
+      backgroundColor: token.contentBackgroundColor,
       overflow: 'hidden',
     },
     content: {
-      backgroundColor: token.contentBackgroundColor,
       left: 0,
       paddingHorizontal: token.contentPaddingHorizontal,
       paddingVertical: token.contentPaddingVertical,

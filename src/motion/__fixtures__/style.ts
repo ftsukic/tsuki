@@ -1,0 +1,52 @@
+import { StyleSheet } from 'react-native'
+
+export const demoStyles = StyleSheet.create({
+  page: { padding: 16, gap: 16 },
+  controls: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  button: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#eaf2ff',
+  },
+  buttonText: { color: '#175cd3', fontSize: 14, fontWeight: '600' },
+  description: { color: '#475467', fontSize: 13, lineHeight: 20 },
+  status: { color: '#344054', fontSize: 13, lineHeight: 20 },
+  stage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    height: 144,
+    borderWidth: 1,
+    borderColor: '#d0d5dd',
+    borderRadius: 12,
+    backgroundColor: '#f8fafc',
+  },
+  card: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 10,
+    backgroundColor: '#d1fadf',
+  },
+  cardText: { color: '#05603a', fontSize: 14, fontWeight: '600' },
+  empty: { color: '#667085', fontSize: 13 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  sample: { minWidth: 132, flexBasis: 132, flexGrow: 1, gap: 8 },
+  sampleStage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    height: 88,
+    borderRadius: 8,
+    backgroundColor: '#f2f4f7',
+  },
+  sampleCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 100,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: '#d1fadf',
+  },
+})

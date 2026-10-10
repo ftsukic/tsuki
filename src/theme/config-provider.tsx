@@ -15,12 +15,15 @@ import { defaultSeed } from './themes/seed'
 import { createAliasToken } from './util/alias'
 import { useContext, useMemo } from 'react'
 import type { PropsWithChildren } from 'react'
+import type { MotionConfig } from '../motion/types'
+import { useMotionConfig } from '../motion/useMotionConfig'
 
 export interface ThemeConfig {
   token?: Partial<AliasToken>
   algorithm?: MappingAlgorithm | readonly MappingAlgorithm[]
   components?: ComponentTokenOverrides
   inherit?: boolean
+  motion?: MotionConfig
 }
 
 export type DesignTokenConfig = Pick<ThemeConfig, 'token' | 'algorithm'>
@@ -99,6 +102,12 @@ function resolveTheme(theme: ThemeConfig = EMPTY_THEME, parent?: ThemeValue | nu
     tokenOverrides,
     algorithm,
     componentOverrides,
+    motion: {
+      ...(inherit ? parent?.motion : undefined),
+      ...Object.fromEntries(
+        Object.entries(theme.motion ?? {}).filter(([, value]) => value !== undefined),
+      ),
+    },
   }
 }
 
@@ -119,7 +128,18 @@ export function getDesignToken(theme: DesignTokenConfig = {}): AliasToken {
 const defaultThemeValue = resolveTheme(EMPTY_THEME, null)
 
 function useThemeValue(): ThemeValue {
-  return useContext(ThemeContext) ?? defaultThemeValue
+  const theme = useContext(ThemeContext) ?? defaultThemeValue
+  const policy = useMotionConfig()
+  return useMemo(
+    () =>
+      policy.enabled
+        ? theme
+        : {
+            ...theme,
+            token: { ...theme.token, motion: false },
+          },
+    [policy.enabled, theme],
+  )
 }
 
 export function useToken(): TokenValue {

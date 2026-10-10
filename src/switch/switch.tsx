@@ -1,9 +1,11 @@
 import { forwardRef, useCallback, useEffect, useRef, useState } from 'react'
-import { Animated, Easing, Platform } from 'react-native'
+import Animated, { interpolateColor, useAnimatedStyle } from 'react-native-reanimated'
+import { useMotionValue } from '../motion/useMotionValue'
+import { STATE_PRESET, LAYOUT_PRESET } from '../motion/presets'
 import { Loading } from '../loading'
 import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
-import { useComponentToken, useToken } from '../theme'
+import { useComponentToken } from '../theme'
 import {
   getSwitchDimensions,
   getSwitchStyles,
@@ -14,11 +16,6 @@ import { getSwitchToken } from './token'
 import type { SwitchProps, SwitchStyleState } from './types'
 
 type SwitchRef = React.ComponentRef<typeof Pressable>
-
-const switchEasing = Easing.bezier(0.3, 1.05, 0.4, 1.05)
-// Vant's background-color transition does not specify a timing function, so
-// it uses CSS's default ease curve instead of the node's spring-like curve.
-const switchTrackEasing = Easing.bezier(0.25, 0.1, 0.25, 1)
 
 function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
   {
@@ -40,7 +37,6 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
   }: SwitchProps<ActiveValueT, InactiveValueT>,
   ref: React.ForwardedRef<SwitchRef>,
 ) {
-  const { token: themeToken } = useToken()
   const token = useComponentToken('Switch', getSwitchToken)
   const resolvedSize = resolveSwitchSize(size)
   const dimensions = getSwitchDimensions(token, resolvedSize)
@@ -62,83 +58,34 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
   const beforeChangeRequestRef = useRef(0)
   const currentValueRef = useRef(currentValue)
   currentValueRef.current = currentValue
-  const translateProgress = useRef(new Animated.Value(active ? 1 : 0)).current
-  const trackProgress = useRef(new Animated.Value(active ? 1 : 0)).current
-  const animationRef = useRef<Animated.CompositeAnimation | null>(null)
-  const previousActiveRef = useRef(active)
+  const translateProgress = useMotionValue(active ? 1 : 0, STATE_PRESET, active ? 1 : 0)
+  const trackProgress = useMotionValue(
+    active ? 1 : 0,
+    { ...LAYOUT_PRESET, duration: token.animationDuration },
+    active ? 1 : 0,
+  )
   const activeTrackColor = activeColor ?? token.activeColor
   const inactiveTrackColor = inactiveColor ?? token.inactiveColor
   const canAnimateTrackColor =
     typeof activeTrackColor === 'string' && typeof inactiveTrackColor === 'string'
-  const animatedTrackColor = canAnimateTrackColor
-    ? trackProgress.interpolate({
-        inputRange: [0, 1],
-        outputRange: [inactiveTrackColor, activeTrackColor],
-      })
-    : undefined
-
-  useEffect(() => {
-    const target = active ? 1 : 0
-    const shouldAnimate = previousActiveRef.current !== active && themeToken.motion
-    previousActiveRef.current = active
-    animationRef.current?.stop()
-    animationRef.current = null
-
-    if (!shouldAnimate || token.animationDuration <= 0) {
-      translateProgress.setValue(target)
-      trackProgress.setValue(target)
-      return
-    }
-
-    const animations: Animated.CompositeAnimation[] = [
-      Animated.timing(translateProgress, {
-        duration: token.animationDuration,
-        easing: switchEasing,
-        toValue: target,
-        useNativeDriver: Platform.OS !== 'web' && !canAnimateTrackColor,
-      }),
-    ]
-
-    if (canAnimateTrackColor) {
-      animations.push(
-        Animated.timing(trackProgress, {
-          duration: token.animationDuration,
-          easing: switchTrackEasing,
-          toValue: target,
-          // Native Animated cannot drive backgroundColor.
-          useNativeDriver: false,
-        }),
-      )
-    }
-
-    const animation = Animated.parallel(animations)
-    animationRef.current = animation
-    animation.start(({ finished }) => {
-      if (animationRef.current !== animation) return
-      animationRef.current = null
-      if (finished) {
-        translateProgress.setValue(target)
-        trackProgress.setValue(target)
-      }
-    })
-
-    return () => {
-      animation.stop()
-      if (animationRef.current === animation) animationRef.current = null
-    }
-  }, [
-    active,
-    canAnimateTrackColor,
-    themeToken.motion,
-    token.animationDuration,
-    trackProgress,
-    translateProgress,
-  ])
+  const animatedTrackStyle = useAnimatedStyle(() =>
+    canAnimateTrackColor
+      ? {
+          backgroundColor: interpolateColor(
+            trackProgress.value,
+            [0, 1],
+            [inactiveTrackColor as string, activeTrackColor as string],
+          ),
+        }
+      : {},
+  )
+  const translateX = getSwitchTranslateX(token, dimensions)
+  const animatedThumbStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateProgress.value * translateX }],
+  }))
 
   useEffect(
     () => () => {
-      animationRef.current?.stop()
-      animationRef.current = null
       beforeChangeRequestRef.current += 1
     },
     [],
@@ -251,33 +198,15 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
           styles,
         }
         const semantic = resolveStyles(styles, { props: switchProps, state })
-        const translateX = getSwitchTranslateX(token, dimensions)
 
         return (
           <Animated.View
             testID="switch-track"
-            style={[
-              resolved.track,
-              animatedTrackColor && { backgroundColor: animatedTrackColor },
-              semantic?.track,
-            ]}
+            style={[resolved.track, animatedTrackStyle, semantic?.track]}
           >
             <Animated.View
               testID="switch-thumb"
-              style={[
-                resolved.thumb,
-                semantic?.thumb,
-                {
-                  transform: [
-                    {
-                      translateX: translateProgress.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, translateX],
-                      }),
-                    },
-                  ],
-                },
-              ]}
+              style={[resolved.thumb, semantic?.thumb, animatedThumbStyle]}
             >
               {loading ? (
                 <Loading

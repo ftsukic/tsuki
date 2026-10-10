@@ -1,4 +1,9 @@
+/* RNTL 14 fireEvent returns a Promise; the lint plugin still assumes sync events. */
+/* eslint testing-library/no-await-sync-events: "off" */
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
+import { useEffect } from 'react'
+import * as Reanimated from 'react-native-reanimated'
+import type { PressStyle } from '../pressable'
 import { StyleSheet, Text } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
 import { ConfigProvider, getDesignToken } from '..'
@@ -42,7 +47,7 @@ describe('Pressable', () => {
       </Pressable>,
     )
 
-    fireEvent.press(screen.getByTestId('pressable'))
+    await fireEvent.press(screen.getByTestId('pressable'))
     expect(onPress).toHaveBeenCalledTimes(1)
   })
 
@@ -56,7 +61,7 @@ describe('Pressable', () => {
     )
 
     const pressable = screen.getByTestId('disabled')
-    fireEvent.press(pressable)
+    await fireEvent.press(pressable)
     expect(onPress).not.toHaveBeenCalled()
     expect(pressable.props.accessibilityState?.disabled).toBe(true)
   })
@@ -253,13 +258,13 @@ describe('Pressable', () => {
     expect(style).toHaveBeenLastCalledWith({ pressed: false })
     expect(screen.getByTestId('stateful-child').props.children).toBe('idle')
 
-    fireEvent(pressable, 'pressIn')
+    await fireEvent(pressable, 'pressIn')
 
     await waitFor(() => expect(style).toHaveBeenLastCalledWith({ pressed: true }))
     expect(flattenStyle('stateful').marginTop).toBe(2)
     expect(screen.getByTestId('stateful-child').props.children).toBe('pressed')
 
-    fireEvent(pressable, 'pressOut')
+    await fireEvent(pressable, 'pressOut')
 
     await waitFor(() => expect(style).toHaveBeenLastCalledWith({ pressed: false }))
     expect(screen.getByTestId('stateful-child').props.children).toBe('idle')
@@ -283,16 +288,101 @@ describe('Pressable', () => {
     )
 
     const pressable = screen.getByTestId('callbacks')
-    fireEvent(pressable, 'pressIn')
-    fireEvent(pressable, 'pressOut')
-    fireEvent.press(pressable)
-    fireEvent(pressable, 'pressIn')
-    fireEvent(pressable, 'pressOut')
-    fireEvent.press(pressable)
+    await fireEvent(pressable, 'pressIn')
+    await fireEvent(pressable, 'pressOut')
+    await fireEvent.press(pressable)
+    await fireEvent(pressable, 'pressIn')
+    await fireEvent(pressable, 'pressOut')
+    await fireEvent.press(pressable)
 
     expect(onPress).toHaveBeenCalledTimes(1)
     expect(onPressIn).toHaveBeenCalledTimes(2)
     expect(onPressOut).toHaveBeenCalledTimes(2)
+  })
+
+  it('starts visual feedback before the user press-in callback', async () => {
+    const timing = jest.spyOn(Reanimated, 'withTiming').mockImplementation((value) => value)
+    const onPressIn = jest.fn(() =>
+      expect(timing).toHaveBeenCalledWith(0.6, expect.any(Object), undefined),
+    )
+    await render(<Pressable testID="immediate-feedback" onPressIn={onPressIn} />)
+    timing.mockClear()
+    await fireEvent(screen.getByTestId('immediate-feedback'), 'pressIn')
+    expect(onPressIn).toHaveBeenCalledTimes(1)
+    timing.mockRestore()
+  })
+
+  it('preserves pressed content and native host across feedback changes', async () => {
+    const mounted = jest.fn()
+    const unmounted = jest.fn()
+    function Content({ pressed }: { pressed: boolean }) {
+      useEffect(() => {
+        mounted()
+        return unmounted
+      }, [])
+      return <Text testID="switching-content">{pressed ? 'pressed' : 'idle'}</Text>
+    }
+    const tree = (pressStyle: PressStyle) => (
+      <Pressable testID="switching" pressStyle={pressStyle}>
+        {({ pressed }) => <Content pressed={pressed} />}
+      </Pressable>
+    )
+    const view = await render(tree('opacity'))
+    await fireEvent(screen.getByTestId('switching'), 'pressIn')
+    for (const feedback of ['background', 'overlay', 'scale', 'none'] as const) {
+      await view.rerender(tree(feedback))
+      expect(screen.getByTestId('switching-content').props.children).toBe('pressed')
+    }
+    expect(mounted).toHaveBeenCalledTimes(1)
+    expect(unmounted).not.toHaveBeenCalled()
+    await fireEvent(screen.getByTestId('switching'), 'pressOut')
+    expect(screen.getByTestId('switching-content').props.children).toBe('idle')
+  })
+
+  it('preserves user transform and function-style opacity in animated feedback', async () => {
+    await render(
+      <Pressable
+        testID="override-transform"
+        pressStyle="scale"
+        testOnly_pressed
+        style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1, transform: [{ translateX: 10 }] })}
+      />,
+    )
+    expect(flattenStyle('override-transform')).toMatchObject({
+      opacity: 0.7,
+      transform: [{ translateX: 10 }],
+    })
+  })
+
+  it('clears pressed state while disabled and keeps native long-press and hit-area props', async () => {
+    const onLongPress = jest.fn()
+    const style = jest.fn(({ pressed }: { pressed: boolean }) => ({ borderWidth: pressed ? 2 : 1 }))
+    const tree = (disabled: boolean) => (
+      <Pressable
+        testID="native-props"
+        motion={false}
+        disabled={disabled}
+        style={style}
+        onLongPress={onLongPress}
+        hitSlop={8}
+        pressRetentionOffset={20}
+        delayLongPress={500}
+      >
+        {({ pressed }) => <Text>{pressed ? 'held' : 'released'}</Text>}
+      </Pressable>
+    )
+    const view = await render(tree(false))
+    await fireEvent(screen.getByTestId('native-props'), 'pressIn')
+    await fireEvent(screen.getByTestId('native-props'), 'longPress')
+    expect(onLongPress).toHaveBeenCalledTimes(1)
+    expect(screen.getByTestId('native-props').props.hitSlop).toBe(8)
+    expect(screen.getByText('held')).toBeTruthy()
+    await view.rerender(tree(true))
+    expect(screen.getByText('released')).toBeTruthy()
+    expect(style).toHaveBeenLastCalledWith({ pressed: false })
+    expect(flattenStyle('native-props').opacity).toBe(1)
+    await view.rerender(tree(false))
+    expect(screen.getByText('released')).toBeTruthy()
   })
 
   it('uses the shared default when no theme override is provided', () => {

@@ -9,7 +9,8 @@ import {
   useState,
 } from 'react'
 import { ScrollView, View } from 'react-native'
-import { useSharedValue, withTiming } from 'react-native-reanimated'
+import { useMotionValue } from '../motion/useMotionValue'
+import { LAYOUT_PRESET } from '../motion/presets'
 import { Icon } from '../icon'
 import { Animated, useAnimatedStyle } from '../motion'
 import { Pressable } from '../pressable'
@@ -113,19 +114,17 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
     context.scrollableItemWidth,
   )
   const duration = themeToken.motion ? Math.max(0, context.duration ?? token.animationDuration) : 0
-  const arrowProgress = useSharedValue(active ? 1 : 0)
+  const arrowProgress = useMotionValue(
+    active ? 1 : 0,
+    { ...LAYOUT_PRESET, duration },
+    active ? 1 : 0,
+  )
   const animatedArrowStyle = useAnimatedStyle(() => {
     const progress = arrowProgress.value
     const base = direction === 'down' ? 0 : 180
     const delta = direction === 'down' ? 180 : -180
     return { transform: [{ rotate: `${base + delta * progress}deg` }] }
   })
-
-  useEffect(() => {
-    arrowProgress.value = withTiming(active ? 1 : 0, {
-      duration,
-    })
-  }, [active, arrowProgress, duration])
 
   useLayoutEffect(() => {
     registerItem(idRef.current, index, disabled)

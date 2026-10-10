@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native'
 import { Animated } from '../../..'
+import { useAnimatedStyle } from 'react-native-reanimated'
 import { GestureDetector, usePanGesture } from '../../'
 
 /**
@@ -9,24 +10,28 @@ import { GestureDetector, usePanGesture } from '../../'
 export default function GestureExample() {
   const horizontal = usePanGesture({ direction: 'horizontal', maxDistance: 120 })
   const vertical = usePanGesture({ direction: 'vertical', maxDistance: 80 })
+  const { translateX } = horizontal
+  const { translateY } = vertical
+  const horizontalStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }))
+  const verticalStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+  }))
 
   return (
     <View style={styles.page}>
       <Text style={styles.description}>拖动两张卡片，松手后观察 spring 回弹。</Text>
       <View style={styles.track}>
         <GestureDetector gesture={horizontal.gesture}>
-          <Animated.View
-            style={[styles.horizontalCard, { transform: [{ translateX: horizontal.translateX }] }]}
-          >
+          <Animated.View style={[styles.horizontalCard, horizontalStyle]}>
             <Text style={styles.cardText}>horizontal</Text>
           </Animated.View>
         </GestureDetector>
       </View>
       <View style={styles.verticalTrack}>
         <GestureDetector gesture={vertical.gesture}>
-          <Animated.View
-            style={[styles.verticalCard, { transform: [{ translateY: vertical.translateY }] }]}
-          >
+          <Animated.View style={[styles.verticalCard, verticalStyle]}>
             <Text style={styles.cardText}>vertical</Text>
           </Animated.View>
         </GestureDetector>

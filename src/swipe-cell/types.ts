@@ -51,6 +51,8 @@ export interface SwipeCellProps extends Omit<ViewProps, 'children' | 'style'> {
   onLeftActionPress?: NativePressableProps['onPress']
   onRightActionPress?: NativePressableProps['onPress']
   closeOnActionPress?: boolean
+  /** Apply resistance beyond the measured action width. Defaults to false. */
+  overshoot?: boolean
   style?: StyleProp<ViewStyle>
   contentStyle?: StyleProp<ViewStyle>
   actionStyle?: StyleProp<ViewStyle>

@@ -4,7 +4,7 @@ import { Animated, useAnimatedStyle, useSharedValue, withSpring } from '../../..
 
 /**
  * @title Pan + Reanimated
- * @description 使用 Gesture.Pan 驱动 UI thread 上的 SharedValue，并在结束时弹簧回弹。
+ * @description 底层 RNGH/Reanimated 集成示例，直接配置 spring，不受 Tsuki Motion 策略控制。
  */
 export default function PanReanimatedExample() {
   const translateX = useSharedValue(0)
@@ -32,7 +32,9 @@ export default function PanReanimatedExample() {
   return (
     <View style={styles.page}>
       <Text style={styles.title}>Gesture Handler + Reanimated</Text>
-      <Text style={styles.description}>拖动蓝色卡片，松手后观察 spring 回弹。</Text>
+      <Text style={styles.description}>
+        底层引擎示例：拖动后 spring 回弹，不受 Tsuki Motion 开关与倍率控制。
+      </Text>
       <View style={styles.track}>
         <GestureDetector gesture={pan}>
           <Animated.View style={[styles.card, animatedStyle]}>

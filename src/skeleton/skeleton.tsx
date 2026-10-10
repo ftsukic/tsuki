@@ -1,7 +1,9 @@
-import { memo, useEffect, useRef } from 'react'
-import { Animated, Easing, Platform, View } from 'react-native'
+import Animated from 'react-native-reanimated'
+import { useFeedbackMotion } from '../motion/useFeedbackMotion'
+import { memo } from 'react'
+import { View } from 'react-native'
 import { resolveStyles } from '../style'
-import { useComponentToken, useToken } from '../theme'
+import { useComponentToken } from '../theme'
 import { getSkeletonStyles } from './style'
 import { getSkeletonToken } from './token'
 import type { SkeletonProps } from './types'
@@ -35,9 +37,13 @@ function SkeletonComponent({
   titleWidth,
   ...viewProps
 }: SkeletonProps) {
-  const { token: themeToken } = useToken()
   const token = useComponentToken('Skeleton', getSkeletonToken)
-  const opacity = useRef(new Animated.Value(1)).current
+  const animatedStyle = useFeedbackMotion(
+    'pulse',
+    token.animationDuration,
+    loading && animate,
+    token.animationMinOpacity,
+  )
   const rowCount = normalizeRowCount(row)
   const resolvedProps: SkeletonProps = {
     ...viewProps,
@@ -59,45 +65,6 @@ function SkeletonComponent({
   const resolved = getSkeletonStyles(token, resolvedProps, state)
   const semantic = resolveStyles(styles, { props: resolvedProps, state })
 
-  useEffect(() => {
-    const shouldAnimate = loading && animate && themeToken.motion && token.animationDuration > 0
-
-    opacity.stopAnimation()
-    opacity.setValue(1)
-    if (!shouldAnimate) return
-
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, {
-          toValue: token.animationMinOpacity,
-          duration: token.animationDuration / 2,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: token.animationDuration / 2,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: Platform.OS !== 'web',
-        }),
-      ]),
-    )
-    animation.start()
-
-    return () => {
-      animation.stop()
-      opacity.stopAnimation()
-      opacity.setValue(1)
-    }
-  }, [
-    animate,
-    loading,
-    opacity,
-    themeToken.motion,
-    token.animationDuration,
-    token.animationMinOpacity,
-  ])
-
   return (
     <View
       {...viewProps}
@@ -109,7 +76,7 @@ function SkeletonComponent({
       style={[resolved.root, semantic?.root, style]}
     >
       {loading ? (
-        <Animated.View style={[resolved.placeholder, semantic?.placeholder, { opacity }]}>
+        <Animated.View style={[resolved.placeholder, semantic?.placeholder, animatedStyle]}>
           <View style={[avatar ? { flexDirection: 'row', alignItems: 'flex-start' } : null]}>
             {avatar ? <View style={[resolved.avatar, semantic?.avatar]} /> : null}
             <View style={[resolved.content, semantic?.content]}>

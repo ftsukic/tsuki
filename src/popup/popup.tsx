@@ -1,8 +1,9 @@
+import { OVERLAY_PRESETS, overlayAnimation } from '../motion/presets'
 import { forwardRef, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { BackHandler, Platform, StyleSheet, View, useWindowDimensions } from 'react-native'
-import { Easing } from 'react-native-reanimated'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
-import { Animated, motionPresets, useAnimatedStyle, useTransitionProgress } from '../motion'
+import Animated, { useAnimatedStyle } from 'react-native-reanimated'
+import { useTransitionProgress } from '../motion/useTransitionProgress'
 import { OverlaySurface } from '../overlay/overlay-surface'
 import { Portal } from '../portal'
 import { resolveStyles } from '../style'
@@ -189,16 +190,16 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
   const motionPreset = useMemo(() => {
     switch (effectivePosition) {
       case 'top':
-        return motionPresets.popupTop
+        return OVERLAY_PRESETS.popupTop
       case 'bottom':
-        return motionPresets.popupBottom
+        return OVERLAY_PRESETS.popupBottom
       case 'left':
-        return motionPresets.drawerLeft
+        return OVERLAY_PRESETS.drawerLeft
       case 'right':
-        return motionPresets.drawerRight
+        return OVERLAY_PRESETS.drawerRight
       case 'center':
       default:
-        return motionPresets.dialog
+        return OVERLAY_PRESETS.dialog
     }
   }, [effectivePosition])
   const transitionDistance =
@@ -206,22 +207,11 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
       ? Math.max(height, 1)
       : Math.max(width, 1)
   const enteringConfig = useMemo(
-    () =>
-      themeToken.motion && motionPreset.entering
-        ? motionPreset.entering
-        : {
-            duration: animationDuration,
-            easing: Easing.out(Easing.ease),
-            mode: 'timing' as const,
-          },
-    [animationDuration, motionPreset, themeToken.motion],
+    () => overlayAnimation(animationDuration, true),
+    [animationDuration],
   )
   const leavingConfig = useMemo(
-    () => ({
-      duration: animationDuration,
-      easing: Easing.in(Easing.ease),
-      mode: 'timing' as const,
-    }),
+    () => overlayAnimation(animationDuration, false),
     [animationDuration],
   )
   const { progress, animatedStyle: animatedPanelStyle } = useTransitionProgress({

@@ -290,7 +290,12 @@ describe('Collapse', () => {
     )
 
     const root = screen.getByTestId('animated-collapse')
-    const arrow = findNode(root, (node) => node.props.pointerEvents === 'none')
+    const arrow = findNode(
+      root,
+      (node) =>
+        node.props.pointerEvents === 'none' &&
+        StyleSheet.flatten(node.props.style)?.transform !== undefined,
+    )
     expect(StyleSheet.flatten(arrow.props.style)?.transform).toEqual([{ rotate: '90deg' }])
 
     const content = findLayoutNode(root)
@@ -314,6 +319,7 @@ describe('Collapse', () => {
       2,
       1,
       expect.objectContaining({ duration: 300, easing: expect.any(Function) }),
+      undefined,
     )
 
     timing.mockClear()
@@ -324,6 +330,40 @@ describe('Collapse', () => {
     expect(timing).not.toHaveBeenCalled()
 
     await view.unmount()
+  })
+
+  it('retargets height when content grows during opening and stays closed after reversal', async () => {
+    jest.spyOn(Reanimated, 'measure').mockReturnValue(null)
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value) => (value === 1 ? 0.5 : Number(value) / 2))
+    await render(
+      <Collapse testID="dynamic-collapse">
+        <CollapseItem name="first" testID="dynamic-first" title="第一项">
+          内容
+        </CollapseItem>
+      </Collapse>,
+    )
+    const content = findLayoutNode(screen.getByTestId('dynamic-collapse'))
+    await act(async () => content.props.onLayout({ nativeEvent: { layout: { height: 40 } } }))
+    await flushUI()
+    await press(screen.getByTestId('dynamic-first'))
+    await flushUI()
+    timing.mockClear()
+    await act(async () => content.props.onLayout({ nativeEvent: { layout: { height: 80 } } }))
+    await flushUI()
+    expect(timing).toHaveBeenCalledWith(
+      80,
+      expect.objectContaining({ duration: 300 }),
+      expect.any(Function),
+    )
+    await press(screen.getByTestId('dynamic-first'))
+    await flushUI()
+    timing.mockClear()
+    await act(async () => content.props.onLayout({ nativeEvent: { layout: { height: 160 } } }))
+    await flushUI()
+    expect(timing).not.toHaveBeenCalled()
+    expect(screen.getByTestId('dynamic-first').props.accessibilityState.expanded).toBe(false)
   })
 
   it('resolves Collapse motion to zero when the theme disables motion', async () => {
@@ -348,9 +388,7 @@ describe('Collapse', () => {
     await press(screen.getByTestId('motionless-first'))
     await flushUI()
 
-    expect(timing).toHaveBeenCalledWith(
-      1,
-      expect.objectContaining({ duration: 0, easing: expect.any(Function) }),
-    )
+    expect(timing).not.toHaveBeenCalled()
+    expect(screen.getByTestId('motionless-first').props.accessibilityState.expanded).toBe(true)
   })
 })

@@ -1,3 +1,6 @@
+import Animated, { useAnimatedStyle } from 'react-native-reanimated'
+import { useMotionValue } from '../motion/useMotionValue'
+import { LAYOUT_PRESET } from '../motion/presets'
 import {
   Children,
   forwardRef,
@@ -10,7 +13,7 @@ import {
   useState,
 } from 'react'
 import type { ReactElement, ReactNode } from 'react'
-import { Animated, Easing, Platform, ScrollView, StyleSheet, View } from 'react-native'
+import { ScrollView, StyleSheet, View } from 'react-native'
 import type {
   LayoutChangeEvent,
   StyleProp,
@@ -248,8 +251,6 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
   const [navViewportWidth, setNavViewportWidth] = useState(0)
   const [navContentWidth, setNavContentWidth] = useState(0)
   const lastNavScrollOffsetRef = useRef<number | null>(null)
-  const indicatorX = useRef(new Animated.Value(0)).current
-  const indicatorAnimation = useRef<Animated.CompositeAnimation | null>(null)
   const resolvedStyles = useMemo(
     () => getTabsStyles(token, type, scrollable, shrink),
     [scrollable, shrink, token, type],
@@ -349,34 +350,15 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
     resolvedScrollable,
   ])
 
-  useEffect(() => {
-    if (indicatorTarget === undefined) return
-
-    indicatorAnimation.current?.stop()
-    const duration = tabMotionEnabled ? Math.max(0, token.animationDuration) : 0
-    if (duration === 0) {
-      indicatorX.setValue(indicatorTarget)
-      return
-    }
-
-    const animation = Animated.timing(indicatorX, {
-      duration,
-      easing: Easing.out(Easing.ease),
-      toValue: indicatorTarget,
-      useNativeDriver: Platform.OS !== 'web',
-    })
-    indicatorAnimation.current = animation
-    animation.start()
-
-    return () => animation.stop()
-  }, [indicatorTarget, indicatorX, tabMotionEnabled, token.animationDuration])
-
-  useEffect(
-    () => () => {
-      indicatorAnimation.current?.stop()
-    },
-    [],
+  const indicatorX = useMotionValue(
+    indicatorTarget ?? 0,
+    { ...LAYOUT_PRESET, duration: token.animationDuration },
+    0,
+    tabMotionEnabled,
   )
+  const indicatorMotionStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: indicatorX.value }],
+  }))
 
   const selectValue = useCallback(
     (nextValue: TabsValue) => {
@@ -435,11 +417,7 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
     type === 'line' && activeLayout && indicatorTarget !== undefined ? (
       <Animated.View
         pointerEvents="none"
-        style={[
-          resolvedStyles.indicator,
-          semanticStyles?.indicator,
-          { transform: [{ translateX: indicatorX }] },
-        ]}
+        style={[resolvedStyles.indicator, semanticStyles?.indicator, indicatorMotionStyle]}
         testID="tabs-indicator"
       />
     ) : null

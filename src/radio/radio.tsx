@@ -1,3 +1,5 @@
+import { MOTION_SCALE } from '../motion/token'
+import { MotionView } from '../motion/motion-view'
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import { Icon } from '../icon'
@@ -151,10 +153,27 @@ export const Radio = forwardRef<React.ComponentRef<typeof Pressable>, RadioProps
             <View style={[resolved.indicator, semantic?.indicator]}>
               {shape === 'dot' ? (
                 isChecked ? (
-                  <View style={resolved.dot} />
+                  <MotionView
+                    pointerEvents="none"
+                    style={resolved.dot}
+                    initial={{ opacity: 0, scale: MOTION_SCALE.selection }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    spring="normal"
+                  />
                 ) : null
               ) : isChecked ? (
-                <Icon name="CheckOutlined" size={resolved.checkSize} color={resolved.checkColor} />
+                <MotionView
+                  pointerEvents="none"
+                  initial={{ opacity: 0, scale: MOTION_SCALE.selection }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  spring="normal"
+                >
+                  <Icon
+                    name="CheckOutlined"
+                    size={resolved.checkSize}
+                    color={resolved.checkColor}
+                  />
+                </MotionView>
               ) : null}
             </View>
             {labelPosition === 'right' ? label : null}

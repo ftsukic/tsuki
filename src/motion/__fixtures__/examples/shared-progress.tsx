@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
-import { Animated, useAnimatedStyle, useTransitionProgress } from '../../..'
+import { Animated, useAnimatedStyle, useTransitionProgress } from '../..'
 import { Pressable } from '../../../pressable'
 
 /**
- * @title Shared transition progress
+ * @title 共享进度
  * @description 使用 useTransitionProgress 同时驱动面板和辅助状态层。
  */
-export default function ProgressExample() {
+export default function SharedProgressExample() {
   const [visible, setVisible] = useState(true)
   const { progress, animatedStyle } = useTransitionProgress({
     entering: { duration: 240 },
     leaving: { duration: 240 },
-    preset: { type: 'scale', scale: 0.82 },
+    preset: { type: 'scale', fade: true },
     visible,
   })
   const progressStyle = useAnimatedStyle(() => ({
@@ -22,10 +22,15 @@ export default function ProgressExample() {
   return (
     <View style={styles.page}>
       <Pressable onPress={() => setVisible((current) => !current)} style={styles.toggle}>
-        <Text style={styles.toggleText}>{visible ? 'Hide' : 'Show'} shared transition</Text>
+        <Text style={styles.toggleText}>{visible ? '隐藏' : '显示'} 共享过渡</Text>
       </Pressable>
-      <Animated.View style={[styles.panel, animatedStyle]}>
-        <Text style={styles.panelText}>panel</Text>
+      <Animated.View
+        pointerEvents={visible ? 'auto' : 'none'}
+        accessibilityElementsHidden={!visible}
+        importantForAccessibility={visible ? 'auto' : 'no-hide-descendants'}
+        style={[styles.panel, animatedStyle]}
+      >
+        <Text style={styles.panelText}>共享过渡面板</Text>
       </Animated.View>
       <Animated.View style={[styles.progress, progressStyle]} />
     </View>

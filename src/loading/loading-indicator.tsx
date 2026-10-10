@@ -1,5 +1,7 @@
-import { memo, useEffect, useRef } from 'react'
-import { Animated, Easing, Platform, View } from 'react-native'
+import Animated from 'react-native-reanimated'
+import { useFeedbackMotion } from '../motion/useFeedbackMotion'
+import { memo } from 'react'
+import { View } from 'react-native'
 import type { ColorValue } from 'react-native'
 import { Circle, Svg } from 'react-native-svg'
 import type { LoadingType } from './types'
@@ -77,46 +79,10 @@ function SpinnerIndicator({ size, color }: Pick<LoadingIndicatorProps, 'size' | 
 }
 
 function LoadingIndicatorComponent({ type, size, color, duration, motion }: LoadingIndicatorProps) {
-  const rotation = useRef(new Animated.Value(0)).current
-
-  useEffect(() => {
-    rotation.stopAnimation()
-    rotation.setValue(0)
-
-    if (!motion || duration <= 0) return
-
-    const animation = Animated.loop(
-      Animated.timing(rotation, {
-        duration,
-        easing: Easing.linear,
-        toValue: 1,
-        useNativeDriver: Platform.OS !== 'web',
-      }),
-    )
-    animation.start()
-
-    return () => {
-      animation.stop()
-      rotation.stopAnimation()
-      rotation.setValue(0)
-    }
-  }, [duration, motion, rotation])
+  const animatedStyle = useFeedbackMotion('spin', duration, motion)
 
   return (
-    <Animated.View
-      style={{
-        height: size,
-        transform: [
-          {
-            rotateZ: rotation.interpolate({
-              inputRange: [0, 1],
-              outputRange: ['0deg', '360deg'],
-            }),
-          },
-        ],
-        width: size,
-      }}
-    >
+    <Animated.View style={[{ height: size, width: size }, animatedStyle]}>
       {type === 'circular' ? (
         <CircularIndicator color={color} size={size} />
       ) : (

@@ -10,11 +10,12 @@ export function useTapGesture({
   onPress,
 }: UseTapGestureOptions = {}): UseTapGestureResult {
   const pressed = useSharedValue(false)
+  const tapCount = Number.isFinite(numberOfTaps) ? Math.max(1, Math.floor(numberOfTaps)) : 1
   const gesture = useMemo(
     () =>
       Gesture.Tap()
         .enabled(enabled)
-        .numberOfTaps(Math.max(1, Math.floor(numberOfTaps)))
+        .numberOfTaps(tapCount)
         .onBegin(() => {
           'worklet'
           pressed.value = true
@@ -27,7 +28,7 @@ export function useTapGesture({
           'worklet'
           pressed.value = false
         }),
-    [enabled, numberOfTaps, onPress, pressed],
+    [enabled, tapCount, onPress, pressed],
   )
 
   return { gesture, pressed }

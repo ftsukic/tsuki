@@ -10,7 +10,8 @@ export type { PanGestureHandlerEventPayload } from 'react-native-gesture-handler
 import type { SharedValue } from 'react-native-reanimated'
 import type {
   GestureStateChangeEvent,
-  GestureType,
+  PanGesture,
+  TapGesture,
   GestureUpdateEvent,
   PanGestureHandlerEventPayload,
 } from 'react-native-gesture-handler'
@@ -30,19 +31,31 @@ export type PanGestureEndHandler = (
   values: PanGestureSharedValues,
 ) => void
 
+/** RN-thread result emitted once for an activated gesture, including cancellation. */
+export interface PanGestureFinalizeEvent {
+  canceled: boolean
+  translateX: number
+  translateY: number
+}
+
 export interface UsePanGestureOptions {
   direction: GestureDirection
   enabled?: boolean
   minDistance?: number
   maxDistance?: number
   springBack?: boolean
+  /** UI-thread callback: must be a worklet. */
   onStart?: PanGestureStartHandler
+  /** UI-thread callback: must be a worklet. */
   onChange?: PanGestureChangeHandler
+  /** UI-thread callback, before automatic settling: must be a worklet. */
   onEnd?: PanGestureEndHandler
+  /** RN-thread release/cancellation snapshot; does not wait for settling. */
+  onFinalize?: (event: PanGestureFinalizeEvent) => void
 }
 
 export interface UsePanGestureResult {
-  gesture: GestureType
+  gesture: PanGesture
   translateX: SharedValue<number>
   translateY: SharedValue<number>
   progress: SharedValue<number>
@@ -55,10 +68,12 @@ export interface UseSwipeGestureOptions {
   snapPoint?: number
   velocityThreshold?: number
   enabled?: boolean
+  /** RN-thread notification after the latest target settles; repeated states are deduplicated. */
+  onOpenChange?: (open: boolean) => void
 }
 
 export interface UseSwipeGestureResult {
-  gesture: GestureType
+  gesture: PanGesture
   open: () => void
   close: () => void
   progress: SharedValue<number>
@@ -72,6 +87,6 @@ export interface UseTapGestureOptions {
 }
 
 export interface UseTapGestureResult {
-  gesture: GestureType
+  gesture: TapGesture
   pressed: SharedValue<boolean>
 }

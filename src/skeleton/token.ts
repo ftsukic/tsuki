@@ -1,3 +1,4 @@
+import { MOTION_LOOP_DURATION } from '../motion/token'
 import type { AliasToken, SkeletonToken } from '../theme'
 
 export function getSkeletonToken(token: AliasToken): SkeletonToken {
@@ -13,7 +14,7 @@ export function getSkeletonToken(token: AliasToken): SkeletonToken {
     avatarGap: token.margin,
     borderRadius: token.borderRadius,
     roundBorderRadius: 9999,
-    animationDuration: 1200,
+    animationDuration: MOTION_LOOP_DURATION.pulse,
     animationMinOpacity: 0.6,
   }
 }
