@@ -15,7 +15,7 @@ export default function NotifyControlledExample() {
   return (
     <View style={styles.container}>
       <Button onPress={() => setVisible(true)}>显示受控通知</Button>
-      <Button disabled={!visible} variant="outline" onPress={() => notifyRef.current?.close()}>
+      <Button disabled={!visible} variant="outlined" onPress={() => notifyRef.current?.close()}>
         关闭受控通知
       </Button>
       <Notify

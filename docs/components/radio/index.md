@@ -78,7 +78,7 @@ type RadioLabelPosition = 'left' | 'right';
 
 独立 Radio 只有在从未选中变为选中时触发 `onChange(true)`；再次点击已选中项不会取消选中。需要取消选中时，由上层通过受控 `checked` 改变状态。
 
-`variant="button"` 隐藏 indicator，默认使用内容加水平 padding 的自适应宽度容器，并保证最小宽度为 `buttonMinWidth`。选中状态改变背景、边框和文字颜色，但不显示 check icon；Group 仍保持互斥选择，已选项不能通过再次点击取消。`buttonVariant` 可使用 Button 的 `solid`、`filled`、`outline`、`dashed` 和 `text` 视觉变体。需要等宽按钮时，在 Group 上设置 `buttonLayout="equal"`；FieldRadio 的 button 选项默认使用该布局。
+`variant="button"` 隐藏 indicator，默认使用内容加水平 padding 的自适应宽度容器，并保证最小宽度为 `buttonMinWidth`。选中状态改变背景、边框和文字颜色，但不显示 check icon；Group 仍保持互斥选择，已选项不能通过再次点击取消。`buttonVariant` 可使用 Button 的 `solid`、`filled`、`outlined`、`dashed` 和 `text` 视觉变体。需要等宽按钮时，在 Group 上设置 `buttonLayout="equal"`；FieldRadio 的 button 选项默认使用该布局。
 
 `shape="round"` 是默认形状，选中后显示白色 check；`shape="square"` 使用方形 checked indicator 并显示白色 check；`shape="dot"` 保持透明圆形外圈，仅在内部显示 `dotSize` 大小的 checkedColor 圆点。
 

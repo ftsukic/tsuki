@@ -20,7 +20,7 @@ export default function PopoverThemeTokenFixture() {
     >
       <View style={styles.container}>
         <Popover actions={[{ text: '主题化操作' }]}>
-          <Button variant="outline">主题 token</Button>
+          <Button variant="outlined">主题 token</Button>
         </Popover>
         <Text style={styles.caption}>宽度、行高和圆角来自 Popover component token。</Text>
       </View>

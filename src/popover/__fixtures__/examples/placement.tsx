@@ -13,7 +13,7 @@ export default function PopoverPlacementFixture() {
     <View style={styles.container}>
       {placements.map((placement) => (
         <Popover key={placement} placement={placement} actions={[{ text: placement }]}>
-          <Button size="small" variant="outline">
+          <Button size="small" variant="outlined">
             {placement}
           </Button>
         </Popover>

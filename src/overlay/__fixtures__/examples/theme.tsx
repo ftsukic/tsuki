@@ -34,7 +34,7 @@ export default function OverlayThemeExample() {
         >
           <View style={styles.card}>
             <Text style={styles.text}>主题 token 与 semantic styles 可以同时使用。</Text>
-            <Button color="#102a43" onPress={() => setShow(false)}>
+            <Button variant="solid" color="#102a43" onPress={() => setShow(false)}>
               关闭
             </Button>
           </View>

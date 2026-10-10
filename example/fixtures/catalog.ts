@@ -97,7 +97,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview4,
     component: 'button',
-    description: 'Button 的类型、状态和形状预览。',
+    description: '按钮的变体、尺寸、图标与加载、形状、按钮组和按下反馈。',
     id: 'button',
     title: 'Button',
   },

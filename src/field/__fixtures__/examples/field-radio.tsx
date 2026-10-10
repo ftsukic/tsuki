@@ -30,7 +30,7 @@ export default function FieldRadioFixture() {
         onChange={setValue}
         required
         variant="button"
-        buttonVariant="outline"
+        buttonVariant="outlined"
         options={[
           { value: 'small', label: '小' },
           { value: 'medium', label: '中' },
@@ -53,7 +53,7 @@ export default function FieldRadioFixture() {
         required
         vertical
         variant="button"
-        buttonVariant="outline"
+        buttonVariant="outlined"
         buttonLayout="equal"
         options={[
           { value: 'small', label: '小' },

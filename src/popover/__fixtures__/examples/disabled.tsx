@@ -18,7 +18,7 @@ export default function PopoverDisabledFixture() {
         <Button>含禁用项</Button>
       </Popover>
       <Popover actions={[{ text: '不会打开' }]} disabled>
-        <Button variant="outline">禁用触发器</Button>
+        <Button variant="outlined">禁用触发器</Button>
       </Popover>
       <Text style={styles.caption}>禁用 action 不响应点击；禁用触发器仍保留自身展示。</Text>
     </View>

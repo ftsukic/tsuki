@@ -93,7 +93,7 @@ Checkbox.Group 不自动管理“全选 Checkbox”的 `checked` 或 `indetermin
 
 在 FlashList 等虚拟化列表中，不建议依赖 `Checkbox.Group` 枚举 children 来表达完整 selection domain。推荐将 selection 保存在列表外部，给每个 Checkbox 传受控 `checked`，并通过 `FlashList.extraData` 通知列表 selection 发生变化。全选和半选状态应基于完整业务数据计算，而不是当前已经渲染的 item。本页的 `FlashList 全选` demo 采用 disabled item 不参与全选、并保持原选中状态的业务策略；这不是 Checkbox 的强制 contract。
 
-`variant="button"` 配合 `buttonVariant` 可以使用 Button 的 `solid`、`filled`、`outline`、`dashed` 和 `text` 视觉变体。button 选项默认高度为 `buttonHeight`，并保证最小宽度为 `buttonMinWidth`。配合 `buttonLayout="equal"` 时，Group 使用 Grid 作为纯布局容器。横向 `buttonColumns={5}` 时，8 个按钮会按 5+3 换行，并保持两行按钮宽度一致；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；默认 `buttonLayout="intrinsic"` 仍是内容自适应宽度。
+`variant="button"` 配合 `buttonVariant` 可以使用 Button 的 `solid`、`filled`、`outlined`、`dashed` 和 `text` 视觉变体。button 选项默认高度为 `buttonHeight`，并保证最小宽度为 `buttonMinWidth`。配合 `buttonLayout="equal"` 时，Group 使用 Grid 作为纯布局容器。横向 `buttonColumns={5}` 时，8 个按钮会按 5+3 换行，并保持两行按钮宽度一致；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；默认 `buttonLayout="intrinsic"` 仍是内容自适应宽度。
 
 #### 实例方法
 

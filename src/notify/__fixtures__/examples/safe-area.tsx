@@ -14,7 +14,7 @@ export default function NotifySafeAreaExample() {
   return (
     <View style={styles.container}>
       <Button onPress={() => setVisible(true)}>显示{withSafeArea ? '安全区' : '普通'}通知</Button>
-      <Button variant="outline" onPress={() => setWithSafeArea((current) => !current)}>
+      <Button variant="outlined" onPress={() => setWithSafeArea((current) => !current)}>
         {withSafeArea ? '关闭' : '开启'}顶部安全区适配
       </Button>
       <Notify
@@ -24,7 +24,7 @@ export default function NotifySafeAreaExample() {
         safeAreaInsetTop={withSafeArea}
         onClosed={() => setVisible(false)}
       />
-      <Button variant="outline" disabled={!visible} onPress={() => setVisible(false)}>
+      <Button variant="outlined" disabled={!visible} onPress={() => setVisible(false)}>
         请求关闭
       </Button>
     </View>

@@ -29,13 +29,19 @@ import { Button, Icon } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-<code src="../../../src/button/__fixtures__/examples/variants.tsx" title="类型、尺寸和状态" description="展示 Button 的类型、尺寸、禁用、加载和语义样式。"></code>
+<code src="../../../src/button/__fixtures__/examples/variants.tsx" title="类型与变体" description="展示 Button 的类型、五种视觉变体、自定义颜色和语义样式。"></code>
+
+<code src="../../../src/button/__fixtures__/examples/sizes.tsx" title="尺寸与布局" description="比较四种尺寸、块级按钮和文字按钮。"></code>
+
+<code src="../../../src/button/__fixtures__/examples/loading.tsx" title="图标与加载" description="切换加载状态，观察图标替换、左右位置、内容保留和动态文案。"></code>
 
 <code src="../../../src/button/__fixtures__/examples/shapes.tsx" title="形状" description="并排比较默认、方角、胶囊和不同尺寸的圆形图标按钮。"></code>
 
 <code src="../../../src/button/__fixtures__/examples/group.tsx" title="Button.Group" description="展示连接按钮组、统一尺寸、视觉变体、显式尺寸覆盖和单按钮组。"></code>
 
 <code src="../../../src/button/__fixtures__/examples/press-feedback.tsx" title="按下反馈" description="比较 text Button 默认透明度反馈和显式 overlay 配置。"></code>
+
+升级已有用法请参阅 [Button API 迁移](../../guide/button-migration.md)。
 
 ## API
 
@@ -44,31 +50,32 @@ import { Button, Icon } from '@ftsukic/tsuki'
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | children | `ReactNode` | — | 按钮内容；`circle` 不禁止传入内容，但固定尺寸主要用于图标操作 |
-| type | `'default' \| 'primary' \| 'success' \| 'warning' \| 'danger'` | `'default'` | 按钮语义和配色 |
+| type | `'default' \| 'primary' \| 'dashed' \| 'text'` | `'default'` | 常用外观快捷入口 |
+| danger | `boolean` | `false` | 危险配色，与 success、warning 互斥 |
+| success | `boolean` | `false` | 成功配色，与 danger、warning 互斥 |
+| warning | `boolean` | `false` | 警告配色，与 danger、success 互斥 |
 | size | `'large' \| 'normal' \| 'small' \| 'mini'` | `'normal'` | 按钮尺寸；`circle` 直接使用对应的高度 token |
-| color | `ColorValue` | — | 自定义前景色和实心背景/边框色 |
-| variant | `'solid' \| 'filled' \| 'outline' \| 'dashed' \| 'text'` | `'solid'` | 视觉变体 |
+| color | `ButtonSemanticColor \| ColorValue` | 根据 type 推导 | 语义配色或自定义颜色，优先于快捷配色属性 |
+| variant | `'solid' \| 'filled' \| 'outlined' \| 'dashed' \| 'text'` | 根据 type 推导 | 视觉变体；显式属性优先于 Group，Group 优先于 type 映射 |
 | pressFeedback | `'opacity' \| 'overlay'` | 按变体决定 | 显式选择按下反馈；不传时 `text` 使用透明度，其余变体使用覆盖层 |
 | pressedOverlayColor | `ColorValue` | Button token | `pressFeedback="overlay"` 时覆盖层的颜色 |
 | shape | `'default' \| 'round' \| 'square' \| 'circle'` | `'default'` | 按钮形状；显式 `shape` 优先于旧的形状 boolean |
-| plain | `boolean` | `false` | 兼容写法，等价于 `variant="outline"`；显式 `variant` 优先 |
-| block | `boolean` | `false` | 非 `circle` 且非 `text` 按钮占满父级可用宽度；`text` 变体仍按可见内容尺寸布局 |
+| block | `boolean` | `false` | 非 `circle` 按钮占满父级可用宽度，包括 `text` 变体 |
 | square | `boolean` | `false` | 方角按钮，只将圆角移除为 `0`；保留正常高度、水平内边距和内容决定的宽度，不是固定正方形 |
 | round | `boolean` | `false` | 胶囊按钮；保留内容决定的宽度并使用足够大的圆角 |
 | circle | `boolean` | `false` | 固定宽高的圆形按钮：`width === height === 当前 size 的高度`，水平内边距为 `0`，主要用于 icon-only action |
 | hairline | `boolean` | `false` | 使用 React Native 的 hairline border |
 | disabled | `boolean` | `false` | 禁用按钮并应用禁用透明度 |
-| loading | `boolean` | `false` | 显示 `Loading` 并禁用 press；`circle` loading 仍保持固定圆形尺寸 |
-| loadingText | `ReactNode` | — | loading 时替代 `children` 显示的内容 |
+| loading | `boolean` | `false` | 用 `Loading` 替换普通 icon，保留 `children` 并禁用 press；`circle` loading 仍保持固定圆形尺寸 |
 | loadingType | `'circular' \| 'spinner'` | `'circular'` | loading 指示器类型 |
 | loadingSize | `number` | 当前 Button 字号 | loading 指示器尺寸；未传入时根据当前 Button size/font token 推导 |
 | icon | `ReactNode` | — | 图标节点；`circle` 不为图标增加左右间距 |
-| iconPosition | `'left' \| 'right'` | `'left'` | 非圆形按钮中图标相对文本的位置 |
+| iconPosition | `'left' \| 'right'` | `'left'` | 图标（包括 Loading）相对文本的位置 |
 | style | `StyleProp<ViewStyle>` | — | Button root 节点样式，优先级高于默认样式和 `styles.root` |
-| styles | `ButtonStyles` | — | `root`、`icon`、`label`、`contentContainer` 的语义样式；`content` 是 `label` 的兼容别名 |
+| styles | `ButtonStyles` | — | `root`、`icon`、`content` 语义样式；支持对象或函数。 |
 | onPressDebounceWait | `number` | — | 两次 `onPress` 之间的最小间隔，单位为毫秒 |
 
-`variant="text"` 默认不使用普通 Button 的最小高度、水平内边距或 `contentContainer` 最小高度，点击区域与可见 content 一致；按下时通过通用 `Pressable` 提供 `pressedOpacity` 文字透明度反馈，需要扩大点击区域时可显式传入 `style` 或 `hitSlop`。其他变体按下时显示由 `pressedOverlayColor` 控制的覆盖层，默认值为 `rgba(0, 0, 0, 0.1)`；需要让文本按钮也使用覆盖层时，显式设置 `pressFeedback="overlay"`。
+`variant="text"` 默认不使用普通 Button 的最小高度或水平内边距，默认点击区域与可见 content 一致，设置 `block` 可占满父级宽度；按下时通过通用 `Pressable` 提供 `pressedOpacity` 文字透明度反馈，需要扩大点击区域时可显式传入 `style` 或 `hitSlop`。其他变体按下时显示由 `pressedOverlayColor` 控制的覆盖层，默认值为 `rgba(0, 0, 0, 0.1)`；需要让文本按钮也使用覆盖层时，显式设置 `pressFeedback="overlay"`。
 
 Button 继承 React Native `PressableProps`，但由组件管理 `children`、`style` 和 `disabled`。默认 `accessibilityRole` 为 `button`；icon-only `circle` 应设置 `accessibilityLabel`：
 
@@ -79,6 +86,21 @@ Button 继承 React Native `PressableProps`，但由组件管理 `children`、`s
   accessibilityLabel="新增"
   onPress={createItem}
 />
+```
+
+加载状态的文字仍由 `children` 控制，需要切换文案时使用 `{loading ? '提交中' : '提交'}`；不提供 `loadingText`。
+
+### 类型与配色
+
+`type` 是外观快捷入口：`default` 对应 default + outlined，`primary` 对应 primary + solid，`dashed` 对应 default + dashed，`text` 对应 default + text。
+
+`color` 支持 `default`、`primary`、`success`、`warning`、`danger` 和自定义 `ColorValue`。配色优先级为显式 color、快捷属性、type 映射；快捷属性只改配色，不改外观。danger、success、warning 互斥，动态调用冲突时开发环境提示，并按 danger > warning > success 解析。
+
+```tsx | pure
+<Button danger>删除</Button>
+<Button type="primary" success>完成</Button>
+<Button warning variant="filled">提醒</Button>
+<Button color="success" variant="solid">完成</Button>
 ```
 
 ### 形状规则
@@ -110,7 +132,7 @@ import { Button, ConfigProvider } from '@ftsukic/tsuki'
 ```tsx | pure
 import { Button, ButtonGroup } from '@ftsukic/tsuki'
 
-;<Button.Group size="small" variant="outline">
+;<Button.Group size="small" variant="outlined">
   <Button>左侧</Button>
   <Button size="large">显式尺寸优先</Button>
   <Button>右侧</Button>

@@ -14,24 +14,27 @@ export default function NotifyTypesExample() {
         primary
       </Button>
       <Button
-        type="success"
+        type="primary"
+        success
         onPress={() => showNotify({ duration: 1800, message: '保存成功', type: 'success' })}
       >
         success
       </Button>
       <Button
-        type="warning"
+        type="primary"
+        warning
         onPress={() => showNotify({ duration: 1800, message: '请检查输入内容', type: 'warning' })}
       >
         warning
       </Button>
       <Button
-        type="danger"
+        type="primary"
+        danger
         onPress={() => showNotify({ duration: 1800, message: '操作失败', type: 'error' })}
       >
         error
       </Button>
-      <Button variant="outline" onPress={closeNotify}>
+      <Button variant="outlined" onPress={closeNotify}>
         关闭当前通知
       </Button>
     </View>

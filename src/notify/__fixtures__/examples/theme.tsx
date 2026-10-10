@@ -36,7 +36,7 @@ export default function NotifyThemeExample() {
           textStyle={styles.notifyText}
           onClosed={() => setVisible(false)}
         />
-        <Button variant="outline" disabled={!visible} onPress={() => setVisible(false)}>
+        <Button variant="outlined" disabled={!visible} onPress={() => setVisible(false)}>
           请求关闭
         </Button>
       </View>

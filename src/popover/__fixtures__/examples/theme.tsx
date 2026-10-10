@@ -11,10 +11,10 @@ export default function PopoverThemeFixture() {
   return (
     <View style={styles.container}>
       <Popover actions={actions} theme="light">
-        <Button variant="outline">浅色</Button>
+        <Button variant="outlined">浅色</Button>
       </Popover>
       <Popover actions={actions} theme="dark">
-        <Button variant="outline">深色</Button>
+        <Button variant="outlined">深色</Button>
       </Popover>
     </View>
   )

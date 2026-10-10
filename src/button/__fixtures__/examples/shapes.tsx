@@ -4,8 +4,8 @@ import { Button, Icon } from '@ftsukic/tsuki'
 import { StyleSheet, Text, View } from 'react-native'
 
 /**
- * @title Button shapes
- * @description Compare the default, square, round and icon-only circle shapes across sizes.
+ * @title 按钮形状
+ * @description 比较不同尺寸下的默认、方角、胶囊和纯图标圆形按钮。
  */
 export default function ButtonShapesFixture() {
   return (
@@ -13,39 +13,39 @@ export default function ButtonShapesFixture() {
       <Text style={styles.heading}>按钮形状</Text>
       <View style={styles.row}>
         <View style={styles.item}>
-          <Button type="primary">Default</Button>
-          <Text style={styles.caption}>Default</Text>
+          <Button type="primary">默认</Button>
+          <Text style={styles.caption}>默认</Text>
         </View>
         <View style={styles.item}>
-          <Button type="primary" square>
-            Square
+          <Button type="primary" shape="square">
+            方角
           </Button>
-          <Text style={styles.caption}>Square</Text>
+          <Text style={styles.caption}>方角</Text>
         </View>
         <View style={styles.item}>
-          <Button type="primary" round>
-            Round
+          <Button type="primary" shape="round">
+            胶囊
           </Button>
-          <Text style={styles.caption}>Round</Text>
+          <Text style={styles.caption}>胶囊</Text>
         </View>
         <View style={styles.item}>
           <Button
             type="primary"
-            circle
+            shape="circle"
             icon={<Icon name="PlusOutlined" size={18} color="#ffffff" />}
             accessibilityLabel="新增"
           />
-          <Text style={styles.caption}>Circle icon</Text>
+          <Text style={styles.caption}>圆形图标</Text>
         </View>
       </View>
 
-      <Text style={styles.heading}>Circle sizes</Text>
+      <Text style={styles.heading}>圆形按钮尺寸</Text>
       <View style={styles.row}>
         <View style={styles.item}>
           <Button
             type="primary"
             size="mini"
-            circle
+            shape="circle"
             icon={<Icon name="PlusOutlined" size={10} color="#ffffff" />}
             accessibilityLabel="新增（mini）"
           />
@@ -55,7 +55,7 @@ export default function ButtonShapesFixture() {
           <Button
             type="primary"
             size="small"
-            circle
+            shape="circle"
             icon={<Icon name="PlusOutlined" size={12} color="#ffffff" />}
             accessibilityLabel="新增（small）"
           />
@@ -65,7 +65,7 @@ export default function ButtonShapesFixture() {
           <Button
             type="primary"
             size="normal"
-            circle
+            shape="circle"
             icon={<Icon name="PlusOutlined" size={16} color="#ffffff" />}
             accessibilityLabel="新增（normal）"
           />
@@ -75,7 +75,7 @@ export default function ButtonShapesFixture() {
           <Button
             type="primary"
             size="large"
-            circle
+            shape="circle"
             icon={<Icon name="PlusOutlined" size={20} color="#ffffff" />}
             accessibilityLabel="新增（large）"
           />

@@ -12,7 +12,7 @@ export default function ActionSheetCustomColorFixture() {
 
   return (
     <View style={styles.container}>
-      <Button type="danger" onPress={() => setVisible(true)}>
+      <Button type="primary" danger onPress={() => setVisible(true)}>
         管理文件
       </Button>
       {message ? <Text style={styles.message}>{message}</Text> : null}

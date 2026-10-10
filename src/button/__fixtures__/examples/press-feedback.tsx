@@ -4,8 +4,8 @@ import { Button } from '@ftsukic/tsuki'
 import { StyleSheet, Text, View } from 'react-native'
 
 /**
- * @title Press feedback
- * @description Text buttons keep opacity feedback by default and can opt into an explicit overlay.
+ * @title 按下反馈
+ * @description 文字按钮默认使用透明度反馈，也可显式选择遮罩反馈。
  */
 export default function ButtonPressFeedbackFixture() {
   return (
@@ -13,7 +13,12 @@ export default function ButtonPressFeedbackFixture() {
       <Text style={styles.heading}>按下反馈</Text>
       <View style={styles.row}>
         <Button variant="text">默认透明度</Button>
-        <Button variant="text" pressFeedback="overlay" pressedOverlayColor="#1989FA" hitSlop={8}>
+        <Button
+          variant="text"
+          pressFeedback="overlay"
+          pressedOverlayColor="rgba(25, 137, 250, 0.12)"
+          hitSlop={8}
+        >
           显式覆盖层
         </Button>
       </View>

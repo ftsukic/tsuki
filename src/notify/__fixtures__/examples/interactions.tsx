@@ -24,13 +24,13 @@ export default function NotifyInteractionsExample() {
       </Button>
       <Button
         disabled={!active}
-        variant="outline"
+        variant="outlined"
         onPress={() => notifyRef.current?.setMessage('数据同步完成')}
       >
         更新通知内容
       </Button>
       <Button
-        variant="outline"
+        variant="outlined"
         onPress={() => {
           closeNotify()
           notifyRef.current = null
