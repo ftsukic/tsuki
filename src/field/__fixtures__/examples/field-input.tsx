@@ -31,6 +31,7 @@ export default function FieldInputFixture() {
           clearable
           onChange={setName}
         />
+        <FieldInput valueAlign="left" placeholder="标题" clearable onChange={setName} />
       </Cell.Group>
     </View>
   )
