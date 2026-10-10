@@ -132,3 +132,7 @@ interface SegmentedOption {
 ```
 
 组件不提供多选、路由绑定、Web 专属 HTML 属性或独立动画库；业务内容由调用方根据 `value` 自行渲染。
+
+## 动画
+
+选中背景通过统一 layout preset 更新位置与宽度，保留首次测量立即定位和受控状态语义。遵循 `Provider motion` 的开关、Reduced Motion 与 timing 时长倍率。

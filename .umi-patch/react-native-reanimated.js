@@ -1,10 +1,19 @@
 import React, { useMemo, useRef } from 'react'
-import { View, Text, Image, ScrollView, FlatList } from 'react-native-web'
+import { View, Text, Image, ScrollView, FlatList, Easing } from 'react-native-web'
+import { FastColor } from '@ant-design/fast-color'
+
+export const ReduceMotion = { System: 'system', Always: 'always', Never: 'never' }
+
+export function interpolateColor(value, range, colors) {
+  const progress = Math.min(1, Math.max(0, (value - range[0]) / (range[1] - range[0])))
+  return new FastColor(colors[0]).mix(colors[1], progress * 100).toRgbString()
+}
 
 function useSharedValue(initialValue) {
   const valueRef = useRef(initialValue)
   return useMemo(() => {
     const sharedValue = {
+      __tsukiStaticAdapter: true,
       get: () => valueRef.current,
       set: (next) => {
         valueRef.current = typeof next === 'function' ? next(valueRef.current) : next
@@ -59,17 +68,7 @@ export function createAnimatedComponent(Component) {
   return Component
 }
 
-const linear = (value) => value
-
-export const Easing = {
-  ease: linear,
-  in: (easing) => easing,
-  inOut: () => (value) => value * value * (3 - 2 * value),
-  linear,
-  out: (easing) => easing,
-}
-
-export { useSharedValue }
+export { Easing, useSharedValue }
 function complete(callback) {
   if (callback) Promise.resolve().then(() => callback(true))
 }

@@ -114,3 +114,7 @@ import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 ```
 
 Collapse 的 Header 参照 Cell 的行高、内边距、字体和图标间距，但不继承 Cell，也不提供 Cell 的 `value`、`label`、`isLink` 等 API；Header 仅复用现有 Pressable、Icon、Text 和主题 token 体系。
+
+## 动画
+
+高度、内容透明度与箭头共用 Motion 的 layout preset。展开途中内容变高会重新指向最新测量值，快速反转从当前高度继续；关闭内容保留挂载并禁用点击及无障碍导航。遵循 `Provider motion`。

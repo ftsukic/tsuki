@@ -100,3 +100,7 @@ Popup 不会自动修改 `visible`。`closeOnPressOverlay` 和 Android 返回键
 | zIndex            | `zIndexPopupBase`    | Popup 宿主默认层级                                 |
 
 `theme.token.motion=false` 时动画时长强制为 `0`，但生命周期回调仍按打开/关闭顺序触发。`styles` 支持对象或函数；函数接收 `{ props, state: { visible, position, rendered } }`。
+
+## 动画
+
+面板和遮罩复用 Motion 浮层 preset 与共享进度。遵循 `Provider motion` 的全局开关、Reduced Motion 和时长倍率；快速切换从当前进度继续，退出完成后才执行 `destroyOnClosed`。

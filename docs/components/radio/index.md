@@ -148,4 +148,8 @@ type RadioLabelPosition = 'left' | 'right';
 
 可覆盖的主要 token 包括 `indicatorSize`、`dotSize`、`borderWidth`、`borderRadius`、`borderColor`、`checkedColor`、`labelColor`、`disabledBorderColor`、`disabledBackgroundColor`、`disabledCheckedBackgroundColor`、`disabledMarkColor`、`disabledLabelColor`、`fontSize`、`lineHeight`、`gap`、`pressedOpacity`、`disabledOpacity`，以及 button variant 的 `buttonHeight`、`buttonMinWidth`、`buttonPaddingHorizontal`、`buttonBorderRadius`、`buttonBackground`、`buttonFilledBackground`、`buttonDisabledBackground`、`buttonCheckedFilledBackground` 和 `buttonCheckedLabelColor`。
 
-Radio 暴露 `radio` 无障碍角色和 `selected`、`disabled` 状态；Group 暴露 `radiogroup` 角色。当前不提供多选、取消选中、动画或 options 与 children 混用能力。
+Radio 暴露 `radio` 无障碍角色和 `selected`、`disabled` 状态；Group 暴露 `radiogroup` 角色。当前不提供多选、取消选中或 options 与 children 混用能力。
+
+## 动画
+
+选中圆点通过 MotionView 执行透明度与 0.6 → 1 的 normal spring 入场，取消选中即时移除。外圈保持既有状态颜色，遵循 `Provider motion` 的关闭与 Reduced Motion。

@@ -58,7 +58,7 @@ import { Switch } from '@ftsukic/tsuki'
 
 `Switch` 继承 React Native `PressableProps`，但由组件管理 `children`、`style`、`disabled` 和 `onPress`。根节点使用 `accessibilityRole="switch"`，并同步 `checked`、`disabled` 和 `busy` 无障碍状态。`loading` 与 `disabled` 都会阻止点击。
 
-数字 `size` 按 `width = size * 2`、`height = size` 计算，thumb 的宽高为 `size - 4`；预设尺寸使用明确的 Vant 风格移动端几何值。默认动画时长为 200ms，并遵循主题的 `motion` 设置。
+数字 `size` 按 `width = size * 2`、`height = size` 计算，thumb 的宽高为 `size - 4`；预设尺寸使用明确的 Vant 风格移动端几何值。轨道默认动画时长为 200ms，thumb 使用统一 spring，并遵循主题的 `motion` 设置。
 
 ### 受控和非受控
 
@@ -102,7 +102,7 @@ const [enabled, setEnabled] = useState(false)
 | `loadingColor` | `colorIcon` | loading 指示器颜色 |
 | `disabledOpacity` | Button disabled opacity | 禁用透明度 |
 | `pressedOpacity` | `pressedOpacity` | pressed 反馈透明度；移动端不由 hovered 触发 |
-| `animationDuration` | `motionDurationMid` | thumb 动画时长 |
+| `animationDuration` | `motionDurationMid` | 轨道颜色动画时长 |
 
 ```tsx | pure
 import { ConfigProvider, Switch } from '@ftsukic/tsuki'
@@ -122,3 +122,7 @@ import { ConfigProvider, Switch } from '@ftsukic/tsuki'
 ```
 
 组件不使用 React Native `Switch`，不提供 Web DOM 属性、`checked/defaultChecked` 别名或自定义 thumb children API。
+
+## 动画
+
+轨道颜色使用 timing 插值，thumb 使用统一 normal spring 平移。`animationDuration` 控制轨道时长，物理 spring 由预设决定；遵循 `Provider motion`，关闭或 Reduced Motion 时即时切换。

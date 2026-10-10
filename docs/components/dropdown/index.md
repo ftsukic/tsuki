@@ -136,3 +136,7 @@ ref 方法复用同一套 `DropdownMenu` 状态，不会创建第二套 visible 
 公开 token 包含 `menuHeight`、`menuBackgroundColor`、`titleColor`、`activeColor`、`disabledColor`、`optionTextColor`、`optionDisabledColor`、`optionPressedBackgroundColor`、`titleFontSize`、`titleLineHeight`、`titleFontFamily`、`arrowSize`、`arrowGap`、`optionHeight`、`optionPaddingHorizontal`、`optionFontSize`、`optionLineHeight`、`optionIconSize`、`contentBackgroundColor`、`dividerColor`、`dividerWidth`、`shadowColor`、`shadowOpacity`、`shadowRadius`、`shadowOffset`、`elevation`、`overlayColor`、`animationDuration` 和 `zIndex`。`activeColor` 仍表示打开/选中状态，不是 pressed 反馈。
 
 组件不提供 Web DOM、`openIndex`、`defaultOpenIndex` 或第三方 popover/dropdown API；需要外部打开状态时使用 `DropdownMenuRef` 或由上层响应 `onChange`。
+
+## 动画
+
+面板、遮罩和箭头使用统一 Motion 配置与浮层 preset，保留原有向上/向下展开和 item 切换语义。关闭期间保留面板；快速切换取消旧完成回调，遵循 `Provider motion`。

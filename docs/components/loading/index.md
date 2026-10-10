@@ -92,3 +92,7 @@ import { ConfigProvider, Loading } from '@ftsukic/tsuki'
 ```
 
 Loading 继承 React Native `ViewProps`，但由组件管理 `children`、`style` 和 `accessibilityRole`。不提供 Web 专属 DOM 属性，也不提供 `active`、进度百分比或全屏遮罩 API。
+
+## 动画
+
+两种指示器复用内部 spin preset，保留默认 1000ms 一周和 `duration` 覆盖。遵循全局关闭、Reduced Motion 与时长倍率；关闭后显示静态指示器，卸载时取消循环。

@@ -152,3 +152,7 @@ if (result) {
 | fontFamily | `fontFamily` | 文字字体 |
 
 `theme.token.motion=false` 时 Popup 动画时长强制为 `0`，但打开/关闭生命周期仍然触发。ActionSheet 使用 Popup 的 bottom translateY 动画，并由同一个 transition progress 驱动 Overlay opacity；底部 safe-area 纳入取消 pressable，使取消内容与安全区共享 pressed 背景色；组件不单独提供 transition API。
+
+## 动画
+
+ActionSheet 复用 Popup 的底部平移和遮罩渐变，整个面板一起运动。遵循 `Provider motion` 的开关、Reduced Motion 和时长倍率；Portal 在退出完成后卸载。

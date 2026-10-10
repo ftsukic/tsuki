@@ -55,3 +55,7 @@ Skeleton 继承 React Native `ViewProps`，但由组件管理 `children` 和 `st
 通过 `ConfigProvider theme.components.Skeleton` 覆盖 `backgroundColor`、尺寸、间距、圆角和动画 token。背景色默认派生自当前主题的 `colorFillSecondary`，因此会随明暗主题变化。`theme.token.motion=false` 会完全禁用动画。
 
 Skeleton 不支持 shimmer、SVG、LinearGradient、DOM API，也不提供 `rowStyles(index)` 等额外公开 API。
+
+## 动画
+
+占位内容共享内部 pulse preset，保留 `animate` 开关和默认 1200ms 的透明度呼吸周期。遵循全局关闭、Reduced Motion 与时长倍率；停止时恢复完整透明度。当前不提供 shimmer。

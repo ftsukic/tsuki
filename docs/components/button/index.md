@@ -130,3 +130,7 @@ import { Button, ButtonGroup } from '@ftsukic/tsuki'
 | 其他 ViewProps | React Native `ViewProps` | — | Group 继承 View 的其他属性，例如 `testID`、`accessibilityLabel` 和 `onLayout` |
 
 Group 不添加 `gap`。有边框的相邻 Button 使用实际 `borderWidth` 消除双边框；`filled`、`text` 等无边框变体不会产生负 `marginLeft`。设置 `block` 后 Group 撑满父级宽度，直接 Button 子项等分可用空间。Group 的 `variant` 只作为未显式设置子项的默认值，不会覆盖子 Button 自己的 `variant`。单个 Button 保持自身显式 `shape` 或 `round`、`square`、`circle` 的形状行为。
+
+## 动画
+
+Button 通过现有 Pressable 接入统一 Motion 策略，保持原有背景/遮罩按压反馈。全局关闭或 Reduced Motion 时反馈立即到达按下状态；需要缩放或透明度反馈时可使用 `MotionPressable`。

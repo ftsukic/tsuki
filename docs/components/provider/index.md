@@ -25,11 +25,12 @@ Provider 组合 `SafeAreaProvider`、`GestureHandlerRootView`、`ConfigProvider`
 
 ## API
 
-| 属性       | 说明                            | 类型          | 默认值   |
-| ---------- | ------------------------------- | ------------- | -------- |
-| `theme`    | 全局主题配置                    | `ThemeConfig` | 默认主题 |
-| `gesture`  | 是否提供 Gesture Handler 根节点 | `boolean`     | `true`   |
-| `safeArea` | 是否提供 Safe Area 根节点       | `boolean`     | `false`  |
-| `children` | 应用内容                        | `ReactNode`   | —        |
+| 属性       | 说明                                | 类型           | 默认值       |
+| ---------- | ----------------------------------- | -------------- | ------------ |
+| `theme`    | 全局主题配置                        | `ThemeConfig`  | 默认主题     |
+| `motion`   | 动画开关、Reduced Motion 与时长倍率 | `MotionConfig` | 默认动画策略 |
+| `gesture`  | 是否提供 Gesture Handler 根节点     | `boolean`      | `true`       |
+| `safeArea` | 是否提供 Safe Area 根节点           | `boolean`      | `false`      |
+| `children` | 应用内容                            | `ReactNode`    | —            |
 
 Provider 是推荐的应用级入口，会按可选 `SafeAreaProvider` → 默认 `GestureHandlerRootView` → `ConfigProvider` → `SwipeCellManager` → `InteractionCoordinator` → `PortalHost` 的顺序组合上下文。`gesture={false}` 可在宿主已经提供根节点时关闭内部 root。`KeyboardProvider` 和导航等其它业务运行时能力仍应由宿主应用组合。浮层组件必须挂在该 Provider 或显式 `PortalHost` 下，Provider 没有独立 `style` 或 `styles` API。

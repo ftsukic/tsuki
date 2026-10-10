@@ -30,6 +30,7 @@
 | Component 目录、文件名、support module、Hook | `.agents/rules/component-structure.md` |
 | Props、types、callback、ref、compatibility、accessibility | `.agents/rules/api-design.md` |
 | Theme token、provider、style、semantic slot | `.agents/rules/theme-style.md` |
+| Motion、动画策略、过渡生命周期、手势吸附 | `.agents/rules/motion-animation.md` |
 | Fixture、Dumi 文档、Expo Example 复用 | `.agents/rules/docs-fixtures.md` |
 | 测试范围和行为覆盖 | `.agents/rules/testing.md` |
 | Changeset、versioning、publishing | `.agents/rules/release.md` |

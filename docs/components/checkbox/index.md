@@ -128,3 +128,7 @@ import { Checkbox, ConfigProvider } from '@ftsukic/tsuki'
 ```
 
 当前不提供 Web 专属的 `className`、HTML 属性、CSS 图标 slot 或 Radio 的 dot 指示器；自定义 React 节点应通过 `children` 完成。
+
+## 动画
+
+选中图标通过 MotionView 执行透明度与 0.6 → 1 的轻量 spring 入场；取消选中仍即时移除图标。容器颜色保持既有状态样式，遵循全局关闭与 Reduced Motion。

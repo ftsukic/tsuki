@@ -116,3 +116,7 @@ Popover 的定位、箭头、屏幕边界、设备旋转和键盘适配基于 `r
 `react-native-popover-view` 对 Web 没有官方保证，但本组件的 docs demo 通过 `react-native-web` 构建和运行路径验证；Web 使用时仍应在目标浏览器确认 reference 定位和 outside press。使用 Popover 的宿主需要提供 `react-native-safe-area-context` 的 `SafeAreaProvider`，组件会把 safe-area insets 与自身最小边缘 margin 一起传给定位层。
 
 Popover 不提供 `showPopover()` imperative API，也不是 Tooltip、Dropdown 或 Popup 的替代实现。
+
+## 动画
+
+Popover 遵循 `Provider motion` 的开关、Reduced Motion 和 timing 时长倍率。定位和动画仍由 `react-native-popover-view` 的 RN Animated 引擎管理，尚未迁移到 Reanimated Primitive。

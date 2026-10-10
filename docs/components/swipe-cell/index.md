@@ -11,6 +11,8 @@ group:
 
 # SwipeCell 滑动单元格
 
+动画由统一 Gesture Motion Spring 驱动。`overshoot` 默认 `false`；开启后超过 action 实测宽度的位移按 0.25 阻尼处理。松手仍按原有半宽 / 方向速度阈值吸附，`onOpen` / `onClose` 在当前有效动画完成后触发。关闭 Motion 或开启 Reduced Motion 时即时吸附，拖动本身继续跟随手指。
+
 <section className="component-doc-intro">
 
 ## 介绍

@@ -149,3 +149,7 @@ Tab 标题和 line indicator 的切换动画默认始终开启，scrollable/shri
 ```
 
 Tabs 使用主题 token 和 `Pressable`，不提供 Web 专属的 `className`、HTML 属性或 DOM API；不包含路由绑定和强制内容面板 API。
+
+## 动画
+
+line indicator 的位置和宽度使用统一 layout preset，遵循 `Provider motion` 的开关、Reduced Motion 与时长倍率。内容面板和滚动定位保留既有实现，仍由原有 `animated` 与主题开关控制，其时长暂不应用倍率。
