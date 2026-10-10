@@ -198,7 +198,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview18,
     component: 'gesture',
-    description: 'Gesture Handler 与 Reanimated 的基础手势和 UI thread 动画示例。',
+    description: 'Pan、Swipe、Tap 的基础手势、取消、稳定状态与嵌套滚动示例。',
     id: 'gesture',
     title: 'Gesture',
   },
@@ -248,7 +248,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview25,
     component: 'motion',
-    description: '统一动画 Hook 和 preset 的可视化验证。',
+    description: '分别查看过渡生命周期、属性动画、策略、预设与组件接入。',
     id: 'motion',
     title: 'Motion',
   },
@@ -320,7 +320,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview35,
     component: 'pressable',
-    description: '统一 Pressable 的 opacity、scale、background、overlay 和 none 点击反馈。',
+    description: '统一按压反馈、状态一致性、禁用、长按、节流与 Motion 策略。',
     id: 'pressable',
     title: 'Pressable',
   },

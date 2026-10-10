@@ -1,269 +1,145 @@
-import { lazy, Suspense, useState } from 'react'
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import { useState } from 'react'
+import { useRouter } from 'expo-router'
+import { FlatList, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-
-import { defaultAlgorithm, Provider } from '@ftsukic/tsuki'
-import { componentCatalog } from '../fixtures/catalog'
-import type { ComponentFixtureEntry } from '../fixtures/catalog'
-
-const KeyboardChatScrollViewPage = lazy(() => import('../pages/keyboard-chat-scroll-view'))
+import { Cell, Search, Segmented, Text, useToken } from '@ftsukic/tsuki'
+import { componentCatalog } from '@/fixtures/catalog'
+import { componentCategories } from '@/fixtures/categories'
+import { useDemoTheme } from './demo-provider'
 
 export default function FixtureExplorer() {
+  const router = useRouter()
+  const { token } = useToken()
+  const { mode, setMode } = useDemoTheme()
+  const [query, setQuery] = useState('')
+  const keyword = query.trim().toLowerCase()
+  const sections = componentCategories
+    .map((category) => ({
+      title: category.title,
+      data: category.components.flatMap((id) => {
+        const item = componentCatalog.find((entry) => entry.id === id)
+        return item &&
+          `${category.title} ${item.title} ${item.component} ${item.description}`
+            .toLowerCase()
+            .includes(keyword)
+          ? [item]
+          : []
+      }),
+    }))
+    .filter((section) => section.data.length > 0)
+  const resultCount = sections.reduce((count, section) => count + section.data.length, 0)
   return (
-    <Provider safeArea theme={{ algorithm: defaultAlgorithm }}>
-      <Explorer />
-    </Provider>
-  )
-}
-
-function Explorer() {
-  const [selected, setSelected] = useState<ComponentFixtureEntry | null>(null)
-  const [showKeyboardChat, setShowKeyboardChat] = useState(false)
-
-  if (showKeyboardChat) {
-    return (
-      <Suspense fallback={<Text style={styles.loading}>正在加载专项实验…</Text>}>
-        <KeyboardChatScrollViewPage onBack={() => setShowKeyboardChat(false)} />
-      </Suspense>
-    )
-  }
-
-  if (selected) {
-    return <PreviewScreen fixture={selected} onBack={() => setSelected(null)} />
-  }
-
-  return (
-    <FixtureCatalog onOpenKeyboardChat={() => setShowKeyboardChat(true)} onSelect={setSelected} />
-  )
-}
-
-function FixtureCatalog({
-  onOpenKeyboardChat,
-  onSelect,
-}: {
-  onOpenKeyboardChat: () => void
-  onSelect: (component: ComponentFixtureEntry) => void
-}) {
-  return (
-    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
-      <View style={styles.header}>
-        <Text style={styles.eyebrow}>@ftsukic/tsuki</Text>
-        <Text style={styles.title}>Components / 组件预览</Text>
-        <Text style={styles.description} selectable>
-          每个组件进入自己的 overview，examples 在 overview 内组织。
-        </Text>
-      </View>
-      <Pressable
-        accessibilityRole="button"
-        onPress={onOpenKeyboardChat}
-        style={({ pressed }) => [styles.specialCard, pressed && styles.fixtureCardPressed]}
-      >
-        <View style={styles.cardText}>
-          <Text style={styles.specialEyebrow}>专项实验</Text>
-          <Text style={styles.cardTitle}>KeyboardChatScrollView</Text>
-          <Text style={styles.cardDescription} selectable>
-            测试键盘抬升、interactive dismissal、sticky composer 和消息滚动。
-          </Text>
-        </View>
-        <Text style={styles.chevron} accessibilityElementsHidden>
-          ›
-        </Text>
-      </Pressable>
+    <SafeAreaView style={[styles.screen, { backgroundColor: token.colorBgLayout }]}>
       <FlatList
-        data={componentCatalog}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContent}
-        renderItem={({ item }) => (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => onSelect(item)}
-            style={({ pressed }) => [styles.fixtureCard, pressed && styles.fixtureCardPressed]}
-          >
-            <View style={styles.cardText}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              <Text style={styles.cardDescription} selectable>
-                {item.description}
+        data={sections}
+        keyExtractor={(section) => section.title}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.content}
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <View style={styles.brandRow}>
+              <View style={[styles.logo, { backgroundColor: token.colorPrimary }]}>
+                <Text style={styles.logoText}>月</Text>
+              </View>
+              <View>
+                <Text style={styles.brand}>TSUKI</Text>
+                <Text style={{ color: token.colorTextSecondary }}>React Native UI</Text>
+              </View>
+            </View>
+            <Text style={styles.title}>组件游乐场</Text>
+            <Text style={[styles.description, { color: token.colorTextSecondary }]}>
+              探索组件的样式、交互和组合方式。
+            </Text>
+            <Segmented
+              block
+              value={mode}
+              options={[
+                { label: '跟随系统', value: 'system' },
+                { label: '浅色', value: 'light' },
+                { label: '深色', value: 'dark' },
+              ]}
+              onChange={(value) => {
+                if (value === 'system' || value === 'light' || value === 'dark') setMode(value)
+              }}
+            />
+            <Cell.Group title="交互实验室" border={false} styles={{ body: styles.groupBody }}>
+              <Cell
+                title="键盘与聊天"
+                label="键盘联动 · 消息滚动 · 输入面板"
+                isLink
+                onPress={() => router.push('/labs/keyboard-chat')}
+              />
+            </Cell.Group>
+            <View style={styles.sectionRow}>
+              <Text style={styles.sectionTitle}>全部组件</Text>
+              <Text style={{ color: token.colorTextSecondary }}>
+                {resultCount} / {componentCatalog.length}
               </Text>
             </View>
-            <Text style={styles.chevron} accessibilityElementsHidden>
-              ›
-            </Text>
-          </Pressable>
+            <Search
+              value={query}
+              onChange={setQuery}
+              placeholder="搜索组件名称或功能"
+              accessibilityLabel="搜索组件"
+              shape="round"
+            />
+          </View>
+        }
+        renderItem={({ item: section }) => (
+          <Cell.Group
+            title={section.title}
+            extra={`${section.data.length} 个组件`}
+            border={false}
+            styles={{ body: styles.groupBody }}
+          >
+            {section.data.map((item) => (
+              <Cell
+                key={item.id}
+                title={item.title}
+                label={item.description}
+                isLink
+                onPress={() =>
+                  router.push({ pathname: '/components/[id]', params: { id: item.id } })
+                }
+              />
+            ))}
+          </Cell.Group>
         )}
-        ListEmptyComponent={<Text style={styles.empty}>没有找到组件。</Text>}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <Text style={styles.cardTitle}>没有找到组件</Text>
+            <Text style={{ color: token.colorTextSecondary }}>试试其他名称或功能关键词。</Text>
+          </View>
+        }
+        ListFooterComponent={
+          <Text style={[styles.footer, { color: token.colorTextTertiary }]}>
+            @ftsukic/tsuki · 为原生体验而造
+          </Text>
+        }
       />
     </SafeAreaView>
   )
 }
 
-function PreviewScreen({
-  fixture,
-  onBack,
-}: {
-  fixture: ComponentFixtureEntry
-  onBack: () => void
-}) {
-  const SelectedFixture = fixture.Component
-
-  return (
-    <SafeAreaView style={styles.screen} edges={['top', 'bottom']}>
-      <View style={styles.previewHeader}>
-        <Pressable
-          accessibilityLabel="返回组件列表"
-          accessibilityRole="button"
-          hitSlop={8}
-          onPress={onBack}
-          style={styles.backButton}
-        >
-          <Text style={styles.backLabel}>‹</Text>
-        </Pressable>
-        <View style={styles.previewTitleBlock}>
-          <Text style={styles.previewTitle} numberOfLines={1}>
-            {fixture.title}
-          </Text>
-          <Text style={styles.previewMeta} numberOfLines={1} selectable>
-            {fixture.component}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.previewViewport}>
-        <View style={styles.fixtureViewport}>
-          <SelectedFixture key={fixture.id} />
-        </View>
-      </View>
-    </SafeAreaView>
-  )
-}
-
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: '#f5f7fa',
-  },
-  header: {
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-  },
-  eyebrow: {
-    color: '#1677ff',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  title: {
-    color: '#101828',
-    fontSize: 30,
-    fontWeight: '700',
-  },
-  description: {
-    color: '#667085',
-    fontSize: 14,
-    lineHeight: 21,
-  },
-  listContent: {
-    gap: 12,
-    padding: 20,
-  },
-  fixtureCard: {
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderColor: '#eaecf0',
-    borderRadius: 14,
-    borderWidth: 1,
+  screen: { flex: 1 },
+  content: { width: '100%', maxWidth: 760, alignSelf: 'center', padding: 20, gap: 10 },
+  header: { gap: 18, paddingBottom: 8 },
+  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 },
+  logo: { width: 46, height: 46, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  logoText: { color: '#fff', fontSize: 24, fontWeight: '600' },
+  brand: { fontSize: 17, fontWeight: '800', letterSpacing: 3 },
+  title: { fontSize: 34, fontWeight: '700', marginTop: 8 },
+  description: { fontSize: 15, lineHeight: 23 },
+  groupBody: { borderRadius: 16, overflow: 'hidden' },
+  sectionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 16,
-  },
-  fixtureCardPressed: {
-    opacity: 0.7,
-  },
-  specialCard: {
-    backgroundColor: '#eef6ff',
-    borderColor: '#b2d4ff',
-    borderRadius: 14,
-    borderWidth: 1,
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginHorizontal: 20,
-    marginTop: 16,
-    padding: 16,
+    marginTop: 8,
   },
-  specialEyebrow: {
-    color: '#1677ff',
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.3,
-    textTransform: 'uppercase',
-  },
-  cardText: {
-    flex: 1,
-    gap: 4,
-  },
-  cardTitle: {
-    color: '#101828',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  cardDescription: {
-    color: '#667085',
-    fontSize: 13,
-    lineHeight: 19,
-  },
-  chevron: {
-    color: '#98a2b3',
-    fontSize: 28,
-    lineHeight: 28,
-    paddingLeft: 12,
-  },
-  empty: {
-    color: '#667085',
-    padding: 20,
-    textAlign: 'center',
-  },
-  loading: {
-    color: '#667085',
-    padding: 24,
-    textAlign: 'center',
-  },
-  previewHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  backButton: {
-    alignItems: 'center',
-    height: 40,
-    justifyContent: 'center',
-    width: 40,
-  },
-  backLabel: {
-    color: '#1677ff',
-    fontSize: 36,
-    fontWeight: '300',
-    lineHeight: 36,
-  },
-  previewTitleBlock: {
-    flex: 1,
-    gap: 2,
-  },
-  previewTitle: {
-    color: '#101828',
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  previewMeta: {
-    color: '#667085',
-    fontSize: 12,
-  },
-  previewViewport: {
-    flex: 1,
-    minHeight: 0,
-  },
-  fixtureViewport: {
-    flex: 1,
-  },
+  sectionTitle: { fontSize: 20, fontWeight: '700' },
+  cardTitle: { fontSize: 17, fontWeight: '600' },
+  empty: { alignItems: 'center', padding: 32, gap: 10 },
+  footer: { textAlign: 'center', fontSize: 12, paddingVertical: 24 },
 })
