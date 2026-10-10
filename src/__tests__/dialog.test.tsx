@@ -19,7 +19,7 @@ import type { JsonElement, JsonNode, TestInstance } from 'test-renderer'
 
 function AppProvider({ children }: { children?: ReactNode }) {
   return (
-    <ConfigProvider theme={{ token: { motion: false } }}>
+    <ConfigProvider theme={{ seed: { motion: false } }}>
       <PortalHost>{children}</PortalHost>
     </ConfigProvider>
   )
@@ -368,7 +368,7 @@ describe('Dialog', () => {
     const view = await render(
       <ConfigProvider
         theme={{
-          token: { motion: false },
+          seed: { motion: false },
           components: {
             Button: { pressedOverlayColor: buttonOverlayColor },
             Dialog: { buttonPressedOverlayColor: dialogOverlayColor },
@@ -646,7 +646,7 @@ describe('Dialog', () => {
     const view = await render(
       <ConfigProvider
         theme={{
-          token: { motion: false },
+          seed: { motion: false },
           components: { Dialog: { width: 280 } },
         }}
       >
@@ -701,7 +701,7 @@ describe('Dialog', () => {
     })
 
     const view = await render(
-      <ConfigProvider theme={{ token: { motion: true } }}>
+      <ConfigProvider theme={{ seed: { motion: true } }}>
         <PortalHost />
       </ConfigProvider>,
     )
@@ -984,7 +984,7 @@ describe('Dialog', () => {
     }
 
     const view = await render(
-      <ConfigProvider theme={{ token: { motion: true } }}>
+      <ConfigProvider theme={{ seed: { motion: true } }}>
         <PortalHost>
           <StatefulDialog />
         </PortalHost>
@@ -1032,7 +1032,7 @@ describe('Dialog', () => {
     const view = await render(
       <ConfigProvider
         theme={{
-          token: { motion: false },
+          seed: { motion: false },
           components: { Dialog: { backgroundColor: '#123456', borderRadius: 20 } },
         }}
       >
@@ -1089,7 +1089,7 @@ describe('Dialog', () => {
   it('requires PortalHost for controlled rendering', async () => {
     await expect(
       render(
-        <ConfigProvider theme={{ token: { motion: false } }}>
+        <ConfigProvider theme={{ seed: { motion: false } }}>
           <Dialog show message="没有 Portal.Host" />
         </ConfigProvider>,
       ),

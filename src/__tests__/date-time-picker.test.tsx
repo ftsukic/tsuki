@@ -22,7 +22,7 @@ async function press(testID: string) {
 
 async function renderPicker(props: DateTimePickerProps & { ref?: Ref<DateTimePickerRef> }) {
   return render(
-    <Provider theme={{ token: { motion: false } }}>
+    <Provider theme={{ seed: { motion: false } }}>
       <DateTimePicker {...props} />
     </Provider>,
   )
@@ -132,7 +132,7 @@ describe('DateTimePicker', () => {
     expect(screen.getAllByTestId(/^picker-item-2-\d+$/)).toHaveLength(29)
 
     await view.rerender(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <DateTimePicker
           columnsType={['year', 'month', 'day']}
           value={['2027', '02', '31']}
@@ -212,7 +212,7 @@ describe('DateTimePicker', () => {
       )
     }
     await render(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <Controlled />
       </Provider>,
     )

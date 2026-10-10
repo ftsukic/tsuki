@@ -8,7 +8,7 @@ export default function SkeletonThemeExample() {
   return (
     <ConfigProvider
       theme={{
-        token: { motion: false },
+        seed: { motion: false },
         components: {
           Skeleton: {
             backgroundColor: '#d9e8ff',

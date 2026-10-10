@@ -183,7 +183,7 @@ describe('useAnimatedTransition', () => {
     const onTransitionEnd = jest.fn()
 
     await render(
-      <ConfigProvider theme={{ token: { motion: false } }}>
+      <ConfigProvider theme={{ seed: { motion: false } }}>
         <MotionHarness
           visible
           motion

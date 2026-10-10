@@ -107,7 +107,7 @@ describe('Portal', () => {
 
   it('preserves the current ConfigProvider theme in portal content', async () => {
     await render(
-      <ConfigProvider theme={{ token: { colorPrimary: '#123456' } }}>
+      <ConfigProvider theme={{ seed: { colorPrimary: '#123456' } }}>
         <PortalHost>
           <Portal>
             <TokenProbe />

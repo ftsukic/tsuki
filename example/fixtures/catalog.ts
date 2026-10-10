@@ -432,7 +432,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview51,
     component: 'theme',
-    description: 'Theme 汇总亮暗算法和组件 token 覆盖示例。',
+    description: 'Theme 展示明暗算法、当前配置和解析后生效的主题参数。',
     id: 'theme',
     title: 'Theme',
   },

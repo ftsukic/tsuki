@@ -1,3 +1,6 @@
 export * from './types'
-export * from './config-provider'
-export * from './themes'
+export { ConfigProvider } from './config-provider'
+export { getDesignToken } from './design-token'
+export { useToken, useOptionalToken, useComponentToken } from './useToken'
+export { defaultAlgorithm } from './themes/default'
+export { darkAlgorithm } from './themes/dark'

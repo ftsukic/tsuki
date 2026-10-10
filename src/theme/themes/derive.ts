@@ -1,3 +1,4 @@
+import { FastColor } from '@ant-design/fast-color'
 import { generate } from '@ant-design/colors'
 import { StyleSheet } from 'react-native'
 import type { ColorPalettes, MapToken, PresetColorKey, SeedToken } from '../types'
@@ -45,29 +46,29 @@ function getPresetPalettes(seed: SeedToken, dark: boolean): ColorPalettes {
 }
 
 function getNeutralColors(seed: SeedToken, dark: boolean) {
-  const background = seed.colorBgBase
-  const text = seed.colorTextBase
+  const background = seed.colorBgBase ?? (dark ? '#141414' : '#FFFFFF')
+  const text = seed.colorTextBase ?? (dark ? '#FFFFFF' : '#000000')
 
   if (dark) {
     return {
       colorWhite: '#FFFFFF',
       colorBlack: '#000000',
       colorShadow: 'rgba(0, 0, 0, 0.45)',
-      colorTextBase: '#FFFFFF',
-      colorBgBase: '#141414',
-      colorText: alphaColor('#FFFFFF', 0.85),
-      colorTextSecondary: alphaColor('#FFFFFF', 0.65),
-      colorTextTertiary: alphaColor('#FFFFFF', 0.45),
-      colorTextQuaternary: alphaColor('#FFFFFF', 0.25),
-      colorBorder: alphaColor('#FFFFFF', 0.2),
-      colorBorderSecondary: alphaColor('#FFFFFF', 0.12),
-      colorFill: alphaColor('#FFFFFF', 0.18),
-      colorFillSecondary: alphaColor('#FFFFFF', 0.12),
-      colorFillTertiary: alphaColor('#FFFFFF', 0.08),
-      colorBgLayout: '#141414',
-      colorBgContainer: '#1F1F1F',
-      colorBgContainerPressed: '#3A3A3C',
-      colorBgElevated: '#262626',
+      colorTextBase: text,
+      colorBgBase: background,
+      colorText: alphaColor(text, 0.85),
+      colorTextSecondary: alphaColor(text, 0.65),
+      colorTextTertiary: alphaColor(text, 0.45),
+      colorTextQuaternary: alphaColor(text, 0.25),
+      colorBorder: alphaColor(text, 0.2),
+      colorBorderSecondary: alphaColor(text, 0.12),
+      colorFill: alphaColor(text, 0.18),
+      colorFillSecondary: alphaColor(text, 0.12),
+      colorFillTertiary: alphaColor(text, 0.08),
+      colorBgLayout: background,
+      colorBgContainer: new FastColor(background).lighten(4).toHexString(),
+      colorBgContainerPressed: new FastColor(background).lighten(15).toHexString(),
+      colorBgElevated: new FastColor(background).lighten(7).toHexString(),
       colorBgMask: alphaColor('#000000', 0.65),
     }
   }

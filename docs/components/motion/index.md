@@ -87,7 +87,7 @@ Collapse 的 height 和指示器背景的 width 属于布局语义例外。不�
 | reducedMotion | `'system' \| 'always' \| 'never'` | `'system'` | 系统减少动态效果通过一条共享订阅实时更新；当前降级为即时完成 |
 | durationScale | `number` | `1` | timing 和循环时长倍率；`0` 关闭所有 Motion；物理 spring 不按倍率改变参数 |
 
-嵌套 ConfigProvider 按字段继承配置，`inherit: false` 恢复默认配置。`theme.token.motion=false` 仍是硬开关，局部 `motion=true` 或 `ReduceMotion.Never` 不能绕过它。Primitive 不暴露 Reanimated 类型，Hook 返回 SharedValue 和 animated style。
+嵌套 ConfigProvider 按字段继承配置，`inherit: false` 恢复默认配置。`theme.seed.motion=false` 仍是硬开关，局部 `motion=true` 或 `ReduceMotion.Never` 不能绕过它。Primitive 不暴露 Reanimated 类型，Hook 返回 SharedValue 和 animated style。
 
 ### Transition
 
@@ -204,7 +204,7 @@ const animatedStyle = useAnimatedTransition(options)
 
 ### 主题与行为边界
 
-通过 `ConfigProvider` 的 `theme.token.motion` 控制动效开关，`motionDurationMid` 提供 timing 默认时长。显式进入 / 退出时长优先于 preset 时长，preset 时长优先于主题默认值。主题关闭具有最终优先级，显式时长和 `reduceMotion: Never` 也不能绕过它。
+通过 `ConfigProvider` 的 `theme.seed.motion` 控制动效开关，`motionDurationMid` 提供 timing 默认时长。显式进入 / 退出时长优先于 preset 时长，preset 时长优先于主题默认值。主题关闭具有最终优先级，显式时长和 `reduceMotion: Never` 也不能绕过它。
 
 Motion Hook 只负责视觉过渡，不负责 mount / unmount、`pointerEvents`、焦点、手势或 accessibility；新 `Transition` 则管理退出生命周期与隐藏状态。使用 Hook 时，调用方仍需管理可点击性和可访问性；纯缩放和平移的隐藏端点不代表内容完全不可见。
 

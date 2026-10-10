@@ -20,7 +20,7 @@ async function press(testID: string) {
 
 async function renderPicker(props: TimePickerProps & { ref?: Ref<TimePickerRef> }) {
   return render(
-    <Provider theme={{ token: { motion: false } }}>
+    <Provider theme={{ seed: { motion: false } }}>
       <TimePicker {...props} />
     </Provider>,
   )
@@ -40,7 +40,7 @@ describe('TimePicker', () => {
 
   it('opts into seconds', async () => {
     await render(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <TimePicker columnsType={['hour', 'minute', 'second']} defaultValue={['21', '30', '15']} />
       </Provider>,
     )
@@ -238,7 +238,7 @@ describe('TimePicker', () => {
       )
     }
     await render(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <Controlled />
       </Provider>,
     )

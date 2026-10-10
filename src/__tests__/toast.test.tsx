@@ -19,7 +19,7 @@ import type { JsonElement, JsonNode } from 'test-renderer'
 
 function AppProvider({ children }: { children?: ReactNode }) {
   return (
-    <ConfigProvider theme={{ token: { motion: false } }}>
+    <ConfigProvider theme={{ seed: { motion: false } }}>
       <PortalHost>{children}</PortalHost>
     </ConfigProvider>
   )
@@ -214,7 +214,7 @@ describe('Toast', () => {
 
   it('renders positions, overlay, and transparent click blocking', async () => {
     const view = await render(
-      <ConfigProvider theme={{ token: { motion: false } }}>
+      <ConfigProvider theme={{ seed: { motion: false } }}>
         <PortalHost>
           <Toast
             show
@@ -279,7 +279,7 @@ describe('Toast', () => {
     const view = await render(
       <ConfigProvider
         theme={{
-          token: { motion: false },
+          seed: { motion: false },
           components: { Toast: { backgroundColor: '#123456' } },
         }}
       >

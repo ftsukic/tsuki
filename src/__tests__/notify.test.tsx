@@ -7,7 +7,7 @@ import type { ReactNode } from 'react'
 
 function AppProvider({ children }: { children?: ReactNode }) {
   return (
-    <ConfigProvider theme={{ token: { motion: false } }}>
+    <ConfigProvider theme={{ seed: { motion: false } }}>
       <PortalHost>{children}</PortalHost>
     </ConfigProvider>
   )
@@ -52,7 +52,7 @@ describe('Notify', () => {
     })
     const onClosed = jest.fn()
     const view = await render(
-      <ConfigProvider theme={{ token: { motion: true } }}>
+      <ConfigProvider theme={{ seed: { motion: true } }}>
         <PortalHost />
       </ConfigProvider>,
     )

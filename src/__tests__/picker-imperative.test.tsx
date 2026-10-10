@@ -18,7 +18,7 @@ async function press(target: Parameters<typeof fireEvent.press>[0]) {
 
 async function renderHost({ motion = false }: { motion?: boolean } = {}) {
   return render(
-    <ConfigProvider theme={{ token: { motion } }}>
+    <ConfigProvider theme={{ seed: { motion } }}>
       <PortalHost />
     </ConfigProvider>,
   )

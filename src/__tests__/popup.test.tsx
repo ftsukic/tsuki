@@ -11,7 +11,7 @@ function AppProvider({ children, motion = false }: { children?: ReactNode; motio
   return (
     <ConfigProvider
       theme={{
-        token: { motion },
+        seed: { motion },
       }}
     >
       <PortalHost>{children}</PortalHost>
@@ -143,7 +143,7 @@ describe('Popup', () => {
 
   it('applies bottom safe-area inset to the Popup panel', async () => {
     const view = await render(
-      <ConfigProvider theme={{ token: { motion: false } }}>
+      <ConfigProvider theme={{ seed: { motion: false } }}>
         <SafeAreaInsetsContext.Provider value={{ top: 0, right: 0, bottom: 20, left: 0 }}>
           <PortalHost>
             <Popup visible position="bottom" safeAreaInsetBottom testID="safe-area-popup">
@@ -506,7 +506,7 @@ describe('Popup', () => {
     const view = await render(
       <ConfigProvider
         theme={{
-          token: { motion: false },
+          seed: { motion: false },
           components: {
             Popup: {
               backgroundColor: '#123456',

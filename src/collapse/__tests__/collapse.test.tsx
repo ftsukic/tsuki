@@ -370,7 +370,7 @@ describe('Collapse', () => {
     jest.spyOn(Reanimated, 'measure').mockReturnValue(null)
     const timing = jest.spyOn(Reanimated, 'withTiming').mockImplementation((value) => value)
     await render(
-      <ConfigProvider theme={{ token: { motion: false } }}>
+      <ConfigProvider theme={{ seed: { motion: false } }}>
         <Collapse testID="motionless-collapse">
           <CollapseItem name="first" testID="motionless-first" title="第一项">
             内容

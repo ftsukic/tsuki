@@ -20,7 +20,7 @@ function findNode(
 }
 
 function renderWithoutMotion(children: React.ReactNode) {
-  return render(<ConfigProvider theme={{ token: { motion: false } }}>{children}</ConfigProvider>)
+  return render(<ConfigProvider theme={{ seed: { motion: false } }}>{children}</ConfigProvider>)
 }
 
 describe('Loading', () => {
@@ -115,7 +115,7 @@ describe('Loading', () => {
     const view = await render(
       <ConfigProvider
         theme={{
-          token: { motion: false },
+          seed: { motion: false },
           components: {
             Loading: { defaultColor: '#654321', defaultSize: 48, textFontSize: 16 },
           },

@@ -1,31 +1,38 @@
 import React from 'react'
 
 import { useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { Platform, StyleSheet, View } from 'react-native'
 import {
   Button,
+  Text,
   Cell,
   ConfigProvider,
   darkAlgorithm,
   defaultAlgorithm,
+  getButtonToken,
+  useComponentToken,
+  useToken,
   Input as TextInput,
 } from '../../..'
+import type { ThemeConfig } from '../../..'
 
 /**
  * @title Theme algorithms and overrides
- * @description Switch between light and dark algorithms and inspect a component token override.
+ * @description 切换明暗主题，查看当前输入配置和解析后生效的主题参数。
  */
 export default function ThemeAlgorithmsFixture() {
   const [dark, setDark] = useState(false)
 
+  const algorithmName = dark ? 'darkAlgorithm' : 'defaultAlgorithm'
+  const theme: ThemeConfig = {
+    algorithm: dark ? darkAlgorithm : defaultAlgorithm,
+    seed: { colorPrimary: dark ? '#69b1ff' : '#1989fa' },
+    token: { pressedOpacity: 0.8 },
+    components: { Button: { borderRadius: 16 } },
+  }
+
   return (
-    <ConfigProvider
-      theme={{
-        algorithm: dark ? darkAlgorithm : defaultAlgorithm,
-        token: { colorPrimary: dark ? '#69b1ff' : '#1989fa' },
-        components: { Button: { borderRadius: 16 } },
-      }}
-    >
+    <ConfigProvider theme={theme}>
       <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.title}>{dark ? 'Dark theme' : 'Light theme'}</Text>
@@ -38,8 +45,40 @@ export default function ThemeAlgorithmsFixture() {
         </Button>
         <Cell title="Theme" value={dark ? 'Dark' : 'Light'} border={false} />
         <TextInput bordered placeholder="The provider supplies tokens" />
+        <Text style={styles.sectionTitle}>当前输入配置</Text>
+        <Text type="secondary">algorithm 显示函数名称，其余字段来自传入 Provider 的配置。</Text>
+        <Text selectable style={styles.code}>
+          {JSON.stringify({ ...theme, algorithm: algorithmName }, null, 2)}
+        </Text>
+        <ResolvedThemeParameters />
       </View>
     </ConfigProvider>
+  )
+}
+
+function ResolvedThemeParameters() {
+  const { token } = useToken()
+  const button = useComponentToken('Button', getButtonToken)
+  const parameters = {
+    colorPrimary: token.colorPrimary,
+    colorPrimaryBg: token.colorPrimaryBg,
+    colorBgBase: token.colorBgBase,
+    colorBgContainer: token.colorBgContainer,
+    colorText: token.colorText,
+    fontSize: token.fontSize,
+    borderRadius: token.borderRadius,
+    pressedOpacity: token.pressedOpacity,
+    motion: token.motion,
+    Button: { height: button.height, borderRadius: button.borderRadius },
+  }
+
+  return (
+    <>
+      <Text style={styles.sectionTitle}>解析后生效的参数</Text>
+      <Text selectable style={styles.code}>
+        {JSON.stringify(parameters, null, 2)}
+      </Text>
+    </>
   )
 }
 
@@ -52,8 +91,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
+  sectionTitle: {
+    fontWeight: '600',
+  },
+  code: {
+    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    fontSize: 12,
+    lineHeight: 18,
+  },
   title: {
-    color: '#333333',
     fontSize: 18,
     fontWeight: '600',
   },

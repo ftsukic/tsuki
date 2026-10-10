@@ -206,7 +206,7 @@ describe('Button', () => {
 
   it('uses Loading for spinner buttons and honors loadingSize', async () => {
     const view = await render(
-      <ConfigProvider theme={{ token: { motion: false } }}>
+      <ConfigProvider theme={{ seed: { motion: false } }}>
         <Button loading loadingSize={18} loadingType="spinner" testID="spinner-loading">
           提交
         </Button>

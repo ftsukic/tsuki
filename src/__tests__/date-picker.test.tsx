@@ -24,7 +24,7 @@ function item(column: number, index: number) {
 
 async function renderPicker(props: DatePickerProps & { ref?: Ref<DatePickerRef> }) {
   return render(
-    <Provider theme={{ token: { motion: false } }}>
+    <Provider theme={{ seed: { motion: false } }}>
       <DatePicker {...props} />
     </Provider>,
   )
@@ -80,7 +80,7 @@ describe('DatePicker', () => {
     expect(screen.getAllByTestId(/^picker-item-2-\d+$/)).toHaveLength(29)
 
     await view.rerender(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <DatePicker ref={ref} value={['2027', '02', '31']} />
       </Provider>,
     )
@@ -88,7 +88,7 @@ describe('DatePicker', () => {
     expect(ref.current?.getSelectedValues()).toEqual(['2027', '02', '28'])
 
     await view.rerender(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <DatePicker value={['2026', '04', '31']} />
       </Provider>,
     )
@@ -115,7 +115,7 @@ describe('DatePicker', () => {
     expect(ref.current?.getSelectedValues()).toEqual(['09', '2026', '10'])
 
     await view.rerender(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <DatePicker
           columnsType={['month', 'year', 'day']}
           maxDate={new Date(2027, 2, 20)}
@@ -194,7 +194,7 @@ describe('DatePicker', () => {
     }
 
     await render(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <Controlled />
       </Provider>,
     )
@@ -205,7 +205,7 @@ describe('DatePicker', () => {
   it('supports defaultValue through the public ref', async () => {
     const ref = createRef<DatePickerRef>()
     await render(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <DatePicker defaultValue={['2025', '01', '02']} ref={ref} />
       </Provider>,
     )

@@ -468,7 +468,7 @@ describe('Tabs', () => {
 
     try {
       const view = await render(
-        <ConfigProvider theme={{ token: { motion: false } }}>
+        <ConfigProvider theme={{ seed: { motion: false } }}>
           <Tabs scrollable value="first" onChange={() => undefined}>
             <Tab testID="motion-off-first" name="first" title="第一项" />
             <Tab testID="motion-off-second" name="second" title="第二项" />
@@ -490,7 +490,7 @@ describe('Tabs', () => {
       })
 
       await view.rerender(
-        <ConfigProvider theme={{ token: { motion: false } }}>
+        <ConfigProvider theme={{ seed: { motion: false } }}>
           <Tabs scrollable value="second" onChange={() => undefined}>
             <Tab testID="motion-off-first" name="first" title="第一项" />
             <Tab testID="motion-off-second" name="second" title="第二项" />

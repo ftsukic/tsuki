@@ -30,7 +30,7 @@ function AppProvider({
   theme?: React.ComponentProps<typeof ConfigProvider>['theme']
 }) {
   return (
-    <ConfigProvider theme={{ token: { motion: false }, ...theme }}>
+    <ConfigProvider theme={{ seed: { motion: false }, ...theme }}>
       <PortalHost>{children}</PortalHost>
     </ConfigProvider>
   )
@@ -744,7 +744,7 @@ describe('FloatingPanel', () => {
     const view = await render(
       <AppProvider
         theme={{
-          token: { motion: true },
+          seed: { motion: true },
           components: {
             FloatingPanel: {
               backgroundColor: '#123456',
@@ -780,7 +780,7 @@ describe('FloatingPanel', () => {
     await view.rerender(
       <AppProvider
         theme={{
-          token: { motion: true },
+          seed: { motion: true },
           components: {
             FloatingPanel: { animationDuration: 120 },
           },
@@ -881,7 +881,7 @@ describe('FloatingPanel', () => {
     const view = await render(
       <AppProvider
         theme={{
-          token: { motion: true },
+          seed: { motion: true },
           components: { FloatingPanel: { animationDuration: 120 } },
         }}
       >

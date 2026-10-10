@@ -16,7 +16,7 @@ export default function MotionConfigExample() {
   return (
     <ConfigProvider
       theme={{
-        token: { motion: themeMotion },
+        seed: { motion: themeMotion },
         motion: { reducedMotion: reduced ? 'always' : 'system', durationScale: slow ? 3 : 1 },
       }}
     >

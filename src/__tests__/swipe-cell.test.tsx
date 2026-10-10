@@ -37,11 +37,11 @@ async function drag(testID: string, distance: number, velocityX = 0) {
 }
 
 function TestProvider({ children }: { children: React.ReactNode }) {
-  return <ConfigProvider theme={{ token: { motion: false } }}>{children}</ConfigProvider>
+  return <ConfigProvider theme={{ seed: { motion: false } }}>{children}</ConfigProvider>
 }
 
 function InteractionProvider({ children }: { children: React.ReactNode }) {
-  return <Provider theme={{ token: { motion: false } }}>{children}</Provider>
+  return <Provider theme={{ seed: { motion: false } }}>{children}</Provider>
 }
 
 function getTranslation(testID: string) {
@@ -407,7 +407,7 @@ describe('SwipeCell', () => {
     await render(
       <ConfigProvider
         theme={{
-          token: { motion: true },
+          seed: { motion: true },
           components: { SwipeCell: { animationDuration: 120 } },
         }}
       >
@@ -459,7 +459,7 @@ describe('SwipeCell', () => {
     const view = await render(
       <ConfigProvider
         theme={{
-          token: { motion: true },
+          seed: { motion: true },
           components: { SwipeCell: { animationDuration: 120 } },
         }}
       >
@@ -480,7 +480,7 @@ describe('SwipeCell', () => {
     expect(springs).toHaveLength(1)
 
     await view.rerender(
-      <ConfigProvider theme={{ token: { motion: true } }}>
+      <ConfigProvider theme={{ seed: { motion: true } }}>
         <SwipeCell ref={ref} testID="motion-removed-action" onOpen={onOpen} onClose={onClose}>
           <Text>内容</Text>
         </SwipeCell>
@@ -653,7 +653,7 @@ describe('SwipeCell', () => {
     const onClose = jest.fn()
     const user = userEvent.setup()
     await render(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <SwipeCell ref={ref} testID="outside-close" rightAction="删除" onClose={onClose}>
           <Text>内容</Text>
         </SwipeCell>

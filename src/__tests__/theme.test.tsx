@@ -6,6 +6,9 @@ import {
   getDesignToken,
   useComponentToken,
   useToken,
+  useOptionalToken,
+  Portal,
+  PortalHost,
 } from '..'
 import { render, screen } from '@testing-library/react-native'
 import { StyleSheet, Text } from 'react-native'
@@ -23,12 +26,12 @@ function ButtonTokenProbe() {
 }
 
 describe('theme', () => {
-  it('derives the Vant mobile baseline tokens', () => {
+  it('derives the mobile baseline tokens', () => {
     const token = getDesignToken()
 
     expect(token.colorPrimary).toBe('#1989FA')
     expect(token.colorSuccess).toBe('#07C160')
-    expect(token.colorWarning).toBe('#FF976A')
+    expect(token.colorWarning).toBe('#FAAD14')
     expect(token.colorError).toBe('#EE0A24')
     expect(token.fontSizeXS).toBe(10)
     expect(token.fontSizeSM).toBe(12)
@@ -71,9 +74,9 @@ describe('theme', () => {
 
     expect(composed.colorPrimary).toBe('#123456')
     expect(composed.colorText).toBe('#222222')
-    expect(dark.colorBgContainer).toBe('#1F1F1F')
-    expect(dark.colorBgContainerPressed).toBe('#3A3A3C')
-    expect(dark.pressedBackgroundColor).toBe('#3A3A3C')
+    expect(dark.colorBgContainer).toBe('#1e1e1e')
+    expect(dark.colorBgContainerPressed).toBe('#3a3a3a')
+    expect(dark.pressedBackgroundColor).toBe('#3a3a3a')
     expect(dark.colorBgBase).toBe('#141414')
     expect(dark.colorTextBase).toBe('#FFFFFF')
     expect(dark.colorShadow).toBe('rgba(0, 0, 0, 0.45)')
@@ -81,7 +84,7 @@ describe('theme', () => {
   })
 
   it('keeps every radius at zero when borderRadius is zero', () => {
-    const square = getDesignToken({ token: { borderRadius: 0 } })
+    const square = getDesignToken({ seed: { borderRadius: 0 } })
 
     expect(square.borderRadiusXS).toBe(0)
     expect(square.borderRadiusSM).toBe(0)
@@ -103,10 +106,10 @@ describe('theme', () => {
     expect(token.pressedOverlayColor).toBe('rgba(0, 0, 0, 0.2)')
   })
 
-  it('inherits parent tokens and allows inherit false', async () => {
+  it('inherits parent tokens', async () => {
     await render(
-      <ConfigProvider theme={{ token: { colorPrimary: '#111111' } }}>
-        <ConfigProvider theme={{ token: { colorSuccess: '#222222' } }}>
+      <ConfigProvider theme={{ seed: { colorPrimary: '#111111' } }}>
+        <ConfigProvider theme={{ seed: { colorSuccess: '#222222' } }}>
           <TokenProbe />
         </ConfigProvider>
       </ConfigProvider>,
@@ -131,5 +134,148 @@ describe('theme', () => {
     )
 
     expect(screen.getByText('48|12')).toBeTruthy()
+  })
+})
+
+describe('theme configuration', () => {
+  it('derives dark neutrals from explicit base colors', () => {
+    const token = getDesignToken({
+      algorithm: darkAlgorithm,
+      seed: { colorBgBase: '#102030', colorTextBase: '#aabbcc' },
+    })
+    expect(token.colorBgBase).toBe('#102030')
+    expect(token.colorBgLayout).toBe('#102030')
+    expect(token.colorBgContainer).not.toBe('#1F1F1F')
+    expect(token.colorText).toBe('rgba(170,187,204,0.85)')
+    expect(token.colorBorder).toBe('rgba(170,187,204,0.2)')
+  })
+
+  it('ignores undefined overrides and preserves zero and false', () => {
+    const token = getDesignToken({
+      seed: { colorPrimary: undefined, borderRadius: 0, motion: false },
+      token: { colorText: undefined, pressedOpacity: 0 },
+    })
+    expect(token.colorPrimary).toBe('#1989FA')
+    expect(token.colorText).toBeDefined()
+    expect(token.borderRadiusLG).toBe(0)
+    expect(token.motion).toBe(false)
+    expect(token.pressedOpacity).toBe(0)
+  })
+
+  it('preserves inherited seed, alias and component values for undefined entries', async () => {
+    function Probe() {
+      const { token } = useToken()
+      const button = useComponentToken('Button', getButtonToken)
+      return (
+        <Text>{`${token.colorPrimary}|${token.colorText}|${button.height}|${button.borderRadius}`}</Text>
+      )
+    }
+    await render(
+      <ConfigProvider
+        theme={{
+          seed: { colorPrimary: '#123456' },
+          token: { colorText: '#abcdef' },
+          components: { Button: { height: 61 } },
+        }}
+      >
+        <ConfigProvider
+          theme={{
+            seed: { colorPrimary: undefined },
+            token: { colorText: undefined },
+            components: { Button: { height: undefined, borderRadius: 0 } },
+          }}
+        >
+          <Probe />
+        </ConfigProvider>
+      </ConfigProvider>,
+    )
+    expect(screen.getByText('#123456|#abcdef|61|0')).toBeTruthy()
+  })
+
+  it('isolates every configuration layer with inherit false', async () => {
+    function Probe() {
+      const { token } = useToken()
+      const button = useComponentToken('Button', getButtonToken)
+      return (
+        <Text>{`${token.colorPrimary}|${token.colorBgContainer}|${token.pressedOpacity}|${button.height}|${token.motion}`}</Text>
+      )
+    }
+    await render(
+      <ConfigProvider
+        theme={{
+          seed: { colorPrimary: '#123456' },
+          algorithm: darkAlgorithm,
+          token: { pressedOpacity: 0.2 },
+          components: { Button: { height: 61 } },
+          motion: { enabled: false },
+        }}
+      >
+        <ConfigProvider theme={{ inherit: false, motion: { reducedMotion: 'never' } }}>
+          <Probe />
+        </ConfigProvider>
+      </ConfigProvider>,
+    )
+    expect(screen.getByText('#1989FA|#ffffff|0.6|44|true')).toBeTruthy()
+  })
+
+  it('updates inherited and portal tokens when the parent theme changes', async () => {
+    function Probe() {
+      const { token } = useToken()
+      return <Text>{token.colorPrimary}</Text>
+    }
+    const tree = (colorPrimary: string) => (
+      <ConfigProvider theme={{ seed: { colorPrimary } }}>
+        <PortalHost>
+          <ConfigProvider>
+            <Portal>
+              <Probe />
+            </Portal>
+          </ConfigProvider>
+        </PortalHost>
+      </ConfigProvider>
+    )
+    const view = await render(tree('#123456'))
+    expect(screen.getByText('#123456')).toBeTruthy()
+    await view.rerender(tree('#abcdef'))
+    expect(screen.getByText('#abcdef')).toBeTruthy()
+    expect(screen.queryByText('#123456')).toBeNull()
+  })
+
+  it.each([{ enabled: false }, { reducedMotion: 'always' as const }, { durationScale: 0 }])(
+    'shares the effective motion policy between hooks for %j',
+    async (motion) => {
+      function Probe() {
+        const regular = useToken()
+        const optional = useOptionalToken()
+        return <Text>{`${regular.token.motion}|${optional?.token.motion}`}</Text>
+      }
+      await render(
+        <ConfigProvider theme={{ motion }}>
+          <Probe />
+        </ConfigProvider>,
+      )
+      expect(screen.getByText('false|false')).toBeTruthy()
+    },
+  )
+
+  it('returns null from optional access outside a provider', async () => {
+    function Probe() {
+      return <Text>{useOptionalToken() === null ? 'absent' : 'present'}</Text>
+    }
+    await render(<Probe />)
+    expect(screen.getByText('absent')).toBeTruthy()
+  })
+
+  it('does not rerun the algorithm when only motion configuration changes', async () => {
+    const algorithm = jest.fn(defaultAlgorithm)
+    const tree = (enabled: boolean) => (
+      <ConfigProvider theme={{ algorithm, motion: { enabled } }}>
+        <TokenProbe />
+      </ConfigProvider>
+    )
+    const view = await render(tree(true))
+    const calls = algorithm.mock.calls.length
+    await view.rerender(tree(false))
+    expect(algorithm).toHaveBeenCalledTimes(calls)
   })
 })

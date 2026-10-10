@@ -696,7 +696,7 @@ describe('FieldPicker', () => {
     function Harness() {
       const [value, setValue] = useState<readonly PickerValue[]>(['shanghai'])
       return (
-        <Provider theme={{ token: { motion: false } }}>
+        <Provider theme={{ seed: { motion: false } }}>
           <FieldPicker
             label="城市"
             value={value}
@@ -738,7 +738,7 @@ describe('FieldPicker', () => {
 
   it('supports placeholder and formatValue while keeping Picker separate from Cell', async () => {
     const view = await render(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <FieldPicker label="城市" columns={options} placeholder="请选择城市" />
         <FieldPicker
           label="格式化城市"
@@ -776,7 +776,7 @@ describe('FieldDatePicker', () => {
     function Harness() {
       const [currentValue, setCurrentValue] = useState<DatePickerValue>(value)
       return (
-        <Provider theme={{ token: { motion: false } }}>
+        <Provider theme={{ seed: { motion: false } }}>
           <FieldDatePicker
             label="日期"
             value={currentValue}
@@ -815,7 +815,7 @@ describe('FieldDatePicker', () => {
 
   it('supports placeholder, formatValue, and date picker props', async () => {
     await render(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <FieldDatePicker label="日期" placeholder="请选择日期" {...bounds} />
         <FieldDatePicker
           label="格式化日期"
@@ -850,7 +850,7 @@ describe('FieldTimePicker', () => {
     }
 
     await render(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <Harness />
       </Provider>,
     )
@@ -867,7 +867,7 @@ describe('FieldDateTimePicker', () => {
   it('formats the default value according to the selected columns', async () => {
     const value: DateTimePickerValue = ['2026', '09', '13', '13', '30']
     await render(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <FieldDateTimePicker label="日期时间" value={value} />
         <FieldDateTimePicker label="时间" value={['13', '30']} columnsType={['hour', 'minute']} />
       </Provider>,
@@ -880,7 +880,7 @@ describe('FieldDateTimePicker', () => {
 describe('Field picker alignment', () => {
   it('centers all picker field rows by default', async () => {
     const view = await render(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <FieldPicker label="城市" columns={[{ text: '上海', value: 'shanghai' }]} />
         <FieldDatePicker label="日期" />
         <FieldTimePicker label="时间" />
@@ -907,7 +907,7 @@ describe('Field picker alignment', () => {
 
   it('allows opting out of centered alignment', async () => {
     const view = await render(
-      <Provider theme={{ token: { motion: false } }}>
+      <Provider theme={{ seed: { motion: false } }}>
         <FieldTimePicker label="时间" center={false} />
       </Provider>,
     )

@@ -7,8 +7,8 @@ export interface SeedToken extends PresetColorTokens {
   colorError: string
   colorInfo: string
   colorLink: string
-  colorTextBase: string
-  colorBgBase: string
+  colorTextBase?: string
+  colorBgBase?: string
   fontFamily: string
   fontSize: number
   lineWidth: number

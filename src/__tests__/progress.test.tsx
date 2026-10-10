@@ -19,7 +19,7 @@ function findNode(
 }
 
 function renderWithoutMotion(children: React.ReactNode) {
-  return render(<ConfigProvider theme={{ token: { motion: false } }}>{children}</ConfigProvider>)
+  return render(<ConfigProvider theme={{ seed: { motion: false } }}>{children}</ConfigProvider>)
 }
 
 describe('Progress', () => {
@@ -48,7 +48,7 @@ describe('Progress', () => {
     expect(findNode(view.toJSON(), (node) => node.props.strokeDasharray)).toBeUndefined()
 
     await view.rerender(
-      <ConfigProvider theme={{ token: { motion: false } }}>
+      <ConfigProvider theme={{ seed: { motion: false } }}>
         <Progress percentage={40} type="circle" />
       </ConfigProvider>,
     )
@@ -84,7 +84,7 @@ describe('Progress', () => {
     const view = await render(
       <ConfigProvider
         theme={{
-          token: { motion: false },
+          seed: { motion: false },
           components: {
             Progress: {
               progress_color: '#7232DD',

@@ -12,7 +12,7 @@ import {
 } from '../floating-bubble/floating-bubble'
 
 function TestProvider({ children }: { children: React.ReactNode }) {
-  return <Provider theme={{ token: { motion: false } }}>{children}</Provider>
+  return <Provider theme={{ seed: { motion: false } }}>{children}</Provider>
 }
 
 async function layout(testID: string, width = 48, height = 48) {

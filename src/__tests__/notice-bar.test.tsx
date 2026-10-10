@@ -163,7 +163,7 @@ describe('NoticeBar', () => {
     const timing = jest.spyOn(Reanimated, 'withTiming')
     timing.mockClear()
     await render(
-      <ConfigProvider theme={{ token: { motion: false } }}>
+      <ConfigProvider theme={{ seed: { motion: false } }}>
         <NoticeBar scrollable text="不滚动" delay={0} />
       </ConfigProvider>,
     )

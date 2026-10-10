@@ -46,7 +46,7 @@ describe('Provider', () => {
 
   it('provides theme and Portal context to floating content', async () => {
     const view = await render(
-      <Provider theme={{ token: { colorPrimary: '#123456', motion: false } }}>
+      <Provider theme={{ seed: { colorPrimary: '#123456', motion: false } }}>
         <Popup visible>
           <ThemeProbe />
         </Popup>
@@ -58,7 +58,7 @@ describe('Provider', () => {
   })
 
   it('mounts Dialog, Toast, and Notify command APIs without individual providers', async () => {
-    const view = await render(<Provider theme={{ token: { motion: false } }} />)
+    const view = await render(<Provider theme={{ seed: { motion: false } }} />)
 
     await act(async () => {
       showToast({ duration: 0, message: '统一 Toast' })

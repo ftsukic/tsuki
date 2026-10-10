@@ -1,166 +1,49 @@
-import type { MappingAlgorithm } from './types'
-import type { AliasToken } from './types/alias'
-import type {
-  ComponentTokenFactory,
-  ComponentTokenMap,
-  ComponentTokenName,
-  ComponentTokenOverrides,
-} from './types/components'
-import type { MapToken } from './types/map'
-import type { SeedToken } from './types/seed'
-import { ThemeContext } from './context'
-import type { ThemeValue } from './context'
-import { composeAlgorithms, defaultAlgorithm } from './themes'
-import { defaultSeed } from './themes/seed'
-import { createAliasToken } from './util/alias'
+import { defaultAlgorithm } from './themes/default'
 import { useContext, useMemo } from 'react'
 import type { PropsWithChildren } from 'react'
-import type { MotionConfig } from '../motion/types'
-import { useMotionConfig } from '../motion/useMotionConfig'
-
-export interface ThemeConfig {
-  token?: Partial<AliasToken>
-  algorithm?: MappingAlgorithm | readonly MappingAlgorithm[]
-  components?: ComponentTokenOverrides
-  inherit?: boolean
-  motion?: MotionConfig
-}
-
-export type DesignTokenConfig = Pick<ThemeConfig, 'token' | 'algorithm'>
-
-export interface TokenValue {
-  token: AliasToken
-}
-
-const EMPTY_THEME: ThemeConfig = {}
-
-function isSeedKey(key: string): key is keyof SeedToken {
-  return key in defaultSeed
-}
-
-function splitSeedOverrides(overrides: Partial<AliasToken>): Partial<SeedToken> {
-  const seedOverrides: Partial<SeedToken> = {}
-
-  for (const [key, value] of Object.entries(overrides)) {
-    if (isSeedKey(key) && value !== undefined) {
-      Object.assign(seedOverrides, { [key]: value })
-    }
-  }
-
-  return seedOverrides
-}
-
-function isAlgorithmList(
-  algorithm: MappingAlgorithm | readonly MappingAlgorithm[],
-): algorithm is readonly MappingAlgorithm[] {
-  return Array.isArray(algorithm)
-}
-
-function getMapToken(
-  seed: SeedToken,
-  algorithm: MappingAlgorithm | readonly MappingAlgorithm[],
-): MapToken {
-  return isAlgorithmList(algorithm) ? composeAlgorithms(algorithm)(seed) : algorithm(seed)
-}
-
-function mergeComponentOverrides(
-  parent: ComponentTokenOverrides | undefined,
-  overrides: ComponentTokenOverrides | undefined,
-): ComponentTokenOverrides {
-  const merged: Record<string, object | undefined> = { ...parent }
-
-  for (const [name, override] of Object.entries(overrides ?? {})) {
-    if (override === undefined) continue
-    merged[name] = { ...merged[name], ...override }
-  }
-
-  return merged as ComponentTokenOverrides
-}
-
-function resolveTheme(theme: ThemeConfig = EMPTY_THEME, parent?: ThemeValue | null): ThemeValue {
-  const inherit = theme.inherit !== false
-  const tokenOverrides: Partial<AliasToken> = {
-    ...(inherit ? parent?.tokenOverrides : undefined),
-    ...theme.token,
-  }
-  const seed: SeedToken = {
-    ...defaultSeed,
-    ...(inherit ? parent?.seed : undefined),
-    ...splitSeedOverrides(tokenOverrides),
-  }
-  const algorithm = theme.algorithm ?? (inherit ? parent?.algorithm : undefined) ?? defaultAlgorithm
-  const map = { ...getMapToken(seed, algorithm), ...tokenOverrides }
-  const token = createAliasToken(map, tokenOverrides)
-  const componentOverrides = mergeComponentOverrides(
-    inherit ? parent?.componentOverrides : undefined,
-    theme.components,
-  )
-
-  return {
-    seed,
-    token,
-    tokenOverrides,
-    algorithm,
-    componentOverrides,
-    motion: {
-      ...(inherit ? parent?.motion : undefined),
-      ...Object.fromEntries(
-        Object.entries(theme.motion ?? {}).filter(([, value]) => value !== undefined),
-      ),
-    },
-  }
-}
+import { ThemeContext } from './context'
+import type { ThemeConfig } from './types/config'
+import { definedValues, EMPTY_THEME, resolveTheme } from './resolve-theme'
 
 export function ConfigProvider({
   children,
   theme = EMPTY_THEME,
 }: PropsWithChildren<{ theme?: ThemeConfig }>) {
   const parent = useContext(ThemeContext)
-  const value = useMemo(() => resolveTheme(theme, parent), [parent, theme])
-
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
-}
-
-export function getDesignToken(theme: DesignTokenConfig = {}): AliasToken {
-  return resolveTheme(theme, null).token
-}
-
-const defaultThemeValue = resolveTheme(EMPTY_THEME, null)
-
-function useThemeValue(): ThemeValue {
-  const theme = useContext(ThemeContext) ?? defaultThemeValue
-  const policy = useMotionConfig()
-  return useMemo(
+  const inherited = theme.inherit === false ? null : parent
+  const { seed, token, algorithm, components, motion } = theme
+  const parentSeed = inherited?.seedOverrides
+  const parentToken = inherited?.tokenOverrides
+  const parentAlgorithm = inherited?.algorithm
+  const parentComponents = inherited?.componentOverrides
+  const visual = useMemo(
     () =>
-      policy.enabled
-        ? theme
-        : {
-            ...theme,
-            token: { ...theme.token, motion: false },
-          },
-    [policy.enabled, theme],
+      resolveTheme(
+        { seed, token, algorithm, components },
+        {
+          seedOverrides: parentSeed ?? {},
+          tokenOverrides: parentToken ?? {},
+          algorithm: parentAlgorithm ?? defaultAlgorithm,
+          componentOverrides: parentComponents ?? {},
+          motion: {},
+        },
+      ),
+    [
+      seed,
+      token,
+      algorithm,
+      components,
+      parentSeed,
+      parentToken,
+      parentAlgorithm,
+      parentComponents,
+    ],
   )
-}
-
-export function useToken(): TokenValue {
-  const { token } = useThemeValue()
-  return { token }
-}
-
-export function useOptionalToken(): TokenValue | null {
-  const value = useContext(ThemeContext)
-  return value ? { token: value.token } : null
-}
-
-export function useComponentToken<Name extends ComponentTokenName>(
-  name: Name,
-  factory: ComponentTokenFactory<Name>,
-): ComponentTokenMap[Name] {
-  const { token, componentOverrides } = useThemeValue()
-  const override = componentOverrides[name] as Partial<ComponentTokenMap[Name]> | undefined
-
-  return useMemo(
-    () => ({ ...factory(token), ...override }) as ComponentTokenMap[Name],
-    [factory, override, token],
+  const parentMotion = inherited?.motion
+  const policy = useMemo(
+    () => ({ ...parentMotion, ...definedValues(motion) }),
+    [parentMotion, motion],
   )
+  const value = useMemo(() => ({ ...visual, motion: policy }), [visual, policy])
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }

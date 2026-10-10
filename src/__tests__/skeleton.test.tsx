@@ -53,7 +53,7 @@ describe('Skeleton', () => {
     expect(getSkeletonToken(themeToken).backgroundColor).toBe(themeToken.colorFillSecondary)
     const view = await render(
       <ConfigProvider
-        theme={{ token: { motion: false }, components: { Skeleton: { rowHeight: 24 } } }}
+        theme={{ seed: { motion: false }, components: { Skeleton: { rowHeight: 24 } } }}
       >
         <Skeleton row={1} testID="themed" />
       </ConfigProvider>,
@@ -64,7 +64,7 @@ describe('Skeleton', () => {
   it('does not start the loop when motion is disabled', async () => {
     const loop = jest.spyOn(Reanimated, 'withRepeat').mockClear()
     await render(
-      <ConfigProvider theme={{ token: { motion: false } }}>
+      <ConfigProvider theme={{ seed: { motion: false } }}>
         <Skeleton row={1} />
       </ConfigProvider>,
     )

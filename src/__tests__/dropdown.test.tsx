@@ -14,7 +14,7 @@ function AppProvider({
   theme?: Parameters<typeof ConfigProvider>[0]['theme']
 }) {
   return (
-    <ConfigProvider theme={{ token: { motion: false }, ...theme }}>
+    <ConfigProvider theme={{ seed: { motion: false }, ...theme }}>
       <PortalHost>{children}</PortalHost>
     </ConfigProvider>
   )
@@ -203,7 +203,7 @@ describe('Dropdown', () => {
     }
 
     await render(
-      <AppProvider theme={{ token: { motion: true } }}>
+      <AppProvider theme={{ seed: { motion: true } }}>
         <Removable />
       </AppProvider>,
     )
@@ -456,7 +456,7 @@ describe('Dropdown', () => {
     }
 
     await render(
-      <AppProvider theme={{ token: { motion: true } }}>
+      <AppProvider theme={{ seed: { motion: true } }}>
         <DropdownMenu duration={240}>
           <DropdownItem
             defaultValue="a"
@@ -526,7 +526,7 @@ describe('Dropdown', () => {
     const cOpened = jest.fn()
 
     await render(
-      <AppProvider theme={{ token: { motion: true } }}>
+      <AppProvider theme={{ seed: { motion: true } }}>
         <DropdownMenu duration={240}>
           <DropdownItem defaultValue="a" options={[{ text: '面板 A', value: 'a' }]} />
           <DropdownItem
@@ -571,7 +571,7 @@ describe('Dropdown', () => {
     })
 
     await render(
-      <AppProvider theme={{ token: { motion: true } }}>
+      <AppProvider theme={{ seed: { motion: true } }}>
         <DropdownMenu duration={240}>
           <DropdownItem title="A">
             <View style={{ height: 132 }}>
@@ -625,7 +625,7 @@ describe('Dropdown', () => {
     const bClosed = jest.fn()
 
     await render(
-      <AppProvider theme={{ token: { motion: true } }}>
+      <AppProvider theme={{ seed: { motion: true } }}>
         <DropdownMenu duration={240}>
           <DropdownItem defaultValue="a" options={[{ text: 'A', value: 'a' }]} />
           <DropdownItem
@@ -706,7 +706,7 @@ describe('Dropdown', () => {
       return value
     })
     await render(
-      <AppProvider theme={{ token: { motion: true } }}>
+      <AppProvider theme={{ seed: { motion: true } }}>
         <DropdownMenu duration={240}>
           <DropdownItem defaultValue="a" options={[{ text: '面板 A', value: 'a' }]} />
         </DropdownMenu>

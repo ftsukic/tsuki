@@ -2,6 +2,8 @@ import type { ColorPalettes } from './preset-colors'
 import type { SeedToken } from './seed'
 
 export interface ColorMapToken extends ColorPalettes {
+  colorTextBase: string
+  colorBgBase: string
   colorWhite: string
   colorBlack: string
   colorShadow: string
@@ -65,7 +67,12 @@ export interface HeightMapToken {
 }
 
 export interface MapToken
-  extends SeedToken, ColorMapToken, FontMapToken, SizeMapToken, HeightMapToken {
+  extends
+    Omit<SeedToken, 'colorBgBase' | 'colorTextBase'>,
+    ColorMapToken,
+    FontMapToken,
+    SizeMapToken,
+    HeightMapToken {
   lineWidthBold: number
   lineWidthHairline: number
   motionDurationFast: number

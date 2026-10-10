@@ -10,7 +10,7 @@ import * as Reanimated from 'react-native-reanimated'
 
 function AppProvider({ children, motion = false }: { children?: ReactNode; motion?: boolean }) {
   return (
-    <ConfigProvider theme={{ token: { motion } }}>
+    <ConfigProvider theme={{ seed: { motion } }}>
       <PortalHost>{children}</PortalHost>
     </ConfigProvider>
   )
@@ -70,7 +70,7 @@ describe('Overlay', () => {
     const view = await render(
       <ConfigProvider
         theme={{
-          token: { motion: false },
+          seed: { motion: false },
           components: {
             Overlay: {
               backgroundColor: '#123456',

@@ -25,7 +25,7 @@ function AppProvider({ children }: { children?: ReactNode }) {
   return (
     <ConfigProvider
       theme={{
-        token: { motion: false },
+        seed: { motion: false },
       }}
     >
       <PortalHost>{children}</PortalHost>
@@ -149,7 +149,7 @@ describe('ActionSheet', () => {
         return value
       })
     const view = await render(
-      <ConfigProvider theme={{ token: { motion: true } }}>
+      <ConfigProvider theme={{ seed: { motion: true } }}>
         <PortalHost>
           <ActionSheet visible actions={[{ name: '单一动画' }]} />
         </PortalHost>
@@ -188,7 +188,7 @@ describe('ActionSheet', () => {
     }
 
     const view = await render(
-      <ConfigProvider theme={{ token: { motion: true } }}>
+      <ConfigProvider theme={{ seed: { motion: true } }}>
         <PortalHost>
           <StatefulActionSheet />
         </PortalHost>
@@ -211,7 +211,7 @@ describe('ActionSheet', () => {
     const view = await render(
       <ConfigProvider
         theme={{
-          token: { motion: false },
+          seed: { motion: false },
           components: {
             ActionSheet: {
               actionPressedBackgroundColor: '#e6f4ff',
@@ -402,7 +402,7 @@ describe('ActionSheet', () => {
     const view = await render(
       <ConfigProvider
         theme={{
-          token: { motion: false },
+          seed: { motion: false },
           components: { ActionSheet: { titleHeight: 56 } },
         }}
       >
@@ -455,7 +455,7 @@ describe('ActionSheet', () => {
 
   it('wraps the bottom safe-area inset in the cancel pressable', async () => {
     const view = await render(
-      <ConfigProvider theme={{ token: { motion: false } }}>
+      <ConfigProvider theme={{ seed: { motion: false } }}>
         <SafeAreaInsetsContext.Provider value={{ top: 0, right: 0, bottom: 20, left: 0 }}>
           <PortalHost>
             <ActionSheet visible actions={[{ name: '安全区域' }]} testID="safe-area-sheet" />
@@ -513,7 +513,7 @@ describe('ActionSheet', () => {
     const view = await render(
       <ConfigProvider
         theme={{
-          token: { motion: false },
+          seed: { motion: false },
           components: {
             ActionSheet: {
               cancelPressedBackgroundColor: '#e6f4ff',
@@ -548,7 +548,7 @@ describe('ActionSheet', () => {
 
   it('renders the bottom safe-area inset in the actions surface when cancel is hidden', async () => {
     const view = await render(
-      <ConfigProvider theme={{ token: { motion: false } }}>
+      <ConfigProvider theme={{ seed: { motion: false } }}>
         <SafeAreaInsetsContext.Provider value={{ top: 0, right: 0, bottom: 20, left: 0 }}>
           <PortalHost>
             <ActionSheet visible cancelText={null} actions={[{ name: '安全区域' }]} />

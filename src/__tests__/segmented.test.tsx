@@ -90,7 +90,7 @@ describe('Segmented', () => {
     await render(
       <ConfigProvider
         theme={{
-          token: { colorPrimary: '#0958d9' },
+          seed: { colorPrimary: '#0958d9' },
           components: { Button: { heightLG: 60 } },
         }}
       >

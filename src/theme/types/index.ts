@@ -1,6 +1,7 @@
 import type { MapToken } from './map'
 import type { SeedToken } from './seed'
 
+export * from './config'
 export * from './alias'
 export * from './components'
 export * from './map'
