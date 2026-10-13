@@ -1,5 +1,5 @@
 import * as Reanimated from 'react-native-reanimated'
-import { act, fireEvent, render, screen } from '@testing-library/react-native'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { Text } from 'react-native'
 import { closeImagePreview, PortalHost, showImagePreview } from '..'
 
@@ -100,13 +100,17 @@ describe('ImagePreview imperative lifecycle', () => {
           transitionDuration: 240,
         })
       })
+      fireEvent(screen.getByTestId('image-preview'), 'layout', {
+        nativeEvent: { layout: { width: 320, height: 640, x: 0, y: 0 } },
+      })
+      await waitFor(() => expect(completions).toHaveLength(1))
       await act(async () => completions[0]?.(true))
 
       await act(async () => {
         closeImagePreview()
         await Promise.resolve()
       })
-      expect(completions).toHaveLength(2)
+      await waitFor(() => expect(completions).toHaveLength(2))
 
       await act(async () => {
         showImagePreview({
@@ -115,6 +119,9 @@ describe('ImagePreview imperative lifecycle', () => {
           renderImage: (image) => <Text testID={`preview-${String(image)}`} />,
           transitionDuration: 240,
         })
+      })
+      fireEvent(screen.getByTestId('image-preview'), 'layout', {
+        nativeEvent: { layout: { width: 320, height: 640, x: 0, y: 0 } },
       })
 
       await act(async () => completions[1]?.(true))

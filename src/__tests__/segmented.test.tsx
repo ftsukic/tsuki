@@ -74,7 +74,9 @@ describe('Segmented', () => {
 
     view.rerender(<Segmented value="two" onChange={onChange} options={options} />)
 
-    expect(screen.getAllByRole('radio')[1].props.accessibilityState?.selected).toBe(true)
+    await waitFor(() =>
+      expect(screen.getAllByRole('radio')[1].props.accessibilityState?.selected).toBe(true),
+    )
   })
 
   it('uses an option accessibilityLabel for custom labels without text', async () => {

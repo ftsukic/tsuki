@@ -51,7 +51,7 @@ describe('PickerGroup', () => {
 
     expect(screen.getAllByTestId('picker-toolbar')).toHaveLength(1)
     expect(screen.queryAllByTestId('picker-date')).toHaveLength(1)
-    expect(screen.queryAllByTestId('picker-time')).toHaveLength(1)
+    expect(screen.queryAllByTestId('picker-time', { includeHiddenElements: true })).toHaveLength(1)
     expect(mounts).toHaveBeenCalledWith('date')
     expect(mounts).toHaveBeenCalledWith('time')
     await press(screen.getAllByRole('tab')[1])
