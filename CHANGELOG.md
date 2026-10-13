@@ -1,5 +1,11 @@
 # @ftsukic/tsuki
 
+## 0.1.1
+
+### Patch Changes
+
+- 15aa979: Add theme.mode light/dark shortcuts to Provider, ConfigProvider, and getDesignToken while preserving explicit algorithm precedence and theme inheritance.
+
 ## 0.1.0
 
 ### Major Changes
