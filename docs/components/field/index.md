@@ -75,9 +75,9 @@ import {
 | --- | --- | --- | --- |
 | title | `ReactNode` | — | 映射到 `Cell.title`，字段主标题。 |
 | titleExtra | `ReactNode` | — | 映射到 `Cell.titleExtra`，主标题同行附加内容。 |
-| label | `ReactNode` | — | 映射到 `Cell.label`，标题下方辅助描述。 |
+| description | `ReactNode` | — | 映射到 `Cell.description`，标题下方辅助描述。 |
 | valueExtra | `ReactNode` | — | 映射到 `Cell.valueExtra`，不进入控件区域。 |
-| extra | `ReactNode` | — | 映射到 `Cell.extra`。 |
+| trailing | `ReactNode` | — | 映射到 `Cell.trailing`。 |
 | value | 适配器值类型 | — | 受控值。 |
 | defaultValue | 适配器值类型 | — | 非受控初始值。 |
 | onChange | `(value) => void` | — | 表单值变化回调。 |
@@ -85,12 +85,12 @@ import {
 | disabled | `boolean` | `false` | 同时禁用 Cell 和对应控件。 |
 | readOnly | `boolean` | `false` | 阻止控件交互，但保留正常视觉；`FieldPicker` 也不会打开。 |
 | vertical | `boolean` | `false` | 映射到 `Cell.vertical`。 |
-| center | `boolean` | `FieldInput` 为 `true`，其余适配器为 `false` | 映射到 `Cell.center`，由 Cell 决定垂直居中行为。 |
+| center | `boolean` | FieldInput 和 Picker 类适配器为 `true`，其余为 `false` | 映射到 `Cell.center`，由 Cell 决定垂直居中行为。 |
 | titleWidth | `DimensionValue` | Field token | horizontal 时覆盖 Cell 的 title 区宽度。 |
 | titleAlign | `'left' \| 'center' \| 'right'` | `'left'` | 通过 `Cell.styles.title` 设置 title 文本对齐。 |
 | valueAlign | `'left' \| 'center' \| 'right'` | horizontal 为 `'right'`，vertical 为 `'left'` | 映射到 Cell value 区域的水平对齐；`FieldInput` 同时映射到 Input 文本。 |
-| icon | `ReactNode` | — | 映射到 `Cell.icon`。 |
-| isLink | `boolean` | `false`；FieldPicker 为 `true` | 映射到 Cell 链接箭头。 |
+| leading | `ReactNode` | — | 映射到 `Cell.leading`。 |
+| showArrow | `boolean` | `false`；Picker 类适配器为 `true` | 仅控制 Cell 箭头展示；点击事件控制反馈。 |
 | clickable | `boolean` | — | 映射到 `Cell.clickable`。 |
 | arrowDirection | `CellArrowDirection` | `'right'` | 映射到 Cell 箭头方向。 |
 | onPress | `CellProps['onPress']` | — | Cell 行点击回调；FieldPicker 内部使用它打开 Picker。 |
@@ -98,9 +98,9 @@ import {
 | divider | `boolean` | — | 映射到 `Cell.divider`；仍受 `border={false}` 限制。 |
 | style | `StyleProp<ViewStyle>` | — | Cell 根节点样式。 |
 | cellProps | `Pick<CellProps, 'styles'>` | — | Cell 的样式配置。 |
-| styles | `FieldStyles` | — | root、label、content、help、helpItem、extra 语义样式。 |
+| styles | `FieldStyles` | — | root、title、control、feedback、help、error 语义样式。 |
 
-`titleWidth`、`titleAlign` 只是在具体适配器调用 Cell 时生成 Cell styles，不会创建隐藏的 Field 布局层。`vertical`、`center`、分割线、箭头和外围布局均由 Cell 负责。FieldRadio 和 FieldCheckbox 提供 root、label、content 样式，不渲染反馈节点。
+`titleWidth`、`titleAlign` 只是在具体适配器调用 Cell 时生成 Cell styles，不会创建隐藏的 Field 布局层。`vertical`、`center`、分割线、箭头和外围布局均由 Cell 负责。FieldRadio 和 FieldCheckbox 提供 root、title、control 样式，不渲染反馈节点。
 
 ## FieldInput
 
@@ -117,13 +117,13 @@ import {
 />
 ```
 
-`inputProps.style` 和 `inputProps.styles` 只作用于 embedded Input；`cellProps.styles` 作用于 Cell。FieldInput 不支持 `description`、`errorMessage`、`status`；需要反馈内容时，应组合 `Cell` 与自定义 control。ref 为 Input 的 `TextInputInstance`。
+`inputProps.style` 和 `inputProps.styles` 只作用于 embedded Input；`cellProps.styles` 作用于 Cell。FieldInput 不支持 `help`、`errorMessage`、`status`；需要反馈内容时，应组合 `Cell` 与自定义 control。ref 为 Input 的 `InputInstance`（React Native 原生 TextInput）。
 
 ## FieldRadio
 
-`FieldRadio` 直接将 `Radio.Group` 放入 Cell 的 value 区域，值类型为 `RadioValue`。它暴露 `options`、`children`、`variant`、`buttonVariant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Radio.Group 的其他 View props（`style` 由 Cell 保留）。当选项为 `button` variant 时默认使用 Grid 等宽布局，每行默认最多 5 个，超出后换行；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonVariant` 可透传 Button 的视觉变体；`buttonLayout="intrinsic"` 可恢复内容宽度。`readOnly` 会阻止 group 交互，但不会给 Radio 套用 disabled 视觉。
+`FieldRadio` 直接将 `Radio.Group` 放入 Cell 的 value 区域，值类型为 `RadioValue`。它暴露 `options`、`children`、`variant`、`buttonVariant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Radio.Group 的其他 View props（`style` 由 Cell 保留）。当选项为 `button` variant 时默认使用 Grid 等宽布局；`direction="horizontal"` 时每行默认最多 5 个，超出后换行，默认 `direction="vertical"` 时为单列；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonVariant` 可透传 Button 的视觉变体；`buttonLayout="intrinsic"` 可恢复内容宽度。`readOnly` 会阻止 group 交互，但不会给 Radio 套用 disabled 视觉。
 
-`FieldRadio` 不支持 `description`、`errorMessage`、`status`；需要反馈内容时，应组合 `Cell` 与自定义 control。
+`FieldRadio` 不支持 `help`、`errorMessage`、`status`；需要反馈内容时，应组合 `Cell` 与自定义 control。
 
 ```tsx | pure
 <FieldRadio
@@ -138,13 +138,15 @@ import {
 />
 ```
 
-button 选项可以设置每行列数；例如文档中的 FieldRadio fixture 使用 8 个选项，在 `buttonColumns={5}` 下按 5+3 换行，第二行不会被拉伸。
+横向 button 选项可以通过 `buttonColumns` 设置每行列数；例如文档中的 FieldRadio fixture 使用 8 个选项，横向标题布局在 `buttonColumns={2}` 下按 2+2+2+2 换行，纵向标题布局在 `buttonColumns={4}` 下按 4+4 换行。
 
 ## FieldCheckbox
 
-`FieldCheckbox` 直接将 `Checkbox.Group` 放入 Cell 的 value 区域，值类型为 `readonly CheckboxValue[]`。它暴露 `options`、`children`、`variant`、`buttonVariant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Checkbox.Group 的其他 View props。`variant="button"` 时默认使用 Grid 等宽布局，每行默认最多 5 个，超出后换行；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonVariant` 可透传 Button 的视觉变体；`buttonLayout="intrinsic"` 可恢复内容宽度。`disabled` 会同时下传到 Cell 与 group；`readOnly` 只阻止交互。
+`FieldCheckbox` 直接将 `Checkbox.Group` 放入 Cell 的 value 区域，值类型为 `readonly CheckboxValue[]`。它暴露 `options`、`children`、`variant`、`buttonVariant`、`direction`、`gap`、`buttonLayout` 和 `buttonColumns` 及 Checkbox.Group 的其他 View props。`variant="button"` 时默认使用 Grid 等宽布局；`direction="horizontal"` 时每行默认最多 5 个，超出后换行，默认 `direction="vertical"` 时为单列；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；`buttonVariant` 可透传 Button 的视觉变体；`buttonLayout="intrinsic"` 可恢复内容宽度。`disabled` 会同时下传到 Cell 与 group；`readOnly` 只阻止交互。
 
-`FieldCheckbox` 不支持 `description`、`errorMessage`、`status`；需要反馈内容时，应组合 `Cell` 与自定义 control。
+Field 的 `vertical` 控制标题与内容是否上下排列，Group 的 `direction` 控制选项排列方向，两者独立。等宽按钮按内容区的可用宽度分列，不再受 `buttonMinWidth` 限制；`valueExtra` 会占用自身宽度，Group 在剩余空间内布局。按钮以 `buttonHeight` 为最小高度，内容自适应模式的长标签和自定义多行内容可撑高按钮，等宽模式的普通文字仍单行省略。需要更完整地展示较长标签时，可减少 `buttonColumns` 或使用 `vertical` 为内容区提供更多宽度。
+
+`FieldCheckbox` 不支持 `help`、`errorMessage`、`status`；需要反馈内容时，应组合 `Cell` 与自定义 control。
 
 ```tsx | pure
 <FieldCheckbox title="通知方式" value={channels} onChange={setChannels}>
@@ -175,7 +177,7 @@ button 选项可以设置每行列数；例如文档中的 FieldRadio fixture �
 | switchProps | `Pick<SwitchProps, 'style' \| 'styles'>` | — | Switch 的根节点及语义样式配置。 |
 | switchOnPress | `() => void` | — | Switch 自身的点击回调；Field 的 `onPress` 保留给 Cell 行 |
 
-FieldSwitch 继承 Switch 可安全使用的 React Native `PressableProps`，例如 accessibility props、`testID`、`hitSlop` 和 `pointerEvents`；`children`、Switch 原始 `style`、`disabled` 和 `onPress` 由适配器分别管理或重命名。它支持 root、label、content 语义样式，不支持 Web 专属属性、`checked` 或 `defaultChecked` 别名。
+FieldSwitch 继承 Switch 可安全使用的 React Native `PressableProps`，例如 accessibility props、`testID`、`hitSlop` 和 `pointerEvents`；`children`、Switch 原始 `style`、`disabled` 和 `onPress` 由适配器分别管理或重命名。它支持 root、title、control 语义样式，不支持 Web 专属属性、`checked` 或 `defaultChecked` 别名。
 
 ```tsx | pure
 <FieldSwitch
@@ -192,6 +194,8 @@ FieldSwitch 继承 Switch 可安全使用的 React Native `PressableProps`，例
 FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessibility props、`testID`、`hitSlop` 和 `pointerEvents`。只读状态会将 Switch 的 `pointerEvents` 设为 `none`，但不会改变其 `accessibilityState.disabled`。
 
 ## FieldPicker
+
+Picker 类适配器支持 help（控件下帮助文字）、errorMessage 与 status。description 始终显示在标题下，help 显示在值区控件下方。
 
 `FieldPicker` 将已确认的选项文本直接交给 Cell 展示，并将 `Popup` 与纯 `Picker` 作为 Cell 外部的弹层兄弟节点渲染。Picker 滚动只更新 draft；点击确认后才调用 `onChange`，取消、遮罩关闭或 readOnly 不会提交值。
 
@@ -258,8 +262,16 @@ FieldSwitch 还支持 Switch 可安全继承的 Pressable props，包括 accessi
 
 ## 语义样式与主题
 
-所有 Field 适配器支持 `styles.root`、`styles.label`、`styles.content`。Picker 适配器还渲染 `help` 反馈容器、`extra` 描述文本、`helpItem` 错误文本。下层 Cell、Input、Switch、Picker 的定制分别通过 `cellProps.styles`、`inputProps`、`switchProps`、`pickerProps` 传入；这些配置只开放 style/styles。
+所有 Field 适配器支持 `styles.root`、`styles.title`、`styles.control`。Picker 适配器还渲染 `feedback` 反馈容器、`help` 帮助文本、`error` 错误文本。`control` 仅包含控件或 Picker 显示值，反馈容器是其兄弟节点。下层 Cell、Input、Switch、Picker 的定制分别通过 `cellProps.styles`、`inputProps`、`switchProps`、`pickerProps` 传入；这些配置只开放 style/styles。
 
 `theme.components.Field` 仍表示 Field 系列表单 Cell 组合的主题 token，支持 `defaultTitleWidth`、`titleGap`、`descriptionGap`、`errorGap`、`descriptionColor`、`warningColor` 和 `errorColor`。它不产生运行时 `Field` 组件。
 
 Field 系列不实现 Form store、rules、validation、trigger、dependencies 或 name；这些能力由上层业务组合实现。
+
+Cell 展示属性直接使用 leading / description / trailing / showArrow。Picker 类适配器的 help 是控件下方帮助文字；description 是标题下说明，两者可以同时使用。cellProps.styles 使用 Cell 的 titleContainer / valueContainer 等语义槽，Field 自身的 styles.title / control / feedback / help / error 保持各自职责。旧展示 props 与原帮助文字 description 不提供兼容解析。
+
+Field 的样式计算函数属于内部实现，不从组件入口导出；外部定制使用 `style`、`styles`、`cellProps.styles` 和主题 token。
+
+字符串或数字 title 默认作为真实控件的 accessibilityLabel；required、readOnly、纯文本 description、help 和 errorMessage 默认合并为 accessibilityHint。显式 accessibilityLabel / accessibilityHint 优先；自定义 ReactNode 标题和反馈需由调用方提供可读文本。Picker 入口还提供已选值、展开状态以及 disabled 状态；readOnly 入口使用 text 角色并移除点击事件；错误反馈使用 alert 与 polite live region。继承的 accessibility props 对 Input、Switch 和 Group 作用于真实控件，对 Picker 系列的 label/hint 同时用于 Cell 入口，其余继承属性仍用于弹层内 Picker。
+
+旧 Field 样式槽 label / content / help（容器）/ extra / helpItem 分别迁移为 title / control / feedback / help（文本）/ error，不提供旧槽兼容解析。

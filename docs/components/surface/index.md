@@ -15,7 +15,7 @@ group:
 
 ## 介绍
 
-Surface 是只负责视觉承载的白色背景、圆角和裁剪容器，不包含 Card 的 header、body、footer 语义。
+Surface 是只负责视觉承载的主题背景、圆角和裁剪容器，不包含 Card 的 header、body、footer 语义。
 
 </section>
 

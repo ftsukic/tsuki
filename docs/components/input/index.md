@@ -55,7 +55,7 @@ import { Input } from '@ftsukic/tsuki'
 | placeholder | `string` | — | 占位文本 |
 | size | `'large' \| 'normal' \| 'small'` | `'normal'` | 输入字号、行高和内边距尺寸 |
 | bordered | `boolean` | `false` | 是否显示边框 |
-| focusedBordered | `boolean` | `true` | 聚焦时是否使用高亮边框色；设为 `false` 保持普通边框色 |
+| focusedBordered | `boolean` | `false` | 默认聚焦保持普通边框色；设为 `true` 开启聚焦高亮，需要同时开启 bordered |
 | disabled | `boolean` | `false` | 禁止编辑、清除和密码切换，并使用 disabled token |
 | readOnly | `boolean` | `false` | 禁止编辑但保留普通展示样式 |
 | clearable | `boolean` | `false` | 单行输入有值时展示清除按钮；multiline 输入不显示 |
@@ -73,7 +73,7 @@ import { Input } from '@ftsukic/tsuki'
 | `prefix` / `suffix` | `ReactNode` | — | 输入前后内容；password 模式由可见性按钮占用 suffix |
 | `addonBefore` / `addonAfter` | `ReactNode` | — | 输入框外侧内容 |
 | style | `StyleProp<ViewStyle>` | — | Input 根节点样式 |
-| styles | `InputStyles` | — | `root`、`input`、`prefix`、`suffix`、`clear`、`count`、`addonBefore`、`addonAfter` 语义样式；支持对象或函数。 |
+| styles | `InputStyles` | — | `root`、`container`、`input`、`prefix`、`suffix`、`clear`、`count`、`addonBefore`、`addonAfter` 语义样式；支持对象或函数。 |
 
 Input 继承 React Native `TextInputProps` 的键盘、光标、选择、提交和无障碍属性；组件管理 `value`、`editable`、`multiline`、`onChange`、`onChangeText` 和 `style`。默认 accessibility role 由原生 TextInput 提供，不额外生成 label；调用方应提供 `accessibilityLabel` 或关联的可见 label。`type="number"` 不会执行 number conversion，因此 `0`、`001` 等输入保持原样。password 模式保留 `suffix` 位置给可见性切换按钮，不支持同时注入另一个 password suffix。
 
@@ -81,7 +81,7 @@ Input 继承 React Native `TextInputProps` 的键盘、光标、选择、提交�
 
 ## 主题定制
 
-Input 使用 `theme.components.Input`。单行输入默认 `normal` 尺寸为 `fontSize: 14`、`lineHeight: 24`、`paddingVertical: 10`、`paddingHorizontal: 16`；多行 Textarea 使用独立的基础文本度量，默认 `lineHeight: 20`、`paddingVertical: 8`、`paddingHorizontal: 16`。字号、行高、内边距、边框、圆角、占位文本色、禁用色、清除按钮和密码按钮均从 Input token 派生。Input 不提供固定 `height` token；整体高度由 lineHeight 与内边距自然形成，需要特殊固定尺寸时，可通过 `styles.root` 显式覆盖，由业务自行承担固定高度布局。
+Input 使用 `theme.components.Input`。单行输入默认 `normal` 尺寸为 `fontSize: 14`、`lineHeight: 24`、`paddingVertical: 10`、`paddingHorizontal: 16`；多行 Textarea 使用独立的基础文本度量，默认 `lineHeight: 20`、`paddingVertical: 8`、`paddingHorizontal: 16`。字号、行高、内边距、边框、圆角、占位文本色、禁用色、清除按钮和密码按钮均从 Input token 派生。Input 不提供固定 `height` token；整体高度由 lineHeight 与内边距自然形成，需要特殊固定尺寸时，可通过 `styles.container` 显式覆盖，由业务自行承担固定高度布局。
 
 ```tsx | pure
 import { ConfigProvider, Input } from '@ftsukic/tsuki'
@@ -90,3 +90,15 @@ import { ConfigProvider, Input } from '@ftsukic/tsuki'
   <Input bordered placeholder="请输入内容" />
 </ConfigProvider>
 ```
+
+## 语义结构与文字度量
+
+`style` / `styles.root` 控制整个 Input（包含 addon）；`styles.container` 控制输入框的背景、边框、圆角和内边距。prefix、suffix、addonBefore、addonAfter 是稳定的 View 区域，使用 ViewStyle；字符串由内部 Text 渲染，自定义节点的文字样式由节点自身负责。input、count 使用 TextStyle；clear 使用 ViewStyle。password 的切换按钮位于 suffix 区域。单行和多行均支持 count，多行不显示 prefix、suffix 和 clear。
+
+单行输入不设置固定文字高度。iOS 默认不设置 TextInput 的 lineHeight，使用原生文字度量和内容最小高度；Web、Android 使用 token 行高，Android 默认关闭 includeFontPadding。通过 styles.input 指定 lineHeight 时由调用方负责字体适配，不应设置小于字体所需高度的行高。
+
+多行 rows 与 autoSize 的行数边界采用最终 styles.input 的 lineHeight；只修改 fontSize 时，默认行高至少为该字号。隐藏测量输入共享可见输入的文字样式，并移除动态高度约束。显式 height、minHeight、maxHeight 会覆盖自动高度结果；需要自动增长时不要同时固定这些尺寸。行数边界支持 allowFontScaling 和 maxFontSizeMultiplier；系统字体缩放及不同字体的实际效果仍需设备验证。
+
+自动高度的隐藏测量节点采用可见输入框的实际布局宽度；Web 在受控值更新后重新读取 scrollHeight，测量节点高度归零以支持删除后的缩回。
+
+iOS 在内容或实际宽度变化时重新创建隐藏测量节点，避免原生 contentSize 沿用旧值；可见输入节点保持挂载，保留焦点和选择。隐藏节点只在 Web 设置 numberOfLines=1，原生测量不限制行数。

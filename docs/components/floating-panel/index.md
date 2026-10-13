@@ -52,7 +52,7 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `Provider` 内�
 <code src="../../../src/floating-panel/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 FloatingPanel token 和 semantic styles 定制外观。"></code>
 
 <!-- prettier-ignore -->
-<code src="../../../src/floating-panel/__fixtures__/examples/top.tsx" title="顶部下拉" description="placement=\"top\" 从顶部展开，默认适配顶部 safe-area，拖拽条位于面板底部。"></code>
+<code src="../../../src/floating-panel/__fixtures__/examples/top.tsx" title="顶部下拉" description="收起保留月份、星期标题和一周日期，下拉展开完整月历，高度跟随内容与安全区。"></code>
 
 ## API
 
@@ -65,7 +65,7 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `Provider` 内�
 | `anchors` | `readonly number[]` | `[100, windowHeight * 0.6]` | 高度锚点；无效值会被过滤并按升序处理 |
 | `placement` | `'top' \| 'bottom'` | `'bottom'` | 面板固定在顶部或底部；顶部模式向下展开，底部模式向上展开 |
 | `duration` | `number` | 主题 `animationDuration` | 吸附动画时长，单位为毫秒 |
-| `magnetic` | `boolean` | `true` | 松手后是否吸附到最近锚点 |
+| `magnetic` | `boolean` | `true` | 松手后是否吸附到锚点；短滑可切换相邻锚点 |
 | `draggable` | `boolean` | `true` | 是否允许拖动；关闭时隐藏默认拖拽条 |
 | `contentDraggable` | `boolean` | `true` | 是否允许从内容区域拖动面板 |
 | `safeAreaInsetBottom` | `boolean` | `true` | 是否把底部 safe-area inset 加入内容 padding |
@@ -82,15 +82,21 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `Provider` 内�
 
 面板内部使用 `ScrollView`。`placement="bottom"` 时 header/drag area 位于面板顶部，上拉展开、下拉收起，圆角在顶部，阴影主要向上。`placement="top"` 时内容区域位于 drag area 之前，drag area 位于面板底部，下拉展开、上拉收起，圆角在底部，阴影主要向下。
 
+开启磁吸时，慢滑达到 32px，或滑动至少 8px 且松手速度达到 0.5px/ms，会按滑动方向至少切换到相邻锚点；长拖动仍可跨越多个锚点。未达到上述条件时吸附到最近锚点。手势取消只按当前位置收敛，不触发短滑切换。关闭磁吸时保持任意边界内高度。收起表示回到最小锚点，不会隐藏或卸载面板。
+
 当面板尚未达到最大高度时，内容垂直手势优先拖动面板。bottom 面板达到最大高度后，内容向上滚动交给 `ScrollView`，内容位于顶部并向下拖动时重新接管面板。top 面板达到最大高度后，内容区域始终优先交给 `ScrollView`，建议从底部 drag area 发起收起操作，避免列表无法正常向上滚动。`contentDraggable={false}` 时只有 drag area 拖动，内容仍可滚动。
 
 `styles` 支持对象或函数，函数接收 `{ props, state: { height, minHeight, maxHeight, dragging } }`。`styles.container` 作用于不负责裁剪的 absolute/shadow wrapper；`style` 与 `styles.root` 作用于负责背景、圆角和 `overflow: hidden` 的可见面板 surface；`styles.contentContainer` 作用于内部 `ScrollView` 内容容器。
 
+语义结构为 `container → root → header / content → contentContainer`，默认 `bar` 位于 `header` 内；top placement 的 header 排在 content 之后。`styles.content` 定制滚动视口，`styles.contentContainer` 定制内容布局和 padding。面板高度由 `height`、`defaultHeight`、`anchors` 和手势管理，`styles.container.height` 不能覆盖内部动画高度。
+
 组件没有遮罩，不会阻止面板外部页面交互；不提供 Web 专用的 `lockScroll`、`teleport` 或 imperative API。
+
+面板通过 Portal 挂载在宿主层，不会自动跟随导航页面失去焦点而消失。导航栈可能在回退动画结束后才卸载页面；需要回退时立即移除面板的宿主，应使用页面焦点状态条件挂载 FloatingPanel（例如 `isFocused ? <FloatingPanel /> : null`），不要等页面最终卸载。
 
 ### 无障碍与平台说明
 
-FloatingPanel 不替换 children 的无障碍语义；交互内容应自行提供 `accessible`、`accessibilityRole` 和 `accessibilityLabel`。默认拖拽条是视觉手柄，拖拽能力通过触摸手势提供。组件直接读取 `react-native-safe-area-context` 的 inset；宿主应用需要安装该 peer dependency，并在应用根节点按需挂载 `SafeAreaProvider`。推荐的 `Provider` 不会重复创建 Safe Area context。
+FloatingPanel 不替换 children 的无障碍语义；交互内容应自行提供 `accessible`、`accessibilityRole` 和 `accessibilityLabel`。允许拖动时，默认手柄提供 `adjustable` role、当前高度和范围，并通过 `increment` / `decrement` action 展开或收起一档；受控模式仍需父组件回写高度。自定义 header 保留其内部无障碍语义，组件不将它合并成一个调节控件。组件直接读取 `react-native-safe-area-context` 的 inset；宿主应用需要安装该 peer dependency，并在应用根节点按需挂载 `SafeAreaProvider`。推荐的 `Provider` 不会重复创建 Safe Area context。
 
 H5 文档使用 `react-native-web` 预览；Jest 只验证状态、样式和 responder 逻辑，不代表 iOS、Android 或 HarmonyOS 的真实设备触摸表现。
 

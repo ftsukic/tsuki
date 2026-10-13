@@ -49,6 +49,8 @@ import { ActionSheet, ConfigProvider, PortalHost, Provider, showActionSheet } fr
 
 <code src="../../../src/action-sheet/__fixtures__/examples/custom-subname.tsx" title="自定义 subname" description="name 和 subname 都可以传入 ReactNode。"></code>
 
+<code src="../../../src/action-sheet/__fixtures__/examples/long-list.tsx" title="长操作列表" description="列表滚动，标题和取消区保持可见；打开后增加操作，检查退出动画和取消背景。"></code>
+
 ## API
 
 ### ActionSheetProps
@@ -58,13 +60,13 @@ import { ActionSheet, ConfigProvider, PortalHost, Provider, showActionSheet } fr
 | visible | `boolean` | `false` | 是否显示；ActionSheet 是受控组件 |
 | title | `ReactNode` | — | 顶部说明标题，不参与点击 |
 | actions | `readonly ActionSheetAction[]` | `[]` | 操作列表 |
-| cancelText | `ReactNode` | `'取消'` | 底部取消按钮文案；传 `null`、`undefined` 或 `false` 可隐藏 |
+| cancelText | `ReactNode` | `'取消'` | 底部取消按钮文案；传 `null` 或 `false` 可隐藏，`undefined` 使用默认文案 |
 | closeOnAction | `boolean` | `true` | action 点击后是否发出关闭请求；对应 Vant 的 `closeOnClickAction`，当前名称尚未对齐 |
 | closeOnPressOverlay | `boolean` | `true` | 点击遮罩是否发出关闭请求 |
 | overlay | `boolean` | `true` | 是否渲染全屏遮罩 |
 | safeAreaInsetBottom | `boolean` | `true` | 是否在面板根部追加底部安全区；有取消按钮时安全区属于取消按钮的按压区域 |
 | zIndex | `number` | 主题 `zIndex` | 浮层宿主层级 |
-| style | `StyleProp<ViewStyle>` | — | 面板 root 样式 |
+| style | `StyleProp<ViewStyle>` | — | 全屏浮层 root 样式 |
 | styles | `ActionSheetStyles` | — | `mask`、`wrapper`、`container`、`root`、`body`、`header`、`title`、`item`、`label`、`description`、`footer`、`cancel`、`cancelLabel` 语义样式；支持对象或函数。 |
 | onClose | `() => void` | — | 关闭请求回调；调用方应更新 `visible={false}` |
 | onSelect | `(action, index) => void` | — | action 选中回调；接收当前 action 和其索引 |
@@ -73,6 +75,20 @@ import { ActionSheet, ConfigProvider, PortalHost, Provider, showActionSheet } fr
 | onClosed | `() => void` | — | 关闭动画完成后回调 |
 
 组件继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`；其余 View props 会透传到面板 root，ref 也指向该节点。`style` 和 `styles.root` 作用于全屏根节点，`styles.container` 作用于面板，`styles.mask` 作用于遮罩，其他 slots 作用于对应内部节点。
+
+面板最大高度为窗口高度减去顶部安全区。标题和取消区固定，操作列表超出可用空间时滚动；短列表仍由内容自然撑开。
+
+| 语义槽位 | 作用范围 |
+| --- | --- |
+| root / mask / wrapper | 全屏浮层 / 遮罩 / 面板定位层 |
+| container | 面板内容根节点，负责整体圆角与裁切；最大高度仍受窗口约束 |
+| body | 标题和可滚动操作列表的共同区域 |
+| header / title | 固定标题区域 / 标题文字 |
+| item / label / description | 操作点击区域 / 主文字 / 辅助文字 |
+| footer | 取消按钮和底部安全区的共同区域 |
+| cancel / cancelLabel | 取消内容 / 取消文字；`cancel.backgroundColor` 覆盖整个取消点击区域，包括底部安全区，按压时使用取消按压 token |
+
+`label`、`description`、`title` 和 `cancelLabel` 的文字样式只应用于字符串或数字；自定义 ReactNode 自行管理样式。
 
 ActionSheet 不会直接修改 `visible`。action、取消按钮和默认遮罩点击都会先触发 action 回调（如果有），再触发 `onClose`；父组件需要在回调中设置 `visible={false}`。设置 `closeOnAction={false}` 后 action 仍会执行，但不触发关闭请求。
 
@@ -92,6 +108,8 @@ ActionSheet 不会直接修改 `visible`。action、取消按钮和默认遮罩�
 每个 action 都是完整的 `Pressable` 点击区域，默认无障碍角色为 `button`，disabled/loading 会同步 `accessibilityState`。标题不参与操作导航；面板标记为 modal。当前不支持 action 级别的 `style`、`accessibilityLabel` 或额外 Pressable props；需要自定义内容时使用 `name` 和 `subname` 的 ReactNode。
 
 ActionSheet 级别的 `onSelect` 接收 `(action, index)`，在 action 的 `callback(action)` 之后触发；它不会被 `closeOnAction` 替代。
+
+`callback` 或 `onSelect` 同步抛错时，内部选择结算和默认关闭仍会执行，错误继续向调用方传播；`closeOnAction={false}` 时仍保留面板。
 
 ### 命令式 API
 
@@ -155,3 +173,5 @@ if (result) {
 ## 动画
 
 ActionSheet 复用 Popup 的底部平移和遮罩渐变，整个面板一起运动。遵循 `Provider motion` 的开关、Reduced Motion 和时长倍率；Portal 在退出完成后卸载。
+
+进入和退出期间固定平移距离，稳定展示时更新面板测量；操作数量或内容高度变化后，退出使用最新高度。面板圆角仅由 ActionSheet 的 token 或 `styles.container` 管理，不受 Popup 圆角 token 影响。

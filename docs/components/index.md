@@ -27,7 +27,7 @@ order: 1
 - [Popover](/components/popover)
 - [Picker](/components/picker)、[PickerGroup](/components/picker-group)、[Progress](/components/progress)、[Provider](/components/provider)、[Radio](/components/radio)
 - [Segmented](/components/segmented)、[Surface](/components/surface)
-- [Search](/components/search)、[Tabs](/components/tabs)、[Text](/components/text)、[TextInput](/components/text-input)、[Theme](/components/theme)、[Toast](/components/toast)
+- [Search](/components/search)、[Tabs](/components/tabs)、[Text](/components/text)、[Theme](/components/theme)、[Toast](/components/toast)
 - [SwipeCell](/components/swipe-cell)
 - [Swipe](/components/swipe)
 - [Switch](/components/switch)、[Watermark](/components/watermark)

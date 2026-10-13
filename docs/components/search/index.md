@@ -53,7 +53,7 @@ import { Search } from '@ftsukic/tsuki'
 
 <code src="../../../src/search/__fixtures__/examples/auto-search.tsx" title="自动搜索" description="输入停止后通过 debounce 触发最新搜索。"></code>
 
-<code src="../../../src/search/**fixtures**/examples/square.tsx" title="Square Search" description="使用 shape=\"square\" 渲染小圆角搜索框。"></code>
+<code src="../../../src/search/__fixtures__/examples/square.tsx" title="Square Search" description="使用 square 形状渲染小圆角搜索框。"></code>
 
 ## API
 
@@ -80,11 +80,13 @@ import { Search } from '@ftsukic/tsuki'
 | autoSearch | `boolean` | `false` | 是否在输入变化后自动搜索 |
 | debounce | `number` | `300` | 自动搜索的延迟毫秒数 |
 | style | `StyleProp<ViewStyle>` | — | Search root 节点样式 |
-| styles | `SearchStyles` | — | `root`、`divider`、`left`、`content`、`prefix`、`label`、`input`、`suffix`、`clear`、`action` 语义样式 |
+| styles | `SearchStyles` | — | `root`、`divider`、`left`、`content`、`container`、`prefix`、`label`、`input`、`suffix`、`clear`、`action` 语义样式 |
+
+`content` 控制包住 Input 的外层布局；`container` 控制可见输入框的背景、圆角、高度和内边距，并覆盖 Search 默认样式。`prefix` 控制整个搜索图标与 label 的前缀区域，包括它与输入文字之间的间距；内部图标与 label 的排列由 Search 管理。`label` 仅影响自动生成的文字，自定义 ReactNode 自行设置内部样式。`left` 和 `action` 为 `null`、`undefined` 或 `false` 时不生成区域或占用间距。
 
 Search 继承 Input 支持的原生 TextInput props，包括键盘、选择、可访问性、`editable` 和提交事件属性，但始终保持单行。`multiline`、`height`、`leftIcon` 不属于 Search API；IM 或自动增高输入请直接使用 `<Input multiline autoSize />`。
 
-通过 ref 可以调用底层原生输入框的 `focus`、`blur` 和 `clear`。`onSearch` 提交时读取 Input 当前值；开启 `autoSearch` 后，连续输入只会在 debounce 后触发最后一次搜索，提交会取消待执行的自动搜索。
+通过 ref 可以调用底层原生输入框的 `focus`、`blur` 和 `clear`。`onSearch` 提交时读取 Input 当前值；开启 `autoSearch` 后，连续输入只会在 debounce 后触发最后一次搜索，提交会取消待执行的自动搜索。改变 `autoSearch`、`debounce` 或 `onSearch`，以及进入禁用或只读状态时，也会取消待执行的自动搜索；恢复后需要再次输入才会触发。
 
 ## 主题定制
 

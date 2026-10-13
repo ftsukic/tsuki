@@ -33,7 +33,7 @@ import { BottomBar } from '@ftsukic/tsuki'
 
 <code src="../../../src/bottom-bar/__fixtures__/examples/button-group.tsx" title="底部按钮组" description="使用 Button.Group block 在 BottomBar 中展示等宽按钮。"></code>
 
-<code src="../../../src/bottom-bar/__fixtures__/examples/input.tsx" title="输入操作区" description="将 TextInput 和 Button 组合到页面底部。"></code>
+<code src="../../../src/bottom-bar/__fixtures__/examples/input.tsx" title="输入操作区" description="将 Input 和 Button 组合到页面底部。"></code>
 
 <code src="../../../src/bottom-bar/__fixtures__/examples/safe-area.tsx" title="底部安全区" description="默认处理底部 safe-area inset。"></code>
 
@@ -47,7 +47,7 @@ import { BottomBar } from '@ftsukic/tsuki'
 | safeAreaInsetBottom | `boolean` | `true` | 是否把 `SafeAreaInsetsContext` 的 bottom inset 加入底部内边距。 |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式，优先级高于默认样式。 |
 
-BottomBar 继承 React Native `ViewProps`，并由组件管理 `children` 和 `style`。它本身不是 Pressable；Button、TextInput 或其他交互子节点自行负责无障碍语义和点击反馈。
+BottomBar 继承 React Native `ViewProps`，并由组件管理 `children` 和 `style`。它本身不是 Pressable；Button、Input 或其他交互子节点自行负责无障碍语义和点击反馈。
 
 ## 布局行为
 

@@ -33,7 +33,7 @@ import { Avatar, Badge } from '@ftsukic/tsuki'
 
 <code src="../../../src/badge/__fixtures__/examples/position.tsx" title="四角定位和偏移" description="包裹 children 时支持四个角的 position 和 offset。"></code>
 
-<code src="../../../src/badge/__fixtures__/examples/status.tsx" title="状态点" description="使用兼容扩展 status 和 text 展示状态。"></code>
+<code src="../../../src/badge/__fixtures__/examples/status.tsx" title="状态点" description="使用 status 和 text 展示状态。"></code>
 
 <code src="../../../src/badge/__fixtures__/examples/theme.tsx" title="主题和语义样式" description="通过组件 token 和 styles 定制 Badge，包括 standalone 固定圆形。"></code>
 
@@ -50,7 +50,7 @@ import { Avatar, Badge } from '@ftsukic/tsuki'
 | offset | `readonly [number, number]` | — | attached 模式下在 position 基础上的水平、垂直偏移 |
 | position | `'top-right' \| 'top-left' \| 'bottom-right' \| 'bottom-left'` | `'top-right'` | attached 模式下的角落位置；standalone 模式不改变布局 |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式，优先级高于 `styles.root` |
-| styles | `BadgeStyles` | — | `root / indicator / dot / text` 语义样式 |
+| styles | `BadgeStyles` | — | `root / indicator / content / text` 语义样式 |
 
 Badge 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`。当 `dot` 和 `content` 都没有可展示内容时，如果存在 children 仍会渲染 children，否则不渲染节点。
 
@@ -66,7 +66,7 @@ standalone 不使用 `absolute` 定位，`position` 不会制造额外位移；�
 
 数字为单字符时接近 16×16 圆形；两位及以上数字（包括 `99+`）按内容形成胶囊。`dot` 的默认尺寸为 8×8。
 
-需要固定圆形时，通过 semantic styles 显式覆盖 indicator 和文字：
+需要固定圆形时，通过 semantic styles 显式覆盖 indicator 和 content：
 
 ```tsx | pure
 <Badge
@@ -80,7 +80,7 @@ standalone 不使用 `absolute` 定位，`position` 不会制造额外位移；�
       paddingHorizontal: 0,
       borderRadius: 14,
     },
-    text: {
+    content: {
       fontSize: 16,
       lineHeight: 28,
     },
@@ -88,21 +88,36 @@ standalone 不使用 `absolute` 定位，`position` 不会制造额外位移；�
 />
 ```
 
-`styles.indicator` 控制角标本体，`styles.text` 控制内容文字；consumer semantic styles 会覆盖默认 token 样式。
+`styles.indicator` 控制角标本体，`styles.content` 控制自动生成的数字或内容文字；consumer semantic styles 会覆盖默认 token 样式。
 
-## 兼容扩展
+## 语义结构与无障碍
 
-以下 API 保留用于兼容现有代码，不作为 Badge 的主 API 范式：
+| 槽位      | 作用                                                |
+| --------- | --------------------------------------------------- |
+| root      | 整体根 View；style、ref 和继承的 ViewProps 指向这里 |
+| indicator | 数字徽标本体、普通红点或状态点                      |
+| content   | content 中自动生成的 Text                           |
+| text      | status 模式下 text 中自动生成的说明 Text            |
 
-| 属性            | 替代 API  | 说明                                                          |
-| --------------- | --------- | ------------------------------------------------------------- |
-| `count`         | `content` | deprecated alias；同时传入时以 `content` 为准                 |
-| `overflowCount` | `max`     | deprecated alias；同时传入时以 `max` 为准                     |
-| `status`        | —         | Ant Design 风格状态扩展；设置后优先于 `content` 和 `dot`      |
-| `text`          | —         | `status` 模式下显示在状态点右侧的文字                         |
-| `size`          | —         | 保留 `small / medium` 尺寸兼容；未传时使用新的 Vant 16px 基线 |
+状态点和说明文字的排列、附着模式的定位与测量层属于内部结构，不提供样式槽。自定义 ReactNode 内部样式由调用方设置；数组和 Fragment 中的裸文字会自动生成 Text。空字符串、布尔值和空数组或 Fragment 不会生成内容徽标；数字 0 由 showZero 控制。
 
-`Badge` 不提供 Web slot、tooltip、动画或 `Badge.Ribbon` 等 RN 不存在的能力。
+standalone 的数字文字、红点和状态点默认提供可访问标签，分别为显示内容、`提示` 和状态名称；有纯文字状态说明时优先使用说明。自定义节点不推断内部内容，请显式设置 accessibilityLabel。业务应使用有含义的标签，例如 `accessibilityLabel="有未读消息"`。显式 accessible 和 accessibilityLabel 优先。
+
+attached 模式不会自动将 children 分组或改写其无障碍标签，交互控件保留自身语义。业务应在目标控件的 label 中包含角标信息。动态播报可使用继承的 accessibilityLiveRegion；组件不默认播报每次计数更新。
+
+## 状态与尺寸
+
+| 属性 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| status | `'success' \| 'processing' \| 'default' \| 'error' \| 'warning'` | — | 状态点；优先于 content 和 dot |
+| text | `ReactNode` | — | 状态点右侧说明 |
+| size | `'small' \| 'medium'` | — | 默认使用 16px 基线；medium 使用 20px |
+
+## 迁移
+
+删除 count 和 overflowCount，分别使用 content 和 max。删除 styles.dot，状态点统一使用 styles.indicator；status 模式的 styles.indicator 不再作用于整行容器。数字文字从 styles.text 迁移到 styles.content；styles.text 仅控制状态说明。没有旧字段兼容解析。
+
+`Badge` 不提供 Web slot、tooltip、动画或 `Badge.Ribbon`。
 
 ## 主题定制
 

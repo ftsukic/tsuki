@@ -73,18 +73,20 @@ import { Tabs } from '@ftsukic/tsuki'
 | animated | `boolean` | `false` | 是否开启内容区域切换动画 |
 | swipeable | `boolean` | `false` | 内容存在时允许横向手势切换；手势到达 disabled Tab 会恢复当前可用页且不触发 `onChange` |
 | scrollable | `boolean` | `false` | Tab 数量较多时启用横向滚动；默认 Tab 等分宽度；激活项变化时会自动滚动到可见区域 |
-| shrink | `boolean` | `false` | 按标题内容布局 Tab，并启用横向滚动；等价于 `scrollable |  | shrink` 的导航行为，激活项变化时会自动滚动到可见区域 |
+| shrink | `boolean` | `false` | 按标题内容布局 Tab，并启用横向滚动；激活项变化时会自动滚动到可见区域 |
 | lazyRender | `boolean` | `true` | 首次激活前不渲染 pane；首次激活后保持挂载，后续切换不卸载 |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
 | styles | `TabsStyles` | — | `root`、`header`、`item`、`label`、`indicator`、`body`、`content` 语义样式；支持对象或函数。 |
 
-Tabs 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`。根节点默认无障碍角色为 `tablist`，每个 Tab 默认角色为 `tab`，并同步 `selected` 和 `disabled` 状态。
+Tabs 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`。根 View 默认不设置无障碍角色；导航区域默认角色为 `tablist`，每个 Tab 默认角色为 `tab`，并同步 `selected` 和 `disabled` 状态。启用内容页时，每页使用 `tabpanel` 角色，并通过 `aria-controls` / `aria-labelledby` 与对应 Tab 关联。传给 Tabs 的 `accessibilityLabel`、`accessibilityHint` 和 `aria-label` 用于描述 Tab 列表。
+
+在 H5 中，Tab 键进入当前激活项（没有有效激活项时进入第一个可用项）；左右方向键在可用项间循环移动焦点，Home/End 移到首项或末项，Enter/Space 激活焦点项。禁用项会被跳过。
 
 ### Tab
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| name | `string \| number` | 内部 index | Tab 的选择值；受控使用时应提供稳定值 |
+| name | `string \| number` | 内部 index | Tab 的选择值；每个最终值必须唯一。省略时使用当前 index，因此数字 name 不应与其他未命名项的 index 冲突 |
 | title | `ReactNode` | — | 导航标题；字符串和数字使用库内 `Text` 样式 |
 | styles | `TabSemanticStyles` | — | 当前项的 root、label、content 样式 |
 | disabled | `boolean` | `false` | 禁止点击和状态变化 |
@@ -92,7 +94,7 @@ Tabs 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`
 | style | `StyleProp<ViewStyle>` | — | 当前 Tab 的 Pressable 样式 |
 | 其他 PressableProps | React Native `PressableProps` | — | 例如 `testID`、`accessibilityLabel`、`hitSlop` 和 `onPressIn` |
 
-`Tab` 是声明式子项，交互由 Tabs 内部的 `Pressable` 提供。整个 Tab 区域都可以点击；disabled 时不会触发 `onChange`。没有 `name` 时使用当前 index，适合无受控需求的导航场景。
+`Tab` 是声明式子项，交互由 Tabs 内部的 `Pressable` 提供。整个 Tab 区域都可以点击；disabled 时不会触发 `onChange`。没有 `name` 时使用当前 index，适合无受控需求的导航场景。重复的最终值会在开发环境提示错误，且无法区分对应的 Tab。
 
 Tab 的 `children` 不要求存在。没有任何 pane 内容时，Tabs 只渲染导航，不生成空内容区域。`lazyRender` 默认为 visit-once：pane 首次激活前不渲染，激活后保持挂载；设为 `false` 时所有 pane 一开始都挂载。`swipeable` 只在存在内容时启用横向手势，不会把 navigation-only Tab 变成空页面。
 

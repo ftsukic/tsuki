@@ -46,7 +46,7 @@ root                 全屏根节点，style / styles.root
         └── footer
 ```
 
-Popup 提供 root、mask、wrapper、container；Dialog 和 ActionSheet 在面板内增加内容槽。Toast 与 Notify 使用 container 定制可见提示。Popup、Dialog、ActionSheet 的 ref 和透传 ViewProps 仍指向面板；根 `style` 的作用位置已经改为全屏根节点。
+Popup 提供 root、mask、wrapper、container；Dialog 和 ActionSheet 在面板内增加内容槽。Toast 的 style / styles.root 直接定制提示气泡，styles.content 定制内容，不公开 wrapper / container 定位槽。Notify 使用 container 定制可见提示。Popup、Dialog、ActionSheet 的 ref 和透传 ViewProps 仍指向面板；根 `style` 的作用位置已经改为全屏根节点。
 
 Popover 的 root 是底层原生弹出边界，reference 是触发区域，container 是内部内容容器，content 是自动生成的内容 Text；它不暴露底层引擎无法单独定制的箭头槽。
 
@@ -68,15 +68,15 @@ Popover 的 root 是底层原生弹出边界，reference 是触发区域，conta
 
 <FieldInput
   title="姓名"
-  styles={{ label: { fontWeight: '600' }, content: { minHeight: 40 } }}
+  styles={{ title: { fontWeight: '600' }, control: { minHeight: 40 } }}
   cellProps={{ styles: { description: { color: '#666' } } }}
   inputProps={{ styles: { input: { color: '#222' } } }}
 />
 ```
 
-Field 的 root、label、content 描述表单区域；Picker 类适配器另外提供 help、helpItem、extra。下层组件通过 `cellProps`、`inputProps`、`switchProps`、`pickerProps` 定制，每个配置只开放该组件的 style/styles。下层组件的显式配置覆盖 Field 提供的布局默认值。
+Field 的 root、title、control 分别描述表单根节点、标题和控件区域；Picker 类适配器另外提供 feedback 容器、help 帮助文本和 error 错误文本。control 不包含反馈。下层组件通过 `cellProps`、`inputProps`、`switchProps`、`pickerProps` 定制，每个配置只开放该组件的 style/styles。下层组件的显式配置覆盖 Field 提供的布局默认值。
 
-Picker 的 `styles.toolbar` 是嵌套对象，包含 root、title、item、itemContent；独立 PickerToolbar 的 `styles` 使用同一结构。Dialog 的两个操作按钮通过 `confirmButtonProps`、`cancelButtonProps` 配置 Button 的 style/styles。
+Picker 的 `styles.body` 包含完整滚轮区域及其遮罩、选中框和 Loading。`styles.toolbar` 是嵌套对象，包含 root、titleContainer、title、cancel、cancelContent、confirm、confirmContent；已有 item、itemContent 保留为通用按钮样式。独立 PickerToolbar 的 `styles` 使用同一结构。Dialog 的两个操作按钮通过 `confirmButtonProps`、`cancelButtonProps` 配置 Button 的 style/styles。
 
 ## 破坏性迁移
 
@@ -85,10 +85,14 @@ Picker 的 `styles.toolbar` 是嵌套对象，包含 root、title、item、itemC
 | 原入口 | 新入口 |
 | --- | --- |
 | Button.plain | 删除，使用 variant="outlined" |
+| Button.round / square / circle | 删除，使用 shape="round" / "square" / "circle" |
 | Button.styles.label | Button.styles.content（文字） |
 | Button.styles.contentContainer | 取消公开内部布局层，使用 root 定制根布局 |
+| Badge.count / overflowCount | content / max |
+| Badge.styles.dot | indicator；status 模式的 indicator 指向状态点 |
+| Badge.styles.text（数字文字） | content；text 仅用于状态说明 |
 | Tag.styles.label | Tag.styles.content（文字）；原 content 容器槽删除 |
-| Input.styles.shell | Input.styles.root（输入外壳） |
+| Input.styles.shell | Input.styles.container（输入外壳）；root 负责包含 addon 的整体布局 |
 | Input.styles.wordLimit | Input.styles.count |
 | Segmented.styles.option | Segmented.styles.item |
 | Segmented.styles.selectedBackground | 删除内部动画层槽，使用组件 token |
@@ -97,11 +101,12 @@ Picker 的 `styles.toolbar` 是嵌套对象，包含 root、title、item、itemC
 | Tab.titleStyle | Tab.styles.label |
 | Popup.styles.panel / overlay | container / mask |
 | 弹层 overlayStyle | styles.mask |
-| Dialog / ActionSheet / Toast 原面板 root、style | styles.container；根 style 改为外层根节点 |
+| Dialog / ActionSheet 原面板 root、style | styles.container；根 style 改为外层根节点 |
+| Toast.styles.container / wrapper | 删除；气泡使用 style / styles.root，定位使用 position |
 | Dialog.styles.cancel / confirm | cancelButtonProps / confirmButtonProps 的 style/styles |
 | Toast.styles.message | content |
 | Notify.textStyle | styles.content |
-| Cell.styles.titleArea / valueArea / label / value / suffix | header / body / description / content / actions |
+| Cell.styles.header / body / content / icon / extra / actions | titleContainer / valueContainer / value / leading / trailing / arrow |
 | Checkbox / Radio.styles.indicator | icon |
 | Switch.styles.thumb | indicator |
 | Progress.styles.track / portion / circle / circleLabel / pivot | rail / track / body / indicator / indicatorContainer |
@@ -110,7 +115,7 @@ Picker 的 `styles.toolbar` 是嵌套对象，包含 root、title、item、itemC
 | DropdownItem.contentStyle | styles.popup.root |
 | SwipeCell.contentStyle / actionStyle | styles.content / actions |
 | Field.cellStyles / inputStyle(s) / pickerStyle(s) / switchStyle(s) | cellProps.styles / inputProps / pickerProps / switchProps |
-| Field.styles.control / feedback / description / error | content / help / extra / helpItem |
+| Field.styles.label / content / help（容器）/ extra / helpItem | title / control / feedback / help（文本）/ error |
 | Picker.styles.container | 删除 root 同节点别名，使用 root |
 | Picker.styles.columns / itemLabel | body / itemContent |
 | PickerToolbar.titleStyle / buttonStyle / buttonLabelStyle | styles.title / item / itemContent |
@@ -121,3 +126,5 @@ Picker 的 `styles.toolbar` 是嵌套对象，包含 root、title、item、itemC
 没有对应 Ant Design 组件、或存在原生独有节点时，保留可描述实际职责的槽，例如 progress.indicatorContainer、tabs.label、image-preview.pager。未参与此次重构的组件以各自文档和类型为准。
 
 参考 [Ant Design 的组件通用属性](https://ant.design/docs/react/common-props-cn/) 与 [Semantic DOM 定制方式](https://ant.design/docs/react/customize-theme-cn/)；具体槽位以对应组件文档为准。
+
+Cell 的 leading / titleExtraContainer / valueExtraContainer / trailingContainer 负责自定义 ReactNode 外层布局；title / description / value / titleExtra / valueExtra / trailing 只定制自动生成文字。container 负责内容行内边距；内部 main / titleRow 不公开。showArrow 仅展示箭头，反馈由事件或 clickable 决定。

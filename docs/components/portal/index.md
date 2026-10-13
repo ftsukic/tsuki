@@ -58,7 +58,7 @@ import {
 | ---------- | ----------- | ------ | -------------------- |
 | `children` | `ReactNode` | —      | 要渲染到宿主层的内容 |
 
-`Portal` 必须渲染在 `PortalHost` 内部，否则会抛出 `Portal must be rendered inside Portal.Host`。Portal 会保留当前主题上下文，浮层内容可以继续使用 `useToken` 和组件 token。
+`Portal` 必须渲染在 `PortalHost` 内部，否则会抛出缺少 Provider / PortalHost 的错误。Portal 会保留当前主题上下文，浮层内容可以继续使用 `useToken` 和组件 token。
 
 ### PortalHost
 
@@ -66,7 +66,9 @@ import {
 | ---------- | ----------- | ------ | ---------------------------- |
 | `children` | `ReactNode` | —      | 宿主下方的页面内容，可以为空 |
 
-同一运行时按一个 active `PortalHost` 使用。宿主会按挂载顺序渲染 entry，entry 层使用 `pointerEvents="box-none"`，宿主卸载时会清理全部内容。
+同一运行时可以存在多个 `PortalHost`，最近完成挂载的宿主负责新的命令式 entry；该宿主卸载后，恢复使用前一个仍在挂载的宿主。宿主会按挂载顺序渲染 entry，entry 层使用 `pointerEvents="box-none"`，宿主卸载时会清理全部内容。
+
+组件式 Portal 使用组件树中最近的 Host。根 Provider 的 Host 位于导航页面外，挂载到它的内容不会跟随单个页面的转场或隐藏。需要随页面关闭的常驻浮层，应在页面内提供 Host；页面失焦但仍被导航保留时，由宿主应用卸载相应浮层和局部 Host。Portal 本身不识别导航焦点，命令式宿主选择也不按焦点切换。
 
 ### Imperative API
 
@@ -76,6 +78,30 @@ updatePortal(key: PortalKey, children: ReactNode): void
 unmountPortal(key: PortalKey): void
 ```
 
-`PortalKey` 是由宿主生成的不透明数字 key。`mountPortal` 没有 active `PortalHost` 时抛出 `PortalHost must be rendered before mounting an imperative portal`；`updatePortal` 和 `unmountPortal` 在宿主或 key 无效时安全无效。
+`PortalKey` 是由宿主生成的不透明数字 key。`mountPortal` 没有 active `PortalHost` 时抛出 `PortalHost must be rendered before mounting an imperative portal`；`updatePortal` 和 `unmountPortal` 按 key 找到创建时的宿主，不受 active 宿主切换影响；原宿主卸载或 key 无效时安全无效。
 
 命令式 entry 与组件式 entry 共用同一个宿主层级和挂载顺序。Dialog、Toast 的命令式 API 使用这组函数，因此只需要 `ConfigProvider + PortalHost`，不需要单独的 `DialogProvider` 或 `ToastProvider`。
+
+首次命令式调用需要等待宿主完成挂载：使用 `useEffect` 或后续点击事件，不要在 render、首次 `useLayoutEffect` 或首次 ref 回调中调用。需要在布局阶段显示内容时，使用组件式 `Portal`。命令式 entry 不会随调用方组件自动卸载，调用方应在 effect 清理中释放 key。
+
+```tsx | pure
+import { useEffect } from 'react'
+import { Text } from 'react-native'
+import { mountPortal, unmountPortal } from '@ftsukic/tsuki'
+
+function StartupPortal() {
+  useEffect(() => {
+    const key = mountPortal(<Text>初始化提示</Text>)
+    return () => unmountPortal(key)
+  }, [])
+  return null
+}
+```
+
+将 `StartupPortal` 放在 `PortalHost` 内。
+
+组件式 `Portal` 仅桥接调用位置的主题上下文；命令式内容使用目标宿主位置的上下文。其他业务 Context、安全区 Context 或导航 Context 若需要在浮层中使用，应放在 `PortalHost` 外层；局部 Provider 不会自动随内容迁移。浮层内容也不会继承所在 SwipeCell 的按压归属。
+
+## 背景滚动锁状态
+
+`useBackgroundScrollLocked(): boolean` 返回最近 PortalHost 内浮层持有的背景滚动锁状态；当前 Dropdown 使用该锁。页面应在宿主内部调用 Hook，将原有滚动条件与 `!locked` 合并后传给 `ScrollView` / `FlatList.scrollEnabled`。多个持有者全部退出或卸载后才解除锁；不同 PortalHost 独立，宿主外返回 `false`。

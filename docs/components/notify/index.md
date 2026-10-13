@@ -60,16 +60,18 @@ Notify 使用 Portal 渲染。受控组件和命令式 API 都需要当前应用
 | children | `ReactNode` | — | 自定义内容；`message` 未设置时使用 |
 | message | `ReactNode` | — | 通知内容；设置后优先于 `children` |
 | type | `'primary' \| 'success' \| 'error' \| 'warning'` | `'primary'` | 语义类型，并决定默认背景色 |
-| color | `ColorValue` | `'#ffffff'` | 文本颜色 |
+| color | `ColorValue` | `Notify.textColor` token | 文本颜色，显式传入时覆盖主题 |
 | backgroundColor | `ColorValue` | 按 `type` 使用对应 token | 通知背景色 |
 | visible | `boolean` | `true` | 是否显示；受控关闭时由父组件更新为 `false` |
 | duration | `number` | `0` | 自动关闭毫秒数；`0` 或负数不自动关闭 |
 | safeAreaInsetTop | `boolean` | `true` | 是否将 `SafeAreaInsetsContext` 的 `top` inset 加入通知顶部内边距 |
-| style | `StyleProp<ViewStyle>` | — | 通知外层根 View 样式 |
-| styles | `NotifyStyles` | — | root、container、content 语义样式；支持对象或函数 |
+| style | `StyleProp<ViewStyle>` | — | 通知本体根 View 样式 |
+| styles | `NotifyStyles` | — | root、content 语义样式；支持对象或函数 |
 | onClosed | `() => void` | — | 关闭动画完成并卸载内容后调用 |
 
-组件继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`；其他 View props 会透传到通知的动画容器。`ref` 指向 `NotifyMethods`，不指向原生 View。`style` 只作用于通知内容根 View；自定义 `children` 需要自行负责其内部文字样式。
+组件继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`；其他 View props 会透传到通知本体根 View。`ref` 指向 `NotifyMethods`，不指向原生 View。`style` 和 `styles.root` 作用于同一个通知本体根 View，优先级为默认样式 < `styles.root` < `style`。内部全屏定位层和动画层不提供公共样式入口；`onLayout` 测量的是通知本体。
+
+`styles.content` 是 `TextStyle`，仅作用于字符串或数字生成的内置 Text。ReactNode `message` 和自定义 `children` 直接渲染，需要自行负责内部样式。`styles.container` 已移除，请迁移到 `styles.root`，不提供兼容别名。退出动画期间通知不可交互，并从无障碍树中隐藏。
 
 通知默认铺满容器宽度并固定在 Portal 顶部。启用 `safeAreaInsetTop` 时，安全区只增加通知顶部内边距，背景色仍覆盖安全区；没有 `SafeAreaProvider` 或 top inset 时按 `0` 处理。`message` 支持字符串、数字和 ReactNode；当 `message` 已设置时，它优先于 `children`。组件使用当前主题的 motion 配置执行顶部进入和退出动画。
 

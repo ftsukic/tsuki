@@ -24,7 +24,7 @@ Dropdown 用于在菜单栏下方或上方展开一个选项面板。它复用 P
 ## 引入
 
 ```tsx | pure
-import { DropdownItem, DropdownMenu } from '@ftsukic/tsuki'
+import { DropdownItem, DropdownMenu, useBackgroundScrollLocked } from '@ftsukic/tsuki'
 ```
 
 组件需要放在 `PortalHost` 或 `Provider` 内；应用已经提供 Portal 宿主时不需要为每个 Dropdown 额外添加宿主。
@@ -40,6 +40,10 @@ import { DropdownItem, DropdownMenu } from '@ftsukic/tsuki'
 <code src="../../../src/dropdown/__fixtures__/examples/direction-up.tsx" title="向上展开" description="使用 direction up 将面板锚定在菜单上方。"></code>
 
 <code src="../../../src/dropdown/__fixtures__/examples/controlled.tsx" title="受控值" description="由外部状态控制 DropdownItem.value。"></code>
+
+<code src="../../../src/dropdown/__fixtures__/examples/semantic.tsx" title="语义样式" description="单项标题、箭头、面板、选项图标和选中标记，以及打开期间的动态更新。"></code>
+
+<code src="../../../src/dropdown/__fixtures__/examples/scroll-lock.tsx" title="背景滚动锁定" description="锁定背景列表，同时保留长选项列表与横向菜单的滚动。"></code>
 
 ## API
 
@@ -78,7 +82,7 @@ import { DropdownItem, DropdownMenu } from '@ftsukic/tsuki'
 | onClosed | `() => void` | — | 面板关闭动画完成并卸载后回调；切换到其他 item 时，在旧 item 不再作为面板内容后回调 |
 | closeOnSelect | `boolean` | `true` | 选择 option 后是否关闭面板；自定义内容需要自行调用 ref 关闭 |
 | style | `StyleProp<ViewStyle>` | — | 触发器根节点样式 |
-| styles | `DropdownItemStyles` | — | `root`、`popup` 语义样式；支持对象或函数。 |
+| styles | `DropdownItemStyles` | — | `root`、`title`、`arrow`、`popup` 语义样式；支持对象或函数。 |
 | testID | `string` | — | 触发器测试标识；options 行使用 `dropdown-option-{index}-{optionIndex}` 形式的内部标识 |
 
 ### DropdownOption
@@ -95,6 +99,47 @@ interface DropdownOption {
 禁用 option 不会触发 `onChange` 或关闭面板。`DropdownItem` 的触发器和 option 都使用 `accessibilityRole="button"`；触发器暴露 `expanded`/`disabled`，option 暴露 `selected`/`disabled`。
 
 DropdownItem 的 styles resolver 只描述触发器自身的 `active`、`disabled`、`index` 状态。option 的 `selected`、`pressed` 和 `disabled` 按每一行独立计算；`styles.popup.listItem` 与 `styles.popup.listItemLabel` 是静态样式覆盖，不会把所有 option 误判为 selected。
+
+## 语义结构
+
+| 区域                                   | 对应节点                                              |
+| -------------------------------------- | ----------------------------------------------------- |
+| `DropdownMenu.styles.root` / `style`   | 菜单栏根节点；`style` 优先                            |
+| `DropdownMenu.styles.item/title/arrow` | 所有触发器的根节点、文本、箭头；resolver 按每一项解析 |
+| `DropdownItem.styles.root` / `style`   | 单项触发器；菜单级样式、单项样式、`style` 依次覆盖    |
+| `DropdownItem.styles.title/arrow`      | 单项标题、箭头，覆盖菜单级同名样式                    |
+| `DropdownItem.styles.popup.root`       | 可见面板，包括自定义内容；不是 Portal 定位或裁剪节点  |
+| `popup.list`                           | options 的 ScrollView                                 |
+| `popup.listItem/listItemLabel`         | 可点击选项行、字符串或数字文本                        |
+| `popup.listItemIcon`                   | 保留原有行为，同时作用于前置图标与选中勾              |
+| `popup.listItemSelectedIcon`           | 选中勾的独立覆盖，在 `listItemIcon` 之后应用          |
+| `popup.mask`                           | 可见遮罩；透明交互拦截层不接受该样式                  |
+
+`title` 与 option 的 `text` 接受 ReactNode。字符串、数字应用文本 slot；自定义 ReactNode 保留自己的样式，不会被克隆或注入样式。面板高度由实际布局更新，包含换行、行高及面板 padding；options 列表在可用空间内滚动，自定义内容需要自行配置内部滚动容器。
+
+## 背景滚动锁定
+
+Dropdown 从开始打开到退出动画完成持续持有背景滚动锁；切换、关闭途中重开不会释放。`overlay={false}` 只隐藏可见遮罩，背景锁仍生效。完全关闭或卸载释放锁，同一 PortalHost 的多个持有者全部释放后才恢复背景滚动。
+
+Web 自动锁定菜单所在页面与可滚动祖先，保留原有 overflow 样式；面板内滚动和菜单横向滚动可用，列表边界不继续带动背景。背景祖先通过程序改变滚动位置时关闭菜单，避免旧锚点造成错位。Escape 关闭后恢复触发器焦点。
+
+React Native 通过透明交互层阻断菜单之外的背景手势。宿主列表应在最近的 `PortalHost` / `Provider` **内部**使用 `useBackgroundScrollLocked()`，连接 `scrollEnabled`，停止背景列表自身的滚动能力；Portal 无法直接设置任意父列表的属性。
+
+```tsx | pure
+function Page() {
+  const locked = useBackgroundScrollLocked()
+  return (
+    <ScrollView scrollEnabled={!locked}>
+      <DropdownMenu>...</DropdownMenu>
+    </ScrollView>
+  )
+}
+// <Provider><Page /></Provider>
+```
+
+已有 `scrollEnabled` 条件应保留，例如 `scrollEnabled={pageScrollEnabled && !locked}`。Hook 按最近的 PortalHost 隔离；PortalHost 外返回 `false`。示例浏览器已接入背景锁。
+
+退出、旧面板切换退出和透明测量期间的内容禁用交互并从读屏树隐藏；读屏关闭动作在关闭完成后恢复触发器的可访问焦点。锁定不会阻止调用方通过程序滚动原生列表；需要主动滚动时先调用 `close()`，再执行滚动。
 
 ## Ref API
 
@@ -132,7 +177,7 @@ ref 方法复用同一套 `DropdownMenu` 状态，不会创建第二套 visible 
 </ConfigProvider>
 ```
 
-公开 token 包含 `menuHeight`、`menuBackgroundColor`、`titleColor`、`activeColor`、`disabledColor`、`optionTextColor`、`optionDisabledColor`、`optionPressedBackgroundColor`、`titleFontSize`、`titleLineHeight`、`titleFontFamily`、`arrowSize`、`arrowGap`、`optionHeight`、`optionPaddingHorizontal`、`optionFontSize`、`optionLineHeight`、`optionIconSize`、`contentBackgroundColor`、`dividerColor`、`dividerWidth`、`shadowColor`、`shadowOpacity`、`shadowRadius`、`shadowOffset`、`elevation`、`overlayColor`、`animationDuration` 和 `zIndex`。`activeColor` 仍表示打开/选中状态，不是 pressed 反馈。
+公开 token 包含 `menuHeight`、`menuBackgroundColor`、`titleColor`、`activeColor`、`disabledColor`、`optionTextColor`、`optionDisabledColor`、`optionPressedBackgroundColor`、`titleFontSize`、`titleLineHeight`、`titleFontFamily`、`caretSize`、`caretGap`、`optionHeight`、`optionPaddingHorizontal`、`optionFontSize`、`optionLineHeight`、`optionIconSize`、`contentBackgroundColor`、`dividerColor`、`dividerWidth`、`shadowColor`、`shadowOpacity`、`shadowRadius`、`shadowOffset`、`elevation`、`overlayColor`、`animationDuration` 和 `zIndex`。`activeColor` 仍表示打开/选中状态，不是 pressed 反馈。
 
 组件不提供 Web DOM、`openIndex`、`defaultOpenIndex` 或第三方 popover/dropdown API；需要外部打开状态时使用 `DropdownMenuRef` 或由上层响应 `onChange`。
 

@@ -41,7 +41,7 @@ import { Checkbox } from '@ftsukic/tsuki'
 
 <code src="../../../src/checkbox/__fixtures__/examples/button.tsx" title="Button checkbox" description="展示 button variant 的独立和分组用法。"></code>
 
-<code src="../../../src/checkbox/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 Checkbox component token 定制尺寸、间距和选中背景。"></code>
+<code src="../../../src/checkbox/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 token 定制主题，并通过 styles.label 调整自定义标签区域。"></code>
 
 ## API
 
@@ -49,7 +49,7 @@ import { Checkbox } from '@ftsukic/tsuki'
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| children | `ReactNode` | — | 标签内容；字符串和数字使用库内文本样式，自定义节点由调用方控制 |
+| children | `ReactNode` | — | 标签内容；字符串和数字使用库内文本样式，自定义节点的内部样式由调用方控制 |
 | name | `string \| number` | — | `Checkbox.Group` 中的选项名；Group 子 Checkbox 必须提供 |
 | checked | `boolean` | — | 独立 Checkbox 的受控选中状态；在 Group 中由 Group 的 `value` 决定 |
 | indeterminate | `boolean` | `false` | 是否显示半选状态；仅控制展示，不改变 `checked` 和 `onChange` 的 boolean 语义 |
@@ -62,7 +62,7 @@ import { Checkbox } from '@ftsukic/tsuki'
 | variant | `'default' \| 'button'` | `'default'` | `button` 隐藏 indicator，使用按钮边框和背景，但仍由 Checkbox 自己渲染和管理状态；宽度由内容和水平 padding 撑开 |
 | buttonVariant | `ButtonVariant` | `'solid'` | `variant="button"` 时使用的 Button 视觉变体；不影响普通 Checkbox |
 | style | `StyleProp<ViewStyle>` | — | 根 `Pressable` 节点样式，优先级高于默认样式和 `styles.root` |
-| styles | `CheckboxStyles` | — | `root`、`icon`、`label` 语义样式；支持对象或函数。 |
+| styles | `CheckboxStyles` | — | `root` 为整个点击区域，`icon` 为包含外框和图标的完整指示器（仅 default 变体生效），`label` 为标签区域；支持对象或函数。 |
 | onPressDebounceWait | `number` | — | 两次点击之间的最小间隔，单位为毫秒 |
 
 组件继承 React Native `PressableProps`，但由组件管理 `children`、`style`、`disabled` 和 `onPress` 的状态分发。整个 Checkbox 区域（包括 label）都可以点击；disabled 时不响应。默认无障碍角色为 `checkbox`，并同步 `accessibilityState.disabled`；`indeterminate` 时 `accessibilityState.checked` 为 `'mixed'`，否则为真实的 boolean `checked` 状态。半选 Checkbox 点击时仍按 `checked` 的 boolean 状态切换，`indeterminate` 由调用方控制，不会自动清除。
@@ -93,7 +93,7 @@ Checkbox.Group 不自动管理“全选 Checkbox”的 `checked` 或 `indetermin
 
 在 FlashList 等虚拟化列表中，不建议依赖 `Checkbox.Group` 枚举 children 来表达完整 selection domain。推荐将 selection 保存在列表外部，给每个 Checkbox 传受控 `checked`，并通过 `FlashList.extraData` 通知列表 selection 发生变化。全选和半选状态应基于完整业务数据计算，而不是当前已经渲染的 item。本页的 `FlashList 全选` demo 采用 disabled item 不参与全选、并保持原选中状态的业务策略；这不是 Checkbox 的强制 contract。
 
-`variant="button"` 配合 `buttonVariant` 可以使用 Button 的 `solid`、`filled`、`outlined`、`dashed` 和 `text` 视觉变体。button 选项默认高度为 `buttonHeight`，并保证最小宽度为 `buttonMinWidth`。配合 `buttonLayout="equal"` 时，Group 使用 Grid 作为纯布局容器。横向 `buttonColumns={5}` 时，8 个按钮会按 5+3 换行，并保持两行按钮宽度一致；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；默认 `buttonLayout="intrinsic"` 仍是内容自适应宽度。
+`variant="button"` 配合 `buttonVariant` 可以使用 Button 的 `solid`、`filled`、`outlined`、`dashed` 和 `text` 视觉变体。button 选项以 `buttonHeight` 为最小高度，内容换行或自定义节点较高时会随内容增长。内容自适应模式保留 `buttonMinWidth` 最小宽度；等宽模式的最小宽度为 0，由 Grid 决定实际宽度。配合 `buttonLayout="equal"` 时，Group 使用 Grid 作为纯布局容器。横向 `buttonColumns={5}` 时，8 个按钮会按 5+3 换行，并保持两行按钮宽度一致；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；默认 `buttonLayout="intrinsic"` 仍是内容自适应宽度。
 
 #### 实例方法
 
@@ -114,6 +114,10 @@ groupRef.current?.toggleAll({ checked: true, skipDisabled: true }) // 只全选 
 `toggleAll` 也接受不带 `checked` 的对象，此时会对 enabled 项逐项反选；`skipDisabled` 默认是 `false`，因此显式传入 `true` 才会跳过 disabled 项。一次调用最多触发一次 Group `onChange`。受控 Group 仍由调用方更新 `value`，非受控 Group 会更新自身状态。Group disabled 不影响 imperative `toggleAll`；只有 `skipDisabled: true` 时才会保留所有有效 disabled 项的原值。
 
 `styles` 函数收到的状态包含 `checked`、`indeterminate`、`disabled` 和 `pressed`。`variant="button"` 仍只使用真实 `checked` 决定按钮 checked / unchecked 样式；`indeterminate` 会继续传给 styles resolver，并不会引入新的 button 半选视觉。
+
+`styles.label` 对字符串、数字和自定义 ReactNode 都生效。字符串和数字渲染为 Text，可设置文字与布局样式；自定义节点的标签区域渲染为 View，可设置间距、背景等 View 样式，内部文字不继承该 View 的颜色、字号等文字样式。button variant 同样支持 label 区域样式。
+
+`variant="button"` 的语义结构为根点击区域与标签区域，对应 `styles.root` 和 `styles.label`；该变体不渲染指示器，因此 `styles.icon` 不生效。它仍使用 `checkbox` 无障碍角色，并同步选中、半选和禁用状态。
 
 ### Checkbox token
 

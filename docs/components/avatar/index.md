@@ -57,6 +57,8 @@ Avatar 继承 React Native `ViewProps`，但由组件管理 `children` 和 `styl
 
 图片失败时回退顺序为 `icon`、`children`；两者都不存在时只保留头像容器。字符串和数字字符会单行显示，`gap` 负责字符内容左右的安全区域；自定义节点需要自行控制尺寸。未显式设置 `size` 的库 `Icon` 会按 Avatar 尺寸缩放，显式 Icon 尺寸和其他自定义节点保持调用方控制。
 
+数值 `size` 必须为有限正数；无效值会统一回退到主题中的 `medium` 容器、文字和图标尺寸。
+
 ### Avatar.Group
 
 | 属性 | 类型 | 默认值 | 说明 |
@@ -71,7 +73,9 @@ Avatar 继承 React Native `ViewProps`，但由组件管理 `children` 和 `styl
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式 |
 | styles | `AvatarGroupStyles` | — | `root / item / overflow / overflowAvatar / overflowText` 语义样式 |
 
-Group 使用主题中的 `groupOverlapping`、`groupBorderColor` 和 `groupBorderWidth` 控制叠放效果。当前不提供 Web Popover；如需查看完整列表，应在 `onOverflowPress` 中调用宿主应用的导航或弹层。 `styles.overflow` 控制 `+N` 外层 Pressable，`styles.overflowAvatar` 控制内部 Avatar，`styles.overflowText` 控制 `+N` 文本。
+Group 使用主题中的 `groupOverlapping`、`groupBorderColor` 和 `groupBorderWidth` 控制叠放效果。当前不提供 Web Popover；如需查看完整列表，应在 `onOverflowPress` 中调用宿主应用的导航或弹层。`styles.overflow` 控制 `+N` 外层节点：设置 `onOverflowPress` 时为 Pressable，否则为展示用 View；`styles.overflowAvatar` 控制内部 Avatar，`styles.overflowText` 控制 `+N` 文本。
+
+溢出区域只有外层节点暴露无障碍语义，描述为“还有 N 个头像”，可点击时为 `button`，否则为 `image`；内部 Avatar 作为装饰隐藏。`maxCount={0}` 时只显示溢出头像，不应用前导叠放边距。
 
 ### 与 Web API 的差异
 

@@ -11,7 +11,7 @@ group:
 
 # SwipeCell 滑动单元格
 
-动画由统一 Gesture Motion Spring 驱动。`overshoot` 默认 `false`；开启后超过 action 实测宽度的位移按 0.25 阻尼处理。松手仍按原有半宽 / 方向速度阈值吸附，`onOpen` / `onClose` 在当前有效动画完成后触发。关闭 Motion 或开启 Reduced Motion 时即时吸附，拖动本身继续跟随手指。
+展开与关闭均由统一 Motion 驱动无回弹的 timing 动画，时长由 `animationDuration` 和 Motion 时长倍率决定。`overshoot` 默认 `false`；开启后超过 action 实测宽度的位移按 0.25 阻尼处理。松手仍按原有半宽 / 方向速度阈值吸附，`onOpen` / `onClose` 在当前有效动画完成后触发。关闭 Motion 或开启 Reduced Motion 时即时吸附，拖动本身继续跟随手指。
 
 <section className="component-doc-intro">
 
@@ -75,9 +75,17 @@ import { SwipeCell, SwipeCellAction, SwipeCellGroup, useSwipeCellController } fr
 | onOpen | `() => void` | — | action 完成展开后的回调 |
 | onClose | `() => void` | — | action 完成关闭后的回调 |
 
-SwipeCell 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`。`open()` 默认展开右侧 action；如果右侧没有可测宽度，会回退到左侧 action。action 宽度由实际布局测量，拖动结束时位移严格超过对应宽度的 50% 才展开，等于或低于 50% 则关闭。
+SwipeCell 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`。`open()` 默认展开右侧 action；如果右侧没有可测宽度，会回退到左侧 action。action 宽度由实际布局测量，慢速拖动结束时位移严格超过对应宽度的 50% 才展开，等于或低于 50% 则关闭；快速滑动优先按方向判断展开或关闭。
 
-组件使用 Gesture Handler 的 `Gesture.Pan()` 处理水平拖动，主体通过 Reanimated `Animated.View` 的 `translateX` 移动；主体 pressed 时使用 Cell 的 `pressedBackgroundColor`，action pressed 时在原彩色背景上显示 `actionPressedOverlayColor`，不会整体变透明。关闭状态下没有可用 action 时不会响应滑动；`activeOffsetX` 和 `failOffsetY` 用于避免误抢纵向列表手势。展开后点击主体会关闭当前 cell，但不会阻止主体子组件自己的 press 事件。
+组件使用 Gesture Handler 的 `Gesture.Pan()` 处理水平拖动，主体通过 Reanimated `Animated.View` 的 `translateX` 移动；主体保持按住约 80ms 后才显示按压反馈，使用 Cell 的 `pressedBackgroundColor`；横向滑动或纵向移动超过手势阈值时取消本次反馈，嵌套的库内 Cell / Pressable 同步恢复，业务 press 事件不因此延迟；自定义原生 Pressable 的内部样式仍由其自身管理，action pressed 时在原彩色背景上显示 `actionPressedOverlayColor`，不会整体变透明。关闭状态下没有可用 action 时不会响应滑动；`activeOffsetX` 和 `failOffsetY` 用于避免误抢纵向列表手势。展开后点击主体会关闭当前 cell，但不会阻止主体子组件自己的 press 事件。触摸开始不会关闭自身，继续拖动会从当前位移接管。打开和关闭均使用无回弹的 timing 动画，关闭时 action 按打开路径反向收拢。多个 action 保持实际宽度，根据主体位移逐个展开；靠近外侧边缘的 action 覆盖内侧 action，完全展开后恢复并排布局。
+
+### 语义结构与无障碍
+
+`style` 和 `styles.root` 作用于根 View，且 `style` 优先；`styles.content` 作用于实际主体内容节点，私有动画层只负责水平位移。`styles.actions` 作用于双侧操作共用的区域，左右测量节点和占位节点属于内部实现。
+
+主体提供按压背景反馈，但不默认声明为按钮，也不聚合子节点的无障碍语义。主体内部的交互控件保留自己的 role、label 和事件。需要整行可访问或自定义无障碍操作时，可以通过根节点继承的 `ViewProps` 配置。
+
+操作按钮保持挂载以测量宽度，但只有对应侧展开完成后才可交互、可被读屏访问；另一侧、收起状态、拖动及关闭过渡期间禁用操作区交互并隐藏其无障碍节点。`close()` 对已经关闭的项不触发 `onClose`，重复关闭也不会重复通知。删除列表项时应先记录待删除项，在 `onClose` 中移除，避免 action 回调立即卸载整行而跳过收拢动画；微信示例采用此方式，并使用主题 token 适配浅色与深色模式。
 
 `actions` 是 `rightActions` 的简写；每一项可以使用 `text`、`color` 和 `onPress`。`leftActions` 和 `rightActions` 的每一项都会独立渲染为 `SwipeCellAction`，action slot 的测量宽度是所有 action 的总宽度。传入 action 数组时，数组优先于对应的旧 `leftAction` / `rightAction`。旧的 `label` 字段继续兼容，推荐新代码使用 `text`。
 
@@ -174,4 +182,4 @@ ref.current?.close()
 
 ### 按压协调边界
 
-最近的 Provider 提供 SwipeCellManager，嵌套 Provider 各自协调。内容按下关闭自身，操作区按下保留自身，操作完成是否关闭由 `closeOnActionPress` 决定；外部库内 Pressable 按下关闭当前展开项，disabled 不通知。内容及自定义操作中的库内 Pressable 自动读取所属 cell，无需 `interactionId`。Portal 与 Popover 浮层内容清除所属 cell。自定义 React Native Modal 会继承调用处 Context，不属于库内浮层边界；需要外部按压语义时，应通过库内 Portal 承载。没有 Provider 时不提供全局单开或外部按压关闭，Group 仍提供组内打开互斥。
+最近的 Provider 提供 SwipeCellManager，嵌套 Provider 各自协调。内容点击关闭自身，内容按下仅关闭其它项，操作区按下保留自身，操作完成是否关闭由 `closeOnActionPress` 决定；外部库内 Pressable 按下关闭当前展开项，disabled 不通知。内容及自定义操作中的库内 Pressable 自动读取所属 cell，无需 `interactionId`。Portal 与 Popover 浮层内容清除所属 cell。自定义 React Native Modal 会继承调用处 Context，不属于库内浮层边界；需要外部按压语义时，应通过库内 Portal 承载。没有 Provider 时不提供全局单开或外部按压关闭，Group 仍提供组内打开互斥。

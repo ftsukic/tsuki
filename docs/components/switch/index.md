@@ -35,6 +35,8 @@ import { Switch } from '@ftsukic/tsuki'
 
 <code src="../../../src/switch/__fixtures__/examples/before-change.tsx" title="异步确认" description="beforeChange 返回 Promise，在确认完成前不提交新的开关值。"></code>
 
+<code src="../../../src/switch/__fixtures__/examples/semantic.tsx" title="语义样式" description="自定义轨道与滑块尺寸、状态背景及加载区域。"></code>
+
 ## API
 
 ### Switch
@@ -45,7 +47,7 @@ import { Switch } from '@ftsukic/tsuki'
 | defaultValue | `ActiveValueT \| InactiveValueT` | `inactiveValue` | 非受控初始值 |
 | loading | `boolean` | `false` | 在 thumb 中显示 Loading，并禁止切换 |
 | disabled | `boolean` | `false` | 禁止点击并应用 disabled opacity |
-| size | `'small' \| 'medium' \| 'large' \| number` | `'medium'` | 预设尺寸或数字自定义高度；预设尺寸分别为 `32×20`、`44×24`、`52×32` |
+| size | `'small' \| 'medium' \| 'large' \| number` | `'medium'` | 预设尺寸或有限正数自定义高度；无效数字回退到 medium。预设尺寸分别为 `32×20`、`44×24`、`52×32` |
 | activeColor | `ColorValue` | `colorPrimary` | 开启时的轨道颜色 |
 | inactiveColor | `ColorValue` | `colorFillSecondary` | 关闭时的轨道颜色 |
 | activeValue | `ActiveValueT` | `true` | 开启时通过 `onChange` 输出的值 |
@@ -60,6 +62,21 @@ import { Switch } from '@ftsukic/tsuki'
 
 数字 `size` 按 `width = size * 2`、`height = size` 计算，thumb 的宽高为 `size - 4`；预设尺寸使用明确的 Vant 风格移动端几何值。轨道默认动画时长为 200ms，thumb 使用统一 spring，并遵循主题的 `motion` 设置。
 
+### 语义结构和样式优先级
+
+结构为 `root → track → indicator → loading`。`indicator` 表示可移动滑块，`loading` 仅在加载时出现，作用于滑块内部的 Loading 根容器。
+
+| 区域        | 职责                                                                      |
+| ----------- | ------------------------------------------------------------------------- |
+| `root`      | 交互、外部布局、禁用透明度；`style` 优先于 `styles.root`                  |
+| `track`     | 轨道尺寸、圆角和背景；`backgroundColor` 覆盖 active/inactive 颜色及其插值 |
+| `indicator` | 滑块尺寸与外观；组件平移与调用方 `transform` 组合                         |
+| `loading`   | 加载区域的布局和背景；不直接设置内部 spinner 的颜色                       |
+
+默认尺寸由 `size` 和组件 token 决定。通过语义样式调整轨道或滑块宽度时，平移距离跟随实际布局更新；滑块右侧默认保留 `thumbInset`。调用方 transform 在组件平移之后组合，布局测量不把视觉缩放或旋转当作尺寸变化。不承诺对任意旋转、缩放或绝对定位自动校正边缘。外部布局请使用根节点样式。
+
+函数形式的 `styles` 接收 props 与 `active / disabled / loading / pressed / hovered / size` 状态，支持按状态改变样式。
+
 ### 受控和非受控
 
 ```tsx | pure
@@ -72,6 +89,10 @@ const [enabled, setEnabled] = useState(false)
 `value` 存在时组件不会自行改变视觉状态，只会在切换确认后调用 `onChange`。未传入 `value` 时，组件内部保存切换后的状态。
 
 ### 自定义值和异步确认
+
+连续确认只接受最新请求。等待期间当前值、`activeValue / inactiveValue` 或受控模式发生变化，进入 `disabled / loading`，或组件卸载，旧请求会失效；即使值或交互状态随后恢复，也不会重新提交。有效确认通过时使用最新的 `onChange`。
+
+`beforeChange` 返回或解析为 `false`，以及 Promise 拒绝时，均取消切换。等待确认本身不会自动进入 loading。将 loading 设为 true 会取消待确认请求，因此不要在希望继续提交的同一次确认中用 loading 表示等待；需要等待提示时可在开关外显示状态。
 
 ```tsx | pure
 <Switch

@@ -50,6 +50,22 @@ import { Skeleton } from '@ftsukic/tsuki'
 
 Skeleton 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`。loading 状态默认使用 `accessibilityRole="progressbar"` 和 `accessibilityState.busy=true`，显式传入的 accessibility props 优先；非 loading 状态不强制 root 的无障碍语义。
 
+### 语义样式
+
+| 槽位 | 对应节点与生效条件 |
+| --- | --- |
+| root | 始终保留的根容器；`style` 优先于 `styles.root` |
+| header | 头像区域容器，仅在 loading 且 avatar 为 true 时存在；不包含标题 |
+| avatar | header 内的头像占位块 |
+| section | loading 时包含标题与段落的内容区域 |
+| title | 标题占位块，仅在 loading 且 title 为 true 时存在 |
+| paragraph | 段落行集合，仅在 loading 且归一化后的 row 大于 0 时存在；可用 marginTop 覆盖标题与段落的默认间距 |
+| row | 每个段落占位块，共用同一份样式；可覆盖宽度和行间距 |
+
+各槽位的自定义样式优先于默认样式和 token。内部动画层不公开样式槽位。loading 为 false 时仅保留 root 并直接渲染 children，其余槽位不生效。
+
+标题、段落和头像都是装饰性占位，槽位名称不代表无障碍标题或文本语义。root 默认表达加载状态；可通过 accessibilityLabel 提供具体的加载说明。显式传入的 accessibilityState.busy（包括 false）优先于加载状态的默认值；加载完成后不再注入默认 role 和 busy，显式传入的无障碍属性仍保留。
+
 ### 主题定制
 
 通过 `ConfigProvider theme.components.Skeleton` 覆盖 `backgroundColor`、尺寸、间距、圆角和动画 token。背景色默认派生自当前主题的 `colorFillSecondary`，因此会随明暗主题变化。`theme.seed.motion=false` 会完全禁用动画。

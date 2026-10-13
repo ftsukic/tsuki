@@ -78,7 +78,7 @@ type RadioLabelPosition = 'left' | 'right';
 
 独立 Radio 只有在从未选中变为选中时触发 `onChange(true)`；再次点击已选中项不会取消选中。需要取消选中时，由上层通过受控 `checked` 改变状态。
 
-`variant="button"` 隐藏 indicator，默认使用内容加水平 padding 的自适应宽度容器，并保证最小宽度为 `buttonMinWidth`。选中状态改变背景、边框和文字颜色，但不显示 check icon；Group 仍保持互斥选择，已选项不能通过再次点击取消。`buttonVariant` 可使用 Button 的 `solid`、`filled`、`outlined`、`dashed` 和 `text` 视觉变体。需要等宽按钮时，在 Group 上设置 `buttonLayout="equal"`；FieldRadio 的 button 选项默认使用该布局。
+`variant="button"` 隐藏 indicator，默认使用内容加水平 padding 的自适应宽度容器，内容自适应模式保留 `buttonMinWidth` 最小宽度。按钮以 `buttonHeight` 为最小高度，内容换行或自定义节点较高时会随内容增长。选中状态改变背景、边框和文字颜色，但不显示 check icon；Group 仍保持互斥选择，已选项不能通过再次点击取消。`buttonVariant` 可使用 Button 的 `solid`、`filled`、`outlined`、`dashed` 和 `text` 视觉变体。需要等宽按钮时，在 Group 上设置 `buttonLayout="equal"`；FieldRadio 的 button 选项默认使用该布局。
 
 `shape="round"` 是默认形状，选中后显示白色 check；`shape="square"` 使用方形 checked indicator 并显示白色 check；`shape="dot"` 保持透明圆形外圈，仅在内部显示 `dotSize` 大小的 checkedColor 圆点。
 
@@ -108,7 +108,7 @@ type RadioLabelPosition = 'left' | 'right';
 
 `Radio.Group variant` 会透传给子 Radio 和 `options` 自动生成的 Radio。子 Radio 显式设置 `variant` 时，以子 Radio 的设置为准；可运行的 children、options 和等宽换行示例见上方 Button Radio fixture。
 
-`buttonLayout="equal"` 会使用 Grid 作为纯布局容器。横向 `buttonColumns={5}` 时，8 个 button option 会按 5+3 换行，并保持两行按钮宽度一致；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；普通 Group 默认仍是内容自适应宽度。
+`buttonLayout="equal"` 会使用 Grid 作为纯布局容器，按钮最小宽度为 0，由 Grid 决定实际宽度。横向 `buttonColumns={5}` 时，8 个 button option 会按 5+3 换行，并保持两行按钮宽度一致；等宽按钮标签保持单行，过长文本按原生 Text 默认方式省略；普通 Group 默认仍是内容自适应宽度。
 
 ## 语义样式
 

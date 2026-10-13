@@ -83,12 +83,12 @@ import {
 | closeOnClickOverlay | `boolean` | `false` | 是否点击遮罩关闭；需要 `overlay` |
 | zIndex | `number` | 主题值 | 根宿主层级 |
 | style | `StyleProp<ViewStyle>` | — | 提示气泡 root 样式 |
-| styles | `ToastStyles` | — | `root`、`content`、`icon`、`loading`、`mask`、`wrapper`、`container` 语义样式；支持对象或函数。 |
+| styles | `ToastStyles` | — | `root`、`content`、`icon`、`loading`、`mask` 语义样式；支持对象或函数。 |
 | onShowChange | `(show: boolean) => void` | — | 显示状态变化回调；自动关闭和点击关闭传入 `false` |
 | onOpened | `() => void` | — | 入场动画完成后回调 |
 | onClose | `() => void` | — | 关闭动画完成并卸载前回调 |
 
-组件继承 React Native `ViewProps`，`style` 和 `styles.root` 作用于全屏根节点，`styles.container` 作用于提示气泡，其他 View props 透传到气泡 root。`styles` 可以是对象或函数；函数接收 `{ props, state: { show, type, position } }`。组件使用无障碍 `alert` 语义和 `polite` live region。
+组件继承 React Native `ViewProps`，`style` 和 `styles.root` 作用于提示气泡，其他 View props 也透传到气泡 root。定位使用 `position`，不公开内部定位层样式。`styles.content` 对字符串和数字作用于文本，对 ReactNode 或 `children` 作用于内容容器。`styles` 可以是对象或函数；函数接收 `{ props, state: { show, type, position } }`。组件使用无障碍 `alert` 语义和 `polite` live region，退出期间隐藏无障碍内容。
 
 ### PortalHost 与命令式 API
 
@@ -108,7 +108,7 @@ setToastDefaultOptions(type: ToastType, options: ToastOptions): void
 resetToastDefaultOptions(type?: ToastType): void
 ```
 
-`ToastInstance` 提供 `message` getter/setter 和 `close()`。默认情况下新调用会更新当前实例；`allowMultipleToast(true)` 后每次调用创建独立实例，`closeToast()` 关闭最早的实例，`closeToast(true)` 关闭全部实例。`setToastDefaultOptions` 的类型配置只作用于对应快捷方法，显式参数优先。
+`ToastInstance` 提供 `message` getter/setter 和 `close()`。默认情况下新调用会更新当前实例并重新计时（即使内容相同）；`allowMultipleToast(true)` 后每次调用创建独立实例，`closeToast()` 关闭最早的实例，`closeToast(true)` 关闭全部实例。`setToastDefaultOptions` 的类型配置只作用于对应快捷方法，显式参数优先。
 
 ## 主题定制
 

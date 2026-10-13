@@ -74,6 +74,10 @@ interface SwipeRef {
 
 `styles` 支持 `root`、`track`、`item`、`indicators`、`indicator` 和 `activeIndicator`。函数形式会收到 `activeIndex`、`total`、`vertical` 和 `dragging`。
 
+节点结构为根视口 `root` → 页面集合 `track` → 页面 `item`，默认指示器位于根视口内。`styles.item` 应用到每个页面；页面样式依次合并默认样式、`styles.item` 和 `Swipe.Item.style`，内部尺寸与位移动画约束最后应用。`Swipe.Item` 的原生 View props 与 ref 落到同一个页面节点。
+
+非当前页面会从无障碍树中隐藏，切页后恢复目标页面自身的无障碍设置；显式设置的 `accessibilityElementsHidden` 和 `importantForAccessibility` 在页面激活时仍然保留。
+
 通过 `ConfigProvider` 的 `theme.components.Swipe` 覆盖 `indicatorSize`、`indicatorMargin`、`indicatorGap`、`indicatorInactiveOpacity`、`indicatorActiveOpacity`、`indicatorBackground`、`indicatorActiveBackground` 和 `animationDuration`。默认动画时长为 Vant 的 500ms，不跟随 `motionDurationSlow`。
 
 Vant 的 `indicator` slot 在 React Native 中对应 `renderIndicator({ activeIndex, total })`；不会映射 Web 专属 CSS slot 或 DOM API。

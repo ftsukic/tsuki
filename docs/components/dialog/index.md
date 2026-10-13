@@ -92,12 +92,31 @@ import {
 | `closeOnClickOverlay` | `boolean` | `false` | 点击遮罩是否关闭；关闭不触发 `beforeClose` |
 | `zIndex` | `number` | 主题值 | 浮层层级 |
 | `beforeClose` | `(action) => boolean \| void \| Promise<boolean \| void>` | — | 关闭前拦截，只有返回 `false` 才阻止关闭 |
-| `style` | `StyleProp<ViewStyle>` | — | 弹窗面板 root 样式 |
+| `style` | `StyleProp<ViewStyle>` | — | 全屏根节点样式 |
 | `confirmButtonProps` | `Pick<ButtonProps, 'style' \| 'styles'>` | — | 确认按钮样式 |
 | `cancelButtonProps` | `Pick<ButtonProps, 'style' \| 'styles'>` | — | 取消按钮样式 |
-| `styles` | `DialogStyles` | — | `mask`、`root`、`wrapper`、`container`、`header`、`title`、`body`、`message`、`footer` 语义样式；支持对象或函数。 |
+| `styles` | `DialogStyles` | — | `root`、`mask`、`container`、`header`、`title`、`body`、`message`、`footer`、`cancelButton`、`confirmButton` 语义样式；支持对象或函数。`wrapper` 为 deprecated 兼容入口。 |
 
 组件继承 React Native `ViewProps`，除 `children` 和 `style` 外透传到弹窗面板。`style` 和 `styles.root` 作用于全屏根节点；`styles.container` 作用于面板，`styles.header` 作用于标题容器，`styles.title` 作用于标题文字。确认和取消按钮通过 `confirmButtonProps`、`cancelButtonProps` 配置各自的 `style` / `styles`。
+
+### 语义样式
+
+| 槽位            | 作用节点               | 边界                         |
+| --------------- | ---------------------- | ---------------------------- |
+| `root`          | 全屏根节点             | `style` 优先于 `styles.root` |
+| `mask`          | 遮罩                   | `overlay={false}` 时不渲染   |
+| `container`     | 可见面板               | 背景、边框、圆角等面板样式   |
+| `header`        | 标题区域               | 包含自定义标题               |
+| `title`         | 自动生成的标题 Text    | 只作用于字符串和数字标题     |
+| `body`          | 正文 ScrollView        | 包含自定义正文               |
+| `message`       | 自动生成的正文 Text    | 只作用于字符串和数字正文     |
+| `footer`        | 底部区域               | 默认与自定义 footer 均生效   |
+| `cancelButton`  | 默认取消 Button 根节点 | 自定义 footer 时不生效       |
+| `confirmButton` | 默认确认 Button 根节点 | 自定义 footer 时不生效       |
+
+`styles.wrapper` 保留为 deprecated 兼容入口，作用于 Popup 内部定位层。新用法优先使用 `root` 或 `container`；动画与测量层不提供公共槽位。
+
+按钮根节点样式按以下顺序合并，后者优先：Button 默认样式、Dialog 默认布局与状态样式、Dialog 按钮语义槽位、对应 `buttonProps.styles.root`、对应 `buttonProps.style`。按钮文字和图标等内部样式继续通过 `confirmButtonProps.styles` / `cancelButtonProps.styles` 定制。
 
 `children` 使用 `undefined` 判断是否覆盖 `message`，因此传入 `null` 可以主动清空正文。字符串和数字标题/正文会自动应用主题样式，自定义 ReactNode 需要自行控制样式。正文超过视口高度的 `60%` 时可以滚动。
 
@@ -118,6 +137,8 @@ Dialog 使用无障碍 `alert` 和 modal 语义，遮罩不会进入无障碍导
 | `onClose`      | 关闭动画完成、面板卸载前调用                                |
 
 `beforeClose` 的 action 只有 `confirm` 和 `cancel`。异步检查期间对应按钮显示 loading，并暂时锁定两个默认操作按钮；返回 `false`、抛出异常或 rejected Promise 都会保持 Dialog 打开。
+
+隐藏、重新打开、命令式替换、主动关闭或卸载会使旧关闭请求失效。旧 `beforeClose` 完成或失败后，不会修改新弹窗的 loading、显示状态或 Promise 结果；不会中止用户回调本身执行的业务操作。
 
 默认 footer 使用固定高度；显示取消按钮时，取消和确认 Button 直接作为 footer 子项并通过 `flex: 1` 平分宽度，整个半区都可点击。`theme="round-button"` 保留 footer 内边距、间隔和圆角按钮样式。
 

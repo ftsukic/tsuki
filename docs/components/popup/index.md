@@ -41,7 +41,7 @@ Popup 推荐挂载在应用根节点的 `Provider` 内：
 
 <code src="../../../src/popup/__fixtures__/examples/positions.tsx" title="五种位置" description="支持 center、top、bottom、left 和 right，并按位置处理 round 圆角。"></code>
 
-<code src="../../../src/popup/__fixtures__/examples/safe-area.tsx" title="底部安全区" description="bottom Popup 可将宿主提供的底部 safe-area inset 加入面板内边距。"></code>
+<code src="../../../src/popup/__fixtures__/examples/safe-area.tsx" title="底部安全区" description="bottom Popup 可将宿主提供的底部 safe-area inset 叠加到面板已有的底部内边距。"></code>
 
 <code src="../../../src/popup/__fixtures__/examples/interactions.tsx" title="遮罩交互" description="通过 overlay、onPressOverlay 和 closeOnPressOverlay 管理遮罩点击。"></code>
 
@@ -59,7 +59,7 @@ Popup 推荐挂载在应用根节点的 `Provider` 内：
 | position | `'center' \| 'top' \| 'bottom' \| 'left' \| 'right'` | `'center'` | 弹出位置 |
 | overlay | `boolean` | `true` | 是否显示全屏遮罩；遮罩默认拦截底层触摸 |
 | closeOnPressOverlay | `boolean` | `false` | 点击遮罩时是否发出 `onRequestClose` 请求 |
-| safeAreaInsetBottom | `boolean` | `false` | `position="bottom"` 时是否把 `SafeAreaInsetsContext` 的 bottom inset 加入面板内边距 |
+| safeAreaInsetBottom | `boolean` | `false` | `position="bottom"` 时是否把 `SafeAreaInsetsContext` 的 bottom inset 叠加到面板已有的底部内边距 |
 | onPressOverlay | `(event) => void` | — | 点击遮罩回调 |
 | onRequestClose | `() => void` | — | 关闭请求回调，也用于 Android 返回键；调用方应更新 `visible` |
 | duration | `number` | 主题 `animationDuration` | 动画毫秒数；非正数按 `0` 处理 |
@@ -67,7 +67,7 @@ Popup 推荐挂载在应用根节点的 `Provider` 内：
 | lazyRender | `boolean` | `true` | 初次显示前不挂载 children |
 | destroyOnClosed | `boolean` | `false` | 关闭动画完成后是否卸载 children |
 | zIndex | `number` | 主题 `zIndex` | Popup 宿主层级 |
-| style | `StyleProp<ViewStyle>` | — | 面板样式 |
+| style | `StyleProp<ViewStyle>` | — | 全屏根节点样式，最后合并 |
 | styles | `PopupStyles` | — | `root`、`container`、`mask`、`wrapper` 语义样式；支持对象或函数。 |
 | onOpen | `() => void` | — | 开始打开动画时回调 |
 | onOpened | `() => void` | — | 打开动画完成时回调 |
@@ -76,13 +76,17 @@ Popup 推荐挂载在应用根节点的 `Provider` 内：
 
 组件还继承 React Native `ViewProps`（`children` 和 `style` 除外），其余 View props 会透传到面板，并且 ref 指向面板 root。`style` 和 `styles.root` 作用于全屏根节点；`styles.wrapper` 作用于定位层，`styles.container` 作用于面板，`styles.mask` 作用于遮罩。
 
+面板的 `opacity` 和 `transform` 由 Motion 驱动；`styles.container.opacity` 作为动画目标透明度，`transform` 不用于覆盖动画。`styles.mask` 只应用到遮罩视觉层，其透明度与共享动画进度相乘。`styles.wrapper` 保留用于定位层定制。
+
+启用底部安全区后，按 `paddingBottom`、`paddingBlockEnd`、`paddingBlock`、`paddingVertical`、`padding` 的优先级读取已有 padding，再叠加 bottom inset。百分比 padding 按定位层宽度解析；首次测量前使用窗口宽度。
+
 Popup 不会自动修改 `visible`。`closeOnPressOverlay` 和 Android 返回键都只是发出 `onRequestClose`，需要由父组件设置 `visible={false}`。未提供 `onRequestClose` 时 Android 返回键返回 `false`，继续交给更底层的返回处理器。
 
-`center` 面板按内容尺寸布局；`top` 和 `bottom` 默认占满可用宽度；`left` 和 `right` 默认占满可用高度。显式 `style` 可以覆盖这些尺寸。方向面板使用从对应边缘滑入/滑出的动画，居中面板使用淡入和轻微缩放；遮罩与面板由同一个 transition progress 同步驱动。动画运行时快速切换 `visible` 会从当前进度继续。
+`center` 面板按内容尺寸布局；`top` 和 `bottom` 默认占满可用宽度；`left` 和 `right` 默认占满可用高度。使用 `styles.container` 可以覆盖面板尺寸。方向面板使用从对应边缘滑入/滑出的动画，居中面板使用淡入和轻微缩放；遮罩与面板由同一个 transition progress 同步驱动。动画运行时快速切换 `visible` 会从当前进度继续。
 
 `lazyRender` 只控制首次挂载；关闭后默认保留内容状态，`destroyOnClosed` 会在关闭动画完成后卸载内容。若动画被新的 `visible` 状态中断，不会触发被取消的完成回调。
 
-面板继承调用方传入的无障碍属性。遮罩不进入无障碍元素导航；需要明确语义时，应在 children 上提供 `accessible`、`accessibilityRole` 和 `accessibilityLabel`。
+面板继承调用方传入的无障碍属性。隐藏及退出期间，根节点会隐藏整个无障碍子树；再次显示时恢复导航。遮罩不进入无障碍元素导航；需要明确语义时，应在 children 上提供 `accessible`、`accessibilityRole` 和 `accessibilityLabel`。
 
 首版不支持 `closeable`、`beforeClose`、`lockScroll`、safe-area top、imperative API、Web `teleport`、HTML 字符串和自定义 transition 名称。`safeAreaInsetBottom` 只对 `position="bottom"` 生效；没有 `SafeAreaProvider` 或 bottom inset 时按 `0` 处理。
 

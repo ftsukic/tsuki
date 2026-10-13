@@ -51,6 +51,8 @@ import { Cell, Picker, PickerToolbar, Popup, showPicker } from '@ftsukic/tsuki'
 
 <code src="../../../src/picker/__fixtures__/examples/picker-view.tsx" title="无 Toolbar Picker" description="使用 showToolbar=false 渲染不带 Toolbar 的滚轮。"></code>
 
+<code src="../../../src/picker/__fixtures__/examples/semantic.tsx" title="语义样式与空列" description="定制完整滚轮区域和独立操作样式；空列之后的选中值仍可正常回写。"></code>
+
 ## API
 
 ### PickerOption
@@ -71,10 +73,12 @@ interface PickerOption {
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
 | `columns` | `PickerColumns` | — | 单列、多列或级联数据 |
+| `columnLabels` | `readonly string[]` | — | 按列位置提供无障碍名称；名称与 option 文本一起读出 |
 | `value` | `readonly (string \| number)[]` | — | 受控选中值；未收到新的 prop 时，点击和手势不会改变最终选中状态 |
 | `defaultValue` | `readonly (string \| number)[]` | — | 非受控初始值，只在初始化时使用 |
 | `itemHeight` | `number` | 主题 token | 每个 option 的行高 |
 | `visibleItemCount` | `number` | 主题 token | 滚轮视口显示的行数 |
+| `virtual` | `boolean` | `true` | 长列按窗口渲染；`false` 全量渲染。短列及读屏器开启时全量渲染 |
 | `loading` | `boolean` | `false` | 覆盖滚轮并禁止 option 的 tap/pan；不改变选中值，Toolbar 仍可操作 |
 | `title` | `ReactNode` | — | Toolbar 中间标题 |
 | `showToolbar` | `boolean` | `true` | 是否渲染 Toolbar；设置为 `false` 即为无 Toolbar Picker |
@@ -102,7 +106,7 @@ const [draft, setDraft] = useState(committed)
 <Cell
   title="城市"
   value={String(committed[0])}
-  isLink
+  showArrow
   onPress={() => {
     setDraft(committed)
     setVisible(true)
@@ -131,9 +135,38 @@ const [draft, setDraft] = useState(committed)
 
 Picker 不维护 Popup 的 draft/commit 生命周期；上例中的 `draft`、`committed` 和关闭逻辑属于调用方。`columns={[]}` 时保留滚轮 frame，不渲染 option，确认结果是空数组；需要展示“暂无数据”时传入一个 disabled option。
 
+多列中，空列和全 disabled 列不占用 `value`、`defaultValue`、回调 `values/options` 或列函数 `selectedValues/selectedOptions` 的位置。例如 `[[], cityOptions]` 的 `value` 为 `['hangzhou']`。`indexes` 和 `selectedIndexes` 始终按列位置返回，不可选列为 `-1`。所有列都不可选时，结果为 `values: []`、`options: []`。
+
+### 语义样式
+
+`style` 作用于根节点，优先级高于 `styles.root`。`styles` 函数接收当前 props 和规范化的 values、options、indexes。
+
+| 槽位 | 作用区域 |
+| --- | --- |
+| `root` | 包含 Toolbar 和滚轮的根容器 |
+| `toolbar` | 嵌套的 PickerToolbar 语义样式 |
+| `body` | 完整滚轮区域，包含列、mask、indicator 和 Loading；padding/margin 会一起移动滚轮及覆盖层 |
+| `column` | 每列的裁剪容器；统一作用于所有列 |
+| `item` | option 的交互容器 |
+| `itemContent` | option 文字 |
+| `mask` | 上下渐隐遮罩 |
+| `indicator` | 中央选中框 |
+| `loading` | 中央 Loading 容器，不包含遮挡背景 |
+
+行高由 `itemHeight` 控制；`styles.item.height` 不覆盖行高，避免文字排列与吸附位置错位。不要通过 item 的 margin、minHeight、maxHeight 或 flex 改变行距，也不要通过 column/mask/indicator 的尺寸覆盖滚轮几何。完整视口高度始终由 `itemHeight * visibleItemCount` 决定。自定义背景时，需同时配置 Picker 的 background 和 mask token，保持渐隐颜色一致。
+
 ### PickerToolbarProps
 
-`PickerToolbar` 可独立使用，支持 `title`、`cancelButtonText`、`confirmButtonText`、`showDivider`、`onCancel`、`onConfirm`、`style`、`styles` 和 `testID`。`styles` 提供 root、title、item、itemContent；Picker 的 `styles.toolbar` 使用同一结构。取消和确认按钮分别位于左右两侧，标题保持居中。
+`PickerToolbar` 可独立使用，支持 `title`、`cancelButtonText`、`confirmButtonText`、`showDivider`、`onCancel`、`onConfirm`、`style`、`styles` 和 `testID`。Picker 的 `styles.toolbar` 使用同一结构。取消和确认按钮分别位于左右两侧，默认两侧等宽，标题在中间区域单行截断，不覆盖按钮。传入自定义 ReactNode 时，文字样式由该节点自己管理。
+
+| 槽位                               | 作用区域                                           |
+| ---------------------------------- | -------------------------------------------------- |
+| `root`                             | Toolbar 根容器                                     |
+| `titleContainer`                   | 中间标题容器                                       |
+| `title`                            | 字符串或数字标题的文字                             |
+| `cancel` / `confirm`               | 各自的操作按钮容器                                 |
+| `cancelContent` / `confirmContent` | 各自的字符串或数字按钮文字                         |
+| `item` / `itemContent`             | 保留的通用按钮容器和文字样式，先于各自操作样式应用 |
 
 ### 命令式 API
 
@@ -160,4 +193,8 @@ Picker 不维护 Popup 的 draft/commit 生命周期；上例中的 `draft`、`c
 
 ## 无障碍与平台说明
 
-滚轮 option 暴露 `radio` 角色和 selected/disabled 状态，Toolbar 操作暴露 `button` 角色。Loading 隐藏 option 的无障碍树并保留 progressbar。PickerColumn 使用 `Gesture.Pan`、SharedValue 和 timing 吸附；iOS、Android 的实际 tap/pan 冲突、速度和视觉效果仍需在目标设备确认。
+每列暴露 `radiogroup` 角色，滚轮 option 暴露 `radio` 角色和 selected/disabled 状态；可用 `columnLabels` 区分多列。Toolbar 操作暴露 `button` 角色。Loading 隐藏 option 的无障碍树并保留 progressbar，同时取消尚未结算的选项交互。读屏器开启时自动全量渲染，长列表的屏幕阅读器遍历体验需在目标设备确认。
+
+`virtual` 默认开启。长列只挂载可视范围及上下缓冲选项，完整数据仍用于选值、联动和确认；`virtual={false}` 保留全量渲染。首次挂载长列时，选项等待原生读屏状态查询完成后再显示，查询失败回退全量渲染。DatePicker、DateTimePicker、TimePicker、Field 选择适配器及 `Picker.open()` 同样支持此配置。窗口随拖动和吸附的真实偏移更新；JS 线程长时间阻塞时仍可能出现补充节点延迟，原生高速滚动体验需在目标设备验证。
+
+PickerColumn 使用 `Gesture.Pan`、SharedValue 和共享 Motion 吸附能力，遵循 `ConfigProvider` / `Provider` 的 enabled、reducedMotion 和 durationScale。点击默认 200ms，滑动采用 swipeDuration；关闭动画或减少动态效果时直接结算。iOS、Android 的实际 tap/pan 冲突、速度和视觉效果仍需在目标设备确认。

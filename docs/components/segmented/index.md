@@ -67,12 +67,13 @@ interface SegmentedOption {
   label: ReactNode
   value: string | number
   disabled?: boolean
+  accessibilityLabel?: string
 }
 ```
 
 字符串 option 等价于 `{ label: option, value: option }`。对象 option 的 `value` 应保持唯一；`label` 可以是自定义 ReactNode。
 
-根节点默认角色为 `radiogroup`，每个 option 使用 `radio` 角色并同步 `selected` 和 `disabled` 状态。每个完整 option 都是 `Pressable` 点击区域，不只文本可点击。
+根节点默认角色为 `radiogroup`，每个 option 使用 `radio` 角色并同步 `selected` 和 `disabled` 状态。每个完整 option 都是 `Pressable` 点击区域，不只文本可点击。自定义 label 不含可读文本时，可用该 option 的 `accessibilityLabel` 提供单项的屏幕阅读器名称。
 
 `value` 无匹配项时不会自动修正，也不会触发回调。未传 `value` 或 `defaultValue` 时选中第一个可用 option；所有 option 都禁用时仍展示列表，但没有可用的切换行为。
 
@@ -88,16 +89,21 @@ interface SegmentedOption {
 /
 ```
 
-`style` 和 `styles.root` 作用于根节点；`styles.item` 作用于每个完整点击项；`styles.label` 作用于文本 label；动画 thumb 由 token 控制。自定义 label 的内部样式由调用方控制。
+`style` 和 `styles.root` 作用于根节点；`styles.item` 作用于每个完整点击项；`styles.label` 作用于文本 label。`styles.label.color` 可设置选项文字颜色，激活项仍优先使用 `selectedTextColor`，禁用项仍使用 `disabledColor`；字号、字重等其他 label 样式会应用到所有选项。动画 thumb 由 token 控制。自定义 label 的内部样式由调用方控制。
 
 `shape="default"` 使用 Button 的 `borderRadius`，`shape="round"` 使用 `borderRadiusRound`；传入 `borderRadius` 后，当前实例的外层容器、selected thumb 和 pressed feedback 统一使用该值，并优先于 `shape`。`style={{ borderRadius }}` 只描述根节点，不会作为内部圆角来源。`block` 会让 option 等分可用宽度。
 
 ## 主题定制
 
-默认 track 背景使用 `colorFillTertiary`，selected thumb 使用 `colorBgContainer`，选中文字使用 `colorText`。如需只覆盖当前实例的选中文字颜色，可直接传入 `selectedTextColor`；如需统一调整多个实例，可通过 `ConfigProvider` 的 `theme.components.Segmented` 覆盖组件 token：
+默认 track 背景使用 `colorFillTertiary`，selected thumb 使用 `colorBgContainer`，选中文字使用 `colorText`。可同时用 `styles.label.color` 设置选项文字颜色、用 `selectedTextColor` 单独设置激活文字颜色；禁用文字仍使用 `disabledColor`。如需统一调整多个实例，可通过 `ConfigProvider` 的 `theme.components.Segmented` 覆盖组件 token：
 
 ```tsx | pure
-<Segmented defaultValue="list" selectedTextColor="#1677ff" options={['list', 'board']} />
+<Segmented
+  defaultValue="list"
+  selectedTextColor="#1677ff"
+  styles={{ label: { color: '#595959' } }}
+  options={['list', 'board']}
+/>
 ```
 
 | Token                   | 默认来源                  | 说明                       |

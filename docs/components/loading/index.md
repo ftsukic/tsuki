@@ -52,13 +52,17 @@ import { Loading } from '@ftsukic/tsuki'
 | color | `ColorValue` | `Loading token.defaultColor` | 指示器颜色 |
 | duration | `number` | `Loading token.animationDuration` | 旋转一周的时长，单位为毫秒；有限值按 `max(0, value)` 处理，0 或负值不启动动画，无效值回退到 token |
 | vertical | `boolean` | `false` | 是否将指示器和文字上下排列 |
-| children | `ReactNode` | — | 加载文字或自定义 React 节点；字符串和数字使用库内 `Text` 渲染 |
+| children | `ReactNode` | — | 加载文字或自定义 React 节点；递归处理数组和 Fragment，连续字符串和数字合并后使用库内 `Text` 渲染 |
 | textColor | `ColorValue` | `Loading token.textColor` | `children` 为字符串或数字时的文字颜色 |
 | textSize | `number` | `Loading token.textFontSize` | `children` 为字符串或数字时的字号，必须为正数 |
 | style | `StyleProp<ViewStyle>` | — | Loading 根节点样式，优先级高于默认样式和 `styles.root` |
-| styles | `LoadingStyles` | — | `root`、`indicator`、`text` 三个语义样式插槽；也支持函数形式 |
+| styles | `LoadingStyles` | — | `root`、`indicator`、`content`、`text` 四个语义样式插槽；也支持函数形式 |
 
-Loading 根节点使用无障碍 `progressbar` 角色，并将 `accessibilityState.busy` 设为 `true`。`style` 只作用于根节点；`styles.indicator` 作用于指示器容器，`styles.text` 作用于 primitive `children` 的库内 `Text` 节点。
+Loading 根节点使用无障碍 `progressbar` 角色，并将 `accessibilityState.busy` 设为 `true`。`style` 只作用于根节点；`styles.indicator` 作用于指示器容器，`styles.content` 作用于有内容时渲染的内容容器，负责图文间距和内容布局；`styles.text` 作用于自动生成的库内 `Text` 节点。自定义 React 元素原样保留，不注入文字样式。
+
+内容容器默认按行排列，`vertical` 控制指示器与整个内容区域上下排列。空字符串、boolean、null、undefined 和空数组或 Fragment 不产生内容区域；数字 `0` 正常显示。`textGap` 对文字与自定义节点均生效。
+
+默认 `accessible=true`，可以通过 `accessible={false}` 关闭独立无障碍节点；保留调用方提供的 label、hint 和其他 state，`busy` 始终为 `true`。`color` 支持原生 `PlatformColor` 和 `DynamicColorIOS`，只控制指示器颜色。
 
 `circular` 通过 `react-native-svg` 的 `Circle` 和 `strokeDasharray` 绘制缺口圆环；`spinner` 通过八个径向条段绘制，静态外观与 `circular` 不同。两者共享 `size`、`color`，并在主题 `motion` 开启时旋转；`theme.seed.motion=false` 时不会启动持续动画。
 
@@ -74,7 +78,7 @@ Loading 根节点使用无障碍 `progressbar` 角色，并将 `accessibilitySta
 | `defaultColor`      | `colorIcon`                       | 默认指示器颜色             |
 | `textColor`         | `colorTextSecondary`              | primitive 文本颜色         |
 | `textFontSize`      | `fontSizeSM`                      | primitive 文本字号         |
-| `textGap`           | `marginXS`                        | 指示器和文本间距           |
+| `textGap`           | `marginXS`                        | 指示器和内容区域间距       |
 | `animationDuration` | `1000`                            | 旋转一周的时长，单位为毫秒 |
 
 ```tsx | pure

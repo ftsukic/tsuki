@@ -44,6 +44,8 @@ import { Divider } from '@ftsukic/tsuki'
 | inset     | `number`               | `0`                      | 统一设置分隔线左右 inset |
 | style     | `StyleProp<ViewStyle>` | —                        | 根 View 样式             |
 
-Divider 继承合理的 React Native `ViewProps`。根节点默认使用 `pointerEvents="none"`，不会截获底层 Cell 的点击；如有需要可以显式覆盖该 prop。`style` 位于默认样式之后，可以覆盖颜色、厚度、间距和定位属性。
+Divider 继承合理的 React Native `ViewProps`。唯一的根 `View` 同时承担视觉横线和语义分隔线，默认使用 `role="separator"`、`alignSelf="stretch"` 和 `pointerEvents="none"`。因此它会在纵向容器中占满可用宽度，不会截获底层 Cell 的点击。调用方可以通过 `role` 或 `accessibilityRole` 覆盖默认角色；仅作为边框装饰时，应使用 `role="none"` 和 `accessible={false}`。
+
+`style` 指向这个唯一根节点，并位于默认样式之后，可以覆盖颜色、厚度、间距、拉伸方式和定位属性。Divider 没有独立子区域，因此不提供 `styles` semantic slots。
 
 本轮只提供横向基础 hairline，不实现 Vant 的文案、`dashed`、`contentPosition`、竖向分隔线或其他高级能力。

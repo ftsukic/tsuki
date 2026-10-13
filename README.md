@@ -8,7 +8,7 @@
 
 ## 当前状态
 
-当前版本已完成仓库、组件包、dumi 文档 H5 预览，并实现首轮 Provider、Theme、Button、Cell、Grid、TextInput、Icon、Loading、Skeleton、Radio、Avatar、Badge、Portal、Overlay、Popup、Dialog、Toast 和 Notify。文档使用 `dumi-theme-mobile`、`react-native-web` 和源码同目录 `__fixtures__`，不接入 Expo Snack。
+当前版本已完成仓库、组件包、dumi 文档 H5 预览，并实现首轮 Provider、Theme、Button、Cell、Grid、Input、Icon、Loading、Skeleton、Radio、Avatar、Badge、Portal、Overlay、Popup、Dialog、Toast 和 Notify。文档使用 `dumi-theme-mobile`、`react-native-web` 和源码同目录 `__fixtures__`，不接入 Expo Snack。
 
 计划中的基础组件包括：
 

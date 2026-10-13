@@ -39,6 +39,8 @@ import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 
 <code src="../../../src/collapse/__fixtures__/examples/controlled.tsx" title="受控模式" description="使用 value 和 onChange 管理展开状态。"></code>
 
+<code src="../../../src/collapse/__fixtures__/examples/semantic.tsx" title="语义样式" description="通过 CollapseItem styles 定制稳定的公开区域。"></code>
+
 <code src="../../../src/collapse/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 ConfigProvider 覆盖 Collapse component token。"></code>
 
 ## API
@@ -68,12 +70,28 @@ import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 | disabled | `boolean` | `false` | 禁止点击展开，标题和箭头使用禁用颜色 |
 | icon | `ReactNode` | — | Header 左侧图标或自定义内容 |
 | children | `ReactNode` | — | 内容区域；字符串和数字使用内容文本样式 |
-| style | `StyleProp<ViewStyle>` | — | 当前 Header 的 Pressable 样式 |
+| style | `StyleProp<ViewStyle>` | — | 当前 Item 根 View 样式 |
+| styles | `CollapseItemStyles` | — | `root`、`header`、`leading`、`titleContainer`、`title`、`icon`、`body`、`bodyText` 语义样式；支持对象或函数 |
 | 其他 PressableProps | React Native `PressableProps` | — | 例如 `testID`、`accessibilityLabel`、`hitSlop` 和 `onPressIn` |
 
 右侧箭头由组件管理，关闭时为 `90deg`，展开时动画到 `-90deg`，与 Vant 的右箭头方向保持一致。Header 默认无障碍角色为 `button`，并同步 `expanded` 与 `disabled` 状态。`onPress` 不作为公开覆盖点，面板切换统一由 Collapse 管理。
 
 内容区域始终保持挂载，通过 Reanimated 的高度动画进行裁剪；组件当前不提供 Vant 的 `lazyRender`、`readonly`、`toggleAll`、`value`、`label` 和 Web DOM 属性。
+
+### CollapseItemStyles
+
+| 槽位 | 类型 | 职责 |
+| --- | --- | --- |
+| root | `StyleProp<ViewStyle>` | Item 根 View；`style` 指向同一节点 |
+| header | `StyleProp<ViewStyle>` | 可点击 Header；统一通过 `columnGap` 管理 leading、titleContainer 和 icon 的间距 |
+| leading | `StyleProp<ViewStyle>` | `icon` prop 的左侧容器；按内容自然宽度布局，库内 Icon 未设置 size 时使用 Collapse iconSize |
+| titleContainer | `StyleProp<ViewStyle>` | 标题布局容器；负责占用剩余宽度 |
+| title | `StyleProp<TextStyle>` | 字符串或数字标题生成的 Text；自定义 ReactNode 自行管理内部样式 |
+| icon | `StyleProp<ViewStyle>` | 展开/收起图标的稳定容器，不包含旋转动画节点 |
+| body | `StyleProp<ViewStyle>` | 内容区域及其 padding，不包含高度动画和测量节点 |
+| bodyText | `StyleProp<TextStyle>` | 字符串或数字内容生成的 Text；自定义 ReactNode 自行管理内部样式 |
+
+函数式 `styles` 接收 `{ props, state }`，state 包含 `active` 和 `disabled`。默认 token 样式先应用，随后应用 `styles`，根节点最后应用 `style`。分隔线、高度裁剪、旋转动画和测量容器是内部实现，不作为语义槽公开。
 
 ## 主题定制
 
@@ -113,7 +131,7 @@ import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 </ConfigProvider>
 ```
 
-Collapse 的 Header 参照 Cell 的行高、内边距、字体和图标间距，但不继承 Cell，也不提供 Cell 的 `value`、`label`、`isLink` 等 API；Header 仅复用现有 Pressable、Icon、Text 和主题 token 体系。
+Collapse 的 Header 参照 Cell 的行高、内边距、字体和图标间距，但不继承 Cell，也不提供 Cell 的 `value`、`description`、`showArrow` 等 API；Header 仅复用现有 Pressable、Icon、Text 和主题 token 体系。
 
 ## 动画
 

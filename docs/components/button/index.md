@@ -59,11 +59,8 @@ import { Button, Icon } from '@ftsukic/tsuki'
 | variant | `'solid' \| 'filled' \| 'outlined' \| 'dashed' \| 'text'` | 根据 type 推导 | 视觉变体；显式属性优先于 Group，Group 优先于 type 映射 |
 | pressFeedback | `'opacity' \| 'overlay'` | 按变体决定 | 显式选择按下反馈；不传时 `text` 使用透明度，其余变体使用覆盖层 |
 | pressedOverlayColor | `ColorValue` | Button token | `pressFeedback="overlay"` 时覆盖层的颜色 |
-| shape | `'default' \| 'round' \| 'square' \| 'circle'` | `'default'` | 按钮形状；显式 `shape` 优先于旧的形状 boolean |
+| shape | `'default' \| 'round' \| 'square' \| 'circle'` | `'default'` | 按钮形状 |
 | block | `boolean` | `false` | 非 `circle` 按钮占满父级可用宽度，包括 `text` 变体 |
-| square | `boolean` | `false` | 方角按钮，只将圆角移除为 `0`；保留正常高度、水平内边距和内容决定的宽度，不是固定正方形 |
-| round | `boolean` | `false` | 胶囊按钮；保留内容决定的宽度并使用足够大的圆角 |
-| circle | `boolean` | `false` | 固定宽高的圆形按钮：`width === height === 当前 size 的高度`，水平内边距为 `0`，主要用于 icon-only action |
 | hairline | `boolean` | `false` | 使用 React Native 的 hairline border |
 | disabled | `boolean` | `false` | 禁用按钮并应用禁用透明度 |
 | loading | `boolean` | `false` | 用 `Loading` 替换普通 icon，保留 `children` 并禁用 press；`circle` loading 仍保持固定圆形尺寸 |
@@ -81,7 +78,7 @@ Button 继承 React Native `PressableProps`，但由组件管理 `children`、`s
 
 ```tsx | pure
 <Button
-  circle
+  shape="circle"
   icon={<Icon name="PlusOutlined" size={18} />}
   accessibilityLabel="新增"
   onPress={createItem}
@@ -109,7 +106,7 @@ Button 继承 React Native `PressableProps`，但由组件管理 `children`、`s
 - `shape="round"` 使用 Button token 的 `borderRadiusRound`；`shape="square"` 和 `shape="circle"` 分别对应方角和圆形。
 - `square` 是方角，不代表 `width === height`；`round` 是胶囊，不改变内容决定的宽度。
 - `circle` 使用 `heightXS`、`heightSM`、`height`、`heightLG` 分别对应 `mini`、`small`、`normal`、`large`，并将宽度设为相同值、水平内边距设为 `0`。
-- 同时传入多个形状 boolean 时不报错，优先级为 `circle > square > round > default`。`circle` 也优先于 `block`，不会被拉伸为横向按钮。
+- `shape="circle"` 优先于 `block`，不会被拉伸为横向按钮。
 
 ### 主题定制
 
@@ -119,11 +116,11 @@ Button 继承 React Native `PressableProps`，但由组件管理 `children`、`s
 import { Button, ConfigProvider } from '@ftsukic/tsuki'
 
 ;<ConfigProvider theme={{ components: { Button: { borderRadius: 12 } } }}>
-  <Button round>圆角操作</Button>
+  <Button shape="round">圆角操作</Button>
 </ConfigProvider>
 ```
 
-组件同时保留 `round`、`square`、`circle` 形状 boolean 作为兼容写法；不提供 Web 专属的 `link`、`ghost`、`textColor`、`textStyle`、HTML 属性或 DOM API。
+组件只通过 `shape` 设置形状；不提供 Web 专属的 `link`、`ghost`、`textColor`、`textStyle`、HTML 属性或 DOM API。
 
 ### Button.Group
 
@@ -151,8 +148,10 @@ import { Button, ButtonGroup } from '@ftsukic/tsuki'
 | style | `StyleProp<ViewStyle>` | — | Group 根 View 的样式；默认 `flexDirection: 'row'`，显式样式优先 |
 | 其他 ViewProps | React Native `ViewProps` | — | Group 继承 View 的其他属性，例如 `testID`、`accessibilityLabel` 和 `onLayout` |
 
-Group 不添加 `gap`。有边框的相邻 Button 使用实际 `borderWidth` 消除双边框；`filled`、`text` 等无边框变体不会产生负 `marginLeft`。设置 `block` 后 Group 撑满父级宽度，直接 Button 子项等分可用空间。Group 的 `variant` 只作为未显式设置子项的默认值，不会覆盖子 Button 自己的 `variant`。单个 Button 保持自身显式 `shape` 或 `round`、`square`、`circle` 的形状行为。
+Group 不添加 `gap`。有边框的相邻 Button 使用实际 `borderWidth` 消除双边框；`filled`、`text` 等无边框变体不会产生负 `marginLeft`。设置 `block` 后 Group 撑满父级宽度，直接 Button 子项等分可用空间。Group 的 `variant` 只作为未显式设置子项的默认值，不会覆盖子 Button 自己的 `variant`。单个 Button 保持自身显式 `shape` 的形状行为。
 
 ## 动画
 
 Button 通过现有 Pressable 接入统一 Motion 策略，保持原有背景/遮罩按压反馈。全局关闭或 Reduced Motion 时反馈立即到达按下状态；需要缩放或透明度反馈时可使用 `MotionPressable`。
+
+图标与内容间距由根容器的 columnGap 管理，默认使用 Button.iconGap（8）；circle 为 0。children 在私有内容容器内组合，数组和 Fragment 的片段之间不会额外插入图标间距。styles.icon 不再自带左右 margin；styles.content 继续只定制自动生成的 Text。仅图标、仅文字或空 children 不产生额外区域间距。

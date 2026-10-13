@@ -52,6 +52,7 @@ import { Tag } from '@ftsukic/tsuki'
 | round | `boolean` | `false` | 使用完全圆角 |
 | mark | `boolean` | `false` | 左侧直角、右侧圆角 |
 | closeable | `boolean` | `false` | 显示关闭图标 |
+| closeAccessibilityLabel | `string` | 根据纯文本内容生成 | 关闭按钮的可访问名称；自定义 ReactNode 默认使用“关闭标签” |
 | onClose | `() => void` | — | 点击关闭图标时触发；组件不会自动卸载 |
 | disabled | `boolean` | `false` | 降低透明度并禁用关闭图标 |
 | style | `StyleProp<ViewStyle>` | — | 根 View 样式，优先级高于 `styles.root` |
@@ -66,3 +67,7 @@ Tag 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style`�
 ## 主题定制
 
 Tag 的颜色直接读取主题 token：`colorPrimary`、`colorSuccess`、`colorWarning`、`colorError`、`colorText`、`colorBorder` 和 `colorFillSecondary`。尺寸、字体、圆角和关闭图标间距可通过 `ConfigProvider` 的 `theme.components.Tag` 覆盖。
+
+字符串、数字及 Fragment 内的文字会合并为自动生成的 Text；受限宽度下保持单行并在末尾省略，关闭按钮保留空间。自定义 ReactNode 的内部布局和文字截断由调用方负责。
+
+语义结构为根 View → 内部行容器 → 内容和关闭按钮。`style` / `styles.root` 定制根节点；`styles.content` 只定制自动生成的 Text；`styles.close` 定制关闭 Pressable。关闭按钮具有 button role 和 disabled state；多个标签并列时，纯文本内容会生成例如“关闭「已完成」”的名称，自定义内容请设置 `closeAccessibilityLabel`。
