@@ -57,6 +57,7 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
     right,
     leftArrow = false,
     leftIconSize,
+    leftColor,
     leftDisabled = false,
     rightDisabled = false,
     leftText,
@@ -85,6 +86,7 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
     right,
     leftArrow,
     leftIconSize,
+    leftColor,
     leftDisabled,
     rightDisabled,
     leftText,
@@ -111,8 +113,9 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
   const hasDefaultRight = rightText !== undefined && rightText !== null
   const hasRightContent = hasCustomRight || hasDefaultRight
   const hasTitle = title !== undefined && title !== null
+  const resolvedLeftColor = leftColor ?? aliasToken.colorText
   const leftTextStyle = {
-    color: token.actionColor,
+    color: resolvedLeftColor,
     fontFamily: aliasToken.fontFamily,
     fontSize: token.actionFontSize,
     lineHeight: aliasToken.lineHeight,
@@ -124,7 +127,7 @@ export const Navbar = forwardRef<View, NavbarProps>(function Navbar(
         <Icon
           name="LeftOutlined"
           size={leftIconSize ?? token.iconSize}
-          color={token.actionColor}
+          color={resolvedLeftColor}
           style={{ marginRight: aliasToken.paddingXXS }}
         />
       ) : null}

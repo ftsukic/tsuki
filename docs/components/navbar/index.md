@@ -160,6 +160,7 @@ safeAreaInsetTop 默认关闭。开启后，Navbar 使用最近的 SafeAreaProvi
 | rightText | `string` | — | 默认右侧文本，由 Navbar 内部 `Text` 渲染 |
 | leftArrow | `boolean` | `false` | 是否显示内置 `LeftOutlined` |
 | leftIconSize | `number` | `Navbar` token 的 `iconSize` | 内置左箭头尺寸；Tsuki RN 扩展，只作用于内置箭头 |
+| leftColor | `string` | 主题正常文本色（`colorText`） | 内置左箭头和 `leftText` 的颜色；自定义 `left` 内容不受影响 |
 | leftDisabled | `boolean` | `false` | 是否禁用左侧操作；不影响 slot 是否因内容存在而渲染 |
 | rightDisabled | `boolean` | `false` | 是否禁用右侧操作；不影响 slot 是否因内容存在而渲染 |
 | onPressLeft | `PressableProps['onPress']` | — | 左侧默认内容或 custom left 整体的点击回调 |
@@ -195,4 +196,4 @@ Navbar 根节点本身是普通 View，不自动声明导航或按钮角色。�
 | `titleColor`        | 主题文本色                             |
 | `borderColor`       | 主题弱边框色（`colorBorderSecondary`） |
 
-默认按压反馈透明度、图标与文字间距等行为继续使用现有全局 token，暗色模式的背景、文字和边框也都来自主题 token。
+默认按压反馈透明度、图标与文字间距等行为继续使用现有全局 token，暗色模式的背景、文字和边框也都来自主题 token。内置左箭头与 `leftText` 默认使用主题正常文本色 `colorText`，可通过 `leftColor` 同时自定义；右侧操作仍使用 `actionColor`。

@@ -26,6 +26,7 @@ export interface NavbarProps extends Omit<ViewProps, 'children' | 'style'> {
   rightText?: string
   leftArrow?: boolean
   leftIconSize?: number
+  leftColor?: string
   leftDisabled?: boolean
   rightDisabled?: boolean
   onPressLeft?: PressableProps['onPress']

@@ -10,8 +10,17 @@ jest.mock('../icon', () => {
   const { Text: NativeText } = jest.requireActual('react-native')
 
   return {
-    Icon: ({ name, size, style }: { name: string; size?: number; style?: unknown }) =>
-      React.createElement(NativeText, { testID: `icon-${name}`, size, style }),
+    Icon: ({
+      name,
+      size,
+      color,
+      style,
+    }: {
+      name: string
+      size?: number
+      color?: string
+      style?: unknown
+    }) => React.createElement(NativeText, { testID: `icon-${name}`, size, color, style }),
   }
 })
 
@@ -139,6 +148,18 @@ describe('Navbar', () => {
       ellipsizeMode: 'tail',
       numberOfLines: 1,
     })
+    expect(StyleSheet.flatten(screen.getByText('返回').props.style)).toMatchObject({
+      color: getDesignToken().colorText,
+    })
+  })
+
+  it('uses one configurable color for the built-in left arrow and text', async () => {
+    await render(<Navbar testID="navbar" leftArrow leftText="返回" leftColor="#123456" />)
+
+    expect(screen.getByTestId('icon-LeftOutlined').props.color).toBe('#123456')
+    expect(StyleSheet.flatten(screen.getByText('返回').props.style)).toMatchObject({
+      color: '#123456',
+    })
   })
 
   it('renders the left arrow and text as direct left slot children', async () => {
@@ -157,6 +178,7 @@ describe('Navbar', () => {
     expect(screen.getByTestId('icon-LeftOutlined').props.style).toEqual({
       marginRight: getDesignToken().paddingXXS,
     })
+    expect(screen.getByTestId('icon-LeftOutlined').props.color).toBe(getDesignToken().colorText)
   })
 
   it('renders only the arrow when leftArrow is enabled without leftText', async () => {
