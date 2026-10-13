@@ -1,5 +1,24 @@
 # @ftsukic/tsuki
 
+## 0.1.0
+
+### Major Changes
+
+- 统一多个组件的语义样式槽和布局契约，包含 Badge、Button、Cell、Field、Input、Notify、Overlay、Toast 等。旧样式别名和部分旧 props 已移除，请按组件文档迁移。
+- 更新 Button、Cell、Field、Input、Theme、Gesture、Pressable、Interaction 和 Icon 等公共 API；删除若干旧导出和兼容入口。请查阅下方各组件文档及迁移说明。
+- 重构 Theme 配置：基础值使用 `theme.seed`，`theme.token` 仅用于派生 token 覆盖；移除 `defaultSeed`、`defaultPresetColors` 和 `composeAlgorithms` 等导出。
+- 新增 Transition、MotionView、MotionPressable 和 MotionConfig，统一动画 token、Reduced Motion 与过渡中断策略。
+
+### Minor Changes
+
+- 增强 Dropdown、Empty、NoticeBar、Picker、Segmented 等组件的语义样式、无障碍行为、虚拟渲染和交互能力。
+- 扩展 Gesture、Pressable 与 Swipe 的生命周期回调和动画策略，保留现有 worklet 与程序化控制语义。
+
+### Patch Changes
+
+- 修复 ActionSheet、Avatar、Button、FloatingBubble、FloatingPanel、ImagePreview、Picker、Popover、Popup、Search、SwipeCell、Switch 等组件的布局、交互、动画和无障碍问题。
+- 改进 Icon、Divider、Loading、Progress、Radio、Skeleton、Tabs、Tag、Watermark 等组件的语义、样式和边界处理。
+
 ## 0.0.12
 
 ### Patch Changes
