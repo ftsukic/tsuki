@@ -39,7 +39,7 @@ export default function FixtureExplorer() {
           <View style={styles.header}>
             <View style={styles.brandRow}>
               <View style={[styles.logo, { backgroundColor: token.colorPrimary }]}>
-                <Text style={styles.logoText}>月</Text>
+                <Text style={[styles.logoText, { color: token.colorTextLightSolid }]}>月</Text>
               </View>
               <View>
                 <Text style={styles.brand}>TSUKI</Text>
@@ -65,8 +65,8 @@ export default function FixtureExplorer() {
             <Cell.Group title="交互实验室" border={false} styles={{ body: styles.groupBody }}>
               <Cell
                 title="键盘与聊天"
-                label="键盘联动 · 消息滚动 · 输入面板"
-                isLink
+                description="键盘联动 · 消息滚动 · 输入面板"
+                showArrow
                 onPress={() => router.push('/labs/keyboard-chat')}
               />
             </Cell.Group>
@@ -82,6 +82,8 @@ export default function FixtureExplorer() {
               placeholder="搜索组件名称或功能"
               accessibilityLabel="搜索组件"
               shape="round"
+              background={token.colorBgLayout}
+              style={{ paddingHorizontal: 0, paddingVertical: 0 }}
             />
           </View>
         }
@@ -96,8 +98,8 @@ export default function FixtureExplorer() {
               <Cell
                 key={item.id}
                 title={item.title}
-                label={item.description}
-                isLink
+                description={item.description}
+                showArrow
                 onPress={() =>
                   router.push({ pathname: '/components/[id]', params: { id: item.id } })
                 }
@@ -127,9 +129,9 @@ const styles = StyleSheet.create({
   header: { gap: 18, paddingBottom: 8 },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 },
   logo: { width: 46, height: 46, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
-  logoText: { color: '#fff', fontSize: 24, fontWeight: '600' },
-  brand: { fontSize: 17, fontWeight: '800', letterSpacing: 3 },
-  title: { fontSize: 34, fontWeight: '700', marginTop: 8 },
+  logoText: { fontSize: 24, lineHeight: 32, fontWeight: '600' },
+  brand: { fontSize: 17, lineHeight: 24, fontWeight: '800', letterSpacing: 3 },
+  title: { fontSize: 34, lineHeight: 44, fontWeight: '700', marginTop: 8 },
   description: { fontSize: 15, lineHeight: 23 },
   groupBody: { borderRadius: 16, overflow: 'hidden' },
   sectionRow: {
@@ -138,8 +140,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
   },
-  sectionTitle: { fontSize: 20, fontWeight: '700' },
-  cardTitle: { fontSize: 17, fontWeight: '600' },
+  sectionTitle: { fontSize: 20, lineHeight: 28, fontWeight: '700' },
+  cardTitle: { fontSize: 17, lineHeight: 24, fontWeight: '600' },
   empty: { alignItems: 'center', padding: 32, gap: 10 },
-  footer: { textAlign: 'center', fontSize: 12, paddingVertical: 24 },
+  footer: { textAlign: 'center', fontSize: 12, lineHeight: 18, paddingVertical: 24 },
 })

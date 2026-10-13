@@ -1,5 +1,6 @@
+import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router'
 import { Stack } from 'expo-router/stack'
-import { StatusBar } from 'react-native'
+import { StatusBar, View } from 'react-native'
 import { useToken } from '@ftsukic/tsuki'
 import { DemoProvider, useDemoTheme } from '@/components/demo-provider'
 
@@ -16,21 +17,36 @@ export default function RootLayout() {
 function DemoStack() {
   const { token } = useToken()
   const { dark } = useDemoTheme()
+  const baseTheme = dark ? DarkTheme : DefaultTheme
+  const navigationTheme = {
+    ...baseTheme,
+    colors: {
+      ...baseTheme.colors,
+      primary: token.colorPrimary,
+      background: token.colorBgLayout,
+      card: token.colorBgContainer,
+      text: token.colorText,
+      border: token.colorBorder,
+      notification: token.colorError,
+    },
+  }
   return (
-    <>
-      <StatusBar barStyle={dark ? 'light-content' : 'dark-content'} />
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: token.colorBgContainer },
-          headerTintColor: token.colorText,
-          headerShadowVisible: false,
-          contentStyle: { backgroundColor: token.colorBgLayout },
-        }}
-      >
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="components/[id]" options={{ title: '组件预览' }} />
-        <Stack.Screen name="labs/keyboard-chat" options={{ headerShown: false }} />
-      </Stack>
-    </>
+    <ThemeProvider value={navigationTheme}>
+      <View style={{ flex: 1, backgroundColor: token.colorBgLayout }}>
+        <StatusBar barStyle={dark ? 'light-content' : 'dark-content'} />
+        <Stack
+          screenOptions={{
+            headerStyle: { backgroundColor: token.colorBgContainer },
+            headerTintColor: token.colorText,
+            headerShadowVisible: false,
+            contentStyle: { backgroundColor: token.colorBgLayout },
+          }}
+        >
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="components/[id]" options={{ title: '组件预览' }} />
+          <Stack.Screen name="labs/keyboard-chat" options={{ headerShown: false }} />
+        </Stack>
+      </View>
+    </ThemeProvider>
   )
 }

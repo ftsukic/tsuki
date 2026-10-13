@@ -51,11 +51,10 @@ import ComponentOverview46 from '../../src/switch/__fixtures__/overview'
 import ComponentOverview47 from '../../src/tabs/__fixtures__/overview'
 import ComponentOverview48 from '../../src/tag/__fixtures__/overview'
 import ComponentOverview49 from '../../src/text/__fixtures__/overview'
-import ComponentOverview50 from '../../src/text-input/__fixtures__/overview'
-import ComponentOverview51 from '../../src/theme/__fixtures__/overview'
-import ComponentOverview52 from '../../src/time-picker/__fixtures__/overview'
-import ComponentOverview53 from '../../src/toast/__fixtures__/overview'
-import ComponentOverview54 from '../../src/watermark/__fixtures__/overview'
+import ComponentOverview50 from '../../src/theme/__fixtures__/overview'
+import ComponentOverview51 from '../../src/time-picker/__fixtures__/overview'
+import ComponentOverview52 from '../../src/toast/__fixtures__/overview'
+import ComponentOverview53 from '../../src/watermark/__fixtures__/overview'
 
 export interface ComponentFixtureEntry {
   Component: ComponentType
@@ -104,7 +103,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview5,
     component: 'cell',
-    description: 'Cell 和 CellGroup 的 Vant 基线用法预览。',
+    description: 'Cell 和 CellGroup 的语义布局用法预览。',
     id: 'cell',
     title: 'Cell',
   },
@@ -424,34 +423,27 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   },
   {
     Component: ComponentOverview50,
-    component: 'text-input',
-    description: 'TextInput 展示 React Native 基础输入能力。',
-    id: 'text-input',
-    title: 'TextInput',
-  },
-  {
-    Component: ComponentOverview51,
     component: 'theme',
     description: 'Theme 展示明暗算法、当前配置和解析后生效的主题参数。',
     id: 'theme',
     title: 'Theme',
   },
   {
-    Component: ComponentOverview52,
+    Component: ComponentOverview51,
     component: 'time-picker',
     description: 'TimePicker 的 Vant 时间范围、过滤和 Tsuki 步进示例。',
     id: 'time-picker',
     title: 'TimePicker',
   },
   {
-    Component: ComponentOverview53,
+    Component: ComponentOverview52,
     component: 'toast',
     description: 'Toast 通过 selector 汇总类型、位置、交互和主题示例，每次只挂载一个提示案例。',
     id: 'toast',
     title: 'Toast',
   },
   {
-    Component: ComponentOverview54,
+    Component: ComponentOverview53,
     component: 'watermark',
     description: 'Watermark 汇总文字、图片、平铺布局、语义样式和主题 token 示例。',
     id: 'watermark',

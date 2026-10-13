@@ -1,12 +1,15 @@
-import { Link, useLocalSearchParams } from 'expo-router'
+import { Link, useIsFocused, useLocalSearchParams } from 'expo-router'
 import { Stack } from 'expo-router/stack'
 import { View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { Text, useToken } from '@ftsukic/tsuki'
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
+import { PortalHost, Text, useToken } from '@ftsukic/tsuki'
 import { componentCatalog } from '@/fixtures/catalog'
+
+const PAGE_PORTAL_COMPONENTS = new Set(['floating-panel', 'floating-bubble'])
 
 export default function ComponentScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
+  const isFocused = useIsFocused()
   const { token } = useToken()
   const fixture = componentCatalog.find((entry) => entry.id === id)
   if (!fixture)
@@ -18,13 +21,25 @@ export default function ComponentScreen() {
       </View>
     )
   const Preview = fixture.Component
-  return (
+  const hasPagePortal = PAGE_PORTAL_COMPONENTS.has(fixture.id)
+  const preview = (
     <SafeAreaView
       edges={['left', 'right', 'bottom']}
       style={{ flex: 1, backgroundColor: token.colorBgLayout }}
     >
       <Stack.Screen options={{ title: fixture.title }} />
-      <Preview key={fixture.id} />
+      {hasPagePortal ? (
+        isFocused ? (
+          <Preview key={fixture.id} />
+        ) : null
+      ) : (
+        <Preview key={fixture.id} />
+      )}
     </SafeAreaView>
+  )
+  return hasPagePortal ? (
+    <SafeAreaProvider>{isFocused ? <PortalHost>{preview}</PortalHost> : preview}</SafeAreaProvider>
+  ) : (
+    preview
   )
 }

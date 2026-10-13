@@ -23,7 +23,6 @@ export const componentCategories = [
     components: [
       'field',
       'input',
-      'text-input',
       'checkbox',
       'radio',
       'switch',
