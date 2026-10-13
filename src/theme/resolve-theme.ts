@@ -1,7 +1,7 @@
 import type { ThemeConfig } from './types/config'
 import type { ThemeValue } from './context'
 import type { AliasToken, ComponentTokenOverrides, MappingAlgorithm } from './types'
-import { composeAlgorithms, defaultAlgorithm } from './themes'
+import { composeAlgorithms, darkAlgorithm, defaultAlgorithm } from './themes'
 import { defaultSeed } from './themes/seed'
 import { createAliasToken } from './util/alias'
 
@@ -24,7 +24,9 @@ export function resolveTheme(
   const seedOverrides = { ...inherited?.seedOverrides, ...definedValues(theme.seed) }
   const seed = { ...defaultSeed, ...seedOverrides }
   const tokenOverrides = { ...inherited?.tokenOverrides, ...definedValues(theme.token) }
-  const algorithm = theme.algorithm ?? inherited?.algorithm ?? defaultAlgorithm
+  const modeAlgorithm =
+    theme.mode === undefined ? undefined : theme.mode === 'dark' ? darkAlgorithm : defaultAlgorithm
+  const algorithm = theme.algorithm ?? modeAlgorithm ?? inherited?.algorithm ?? defaultAlgorithm
   const map = Array.isArray(algorithm)
     ? composeAlgorithms(algorithm)(seed)
     : (algorithm as MappingAlgorithm)(seed)

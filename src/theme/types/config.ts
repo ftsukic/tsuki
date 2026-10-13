@@ -10,13 +10,15 @@ export type ThemeTokenOverrides = Partial<Omit<AliasToken, keyof SeedToken>>
 export interface ThemeConfig {
   seed?: Partial<SeedToken>
   token?: ThemeTokenOverrides
+  /** Built-in appearance; an explicit algorithm takes precedence. */
+  mode?: 'light' | 'dark'
   algorithm?: MappingAlgorithm | readonly MappingAlgorithm[]
   components?: ComponentTokenOverrides
   inherit?: boolean
   motion?: MotionConfig
 }
 
-export type DesignTokenConfig = Pick<ThemeConfig, 'seed' | 'token' | 'algorithm'>
+export type DesignTokenConfig = Pick<ThemeConfig, 'seed' | 'token' | 'algorithm' | 'mode'>
 export interface TokenValue {
   token: AliasToken
 }

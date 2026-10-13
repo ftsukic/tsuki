@@ -11,7 +11,7 @@ export function ConfigProvider({
 }: PropsWithChildren<{ theme?: ThemeConfig }>) {
   const parent = useContext(ThemeContext)
   const inherited = theme.inherit === false ? null : parent
-  const { seed, token, algorithm, components, motion } = theme
+  const { seed, token, algorithm, mode, components, motion } = theme
   const parentSeed = inherited?.seedOverrides
   const parentToken = inherited?.tokenOverrides
   const parentAlgorithm = inherited?.algorithm
@@ -19,7 +19,7 @@ export function ConfigProvider({
   const visual = useMemo(
     () =>
       resolveTheme(
-        { seed, token, algorithm, components },
+        { seed, token, algorithm, mode, components },
         {
           seedOverrides: parentSeed ?? {},
           tokenOverrides: parentToken ?? {},
@@ -32,6 +32,7 @@ export function ConfigProvider({
       seed,
       token,
       algorithm,
+      mode,
       components,
       parentSeed,
       parentToken,

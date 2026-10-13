@@ -7,8 +7,6 @@ import {
   Text,
   Cell,
   ConfigProvider,
-  darkAlgorithm,
-  defaultAlgorithm,
   getButtonToken,
   useComponentToken,
   useToken,
@@ -23,9 +21,8 @@ import type { ThemeConfig } from '../../..'
 export default function ThemeAlgorithmsFixture() {
   const [dark, setDark] = useState(false)
 
-  const algorithmName = dark ? 'darkAlgorithm' : 'defaultAlgorithm'
   const theme: ThemeConfig = {
-    algorithm: dark ? darkAlgorithm : defaultAlgorithm,
+    mode: dark ? 'dark' : 'light',
     seed: { colorPrimary: dark ? '#69b1ff' : '#1989fa' },
     token: { pressedOpacity: 0.8 },
     components: { Button: { borderRadius: 16 } },
@@ -46,9 +43,9 @@ export default function ThemeAlgorithmsFixture() {
         <Cell title="Theme" value={dark ? 'Dark' : 'Light'} border={false} />
         <TextInput bordered placeholder="The provider supplies tokens" />
         <Text style={styles.sectionTitle}>当前输入配置</Text>
-        <Text type="secondary">algorithm 显示函数名称，其余字段来自传入 Provider 的配置。</Text>
+        <Text type="secondary">通过 mode 切换明暗主题，其余字段来自传入 Provider 的配置。</Text>
         <Text selectable style={styles.code}>
-          {JSON.stringify({ ...theme, algorithm: algorithmName }, null, 2)}
+          {JSON.stringify(theme, null, 2)}
         </Text>
         <ResolvedThemeParameters />
       </View>

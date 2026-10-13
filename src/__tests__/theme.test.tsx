@@ -1,5 +1,6 @@
 import {
   ConfigProvider,
+  Provider,
   darkAlgorithm,
   defaultAlgorithm,
   getButtonToken,
@@ -138,6 +139,43 @@ describe('theme', () => {
 })
 
 describe('theme configuration', () => {
+  it('maps modes to built-in algorithms and keeps explicit algorithms first', () => {
+    expect(getDesignToken({ mode: 'dark' })).toEqual(getDesignToken({ algorithm: darkAlgorithm }))
+    expect(getDesignToken({ mode: 'light' })).toEqual(getDesignToken())
+    expect(getDesignToken({ mode: 'dark', algorithm: defaultAlgorithm })).toEqual(getDesignToken())
+    expect(getDesignToken({ mode: 'light', algorithm: [darkAlgorithm] })).toEqual(
+      getDesignToken({ algorithm: darkAlgorithm }),
+    )
+  })
+
+  it('updates inherited modes and allows a local light mode or inheritance reset', async () => {
+    function Probe({ name }: { name: string }) {
+      const { token } = useToken()
+      return <Text>{`${name}:${token.colorBgContainer}`}</Text>
+    }
+    const tree = (mode: 'light' | 'dark') => (
+      <Provider theme={{ mode }}>
+        <ConfigProvider theme={{ mode: undefined }}>
+          <Probe name="inherited" />
+        </ConfigProvider>
+        <ConfigProvider theme={{ mode: 'light' }}>
+          <Probe name="local" />
+        </ConfigProvider>
+        <ConfigProvider theme={{ inherit: false }}>
+          <Probe name="isolated" />
+        </ConfigProvider>
+      </Provider>
+    )
+    const view = await render(tree('dark'))
+    expect(screen.getByText('inherited:#1e1e1e')).toBeTruthy()
+    expect(screen.getByText('local:#ffffff')).toBeTruthy()
+    expect(screen.getByText('isolated:#ffffff')).toBeTruthy()
+    await view.rerender(tree('light'))
+    expect(screen.getByText('inherited:#ffffff')).toBeTruthy()
+    await view.rerender(tree('dark'))
+    expect(screen.getByText('inherited:#1e1e1e')).toBeTruthy()
+  })
+
   it('derives dark neutrals from explicit base colors', () => {
     const token = getDesignToken({
       algorithm: darkAlgorithm,
