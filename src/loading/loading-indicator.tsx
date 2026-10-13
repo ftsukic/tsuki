@@ -14,10 +14,6 @@ interface LoadingIndicatorProps {
   motion: boolean
 }
 
-function toColorString(color: ColorValue): string {
-  return typeof color === 'string' ? color : String(color)
-}
-
 function CircularIndicator({ size, color }: Pick<LoadingIndicatorProps, 'size' | 'color'>) {
   const strokeWidth = Math.max(1, size / 10)
   const radius = Math.max(0, (size - strokeWidth) / 2)
@@ -31,7 +27,7 @@ function CircularIndicator({ size, color }: Pick<LoadingIndicatorProps, 'size' |
         cy={size / 2}
         fill="none"
         r={radius}
-        stroke={toColorString(color)}
+        stroke={color}
         strokeDasharray={`${circumference - gap} ${gap}`}
         strokeLinecap="round"
         strokeWidth={strokeWidth}
@@ -44,7 +40,6 @@ function SpinnerIndicator({ size, color }: Pick<LoadingIndicatorProps, 'size' | 
   const segmentCount = 8
   const segmentWidth = Math.max(1, size * 0.11)
   const segmentHeight = Math.max(2, size * 0.28)
-  const segmentColor = toColorString(color)
 
   return (
     <View style={{ height: size, width: size }}>
@@ -62,7 +57,7 @@ function SpinnerIndicator({ size, color }: Pick<LoadingIndicatorProps, 'size' | 
         >
           <View
             style={{
-              backgroundColor: segmentColor,
+              backgroundColor: color,
               borderRadius: segmentWidth / 2,
               height: segmentHeight,
               left: (size - segmentWidth) / 2,

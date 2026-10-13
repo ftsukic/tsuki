@@ -51,7 +51,7 @@ export default function DateRange() {
       <Cell
         title="选择日期范围"
         value={`${formatDate(committedStart)} 至 ${formatDate(committedEnd)}`}
-        isLink
+        showArrow
         onPress={handleOpen}
       />
       <Popup

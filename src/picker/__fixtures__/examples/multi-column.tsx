@@ -30,7 +30,7 @@ export default function PickerMultiColumnExample() {
 
   return (
     <View style={{ gap: 12 }}>
-      <Cell title="选择省市" value={committed.join(' / ')} isLink onPress={handleOpen} />
+      <Cell title="选择省市" value={committed.join(' / ')} showArrow onPress={handleOpen} />
       <Text>{committed.join(' / ')}</Text>
       <Popup
         visible={visible}

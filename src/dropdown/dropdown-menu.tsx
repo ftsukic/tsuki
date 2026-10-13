@@ -198,15 +198,12 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
 
       const requestId = ++openRequestRef.current
       const commit = () => {
-        if (
-          openRequestRef.current !== requestId ||
-          registrationsRef.current.find((item) => item.id === registration.id) !== registration
-        )
-          return
-        activeIndexRef.current = index
-        activeItemIdRef.current = registration.id
-        setActiveIndex(index)
-        onChangeRef.current?.(index)
+        const current = registrationsRef.current.find((item) => item.id === registration.id)
+        if (openRequestRef.current !== requestId || !current || current.disabled) return
+        activeIndexRef.current = current.index
+        activeItemIdRef.current = current.id
+        setActiveIndex(current.index)
+        onChangeRef.current?.(current.index)
       }
 
       // A closed menu must resolve its anchor before committing the active item.
@@ -387,6 +384,8 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
         )}
       </View>
       <DropdownPopupBridge
+        anchorRef={menuRef}
+        onAnchorScroll={close}
         layout={layout}
         tokenDuration={token.animationDuration}
         windowHeight={windowHeight}
@@ -398,10 +397,14 @@ export const DropdownMenu = forwardRef<DropdownMenuRef, DropdownMenuProps>(funct
 DropdownMenu.displayName = 'DropdownMenu'
 
 function DropdownPopupBridge({
+  anchorRef,
+  onAnchorScroll,
   layout,
   tokenDuration,
   windowHeight,
 }: {
+  anchorRef: React.RefObject<ViewComponent | null>
+  onAnchorScroll: () => void
   layout: MenuLayout
   tokenDuration: number
   windowHeight: number
@@ -411,6 +414,8 @@ function DropdownPopupBridge({
 
   return (
     <DropdownPopup
+      anchorRef={anchorRef}
+      onAnchorScroll={onAnchorScroll}
       visible={context.activeItem !== undefined}
       direction={context.direction}
       overlay={context.overlay}

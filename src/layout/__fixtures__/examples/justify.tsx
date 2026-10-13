@@ -8,10 +8,10 @@ import { StyleSheet, Text } from 'react-native'
 export default function LayoutJustifyFixture() {
   return (
     <Row justify="space-between">
-      <Col span={5} style={styles.col}>
+      <Col span={5} styles={{ content: styles.col }}>
         <Text style={styles.text}>start</Text>
       </Col>
-      <Col span={5} style={styles.col}>
+      <Col span={5} styles={{ content: styles.col }}>
         <Text style={styles.text}>end</Text>
       </Col>
     </Row>

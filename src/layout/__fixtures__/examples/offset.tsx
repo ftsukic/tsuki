@@ -8,7 +8,7 @@ import { StyleSheet, Text } from 'react-native'
 export default function LayoutOffsetFixture() {
   return (
     <Row>
-      <Col span={8} offset={4} style={styles.col}>
+      <Col span={8} offset={4} styles={{ content: styles.col }}>
         <Text style={styles.text}>offset 4 / span 8</Text>
       </Col>
     </Row>

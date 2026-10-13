@@ -4,19 +4,18 @@ import type { ImagePreviewToken } from '../theme'
 export function getImagePreviewStyles(token: ImagePreviewToken) {
   return StyleSheet.create({
     root: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: token.overlayColor,
+      ...StyleSheet.absoluteFill,
       zIndex: token.zIndex,
     },
     overlay: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       backgroundColor: token.overlayColor,
     },
     pager: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
     },
     controls: {
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       pointerEvents: 'box-none',
       zIndex: 2,
     },

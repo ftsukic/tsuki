@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react-native'
+import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import {
   ConfigProvider,
   mountPortal,
@@ -10,7 +10,8 @@ import {
 } from '..'
 import type { PortalManager } from '../portal/portal-manager'
 import { StyleSheet, Text, View } from 'react-native'
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
+import PortalImperativeExample from '../portal/__fixtures__/examples/imperative'
 
 function TokenProbe() {
   const { token } = useToken()
@@ -271,6 +272,86 @@ describe('Portal', () => {
 
     expect(screen.getByTestId('restored-entry')).toBeTruthy()
     await view.unmount()
+  })
+
+  it('routes existing keys to their original host and ignores released keys', async () => {
+    function Hosts({ first, second }: { first: boolean; second: boolean }) {
+      return (
+        <>
+          {first ? <PortalHost key="first" /> : null}
+          {second ? <PortalHost key="second" /> : null}
+        </>
+      )
+    }
+    const view = await render(<Hosts first second={false} />)
+    let retainedKey!: number
+    let staleKey!: number
+    await act(async () => {
+      retainedKey = mountPortal(<Text>保留</Text>)
+      staleKey = mountPortal(<Text>随宿主释放</Text>)
+    })
+    await view.rerender(<Hosts first second />)
+    let newestKey!: number
+    await act(async () => {
+      newestKey = mountPortal(<Text>新宿主</Text>)
+      updatePortal(retainedKey, <Text>原宿主更新</Text>)
+    })
+    expect(screen.getByText('原宿主更新')).toBeTruthy()
+    await act(async () => {
+      unmountPortal(retainedKey)
+    })
+    expect(screen.queryByText('原宿主更新')).toBeNull()
+    await act(async () => {
+      updatePortal(retainedKey, <Text>已释放 key</Text>)
+    })
+    expect(screen.queryByText('已释放 key')).toBeNull()
+    await view.rerender(<Hosts first={false} second />)
+    await act(async () => {
+      updatePortal(staleKey, <Text>失效宿主</Text>)
+      unmountPortal(staleKey)
+      updatePortal(newestKey, <Text>新宿主更新</Text>)
+    })
+    expect(screen.queryByText('失效宿主')).toBeNull()
+    expect(screen.getByText('新宿主更新')).toBeTruthy()
+  })
+
+  it('releases imperative example entries when switching examples', async () => {
+    const view = await render(
+      <PortalHost>
+        <PortalImperativeExample />
+      </PortalHost>,
+    )
+    // RNTL 14 的事件返回 Promise；当前 lint 规则仍按旧版同步签名判断。
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.press(screen.getByText('mountPortal'))
+    expect(screen.getByText('命令式 Portal 内容')).toBeTruthy()
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.press(screen.getByText('updatePortal'))
+    expect(screen.getByText('已更新的 Portal 内容')).toBeTruthy()
+    await view.rerender(
+      <PortalHost>
+        <Text>下一案例</Text>
+      </PortalHost>,
+    )
+    expect(screen.queryByText('已更新的 Portal 内容')).toBeNull()
+  })
+
+  it('initializes imperative entries in useEffect and releases them with the caller', async () => {
+    function StartupPortal() {
+      useEffect(() => {
+        const key = mountPortal(<Text>初始化提示</Text>)
+        return () => unmountPortal(key)
+      }, [])
+      return null
+    }
+    const view = await render(
+      <PortalHost>
+        <StartupPortal />
+      </PortalHost>,
+    )
+    expect(screen.getByText('初始化提示')).toBeTruthy()
+    await view.rerender(<PortalHost />)
+    expect(screen.queryByText('初始化提示')).toBeNull()
   })
 
   it('requires a PortalHost', async () => {

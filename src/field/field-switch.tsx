@@ -1,3 +1,4 @@
+import { getFieldAccessibility } from './accessibility'
 import type { ReactNode } from 'react'
 import type { DimensionValue } from 'react-native'
 import type { CellProps } from '../cell'
@@ -27,7 +28,7 @@ export interface FieldSwitchProps<ActiveValueT = boolean, InactiveValueT = boole
   extends FieldCellProps, SwitchAdapterProps<ActiveValueT, InactiveValueT> {
   title?: ReactNode
   titleExtra?: ReactNode
-  label?: ReactNode
+  description?: ReactNode
   value?: ActiveValueT | InactiveValueT
   defaultValue?: ActiveValueT | InactiveValueT
   activeValue?: ActiveValueT
@@ -50,7 +51,7 @@ export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT =
   const {
     title,
     titleExtra,
-    label,
+    description,
     value,
     defaultValue,
     activeValue,
@@ -64,14 +65,14 @@ export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT =
     switchProps: switchConfig,
     pointerEvents,
     valueExtra,
-    extra,
+    trailing,
     required,
     vertical,
     titleWidth,
     titleAlign,
     valueAlign,
-    icon,
-    isLink,
+    leading,
+    showArrow,
     clickable,
     arrowDirection,
     onPress,
@@ -101,10 +102,11 @@ export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT =
     <Cell
       title={title}
       titleExtra={titleExtra}
-      label={label}
+      description={description}
       value={
         <Switch
           {...switchProps}
+          {...getFieldAccessibility(props)}
           value={value}
           defaultValue={defaultValue}
           activeValue={activeValue}
@@ -115,19 +117,19 @@ export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT =
           onChange={onChange}
           beforeChange={beforeChange}
           pointerEvents={readOnly ? 'none' : pointerEvents}
-          style={[semantic?.content, switchStyle]}
+          style={[semantic?.control, switchStyle]}
           styles={switchStyles}
         />
       }
       valueExtra={valueExtra}
-      extra={extra}
+      trailing={trailing}
       required={required}
       disabled={disabled}
       vertical={vertical}
       valueAlign={valueAlign}
       center={props.center}
-      icon={icon}
-      isLink={isLink}
+      leading={leading}
+      showArrow={showArrow}
       clickable={clickable}
       arrowDirection={arrowDirection}
       onPress={onPress}

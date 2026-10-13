@@ -1,5 +1,5 @@
 import { cloneElement, isValidElement } from 'react'
-import { View } from 'react-native'
+import { Text as NativeText, View } from 'react-native'
 import type { ReactNode } from 'react'
 import type { ColorValue, StyleProp, TextStyle } from 'react-native'
 import { Pressable } from '../pressable'
@@ -42,11 +42,7 @@ function getElementTypeName(type: unknown): string {
   return ''
 }
 
-function applyActionColor(
-  node: ReactNode,
-  color: ColorValue | undefined,
-  style?: StyleProp<TextStyle>,
-): ReactNode {
+function applyActionColor(node: ReactNode, color: ColorValue | undefined): ReactNode {
   if (!color || !isValidElement(node)) return node
 
   const typeName = getElementTypeName(node.type).toLowerCase()
@@ -54,7 +50,7 @@ function applyActionColor(
 
   if (typeName.includes('text')) {
     return cloneElement(node, {
-      style: [props.style, style, { color }],
+      style: [props.style, { color }],
     } as never)
   }
 
@@ -75,16 +71,19 @@ function applyActionColor(
   return node
 }
 
-function renderText(
-  value: ReactNode,
-  style: StyleProp<TextStyle>,
-  color: ColorValue | undefined,
-): ReactNode {
+function renderText(value: ReactNode, style: StyleProp<TextStyle>): ReactNode {
   if (typeof value === 'string' || typeof value === 'number') {
     return <Text style={style}>{value}</Text>
   }
 
-  return applyActionColor(value, color, style)
+  if (
+    isValidElement<ColorableElementProps>(value) &&
+    (value.type === Text || value.type === NativeText)
+  ) {
+    return cloneElement(value, { style: [value.props.style, style] } as never)
+  }
+
+  return value
 }
 
 export function PopoverActionItem({
@@ -104,6 +103,7 @@ export function PopoverActionItem({
 
   return (
     <Pressable
+      accessibilityLabel={action.accessibilityLabel}
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       disabled={disabled}
@@ -118,11 +118,16 @@ export function PopoverActionItem({
     >
       <>
         {action.icon !== undefined && action.icon !== null && action.icon !== false ? (
-          <View pointerEvents="none" style={[styles.actionIcon, semantic?.itemIcon]}>
+          <View
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            pointerEvents="none"
+            style={[styles.actionIcon, semantic?.itemIcon]}
+          >
             {applyActionColor(action.icon, actionColor)}
           </View>
         ) : null}
-        {renderText(action.text, actionTextStyle, actionColor)}
+        {renderText(action.text, actionTextStyle)}
       </>
     </Pressable>
   )

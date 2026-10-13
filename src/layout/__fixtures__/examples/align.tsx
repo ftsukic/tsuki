@@ -8,13 +8,13 @@ import { StyleSheet, Text } from 'react-native'
 export default function LayoutAlignFixture() {
   return (
     <Row align="center" gutter={12}>
-      <Col span={8} style={[styles.col, styles.short]}>
+      <Col span={8} styles={{ content: [styles.col, styles.short] }}>
         <Text style={styles.text}>short</Text>
       </Col>
-      <Col span={8} style={[styles.col, styles.tall]}>
+      <Col span={8} styles={{ content: [styles.col, styles.tall] }}>
         <Text style={styles.text}>tall</Text>
       </Col>
-      <Col span={8} style={[styles.col, styles.medium]}>
+      <Col span={8} styles={{ content: [styles.col, styles.medium] }}>
         <Text style={styles.text}>medium</Text>
       </Col>
     </Row>

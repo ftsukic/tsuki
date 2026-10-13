@@ -1084,6 +1084,199 @@ describe('Dialog', () => {
     await expect(pending).resolves.toBeUndefined()
   })
 
+  it.each(['allow', 'block', 'reject'] as const)(
+    'ignores an old %s result after imperative replacement',
+    async (result) => {
+      let allow!: (value: boolean) => void
+      let reject!: (reason: Error) => void
+      const view = await render(<AppProvider />)
+      let first!: Promise<unknown>
+      let second!: Promise<unknown>
+      await act(async () => {
+        first = showDialog({
+          message: '旧检查',
+          beforeClose: () =>
+            new Promise<boolean>((resolve, fail) => {
+              allow = resolve
+              reject = fail
+            }),
+        })
+      })
+      // eslint-disable-next-line testing-library/no-unnecessary-act
+      await act(async () => fireEvent.press(screen.getByTestId('dialog-confirm-button')))
+      await act(async () => {
+        second = showDialog({ message: '新弹窗' })
+      })
+      await expect(first).resolves.toBeUndefined()
+      expect(screen.getByTestId('dialog-confirm-button').props.accessibilityState?.disabled).toBe(
+        false,
+      )
+      await act(async () => {
+        if (result === 'reject') reject(new Error('旧检查失败'))
+        else allow(result === 'allow')
+      })
+      expect(screen.getByText('新弹窗')).toBeTruthy()
+      // eslint-disable-next-line testing-library/no-unnecessary-act
+      await act(async () => fireEvent.press(screen.getByTestId('dialog-confirm-button')))
+      await expect(second).resolves.toBe('confirm')
+      await view.unmount()
+    },
+  )
+
+  it('keeps a new controlled request loading when an old request finishes', async () => {
+    const requests: Array<(value: boolean) => void> = []
+    const onShowChange = jest.fn()
+    const beforeClose = () => new Promise<boolean>((resolve) => requests.push(resolve))
+    const tree = (show: boolean) => (
+      <AppProvider>
+        <Dialog
+          show={show}
+          message="重新打开"
+          beforeClose={beforeClose}
+          onShowChange={onShowChange}
+        />
+      </AppProvider>
+    )
+    const view = await render(tree(true))
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => fireEvent.press(screen.getByTestId('dialog-confirm-button')))
+    await view.rerender(tree(false))
+    await view.rerender(tree(true))
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => fireEvent.press(screen.getByTestId('dialog-confirm-button')))
+    await act(async () => requests[0](true))
+    expect(onShowChange).not.toHaveBeenCalled()
+    expect(screen.getByTestId('dialog-confirm-button').props.accessibilityState?.disabled).toBe(
+      true,
+    )
+    await act(async () => requests[1](true))
+    expect(onShowChange).toHaveBeenCalledTimes(1)
+    expect(onShowChange).toHaveBeenCalledWith(false)
+    await view.unmount()
+  })
+
+  it('ignores an interceptor after programmatic close and settles only once', async () => {
+    let allow!: (value: boolean) => void
+    const settled = jest.fn()
+    const view = await render(<AppProvider />)
+    await act(async () => {
+      void showDialog({
+        beforeClose: () =>
+          new Promise<boolean>((resolve) => {
+            allow = resolve
+          }),
+      }).then(settled)
+    })
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => fireEvent.press(screen.getByTestId('dialog-confirm-button')))
+    await act(async () => closeDialog())
+    expect(settled).toHaveBeenCalledWith(undefined)
+    await act(async () => allow(true))
+    expect(settled).toHaveBeenCalledTimes(1)
+    await view.unmount()
+  })
+
+  it('ignores an interceptor after PortalHost teardown', async () => {
+    let allow!: (value: boolean) => void
+    const settled = jest.fn()
+    const view = await render(<AppProvider />)
+    await act(async () => {
+      void showDialog({
+        beforeClose: () =>
+          new Promise<boolean>((resolve) => {
+            allow = resolve
+          }),
+      }).then(settled)
+    })
+    // eslint-disable-next-line testing-library/no-unnecessary-act
+    await act(async () => fireEvent.press(screen.getByTestId('dialog-confirm-button')))
+    await view.unmount()
+    await act(async () => allow(true))
+    expect(settled).toHaveBeenCalledTimes(1)
+    expect(settled).toHaveBeenCalledWith(undefined)
+  })
+
+  it('maps semantic regions and preserves action style precedence', async () => {
+    const view = await render(
+      <AppProvider>
+        <Dialog
+          show
+          title="语义标题"
+          message="语义正文"
+          showCancelButton
+          styles={() => ({
+            container: { borderWidth: 3 },
+            header: { paddingTop: 7 },
+            title: { color: '#123456' },
+            body: { paddingTop: 9 },
+            message: { color: '#234567' },
+            footer: { borderTopWidth: 4 },
+            cancelButton: { backgroundColor: '#345678' },
+            confirmButton: { backgroundColor: '#456789', borderBottomWidth: 3 },
+          })}
+          confirmButtonProps={{
+            styles: { root: { backgroundColor: '#567890' } },
+            style: { backgroundColor: '#678901' },
+          }}
+        />
+      </AppProvider>,
+    )
+    expect(StyleSheet.flatten(screen.getByRole('alert').props.style).borderWidth).toBe(3)
+    expect(StyleSheet.flatten(screen.getByTestId('dialog-header').props.style).paddingTop).toBe(7)
+    expect(StyleSheet.flatten(screen.getByText('语义标题').props.style).color).toBe('#123456')
+    expect(StyleSheet.flatten(screen.getByTestId('dialog-content').props.style).paddingTop).toBe(9)
+    expect(StyleSheet.flatten(screen.getByText('语义正文').props.style).color).toBe('#234567')
+    const confirm = screen.getByTestId('dialog-confirm-button')
+    expect(StyleSheet.flatten(confirm.props.style)).toMatchObject({
+      backgroundColor: '#678901',
+      borderBottomWidth: 3,
+    })
+    expect(StyleSheet.flatten(confirm.parent?.props.style).borderTopWidth).toBe(4)
+    expect(
+      StyleSheet.flatten(screen.getByTestId('dialog-cancel-button').props.style).backgroundColor,
+    ).toBe('#345678')
+    await view.unmount()
+  })
+
+  it('keeps custom content styles and applies only region slots to custom nodes', async () => {
+    const view = await render(
+      <AppProvider>
+        <Dialog
+          show
+          title={
+            <Text testID="custom-title" style={{ color: '#123456' }}>
+              标题
+            </Text>
+          }
+          footer={<Text testID="custom-footer">底部</Text>}
+          styles={{
+            header: { paddingTop: 7 },
+            title: { color: '#ffffff' },
+            body: { paddingTop: 9 },
+            message: { color: '#ffffff' },
+            footer: { borderTopWidth: 4 },
+            confirmButton: { borderWidth: 8 },
+          }}
+        >
+          <Text testID="custom-message" style={{ color: '#234567' }}>
+            正文
+          </Text>
+        </Dialog>
+      </AppProvider>,
+    )
+    expect(StyleSheet.flatten(screen.getByTestId('custom-title').props.style).color).toBe('#123456')
+    expect(StyleSheet.flatten(screen.getByTestId('custom-message').props.style).color).toBe(
+      '#234567',
+    )
+    expect(StyleSheet.flatten(screen.getByTestId('dialog-header').props.style).paddingTop).toBe(7)
+    expect(StyleSheet.flatten(screen.getByTestId('dialog-content').props.style).paddingTop).toBe(9)
+    expect(
+      StyleSheet.flatten(screen.getByTestId('custom-footer').parent?.props.style).borderTopWidth,
+    ).toBe(4)
+    expect(screen.queryByTestId('dialog-confirm-button')).toBeNull()
+    await view.unmount()
+  })
+
   it('requires PortalHost for controlled rendering', async () => {
     await expect(
       render(

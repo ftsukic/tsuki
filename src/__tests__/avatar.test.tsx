@@ -25,6 +25,35 @@ function findNodes(node: JsonNode | null, type: string, result: JsonElement[] = 
 }
 
 describe('Avatar', () => {
+  it.each([NaN, Infinity, -Infinity, 0, -24])(
+    'falls back to medium dimensions and typography for size %s',
+    async (size) => {
+      const view = await render(
+        <ConfigProvider
+          theme={{
+            components: { Avatar: { containerSize: 36, textFontSize: 20, iconFontSize: 22 } },
+          }}
+        >
+          <Avatar testID="invalid-size" size={size}>
+            A
+          </Avatar>
+          <Avatar size={size} icon={<Icon name="UserOutlined" />} />
+        </ConfigProvider>,
+      )
+
+      expect(StyleSheet.flatten(screen.getByTestId('invalid-size').props.style)).toMatchObject({
+        width: 36,
+        height: 36,
+      })
+      expect(StyleSheet.flatten(screen.getByText('A').props.style)).toMatchObject({
+        fontSize: 20,
+        lineHeight: 36,
+      })
+      const icon = findNode(view.toJSON(), 'RNSVGSvgView')
+      expect(icon?.props.bbWidth ?? icon?.props.width).toBe(22)
+    },
+  )
+
   it('renders text, icon and image variants with the expected shape and size', async () => {
     const view = await render(
       <ConfigProvider>
@@ -160,6 +189,39 @@ describe('Avatar', () => {
 })
 
 describe('Avatar.Group', () => {
+  it.each([false, true])(
+    'exposes one overflow accessibility node with interactive=%s and no leading overlap',
+    async (interactive) => {
+      const onOverflowPress = interactive ? jest.fn() : undefined
+      const view = await render(
+        <ConfigProvider>
+          <Avatar.Group maxCount={0} onOverflowPress={onOverflowPress}>
+            <Avatar>A</Avatar>
+            <Avatar>B</Avatar>
+          </Avatar.Group>
+        </ConfigProvider>,
+      )
+
+      const overflow = screen.getByRole(interactive ? 'button' : 'image', {
+        name: '还有 2 个头像',
+      })
+      expect(StyleSheet.flatten(overflow.props.style).marginLeft).toBe(0)
+      expect(screen.getAllByRole(interactive ? 'button' : 'image')).toHaveLength(1)
+      const decoration = findNodes(view.toJSON(), 'View').find(
+        (node) => node.props.importantForAccessibility === 'no-hide-descendants',
+      )
+      expect(decoration?.props.accessible).toBe(false)
+      expect(decoration?.props.accessibilityElementsHidden).toBe(true)
+      if (onOverflowPress) {
+        fireEvent.press(overflow)
+        expect(onOverflowPress).toHaveBeenCalledTimes(1)
+      } else {
+        expect(overflow.props.onPress).toBeUndefined()
+        expect(overflow.props.disabled).toBeUndefined()
+      }
+    },
+  )
+
   it('inherits group defaults, preserves child overrides and renders overflow', async () => {
     const onOverflowPress = jest.fn()
     await render(
@@ -225,7 +287,9 @@ describe('Avatar.Group', () => {
       backgroundColor: '#ff0000',
       borderRadius: 8,
     })
-    expect(StyleSheet.flatten(screen.getByText('+1').props.style)).toMatchObject({
+    expect(
+      StyleSheet.flatten(screen.getByText('+1', { includeHiddenElements: true }).props.style),
+    ).toMatchObject({
       color: '#ffffff',
     })
   })

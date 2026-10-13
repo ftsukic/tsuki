@@ -273,11 +273,12 @@ describe('Checkbox', () => {
     ).toBe(token.gap)
   })
 
-  it('applies the label semantic style only to text labels', async () => {
+  it('applies label semantic styles to text and custom label regions', async () => {
     const token = getCheckboxToken(getDesignToken())
 
     await render(
       <ConfigProvider>
+        <Checkbox styles={{ label: { color: 'red', marginLeft: 99 } }}>Text label</Checkbox>
         <Checkbox testID="custom-label" styles={{ label: { color: 'red', marginLeft: 99 } }}>
           <View testID="custom-label-content" />
         </Checkbox>
@@ -285,8 +286,42 @@ describe('Checkbox', () => {
     )
 
     expect(styleOf('custom-label').columnGap).toBe(token.gap)
+    expect(StyleSheet.flatten(screen.getByText('Text label').props.style)).toMatchObject({
+      color: 'red',
+      marginLeft: 99,
+    })
+    expect(
+      StyleSheet.flatten(screen.getByTestId('custom-label-content').parent?.props.style),
+    ).toMatchObject({ marginLeft: 99 })
     expect(screen.getByTestId('custom-label-content').props.style).toBeUndefined()
   })
+
+  it.each(['default', 'button'] as const)(
+    'updates custom label styles from checked state for the %s variant',
+    async (variant) => {
+      await render(
+        <ConfigProvider>
+          <Checkbox
+            testID="styled-custom-label"
+            variant={variant}
+            labelPosition="left"
+            styles={({ state }) => ({
+              label: { paddingHorizontal: state.checked ? 12 : 4 },
+            })}
+          >
+            <View testID="styled-custom-content" style={{ paddingHorizontal: 2 }} />
+          </Checkbox>
+        </ConfigProvider>,
+      )
+
+      const labelStyle = () =>
+        StyleSheet.flatten(screen.getByTestId('styled-custom-content').parent?.props.style)
+      expect(labelStyle()).toMatchObject({ paddingHorizontal: 4 })
+      await press(screen.getByTestId('styled-custom-label'))
+      expect(labelStyle()).toMatchObject({ paddingHorizontal: 12 })
+      expect(styleOf('styled-custom-content')).toMatchObject({ paddingHorizontal: 2 })
+    },
+  )
 
   it.each([
     ['solid', getCheckboxToken(getDesignToken()).checkedIconColor],
@@ -325,10 +360,10 @@ describe('Checkbox', () => {
     expect(styleOf('button-unchecked')).toMatchObject({
       backgroundColor: getCheckboxToken(getDesignToken()).buttonBackground,
       borderWidth: 1,
-      height: getCheckboxToken(getDesignToken()).buttonHeight,
       minHeight: getCheckboxToken(getDesignToken()).buttonHeight,
       minWidth: getCheckboxToken(getDesignToken()).buttonMinWidth,
     })
+    expect(styleOf('button-unchecked').height).toBeUndefined()
     expect(styleOf('button-checked')).toMatchObject({
       backgroundColor: getCheckboxToken(getDesignToken()).checkedBackground,
     })
@@ -563,6 +598,7 @@ describe('CheckboxGroup', () => {
       alignSelf: 'stretch',
       flexGrow: 0,
       flexShrink: 0,
+      minWidth: 0,
       width: '100%',
     })
     expect(screen.getByText('一个很长的选项').props.numberOfLines).toBe(1)

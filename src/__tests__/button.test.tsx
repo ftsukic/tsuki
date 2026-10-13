@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { Button, ButtonGroup, ConfigProvider, getButtonToken, getDesignToken } from '..'
 import type { ButtonProps } from '../button'
 import { fireEvent, render, screen } from '@testing-library/react-native'
@@ -123,7 +124,7 @@ describe('Button', () => {
           type="primary"
           size="mini"
           variant="outlined"
-          round
+          shape="round"
           onPress={onPress}
         >
           立即保存
@@ -185,10 +186,8 @@ describe('Button', () => {
       }
       const parent = findLoadingParent(tree)
       expect(parent).toBeTruthy()
-      expect(StyleSheet.flatten(parent!.props.style)).toMatchObject({
-        marginLeft: iconPosition === 'right' ? gap : 0,
-        marginRight: iconPosition === 'left' ? gap : 0,
-      })
+      expect(StyleSheet.flatten(parent!.props.style).marginLeft).toBeUndefined()
+      expect(StyleSheet.flatten(parent!.props.style).marginRight).toBeUndefined()
       expect(StyleSheet.flatten(progressbar.props.style).marginRight).toBeUndefined()
       const findRow = (node: JsonNode | null): JsonElement | undefined => {
         if (node === null || typeof node === 'string') return undefined
@@ -200,6 +199,7 @@ describe('Button', () => {
         return undefined
       }
       const row = findRow(tree)
+      expect(StyleSheet.flatten(row?.props.style).columnGap).toBe(gap)
       expect(row?.children[iconPosition === 'left' ? 0 : 1]).toBe(parent)
     },
   )
@@ -642,9 +642,9 @@ describe('Button', () => {
   it('keeps a single grouped button shape unchanged', async () => {
     await render(
       <ConfigProvider>
-        <Button testID="standalone-single-circle" circle />
+        <Button testID="standalone-single-circle" shape="circle" />
         <ButtonGroup>
-          <Button testID="group-single-circle" circle />
+          <Button testID="group-single-circle" shape="circle" />
         </ButtonGroup>
       </ConfigProvider>,
     )
@@ -831,7 +831,7 @@ describe('Button', () => {
   it('uses square only to remove the border radius', async () => {
     await render(
       <ConfigProvider>
-        <Button testID="square" square>
+        <Button testID="square" shape="square">
           方形按钮
         </Button>
       </ConfigProvider>,
@@ -848,7 +848,7 @@ describe('Button', () => {
   it('renders round buttons as capsules without changing their content width', async () => {
     await render(
       <ConfigProvider>
-        <Button testID="round" round>
+        <Button testID="round" shape="round">
           胶囊按钮
         </Button>
       </ConfigProvider>,
@@ -891,7 +891,7 @@ describe('Button', () => {
       <ConfigProvider>
         <Button
           testID="circle"
-          circle
+          shape="circle"
           icon={<Text testID="circle-icon">+</Text>}
           accessibilityLabel="更多操作"
         />
@@ -909,10 +909,9 @@ describe('Button', () => {
     const iconContainer = findParentOfTestID(toJSON(), 'circle-icon')
     if (!iconContainer) throw new Error('Circle icon container was not rendered')
 
-    expect(StyleSheet.flatten(iconContainer.props.style)).toMatchObject({
-      marginLeft: 0,
-      marginRight: 0,
-    })
+    expect(StyleSheet.flatten(iconContainer.props.style).marginLeft).toBeUndefined()
+    expect(StyleSheet.flatten(iconContainer.props.style).marginRight).toBeUndefined()
+    expect(style.columnGap).toBe(0)
   })
 
   it('uses the matching size height token for every circle size', async () => {
@@ -924,10 +923,10 @@ describe('Button', () => {
           },
         }}
       >
-        <Button testID="circle-mini" size="mini" circle />
-        <Button testID="circle-small" size="small" circle />
-        <Button testID="circle-normal" size="normal" circle />
-        <Button testID="circle-large" size="large" circle />
+        <Button testID="circle-mini" size="mini" shape="circle" />
+        <Button testID="circle-small" size="small" shape="circle" />
+        <Button testID="circle-normal" size="normal" shape="circle" />
+        <Button testID="circle-large" size="large" shape="circle" />
       </ConfigProvider>,
     )
 
@@ -950,7 +949,11 @@ describe('Button', () => {
   it('does not add horizontal icon gaps to a circle with content', async () => {
     const { toJSON } = await render(
       <ConfigProvider>
-        <Button testID="circle-content" circle icon={<Text testID="circle-content-icon">+</Text>}>
+        <Button
+          testID="circle-content"
+          shape="circle"
+          icon={<Text testID="circle-content-icon">+</Text>}
+        >
           内容
         </Button>
       </ConfigProvider>,
@@ -959,16 +962,15 @@ describe('Button', () => {
     const iconContainer = findParentOfTestID(toJSON(), 'circle-content-icon')
     if (!iconContainer) throw new Error('Circle icon container was not rendered')
 
-    expect(StyleSheet.flatten(iconContainer.props.style)).toMatchObject({
-      marginLeft: 0,
-      marginRight: 0,
-    })
+    expect(StyleSheet.flatten(iconContainer.props.style).marginLeft).toBeUndefined()
+    expect(StyleSheet.flatten(iconContainer.props.style).marginRight).toBeUndefined()
+    expect(StyleSheet.flatten(screen.getByTestId('circle-content').props.style).columnGap).toBe(0)
   })
 
   it('keeps a loading circle fixed and round', async () => {
     await render(
       <ConfigProvider>
-        <Button testID="loading-circle" size="large" circle loading>
+        <Button testID="loading-circle" size="large" shape="circle" loading>
           提交
         </Button>
       </ConfigProvider>,
@@ -984,7 +986,7 @@ describe('Button', () => {
   it('keeps circle shape ahead of block stretching', async () => {
     await render(
       <ConfigProvider>
-        <Button testID="circle-block" circle block />
+        <Button testID="circle-block" shape="circle" block />
       </ConfigProvider>,
     )
 
@@ -992,24 +994,52 @@ describe('Button', () => {
     expect(style.width).toBe(style.height)
     expect(style.alignSelf).toBe('auto')
   })
+})
 
-  it('resolves multiple shape flags with circle, square, then round priority', async () => {
-    await render(
-      <ConfigProvider>
-        <Button testID="all-shapes" circle square round />
-        <Button testID="square-round" square round />
-        <Button testID="round-only" round />
-      </ConfigProvider>,
+describe('Button content gap', () => {
+  it('groups fragments and arrays so gap only separates icon from content', async () => {
+    const view = await render(
+      <Button testID="fragment-gap" icon={<Text testID="gap-icon">+</Text>}>
+        {[
+          'A',
+          <React.Fragment key="fragment">
+            B<Text testID="custom-piece">C</Text>
+          </React.Fragment>,
+        ]}
+      </Button>,
     )
+    expect(screen.getByText('A')).toBeTruthy()
+    expect(screen.getByText('B')).toBeTruthy()
+    const content = findParentOfTestID(view.toJSON(), 'custom-piece')
+    expect(content).toBeTruthy()
+    expect(StyleSheet.flatten(content!.props.style).columnGap).toBeUndefined()
+    const root = view.toJSON() as JsonElement
+    expect(root.children).toHaveLength(2)
+    expect(StyleSheet.flatten(root.props.style).columnGap).toBe(
+      getButtonToken(getDesignToken()).iconGap,
+    )
+  })
 
-    const allShapes = StyleSheet.flatten(screen.getByTestId('all-shapes').props.style)
-    const squareRound = StyleSheet.flatten(screen.getByTestId('square-round').props.style)
-    const roundOnly = StyleSheet.flatten(screen.getByTestId('round-only').props.style)
+  it.each([
+    null,
+    false,
+    [],
+    <React.Fragment key="empty">
+      {null}
+      {false}
+    </React.Fragment>,
+  ])('does not create a content region for empty children %#', async (children) => {
+    const view = await render(
+      <Button testID="empty-gap" icon={<Text>+</Text>}>
+        {children}
+      </Button>,
+    )
+    expect((view.toJSON() as JsonElement).children).toHaveLength(1)
+  })
 
-    expect(allShapes.width).toBe(allShapes.height)
-    expect(allShapes.paddingHorizontal).toBe(0)
-    expect(allShapes.borderRadius).toBe(allShapes.height / 2)
-    expect(squareRound.borderRadius).toBe(0)
-    expect(roundOnly.borderRadius).toBeGreaterThanOrEqual(roundOnly.minHeight / 2)
+  it('keeps zero as visible content', async () => {
+    const view = await render(<Button icon={<Text>+</Text>}>{0}</Button>)
+    expect(screen.getByText('0')).toBeTruthy()
+    expect((view.toJSON() as JsonElement).children).toHaveLength(2)
   })
 })

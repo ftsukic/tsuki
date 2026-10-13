@@ -1,4 +1,4 @@
-import { ConfigProvider, FloatingBubble, Text } from '@ftsukic/tsuki'
+import { ConfigProvider, FloatingBubble, Icon, Text } from '@ftsukic/tsuki'
 import { StyleSheet, View } from 'react-native'
 
 /**
@@ -14,6 +14,8 @@ export default function FloatingBubbleThemeExample() {
             size: 56,
             borderRadius: 16,
             backgroundColor: '#102a43',
+            color: '#fbbf24',
+            iconSize: 28,
             shadowOpacity: 0.3,
             shadowRadius: 12,
             elevation: 8,
@@ -24,15 +26,21 @@ export default function FloatingBubbleThemeExample() {
       <View style={styles.page}>
         <Text style={styles.title}>主题化 FloatingBubble</Text>
         <Text style={styles.description}>
-          token 控制默认外观，semantic styles 负责局部内容覆盖。
+          左侧 Icon 使用 token 颜色和尺寸，右侧显式设置颜色和尺寸。
         </Text>
         <FloatingBubble
           axis="xy"
+          defaultOffset={{ x: 80, y: 200 }}
+          icon={<Icon name="CustomerServiceOutlined" />}
           styles={{ content: styles.content, icon: styles.icon }}
           accessibilityLabel="主题化浮动气泡"
-        >
-          <Text style={styles.bubbleText}>主题</Text>
-        </FloatingBubble>
+        />
+        <FloatingBubble
+          axis="xy"
+          defaultOffset={{ x: 200, y: 200 }}
+          icon={<Icon name="CustomerServiceOutlined" size={20} color="#ffffff" />}
+          accessibilityLabel="显式设置图标的浮动气泡"
+        />
       </View>
     </ConfigProvider>
   )
@@ -44,5 +52,4 @@ const styles = StyleSheet.create({
   description: { color: '#68788d', lineHeight: 22 },
   content: { backgroundColor: '#243b53' },
   icon: { borderRadius: 4 },
-  bubbleText: { color: '#ffffff', fontSize: 12, fontWeight: '600' },
 })

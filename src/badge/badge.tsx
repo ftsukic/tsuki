@@ -2,7 +2,8 @@ import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import { getBadgeToken } from './token'
 import type { BadgePosition, BadgeProps, BadgeStatus } from './types'
-import { forwardRef, isValidElement, useState } from 'react'
+import { Fragment, cloneElement, forwardRef, isValidElement, useState } from 'react'
+import { normalizeBadgeContent, getBadgeText } from './normalize'
 import { View } from 'react-native'
 import type {
   LayoutChangeEvent,
@@ -12,31 +13,6 @@ import type {
   ViewStyle,
 } from 'react-native'
 import { Text } from '../text'
-
-function isRenderable(value: BadgeProps['children']): boolean {
-  return value !== undefined && value !== null && value !== false
-}
-
-function isZero(value: BadgeProps['content']): boolean {
-  return typeof value === 'number' && value === 0
-}
-
-function getTextContent(value: BadgeProps['content']): string | undefined {
-  if (typeof value === 'string' || typeof value === 'number') return String(value)
-  if (Array.isArray(value)) {
-    const parts = value.map(getTextContent)
-    return parts.every((part) => part !== undefined) ? parts.join('') : undefined
-  }
-  if (isValidElement<{ children?: BadgeProps['content'] }>(value)) {
-    return getTextContent(value.props.children)
-  }
-  return undefined
-}
-
-function resolveMax(max: BadgeProps['max'], overflowCount: BadgeProps['overflowCount']) {
-  const value = max !== undefined ? max : overflowCount
-  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : undefined
-}
 
 function resolveStatusColor(status: BadgeStatus, token: ReturnType<typeof getBadgeToken>) {
   switch (status) {
@@ -55,28 +31,26 @@ function resolveStatusColor(status: BadgeStatus, token: ReturnType<typeof getBad
 }
 
 function renderValue(
-  value: BadgeProps['content'] | BadgeProps['text'],
+  value: BadgeProps['content'],
   style: StyleProp<TextStyle>,
   singleLine = false,
-  wrapCustom = false,
 ) {
-  if (typeof value === 'string' || typeof value === 'number') {
-    return (
+  return normalizeBadgeContent(value).map((node, index) =>
+    typeof node === 'string' || typeof node === 'number' ? (
       <Text
+        key={`text-${index}`}
         ellipsizeMode={singleLine ? 'clip' : undefined}
         numberOfLines={singleLine ? 1 : undefined}
         style={style}
       >
-        {value}
+        {node}
       </Text>
-    )
-  }
-  if (wrapCustom) {
-    return (
-      <View style={{ alignSelf: 'flex-start', flexShrink: 0, overflow: 'visible' }}>{value}</View>
-    )
-  }
-  return value
+    ) : isValidElement(node) ? (
+      cloneElement(node, { key: node.key ?? `node-${index}` })
+    ) : (
+      <Fragment key={`node-${index}`}>{node}</Fragment>
+    ),
+  )
 }
 
 function getIndicatorPositionStyle(position: BadgePosition): ViewStyle {
@@ -113,11 +87,9 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
     children,
     color,
     content,
-    count,
     dot = false,
     max,
     offset,
-    overflowCount,
     position = 'top-right',
     showZero = true,
     size,
@@ -130,12 +102,12 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
   ref,
 ) {
   const token = useComponentToken('Badge', getBadgeToken)
-  const hasChildren = isRenderable(children)
-  const resolvedContent = content !== undefined ? content : count
-  const resolvedMax = resolveMax(max, overflowCount)
-  const hasContent = isRenderable(resolvedContent)
-  const hasStatusText = Boolean(status && isRenderable(text))
-  const showContent = !status && !dot && hasContent && (!isZero(resolvedContent) || showZero)
+  const childNodes = normalizeBadgeContent(children)
+  const hasChildren = childNodes.length > 0
+  const resolvedMax = typeof max === 'number' && Number.isFinite(max) && max >= 0 ? max : undefined
+  const hasContent = normalizeBadgeContent(content).length > 0
+  const hasStatusText = Boolean(status && normalizeBadgeContent(text).length > 0)
+  const showContent = !status && !dot && hasContent && (content !== 0 || showZero)
   const visible = Boolean(status || dot || showContent)
   const height = size === 'medium' ? token.height : token.heightSM
   const minWidth = size === 'medium' ? token.minWidth : token.minWidthSM
@@ -151,11 +123,9 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
       children,
       color,
       content,
-      count,
       dot,
       max,
       offset,
-      overflowCount,
       position,
       showZero,
       size,
@@ -168,17 +138,15 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
   })
 
   const contentValue =
-    typeof resolvedContent === 'number' &&
-    resolvedMax !== undefined &&
-    resolvedContent > resolvedMax
+    typeof content === 'number' && resolvedMax !== undefined && content > resolvedMax
       ? `${resolvedMax}+`
-      : resolvedContent
-  const contentValueText = getTextContent(contentValue)
+      : content
+  const contentValueText = getBadgeText(contentValue)
   const contentMinWidth = contentValueText
     ? Math.max(minWidth, contentValueText.length * fontSize)
     : minWidth
 
-  const defaultIndicatorWidth = dot || (status && !hasStatusText) ? token.dotSize : height
+  const defaultIndicatorWidth = dot || status ? token.dotSize : contentMinWidth
   const defaultIndicatorHeight = dot
     ? token.dotSize
     : status
@@ -238,17 +206,36 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
 
   if (!hasChildren && !visible) return null
 
+  const statusLabels = {
+    success: '成功',
+    processing: '处理中',
+    default: '默认状态',
+    error: '错误',
+    warning: '警告',
+  }
+  const defaultLabel = status
+    ? (getBadgeText(text) ?? statusLabels[status])
+    : dot
+      ? '提示'
+      : getBadgeText(contentValue)
+  const accessibilityLabel =
+    viewProps.accessibilityLabel ?? (!hasChildren ? defaultLabel : undefined)
+  const accessible =
+    viewProps.accessible ?? (!hasChildren && accessibilityLabel !== undefined ? true : undefined)
+
   return (
     <View
       ref={ref}
       {...viewProps}
+      accessible={accessible}
+      accessibilityLabel={accessibilityLabel}
       style={[{ position: 'relative', alignSelf: 'flex-start' }, semantic?.root, style]}
     >
-      {children}
+      {renderValue(children, undefined)}
       {visible ? (
         <View
           pointerEvents="none"
-          onLayout={hasChildren && !dot ? handleIndicatorLayout : undefined}
+          onLayout={hasChildren ? handleIndicatorLayout : undefined}
           style={[
             status
               ? statusIndicatorStyle
@@ -268,7 +255,7 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
                       }
                     : undefined),
                 },
-            semantic?.indicator,
+            !status ? semantic?.indicator : undefined,
           ]}
         >
           {status ? (
@@ -281,10 +268,10 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
                     borderRadius: token.dotSize / 2,
                     backgroundColor: indicatorColor,
                   },
-                  semantic?.dot,
+                  semantic?.indicator,
                 ]}
               />
-              {isRenderable(text)
+              {hasStatusText
                 ? renderValue(text, [
                     {
                       color: token.statusTextColor,
@@ -311,9 +298,8 @@ export const Badge = forwardRef<ViewComponent, BadgeProps>(function Badge(
                   textAlign: 'center',
                   flexShrink: 0,
                 },
-                semantic?.text,
+                semantic?.content,
               ],
-              true,
               true,
             )
           )}

@@ -4,7 +4,7 @@ import { Cell, Text, Avatar, Icon, showPicker } from '../../..'
 
 /**
  * @title Link
- * @description An isLink Cell with default clickable active feedback.
+ * @description Arrow display with onPress-driven feedback.
  */
 export default function CellLinkFixture() {
   const [message, setMessage] = useState('点击 Cell')
@@ -16,7 +16,7 @@ export default function CellLinkFixture() {
           size="large"
           title="账号"
           value="查看详情"
-          isLink
+          showArrow
           onPress={() => setMessage('已打开账号详情')}
         />
         <Cell
@@ -40,14 +40,14 @@ export default function CellLinkFixture() {
             </Avatar.Group>
           }
           value="3人"
-          isLink
+          showArrow
           onPress={() => showPicker({ title: 'test', columns: [] })}
         />
         <Cell
           size="large"
           title="账号"
           value="查看详情"
-          isLink
+          showArrow
           onPress={() => setMessage('已打开账号详情')}
         />
       </Cell.Group>

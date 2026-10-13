@@ -8,10 +8,10 @@ import { StyleSheet, Text } from 'react-native'
 export default function LayoutCustomStyleFixture() {
   return (
     <Row gutter={12} style={styles.row}>
-      <Col span={12} style={styles.col}>
+      <Col span={12} styles={{ content: styles.col }}>
         <Text style={styles.text}>custom background</Text>
       </Col>
-      <Col span={12} style={styles.col}>
+      <Col span={12} styles={{ content: styles.col }}>
         <Text style={styles.text}>custom radius</Text>
       </Col>
     </Row>

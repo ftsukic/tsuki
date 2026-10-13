@@ -38,7 +38,9 @@ export default function DialogThemeExample() {
           onShowChange={setShow}
           styles={{
             message: { fontWeight: '600' },
-            root: { borderWidth: 1, borderColor: '#52c41a' },
+            container: { borderWidth: 1, borderColor: '#52c41a' },
+            cancelButton: { borderTopWidth: 2, borderTopColor: '#68788d' },
+            confirmButton: { borderTopWidth: 2, borderTopColor: '#52c41a' },
           }}
         />
       </View>

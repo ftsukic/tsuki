@@ -1,3 +1,4 @@
+import { getFieldAccessibility } from './accessibility'
 import { useCallback, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { View } from 'react-native'
@@ -34,7 +35,7 @@ export type FieldDateTimePickerFormatValue = (
 
 export interface FieldDateTimePickerProps
   extends FieldDateTimePickerCellProps, DateTimePickerAdapterProps {
-  label?: ReactNode
+  description?: ReactNode
   value?: DateTimePickerValue
   defaultValue?: DateTimePickerValue
   onChange?: (value: DateTimePickerValue) => void
@@ -42,7 +43,7 @@ export interface FieldDateTimePickerProps
   readOnly?: boolean
   titleWidth?: DimensionValue
   titleAlign?: FieldTitleAlign
-  description?: ReactNode
+  help?: ReactNode
   errorMessage?: ReactNode
   status?: FieldStatus
   style?: CellProps['style']
@@ -74,12 +75,12 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
     pickerProps: pickerConfig,
     title,
     titleExtra,
-    label,
+    description,
     value,
     defaultValue,
     onChange,
     valueExtra,
-    extra,
+    trailing,
     required,
     disabled = false,
     readOnly = false,
@@ -88,11 +89,11 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
     titleWidth,
     titleAlign,
     valueAlign,
-    description,
+    help,
     errorMessage,
     status,
-    icon,
-    isLink = true,
+    leading,
+    showArrow = true,
     clickable,
     arrowDirection,
     onPress,
@@ -158,31 +159,42 @@ export function FieldDateTimePicker(props: FieldDateTimePickerProps) {
   return (
     <>
       <Cell
+        {...getFieldAccessibility(props)}
+        accessibilityRole={readOnly ? 'text' : 'button'}
+        accessibilityState={{ disabled, expanded: visible }}
+        accessibilityValue={{
+          text:
+            typeof selectedDisplay === 'string' || typeof selectedDisplay === 'number'
+              ? String(selectedDisplay)
+              : undefined,
+        }}
         title={title}
         titleExtra={titleExtra}
-        label={label}
+        description={description}
         value={
-          <View style={[{ flex: 1, minWidth: 0 }, resolved.control, semantic?.content]}>
-            {renderFieldPickerValue(
-              selectedDisplay,
-              hasSelection ? 'default' : 'tertiary',
-              resolvedValueAlign,
-            )}
-            {renderFieldFeedback(description, errorMessage, resolved, semantic)}
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <View style={[resolved.control, semantic?.control]}>
+              {renderFieldPickerValue(
+                selectedDisplay,
+                hasSelection ? 'default' : 'tertiary',
+                resolvedValueAlign,
+              )}
+            </View>
+            {renderFieldFeedback(help, errorMessage, resolved, semantic)}
           </View>
         }
         valueExtra={valueExtra}
-        extra={extra}
+        trailing={trailing}
         required={required}
         disabled={disabled}
         vertical={vertical}
         valueAlign={resolvedValueAlign}
         center={center}
-        icon={icon}
-        isLink={isLink}
+        leading={leading}
+        showArrow={showArrow}
         clickable={clickable}
         arrowDirection={arrowDirection}
-        onPress={handleOpen}
+        onPress={readOnly ? undefined : handleOpen}
         border={border}
         divider={divider}
         style={style}

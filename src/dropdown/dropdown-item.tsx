@@ -5,10 +5,11 @@ import {
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react'
-import { ScrollView, View } from 'react-native'
+import { AccessibilityInfo, findNodeHandle, Platform, ScrollView, View } from 'react-native'
 import { useMotionValue } from '../motion/useMotionValue'
 import { LAYOUT_PRESET } from '../motion/presets'
 import { Icon } from '../icon'
@@ -66,6 +67,15 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
   const { token: themeToken } = useToken()
   const token = useComponentToken('Dropdown', getDropdownToken)
   const idRef = useRef(Symbol('dropdown-item'))
+  const triggerRef = useRef<View>(null)
+  const restoreFocus = useCallback(() => {
+    if (Platform.OS === 'web') {
+      ;(triggerRef.current as unknown as { focus?: () => void } | null)?.focus?.()
+    } else {
+      const handle = findNodeHandle(triggerRef.current)
+      if (handle != null) AccessibilityInfo.setAccessibilityFocus(handle)
+    }
+  }, [])
   const [internalValue, setInternalValue] = useState(defaultValue)
 
   if (!context) {
@@ -79,37 +89,73 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
   const currentValue = value === undefined ? internalValue : value
   const active = context.activeIndex === index
   const activeOption = findOption(options, currentValue)
-  const menuSemantic = resolveStyles(context.menuStyles, {
-    props: context.menuProps,
-    state: { active, disabled, index },
-  })
-  const itemProps: DropdownItemProps = {
-    children,
-    closeOnSelect,
-    defaultValue,
-    disabled,
-    onChange,
-    options,
-    style,
-    styles,
-    title,
-    value,
-  }
-  const itemSemantic = resolveStyles(styles, {
-    props: itemProps,
-    state: {
-      active,
+  const menuSemantic = useMemo(
+    () =>
+      resolveStyles(context.menuStyles, {
+        props: context.menuProps,
+        state: { active, disabled, index },
+      }),
+    [context.menuStyles, context.menuProps, active, disabled, index],
+  )
+  const itemProps = useMemo<DropdownItemProps>(
+    () => ({
+      children,
+      closeOnSelect,
+      defaultValue,
       disabled,
-      index,
-    },
-  })
-  const resolvedStyles = getDropdownItemStyles(
-    token,
-    active,
-    disabled,
-    context.activeColor,
-    context.scrollable,
-    context.scrollableItemWidth,
+      onChange,
+      options,
+      style,
+      styles,
+      title,
+      value,
+      onOpen,
+      onOpened,
+      onClose,
+      onClosed,
+      testID,
+    }),
+    [
+      children,
+      closeOnSelect,
+      defaultValue,
+      disabled,
+      onChange,
+      options,
+      style,
+      styles,
+      title,
+      value,
+      onOpen,
+      onOpened,
+      onClose,
+      onClosed,
+      testID,
+    ],
+  )
+  const itemSemantic = useMemo(
+    () =>
+      resolveStyles(styles, {
+        props: itemProps,
+        state: {
+          active,
+          disabled,
+          index,
+        },
+      }),
+    [styles, itemProps, active, disabled, index],
+  )
+  const resolvedStyles = useMemo(
+    () =>
+      getDropdownItemStyles(
+        token,
+        active,
+        disabled,
+        context.activeColor,
+        context.scrollable,
+        context.scrollableItemWidth,
+      ),
+    [token, active, disabled, context.activeColor, context.scrollable, context.scrollableItemWidth],
   )
   const duration = themeToken.motion ? Math.max(0, context.duration ?? token.animationDuration) : 0
   const arrowProgress = useMotionValue(
@@ -140,96 +186,122 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
 
   useImperativeHandle(ref, () => ({ open, close, toggle }), [close, open, toggle])
 
-  const handleOptionPress = (option: DropdownOption) => {
-    if (option.disabled) return
-    if (value === undefined && !Object.is(internalValue, option.value)) {
-      setInternalValue(option.value)
-    }
-    onChange?.(option.value)
-    if (closeOnSelect) context.close()
-  }
+  const closeMenu = context.close
+  const handleOptionPress = useCallback(
+    (option: DropdownOption) => {
+      if (option.disabled) return
+      if (value === undefined && !Object.is(internalValue, option.value)) {
+        setInternalValue(option.value)
+      }
+      onChange?.(option.value)
+      if (closeOnSelect) closeMenu()
+    },
+    [value, internalValue, onChange, closeOnSelect, closeMenu],
+  )
 
   const resolvedTitle = title !== undefined ? title : activeOption?.text
   const hasCustomContent = children != null
-  const content = hasCustomContent ? (
-    children
-  ) : options ? (
-    <ScrollView
-      testID={`${testID ?? `dropdown-item-${index}`}-options`}
-      nestedScrollEnabled
-      showsVerticalScrollIndicator={false}
-      style={[
-        resolvedStyles.content,
-        itemSemantic?.popup?.list,
-        context.panelMaxHeight ? { maxHeight: context.panelMaxHeight } : null,
-      ]}
-    >
-      {options.map((option, optionIndex) => {
-        const selected = Object.is(currentValue, option.value)
-        const optionTextColor = option.disabled
-          ? token.optionDisabledColor
-          : selected
-            ? context.activeColor
-            : token.optionTextColor
-        return (
-          <Pressable
-            key={`${String(option.value)}-${optionIndex}`}
-            testID={`dropdown-option-${index}-${optionIndex}`}
-            accessibilityRole="button"
-            accessibilityState={{ disabled: option.disabled, selected }}
-            disabled={option.disabled}
-            onPress={() => handleOptionPress(option)}
-            pressStyle="background"
-            pressedBackgroundColor={token.optionPressedBackgroundColor}
-            style={[resolvedStyles.option, itemSemantic?.popup?.listItem]}
-          >
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-              {option.icon ? (
-                <View
-                  style={[
-                    resolvedStyles.optionIcon,
-                    { marginRight: token.caretGap },
-                    itemSemantic?.popup?.listItemIcon,
-                  ]}
-                >
-                  {option.icon}
+  const content = useMemo(
+    () =>
+      hasCustomContent ? (
+        children
+      ) : options ? (
+        <ScrollView
+          testID={`${testID ?? `dropdown-item-${index}`}-options`}
+          nestedScrollEnabled
+          showsVerticalScrollIndicator={false}
+          style={[
+            resolvedStyles.content,
+            itemSemantic?.popup?.list,
+            context.panelMaxHeight ? { maxHeight: context.panelMaxHeight } : null,
+          ]}
+        >
+          {options.map((option, optionIndex) => {
+            const selected = Object.is(currentValue, option.value)
+            const optionTextColor = option.disabled
+              ? token.optionDisabledColor
+              : selected
+                ? context.activeColor
+                : token.optionTextColor
+            return (
+              <Pressable
+                key={`${String(option.value)}-${optionIndex}`}
+                testID={`dropdown-option-${index}-${optionIndex}`}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: option.disabled, selected }}
+                disabled={option.disabled}
+                onPress={() => handleOptionPress(option)}
+                pressStyle="background"
+                pressedBackgroundColor={token.optionPressedBackgroundColor}
+                style={[resolvedStyles.option, itemSemantic?.popup?.listItem]}
+              >
+                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                  {option.icon ? (
+                    <View
+                      style={[
+                        resolvedStyles.optionIcon,
+                        { marginRight: token.caretGap },
+                        itemSemantic?.popup?.listItemIcon,
+                      ]}
+                    >
+                      {option.icon}
+                    </View>
+                  ) : null}
+                  {renderText(
+                    option.text,
+                    [
+                      resolvedStyles.optionText,
+                      { color: optionTextColor },
+                      itemSemantic?.popup?.listItemLabel,
+                    ],
+                    `dropdown-option-${index}-${optionIndex}-text`,
+                  )}
                 </View>
-              ) : null}
-              {renderText(
-                option.text,
-                [
-                  resolvedStyles.optionText,
-                  { color: optionTextColor },
-                  itemSemantic?.popup?.listItemLabel,
-                ],
-                `dropdown-option-${index}-${optionIndex}-text`,
-              )}
-            </View>
-            {selected ? (
-              <Icon
-                name="CheckOutlined"
-                size={token.optionIconSize}
-                color={option.disabled ? token.optionDisabledColor : context.activeColor}
-                testID={`dropdown-option-${index}-${optionIndex}-check`}
-                style={[
-                  resolvedStyles.optionIcon,
-                  { marginLeft: token.caretGap },
-                  itemSemantic?.popup?.listItemIcon,
-                ]}
-              />
-            ) : null}
-            {optionIndex < options.length - 1 ? (
-              <View style={resolvedStyles.optionDivider} />
-            ) : null}
-          </Pressable>
-        )
-      })}
-    </ScrollView>
-  ) : null
+                {selected ? (
+                  <Icon
+                    name="CheckOutlined"
+                    size={token.optionIconSize}
+                    color={option.disabled ? token.optionDisabledColor : context.activeColor}
+                    testID={`dropdown-option-${index}-${optionIndex}-check`}
+                    style={[
+                      resolvedStyles.optionIcon,
+                      { marginLeft: token.caretGap },
+                      itemSemantic?.popup?.listItemIcon,
+                      itemSemantic?.popup?.listItemSelectedIcon,
+                    ]}
+                    accessible={false}
+                    accessibilityElementsHidden
+                    importantForAccessibility="no-hide-descendants"
+                  />
+                ) : null}
+                {optionIndex < options.length - 1 ? (
+                  <View style={resolvedStyles.optionDivider} />
+                ) : null}
+              </Pressable>
+            )
+          })}
+        </ScrollView>
+      ) : null,
+    [
+      hasCustomContent,
+      children,
+      options,
+      testID,
+      index,
+      resolvedStyles,
+      itemSemantic,
+      context.panelMaxHeight,
+      currentValue,
+      token,
+      context.activeColor,
+      handleOptionPress,
+    ],
+  )
 
   useEffect(() => {
     updateItem(idRef.current, {
       content,
+      restoreFocus,
       contentStyle: itemSemantic?.popup?.root,
       estimatedHeight:
         children == null && options
@@ -253,6 +325,14 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
         onOpen,
         onOpened,
         context.panelMaxHeight,
+        styles,
+        context.menuStyles,
+        context.activeColor,
+        token,
+        active,
+        disabled,
+        index,
+        closeOnSelect,
       ],
     })
   }, [
@@ -270,13 +350,24 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
     onOpened,
     options,
     title,
-    token.optionHeight,
+    token,
+    styles,
+    context.menuStyles,
+    context.activeColor,
+    active,
+    disabled,
+    index,
+    closeOnSelect,
     updateItem,
+    restoreFocus,
     value,
   ])
 
   return (
     <Pressable
+      ref={(node) => {
+        triggerRef.current = node
+      }}
       {...viewProps}
       testID={testID ?? `dropdown-item-${index}`}
       accessibilityRole="button"
@@ -288,13 +379,16 @@ export const DropdownItem = forwardRef<DropdownItemRef, DropdownItemProps>(funct
     >
       {renderText(
         resolvedTitle,
-        [resolvedStyles.title, menuSemantic?.title],
+        [resolvedStyles.title, menuSemantic?.title, itemSemantic?.title],
         `dropdown-title-${index}`,
       )}
       <Animated.View
         testID={`dropdown-arrow-${index}`}
         pointerEvents="none"
-        style={[resolvedStyles.arrow, menuSemantic?.arrow, animatedArrowStyle]}
+        accessible={false}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={[resolvedStyles.arrow, menuSemantic?.arrow, itemSemantic?.arrow, animatedArrowStyle]}
       >
         <View
           testID={`dropdown-caret-${index}`}

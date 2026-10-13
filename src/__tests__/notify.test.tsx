@@ -1,6 +1,6 @@
 import { act, cleanup, render, screen } from '@testing-library/react-native'
 import * as Reanimated from 'react-native-reanimated'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { closeNotify, ConfigProvider, Notify, PortalHost, showNotify } from '..'
 import type { ReactNode } from 'react'
@@ -18,6 +18,66 @@ describe('Notify', () => {
     cleanup()
     jest.useRealTimers()
     jest.restoreAllMocks()
+  })
+
+  it('applies root styles and native props to the notification body only', async () => {
+    const onLayout = jest.fn()
+    const view = await render(
+      <AppProvider>
+        <Notify
+          testID="notify-body"
+          accessibilityLabel="通知内容"
+          onLayout={onLayout}
+          message="语义通知"
+          styles={{ root: { backgroundColor: 'red', paddingHorizontal: 19 } }}
+          style={{ backgroundColor: 'blue', borderRadius: 12 }}
+        />
+      </AppProvider>,
+    )
+    const body = screen.getByTestId('notify-body')
+    expect(body.props.onLayout).toBe(onLayout)
+    expect(body.props.accessibilityLabel).toBe('通知内容')
+    expect(StyleSheet.flatten(body.props.style)).toMatchObject({
+      backgroundColor: 'blue',
+      borderRadius: 12,
+      paddingHorizontal: 19,
+    })
+    expect(screen.getByText('语义通知').parent?.props.testID).toBe('notify-body')
+    let ancestor = body.parent
+    while (ancestor) {
+      expect(StyleSheet.flatten(ancestor.props.style)?.backgroundColor).not.toBe('blue')
+      expect(ancestor.props.onLayout).not.toBe(onLayout)
+      ancestor = ancestor.parent
+    }
+    await view.unmount()
+  })
+
+  it('uses theme textColor and confines content styles to built-in text', async () => {
+    const view = await render(
+      <ConfigProvider
+        theme={{ seed: { motion: false }, components: { Notify: { textColor: 'red' } } }}
+      >
+        <PortalHost>
+          <Notify message="主题文字" styles={{ content: { letterSpacing: 3 } }} />
+          <Notify color="blue" message="显式颜色" />
+          <Notify styles={{ content: { opacity: 0 } }}>
+            <View testID="custom-content">
+              <Text>自定义内容</Text>
+            </View>
+          </Notify>
+        </PortalHost>
+      </ConfigProvider>,
+    )
+    expect(StyleSheet.flatten(screen.getByText('主题文字').props.style)).toMatchObject({
+      color: 'red',
+      letterSpacing: 3,
+    })
+    expect(StyleSheet.flatten(screen.getByText('显式颜色').props.style).color).toBe('blue')
+    expect(
+      StyleSheet.flatten(screen.getByTestId('custom-content').props.style)?.opacity,
+    ).toBeUndefined()
+    expect(screen.getByText('自定义内容')).toBeTruthy()
+    await view.unmount()
   })
 
   it('uses its own top layer animation and close lifecycle', async () => {
@@ -58,13 +118,16 @@ describe('Notify', () => {
     )
 
     await act(async () => {
-      showNotify({ duration: 0, message: '命令式动画通知', onClosed })
+      showNotify({ duration: 0, message: '命令式动画通知', testID: 'exiting-body', onClosed })
     })
     await act(async () => animations[0]?.complete())
 
     await act(async () => closeNotify())
     expect(animations).toHaveLength(2)
-    expect(screen.getByText('命令式动画通知')).toBeTruthy()
+    expect(screen.queryByText('命令式动画通知')).toBeNull()
+    const exitingBody = screen.getByTestId('exiting-body', { includeHiddenElements: true })
+    expect(exitingBody.parent?.props.accessibilityElementsHidden).toBe(true)
+    expect(exitingBody.parent?.props.importantForAccessibility).toBe('no-hide-descendants')
     expect(onClosed).not.toHaveBeenCalled()
 
     await act(async () => animations[1]?.complete())

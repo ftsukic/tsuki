@@ -5,6 +5,7 @@ export interface ActionSheetResolvedStyles {
   popupPanel: ViewStyle
   root: ViewStyle
   actions: ViewStyle
+  list: ViewStyle
   header: ViewStyle
   title: TextStyle
   action: ViewStyle
@@ -23,6 +24,7 @@ export function getActionSheetStyles(token: ActionSheetToken): ActionSheetResolv
     popupPanel: {
       width: '100%',
       backgroundColor: 'transparent',
+      flexShrink: 1,
     },
     root: {
       width: '100%',
@@ -30,14 +32,19 @@ export function getActionSheetStyles(token: ActionSheetToken): ActionSheetResolv
       borderTopLeftRadius: token.borderRadius,
       borderTopRightRadius: token.borderRadius,
       overflow: 'hidden',
+      flexShrink: 1,
     },
     actions: {
       backgroundColor: token.backgroundColor,
-      borderTopLeftRadius: token.borderRadius,
-      borderTopRightRadius: token.borderRadius,
       overflow: 'hidden',
+      flexShrink: 1,
+    },
+    list: {
+      flexGrow: 0,
+      flexShrink: 1,
     },
     header: {
+      flexShrink: 0,
       alignItems: 'center',
       height: token.titleHeight,
       justifyContent: 'center',
@@ -78,10 +85,12 @@ export function getActionSheetStyles(token: ActionSheetToken): ActionSheetResolv
       textAlign: 'center',
     },
     cancelGap: {
+      flexShrink: 0,
       backgroundColor: token.cancelGapColor,
       height: token.cancelGap,
     },
     cancelPanel: {
+      flexShrink: 0,
       backgroundColor: token.backgroundColor,
     },
     cancelPressable: {

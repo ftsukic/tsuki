@@ -17,11 +17,12 @@ export default function PopupSafeAreaExample() {
         position="bottom"
         round
         safeAreaInsetBottom
+        styles={{ container: { padding: 20 } }}
         closeOnPressOverlay
         onRequestClose={() => setVisible(false)}
       >
         <View style={styles.panel}>
-          <Text style={styles.title}>底部安全区由 Popup 统一处理</Text>
+          <Text style={styles.title}>底部间距 = 20 + 底部安全区</Text>
           <Button size="small" onPress={() => setVisible(false)}>
             关闭
           </Button>
@@ -33,6 +34,6 @@ export default function PopupSafeAreaExample() {
 
 const styles = StyleSheet.create({
   container: { gap: 12 },
-  panel: { gap: 16, padding: 20 },
+  panel: { gap: 16 },
   title: { color: '#1f2937', fontSize: 16, fontWeight: '600' },
 })

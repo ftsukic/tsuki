@@ -30,10 +30,18 @@ export function animateValue(
   config: MotionAnimationConfig,
   onFinished?: (finished?: boolean) => void,
   durationScale = 1,
+  velocity?: number,
 ) {
   'worklet'
   return config.mode === 'spring'
-    ? withSpring(target, getSpringConfig(config, durationScale), onFinished)
+    ? withSpring(
+        target,
+        {
+          ...getSpringConfig(config, durationScale),
+          ...(velocity === undefined ? {} : { velocity }),
+        },
+        onFinished,
+      )
     : withTiming(
         target,
         {

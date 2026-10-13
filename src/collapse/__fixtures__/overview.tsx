@@ -4,6 +4,7 @@ import CollapseBasicExample from './examples/basic'
 import CollapseControlledExample from './examples/controlled'
 import CollapseDefaultExample from './examples/default'
 import CollapseDisabledExample from './examples/disabled'
+import CollapseSemanticExample from './examples/semantic'
 import CollapseThemeExample from './examples/theme'
 
 /**
@@ -44,6 +45,12 @@ export default function CollapseOverview() {
           description: '使用 value 和 onChange 在父组件中管理展开状态。',
           id: 'controlled',
           title: 'Controlled',
+        },
+        {
+          Component: CollapseSemanticExample,
+          description: '通过稳定的语义槽定制 Item，不依赖动画或测量节点。',
+          id: 'semantic',
+          title: 'Semantic styles',
         },
         {
           Component: CollapseThemeExample,

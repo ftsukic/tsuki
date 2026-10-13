@@ -20,7 +20,18 @@ export default function EmptyThemeExample() {
         },
       }}
     >
-      <Empty description="暂无结果" />
+      <Empty
+        description="暂无结果"
+        styles={({ state }) => ({
+          root: { backgroundColor: '#f5f7fa', borderRadius: 12 },
+          image: { opacity: state.hasImage ? 0.8 : 1 },
+          descriptionContainer: { paddingHorizontal: 24 },
+          description: { fontSize: 18, lineHeight: 28 },
+          footer: { marginTop: 12, alignItems: 'center' },
+        })}
+      >
+        请调整筛选条件
+      </Empty>
     </ConfigProvider>
   )
 }

@@ -40,7 +40,7 @@ export default function Controlled() {
       <Cell
         title="选择日期和时间"
         value={formatDateTime(committedDate, committedTime)}
-        isLink
+        showArrow
         onPress={handleOpen}
       />
       <Popup

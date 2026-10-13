@@ -15,10 +15,11 @@ export interface SearchSemanticStyles {
   divider?: StyleProp<ViewStyle>
   left?: StyleProp<ViewStyle>
   content?: StyleProp<ViewStyle>
+  container?: StyleProp<ViewStyle>
   prefix?: StyleProp<ViewStyle>
   label?: StyleProp<TextStyle>
   input?: StyleProp<TextStyle>
-  suffix?: StyleProp<TextStyle>
+  suffix?: StyleProp<ViewStyle>
   clear?: StyleProp<ViewStyle>
   action?: StyleProp<ViewStyle>
 }

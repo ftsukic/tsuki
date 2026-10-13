@@ -16,7 +16,7 @@ export interface SwitchResolvedStyles {
 
 export function resolveSwitchSize(size: SwitchProps['size']): SwitchSize | number {
   if (size === undefined) return 'medium'
-  if (typeof size === 'number' && Number.isFinite(size) && size > 0) return size
+  if (typeof size === 'number') return Number.isFinite(size) && size > 0 ? size : 'medium'
   return size
 }
 

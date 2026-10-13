@@ -54,7 +54,6 @@ describe('Overlay', () => {
     const theme = getDesignToken()
 
     expect(rootStyle).toMatchObject({
-      backgroundColor: theme.colorBgMask,
       bottom: 0,
       left: 0,
       position: 'absolute',
@@ -62,6 +61,9 @@ describe('Overlay', () => {
       top: 0,
       zIndex: theme.zIndexPopupBase,
     })
+    expect(
+      findNode(view.toJSON(), (node) => flattenStyle(node).backgroundColor === theme.colorBgMask),
+    ).toBeTruthy()
     expect(screen.getByTestId('content')).toBeTruthy()
     await view.unmount()
   })
@@ -96,12 +98,14 @@ describe('Overlay', () => {
     )
 
     expect(flattenStyle(screen.getByTestId('styled-overlay'))).toMatchObject({
-      backgroundColor: '#123456',
       borderColor: '#52c41a',
       borderWidth: 2,
       opacity: 0.5,
       zIndex: 1800,
     })
+    expect(
+      findNode(view.toJSON(), (node) => flattenStyle(node).backgroundColor === '#123456'),
+    ).toBeTruthy()
     expect(findNode(view.toJSON(), (node) => flattenStyle(node).padding === 4)).toBeTruthy()
     await view.unmount()
   })
@@ -201,7 +205,10 @@ describe('Overlay', () => {
     )
 
     expect(timing).toHaveBeenCalledTimes(2)
-    expect(screen.getByTestId('overlay')).toBeTruthy()
+    const exiting = screen.getByTestId('overlay', { includeHiddenElements: true })
+    expect(exiting.props.pointerEvents).toBe('none')
+    expect(exiting.props.accessibilityElementsHidden).toBe(true)
+    expect(exiting.props.importantForAccessibility).toBe('no-hide-descendants')
 
     await act(async () => {
       completions.at(-1)?.(true)
@@ -223,8 +230,45 @@ describe('Overlay', () => {
     )
 
     expect(timing).not.toHaveBeenCalled()
-    expect(flattenStyle(screen.getByTestId('controlled-overlay'))).toMatchObject({ opacity: 0.25 })
-    expect(screen.getByTestId('controlled-overlay').props.pointerEvents).toBe('none')
+    expect(
+      flattenStyle(screen.getByTestId('controlled-overlay', { includeHiddenElements: true })),
+    ).toMatchObject({ opacity: 0.25 })
+    expect(
+      screen.getByTestId('controlled-overlay', { includeHiddenElements: true }).props.pointerEvents,
+    ).toBe('none')
+    await view.unmount()
+  })
+
+  it('separates mask styling and presses from accessible content', async () => {
+    const onPress = jest.fn()
+    const childPress = jest.fn()
+    const styles = jest.fn(() => ({
+      mask: { backgroundColor: '#abcdef' },
+      content: { width: 120, margin: 20 },
+    }))
+    const view = await render(
+      <AppProvider>
+        <Overlay show testID="semantic-overlay" onPress={onPress} styles={styles}>
+          <Pressable accessible accessibilityRole="button" onPress={childPress}>
+            <Text>Embedded action</Text>
+          </Pressable>
+        </Overlay>
+      </AppProvider>,
+    )
+
+    const root = screen.getByTestId('semantic-overlay')
+    const [mask, content] = root.children as Array<{ props: Record<string, unknown> }>
+    expect(flattenStyle(mask)).toMatchObject({ backgroundColor: '#abcdef', top: 0, bottom: 0 })
+    expect(flattenStyle(mask).width).toBeUndefined()
+    expect(mask.props.accessible).toBe(false)
+    expect(mask.props.importantForAccessibility).toBe('no-hide-descendants')
+    expect(flattenStyle(content)).toMatchObject({ width: 120, margin: 20 })
+    expect(content.props.pointerEvents).toBe('box-none')
+    const action = screen.getByRole('button', { name: 'Embedded action' })
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.press(action)
+    expect(childPress).toHaveBeenCalledTimes(1)
+    expect(onPress).not.toHaveBeenCalled()
     await view.unmount()
   })
 

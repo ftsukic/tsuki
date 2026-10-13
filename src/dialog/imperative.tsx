@@ -5,6 +5,7 @@ import { mountPortal, unmountPortal, updatePortal } from '../portal'
 import type { PortalKey } from '../portal'
 
 interface DialogRecord {
+  identity: object
   key: PortalKey | null
   options: DialogOptions
   resolve: (action: 'confirm' | undefined) => void
@@ -54,17 +55,19 @@ function rejectRecord(record: DialogRecord, action: 'cancel') {
 function wrapBeforeClose(
   beforeClose: DialogBeforeClose | undefined,
   actionRef: { current: DialogAction | null },
+  record: DialogRecord,
 ): DialogBeforeClose | undefined {
   if (!beforeClose) return undefined
 
   return async (action) => {
     try {
       const result = await beforeClose(action)
+      if (currentRecord !== record || !record.show) return false
       if (result === false) actionRef.current = null
       else actionRef.current = action
       return result
     } catch (error) {
-      actionRef.current = null
+      if (currentRecord === record && record.show) actionRef.current = null
       throw error
     }
   }
@@ -111,7 +114,8 @@ function DialogMethod({ record }: { record: DialogRecord }) {
     <DialogContent
       {...record.options}
       show={record.show}
-      beforeClose={wrapBeforeClose(record.options.beforeClose, actionRef)}
+      requestIdentity={record.identity}
+      beforeClose={wrapBeforeClose(record.options.beforeClose, actionRef, record)}
       onConfirm={() => {
         actionRef.current = 'confirm'
       }}
@@ -136,6 +140,7 @@ export function showDialog(options: DialogOptions = {}): Promise<DialogAction | 
   if (currentRecord?.key !== null && currentRecord) {
     resolveRecord(currentRecord, undefined)
     replaceRecord(currentRecord, {
+      identity: {},
       options: { ...currentOptions, ...options },
       resolve: resolvePromise,
       reject: rejectPromise,
@@ -147,6 +152,7 @@ export function showDialog(options: DialogOptions = {}): Promise<DialogAction | 
   }
 
   const record: DialogRecord = {
+    identity: {},
     key: null,
     options: { ...currentOptions, ...options },
     resolve: resolvePromise,
@@ -175,7 +181,7 @@ export function closeDialog(): void {
   const current = currentRecord
   if (!current || current.key === null) return
 
-  currentRecord = { ...current, show: false }
+  currentRecord = { ...current, show: false, closingAction: null }
   updatePortal(current.key, <DialogMethod record={currentRecord} />)
 }
 

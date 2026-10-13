@@ -6,14 +6,17 @@ import {
   usePickerGroupRegistrationContext,
 } from '../picker-group/context'
 import type { PickerOption, PickerRef, PickerSelection, PickerValue } from '../picker/types'
-import { createDateTimeColumns, normalizeDateTimePickerValues } from '../picker/date-time/columns'
+import {
+  createDateTimeColumns,
+  normalizeDateTimePickerValues,
+  pickerOptionsToSelectedValues,
+} from '../picker/date-time/columns'
 import type { DateTimeColumnsConfig } from '../picker/date-time/columns'
 import { normalizeDateTimeBounds, validateDateTimeColumnOrder } from '../picker/date-time/normalize'
 import {
   dateToFields,
   fieldsToPickerValues,
   pickerValuesToFields,
-  pickerValuesToSelectedValues,
   selectedValuesToPickerValues,
 } from '../picker/date-time/value'
 import type {
@@ -123,25 +126,20 @@ export const DateTimePicker = forwardRef<DateTimePickerRef, DateTimePickerProps>
       [baseFields, columnConfig, defaultValue, resolvedColumns, value],
     )
     const handleChange = useCallback(
-      (nextValues: readonly PickerValue[], options: readonly PickerOption[]) => {
-        onChange?.(pickerValuesToSelectedValues(nextValues, resolvedColumns, baseFields), options)
+      (_nextValues: readonly PickerValue[], options: readonly PickerOption[]) => {
+        onChange?.(pickerOptionsToSelectedValues(options), options)
       },
-      [baseFields, onChange, resolvedColumns],
+      [onChange],
     )
     const handleConfirm = useCallback(
-      (nextValues: readonly PickerValue[], options: readonly PickerOption[]) => {
-        onConfirm?.(pickerValuesToSelectedValues(nextValues, resolvedColumns, baseFields), options)
+      (_nextValues: readonly PickerValue[], options: readonly PickerOption[]) => {
+        onConfirm?.(pickerOptionsToSelectedValues(options), options)
       },
-      [baseFields, onConfirm, resolvedColumns],
+      [onConfirm],
     )
     const getSelectedValues = useCallback(
-      () =>
-        pickerValuesToSelectedValues(
-          pickerRef.current?.getSelectedValues() ?? [],
-          resolvedColumns,
-          baseFields,
-        ),
-      [baseFields, resolvedColumns],
+      () => pickerOptionsToSelectedValues(pickerRef.current?.getSelectedOptions() ?? []),
+      [],
     )
     const confirm = useCallback((): DateTimePickerSelection => {
       const selection: PickerSelection | undefined = pickerRef.current?.confirm()
@@ -149,9 +147,9 @@ export const DateTimePicker = forwardRef<DateTimePickerRef, DateTimePickerProps>
       return {
         indexes: selection.indexes,
         options: selection.options,
-        values: pickerValuesToSelectedValues(selection.values, resolvedColumns, baseFields),
+        values: pickerOptionsToSelectedValues(selection.options),
       }
-    }, [baseFields, resolvedColumns])
+    }, [])
     const group = usePickerGroup()
     const registrationContext = usePickerGroupRegistrationContext()
     const confirmRef = useRef(confirm)

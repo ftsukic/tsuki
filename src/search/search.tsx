@@ -50,7 +50,7 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
   const { token: aliasToken } = useToken()
   const currentValueRef = useRef(value ?? defaultValue ?? '')
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const isDisabled = disabled === true
+  const isDisabled = disabled || (nativeProps.editable === false && !readOnly)
   const state: SearchStyleState = { disabled: isDisabled }
   const searchProps = {
     ...nativeProps,
@@ -89,15 +89,18 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
     debounceRef.current = null
   }, [])
 
-  useEffect(() => clearDebounce, [clearDebounce])
+  useEffect(
+    () => clearDebounce,
+    [autoSearch, clearDebounce, debounce, onSearch, isDisabled, readOnly],
+  )
 
   const handleChangeText = useCallback(
     (nextValue: string) => {
       currentValueRef.current = nextValue
       onChange?.(nextValue)
 
-      if (!autoSearch || onSearch === undefined) return
       clearDebounce()
+      if (!autoSearch || onSearch === undefined || isDisabled || readOnly) return
       debounceRef.current = setTimeout(
         () => {
           debounceRef.current = null
@@ -106,7 +109,7 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
         Math.max(0, debounce),
       )
     },
-    [autoSearch, clearDebounce, debounce, onChange, onSearch],
+    [autoSearch, clearDebounce, debounce, isDisabled, onChange, onSearch, readOnly],
   )
 
   const handleSubmitEditing = useCallback<NonNullable<SearchProps['onSubmitEditing']>>(
@@ -138,23 +141,24 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
     (renderedSearchIcon !== null && renderedSearchIcon !== false) ||
     (renderedLabel !== null && renderedLabel !== undefined && renderedLabel !== false)
   const renderedPrefix = hasPrefix ? (
-    <View
-      testID={testID === undefined ? undefined : `${testID}-prefix`}
-      style={[resolved.prefix, semantic?.prefix]}
-    >
+    <View testID={testID === undefined ? undefined : `${testID}-prefix`} style={resolved.prefix}>
       {renderedSearchIcon}
       {renderedLabel}
     </View>
   ) : undefined
   const inputStyles: InputStyles = {
-    root: {
-      height: token.search_height,
-      minHeight: token.search_height,
-      paddingVertical: 0,
-      borderRadius:
-        shape === 'round' ? token.search_round_border_radius : token.search_border_radius,
-      ...(isDisabled ? {} : { backgroundColor: token.search_content_background_color }),
-    },
+    container: [
+      {
+        height: token.search_height,
+        minHeight: token.search_height,
+        paddingVertical: 0,
+        borderRadius:
+          shape === 'round' ? token.search_round_border_radius : token.search_border_radius,
+        ...(isDisabled ? {} : { backgroundColor: token.search_content_background_color }),
+      },
+      semantic?.container,
+    ],
+    prefix: semantic?.prefix,
     input: [{ textAlign: inputAlign }, semantic?.input],
     suffix: semantic?.suffix,
     clear: semantic?.clear,
@@ -165,7 +169,7 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
       testID={testID === undefined ? undefined : `${testID}-root`}
       style={[resolved.root, semantic?.root, style]}
     >
-      {left !== undefined ? (
+      {left !== undefined && left !== null && left !== false ? (
         <View
           testID={testID === undefined ? undefined : `${testID}-left`}
           style={[resolved.left, semantic?.left]}
@@ -198,7 +202,7 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
           styles={inputStyles}
         />
       </View>
-      {action !== undefined ? (
+      {action !== undefined && action !== null && action !== false ? (
         <View
           testID={testID === undefined ? undefined : `${testID}-action`}
           style={[resolved.action, semantic?.action]}
@@ -208,8 +212,10 @@ export const Search = forwardRef<SearchInstance, SearchProps>(function Search(
       ) : null}
       {divider ? (
         <Divider
+          accessible={false}
           testID={testID === undefined ? undefined : `${testID}-divider`}
           color={aliasToken.colorBorder}
+          role="none"
           thickness={aliasToken.lineWidthHairline}
           style={[resolved.divider, semantic?.divider]}
         />

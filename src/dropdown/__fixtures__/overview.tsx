@@ -4,6 +4,8 @@ import ControlledDropdownExample from './examples/controlled'
 import CustomContentDropdownExample from './examples/custom-content'
 import DisabledDropdownExample from './examples/disabled'
 import DirectionUpDropdownExample from './examples/direction-up'
+import SemanticDropdownExample from './examples/semantic'
+import ScrollLockDropdownExample from './examples/scroll-lock'
 
 /**
  * @title Dropdown overview
@@ -13,6 +15,18 @@ export default function DropdownOverview() {
   return (
     <FixtureOverview
       examples={[
+        {
+          Component: SemanticDropdownExample,
+          description: '语义区域与打开期间的动态样式更新。',
+          id: 'semantic',
+          title: '语义样式',
+        },
+        {
+          Component: ScrollLockDropdownExample,
+          description: '背景锁定与面板内部滚动。',
+          id: 'scroll-lock',
+          title: '滚动锁定',
+        },
         {
           Component: BasicDropdownExample,
           description: '两个等宽菜单展示默认排序和筛选面板。',

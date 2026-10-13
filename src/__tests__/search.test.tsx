@@ -41,6 +41,7 @@ describe('Search', () => {
 
     expect(divider.parent).toBe(root)
     expect(divider.parent).not.toBe(getInputShell('search'))
+    expect(divider.props).toMatchObject({ accessible: false, role: 'none' })
     expect(dividerStyle).toMatchObject({
       position: 'absolute',
       left: 0,
@@ -136,12 +137,66 @@ describe('Search', () => {
     expect(screen.getByText('取消')).toBeTruthy()
   })
 
+  it('matches disabled visuals when editing is disabled through native props', async () => {
+    await render(
+      <>
+        <Search testID="disabled" disabled label="地址" />
+        <Search testID="noneditable" editable={false} label="地址" />
+        <Search testID="readonly" editable={false} readOnly label="地址" />
+        <Search testID="normal" label="地址" />
+      </>,
+    )
+
+    const shellStyle = (id: string) => StyleSheet.flatten(getInputShell(id)?.props.style)
+    expect(shellStyle('noneditable').backgroundColor).toBe(shellStyle('disabled').backgroundColor)
+    expect(shellStyle('readonly').backgroundColor).toBe(shellStyle('normal').backgroundColor)
+    const labels = screen.getAllByText('地址')
+    expect(StyleSheet.flatten(labels[1].props.style).color).toBe(
+      StyleSheet.flatten(labels[0].props.style).color,
+    )
+    expect(StyleSheet.flatten(labels[2].props.style).color).toBe(
+      StyleSheet.flatten(labels[3].props.style).color,
+    )
+  })
+
   it('renders label after the search icon and keeps suffix inside Input', async () => {
     await render(<Search testID="search" label="地址" suffix={<View testID="suffix-content" />} />)
 
     expect(screen.getByTestId('search-prefix')).toBeTruthy()
     expect(screen.getByText('地址')).toBeTruthy()
     expect(screen.getByTestId('suffix-content')).toBeTruthy()
+  })
+
+  it.each([null, undefined, false])('omits empty outer slots for %j', async (empty) => {
+    await render(<Search testID="search" left={empty} action={empty} />)
+    expect(screen.queryByTestId('search-left')).toBeNull()
+    expect(screen.queryByTestId('search-action')).toBeNull()
+  })
+
+  it('allows container styles to override the visible input surface', async () => {
+    await render(
+      <Search
+        testID="search"
+        shape="round"
+        styles={{ container: { backgroundColor: '#123456', borderRadius: 6, height: 48 } }}
+      />,
+    )
+    expect(StyleSheet.flatten(getInputShell('search')?.props.style)).toMatchObject({
+      backgroundColor: '#123456',
+      borderRadius: 6,
+      height: 48,
+    })
+    expect(StyleSheet.flatten(getInputContent('search')?.props.style).minHeight).toBe(48)
+    expect(
+      StyleSheet.flatten(screen.getByTestId('search-content').props.style).backgroundColor,
+    ).toBeUndefined()
+  })
+
+  it('applies prefix spacing to the full affix region', async () => {
+    await render(<Search testID="search" label="地址" styles={{ prefix: { marginRight: 24 } }} />)
+    const prefix = screen.getByTestId('search-prefix')
+    expect(StyleSheet.flatten(prefix.parent?.props.style).marginRight).toBe(24)
+    expect(StyleSheet.flatten(prefix.props.style).marginRight).toBeUndefined()
   })
 
   it('applies inputAlign to the native input', async () => {
@@ -254,6 +309,49 @@ describe('Search', () => {
       expect(onSearch).toHaveBeenCalledTimes(1)
       jest.advanceTimersByTime(300)
       expect(onSearch).toHaveBeenCalledTimes(1)
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+
+  it.each([
+    { autoSearch: false },
+    { debounce: 500 },
+    { disabled: true },
+    { editable: false },
+    { readOnly: true },
+  ])('cancels pending autoSearch when configuration changes to %j', async (nextProps) => {
+    jest.useFakeTimers()
+    try {
+      const onSearch = jest.fn()
+      const { rerender } = await render(<Search testID="search" autoSearch onSearch={onSearch} />)
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent.changeText(screen.getByTestId('search'), 'Alice')
+      await rerender(<Search testID="search" autoSearch onSearch={onSearch} {...nextProps} />)
+      await act(async () => jest.advanceTimersByTime(500))
+      expect(onSearch).not.toHaveBeenCalled()
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+
+  it('cancels the old callback and uses the replacement for subsequent input', async () => {
+    jest.useFakeTimers()
+    try {
+      const oldSearch = jest.fn()
+      const newSearch = jest.fn()
+      const { rerender } = await render(<Search testID="search" autoSearch onSearch={oldSearch} />)
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent.changeText(screen.getByTestId('search'), 'Alice')
+      await rerender(<Search testID="search" autoSearch onSearch={newSearch} />)
+      await act(async () => jest.advanceTimersByTime(300))
+      expect(oldSearch).not.toHaveBeenCalled()
+      expect(newSearch).not.toHaveBeenCalled()
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent.changeText(screen.getByTestId('search'), 'Bob')
+      await act(async () => jest.advanceTimersByTime(300))
+      expect(newSearch).toHaveBeenCalledTimes(1)
+      expect(newSearch).toHaveBeenCalledWith('Bob')
     } finally {
       jest.useRealTimers()
     }

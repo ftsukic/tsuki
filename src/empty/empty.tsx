@@ -1,3 +1,7 @@
+import { Children } from 'react'
+import type { ReactNode } from 'react'
+import { resolveStyles } from '../style'
+import { getEmptyStyles } from './style'
 import { Image, Platform, View } from 'react-native'
 import type { DimensionValue } from 'react-native'
 import { Text } from '../text'
@@ -26,101 +30,89 @@ function resolveImageSize(size: number | string | undefined, fallback: number): 
   return fallback
 }
 
-function renderDescription(
-  description: EmptyProps['description'],
-  color: string,
-  fontSize: number,
-) {
-  if (!isRenderable(description) || description === '') return null
-
-  if (typeof description === 'string' || typeof description === 'number') {
-    return (
-      <Text
-        type="secondary"
-        style={{
-          color,
-          fontSize,
-          textAlign: 'center',
-        }}
-      >
-        {description}
-      </Text>
-    )
-  }
-
-  return description
+function renderContent(content: ReactNode): ReactNode {
+  return Children.map(content, (child) =>
+    typeof child === 'string' || typeof child === 'number' || typeof child === 'bigint' ? (
+      <Text>{child}</Text>
+    ) : (
+      child
+    ),
+  )
 }
 
-export function Empty({
-  children,
-  description,
-  image,
-  imageSize,
-  style,
-  ...viewProps
-}: EmptyProps) {
+export function Empty(props: EmptyProps) {
+  const {
+    children,
+    description,
+    image,
+    imageSize,
+    imageAccessibilityLabel,
+    style,
+    styles,
+    ...viewProps
+  } = props
   const { token: themeToken } = useToken()
   const token = useComponentToken('Empty', getEmptyToken)
   const resolvedImageSize = resolveImageSize(imageSize, token.empty_image_size)
   const hasImage = image === undefined || isRenderable(image)
+  const hasDescription = isRenderable(description)
+  const hasAction = isRenderable(children)
+  const semantic = resolveStyles(styles, {
+    props,
+    state: { hasImage, hasDescription, hasAction },
+  })
+  const defaultStyles = getEmptyStyles(themeToken, token, resolvedImageSize as DimensionValue)
+  const imageLabel = imageAccessibilityLabel?.trim() || undefined
+  const ownsImage = image === undefined || typeof image === 'string'
   const imageContent =
     image === undefined ? (
       <EmptyImage />
     ) : typeof image === 'string' ? (
       <Image
-        accessibilityRole="image"
+        accessible={false}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
         resizeMode="contain"
         source={{ uri: image }}
         style={{ height: '100%', width: '100%' }}
       />
     ) : (
-      image
+      renderContent(image)
     )
-  const descriptionContent = renderDescription(
-    description,
-    token.empty_description_color,
-    token.empty_description_font_size,
-  )
-  const hasAction = isRenderable(children)
+  const descriptionContent =
+    typeof description === 'string' ||
+    typeof description === 'number' ||
+    typeof description === 'bigint' ? (
+      <Text type="secondary" style={[defaultStyles.description, semantic?.description]}>
+        {description}
+      </Text>
+    ) : (
+      renderContent(description)
+    )
 
   return (
-    <View
-      {...viewProps}
-      style={[
-        {
-          alignItems: 'center',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          paddingVertical: themeToken.paddingXL,
-        },
-        style,
-      ]}
-    >
+    <View {...viewProps} style={[defaultStyles.root, semantic?.root, style]}>
       {hasImage ? (
         <View
-          accessibilityRole="image"
-          style={{
-            alignItems: 'center',
-            height: resolvedImageSize as DimensionValue,
-            justifyContent: 'center',
-            width: resolvedImageSize as DimensionValue,
-          }}
+          accessible={ownsImage ? imageLabel !== undefined : undefined}
+          accessibilityRole={ownsImage && imageLabel ? 'image' : undefined}
+          accessibilityLabel={ownsImage ? imageLabel : undefined}
+          accessibilityElementsHidden={ownsImage ? !imageLabel : undefined}
+          importantForAccessibility={
+            ownsImage ? (imageLabel ? 'yes' : 'no-hide-descendants') : undefined
+          }
+          style={[defaultStyles.image, semantic?.image]}
         >
           {imageContent}
         </View>
       ) : null}
-      {descriptionContent ? (
-        <View
-          style={{
-            marginTop: token.empty_description_margin_top,
-            paddingHorizontal: token.empty_description_padding_horizontal,
-          }}
-        >
+      {hasDescription ? (
+        <View style={[defaultStyles.descriptionContainer, semantic?.descriptionContainer]}>
           {descriptionContent}
         </View>
       ) : null}
       {hasAction ? (
-        <View style={{ marginTop: token.empty_footer_margin_top }}>{children}</View>
+        <View style={[defaultStyles.footer, semantic?.footer]}>{renderContent(children)}</View>
       ) : null}
     </View>
   )

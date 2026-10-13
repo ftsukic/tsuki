@@ -1,4 +1,6 @@
 import { FixtureOverview } from '../../fixture-overview'
+import CellCompositionExample from './examples/composition'
+import CellSemanticExample from './examples/semantic'
 import CellBasicExample from './examples/basic'
 import CellCenterExample from './examples/center'
 import CellDividerExample from './examples/divider'
@@ -19,12 +21,24 @@ import CellVerticalExample from './examples/vertical'
 
 /**
  * @title Cell overview
- * @description Cell 和 CellGroup 的 Vant 基线用法预览。
+ * @description Cell 和 CellGroup 的语义布局用法预览。
  */
 export default function CellOverview() {
   return (
     <FixtureOverview
       examples={[
+        {
+          Component: CellCompositionExample,
+          description: '任意 leading、说明和 trailing 的组合与对齐。',
+          id: 'composition',
+          title: 'Composition',
+        },
+        {
+          Component: CellSemanticExample,
+          description: '容器与文字槽的独立定制。',
+          id: 'semantic',
+          title: 'Semantic styles',
+        },
         {
           Component: CellBasicExample,
           description: '展示只有标题的基础 Cell。',
@@ -57,7 +71,7 @@ export default function CellOverview() {
         },
         {
           Component: CellLabelExample,
-          description: '展示标题下方的 label 辅助信息。',
+          description: '展示标题下方的 description 辅助信息。',
           id: 'label',
           title: 'Label',
         },
@@ -87,7 +101,7 @@ export default function CellOverview() {
         },
         {
           Component: CellLinkExample,
-          description: '展示 isLink 默认点击反馈和箭头。',
+          description: '展示 showArrow 箭头与 onPress 点击反馈。',
           id: 'link',
           title: 'Link',
         },

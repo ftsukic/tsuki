@@ -18,7 +18,7 @@ export default function FieldDatePickerFixture() {
       minDate={new Date(2021, 0, 1)}
       maxDate={new Date(2030, 11, 31, 23, 59, 59)}
       placeholder="请选择日期"
-      isLink
+      showArrow
     />
   )
 }

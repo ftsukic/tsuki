@@ -2,6 +2,17 @@ import * as Reanimated from 'react-native-reanimated'
 import { StyleSheet, Text } from 'react-native'
 import { ConfigProvider, Skeleton, getDesignToken, getSkeletonToken } from '..'
 import { render, screen } from '@testing-library/react-native'
+import type { JsonElement, JsonNode } from 'test-renderer'
+
+function findParagraph(node: JsonNode | null): JsonElement | undefined {
+  if (!node || typeof node === 'string') return undefined
+  if (StyleSheet.flatten(node.props.style)?.borderColor === 'red') return node
+  for (const child of node.children) {
+    const paragraph = findParagraph(child)
+    if (paragraph) return paragraph
+  }
+  return undefined
+}
 
 describe('Skeleton', () => {
   it('renders title, rows, avatar, and resolved widths', async () => {
@@ -59,6 +70,59 @@ describe('Skeleton', () => {
       </ConfigProvider>,
     )
     expect(JSON.stringify(view.toJSON())).toContain('24')
+  })
+
+  it('lets paragraph styles override the title gap without changing row gaps', async () => {
+    const view = await render(
+      <Skeleton title row={2} styles={{ paragraph: { borderColor: 'red' } }} />,
+    )
+    const paragraphStyle = () => StyleSheet.flatten(findParagraph(view.toJSON())?.props.style)
+
+    expect(paragraphStyle()).toMatchObject({ marginTop: 12 })
+    await view.rerender(
+      <Skeleton title row={2} styles={{ paragraph: { borderColor: 'red', marginTop: 0 } }} />,
+    )
+    expect(paragraphStyle()).toMatchObject({ marginTop: 0 })
+    const rows = findParagraph(view.toJSON())?.children
+    expect(rows).toHaveLength(2)
+    expect(StyleSheet.flatten((rows?.[1] as JsonElement).props.style)).toMatchObject({
+      marginTop: 12,
+    })
+  })
+
+  it('removes default loading accessibility when children are shown', async () => {
+    const { rerender } = await render(
+      <Skeleton testID="skeleton" title row={2}>
+        <Text testID="loaded">Loaded</Text>
+      </Skeleton>,
+    )
+    expect(screen.getByRole('progressbar').props.accessibilityState).toEqual({ busy: true })
+    expect(screen.queryByTestId('loaded')).toBeNull()
+
+    await rerender(
+      <Skeleton testID="skeleton" loading={false}>
+        <Text testID="loaded">Loaded</Text>
+      </Skeleton>,
+    )
+    expect(screen.queryByRole('progressbar')).toBeNull()
+    expect(screen.getByTestId('skeleton').props).toMatchObject({ accessible: false })
+    expect(screen.getByTestId('skeleton').props.accessibilityState).toBeUndefined()
+    expect(screen.getByTestId('loaded')).toBeTruthy()
+  })
+
+  it('preserves explicit accessibility overrides across loading changes', async () => {
+    const props = {
+      accessibilityLabel: 'Profile',
+      accessibilityRole: 'summary' as const,
+      accessibilityState: { busy: false, disabled: true },
+      accessible: false,
+      testID: 'skeleton',
+    }
+    const { rerender } = await render(<Skeleton {...props} title row={2} />)
+    expect(screen.getByTestId('skeleton').props).toMatchObject(props)
+
+    await rerender(<Skeleton {...props} loading={false} />)
+    expect(screen.getByTestId('skeleton').props).toMatchObject(props)
   })
 
   it('does not start the loop when motion is disabled', async () => {

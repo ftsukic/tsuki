@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Cell, FieldRadio } from '../../..'
 import type { RadioValue } from '../../..'
+import { Text } from 'react-native'
 
 /**
  * @title FieldRadio
@@ -43,7 +44,7 @@ export default function FieldRadioFixture() {
         ]}
         direction="horizontal"
         gap={8}
-        buttonColumns={4}
+        buttonColumns={2}
         buttonLayout="equal"
       />
       <FieldRadio
@@ -68,6 +69,22 @@ export default function FieldRadioFixture() {
         direction="horizontal"
         gap={8}
         buttonColumns={4}
+      />
+      <FieldRadio
+        title="附加内容"
+        variant="button"
+        buttonVariant="outlined"
+        direction="horizontal"
+        buttonColumns={2}
+        style={{ width: 300 }}
+        valueExtra={<Text style={{ width: 32 }}>说明</Text>}
+        value={value}
+        onChange={setValue}
+        options={[
+          { value: 'small', label: '小' },
+          { value: 'medium', label: '中等尺寸' },
+          { value: 'large', label: '大' },
+        ]}
       />
     </Cell.Group>
   )

@@ -7,6 +7,7 @@ import { Easing } from 'react-native-reanimated'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import * as Reanimated from 'react-native-reanimated'
 import type { ReactNode } from 'react'
+import type { ViewStyle } from 'react-native'
 
 function AppProvider({ children, motion = false }: { children?: ReactNode; motion?: boolean }) {
   return (
@@ -31,6 +32,196 @@ describe('Popup', () => {
     jest.restoreAllMocks()
   })
 
+  it.each(['bottom', 'top', 'left', 'right'] as const)(
+    'waits for panel layout and slides by its own size at %s',
+    async (position) => {
+      const completions: Array<() => void> = []
+      const timing = jest
+        .spyOn(Reanimated, 'withTiming')
+        .mockImplementation((_value, _config, callback) => {
+          completions.push(() => callback?.(true))
+          return 0
+        })
+      const onOpened = jest.fn()
+      const onLayout = jest.fn()
+      const onClosed = jest.fn()
+      const tree = (visible: boolean) => (
+        <AppProvider motion>
+          <Popup
+            visible={visible}
+            position={position}
+            onClosed={onClosed}
+            onOpened={onOpened}
+            onLayout={onLayout}
+            testID="measured-panel"
+          >
+            <Text>measured content</Text>
+          </Popup>
+        </AppProvider>
+      )
+      const view = await render(tree(true))
+      const panel = screen.getByTestId('measured-panel', { includeHiddenElements: true })
+      expect(flattenStyle(panel).opacity).toBe(0)
+      // Reanimated gives its animated style priority over ordinary styles on Web.
+      const animatedStyle = panel.props.style.find(
+        (style: { transform?: unknown }) => style?.transform !== undefined,
+      )
+      expect(animatedStyle.opacity).toBe(0)
+      expect(panel.props.pointerEvents).toBe('none')
+      expect(timing).not.toHaveBeenCalled()
+      expect(onOpened).not.toHaveBeenCalled()
+      // React 19 commits the layout state update asynchronously.
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent(panel, 'layout', {
+        nativeEvent: { layout: { width: 320, height: 280, x: 0, y: 0 } },
+      })
+      expect(onLayout).toHaveBeenCalledTimes(1)
+      expect(timing).toHaveBeenCalledTimes(1)
+      const transform =
+        position === 'bottom'
+          ? { translateY: 280 }
+          : position === 'top'
+            ? { translateY: -280 }
+            : position === 'left'
+              ? { translateX: -320 }
+              : { translateX: 320 }
+      expect(flattenStyle(screen.getByTestId('measured-panel')).transform).toContainEqual(transform)
+      // React 19 commits the layout state update asynchronously.
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent(screen.getByTestId('measured-panel'), 'layout', {
+        nativeEvent: { layout: { width: 350, height: 400, x: 0, y: 0 } },
+      })
+      expect(flattenStyle(screen.getByTestId('measured-panel')).transform).toContainEqual(transform)
+      expect(timing).toHaveBeenCalledTimes(1)
+      await act(async () => completions[0]())
+      expect(onOpened).toHaveBeenCalledTimes(1)
+      // Stable content can grow; exit must use the latest dimensions.
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent(screen.getByTestId('measured-panel'), 'layout', {
+        nativeEvent: { layout: { width: 360, height: 450, x: 0, y: 0 } },
+      })
+      await view.rerender(tree(false))
+      // Re-render after the mock commits its exit progress to expose the transform.
+      await view.rerender(tree(false))
+      const exitTransform =
+        position === 'bottom'
+          ? { translateY: 450 }
+          : position === 'top'
+            ? { translateY: -450 }
+            : position === 'left'
+              ? { translateX: -360 }
+              : { translateX: 360 }
+      expect(
+        flattenStyle(screen.getByTestId('measured-panel', { includeHiddenElements: true }))
+          .transform,
+      ).toContainEqual(exitTransform)
+      // Layout changes during exit must not change the frozen travel distance.
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent(
+        screen.getByTestId('measured-panel', { includeHiddenElements: true }),
+        'layout',
+        {
+          nativeEvent: { layout: { width: 350, height: 400, x: 0, y: 0 } },
+        },
+      )
+      expect(
+        flattenStyle(screen.getByTestId('measured-panel', { includeHiddenElements: true }))
+          .transform,
+      ).toContainEqual(exitTransform)
+      await view.rerender(tree(true))
+      await act(async () => completions[1]())
+      expect(onClosed).not.toHaveBeenCalled()
+      await act(async () => completions[2]())
+      expect(onOpened).toHaveBeenCalledTimes(2)
+      await view.rerender(tree(false))
+      await act(async () => completions[3]())
+      expect(onClosed).toHaveBeenCalledTimes(1)
+      await view.rerender(tree(true))
+      const nextTransform =
+        position === 'bottom'
+          ? { translateY: 400 }
+          : position === 'top'
+            ? { translateY: -400 }
+            : position === 'left'
+              ? { translateX: -350 }
+              : { translateX: 350 }
+      expect(flattenStyle(screen.getByTestId('measured-panel')).transform).toContainEqual(
+        nextTransform,
+      )
+      await view.unmount()
+    },
+  )
+
+  it('cancels an unmeasured opening and measures again after destruction', async () => {
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value, _config, callback) => {
+        callback?.(true)
+        return value
+      })
+    const events: string[] = []
+    const tree = (visible: boolean) => (
+      <AppProvider motion>
+        <Popup
+          visible={visible}
+          position="bottom"
+          destroyOnClosed
+          testID="remeasured-panel"
+          onOpen={() => events.push('open')}
+          onOpened={() => events.push('opened')}
+          onClose={() => events.push('close')}
+          onClosed={() => events.push('closed')}
+        >
+          <Text>remeasured content</Text>
+        </Popup>
+      </AppProvider>
+    )
+    const view = await render(tree(true))
+    await view.rerender(tree(false))
+    expect(events).toEqual(['open', 'close', 'closed'])
+    expect(screen.queryByTestId('remeasured-panel', { includeHiddenElements: true })).toBeNull()
+    await view.rerender(tree(true))
+    expect(timing).not.toHaveBeenCalled()
+    // React 19 commits the layout state update asynchronously.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(
+      screen.getByTestId('remeasured-panel', { includeHiddenElements: true }),
+      'layout',
+      {
+        nativeEvent: { layout: { width: 320, height: 280, x: 0, y: 0 } },
+      },
+    )
+    expect(events).toEqual(['open', 'close', 'closed', 'open', 'opened'])
+    await view.rerender(tree(false))
+    await view.rerender(tree(true))
+    expect(timing).toHaveBeenCalledTimes(2)
+    expect(
+      flattenStyle(screen.getByTestId('remeasured-panel', { includeHiddenElements: true })).opacity,
+    ).toBe(0)
+    // React 19 commits the layout state update asynchronously.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(
+      screen.getByTestId('remeasured-panel', { includeHiddenElements: true }),
+      'layout',
+      {
+        nativeEvent: { layout: { width: 320, height: 300, x: 0, y: 0 } },
+      },
+    )
+    expect(timing).toHaveBeenCalledTimes(3)
+    expect(events).toEqual([
+      'open',
+      'close',
+      'closed',
+      'open',
+      'opened',
+      'close',
+      'closed',
+      'open',
+      'opened',
+    ])
+    await view.unmount()
+  })
+
   it('hides a centered Popup at the closed animation endpoint', async () => {
     const view = await render(
       <AppProvider>
@@ -40,7 +231,9 @@ describe('Popup', () => {
       </AppProvider>,
     )
 
-    expect(flattenStyle(screen.getByTestId('closed-center'))).toMatchObject({
+    expect(
+      flattenStyle(screen.getByTestId('closed-center', { includeHiddenElements: true })),
+    ).toMatchObject({
       opacity: 0,
       transform: [{ scale: 0.96 }],
     })
@@ -76,13 +269,31 @@ describe('Popup', () => {
     expect(screen.getByText('left')).toBeTruthy()
     expect(screen.getByText('right')).toBeTruthy()
 
-    expect(flattenStyle(screen.getByTestId('center')).borderRadius).toBe(8)
-    expect(flattenStyle(screen.getByTestId('top')).borderBottomLeftRadius).toBe(8)
-    expect(flattenStyle(screen.getByTestId('bottom')).borderTopLeftRadius).toBe(8)
-    expect(flattenStyle(screen.getByTestId('left')).borderTopRightRadius).toBe(8)
-    expect(flattenStyle(screen.getByTestId('right')).borderTopLeftRadius).toBe(8)
-    expect(flattenStyle(screen.getByTestId('top')).width).toBe('100%')
-    expect(flattenStyle(screen.getByTestId('left')).height).toBe('100%')
+    expect(
+      flattenStyle(screen.getByTestId('center', { includeHiddenElements: true })).borderRadius,
+    ).toBe(8)
+    expect(
+      flattenStyle(screen.getByTestId('top', { includeHiddenElements: true }))
+        .borderBottomLeftRadius,
+    ).toBe(8)
+    expect(
+      flattenStyle(screen.getByTestId('bottom', { includeHiddenElements: true }))
+        .borderTopLeftRadius,
+    ).toBe(8)
+    expect(
+      flattenStyle(screen.getByTestId('left', { includeHiddenElements: true }))
+        .borderTopRightRadius,
+    ).toBe(8)
+    expect(
+      flattenStyle(screen.getByTestId('right', { includeHiddenElements: true }))
+        .borderTopLeftRadius,
+    ).toBe(8)
+    expect(flattenStyle(screen.getByTestId('top', { includeHiddenElements: true })).width).toBe(
+      '100%',
+    )
+    expect(flattenStyle(screen.getByTestId('left', { includeHiddenElements: true })).height).toBe(
+      '100%',
+    )
     await view.unmount()
   })
 
@@ -138,7 +349,9 @@ describe('Popup', () => {
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent.press(screen.getByText('open bottom'))
     expect(screen.getByText('opened bottom')).toBeTruthy()
-    expect(flattenStyle(screen.getByTestId('same-press-popup'))).toMatchObject({ opacity: 1 })
+    expect(
+      flattenStyle(screen.getByTestId('same-press-popup', { includeHiddenElements: true })),
+    ).toMatchObject({ opacity: 1 })
     await view.unmount()
   })
 
@@ -155,9 +368,69 @@ describe('Popup', () => {
       </ConfigProvider>,
     )
 
-    expect(flattenStyle(screen.getByTestId('safe-area-popup'))).toMatchObject({
+    expect(
+      flattenStyle(screen.getByTestId('safe-area-popup', { includeHiddenElements: true })),
+    ).toMatchObject({
       paddingBottom: 20,
     })
+    await view.unmount()
+  })
+
+  it('hides retained content from accessibility while closed and restores it on reopen', async () => {
+    const tree = (visible: boolean) => (
+      <AppProvider>
+        <Popup visible={visible} lazyRender={false}>
+          <View accessible accessibilityRole="button" accessibilityLabel="Popup action" />
+        </Popup>
+      </AppProvider>
+    )
+    const view = await render(tree(false))
+    expect(screen.queryByRole('button', { name: 'Popup action' })).toBeNull()
+    expect(
+      screen.getByRole('button', { name: 'Popup action', includeHiddenElements: true }),
+    ).toBeTruthy()
+    await view.rerender(tree(true))
+    expect(screen.getByRole('button', { name: 'Popup action' })).toBeTruthy()
+    await view.rerender(tree(false))
+    expect(screen.queryByRole('button', { name: 'Popup action' })).toBeNull()
+    await view.rerender(tree(true))
+    expect(screen.getByRole('button', { name: 'Popup action' })).toBeTruthy()
+  })
+
+  it.each([
+    [{ padding: 16 }, 50],
+    [{ padding: 16, paddingVertical: 20 }, 54],
+    [{ padding: 16, paddingVertical: 20, paddingBlock: 24 }, 58],
+    [{ paddingVertical: 20, paddingBlockEnd: 12 }, 46],
+    [{ paddingBlockEnd: 12, paddingBottom: 8 }, 42],
+    [{ padding: 16, paddingBottom: 0 }, 34],
+    [{ paddingBottom: '10%' }, 64],
+  ])('adds bottom safe area to existing padding %j', async (container, expected) => {
+    const view = await render(
+      <ConfigProvider theme={{ seed: { motion: false } }}>
+        <SafeAreaInsetsContext.Provider value={{ top: 0, right: 0, bottom: 34, left: 0 }}>
+          <PortalHost>
+            <Popup
+              visible
+              position="bottom"
+              safeAreaInsetBottom
+              styles={{ container: container as ViewStyle }}
+              testID="padded-panel"
+            />
+          </PortalHost>
+        </SafeAreaInsetsContext.Provider>
+      </ConfigProvider>,
+    )
+    const panel = screen.getByTestId('padded-panel')
+    // RNTL 14 fireEvent returns a Promise and must finish before the next test.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(panel.parent!, 'layout', {
+      nativeEvent: { layout: { width: 300, height: 600, x: 0, y: 0 } },
+    })
+    expect(flattenStyle(screen.getByTestId('padded-panel')).paddingBottom).toBe(expected)
+    expect(flattenStyle(screen.getByTestId('padded-panel')).padding).toBe(
+      (container as ViewStyle).padding,
+    )
     await view.unmount()
   })
 
@@ -232,7 +505,7 @@ describe('Popup', () => {
         </Popup>
       </AppProvider>,
     )
-    expect(screen.getByTestId('probe')).toBeTruthy()
+    expect(screen.getByTestId('probe', { includeHiddenElements: true })).toBeTruthy()
     expect(mountCount).toBe(1)
 
     await view.rerender(
@@ -242,7 +515,7 @@ describe('Popup', () => {
         </Popup>
       </AppProvider>,
     )
-    expect(screen.getByTestId('probe')).toBeTruthy()
+    expect(screen.getByTestId('probe', { includeHiddenElements: true })).toBeTruthy()
     expect(unmountCount).toBe(0)
 
     await view.unmount()
@@ -254,7 +527,7 @@ describe('Popup', () => {
         </Popup>
       </AppProvider>,
     )
-    expect(screen.getByTestId('destroyed')).toBeTruthy()
+    expect(screen.getByTestId('destroyed', { includeHiddenElements: true })).toBeTruthy()
     await utils.rerender(
       <AppProvider>
         <Popup visible={false} destroyOnClosed>
@@ -329,11 +602,18 @@ describe('Popup', () => {
 
     const view = await render(
       <AppProvider motion>
-        <Popup visible position="bottom">
+        <Popup visible position="bottom" testID="timed-panel">
           <Text>timed popup</Text>
         </Popup>
       </AppProvider>,
     )
+
+    expect(timing).not.toHaveBeenCalled()
+    // React 19 commits the layout state update asynchronously.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(screen.getByTestId('timed-panel', { includeHiddenElements: true }), 'layout', {
+      nativeEvent: { layout: { width: 320, height: 280, x: 0, y: 0 } },
+    })
 
     expect(timing).toHaveBeenCalledTimes(1)
     expect(configs.map(({ duration }) => duration)).toEqual([300])
@@ -383,6 +663,12 @@ describe('Popup', () => {
       </AppProvider>,
     )
 
+    // React 19 commits the layout state update asynchronously.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(screen.getByTestId('motion-panel', { includeHiddenElements: true }), 'layout', {
+      nativeEvent: { layout: { width: 320, height: 280, x: 0, y: 0 } },
+    })
+
     expect(timing).toHaveBeenCalledTimes(1)
     await act(async () => {
       animations[0]?.complete()
@@ -406,7 +692,8 @@ describe('Popup', () => {
     )
 
     expect(timing).toHaveBeenCalledTimes(2)
-    const closingPanel = screen.getByTestId('motion-panel')
+    expect(screen.queryByTestId('motion-panel')).toBeNull()
+    const closingPanel = screen.getByTestId('motion-panel', { includeHiddenElements: true })
     expect(flattenStyle(closingPanel.parent)).toMatchObject({ justifyContent: 'flex-end' })
     expect(flattenStyle(closingPanel)).toMatchObject({
       borderWidth: 1,
@@ -419,14 +706,18 @@ describe('Popup', () => {
 
     await act(async () => animations[1]?.complete())
     expect(onClosed).toHaveBeenCalledTimes(1)
-    expect(flattenStyle(screen.getByTestId('motion-panel').parent)).toMatchObject({
+    expect(
+      flattenStyle(screen.getByTestId('motion-panel', { includeHiddenElements: true }).parent),
+    ).toMatchObject({
       alignItems: 'center',
       justifyContent: 'center',
     })
-    expect(flattenStyle(screen.getByTestId('motion-panel'))).toMatchObject({ borderWidth: 2 })
-    expect(flattenStyle(screen.getByTestId('motion-panel')).transform).toEqual(
-      expect.arrayContaining([expect.objectContaining({ scale: expect.anything() })]),
-    )
+    expect(
+      flattenStyle(screen.getByTestId('motion-panel', { includeHiddenElements: true })),
+    ).toMatchObject({ borderWidth: 2 })
+    expect(
+      flattenStyle(screen.getByTestId('motion-panel', { includeHiddenElements: true })).transform,
+    ).toEqual(expect.arrayContaining([expect.objectContaining({ scale: expect.anything() })]))
 
     await view.rerender(
       <AppProvider motion>
@@ -443,7 +734,9 @@ describe('Popup', () => {
         </Popup>
       </AppProvider>,
     )
-    expect(flattenStyle(screen.getByTestId('motion-panel').parent)).toMatchObject({
+    expect(
+      flattenStyle(screen.getByTestId('motion-panel', { includeHiddenElements: true }).parent),
+    ).toMatchObject({
       alignItems: 'center',
       justifyContent: 'center',
     })
@@ -470,6 +763,15 @@ describe('Popup', () => {
           </Popup>
         </AppProvider>,
       )
+      // React 19 commits the layout state update asynchronously.
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent(
+        screen.getByTestId('directional-panel', { includeHiddenElements: true }),
+        'layout',
+        {
+          nativeEvent: { layout: { width: 320, height: 280, x: 0, y: 0 } },
+        },
+      )
       await act(async () => {
         animations[0]?.complete()
       })
@@ -482,7 +784,7 @@ describe('Popup', () => {
         </AppProvider>,
       )
 
-      const panel = screen.getByTestId('directional-panel')
+      const panel = screen.getByTestId('directional-panel', { includeHiddenElements: true })
       const panelStyle = flattenStyle(panel)
       const containerStyle = flattenStyle(panel.parent)
       if (position === 'top') {
@@ -524,6 +826,7 @@ describe('Popup', () => {
             round
 
             testID="styled-panel"
+            style={{ marginTop: 8 }}
             styles={(info) => {
               const custom = resolveStyles(
                 ({ state }) => ({
@@ -546,7 +849,9 @@ describe('Popup', () => {
       </ConfigProvider>,
     )
 
-    expect(flattenStyle(screen.getByTestId('styled-panel'))).toMatchObject({
+    expect(
+      flattenStyle(screen.getByTestId('styled-panel', { includeHiddenElements: true })),
+    ).toMatchObject({
       backgroundColor: '#123456',
       borderRadius: 20,
       borderWidth: 1,
@@ -557,7 +862,7 @@ describe('Popup', () => {
       (node) => node.props.accessibilityElementsHidden === true,
     )[0]
     const overlayLayer = overlay?.parent
-    const panel = screen.getByTestId('styled-panel')
+    const panel = screen.getByTestId('styled-panel', { includeHiddenElements: true })
     const container = panel.parent
     const root = overlayLayer?.parent
 
@@ -565,6 +870,7 @@ describe('Popup', () => {
     expect(flattenStyle(root)).toMatchObject({
       ...StyleSheet.absoluteFillObject,
       zIndex: 1800,
+      marginTop: 8,
     })
     expect(flattenStyle(overlayLayer)).toMatchObject({ zIndex: 1800 })
     expect(flattenStyle(container)).toMatchObject({ zIndex: 1801 })
@@ -575,7 +881,9 @@ describe('Popup', () => {
     expect(panel.parent).toBe(container)
     expect(rootChildren.indexOf(overlayLayer!)).toBeLessThan(rootChildren.indexOf(container!))
     expect(flattenStyle(overlay)).toMatchObject({ borderWidth: 2 })
-    expect(flattenStyle(overlay)).toMatchObject({ opacity: 0.2 })
+    expect(flattenStyle(overlayLayer)).not.toHaveProperty('borderWidth')
+    expect(flattenStyle(overlay)).not.toHaveProperty('opacity')
+    expect(flattenStyle(overlayLayer)).toMatchObject({ opacity: 0.2 })
     await view.unmount()
   })
 
@@ -678,7 +986,9 @@ describe('Popup', () => {
         </Popup>
       </AppProvider>,
     )
-    expect(screen.getByTestId('reversible-destroy-content')).toBeTruthy()
+    expect(
+      screen.getByTestId('reversible-destroy-content', { includeHiddenElements: true }),
+    ).toBeTruthy()
 
     await view.rerender(
       <AppProvider motion>
@@ -695,7 +1005,9 @@ describe('Popup', () => {
     )
     await act(async () => animations[1]?.complete())
     expect(onClosed).not.toHaveBeenCalled()
-    expect(screen.getByTestId('reversible-destroy-content')).toBeTruthy()
+    expect(
+      screen.getByTestId('reversible-destroy-content', { includeHiddenElements: true }),
+    ).toBeTruthy()
 
     await act(async () => animations[2]?.complete())
     await view.rerender(
@@ -751,7 +1063,7 @@ describe('Popup', () => {
     )
 
     expect(onClosed).toHaveBeenCalledTimes(1)
-    expect(screen.getByTestId('zero-duration-popup')).toBeTruthy()
+    expect(screen.getByTestId('zero-duration-popup', { includeHiddenElements: true })).toBeTruthy()
     await view.unmount()
   })
 

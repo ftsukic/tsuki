@@ -49,6 +49,7 @@ export interface TabProps extends Omit<
   PressableProps,
   'children' | 'disabled' | 'onPress' | 'style'
 > {
+  /** Must be unique within Tabs; omitted names use the current child index. */
   name?: TabsValue
   title: ReactNode
   styles?: TabSemanticStyles

@@ -7,6 +7,7 @@ export interface DropdownItemRegistration {
   id: symbol
   index: number
   disabled: boolean
+  restoreFocus?: () => void
   content?: ReactNode
   contentStyle?: StyleProp<ViewStyle>
   overlayStyle?: StyleProp<ViewStyle>

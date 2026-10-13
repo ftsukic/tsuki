@@ -51,9 +51,6 @@ interface ButtonBaseProps extends Omit<PressableProps, 'children' | 'style' | 'd
   pressedOverlayColor?: ColorValue
   shape?: ButtonShape
   block?: boolean
-  round?: boolean
-  square?: boolean
-  circle?: boolean
   hairline?: boolean
   disabled?: boolean
   loading?: boolean

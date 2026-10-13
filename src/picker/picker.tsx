@@ -67,6 +67,7 @@ function PickerMask({
 export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
   {
     columns,
+    columnLabels,
     value,
     defaultValue,
     title,
@@ -80,6 +81,7 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
     onCancel,
     itemHeight,
     visibleItemCount,
+    virtual = true,
     loading = false,
     style,
     styles,
@@ -95,11 +97,10 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
     () => value ?? defaultValue ?? [],
     [defaultValue, value],
   )
-  const initialValues = useMemo(
-    () => resolvePickerState(columns, initialRequestedValues).values,
-    [columns, initialRequestedValues],
-  )
+  const [initialState] = useState(() => resolvePickerState(columns, initialRequestedValues))
+  const initialValues = initialState.values
   const [internalValues, setInternalValues] = useState<readonly PickerValue[]>(initialValues)
+  const [selectionRevisions, setSelectionRevisions] = useState<readonly number[]>([])
   const requestedValuesRef = useRef<readonly PickerValue[]>(initialRequestedValues)
   if (controlled) requestedValuesRef.current = value
   const columnsRef = useRef(columns)
@@ -130,14 +131,18 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
     [itemHeightValue, token, visibleItemCountValue],
   )
   const resolvedState = useMemo(
-    () => resolvePickerState(columns, requestedValues, previousResolvedStateRef.current),
-    [columns, requestedValues],
+    () =>
+      previousResolvedStateRef.current === undefined
+        ? initialState
+        : resolvePickerState(columns, requestedValues, previousResolvedStateRef.current),
+    [columns, requestedValues, initialState],
   )
   previousResolvedStateRef.current = resolvedState
   selectedValuesRef.current = resolvedState.values
   const pickerProps: PickerProps = {
     ...viewProps,
     columns,
+    columnLabels,
     value,
     defaultValue,
     title,
@@ -151,6 +156,7 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
     onCancel,
     itemHeight,
     visibleItemCount,
+    virtual,
     loading,
     style,
     styles,
@@ -165,10 +171,16 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
   })
 
   const handleChange = useCallback(
-    (nextValues: readonly PickerValue[], options: readonly PickerOption[]) => {
+    (nextValues: readonly PickerValue[], options: readonly PickerOption[], columnIndex: number) => {
       if (!controlled) {
         requestedValuesRef.current = nextValues
         setInternalValues(nextValues)
+      } else {
+        setSelectionRevisions((revisions) => {
+          const next = [...revisions]
+          next[columnIndex] = (next[columnIndex] ?? 0) + 1
+          return next
+        })
       }
       onChange?.(nextValues, options)
     },
@@ -177,17 +189,23 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
 
   const settleColumns = useCallback(() => {
     const nextValues = [...resolvedState.values]
+    let valueIndex = 0
     columnRefs.current.forEach((column, columnIndex) => {
       const finalIndex = column?.stopMomentum()
       if (finalIndex != null) {
         const option = resolvedState.columns[columnIndex]?.items[finalIndex]
-        if (option) nextValues[columnIndex] = option.value
+        if (option) nextValues[valueIndex] = option.value
       }
+      if (resolvedState.columns[columnIndex]?.index >= 0) valueIndex += 1
     })
     const next = resolvePickerState(columns, nextValues, resolvedState)
     if (!controlled) {
       requestedValuesRef.current = next.values
       setInternalValues(next.values)
+    } else {
+      setSelectionRevisions((revisions) =>
+        resolvedState.columns.map((_, index) => (revisions[index] ?? 0) + 1),
+      )
     }
     return next
   }, [columns, controlled, resolvedState])
@@ -253,64 +271,72 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
           title={title}
         />
       ) : null}
-      <View style={resolved.view} testID="picker-frame">
-        <View
-          accessibilityElementsHidden={loading || undefined}
-          importantForAccessibility={loading ? 'no-hide-descendants' : undefined}
-          style={[resolved.columns, semantic?.body]}
-          testID="picker-columns"
-        >
-          {resolvedState.columns.map((column, columnIndex) => (
-            <PickerColumn
-              key={columnIndex}
-              columnIndex={columnIndex}
-              disabled={loading || column.items.length === 0}
-              itemHeight={itemHeightValue}
-              itemLabelStyle={semantic?.itemContent}
-              itemStyle={semantic?.item}
-              items={column.items}
-              swipeDuration={swipeDuration ?? token.picker_swipe_duration}
-              onIndexChange={(index) => {
-                const nextValues = [...resolvedState.values]
-                nextValues[columnIndex] = column.items[index].value
-                const next = resolvePickerState(columns, nextValues, resolvedState)
-                handleChange(next.values, next.options)
-              }}
-              ref={(columnRef) => {
-                columnRefs.current[columnIndex] = columnRef
-              }}
-              selectedIndex={column.index}
-              style={semantic?.column}
-              testID={`picker-column-${columnIndex}`}
-              visibleItemCount={visibleItemCountValue}
-            />
-          ))}
+      <View style={[resolved.body, semantic?.body]} testID="picker-body">
+        <View style={resolved.view} testID="picker-frame">
+          <View
+            accessibilityElementsHidden={loading || undefined}
+            importantForAccessibility={loading ? 'no-hide-descendants' : undefined}
+            style={resolved.columns}
+            testID="picker-columns"
+          >
+            {resolvedState.columns.map((column, columnIndex) => (
+              <PickerColumn
+                key={columnIndex}
+                columnIndex={columnIndex}
+                accessibilityLabel={columnLabels?.[columnIndex]}
+                disabled={loading || column.items.length === 0}
+                itemHeight={itemHeightValue}
+                itemLabelStyle={semantic?.itemContent}
+                itemStyle={semantic?.item}
+                items={column.items}
+                swipeDuration={swipeDuration ?? token.picker_swipe_duration}
+                onIndexChange={(index) => {
+                  const nextValues = [...resolvedState.values]
+                  const valueIndex = resolvedState.indexes
+                    .slice(0, columnIndex)
+                    .filter((selected) => selected >= 0).length
+                  nextValues[valueIndex] = column.items[index].value
+                  const next = resolvePickerState(columns, nextValues, resolvedState)
+                  handleChange(next.values, next.options, columnIndex)
+                }}
+                ref={(columnRef) => {
+                  columnRefs.current[columnIndex] = columnRef
+                }}
+                selectedIndex={column.index}
+                selectionRevision={selectionRevisions[columnIndex] ?? 0}
+                style={semantic?.column}
+                testID={`picker-column-${columnIndex}`}
+                visibleItemCount={visibleItemCountValue}
+                virtual={virtual}
+              />
+            ))}
+          </View>
+          <PickerMask
+            color={token.picker_mask_color}
+            height={itemHeightValue * visibleItemCountValue}
+            maskHeight={((visibleItemCountValue - 1) * itemHeightValue) / 2}
+            opacities={token.picker_mask_opacities}
+            style={[resolved.mask, semantic?.mask]}
+          />
+          <View
+            style={[resolved.indicator, semantic?.indicator, { pointerEvents: 'none' }]}
+            testID="picker-indicator"
+          />
+          {loading ? (
+            <>
+              <View
+                style={[resolved.stateBackdrop, { pointerEvents: 'none' }]}
+                testID="picker-state-backdrop"
+              />
+              <View
+                style={[resolved.stateItem, semantic?.loading, { pointerEvents: 'none' }]}
+                testID="picker-loading"
+              >
+                <Loading />
+              </View>
+            </>
+          ) : null}
         </View>
-        <PickerMask
-          color={token.picker_mask_color}
-          height={itemHeightValue * visibleItemCountValue}
-          maskHeight={((visibleItemCountValue - 1) * itemHeightValue) / 2}
-          opacities={token.picker_mask_opacities}
-          style={[resolved.mask, semantic?.mask]}
-        />
-        <View
-          style={[resolved.indicator, semantic?.indicator, { pointerEvents: 'none' }]}
-          testID="picker-indicator"
-        />
-        {loading ? (
-          <>
-            <View
-              style={[resolved.stateBackdrop, { pointerEvents: 'none' }]}
-              testID="picker-state-backdrop"
-            />
-            <View
-              style={[resolved.stateItem, semantic?.loading, { pointerEvents: 'none' }]}
-              testID="picker-loading"
-            >
-              <Loading />
-            </View>
-          </>
-        ) : null}
       </View>
     </View>
   )

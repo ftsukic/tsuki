@@ -59,7 +59,7 @@ export default function ButtonGroupFixture() {
 
       <Text style={styles.heading}>单个按钮</Text>
       <ButtonGroup>
-        <Button type="primary" round>
+        <Button type="primary" shape="round">
           单个按钮
         </Button>
       </ButtonGroup>

@@ -35,6 +35,7 @@ export interface TagProps extends Omit<ViewProps, 'children' | 'style'> {
   closeable?: boolean
   disabled?: boolean
   onClose?: () => void
+  closeAccessibilityLabel?: string
   style?: StyleProp<ViewStyle>
   styles?: TagStyles
 }

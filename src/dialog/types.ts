@@ -33,6 +33,7 @@ export interface DialogStyleState {
 export interface DialogSemanticStyles {
   mask?: StyleProp<ViewStyle>
   root?: StyleProp<ViewStyle>
+  /** @deprecated Internal positioning layer; prefer root or container. */
   wrapper?: StyleProp<ViewStyle>
   container?: StyleProp<ViewStyle>
   header?: StyleProp<ViewStyle>
@@ -40,6 +41,8 @@ export interface DialogSemanticStyles {
   body?: StyleProp<ViewStyle>
   message?: StyleProp<TextStyle>
   footer?: StyleProp<ViewStyle>
+  cancelButton?: StyleProp<ViewStyle>
+  confirmButton?: StyleProp<ViewStyle>
 }
 
 export type DialogStyles = StyleResolver<DialogProps, DialogStyleState, DialogSemanticStyles>

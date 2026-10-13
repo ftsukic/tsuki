@@ -28,10 +28,15 @@ export default function SegmentedThemeExample() {
             root: { borderWidth: 1, borderColor: '#91caff' },
           })}
         />
-        <Segmented defaultValue="list" selectedTextColor="#1677ff" options={['list', 'board']} />
+        <Segmented
+          defaultValue="list"
+          selectedTextColor="#1677ff"
+          styles={{ label: { color: '#595959' } }}
+          options={['list', 'board']}
+        />
         <Text type="secondary">
-          selectedTextColor 用于单实例覆盖选中项文字颜色；selected thumb 默认使用
-          colorBgContainer，semantic styles 控制局部样式。
+          styles.label.color 设置选项文字颜色，selectedTextColor 单独覆盖选中项；selected thumb
+          默认使用 colorBgContainer。
         </Text>
         <Segmented
           block

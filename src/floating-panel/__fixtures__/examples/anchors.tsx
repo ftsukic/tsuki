@@ -23,7 +23,9 @@ export default function FloatingPanelAnchorsExample() {
       >
         <View style={styles.content}>
           <Text style={styles.title}>三个停靠位置</Text>
-          <Text style={styles.description}>松手后会吸附到 100、280 或 520px。</Text>
+          <Text style={styles.description}>
+            短滑一档即可展开或收起，无需拖过锚点中点。长拖动可跨档，最小高度为 100px。
+          </Text>
         </View>
       </FloatingPanel>
     </View>

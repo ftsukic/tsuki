@@ -77,6 +77,8 @@ export function getDropdownItemStyles(
       marginLeft: token.caretGap,
     },
     content: {
+      minHeight: 0,
+      flexShrink: 1,
       backgroundColor: token.contentBackgroundColor,
     },
     option: {

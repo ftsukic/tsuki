@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native'
 import { ConfigProvider, getDesignToken, Tag } from '..'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, Text } from 'react-native'
 
 function styleOf(testID: string) {
   return StyleSheet.flatten(screen.getByTestId(testID).props.style)
@@ -159,7 +159,7 @@ describe('Tag', () => {
     )
 
     expect(screen.getByTestId('closeable').props.onPress).toBeUndefined()
-    fireEvent.press(screen.getByLabelText('关闭标签'))
+    fireEvent.press(screen.getByLabelText('关闭「可关闭」'))
 
     expect(onClose).toHaveBeenCalledTimes(1)
     expect(screen.getByTestId('closeable')).toBeTruthy()
@@ -175,9 +175,66 @@ describe('Tag', () => {
       </ConfigProvider>,
     )
 
-    const closeButton = screen.getByLabelText('关闭标签')
+    const closeButton = screen.getByLabelText('关闭「禁用」')
     expect(closeButton.props.accessibilityState).toMatchObject({ disabled: true })
     fireEvent.press(closeButton)
     expect(onClose).not.toHaveBeenCalled()
+  })
+  it('normalizes nested fragments and arrays into themed text', async () => {
+    await render(
+      <ConfigProvider>
+        <Tag closeable styles={{ content: { letterSpacing: 2 } }}>
+          <>
+            标签
+            {[
+              <>
+                {0}
+                <>{'内容'}</>
+              </>,
+              false,
+              null,
+            ]}
+          </>
+        </Tag>
+      </ConfigProvider>,
+    )
+    const label = screen.getByText('标签0内容')
+    expect(StyleSheet.flatten(label.props.style).letterSpacing).toBe(2)
+    expect(screen.getByRole('button', { name: '关闭「标签0内容」' })).toBeTruthy()
+  })
+
+  it('supports distinct close names for custom content without changing its styles', async () => {
+    const onClose = jest.fn()
+    await render(
+      <ConfigProvider>
+        <Tag
+          closeable
+          onClose={onClose}
+          closeAccessibilityLabel="移除筛选项"
+          accessibilityLabel="筛选"
+        >
+          <Text style={{ color: 'red' }}>自定义</Text>
+        </Tag>
+        <Tag closeable>
+          <Text>其他内容</Text>
+        </Tag>
+      </ConfigProvider>,
+    )
+    expect(StyleSheet.flatten(screen.getByText('自定义').props.style).color).toBe('red')
+    fireEvent.press(screen.getByRole('button', { name: '移除筛选项' }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(screen.getByRole('button', { name: '关闭标签' })).toBeTruthy()
+  })
+
+  it('keeps generated text on one line when width is constrained', async () => {
+    await render(
+      <Tag style={{ maxWidth: 120 }} closeable>
+        很长的标签内容
+      </Tag>,
+    )
+    const label = screen.getByText('很长的标签内容')
+    expect(label.props.numberOfLines).toBe(1)
+    expect(label.props.ellipsizeMode).toBe('tail')
+    expect(screen.getByRole('button', { name: '关闭「很长的标签内容」' })).toBeTruthy()
   })
 })

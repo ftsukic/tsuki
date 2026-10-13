@@ -25,4 +25,5 @@ export const MOTION_SPRING = {
   normal: { damping: 20, stiffness: 240, mass: 1 },
   responsive: { damping: 18, stiffness: 300, mass: 0.9 },
   bouncy: { damping: 14, stiffness: 280, mass: 0.9 },
+  magnetic: { damping: 30, stiffness: 600, mass: 0.8 },
 }

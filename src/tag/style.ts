@@ -120,12 +120,16 @@ export function getTagStyles(
       ...borderStyle,
     },
     content: {
+      flexShrink: 1,
+      minWidth: 0,
       alignItems: 'center',
       flexDirection: 'row',
       height: size.height - (state.plain ? token.borderWidth * 2 : 0),
       paddingHorizontal: size.paddingHorizontal,
     },
     label: {
+      flexShrink: 1,
+      minWidth: 0,
       color: textColor,
       fontFamily: token.fontFamily,
       fontSize: size.fontSize,
@@ -134,6 +138,7 @@ export function getTagStyles(
       textAlignVertical: 'center',
     },
     close: {
+      flexShrink: 0,
       alignItems: 'center',
       justifyContent: 'center',
       marginLeft: token.closeGap,

@@ -21,7 +21,6 @@ import type { PickerGroupChildRef, PickerGroupProps, PickerGroupRef } from './ty
 const EMPTY_SELECTION = { values: [], options: [], indexes: [] } as const
 
 function flattenPickerGroupChildren(children: ReactNode): ReactNode[] {
-  if (children === null || children === undefined || children === false) return []
   if (Array.isArray(children)) return children.flatMap(flattenPickerGroupChildren)
   if (isValidElement(children) && children.type === Fragment) {
     return flattenPickerGroupChildren((children.props as { children?: ReactNode }).children)
@@ -70,7 +69,10 @@ export const PickerGroup = forwardRef<PickerGroupRef, PickerGroupProps>(function
 ) {
   const { token } = useToken()
   const childRefs = useRef<Array<PickerGroupChildRef | null>>([])
-  const childNodes = useMemo(() => flattenPickerGroupChildren(children), [children])
+  const childNodes = useMemo(
+    () => (children == null ? [] : flattenPickerGroupChildren(children)),
+    [children],
+  )
   const mismatchSignature = `${tabs.length}:${childNodes.length}`
   const warnedMismatchRef = useRef<string | null>(null)
   useEffect(() => {

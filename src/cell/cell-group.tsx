@@ -1,4 +1,4 @@
-import { Fragment, isValidElement, type ReactNode } from 'react'
+import { Children, Fragment, isValidElement, type ReactNode } from 'react'
 import { View } from 'react-native'
 import { Divider } from '../divider'
 import { resolveStyles } from '../style'
@@ -19,13 +19,17 @@ function getPosition(index: number, count: number): CellGroupPosition {
   return 'middle'
 }
 
-function flattenCellGroupChildren(children: ReactNode): ReactNode[] {
-  if (children === null || children === undefined || children === false) return []
-  if (Array.isArray(children)) return children.flatMap(flattenCellGroupChildren)
-  if (isValidElement(children) && children.type === Fragment) {
-    return flattenCellGroupChildren((children.props as { children?: ReactNode }).children)
-  }
-  return [children]
+function flattenCellGroupChildren(
+  children: ReactNode,
+  parentKey = '',
+): { child: ReactNode; key: string }[] {
+  return Children.toArray(children).flatMap((child, index) => {
+    const key = `${parentKey}/${isValidElement(child) ? child.key : index}`
+    if (isValidElement(child) && child.type === Fragment) {
+      return flattenCellGroupChildren((child.props as { children?: ReactNode }).children, key)
+    }
+    return [{ child, key }]
+  })
 }
 
 export function CellGroup({
@@ -52,8 +56,8 @@ export function CellGroup({
     ? token.groupInsetTitlePaddingVertical
     : token.groupTitlePaddingVertical
   const renderChildren = () =>
-    childItems.map((child, index) => (
-      <CellGroupItem key={index} position={getPosition(index, childItems.length)}>
+    childItems.map(({ child, key }, index) => (
+      <CellGroupItem key={key} position={getPosition(index, childItems.length)}>
         {child}
       </CellGroupItem>
     ))
@@ -62,12 +66,15 @@ export function CellGroup({
     <View testID={testID} style={[semantic?.root, style]}>
       {hasHeader ? (
         <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            paddingHorizontal: titlePaddingHorizontal,
-            paddingVertical: titlePaddingVertical,
-          }}
+          style={[
+            {
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingHorizontal: titlePaddingHorizontal,
+              paddingVertical: titlePaddingVertical,
+            },
+            semantic?.header,
+          ]}
         >
           <View style={{ flex: 1, minWidth: 0 }}>
             {typeof title === 'string' || typeof title === 'number' ? (
@@ -88,24 +95,28 @@ export function CellGroup({
               title
             )}
           </View>
-          {typeof extra === 'string' || typeof extra === 'number' ? (
-            <Text
-              style={[
-                {
-                  color: token.extraColor,
-                  fontFamily: token.fontFamily,
-                  fontSize: token.extraFontSize,
-                  lineHeight: token.extraLineHeight,
-                  flexShrink: 1,
-                },
-                semantic?.extra,
-              ]}
-            >
-              {extra}
-            </Text>
-          ) : (
-            extra
-          )}
+          {isVisible(extra) ? (
+            <View style={[{ flexShrink: 0, marginLeft: token.iconGap }, semantic?.extraContainer]}>
+              {typeof extra === 'string' || typeof extra === 'number' ? (
+                <Text
+                  style={[
+                    {
+                      color: token.extraColor,
+                      fontFamily: token.fontFamily,
+                      fontSize: token.extraFontSize,
+                      lineHeight: token.extraLineHeight,
+                      flexShrink: 1,
+                    },
+                    semantic?.extra,
+                  ]}
+                >
+                  {extra}
+                </Text>
+              ) : (
+                extra
+              )}
+            </View>
+          ) : null}
         </View>
       ) : null}
 
@@ -125,12 +136,16 @@ export function CellGroup({
         {border && !inset ? (
           <>
             <Divider
+              accessible={false}
               color={token.groupBorderColor}
+              role="none"
               style={{ position: 'absolute', top: 0, left: 0, right: 0 }}
               thickness={token.groupBorderWidth}
             />
             <Divider
+              accessible={false}
               color={token.groupBorderColor}
+              role="none"
               style={{ position: 'absolute', bottom: 0, left: 0, right: 0 }}
               thickness={token.groupBorderWidth}
             />

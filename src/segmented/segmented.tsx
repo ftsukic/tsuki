@@ -110,36 +110,21 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
     () => getSegmentedStyles(themeToken, segmentedToken, resolvedBorderRadius, block, disabled),
     [block, disabled, resolvedBorderRadius, segmentedToken, themeToken],
   )
-  const segmentedProps = useMemo<SegmentedProps>(
-    () => ({
-      options,
-      value,
-      defaultValue,
-      onChange,
-      shape,
-      borderRadius,
-      size,
-      block,
-      disabled,
-      selectedTextColor,
-      style,
-      styles,
-    }),
-    [
-      block,
-      defaultValue,
-      disabled,
-      onChange,
-      options,
-      borderRadius,
-      selectedTextColor,
-      shape,
-      size,
-      style,
-      styles,
-      value,
-    ],
-  )
+  const segmentedProps: SegmentedProps = {
+    ...viewProps,
+    options,
+    value,
+    defaultValue,
+    onChange,
+    shape,
+    borderRadius,
+    size,
+    block,
+    disabled,
+    selectedTextColor,
+    style,
+    styles,
+  }
   const styleState: SegmentedStyleState = { block, disabled, shape, size, value: activeValue }
   const semanticStyles = resolveStyles(styles, { props: segmentedProps, state: styleState })
   const { fontSize: optionFontSize, ...optionLayoutStyles } = getOptionSizeStyles(buttonToken, size)
@@ -214,14 +199,15 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
               optionLayoutStyles.minHeight - buttonToken.borderWidth * 2,
             ),
           },
+          semanticStyles?.label,
           active ? { color: selectedTextColor ?? segmentedToken.selectedTextColor } : undefined,
           effectiveDisabled ? { color: segmentedToken.disabledColor } : undefined,
-          semanticStyles?.label,
         ]
 
         return (
           <Pressable
             key={`${String(option.value)}-${index}`}
+            accessibilityLabel={option.accessibilityLabel}
             accessibilityRole="radio"
             accessibilityState={{ disabled: effectiveDisabled, selected: active }}
             disabled={effectiveDisabled}

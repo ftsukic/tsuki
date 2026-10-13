@@ -2,6 +2,7 @@ import { FixtureOverview } from '../../fixture-overview'
 import SwitchBeforeChangeExample from './examples/before-change'
 import SwitchColorsExample from './examples/colors'
 import SwitchStatesExample from './examples/states'
+import SwitchSemanticExample from './examples/semantic'
 
 /**
  * @title Switch overview
@@ -11,6 +12,12 @@ export default function SwitchOverview() {
   return (
     <FixtureOverview
       examples={[
+        {
+          Component: SwitchSemanticExample,
+          description: 'Customize track and indicator geometry, state colors and loading layout.',
+          id: 'semantic',
+          title: 'Semantic styles',
+        },
         {
           Component: SwitchStatesExample,
           description: 'Compare the default, checked, disabled, loading and named size states.',

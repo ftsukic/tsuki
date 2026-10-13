@@ -4,7 +4,9 @@ import type { MotionConfig } from '../motion/types'
 
 export interface ProviderProps {
   children?: ReactNode
+  /** 初始化时选择手势根节点，挂载后固定。 */
   gesture?: boolean
+  /** 初始化时选择安全区根节点，挂载后固定。 */
   safeArea?: boolean
   theme?: ThemeConfig
   motion?: MotionConfig

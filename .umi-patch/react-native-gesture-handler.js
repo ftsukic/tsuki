@@ -10,12 +10,16 @@ function createGesture() {
     failOffsetX: () => gesture,
     failOffsetY: () => gesture,
     minDistance: () => gesture,
+    maxDistance: () => gesture,
+    cancelsTouchesInView: () => gesture,
     numberOfTaps: () => gesture,
     onBegin: () => gesture,
     onEnd: () => gesture,
     onFinalize: () => gesture,
     onStart: () => gesture,
     onUpdate: () => gesture,
+    onTouchesDown: () => gesture,
+    onTouchesMove: () => gesture,
   }
 
   return gesture
@@ -24,6 +28,7 @@ function createGesture() {
 export const Gesture = {
   Pan: createGesture,
   Tap: createGesture,
+  Simultaneous: createGesture,
 }
 
 export const GestureDetector = ({ children }) => children ?? null

@@ -67,46 +67,49 @@ export default function CheckboxFlashListFixture() {
   return (
     <View style={styles.container}>
       <Text>FlashList 1000 条</Text>
-      <FlashList
-        data={items}
-        extraData={selected}
-        keyExtractor={(item) => item.id}
-        ListHeaderComponent={
-          <Cell
-            title="全选"
-            label={`已选择 ${selectedCount} / ${selectableIds.length}`}
-            divider
-            clickable={selectableIds.length > 0}
-            disabled={selectableIds.length === 0}
-            onPress={toggleAll}
-            extra={
-              <Checkbox
-                checked={allChecked}
-                indeterminate={indeterminate}
-                disabled={selectableIds.length === 0}
-                pointerEvents="none"
-              />
-            }
-          />
-        }
-        renderItem={({ item, index }) => (
-          <Cell
-            title={item.name}
-            divider={index < items.length - 1}
-            disabled={item.disabled}
-            clickable={!item.disabled}
-            onPress={item.disabled ? undefined : () => toggle(item.id)}
-            extra={
-              <Checkbox
-                checked={selected.has(item.id)}
-                disabled={item.disabled}
-                pointerEvents="none"
-              />
-            }
-          />
-        )}
-        style={styles.list}
-      />
+      {/* Give FlashList a bounded viewport inside the overview ScrollView. */}
+      <View style={styles.listViewport}>
+        <FlashList
+          data={items}
+          extraData={selected}
+          keyExtractor={(item) => item.id}
+          ListHeaderComponent={
+            <Cell
+              title="全选"
+              description={`已选择 ${selectedCount} / ${selectableIds.length}`}
+              divider
+              clickable={selectableIds.length > 0}
+              disabled={selectableIds.length === 0}
+              onPress={toggleAll}
+              trailing={
+                <Checkbox
+                  checked={allChecked}
+                  indeterminate={indeterminate}
+                  disabled={selectableIds.length === 0}
+                  pointerEvents="none"
+                />
+              }
+            />
+          }
+          renderItem={({ item, index }) => (
+            <Cell
+              title={item.name}
+              divider={index < items.length - 1}
+              disabled={item.disabled}
+              clickable={!item.disabled}
+              onPress={item.disabled ? undefined : () => toggle(item.id)}
+              trailing={
+                <Checkbox
+                  checked={selected.has(item.id)}
+                  disabled={item.disabled}
+                  pointerEvents="none"
+                />
+              }
+            />
+          )}
+          style={styles.list}
+        />
+      </View>
     </View>
   )
 }
@@ -115,7 +118,11 @@ const styles = StyleSheet.create({
   container: {
     gap: 12,
   },
-  list: {
+  listViewport: {
     height: 360,
+    flexShrink: 0,
+  },
+  list: {
+    flex: 1,
   },
 })

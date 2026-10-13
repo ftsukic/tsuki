@@ -1,19 +1,21 @@
 import { forwardRef } from 'react'
-import { Pressable, StyleSheet } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 import type { ForwardedRef } from 'react'
-import type { View } from 'react-native'
-import type { ColorValue, StyleProp, ViewStyle } from 'react-native'
+import type { ColorValue, ViewStyle } from 'react-native'
 import type { AnimatedStyle } from 'react-native-reanimated'
 import { Animated } from '../motion'
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
-import type { OverlayProps } from './types'
+import type { OverlayProps, OverlaySemanticStyles } from './types'
 import { getOverlayToken } from './token'
 
 export interface OverlaySurfaceProps extends Omit<OverlayProps, 'duration' | 'onClosed'> {
   /** Internal mount state owned by the component that controls this surface. */
   rendered?: boolean
-  pressableStyle?: StyleProp<ViewStyle>
+  presentation?: {
+    resolvedStyle: ViewStyle
+    semantic?: OverlaySemanticStyles
+  }
   animatedStyle?: AnimatedStyle<ViewStyle>
 }
 
@@ -35,7 +37,7 @@ function renderSurface(
   backgroundColor: ColorValue,
   zIndex: number,
 ) {
-  const { show = false, children, onPress, pressableStyle, animatedStyle } = props
+  const { show = false, children, onPress, animatedStyle } = props
   const viewProps = { ...props }
   delete viewProps.show
   delete viewProps.backgroundColor
@@ -44,10 +46,11 @@ function renderSurface(
   delete viewProps.onPress
   delete viewProps.style
   delete viewProps.styles
-  delete viewProps.pressableStyle
+  delete viewProps.presentation
   delete viewProps.animatedStyle
   delete viewProps.rendered
-  const { resolvedStyle, semantic } = resolveSurfacePresentation(props, rendered)
+  const { resolvedStyle, semantic } =
+    props.presentation ?? resolveSurfacePresentation(props, rendered)
   const staticStyle = { ...resolvedStyle }
   delete staticStyle.opacity
 
@@ -59,16 +62,22 @@ function renderSurface(
       {...viewProps}
       collapsable={false}
       pointerEvents={show ? 'auto' : 'none'}
-      style={[StyleSheet.absoluteFill, { backgroundColor, zIndex }, staticStyle, animatedStyle]}
+      accessibilityElementsHidden={!show || props.accessibilityElementsHidden}
+      importantForAccessibility={!show ? 'no-hide-descendants' : props.importantForAccessibility}
+      style={[StyleSheet.absoluteFill, { zIndex }, staticStyle, animatedStyle]}
     >
       <Pressable
-        accessibilityElementsHidden={children == null ? true : undefined}
-        accessible={children == null ? false : undefined}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        accessible={false}
         onPress={onPress}
-        style={[StyleSheet.absoluteFill, pressableStyle, semantic?.content]}
-      >
-        {children}
-      </Pressable>
+        style={[StyleSheet.absoluteFill, { backgroundColor }, semantic?.mask]}
+      />
+      {children != null ? (
+        <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, semantic?.content]}>
+          {children}
+        </View>
+      ) : null}
     </Animated.View>
   )
 }

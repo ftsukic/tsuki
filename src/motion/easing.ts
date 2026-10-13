@@ -22,6 +22,7 @@ export const MOTION_EASING = {
   exit: easeIn,
   overlayEnter: Easing.out(Easing.ease),
   overlayExit: Easing.in(Easing.ease),
+  pickerSnap: Easing.bezier(0.23, 1, 0.68, 1),
   linear: (value: number) => {
     'worklet'
     return value

@@ -36,6 +36,7 @@ interface ResponderPanOptions {
   onStart?: ResponderPanCallback
   onChange?: ResponderPanCallback
   onEnd?: ResponderPanCallback
+  onCancel?: ResponderPanCallback
 }
 
 interface ResponderPanResult {
@@ -72,12 +73,14 @@ export function useResponderPanGesture({
   onStart,
   onChange,
   onEnd,
+  onCancel,
 }: ResponderPanOptions): ResponderPanResult {
   const enabledRef = useRef(enabled)
   const shouldActivateRef = useRef(shouldActivate)
   const onStartRef = useRef(onStart)
   const onChangeRef = useRef(onChange)
   const onEndRef = useRef(onEnd)
+  const onCancelRef = useRef(onCancel)
   const activeRef = useRef(false)
 
   enabledRef.current = enabled
@@ -85,6 +88,7 @@ export function useResponderPanGesture({
   onStartRef.current = onStart
   onChangeRef.current = onChange
   onEndRef.current = onEnd
+  onCancelRef.current = onCancel
 
   return useMemo(() => {
     const resolvedDistance = Number.isFinite(distance) ? Math.max(0, distance) : 2
@@ -119,7 +123,8 @@ export function useResponderPanGesture({
       onPanResponderTerminate: (_, gestureState) => {
         if (!activeRef.current) return
         activeRef.current = false
-        onEndRef.current?.(getResponderPanState(axis, gestureState))
+        const onCancel = onCancelRef.current ?? onEndRef.current
+        onCancel?.(getResponderPanState(axis, gestureState))
       },
       onPanResponderTerminationRequest: () => false,
     })

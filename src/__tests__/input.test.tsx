@@ -1,31 +1,218 @@
 import { ConfigProvider, Input, getDesignToken } from '..'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { useState, type ComponentProps, type ForwardedRef } from 'react'
-import { Platform, StyleSheet } from 'react-native'
+import { PixelRatio, Platform, StyleSheet, Text } from 'react-native'
 import { getInputStyles, getTextareaMetrics } from '../input/style'
 import { getInputToken } from '../input/token'
 import type { InputProps } from '../input'
 
 const mockTextInputFocus = jest.fn()
+let mockWebScrollHeight = 36
+const mockWebMeasurementStyle = { height: '' }
 
-jest.mock('../text-input', () => {
+jest.mock('react-native', () => {
   const React = jest.requireActual('react')
-  const actual = jest.requireActual('../text-input')
+  const actual = jest.requireActual('react-native')
   const MockTextInput = React.forwardRef(
     (props: Record<string, unknown>, ref: ForwardedRef<unknown>) => {
-      React.useImperativeHandle(ref, () => ({ focus: mockTextInputFocus, clear: jest.fn() }), [])
+      React.useImperativeHandle(
+        ref,
+        () => ({
+          focus: mockTextInputFocus,
+          clear: jest.fn(),
+          get scrollHeight() {
+            return mockWebScrollHeight
+          },
+          style: mockWebMeasurementStyle,
+        }),
+        [],
+      )
       return React.createElement(actual.TextInput, props)
     },
   )
   MockTextInput.displayName = 'MockTextInput'
 
-  return {
-    ...actual,
-    TextInput: MockTextInput,
-  }
+  return Object.defineProperty(Object.create(actual), 'TextInput', {
+    value: MockTextInput,
+  })
 })
 
 describe('Input', () => {
+  beforeEach(() => {
+    jest.spyOn(PixelRatio, 'getFontScale').mockReturnValue(1)
+  })
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+  it('keeps root layout separate and styles every custom affix region', async () => {
+    await render(
+      <Input
+        testID="semantic-input"
+        style={{ width: 200 }}
+        prefix={<Text>prefix node</Text>}
+        suffix={<Text>suffix node</Text>}
+        addonBefore={<Text>before node</Text>}
+        addonAfter={<Text>after node</Text>}
+        styles={{
+          container: { borderRadius: 13 },
+          prefix: { marginRight: 3 },
+          suffix: { marginLeft: 4 },
+          addonBefore: { marginRight: 5 },
+          addonAfter: { marginLeft: 6 },
+        }}
+      />,
+    )
+    for (const [text, key, expected] of [
+      ['prefix node', 'marginRight', 3],
+      ['suffix node', 'marginLeft', 4],
+      ['before node', 'marginRight', 5],
+      ['after node', 'marginLeft', 6],
+    ] as const) {
+      let region = screen.getByText(text).parent
+      while (region && StyleSheet.flatten(region.props.style)?.[key] !== expected)
+        region = region.parent
+      expect(region).toBeTruthy()
+    }
+    let root = screen.getByTestId('semantic-input').parent
+    while (root && StyleSheet.flatten(root.props.style)?.width !== 200) root = root.parent
+    expect(root).toBeTruthy()
+  })
+
+  it('shows the count in single-line mode', async () => {
+    await render(
+      <Input
+        defaultValue="abc"
+        maxLength={20}
+        showWordLimit
+        styles={{ count: { letterSpacing: 2 } }}
+      />,
+    )
+    expect(StyleSheet.flatten(screen.getByText('3/20').props.style).letterSpacing).toBe(2)
+  })
+
+  it.each(['web', 'ios', 'android'] as const)(
+    'preserves natural single-line text sizing on %s',
+    (os) => {
+      const previous = Platform.OS
+      Object.defineProperty(Platform, 'OS', { configurable: true, value: os })
+      try {
+        const token = getInputToken(getDesignToken())
+        const styles = getInputStyles(
+          token,
+          { size: 'normal' },
+          { focused: false, disabled: false },
+        )
+        const input = StyleSheet.flatten([styles.input, styles.singleInput])
+        expect(input.height).toBeUndefined()
+        expect(input.lineHeight).toBe(os === 'ios' ? undefined : token.lineHeight)
+        if (os === 'android') expect(input.includeFontPadding).toBe(false)
+      } finally {
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: previous })
+      }
+    },
+  )
+
+  it('uses custom multiline line height for autoSize row bounds', async () => {
+    await render(
+      <Input
+        testID="custom-metrics"
+        multiline
+        autoSize={{ minRows: 2, maxRows: 3 }}
+        styles={{ input: { fontSize: 24, lineHeight: 32 } }}
+      />,
+    )
+    expect(getInputStyle('custom-metrics')).toMatchObject({
+      height: 80,
+      minHeight: 80,
+      maxHeight: 112,
+      lineHeight: 32,
+    })
+  })
+
+  it('scales multiline row bounds and respects the font scale cap', async () => {
+    jest.spyOn(PixelRatio, 'getFontScale').mockReturnValue(2)
+    await render(
+      <Input
+        testID="scaled-rows"
+        multiline
+        autoSize={{ minRows: 2, maxRows: 3 }}
+        maxFontSizeMultiplier={1.5}
+      />,
+    )
+    expect(getInputStyle('scaled-rows')).toMatchObject({ minHeight: 76, maxHeight: 106 })
+  })
+
+  it('keeps focus border highlighting opt-in', () => {
+    const token = getInputToken(getDesignToken())
+    const state = { focused: true, disabled: false }
+    expect(getInputStyles(token, { bordered: true }, state).shell.borderColor).toBe(
+      token.borderColor,
+    )
+    expect(
+      getInputStyles(token, { bordered: true, focusedBordered: true }, state).shell.borderColor,
+    ).toBe(token.focusedBorderColor)
+  })
+
+  it('keeps single-line counts in the centered row without textarea offsets', () => {
+    const token = getInputToken(getDesignToken())
+    const state = { focused: false, disabled: false }
+    const single = getInputStyles(token, {}, state).wordLimit
+    expect(single).toMatchObject({ alignSelf: 'center', flexShrink: 0 })
+    expect(single).not.toHaveProperty('position')
+    expect(single).not.toHaveProperty('bottom')
+    expect(single).not.toHaveProperty('right')
+    expect(getInputStyles(token, { multiline: true }, state).wordLimit.position).toBe('absolute')
+  })
+
+  it('shares the actual visible input width with the hidden measurement input', async () => {
+    const onLayout = jest.fn()
+    await render(<Input testID="width-sync" multiline autoSize bordered onLayout={onLayout} />)
+    const event = { nativeEvent: { layout: { width: 213, height: 36, x: 16, y: 0 } } }
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(screen.getByTestId('width-sync'), 'layout', event)
+    const measureStyle = StyleSheet.flatten(getMeasurementInput('width-sync').props.style)
+    expect(measureStyle.width).toBe(213)
+    expect(measureStyle.right).toBeUndefined()
+    expect(onLayout).toHaveBeenCalledWith(event)
+  })
+
+  it('remeasures Web controlled values to grow and shrink without user events on the hidden node', async () => {
+    const previous = Platform.OS
+    Object.defineProperty(Platform, 'OS', { configurable: true, value: 'web' })
+    try {
+      mockWebScrollHeight = 36
+      const view = await render(<Input testID="web-measure" multiline autoSize value="x" />)
+      expect(getInputStyle('web-measure').height).toBe(36)
+      mockWebScrollHeight = 56
+      await view.rerender(<Input testID="web-measure" multiline autoSize value="long value" />)
+      expect(getInputStyle('web-measure').height).toBe(56)
+      mockWebScrollHeight = 36
+      await view.rerender(<Input testID="web-measure" multiline autoSize value="x" />)
+      expect(getInputStyle('web-measure').height).toBe(36)
+      expect(mockWebMeasurementStyle.height).toBe('0px')
+    } finally {
+      Object.defineProperty(Platform, 'OS', { configurable: true, value: previous })
+    }
+  })
+
+  it.each(['ios', 'android', 'web'] as const)(
+    'does not restrict native measurement to one line on %s',
+    async (os) => {
+      const previous = Platform.OS
+      Object.defineProperty(Platform, 'OS', { configurable: true, value: os })
+      try {
+        await render(
+          <Input testID="measurement-lines" multiline autoSize defaultValue="line one\nline two" />,
+        )
+        expect(getMeasurementInput('measurement-lines').props.numberOfLines).toBe(
+          os === 'web' ? 1 : undefined,
+        )
+      } finally {
+        Object.defineProperty(Platform, 'OS', { configurable: true, value: previous })
+      }
+    },
+  )
+
   it('does not expose the private embedded layout mode', () => {
     const inputPropsHasEmbedded: 'embedded' extends keyof InputProps ? true : false = false
     const inputComponentPropsHaveEmbedded: 'embedded' extends keyof ComponentProps<typeof Input>
@@ -240,7 +427,7 @@ describe('Input', () => {
       { focused: true, disabled: false },
     )
 
-    expect(defaultFocusedStyle.shell.borderColor).toBe(token.focusedBorderColor)
+    expect(defaultFocusedStyle.shell.borderColor).toBe(token.borderColor)
     expect(focusedStyle.shell).toMatchObject({
       borderColor: token.borderColor,
       borderWidth: token.borderWidth,
@@ -482,7 +669,7 @@ describe('Input', () => {
     expect(getInputStyle('clear-and-retype-auto-size').height).toBe(36)
 
     // eslint-disable-next-line testing-library/no-await-sync-events
-    await fireEvent(measurementInput, 'contentSizeChange', {
+    await fireEvent(getMeasurementInput('clear-and-retype-auto-size'), 'contentSizeChange', {
       nativeEvent: { contentSize: { width: 200, height: 40 } },
     })
     await waitFor(() => expect(getInputStyle('clear-and-retype-auto-size').height).toBe(40))
@@ -757,7 +944,7 @@ describe('Input', () => {
       />,
     )
 
-    const clearButton = screen.getByLabelText('清除输入')
+    const clearButton = screen.getByLabelText('清除输入', { includeHiddenElements: true })
     expect(clearButton.props.pointerEvents).toBe('none')
     expect(StyleSheet.flatten(clearButton.props.style)).toMatchObject({
       opacity: 0,
@@ -768,7 +955,7 @@ describe('Input', () => {
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent(screen.getByTestId('clear-input'), 'focus')
     // eslint-disable-next-line testing-library/no-await-sync-events
-    await fireEvent.press(screen.getByLabelText('清除输入'))
+    await fireEvent.press(screen.getByLabelText('清除输入', { includeHiddenElements: true }))
 
     expect(onClear).toHaveBeenCalledTimes(1)
     expect(onChangeText).toHaveBeenLastCalledWith('')
@@ -788,7 +975,7 @@ describe('Input', () => {
       />,
     )
 
-    const clearButton = screen.getByLabelText('清除输入')
+    const clearButton = screen.getByLabelText('清除输入', { includeHiddenElements: true })
     expect(clearButton.props.pointerEvents).toBe('auto')
     fireEvent.press(clearButton)
 
@@ -803,7 +990,7 @@ describe('Input', () => {
       <Input testID="hidden-clear-input" defaultValue="hello" clearable onClear={onClear} />,
     )
 
-    const clearButton = screen.getByLabelText('清除输入')
+    const clearButton = screen.getByLabelText('清除输入', { includeHiddenElements: true })
     expect(clearButton.props.pointerEvents).toBe('none')
     fireEvent.press(clearButton)
 
@@ -861,7 +1048,7 @@ describe('Input', () => {
       <Input testID="password-clear-input" type="password" defaultValue="secret" clearable />,
     )
 
-    const clearButton = screen.getByLabelText('清除输入')
+    const clearButton = screen.getByLabelText('清除输入', { includeHiddenElements: true })
     const eyeButton = screen.getByLabelText('显示密码')
     expect(clearButton.props.pointerEvents).toBe('none')
     expect(StyleSheet.flatten(clearButton.props.style)).toMatchObject({

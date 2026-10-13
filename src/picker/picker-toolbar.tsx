@@ -13,8 +13,13 @@ import { getPickerToken } from './token'
 export interface PickerToolbarSemanticStyles {
   root?: StyleProp<ViewStyle>
   title?: StyleProp<TextStyle>
+  titleContainer?: StyleProp<ViewStyle>
   item?: StyleProp<ViewStyle>
   itemContent?: StyleProp<TextStyle>
+  cancel?: StyleProp<ViewStyle>
+  cancelContent?: StyleProp<TextStyle>
+  confirm?: StyleProp<ViewStyle>
+  confirmContent?: StyleProp<TextStyle>
 }
 
 export type PickerToolbarStyles = StyleResolver<
@@ -37,7 +42,9 @@ export interface PickerToolbarProps {
 
 function renderContent(value: ReactNode, style: StyleProp<TextStyle>) {
   return typeof value === 'string' || typeof value === 'number' ? (
-    <Text style={style}>{value}</Text>
+    <Text numberOfLines={1} style={style}>
+      {value}
+    </Text>
   ) : (
     value
   )
@@ -89,16 +96,29 @@ export const PickerToolbar = forwardRef<View, PickerToolbarProps>(function Picke
         onPress={onCancel}
         pressStyle="opacity"
         pressedOpacity={token.picker_toolbar_button_pressed_opacity}
-        style={[resolved.toolbarButton, { alignItems: 'flex-start' }, semantic?.item]}
+        style={[
+          resolved.toolbarButton,
+          { alignItems: 'flex-start' },
+          semantic?.item,
+          semantic?.cancel,
+        ]}
         testID="picker-cancel"
       >
         {renderContent(cancelButtonText, [
           resolved.toolbarButtonLabel,
           { color: token.picker_cancel_button_color },
           semantic?.itemContent,
+          semantic?.cancelContent,
         ])}
       </Pressable>
-      <View style={[resolved.toolbarTitleContainer, { pointerEvents: 'none' }]}>
+      <View
+        style={[
+          resolved.toolbarTitleContainer,
+          semantic?.titleContainer,
+          { pointerEvents: 'none' },
+        ]}
+        testID="picker-toolbar-title"
+      >
         {renderContent(title, [resolved.toolbarTitle, semantic?.title])}
       </View>
       <Pressable
@@ -106,13 +126,19 @@ export const PickerToolbar = forwardRef<View, PickerToolbarProps>(function Picke
         onPress={onConfirm}
         pressStyle="opacity"
         pressedOpacity={token.picker_toolbar_button_pressed_opacity}
-        style={[resolved.toolbarButton, { alignItems: 'flex-end' }, semantic?.item]}
+        style={[
+          resolved.toolbarButton,
+          { alignItems: 'flex-end' },
+          semantic?.item,
+          semantic?.confirm,
+        ]}
         testID="picker-confirm"
       >
         {renderContent(confirmButtonText, [
           resolved.toolbarButtonLabel,
           { color: token.picker_confirm_button_color },
           semantic?.itemContent,
+          semantic?.confirmContent,
         ])}
       </Pressable>
     </View>

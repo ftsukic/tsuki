@@ -11,16 +11,6 @@ export interface ButtonResolvedStyles {
   iconColor: ColorValue
 }
 
-type ResolvedButtonShape = 'default' | 'round' | 'square' | 'circle'
-
-function resolveShape(props: ButtonProps): ResolvedButtonShape {
-  if (props.shape) return props.shape
-  if (props.circle) return 'circle'
-  if (props.square) return 'square'
-  if (props.round) return 'round'
-  return 'default'
-}
-
 function getSizeStyles(
   token: ButtonToken,
   themeToken: AliasToken,
@@ -140,7 +130,7 @@ export function getButtonStyles(
   state: ButtonStyleState,
 ): ButtonResolvedStyles {
   const size = getSizeStyles(token, themeToken, props.size ?? 'normal')
-  const shape = resolveShape(props)
+  const shape = props.shape ?? 'default'
   const isCircle = shape === 'circle'
   const semanticColors: readonly string[] = ['default', 'primary', 'success', 'warning', 'danger']
   const isSemanticColor = typeof props.color === 'string' && semanticColors.includes(props.color)
@@ -181,8 +171,6 @@ export function getButtonStyles(
     : props.hairline
       ? StyleSheet.hairlineWidth
       : token.borderWidth
-  const content = props.children
-  const hasContent = content !== undefined && content !== null
   const radius =
     shape === 'circle'
       ? size.height / 2
@@ -205,6 +193,7 @@ export function getButtonStyles(
       borderColor,
       backgroundColor,
       flexDirection: 'row',
+      columnGap: isCircle ? 0 : token.iconGap,
       alignItems: 'center',
       justifyContent: 'center',
       alignSelf: props.block && !isCircle ? 'stretch' : isText ? 'flex-start' : 'auto',
@@ -222,8 +211,6 @@ export function getButtonStyles(
       textAlign: 'center',
     },
     icon: {
-      marginRight: isCircle ? 0 : props.iconPosition === 'right' || !hasContent ? 0 : token.iconGap,
-      marginLeft: isCircle ? 0 : props.iconPosition === 'right' && hasContent ? token.iconGap : 0,
       alignItems: 'center',
       justifyContent: 'center',
     },

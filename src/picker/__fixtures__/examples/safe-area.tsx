@@ -25,7 +25,7 @@ export default function PickerSafeAreaExample() {
 
   return (
     <View style={styles.container}>
-      <Cell title="选择日期" value={value[0]} isLink onPress={handleOpen} />
+      <Cell title="选择日期" value={value[0]} showArrow onPress={handleOpen} />
       <Text>在 iOS Simulator 的 Home Indicator 设备上查看底部连续背景。</Text>
       <Popup
         visible={visible}

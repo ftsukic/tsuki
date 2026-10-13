@@ -8,14 +8,16 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
 } from 'react'
 import type { ReactElement, ReactNode } from 'react'
-import { ScrollView, StyleSheet, View } from 'react-native'
+import { I18nManager, Platform, ScrollView, StyleSheet, View } from 'react-native'
 import type {
   LayoutChangeEvent,
+  PressableProps,
   StyleProp,
   TextStyle,
   View as ViewComponent,
@@ -43,8 +45,12 @@ import { getTabsToken } from './token'
 interface NormalizedTab {
   element: ReactElement<TabProps>
   index: number
+  panelID: string
+  tabID: string
   value: TabsValue
 }
+
+type TabPressableProps = PressableProps & { 'aria-controls'?: string }
 
 interface TabLayout {
   width: number
@@ -88,6 +94,12 @@ function getTabValue(name: TabsValue | undefined, index: number): TabsValue {
   return name ?? index
 }
 
+function hasDuplicateTabValues(items: readonly NormalizedTab[]): boolean {
+  return items.some((item, index) =>
+    items.slice(0, index).some((previous) => Object.is(previous.value, item.value)),
+  )
+}
+
 function resolveInitialValue(
   items: readonly NormalizedTab[],
   defaultValue: TabsValue | undefined,
@@ -112,21 +124,29 @@ function renderTextContent(value: ReactNode, style?: StyleProp<TextStyle>) {
 }
 
 interface TabHeaderProps {
+  active: boolean
   item: NormalizedTab
   resolvedStyles: ReturnType<typeof getTabsStyles>
   semanticStyles: TabsSemanticStyles | undefined
   token: ReturnType<typeof getTabsToken>
   type: TabsType
   onLayout: (index: number, event: LayoutChangeEvent) => void
+  onFocusChange: (tabID: string, focused: boolean) => void
+  hasPanel: boolean
+  tabIndex?: 0 | -1
 }
 
 function TabHeader({
+  active,
   item,
   resolvedStyles,
   semanticStyles,
   token,
   type,
   onLayout,
+  onFocusChange,
+  hasPanel,
+  tabIndex,
 }: TabHeaderProps) {
   const context = useContext(TabsContext)
   if (!context) return null
@@ -137,15 +157,18 @@ function TabHeader({
     children,
     disabled = false,
     name,
+    nativeID,
+    onBlur: userOnBlur,
+    onFocus: userOnFocus,
     onLayout: userOnLayout,
     style,
+    tabIndex: userTabIndex,
     title,
     styles: itemStyles,
     ...pressableProps
   } = item.element.props
   void children
   void name
-  const active = context.isActive(item.value)
   const baseStyle = StyleSheet.flatten(resolvedStyles.tab) as ViewStyle
   const labelStyle = getTabStyles(
     token,
@@ -157,13 +180,27 @@ function TabHeader({
     },
     baseStyle,
   ).label
+  const accessibilityProps: TabPressableProps = {
+    nativeID: nativeID ?? item.tabID,
+    'aria-controls': Platform.OS === 'web' && hasPanel ? item.panelID : undefined,
+  }
 
   return (
     <Pressable
       {...pressableProps}
+      {...accessibilityProps}
       accessibilityRole={accessibilityRole ?? 'tab'}
       accessibilityState={{ ...accessibilityState, disabled, selected: active }}
+      tabIndex={userTabIndex ?? tabIndex}
       disabled={disabled}
+      onFocus={(event) => {
+        onFocusChange(item.tabID, true)
+        userOnFocus?.(event)
+      }}
+      onBlur={(event) => {
+        onFocusChange(item.tabID, false)
+        userOnBlur?.(event)
+      }}
       onLayout={(event) => {
         onLayout(item.index, event)
         userOnLayout?.(event)
@@ -204,6 +241,15 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
   },
   ref,
 ) {
+  const {
+    accessibilityHint: tabListAccessibilityHint,
+    accessibilityLabel: tabListAccessibilityLabel,
+    accessibilityLabelledBy: tabListAccessibilityLabelledBy,
+    'aria-label': tabListAriaLabel,
+    'aria-labelledby': tabListAriaLabelledBy,
+    ...rootViewProps
+  } = viewProps
+  const generatedID = `tabs-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`
   const { token: themeToken } = useToken()
   const token = useComponentToken('Tabs', getTabsToken)
   const tabElements = useMemo(() => Children.toArray(children).filter(isTabElement), [children])
@@ -212,10 +258,28 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
       tabElements.map((element, index) => ({
         element,
         index,
+        panelID: `${generatedID}-panel-${index}`,
+        tabID: element.props.nativeID ?? `${generatedID}-tab-${index}`,
         value: getTabValue(element.props.name, index),
       })),
-    [tabElements],
+    [generatedID, tabElements],
   )
+  const [focusedTabID, setFocusedTabID] = useState<string | null>(null)
+  const warnedDuplicateValuesRef = useRef(false)
+  const duplicateValues = useMemo(() => hasDuplicateTabValues(items), [items])
+  useEffect(() => {
+    if (!duplicateValues) {
+      warnedDuplicateValuesRef.current = false
+      return
+    }
+    if (warnedDuplicateValuesRef.current) return
+    if (typeof __DEV__ !== 'undefined' && __DEV__) {
+      console.error(
+        'Tabs requires each Tab to resolve to a unique name; unnamed Tabs use their index.',
+      )
+    }
+    warnedDuplicateValuesRef.current = true
+  }, [duplicateValues, items])
   const controlled = value !== undefined
   const [internalValue, setInternalValue] = useState<TabsValue | undefined>(() =>
     resolveInitialValue(items, defaultValue),
@@ -224,6 +288,16 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
   const initialResolutionDoneRef = useRef(internalValue !== undefined)
   const activeValue = controlled ? value : internalValue
   const activeIndex = items.findIndex((item) => Object.is(item.value, activeValue))
+  const firstEnabledIndex = items.findIndex((item) => !item.element.props.disabled)
+  const focusedTab = items.find(
+    (item) => item.tabID === focusedTabID && !item.element.props.disabled,
+  )
+  const activeTab = activeIndex >= 0 ? items[activeIndex] : undefined
+  const tabStopID =
+    focusedTab?.tabID ??
+    (activeTab && !activeTab.element.props.disabled ? activeTab.tabID : undefined) ??
+    items[firstEnabledIndex]?.tabID
+  const hasPaneContent = items.some((item) => hasContent(item.element.props.children))
   useEffect(() => {
     if (controlled) return
 
@@ -407,12 +481,55 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
 
   const contextValue = useMemo(
     () => ({
-      activeValue,
-      isActive: (nextValue: TabsValue) => Object.is(activeValue, nextValue),
       select: selectValue,
     }),
-    [activeValue, selectValue],
+    [selectValue],
   )
+
+  const handleTabFocusChange = useCallback((tabID: string, focused: boolean) => {
+    setFocusedTabID((current) => {
+      if (focused) return tabID
+      return current === tabID ? null : current
+    })
+  }, [])
+
+  const handleTabKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (Platform.OS !== 'web' || focusedTabID === null) return
+      const enabledItems = items.filter((item) => !item.element.props.disabled)
+      const currentIndex = enabledItems.findIndex((item) => item.tabID === focusedTabID)
+      if (currentIndex < 0 || enabledItems.length === 0) return
+
+      let nextIndex: number | undefined
+      if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+        event.preventDefault()
+        selectValue(enabledItems[currentIndex]!.value)
+        return
+      }
+      if (event.key === 'Home') nextIndex = 0
+      else if (event.key === 'End') nextIndex = enabledItems.length - 1
+      else if (event.key === 'ArrowRight') {
+        nextIndex =
+          (currentIndex + (I18nManager.isRTL ? -1 : 1) + enabledItems.length) % enabledItems.length
+      } else if (event.key === 'ArrowLeft') {
+        nextIndex =
+          (currentIndex + (I18nManager.isRTL ? 1 : -1) + enabledItems.length) % enabledItems.length
+      }
+      if (nextIndex === undefined) return
+
+      event.preventDefault()
+      const nextTab = enabledItems[nextIndex]
+      if (!nextTab) return
+      document.getElementById(nextTab.tabID)?.focus()
+    },
+    [focusedTabID, items, selectValue],
+  )
+
+  useEffect(() => {
+    if (Platform.OS !== 'web' || focusedTabID === null || typeof window === 'undefined') return
+    window.addEventListener('keydown', handleTabKeyDown)
+    return () => window.removeEventListener('keydown', handleTabKeyDown)
+  }, [focusedTabID, handleTabKeyDown])
 
   const indicator =
     type === 'line' && activeLayout && indicatorTarget !== undefined ? (
@@ -427,7 +544,19 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
     <TabHeader
       key={item.element.key ?? item.index}
       item={item}
+      active={item.index === activeIndex}
       onLayout={setTabLayout}
+      onFocusChange={handleTabFocusChange}
+      hasPanel={hasPaneContent}
+      tabIndex={
+        Platform.OS === 'web'
+          ? item.element.props.disabled
+            ? -1
+            : item.tabID === tabStopID
+              ? 0
+              : -1
+          : undefined
+      }
       resolvedStyles={resolvedStyles}
       semanticStyles={semanticStyles}
       token={token}
@@ -437,6 +566,12 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
 
   const navigation = (
     <View
+      accessibilityRole="tablist"
+      accessibilityHint={tabListAccessibilityHint}
+      accessibilityLabel={tabListAccessibilityLabel}
+      accessibilityLabelledBy={tabListAccessibilityLabelledBy}
+      aria-label={tabListAriaLabel}
+      aria-labelledby={tabListAriaLabelledBy}
       onLayout={handleNavLayout}
       style={[resolvedStyles.nav, semanticStyles?.header]}
       testID="tabs-nav"
@@ -462,7 +597,6 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
     </View>
   )
 
-  const hasPaneContent = items.some((item) => hasContent(item.element.props.children))
   const contentTestID =
     typeof viewProps.testID === 'string' ? `${viewProps.testID}-content` : undefined
   const content = hasPaneContent ? (
@@ -482,6 +616,10 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
       {items.map((item) => (
         <Swipe.Item
           key={item.element.key ?? item.index}
+          role="tabpanel"
+          nativeID={item.panelID}
+          accessibilityLabelledBy={item.tabID}
+          aria-labelledby={item.tabID}
           style={[semanticStyles?.content, item.element.props.styles?.content]}
         >
           {hasContent(item.element.props.children)
@@ -494,12 +632,7 @@ const TabsComponent = forwardRef<ViewComponent, TabsProps>(function Tabs(
 
   return (
     <TabsContext.Provider value={contextValue}>
-      <View
-        ref={ref}
-        {...viewProps}
-        accessibilityRole={viewProps.accessibilityRole ?? 'tablist'}
-        style={[resolvedStyles.root, semanticStyles?.root, style]}
-      >
+      <View ref={ref} {...rootViewProps} style={[resolvedStyles.root, semanticStyles?.root, style]}>
         {navigation}
         {content}
       </View>

@@ -9,6 +9,7 @@ export interface OverlayStyleState {
 
 export interface OverlaySemanticStyles {
   root?: StyleProp<ViewStyle>
+  mask?: StyleProp<ViewStyle>
   content?: StyleProp<ViewStyle>
 }
 

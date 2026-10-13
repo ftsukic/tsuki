@@ -2,8 +2,9 @@
 /* eslint testing-library/no-await-sync-events: "off" */
 import React from 'react'
 import { act, cleanup, fireEvent, render, screen, userEvent } from '@testing-library/react-native'
-import { Pressable, StyleSheet, Text } from 'react-native'
+import { Platform, Pressable, StyleSheet, Text } from 'react-native'
 import * as Reanimated from 'react-native-reanimated'
+import * as Worklets from 'react-native-worklets'
 import { State } from 'react-native-gesture-handler'
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils'
 import type { TestInstance } from 'test-renderer'
@@ -17,12 +18,13 @@ import {
   SwipeCellGroup,
   useSwipeCellController,
 } from '..'
+import SwipeCellWeChatFixture from '../swipe-cell/__fixtures__/examples/wechat'
 import { SwipeCellManager } from '../swipe-cell/manager'
 import type { SwipeCellRef } from '../swipe-cell'
 
 async function layoutAction(testID: string, side: 'left' | 'right', width: number) {
   await act(async () => {
-    screen.getByTestId(`${testID}-${side}-action`).props.onLayout({
+    screen.getByTestId(`${testID}-${side}-action`, { includeHiddenElements: true }).props.onLayout({
       nativeEvent: { layout: { width, height: 48, x: 0, y: 0 } },
     })
   })
@@ -47,7 +49,7 @@ function SwipeCellProvider({ children }: { children: React.ReactNode }) {
 }
 
 function getTranslation(testID: string) {
-  const style = StyleSheet.flatten(screen.getByTestId(`${testID}-content`).props.style)
+  const style = StyleSheet.flatten(screen.getByTestId(`${testID}-motion`).props.style)
   const transform = style.transform as Array<Record<string, unknown>>
   const value = transform.find((item) => 'translateX' in item)?.translateX
   if (value && typeof value === 'object' && '__getValue' in value) {
@@ -112,7 +114,15 @@ describe('SwipeCellManager', () => {
 })
 
 describe('SwipeCell', () => {
+  let scheduleOnUI: jest.SpyInstance
+  beforeEach(() => {
+    // Exercise UI worklets synchronously; these tests control animation completion explicitly.
+    scheduleOnUI = jest.spyOn(Worklets, 'scheduleOnUI').mockImplementation((worklet, ...args) => {
+      worklet(...args)
+    })
+  })
   afterEach(() => {
+    scheduleOnUI.mockRestore()
     cleanup()
   })
 
@@ -183,11 +193,14 @@ describe('SwipeCell', () => {
   })
 
   it('invokes action press handlers through SwipeCellAction', async () => {
+    const ref = React.createRef<SwipeCellRef>()
     const onPress = jest.fn()
     const user = userEvent.setup()
     await render(
       <TestProvider>
         <SwipeCell
+          ref={ref}
+          testID="custom-action"
           leftAction={
             <SwipeCellAction testID="action" onPress={onPress}>
               删除
@@ -199,6 +212,8 @@ describe('SwipeCell', () => {
       </TestProvider>,
     )
 
+    await layoutAction('custom-action', 'left', 100)
+    await act(async () => ref.current?.open('left'))
     await user.press(screen.getByText('删除'))
     expect(onPress).toHaveBeenCalledTimes(1)
   })
@@ -231,9 +246,11 @@ describe('SwipeCell', () => {
   })
 
   it('supports the WeChat-style actions shorthand and semantic action fields', async () => {
+    const ref = React.createRef<SwipeCellRef>()
     await render(
       <TestProvider>
         <SwipeCell
+          ref={ref}
           id="message-1"
           testID="actions-shorthand"
           actions={[{ text: '删除', color: 'danger' }]}
@@ -243,17 +260,21 @@ describe('SwipeCell', () => {
       </TestProvider>,
     )
 
+    await layoutAction('actions-shorthand', 'right', 100)
+    await act(async () => ref.current?.open())
     expect(screen.getByText('删除')).toBeTruthy()
     expect(screen.getByText('消息')).toBeTruthy()
   })
 
   it('renders multiple left actions and invokes each item handler', async () => {
+    const ref = React.createRef<SwipeCellRef>()
     const onPin = jest.fn()
     const onMore = jest.fn()
     const user = userEvent.setup()
     await render(
       <TestProvider>
         <SwipeCell
+          ref={ref}
           testID="multiple-left"
           leftActions={[
             { key: 'pin', label: '置顶', onPress: onPin },
@@ -266,7 +287,9 @@ describe('SwipeCell', () => {
     )
 
     await layoutAction('multiple-left', 'left', 160)
+    await act(async () => ref.current?.open('left'))
     await user.press(screen.getByText('置顶'))
+    await act(async () => ref.current?.open('left'))
     await user.press(screen.getByText('更多'))
 
     expect(onPin).toHaveBeenCalledTimes(1)
@@ -397,9 +420,100 @@ describe('SwipeCell', () => {
     expect(onClose).not.toHaveBeenCalled()
   })
 
+  it.each([
+    { side: 'left' as const, width: 140 },
+    { side: 'right' as const, width: 140 },
+    { side: 'left' as const, width: 50 },
+    { side: 'right' as const, width: 50 },
+  ])(
+    'preserves the active $side drag when action width becomes $width and settles against it',
+    async ({ side, width }) => {
+      const ref = React.createRef<SwipeCellRef>()
+      const onClose = jest.fn()
+      const direction = side === 'left' ? 1 : -1
+      jest.mocked(Reanimated.useAnimatedStyle).mockClear()
+      await render(
+        <TestProvider>
+          <SwipeCell
+            ref={ref}
+            testID="drag-layout"
+            leftAction="置顶"
+            rightAction="删除"
+            onClose={onClose}
+          >
+            <Text>内容</Text>
+          </SwipeCell>
+        </TestProvider>,
+      )
+      // Read the current motion value; the Jest animated-style mock does not repaint frames.
+      const contentStyle = jest.mocked(Reanimated.useAnimatedStyle).mock.calls[0]![0]
+      await layoutAction('drag-layout', side, 100)
+      await act(async () => ref.current?.open(side))
+      const pan = getByGestureTestId('drag-layout-gesture')
+      await act(async () => {
+        pan.handlers.onStart?.({} as never)
+        pan.handlers.onUpdate?.({ translationX: -direction * 30 } as never)
+      })
+      expect(contentStyle().transform).toEqual([{ translateX: direction * 70 }])
+      await layoutAction('drag-layout', side, width)
+      expect(contentStyle().transform).toEqual([{ translateX: direction * 70 }])
+      await act(async () => {
+        pan.handlers.onUpdate?.({ translationX: -direction * 40 } as never)
+      })
+      expect(contentStyle().transform).toEqual([{ translateX: direction * 60 }])
+      await act(async () => {
+        pan.handlers.onEnd?.({ translationX: -direction * 40, velocityX: 0 } as never, true)
+      })
+      // Release uses the latest width, even when it shrinks below the active offset.
+      const target = width === 140 ? 0 : direction * width
+      expect(contentStyle().transform).toEqual([{ translateX: target }])
+      expect(onClose).toHaveBeenCalledTimes(target === 0 ? 1 : 0)
+    },
+  )
+
+  it('uses the default 200ms transition for opening and closing', async () => {
+    const ref = React.createRef<SwipeCellRef>()
+    const finishes: Array<(finished?: boolean) => void> = []
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((target, _config, callback) => {
+        if (callback) finishes.push(callback)
+        return target as number
+      })
+    try {
+      await render(
+        <Provider>
+          <SwipeCell ref={ref} testID="default-duration" rightAction="删除" />
+        </Provider>,
+      )
+      await layoutAction('default-duration', 'right', 100)
+      await act(async () => ref.current?.open())
+      expect(timing).toHaveBeenCalledWith(
+        -100,
+        expect.objectContaining({ duration: 200 }),
+        expect.any(Function),
+      )
+      await act(async () => finishes[0]!(true))
+      timing.mockClear()
+      await act(async () => ref.current?.close())
+      expect(timing).toHaveBeenCalledWith(
+        0,
+        expect.objectContaining({ duration: 200 }),
+        expect.any(Function),
+      )
+      await act(async () => finishes[1]!(true))
+    } finally {
+      timing.mockRestore()
+    }
+  })
+
   it('restarts the opening spring when the action resizes', async () => {
     const springs: Array<(finished?: boolean) => void> = []
     jest.spyOn(Reanimated, 'withSpring').mockImplementation((_value, _config, callback) => {
+      if (callback) springs.push(callback)
+      return 0
+    })
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((_value, _config, callback) => {
       if (callback) springs.push(callback)
       return 0
     })
@@ -452,6 +566,10 @@ describe('SwipeCell', () => {
   it('does not reopen from a stale opening callback after the action is removed', async () => {
     const springs: Array<(finished?: boolean) => void> = []
     jest.spyOn(Reanimated, 'withSpring').mockImplementation((_value, _config, callback) => {
+      if (callback) springs.push(callback)
+      return 0
+    })
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((_value, _config, callback) => {
       if (callback) springs.push(callback)
       return 0
     })
@@ -563,7 +681,7 @@ describe('SwipeCell', () => {
     expect(secondOpen).toHaveBeenCalledTimes(1)
   })
 
-  it('closes an expanded cell from content touch without blocking its own press', async () => {
+  it('closes on a content tap, not touch start, without blocking its own press', async () => {
     const ref = React.createRef<SwipeCellRef>()
     const onPress = jest.fn()
     const onClose = jest.fn()
@@ -587,13 +705,412 @@ describe('SwipeCell', () => {
     await act(async () => ref.current?.open())
     const content = screen.getByTestId('content-close-content')
     await act(async () => content.props.onTouchStart({}))
+    expect(onClose).not.toHaveBeenCalled()
+    await act(async () => {
+      fireGestureHandler(getByGestureTestId('content-close-tap'), [
+        { state: State.BEGAN },
+        { state: State.END },
+      ])
+    })
     await user.press(screen.getByTestId('content-button'))
 
     expect(onPress).toHaveBeenCalledTimes(1)
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
+  it('keeps an expanded cell open on press start and hands its current offset to dragging', async () => {
+    const ref = React.createRef<SwipeCellRef>()
+    const onClose = jest.fn()
+    const onOpen = jest.fn()
+    await render(
+      <SwipeCellProvider>
+        <SwipeCell
+          ref={ref}
+          testID="resume-drag"
+          rightAction="删除"
+          onOpen={onOpen}
+          onClose={onClose}
+        >
+          <Cell testID="resume-child" title="内容" />
+        </SwipeCell>
+      </SwipeCellProvider>,
+    )
+    await layoutAction('resume-drag', 'right', 100)
+    await act(async () => ref.current?.open())
+    await fireEvent(screen.getByTestId('resume-child'), 'pressIn')
+    expect(onClose).not.toHaveBeenCalled()
+    await drag('resume-drag', 10)
+    expect(onClose).not.toHaveBeenCalled()
+    expect(onOpen).toHaveBeenCalledTimes(2)
+    await drag('resume-drag', 10, 700)
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it.each(['删除', '置顶'])(
+    'defers fixture action %s until reverse animation completes',
+    async (action) => {
+      const finishes: Array<{ target: number; finish: (finished?: boolean) => void }> = []
+      const timing = jest
+        .spyOn(Reanimated, 'withTiming')
+        .mockImplementation((target, _config, callback) => {
+          if (callback) finishes.push({ target: target as number, finish: callback })
+          return target as number
+        })
+      try {
+        await render(
+          <Provider>
+            <SwipeCellWeChatFixture />
+          </Provider>,
+        )
+        await layoutAction('wechat-team', 'right', 240)
+        await drag('wechat-team', -180)
+        await act(async () => finishes.find((entry) => entry.target === -240)!.finish(true))
+        await fireEvent(screen.getByRole('button', { name: action }), 'press')
+        expect(screen.getByTestId('wechat-team')).toBeTruthy()
+        expect(screen.getByText('项目讨论')).toBeTruthy()
+        expect(screen.getAllByText('删除', { includeHiddenElements: true })).toHaveLength(3)
+        expect(screen.queryByText('取消置顶', { includeHiddenElements: true })).toBeNull()
+        const closeAnimation = finishes.find((entry) => entry.target === 0)
+        expect(closeAnimation).toBeDefined()
+        await act(async () => closeAnimation!.finish(true))
+        if (action === '删除') {
+          expect(screen.queryByTestId('wechat-team')).toBeNull()
+          expect(screen.queryByText('项目讨论')).toBeNull()
+        } else {
+          expect(screen.getByTestId('wechat-team')).toBeTruthy()
+          expect(screen.getByText('取消置顶', { includeHiddenElements: true })).toBeTruthy()
+        }
+      } finally {
+        timing.mockRestore()
+      }
+    },
+  )
+
+  it.each(['content', 'outside', 'gesture', 'imperative'])(
+    'uses the same animated close lifecycle for %s',
+    async (source) => {
+      const ref = React.createRef<SwipeCellRef>()
+      const onClose = jest.fn()
+      const finishes: Array<(finished?: boolean) => void> = []
+      const timing = jest
+        .spyOn(Reanimated, 'withTiming')
+        .mockImplementation((target, _config, callback) => {
+          if (callback) finishes.push(callback)
+          return target as number
+        })
+      try {
+        await render(
+          <Provider theme={{ components: { SwipeCell: { animationDuration: 300 } } }}>
+            <SwipeCell ref={ref} testID="animated-source" rightAction="删除" onClose={onClose}>
+              <Text>主体</Text>
+            </SwipeCell>
+            <Cell testID="outside-source" title="其它 Cell" />
+          </Provider>,
+        )
+        await layoutAction('animated-source', 'right', 100)
+        await act(async () => ref.current?.open())
+        await act(async () => finishes[0](true))
+        timing.mockClear()
+        finishes.length = 0
+        if (source === 'content') {
+          await fireEvent(screen.getByTestId('animated-source-content'), 'press')
+        } else if (source === 'outside') {
+          await fireEvent(screen.getByTestId('outside-source'), 'pressIn')
+          await fireEvent(screen.getByTestId('outside-source'), 'pressIn')
+        } else if (source === 'gesture') {
+          await drag('animated-source', 80)
+        } else {
+          await act(async () => {
+            ref.current?.close()
+            ref.current?.close()
+          })
+        }
+        expect(timing).toHaveBeenCalledTimes(1)
+        expect(timing).toHaveBeenCalledWith(
+          0,
+          expect.objectContaining({ duration: 300 }),
+          expect.any(Function),
+        )
+        expect(onClose).not.toHaveBeenCalled()
+        expect(screen.getByText('删除', { includeHiddenElements: true })).toBeTruthy()
+        await act(async () => finishes[0](true))
+        expect(onClose).toHaveBeenCalledTimes(1)
+      } finally {
+        timing.mockRestore()
+      }
+    },
+  )
+
+  it.each(['pressIn first', 'touchStart first'])(
+    'shows native content feedback with %s and clears it on release',
+    async (order) => {
+      jest.useFakeTimers()
+      const pressedBackgroundColor = '#123456'
+      try {
+        await render(
+          <ConfigProvider theme={{ seed: { motion: false }, token: { pressedBackgroundColor } }}>
+            <SwipeCell testID="native-order">
+              <Cell title="内容" clickable testID="native-order-child" />
+            </SwipeCell>
+          </ConfigProvider>,
+        )
+        const content = screen.getByTestId('native-order-content')
+        const child = screen.getByTestId('native-order-child')
+        if (order === 'pressIn first') {
+          await fireEvent(child, 'pressIn')
+          await fireEvent(content, 'touchStart', {})
+        } else {
+          await fireEvent(content, 'touchStart', {})
+          await fireEvent(child, 'pressIn')
+        }
+        await act(async () => {
+          jest.advanceTimersByTime(80)
+        })
+        expect(StyleSheet.flatten(child.props.style).backgroundColor).toBe(pressedBackgroundColor)
+        await fireEvent(content, 'touchEnd', {})
+        expect(StyleSheet.flatten(child.props.style).backgroundColor).not.toBe(
+          pressedBackgroundColor,
+        )
+      } finally {
+        cleanup()
+        jest.useRealTimers()
+      }
+    },
+  )
+
+  it('shows feedback on successive Web mouse presses without touch events', async () => {
+    jest.useFakeTimers()
+    const platform = jest.replaceProperty(Platform, 'OS', 'web')
+    const pressedBackgroundColor = '#123456'
+    try {
+      await render(
+        <ConfigProvider theme={{ seed: { motion: false }, token: { pressedBackgroundColor } }}>
+          <SwipeCell>
+            <Cell title="内容" clickable testID="web-mouse-child" />
+          </SwipeCell>
+        </ConfigProvider>,
+      )
+      const child = screen.getByTestId('web-mouse-child')
+      for (let index = 0; index < 2; index += 1) {
+        await fireEvent(child, 'pressIn')
+        await act(async () => {
+          jest.advanceTimersByTime(80)
+        })
+        expect(StyleSheet.flatten(child.props.style).backgroundColor).toBe(pressedBackgroundColor)
+        await fireEvent(child, 'pressOut')
+        expect(StyleSheet.flatten(child.props.style).backgroundColor).not.toBe(
+          pressedBackgroundColor,
+        )
+      }
+    } finally {
+      cleanup()
+      platform.restore()
+      jest.useRealTimers()
+    }
+  })
+
+  it.each([
+    { axis: 'horizontal', hold: 0, x: 10, y: 0 },
+    { axis: 'vertical', hold: 0, x: 0, y: 10 },
+    { axis: 'horizontal', hold: 80, x: 10, y: 0 },
+    { axis: 'vertical', hold: 80, x: 0, y: 10 },
+  ])(
+    'cancels outer and nested press feedback on $axis movement after $hold ms',
+    async ({ hold, x, y }) => {
+      jest.useFakeTimers()
+      const onPressIn = jest.fn()
+      const pressedBackgroundColor = '#123456'
+      try {
+        await render(
+          <ConfigProvider theme={{ seed: { motion: false }, token: { pressedBackgroundColor } }}>
+            <SwipeCell testID="feedback-cell" rightAction="删除">
+              <Cell testID="feedback-child" title="内容" clickable onPressIn={onPressIn} />
+            </SwipeCell>
+          </ConfigProvider>,
+        )
+        const content = screen.getByTestId('feedback-cell-content')
+        const child = screen.getByTestId('feedback-child')
+        const tap = getByGestureTestId('feedback-cell-tap')
+        const touch = (absoluteX: number, absoluteY: number) => ({
+          allTouches: [{ absoluteX, absoluteY }],
+        })
+        await fireEvent(content, 'touchStart', {})
+        await fireEvent(content, 'pressIn')
+        await fireEvent(child, 'pressIn')
+        expect(onPressIn).toHaveBeenCalledTimes(1)
+        expect(StyleSheet.flatten(content.props.style).backgroundColor).not.toBe(
+          pressedBackgroundColor,
+        )
+        expect(StyleSheet.flatten(child.props.style).backgroundColor).not.toBe(
+          pressedBackgroundColor,
+        )
+        await act(async () => {
+          tap.handlers.onTouchesDown?.(touch(0, 0) as never, {} as never)
+          jest.advanceTimersByTime(hold)
+        })
+        if (hold === 80) {
+          expect(StyleSheet.flatten(content.props.style).backgroundColor).toBe(
+            pressedBackgroundColor,
+          )
+          expect(StyleSheet.flatten(child.props.style).backgroundColor).toBe(pressedBackgroundColor)
+        }
+        await act(async () => {
+          tap.handlers.onTouchesMove?.(touch(x, y) as never, {} as never)
+          jest.runAllTicks()
+        })
+        expect(StyleSheet.flatten(content.props.style).backgroundColor).not.toBe(
+          pressedBackgroundColor,
+        )
+        expect(StyleSheet.flatten(child.props.style).backgroundColor).not.toBe(
+          pressedBackgroundColor,
+        )
+        // A late native pressIn in the same cancelled touch must not restore feedback.
+        await fireEvent(child, 'pressIn')
+        await act(async () => {
+          jest.advanceTimersByTime(200)
+        })
+        expect(StyleSheet.flatten(child.props.style).backgroundColor).not.toBe(
+          pressedBackgroundColor,
+        )
+        await fireEvent(content, 'touchEnd', {})
+        await fireEvent(child, 'pressOut')
+        // A fresh stationary touch can show feedback again.
+        await fireEvent(content, 'touchStart', {})
+        await fireEvent(child, 'pressIn')
+        await act(async () => {
+          jest.advanceTimersByTime(80)
+        })
+        expect(StyleSheet.flatten(child.props.style).backgroundColor).toBe(pressedBackgroundColor)
+        await fireEvent(content, 'touchCancel', {})
+        expect(StyleSheet.flatten(child.props.style).backgroundColor).not.toBe(
+          pressedBackgroundColor,
+        )
+      } finally {
+        cleanup()
+        jest.useRealTimers()
+      }
+    },
+  )
+
+  it('preserves a quick content click without showing delayed feedback after release', async () => {
+    jest.useFakeTimers()
+    const onPress = jest.fn()
+    const onLongPress = jest.fn()
+    const pressedBackgroundColor = '#123456'
+    try {
+      await render(
+        <ConfigProvider theme={{ seed: { motion: false }, token: { pressedBackgroundColor } }}>
+          <SwipeCell testID="quick-feedback">
+            <Cell testID="quick-child" title="内容" onPress={onPress} onLongPress={onLongPress} />
+          </SwipeCell>
+        </ConfigProvider>,
+      )
+      const content = screen.getByTestId('quick-feedback-content')
+      const child = screen.getByTestId('quick-child')
+      await fireEvent(content, 'touchStart', {})
+      await fireEvent(child, 'pressIn')
+      await act(async () => {
+        jest.advanceTimersByTime(30)
+      })
+      await fireEvent(content, 'touchEnd', {})
+      await fireEvent(child, 'press')
+      await fireEvent(child, 'pressOut')
+      expect(onPress).toHaveBeenCalledTimes(1)
+      await act(async () => {
+        jest.advanceTimersByTime(100)
+      })
+      expect(StyleSheet.flatten(child.props.style).backgroundColor).not.toBe(pressedBackgroundColor)
+      await fireEvent(content, 'touchStart', {})
+      await fireEvent(child, 'pressIn')
+      await act(async () => {
+        jest.advanceTimersByTime(80)
+      })
+      await fireEvent(child, 'longPress')
+      expect(onLongPress).toHaveBeenCalledTimes(1)
+    } finally {
+      cleanup()
+      jest.useRealTimers()
+    }
+  })
+
+  it('clears feedback when the tap fails after moving without a move callback', async () => {
+    jest.useFakeTimers()
+    const pressedBackgroundColor = '#123456'
+    try {
+      await render(
+        <ConfigProvider theme={{ seed: { motion: false }, token: { pressedBackgroundColor } }}>
+          <SwipeCell testID="native-fail-feedback">
+            <Cell title="内容" clickable testID="native-fail-child" />
+          </SwipeCell>
+        </ConfigProvider>,
+      )
+      const content = screen.getByTestId('native-fail-feedback-content')
+      const child = screen.getByTestId('native-fail-child')
+      const tap = getByGestureTestId('native-fail-feedback-tap')
+      await fireEvent(content, 'touchStart', {})
+      await fireEvent(child, 'pressIn')
+      await act(async () => {
+        tap.handlers.onTouchesDown?.(
+          { allTouches: [{ absoluteX: 0, absoluteY: 0 }] } as never,
+          {} as never,
+        )
+        jest.advanceTimersByTime(80)
+      })
+      expect(StyleSheet.flatten(child.props.style).backgroundColor).toBe(pressedBackgroundColor)
+      await act(async () => {
+        tap.handlers.onFinalize?.({ absoluteX: 0, absoluteY: 10 } as never, false)
+        jest.runAllTicks()
+      })
+      expect(StyleSheet.flatten(child.props.style).backgroundColor).not.toBe(pressedBackgroundColor)
+    } finally {
+      cleanup()
+      jest.useRealTimers()
+    }
+  })
+
+  it('clears pending content feedback when disabled or unmounted', async () => {
+    jest.useFakeTimers()
+    const timer = jest.spyOn(global, 'setTimeout')
+    const cancelTimer = jest.spyOn(global, 'clearTimeout')
+    const pressedBackgroundColor = '#123456'
+    const renderCell = (disabled: boolean) => (
+      <ConfigProvider theme={{ seed: { motion: false }, token: { pressedBackgroundColor } }}>
+        <SwipeCell testID="cleanup-feedback">
+          <Cell title="内容" clickable disabled={disabled} testID="cleanup-child" />
+        </SwipeCell>
+      </ConfigProvider>
+    )
+    try {
+      const view = await render(renderCell(false))
+      await fireEvent(screen.getByTestId('cleanup-feedback-content'), 'touchStart', {})
+      await fireEvent(screen.getByTestId('cleanup-child'), 'pressIn')
+      await view.rerender(renderCell(true))
+      await act(async () => {
+        jest.advanceTimersByTime(100)
+      })
+      expect(
+        StyleSheet.flatten(screen.getByTestId('cleanup-child').props.style).backgroundColor,
+      ).not.toBe(pressedBackgroundColor)
+      await view.rerender(renderCell(false))
+      await fireEvent(screen.getByTestId('cleanup-feedback-content'), 'touchStart', {})
+      await fireEvent(screen.getByTestId('cleanup-child'), 'pressIn')
+      const pendingTimer = timer.mock.calls
+        .map((args, index) => ({ delay: args[1], id: timer.mock.results[index]?.value }))
+        .filter((entry) => entry.delay === 80)
+        .at(-1)?.id
+      expect(pendingTimer).toBeDefined()
+      await view.unmount()
+      expect(cancelTimer).toHaveBeenCalledWith(pendingTimer)
+    } finally {
+      cleanup()
+      timer.mockRestore()
+      cancelTimer.mockRestore()
+      jest.useRealTimers()
+    }
+  })
+
   it('shares Cell background feedback while keeping action overlay feedback separate', async () => {
+    const ref = React.createRef<SwipeCellRef>()
     const pressedBackgroundColor = '#123456'
     const pressedOverlayColor = '#654321'
     const view = await render(
@@ -604,7 +1121,7 @@ describe('SwipeCell', () => {
         }}
       >
         <Cell testID="pressed-cell" title="Cell" onPress={() => {}} testOnly_pressed />
-        <SwipeCell testID="pressed-content" rightAction="删除">
+        <SwipeCell ref={ref} testID="pressed-content" rightAction="删除">
           <Text>内容</Text>
         </SwipeCell>
       </ConfigProvider>,
@@ -614,11 +1131,11 @@ describe('SwipeCell', () => {
       backgroundColor: pressedBackgroundColor,
     })
 
-    const content = screen.getByTestId('pressed-content-pressable')
+    const content = screen.getByTestId('pressed-content-content')
     // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => {
-      fireEvent(content, 'pressIn')
-      await Promise.resolve()
+      await fireEvent(content, 'pressIn')
+      await new Promise((resolve) => setTimeout(resolve, 80))
     })
     expect(StyleSheet.flatten(content.props.style)).toMatchObject({
       backgroundColor: pressedBackgroundColor,
@@ -630,6 +1147,8 @@ describe('SwipeCell', () => {
       await Promise.resolve()
     })
 
+    await layoutAction('pressed-content', 'right', 100)
+    await act(async () => ref.current?.open())
     const action = screen.getByText('删除').parent
     if (!action) throw new Error('Expected SwipeCell action pressable')
     // eslint-disable-next-line testing-library/no-unnecessary-act
@@ -834,5 +1353,136 @@ describe('SwipeCell', () => {
     await fireEvent(screen.getByTestId('standalone-outside'), 'pressIn')
     expect(onOpen).toHaveBeenCalledTimes(2)
     expect(onClose).not.toHaveBeenCalled()
+  })
+
+  it('coordinates Group drags without a Provider', async () => {
+    const first = React.createRef<SwipeCellRef>()
+    const firstClose = jest.fn()
+    const secondOpen = jest.fn()
+    await render(
+      <TestProvider>
+        <SwipeCellGroup>
+          <SwipeCell ref={first} testID="group-first" rightAction="删除" onClose={firstClose} />
+          <SwipeCell testID="group-second" rightAction="更多" onOpen={secondOpen} />
+        </SwipeCellGroup>
+      </TestProvider>,
+    )
+    await layoutAction('group-first', 'right', 100)
+    await layoutAction('group-second', 'right', 100)
+    await act(async () => first.current?.open())
+    await drag('group-second', -80)
+    expect(firstClose).toHaveBeenCalledTimes(1)
+    expect(secondOpen).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('button', { name: '删除' })).toBeNull()
+    expect(screen.getByRole('button', { name: '更多' })).toBeTruthy()
+  })
+
+  it('only exposes the completed open side and preserves child button semantics', async () => {
+    const ref = React.createRef<SwipeCellRef>()
+    const onPress = jest.fn()
+    await render(
+      <TestProvider>
+        <SwipeCell ref={ref} testID="accessible-cell" leftAction="置顶" rightAction="删除">
+          <Text>普通内容</Text>
+          <Cell title="打开详情" onPress={onPress} />
+        </SwipeCell>
+      </TestProvider>,
+    )
+    await layoutAction('accessible-cell', 'left', 80)
+    await layoutAction('accessible-cell', 'right', 100)
+    expect(screen.queryByRole('button', { name: '普通内容' })).toBeNull()
+    expect(screen.queryByRole('button', { name: '删除' })).toBeNull()
+    expect(screen.queryByRole('button', { name: '置顶' })).toBeNull()
+    expect(screen.getByRole('button', { name: '打开详情' })).toBeTruthy()
+    expect(
+      screen.getByTestId('accessible-cell-left-action', { includeHiddenElements: true }).props
+        .pointerEvents,
+    ).toBe('none')
+    await act(async () => ref.current?.open('left'))
+    expect(screen.getByRole('button', { name: '置顶' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: '删除' })).toBeNull()
+    await act(async () => ref.current?.open('right'))
+    expect(screen.queryByRole('button', { name: '置顶' })).toBeNull()
+    expect(screen.getByRole('button', { name: '删除' })).toBeTruthy()
+    await userEvent.setup().press(screen.getByRole('button', { name: '打开详情' }))
+    expect(onPress).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('button', { name: '删除' })).toBeNull()
+  })
+
+  it('keeps content layout and transforms separate from motion', async () => {
+    await render(
+      <TestProvider>
+        <SwipeCell
+          testID="semantic-content"
+          style={{ borderRadius: 12 }}
+          styles={{
+            root: { borderRadius: 4 },
+            content: { padding: 16, transform: [{ scale: 0.9 }] },
+          }}
+        >
+          <Text>内容</Text>
+        </SwipeCell>
+      </TestProvider>,
+    )
+    expect(
+      StyleSheet.flatten(screen.getByTestId('semantic-content').props.style).borderRadius,
+    ).toBe(12)
+    expect(
+      StyleSheet.flatten(screen.getByTestId('semantic-content-content').props.style),
+    ).toMatchObject({
+      padding: 16,
+      transform: [{ scale: 0.9 }],
+    })
+    expect(StyleSheet.flatten(screen.getByTestId('semantic-content-motion').props.style)).toEqual({
+      transform: [{ translateX: 0 }],
+    })
+  })
+
+  it('does not emit animated close events for closed Group siblings or repeated closes', async () => {
+    const springs: Array<(finished?: boolean) => void> = []
+    jest.spyOn(Reanimated, 'withSpring').mockImplementation((_value, _config, callback) => {
+      if (callback) springs.push(callback)
+      return 0
+    })
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((_value, _config, callback) => {
+      if (callback) springs.push(callback)
+      return 0
+    })
+    const ref = React.createRef<SwipeCellRef>()
+    const onClose = jest.fn()
+    const siblingClose = jest.fn()
+    await render(
+      <ConfigProvider theme={{ seed: { motion: true } }}>
+        <SwipeCellGroup>
+          <SwipeCell ref={ref} testID="close-events" rightAction="删除" onClose={onClose} />
+          <SwipeCell rightAction="更多" onClose={siblingClose} />
+        </SwipeCellGroup>
+      </ConfigProvider>,
+    )
+    const finishLatest = async () => {
+      await act(async () => {
+        springs[springs.length - 1](true)
+        await Promise.resolve()
+      })
+    }
+    await layoutAction('close-events', 'right', 100)
+    await act(async () => ref.current?.close())
+    await finishLatest()
+    expect(onClose).not.toHaveBeenCalled()
+    await act(async () => ref.current?.open())
+    expect(screen.queryByRole('button', { name: '删除' })).toBeNull()
+    await act(async () => {
+      for (const finish of springs) finish(true)
+      await Promise.resolve()
+    })
+    expect(siblingClose).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: '删除' })).toBeTruthy()
+    await act(async () => ref.current?.close())
+    expect(screen.queryByRole('button', { name: '删除' })).toBeNull()
+    await finishLatest()
+    expect(onClose).toHaveBeenCalledTimes(1)
+    await act(async () => ref.current?.close())
+    await finishLatest()
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 })

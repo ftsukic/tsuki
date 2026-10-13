@@ -55,7 +55,7 @@ export default function CheckboxOverview() {
         },
         {
           Component: ThemeExample,
-          description: '通过 Checkbox component token 调整尺寸、圆角和选中颜色。',
+          description: '通过 token 定制主题，并通过 styles.label 调整自定义标签区域。',
           id: 'theme',
           title: '主题定制',
         },

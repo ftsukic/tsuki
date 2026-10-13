@@ -10,6 +10,7 @@ export interface PickerResolvedStyles {
   toolbarButtonLabel: TextStyle
   toolbarTitle: TextStyle
   toolbarTitleContainer: ViewStyle
+  body: ViewStyle
   view: ViewStyle
   columns: ViewStyle
   column: ViewStyle
@@ -50,7 +51,8 @@ export function getPickerStyles(
         : null),
     },
     toolbarButton: {
-      minWidth: token.picker_toolbar_height,
+      flex: 1,
+      minWidth: 0,
       height: token.picker_toolbar_height,
       alignSelf: 'stretch',
       alignItems: 'center',
@@ -72,15 +74,17 @@ export function getPickerStyles(
       textAlign: 'center',
     },
     toolbarTitleContainer: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
+      flex: 2,
+      minWidth: 0,
       alignItems: 'center',
+      overflow: 'hidden',
+    },
+    body: {
+      backgroundColor: token.picker_background_color,
     },
     view: {
       position: 'relative',
       height: viewHeight,
-      backgroundColor: token.picker_background_color,
       overflow: 'hidden',
     },
     columns: {

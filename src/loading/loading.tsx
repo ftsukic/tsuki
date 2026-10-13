@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { Fragment, isValidElement, memo } from 'react'
 import { View } from 'react-native'
 import type { ReactNode } from 'react'
 import type { ColorValue } from 'react-native'
@@ -9,6 +9,7 @@ import { LoadingIndicator } from './loading-indicator'
 import { getLoadingStyles } from './style'
 import { getLoadingToken } from './token'
 import type { LoadingProps } from './types'
+import { normalizeLoadingContent } from './content'
 
 function isPrimitiveText(value: ReactNode): value is string | number {
   return typeof value === 'string' || typeof value === 'number'
@@ -60,12 +61,12 @@ function LoadingComponent({
   const state = { type, vertical }
   const resolved = getLoadingStyles(token, resolvedProps, state)
   const semantic = resolveStyles(styles, { props: resolvedProps, state })
-  const hasText = children !== undefined && children !== null && children !== false
+  const content = normalizeLoadingContent(children)
 
   return (
     <View
       {...viewProps}
-      accessible
+      accessible={viewProps.accessible ?? true}
       accessibilityRole="progressbar"
       accessibilityState={{ ...viewProps.accessibilityState, busy: true }}
       style={[resolved.root, semantic?.root, style]}
@@ -79,12 +80,18 @@ function LoadingComponent({
           type={type}
         />
       </View>
-      {hasText ? (
-        isPrimitiveText(children) ? (
-          <Text style={[resolved.text, semantic?.text]}>{children}</Text>
-        ) : (
-          children
-        )
+      {content.length > 0 ? (
+        <View style={[resolved.content, semantic?.content]}>
+          {content.map((child, index) => (
+            <Fragment key={isValidElement(child) ? (child.key ?? index) : index}>
+              {isPrimitiveText(child) ? (
+                <Text style={[resolved.text, semantic?.text]}>{child}</Text>
+              ) : (
+                child
+              )}
+            </Fragment>
+          ))}
+        </View>
       ) : null}
     </View>
   )

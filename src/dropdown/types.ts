@@ -33,11 +33,14 @@ export interface DropdownPopupSemanticStyles {
   listItem?: StyleProp<ViewStyle>
   listItemLabel?: StyleProp<TextStyle>
   listItemIcon?: StyleProp<ViewStyle>
+  listItemSelectedIcon?: StyleProp<ViewStyle>
   mask?: StyleProp<ViewStyle>
 }
 
 export interface DropdownItemSemanticStyles {
   root?: StyleProp<ViewStyle>
+  title?: StyleProp<TextStyle>
+  arrow?: StyleProp<ViewStyle>
   popup?: DropdownPopupSemanticStyles
 }
 

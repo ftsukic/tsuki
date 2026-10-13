@@ -17,7 +17,7 @@ export default function PickerFieldExample() {
 
   return (
     <FieldPicker
-      label="城市"
+      description="城市"
       value={value}
       onChange={setValue}
       columns={options}

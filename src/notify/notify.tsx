@@ -39,7 +39,7 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
     children,
     message,
     type = 'primary',
-    color = '#ffffff',
+    color,
     backgroundColor,
     visible: visibleProp = true,
     duration = 0,
@@ -170,19 +170,16 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
   return (
     <View
       pointerEvents="box-none"
-      style={[
-        StyleSheet.absoluteFill,
-        { zIndex: themeToken.zIndexPopupBase },
-        semantic?.root,
-        style,
-      ]}
+      style={[StyleSheet.absoluteFill, { zIndex: themeToken.zIndexPopupBase }]}
     >
       <Animated.View
-        {...props}
         pointerEvents={visible ? 'auto' : 'none'}
+        accessibilityElementsHidden={!visible}
+        importantForAccessibility={visible ? 'auto' : 'no-hide-descendants'}
         style={[{ width: '100%' }, animatedStyle]}
       >
         <View
+          {...props}
           style={[
             {
               alignItems: 'center',
@@ -193,7 +190,8 @@ export const NotifyContent = forwardRef<NotifyMethods, NotifyProps>(function Not
               paddingHorizontal: token.paddingHorizontal,
               width: '100%',
             },
-            semantic?.container,
+            semantic?.root,
+            style,
           ]}
         >
           {typeof content === 'string' || typeof content === 'number' ? (

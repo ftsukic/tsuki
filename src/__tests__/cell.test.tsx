@@ -1,3 +1,5 @@
+import CellCompositionFixture from '../cell/__fixtures__/examples/composition'
+import { Fragment, useState } from 'react'
 import { Cell, ConfigProvider, getDesignToken, getCellToken } from '..'
 import { fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet, Text } from 'react-native'
@@ -164,7 +166,7 @@ describe('Cell', () => {
     expect(groupHairlineCount(cellNode(insetTree, 'inset-group'))).toBe(0)
   })
 
-  it('uses stretch for the default row and center for the center modifier', async () => {
+  it('uses top alignment for the default row and center for the center modifier', async () => {
     const view = await render(
       <ConfigProvider>
         <Cell testID="default" title="默认" />
@@ -181,15 +183,15 @@ describe('Cell', () => {
       (node) => nodeStyle(node).flexDirection === 'row',
     )
 
-    expect(nodeStyle(defaultRow).alignItems).toBe('stretch')
+    expect(nodeStyle(defaultRow).alignItems).toBe('flex-start')
     expect(nodeStyle(centerRow).alignItems).toBe('center')
   })
 
   it('uses Vant normal and large padding and typography tokens', async () => {
     const view = await render(
       <ConfigProvider>
-        <Cell testID="normal" title="普通" label="说明" />
-        <Cell testID="large" size="large" title="大号" label="说明" />
+        <Cell testID="normal" title="普通" description="说明" />
+        <Cell testID="large" size="large" title="大号" description="说明" />
       </ConfigProvider>,
     )
 
@@ -271,7 +273,7 @@ describe('Cell', () => {
   it('keeps the label spacing in title and label combinations', async () => {
     await render(
       <ConfigProvider>
-        <Cell title="标题" label="辅助说明" value="值" />
+        <Cell title="标题" description="辅助说明" value="值" />
       </ConfigProvider>,
     )
 
@@ -286,7 +288,7 @@ describe('Cell', () => {
       <Cell
         title="群管理员"
         value={<Text testID="value-node">林默</Text>}
-        extra={
+        trailing={
           <>
             <Text testID="extra-count">2/5 人</Text>
             <Text testID="extra-icon">›</Text>
@@ -307,7 +309,7 @@ describe('Cell', () => {
         titleExtra={<Text testID="title-extra">说明</Text>}
         value="值"
         valueExtra={<Text testID="value-extra">单位</Text>}
-        extra={<Text testID="extra">操作</Text>}
+        trailing={<Text testID="extra">操作</Text>}
       />,
     )
 
@@ -356,8 +358,8 @@ describe('Cell', () => {
         vertical
         title="标题"
         value="值"
-        extra={<Text testID="vertical-extra">操作</Text>}
-        isLink
+        trailing={<Text testID="vertical-extra">操作</Text>}
+        showArrow
       />,
     )
 
@@ -375,28 +377,28 @@ describe('Cell', () => {
     expect(screen.getByTestId('vertical-extra')).toBeTruthy()
   })
 
-  it('keeps extra at the top of a vertical row by default and centers it with center', async () => {
+  it('preserves trailing space in vertical mode and lets the row own alignment', async () => {
     const view = await render(
       <ConfigProvider>
-        <Cell testID="default-extra" vertical title="标题" value="这是一段多行值" extra="操作" />
+        <Cell testID="default-extra" vertical title="标题" value="这是一段多行值" trailing="操作" />
         <Cell
           testID="centered-extra"
           vertical
           center
           title="标题"
           value="这是一段多行值"
-          extra={<Text testID="centered-extra-node">操作</Text>}
+          trailing={<Text testID="centered-extra-node">操作</Text>}
         />
       </ConfigProvider>,
     )
 
     const defaultExtraContainer = findNode(
       cellNode(view.toJSON(), 'default-extra'),
-      (node) => nodeStyle(node).flexShrink === 1 && nodeStyle(node).marginLeft !== undefined,
+      (node) => nodeStyle(node).flexShrink === 0 && nodeStyle(node).marginLeft !== undefined,
     )
     const centeredExtraContainer = findNode(
       cellNode(view.toJSON(), 'centered-extra'),
-      (node) => nodeStyle(node).flexShrink === 1 && nodeStyle(node).marginLeft !== undefined,
+      (node) => nodeStyle(node).flexShrink === 0 && nodeStyle(node).marginLeft !== undefined,
     )
 
     expect(nodeStyle(defaultExtraContainer).justifyContent).toBe('center')
@@ -455,8 +457,8 @@ describe('Cell', () => {
   it('keeps value content top-aligned by default and centers it with center', async () => {
     const view = await render(
       <ConfigProvider>
-        <Cell testID="default" title="标题" label="辅助说明" value="值" />
-        <Cell testID="center" title="标题" label="辅助说明" value="值" center />
+        <Cell testID="default" title="标题" description="辅助说明" value="值" />
+        <Cell testID="center" title="标题" description="辅助说明" value="值" center />
       </ConfigProvider>,
     )
 
@@ -475,18 +477,18 @@ describe('Cell', () => {
 
   it('keeps the link suffix in the same line-height box as the cell text', () => {
     const token = getCellToken(getDesignToken())
-    const resolved = getCellStyles(token, { isLink: true }, { pressed: false, disabled: false })
+    const resolved = getCellStyles(token, { showArrow: true }, { pressed: false, disabled: false })
 
-    expect(resolved.suffix).toMatchObject({ height: token.lineHeight })
+    expect(resolved.arrow).toMatchObject({ height: token.lineHeight })
   })
 
   it('keeps the icon slot at its minimum size while allowing larger nodes to size it', () => {
     const token = getCellToken(getDesignToken())
     const resolved = getCellStyles(token, {}, { pressed: false, disabled: false })
 
-    expect(resolved.icon).not.toHaveProperty('width')
-    expect(resolved.icon).not.toHaveProperty('height')
-    expect(resolved.icon).toMatchObject({
+    expect(resolved.leading).not.toHaveProperty('width')
+    expect(resolved.leading).not.toHaveProperty('height')
+    expect(resolved.leading).toMatchObject({
       minWidth: token.iconSize,
       minHeight: token.lineHeight,
       marginRight: token.iconGap,
@@ -632,28 +634,28 @@ describe('Cell', () => {
     expect(cellDividerCount(cellNode(view.toJSON(), 'borderless'))).toBe(0)
   })
 
-  it('makes isLink clickable by default while allowing explicit clickable={false}', async () => {
+  it('keeps arrow display separate from feedback and preserves the default pressed background', async () => {
     await render(
       <ConfigProvider>
-        <Cell testID="link" title="链接" isLink />
-        <Cell testID="not-clickable" title="静态链接" isLink clickable={false} />
+        <Cell testID="link" title="链接" showArrow />
+        <Cell testID="not-clickable" title="静态链接" showArrow clickable={false} />
         <Cell testID="explicit-clickable" title="可点击" clickable />
       </ConfigProvider>,
     )
     const pressedBackgroundColor = getCellToken(getDesignToken()).pressedBackgroundColor
 
-    expect(screen.getByTestId('link').props.accessibilityRole).toBe('button')
+    expect(screen.getByTestId('link').props.accessibilityRole).toBeUndefined()
     expect(
       getCellStyles(
         getCellToken(getDesignToken()),
-        { isLink: true },
+        { showArrow: true },
         { pressed: true, disabled: false },
       ).root.backgroundColor,
     ).toBe(getCellToken(getDesignToken()).backgroundColor)
     expect(
       getCellStyles(
         getCellToken(getDesignToken()),
-        { isLink: true, clickable: false },
+        { showArrow: true, clickable: false },
         { pressed: true, disabled: false },
       ).root.backgroundColor,
     ).toBe(getCellToken(getDesignToken()).backgroundColor)
@@ -781,5 +783,242 @@ describe('Cell', () => {
       left: 16,
       right: 16,
     })
+    expect(divider.props).toMatchObject({ accessible: false, role: 'none' })
+  })
+  it('uses the same visibility rules for rendering and vertical spacing', async () => {
+    const view = await render(
+      <Cell
+        testID="empty-header"
+        vertical
+        title={null}
+        description={false}
+        titleExtra={false}
+        value={0}
+        styles={{ valueContainer: { borderRadius: 17 } }}
+      />,
+    )
+    expect(screen.getByText('0')).toBeTruthy()
+    const valueContainer = findNode(
+      cellNode(view.toJSON(), 'empty-header'),
+      (node) => nodeStyle(node).borderRadius === 17,
+    )
+    expect(nodeStyle(valueContainer).marginTop).toBeUndefined()
+  })
+
+  it('styles custom node containers without injecting text styles into the nodes', async () => {
+    const view = await render(
+      <Cell
+        testID="composition"
+        leading={
+          <Text testID="avatar" style={{ height: 48 }}>
+            Avatar
+          </Text>
+        }
+        title="姓名"
+        description="多行说明"
+        titleExtra={<Text testID="custom-title-extra">标签</Text>}
+        valueExtra={<Text testID="custom-value-extra">单位</Text>}
+        trailing={<Text testID="custom-trailing">操作</Text>}
+        styles={{
+          leading: { marginRight: 12 },
+          titleExtraContainer: { marginLeft: 13 },
+          valueExtraContainer: { marginLeft: 14 },
+          trailingContainer: { maxWidth: 80, flexShrink: 1 },
+          titleExtra: { color: '#ff0000' },
+          valueExtra: { color: '#ff0000' },
+          trailing: { color: '#ff0000' },
+        }}
+      />,
+    )
+    const cell = cellNode(view.toJSON(), 'composition')
+    expect(findNode(cell, (node) => nodeStyle(node).marginRight === 12)).toBeTruthy()
+    expect(findNode(cell, (node) => nodeStyle(node).marginLeft === 13)).toBeTruthy()
+    expect(findNode(cell, (node) => nodeStyle(node).marginLeft === 14)).toBeTruthy()
+    expect(nodeStyle(findNode(cell, (node) => nodeStyle(node).maxWidth === 80)).flexShrink).toBe(1)
+    expect(StyleSheet.flatten(screen.getByTestId('avatar').props.style)).toEqual({ height: 48 })
+    for (const id of ['custom-title-extra', 'custom-value-extra', 'custom-trailing']) {
+      expect(StyleSheet.flatten(screen.getByTestId(id).props.style)?.color).toBeUndefined()
+    }
+  })
+
+  it('exposes container padding independently of root styles', async () => {
+    const view = await render(
+      <Cell
+        testID="padding"
+        title="标题"
+        styles={{ root: { borderRadius: 8 }, container: { paddingHorizontal: 22 } }}
+        style={{ borderRadius: 9 }}
+      />,
+    )
+    const cell = cellNode(view.toJSON(), 'padding')
+    expect(nodeStyle(cell).borderRadius).toBe(9)
+    expect(
+      nodeStyle(findNode(cell, (node) => nodeStyle(node).paddingHorizontal === 22))
+        .paddingHorizontal,
+    ).toBe(22)
+  })
+
+  it('preserves explicit roles and derives feedback from callbacks instead of the arrow', async () => {
+    const onPress = jest.fn()
+    const onLongPress = jest.fn()
+    const view = await render(
+      <>
+        <Cell testID="arrow-only" showArrow testOnly_pressed />
+        <Cell testID="link-role" onPress={onPress} accessibilityRole="link" />
+        <Cell testID="long-press" onLongPress={onLongPress} testOnly_pressed />
+      </>,
+    )
+    expect(screen.getByTestId('link-role').props.accessibilityRole).toBe('link')
+    expect(nodeStyle(cellNode(view.toJSON(), 'arrow-only')).backgroundColor).toBe(
+      getCellToken(getDesignToken()).backgroundColor,
+    )
+    expect(nodeStyle(cellNode(view.toJSON(), 'long-press')).backgroundColor).toBe(
+      getCellToken(getDesignToken()).pressedBackgroundColor,
+    )
+    await press(screen.getByTestId('link-role'))
+    fireEvent(screen.getByTestId('long-press'), 'longPress')
+    expect(onPress).toHaveBeenCalledTimes(1)
+    expect(onLongPress).toHaveBeenCalledTimes(1)
+  })
+
+  it('lets function styles override pressed background and receives native props', async () => {
+    const view = await render(
+      <Cell
+        testID="custom-pressed"
+        accessibilityLabel="自定义"
+        onPress={() => {}}
+        testOnly_pressed
+        style={{ backgroundColor: '#ffffff' }}
+        styles={({ props, state }) => ({
+          root: {
+            backgroundColor:
+              state.pressed && props.accessibilityLabel === '自定义' ? '#123456' : '#654321',
+          },
+        })}
+      />,
+    )
+    expect(nodeStyle(cellNode(view.toJSON(), 'custom-pressed')).backgroundColor).toBe('#123456')
+  })
+
+  it('preserves state when keyed groups and fragments are inserted or reordered', async () => {
+    function StatefulCell({ id }: { id: string }) {
+      const [count, setCount] = useState(0)
+      return <Cell testID={id} title={`${id}:${count}`} onPress={() => setCount(count + 1)} />
+    }
+    const rows = (order: string[]) => (
+      <Cell.Group>
+        {order.map((id) => (
+          <Fragment key={id}>
+            <StatefulCell id={id} />
+          </Fragment>
+        ))}
+      </Cell.Group>
+    )
+    const view = await render(rows(['a', 'b']))
+    await press(screen.getByTestId('b'))
+    expect(screen.getByText('b:1')).toBeTruthy()
+    await view.rerender(rows(['c', 'b', 'a']))
+    expect(screen.getByText('b:1')).toBeTruthy()
+    expect(cellDividerCount(cellNode(view.toJSON(), 'b'))).toBe(1)
+    expect(cellDividerCount(cellNode(view.toJSON(), 'a'))).toBe(0)
+    await view.rerender(rows(['b']))
+    expect(screen.getByText('b:1')).toBeTruthy()
+    expect(cellDividerCount(cellNode(view.toJSON(), 'b'))).toBe(0)
+  })
+  it('toggles the composed selection through the whole Cell with one accessible checkbox', async () => {
+    await render(<CellCompositionFixture />)
+    expect(screen.getAllByRole('checkbox')).toHaveLength(1)
+    expect(
+      screen.getByRole('checkbox', { name: '选择万小安' }).props.accessibilityState.checked,
+    ).toBe(false)
+    await press(screen.getByText('选择人员'))
+    expect(screen.getByText('已选择')).toBeTruthy()
+    expect(
+      screen.getByRole('checkbox', { name: '选择万小安' }).props.accessibilityState.checked,
+    ).toBe(true)
+    await press(screen.getByRole('checkbox', { name: '选择万小安' }))
+    expect(screen.getByText('未选择')).toBeTruthy()
+  })
+  it('wraps primitive array and Fragment contents while preserving custom nodes', async () => {
+    await render(
+      <Cell
+        title={[
+          '姓名',
+          <Fragment key="nested">
+            {0}
+            <Text testID="custom-array-node" style={{ color: '#123456' }}>
+              自定义
+            </Text>
+          </Fragment>,
+        ]}
+        description={<Fragment>说明</Fragment>}
+        value={['值']}
+        titleLines={1}
+        valueLines={2}
+        styles={{ title: { color: '#ff0000' }, description: { color: '#00ff00' } }}
+      />,
+    )
+    expect(screen.getByText('姓名').props.numberOfLines).toBe(1)
+    expect(screen.getByText('0').props.numberOfLines).toBe(1)
+    expect(screen.getByText('值').props.numberOfLines).toBe(2)
+    expect(StyleSheet.flatten(screen.getByText('说明').props.style).color).toBe('#00ff00')
+    expect(StyleSheet.flatten(screen.getByTestId('custom-array-node').props.style).color).toBe(
+      '#123456',
+    )
+  })
+
+  it.each([
+    [],
+    [null, false],
+    <Fragment key="empty">
+      {null}
+      {false}
+    </Fragment>,
+  ])('omits empty nested regions and their vertical spacing %#', async (empty) => {
+    const view = await render(
+      <Cell
+        testID="empty-nested"
+        vertical
+        title={empty}
+        description={empty}
+        titleExtra={empty}
+        leading={empty}
+        trailing={empty}
+        value="内容"
+        styles={{ valueContainer: { borderRadius: 31 } }}
+      />,
+    )
+    const tree = cellNode(view.toJSON(), 'empty-nested')
+    expect(
+      nodeStyle(findNode(tree, (node) => nodeStyle(node).borderRadius === 31)).marginTop,
+    ).toBeUndefined()
+    expect(
+      findNodes(
+        tree,
+        (node) =>
+          nodeStyle(node).marginLeft !== undefined || nodeStyle(node).marginRight !== undefined,
+      ),
+    ).toHaveLength(0)
+  })
+
+  it('does not indent adjacent extensions when their main content is absent', async () => {
+    const view = await render(
+      <Cell
+        testID="extensions-only"
+        vertical
+        titleExtra="标题扩展"
+        valueExtra="值扩展"
+        styles={{
+          titleExtraContainer: { borderRadius: 32 },
+          valueExtraContainer: { borderRadius: 33 },
+        }}
+      />,
+    )
+    const tree = cellNode(view.toJSON(), 'extensions-only')
+    for (const radius of [32, 33]) {
+      expect(
+        nodeStyle(findNode(tree, (node) => nodeStyle(node).borderRadius === radius)).marginLeft,
+      ).toBeUndefined()
+    }
   })
 })

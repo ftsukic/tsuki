@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { Platform } from 'react-native'
+import { SwipeCellPressContext } from '../swipe-cell/context'
 import { useSwipeCellPress } from '../swipe-cell/useSwipeCellPress'
 import { usePressHandler } from './usePressHandler'
 import type { PressableProps, PressableState } from './types'
@@ -22,9 +23,19 @@ export function usePressable({
 }: PressableOptions) {
   const isDisabled = disabled === true
   const [active, setActive] = useState(false)
+  const feedbackOwner = useContext(SwipeCellPressContext)?.feedback
+  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [hovered, setHovered] = useState(false)
   const notifyPress = useSwipeCellPress()
-  const handlePress = usePressHandler({ disabled: isDisabled, onPress, onPressDebounceWait })
+  const notifyClick = useSwipeCellPress('press')
+  const handlePress = usePressHandler({
+    disabled: isDisabled,
+    onPress: (event) => {
+      notifyClick()
+      onPress?.(event)
+    },
+    onPressDebounceWait,
+  })
   const testOnlyPressed = props.testOnly_pressed === true
   const pressed = !isDisabled && (active || testOnlyPressed)
   const state: PressableState =
@@ -32,19 +43,41 @@ export function usePressable({
   const lastFeedback = useRef<{ pressed: boolean; callback: typeof onPressFeedbackChange } | null>(
     null,
   )
-  const notifyFeedback = (next: boolean) => {
-    const previous = lastFeedback.current
-    if (previous?.pressed === next && previous.callback === onPressFeedbackChange) return
-    lastFeedback.current = { pressed: next, callback: onPressFeedbackChange }
-    onPressFeedbackChange?.(next)
-  }
+  const notifyFeedback = useCallback(
+    (next: boolean) => {
+      const previous = lastFeedback.current
+      if (previous?.pressed === next && previous.callback === onPressFeedbackChange) return
+      lastFeedback.current = { pressed: next, callback: onPressFeedbackChange }
+      onPressFeedbackChange?.(next)
+    },
+    [onPressFeedbackChange],
+  )
+
+  const clearFeedbackTimer = useCallback(() => {
+    if (feedbackTimer.current !== null) {
+      clearTimeout(feedbackTimer.current)
+      feedbackTimer.current = null
+    }
+  }, [])
+  const cancelFeedback = useCallback(() => {
+    clearFeedbackTimer()
+    setActive(false)
+    notifyFeedback(!isDisabled && testOnlyPressed)
+  }, [clearFeedbackTimer, isDisabled, notifyFeedback, testOnlyPressed])
 
   useEffect(() => {
+    const unsubscribe = feedbackOwner?.subscribe(cancelFeedback)
+    return () => {
+      unsubscribe?.()
+      clearFeedbackTimer()
+    }
+  }, [feedbackOwner, cancelFeedback, clearFeedbackTimer])
+  useEffect(() => {
     if (isDisabled) {
-      setActive(false)
+      cancelFeedback()
       setHovered(false)
     }
-  }, [isDisabled])
+  }, [isDisabled, cancelFeedback])
   useEffect(() => {
     // Configuration and testOnly_pressed changes do not have a native press event.
     const previous = lastFeedback.current
@@ -56,15 +89,28 @@ export function usePressable({
 
   const handlePressIn: NonNullable<typeof props.onPressIn> = (event) => {
     if (!isDisabled) {
-      notifyFeedback(true)
-      setActive(true)
+      clearFeedbackTimer()
+      if (feedbackOwner) {
+        // Native responder grant can dispatch pressIn before touchStart bubbles.
+        feedbackOwner.begin()
+        const generation = feedbackOwner.generation
+        feedbackTimer.current = setTimeout(() => {
+          feedbackTimer.current = null
+          if (feedbackOwner.cancelled || feedbackOwner.generation !== generation) return
+          notifyFeedback(true)
+          setActive(true)
+        }, feedbackOwner.delay)
+      } else {
+        notifyFeedback(true)
+        setActive(true)
+      }
       notifyPress()
     }
     props.onPressIn?.(event)
   }
   const handlePressOut: NonNullable<typeof props.onPressOut> = (event) => {
-    notifyFeedback(!isDisabled && testOnlyPressed)
-    setActive(false)
+    if (Platform.OS === 'web') feedbackOwner?.end()
+    cancelFeedback()
     props.onPressOut?.(event)
   }
   const handleHoverIn: NonNullable<typeof props.onHoverIn> = (event) => {

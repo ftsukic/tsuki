@@ -1,7 +1,10 @@
+import { Fragment } from 'react'
+import { normalizeLoadingContent } from '../loading/content'
 import * as Reanimated from 'react-native-reanimated'
 import { StyleSheet, Text, View } from 'react-native'
 import { ConfigProvider, getDesignToken, getLoadingToken, Loading } from '..'
 import { render, screen } from '@testing-library/react-native'
+import type { ColorValue } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
 
 function findNode(
@@ -24,6 +27,112 @@ function renderWithoutMotion(children: React.ReactNode) {
 }
 
 describe('Loading', () => {
+  it('merges mixed text and nested fragments while preserving zero and custom nodes', async () => {
+    const custom = <Text testID="custom-content">自定义</Text>
+    const children = [
+      '加载 ',
+      <Fragment key="fragment">{[0, null, false, <Fragment key="nested"> 项</Fragment>]}</Fragment>,
+      custom,
+    ]
+    expect(normalizeLoadingContent(children)).toEqual(['加载 0 项', custom])
+    await renderWithoutMotion(<Loading>{children}</Loading>)
+    expect(screen.getByText('加载 0 项')).toBeTruthy()
+    expect(screen.getByTestId('custom-content')).toBeTruthy()
+  })
+
+  it('omits the content region for empty content but renders zero', async () => {
+    const styles = { content: { padding: 17 } }
+    const view = await renderWithoutMotion(
+      <Loading styles={styles}>{[null, false, true, '', <Fragment key="empty" />]}</Loading>,
+    )
+    expect(
+      findNode(view.toJSON(), (node) => StyleSheet.flatten(node.props.style)?.padding === 17),
+    ).toBeUndefined()
+    await view.rerender(
+      <ConfigProvider theme={{ seed: { motion: false } }}>
+        <Loading styles={styles}>{0}</Loading>
+      </ConfigProvider>,
+    )
+    expect(screen.getByText('0')).toBeTruthy()
+    expect(
+      findNode(view.toJSON(), (node) => StyleSheet.flatten(node.props.style)?.padding === 17),
+    ).toBeTruthy()
+  })
+
+  it('separates content spacing from text styling and respects style precedence', async () => {
+    const view = await renderWithoutMotion(
+      <Loading
+        vertical
+        testID="slots"
+        style={{ padding: 20 }}
+        styles={{
+          root: { padding: 10 },
+          content: { marginTop: 15 },
+          text: { marginTop: 3, fontWeight: '700' },
+        }}
+      >
+        文字
+        <View testID="custom-view" />
+      </Loading>,
+    )
+    expect(StyleSheet.flatten(screen.getByTestId('slots').props.style).padding).toBe(20)
+    expect(StyleSheet.flatten(screen.getByText('文字').props.style)).toMatchObject({
+      marginTop: 3,
+      fontWeight: '700',
+    })
+    expect(
+      findNode(view.toJSON(), (node) => StyleSheet.flatten(node.props.style)?.marginTop === 15),
+    ).toBeTruthy()
+    expect(screen.getByTestId('custom-view').props.style).toBeUndefined()
+  })
+
+  it('gives custom content the configured horizontal gap', async () => {
+    const view = await render(
+      <ConfigProvider theme={{ seed: { motion: false }, components: { Loading: { textGap: 13 } } }}>
+        <Loading>
+          <View testID="custom" />
+        </Loading>
+      </ConfigProvider>,
+    )
+    expect(
+      findNode(view.toJSON(), (node) => StyleSheet.flatten(node.props.style)?.marginLeft === 13),
+    ).toBeTruthy()
+  })
+
+  it('preserves native color objects for both indicators', async () => {
+    const color = { semantic: ['labelColor'] } as unknown as ColorValue
+    const view = await renderWithoutMotion(
+      <View>
+        <Loading color={color} />
+        <Loading color={color} type="spinner" />
+      </View>,
+    )
+    const circle = findNode(view.toJSON(), (node) => Boolean(node.props.strokeDasharray))
+    expect(circle?.props.stroke).toEqual({ type: 0, payload: color })
+    expect(
+      findNode(
+        view.toJSON(),
+        (node) => StyleSheet.flatten(node.props.style)?.backgroundColor === color,
+      ),
+    ).toBeTruthy()
+  })
+
+  it('respects explicit accessibility overrides while keeping its busy state', async () => {
+    await renderWithoutMotion(
+      <Loading
+        testID="decorative"
+        accessible={false}
+        accessibilityLabel="同步"
+        accessibilityState={{ disabled: true, busy: false }}
+      />,
+    )
+    expect(screen.getByTestId('decorative').props).toMatchObject({
+      accessible: false,
+      accessibilityLabel: '同步',
+      accessibilityState: { disabled: true, busy: true },
+    })
+  })
+
   it('keeps the default rotation period independent from the slow motion token', () => {
     const themeToken = getDesignToken()
 

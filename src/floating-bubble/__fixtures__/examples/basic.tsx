@@ -16,7 +16,7 @@ export default function FloatingBubbleBasicExample() {
       <Text style={styles.message}>{message}</Text>
       <FloatingBubble
         accessibilityLabel="打开客服"
-        icon={<Icon name="CustomerServiceOutlined" size={24} color="#ffffff" />}
+        icon={<Icon name="CustomerServiceOutlined" />}
         onPress={() => setMessage('已点击客服气泡')}
       />
     </View>

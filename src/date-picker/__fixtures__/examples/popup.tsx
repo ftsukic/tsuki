@@ -14,7 +14,7 @@ export default function DatePickerPopupExample() {
   const handleCancel = () => setVisible(false)
   return (
     <>
-      <Cell title="日期" value={value.join('-')} isLink onPress={handleOpen} />
+      <Cell title="日期" value={value.join('-')} showArrow onPress={handleOpen} />
       <Popup
         visible={visible}
         position="bottom"

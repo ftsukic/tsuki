@@ -9,7 +9,7 @@ export default function LayoutWrapFixture() {
   return (
     <Row gutter={[16, 10]}>
       {[1, 2, 3].map((value) => (
-        <Col key={value} span={16} style={styles.col}>
+        <Col key={value} span={16} styles={{ content: styles.col }}>
           <Text style={styles.text}>row item {value}</Text>
         </Col>
       ))}

@@ -1,7 +1,7 @@
 import { overlayAnimation } from '../motion/presets'
 import { forwardRef, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { StyleSheet } from 'react-native'
-import type { View, StyleProp, ViewStyle } from 'react-native'
+import type { View } from 'react-native'
 import { useAnimatedTransition } from '../motion/useAnimatedTransition'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
@@ -9,12 +9,8 @@ import type { OverlayProps } from './types'
 import { getOverlayToken } from './token'
 import { OverlaySurface } from './overlay-surface'
 
-export interface OverlayAnimatedSurfaceProps extends OverlayProps {
-  pressableStyle?: StyleProp<ViewStyle>
-}
-
 /** Owns the default fade and mount/unmount lifecycle for an overlay surface. */
-export const OverlayAnimatedSurface = forwardRef<View, OverlayAnimatedSurfaceProps>(
+export const OverlayAnimatedSurface = forwardRef<View, OverlayProps>(
   function OverlayAnimatedSurface(props, ref) {
     const { token: themeToken } = useToken()
     const token = useComponentToken('Overlay', getOverlayToken)
@@ -84,6 +80,7 @@ export const OverlayAnimatedSurface = forwardRef<View, OverlayAnimatedSurfacePro
         show={show}
         rendered={rendered}
         animatedStyle={animatedStyle}
+        presentation={{ resolvedStyle, semantic }}
       />
     )
   },

@@ -9,7 +9,7 @@ export default function LayoutVerticalGutterFixture() {
   return (
     <Row gutter={[16, 8]}>
       {[1, 2, 3, 4].map((value) => (
-        <Col key={value} span={12} style={styles.col}>
+        <Col key={value} span={12} styles={{ content: styles.col }}>
           <Text style={styles.text}>item {value}</Text>
         </Col>
       ))}

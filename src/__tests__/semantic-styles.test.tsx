@@ -36,12 +36,16 @@ describe('semantic style contracts', () => {
     expect(tagText).toMatchObject({ letterSpacing: 3, fontSize: expect.any(Number) })
   })
 
-  it('applies the input root to its shell while keeping native text styling separate', async () => {
+  it('separates the input root and container from native text styling', async () => {
     await render(
       <Input
         testID="input"
         style={{ borderRadius: 17 }}
-        styles={{ root: { borderRadius: 9 }, input: { letterSpacing: 4 } }}
+        styles={{
+          root: { borderRadius: 9 },
+          container: { borderRadius: 11 },
+          input: { letterSpacing: 4 },
+        }}
       />,
     )
     const nativeInput = screen.getByTestId('input')
@@ -59,7 +63,7 @@ describe('semantic style contracts', () => {
         title="姓名"
         testID="field-input"
         value="Tsuki"
-        styles={{ label: { letterSpacing: 2 }, content: { borderRadius: 9 } }}
+        styles={{ title: { letterSpacing: 2 }, control: { borderRadius: 9 } }}
         inputProps={{ style: { borderRadius: 17 }, styles: { input: { letterSpacing: 4 } } }}
       />,
     )
@@ -97,8 +101,7 @@ describe('semantic style contracts', () => {
             visible
             message="通知"
             styles={{
-              root: { opacity: 0.9 },
-              container: { borderRadius: 11 },
+              root: { opacity: 0.9, borderRadius: 11 },
               content: { letterSpacing: 2 },
             }}
           />
@@ -111,8 +114,6 @@ describe('semantic style contracts', () => {
     while (container && StyleSheet.flatten(container.props.style)?.borderRadius !== 11)
       container = container.parent
     expect(container).toBeTruthy()
-    let root = container?.parent
-    while (root && StyleSheet.flatten(root.props.style)?.opacity !== 0.9) root = root.parent
-    expect(root).toBeTruthy()
+    expect(StyleSheet.flatten(container?.props.style).opacity).toBe(0.9)
   })
 })

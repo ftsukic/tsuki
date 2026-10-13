@@ -1,23 +1,28 @@
 import { View } from 'react-native'
-import { useRow } from './context'
+import { resolveStyles } from '../style/resolve-styles'
+import RowContext, { emptyRowSpace, useRow } from './context'
 import { normalizeOffset, normalizeSpan } from './normalize'
 import type { ColProps } from './types'
 
-export function Col({ offset = 0, span = 24, style, ...restProps }: ColProps) {
-  const { spaces } = useRow()
-  const space = spaces[0]
-  const normalizedOffset = normalizeOffset(offset)
-  const normalizedSpan = normalizeSpan(span)
+export function Col(props: ColProps) {
+  const { offset = 0, span = 24, style, styles, children, onLayout, ...restProps } = props
+  const row = useRow()
+  const space = row.spaces[0]
+  const semanticStyles = resolveStyles(styles, { props, state: {} })
 
   return (
     <View
       {...restProps}
+      onLayout={(event) => {
+        row.onLayout?.(event.nativeEvent.layout)
+        onLayout?.(event)
+      }}
       style={[
         {
-          flexBasis: `${(normalizedSpan / 24) * 100}%`,
+          flexBasis: `${(normalizeSpan(span) / 24) * 100}%`,
           flexGrow: 0,
           flexShrink: 0,
-          marginLeft: `${(normalizedOffset / 24) * 100}%`,
+          marginLeft: `${(normalizeOffset(offset) / 24) * 100}%`,
           paddingBottom: space?.bottom ?? 0,
           paddingLeft: space?.left ?? 0,
           paddingRight: space?.right ?? 0,
@@ -25,6 +30,14 @@ export function Col({ offset = 0, span = 24, style, ...restProps }: ColProps) {
         },
         style,
       ]}
-    />
+    >
+      <RowContext.Provider value={{ spaces: [emptyRowSpace] }}>
+        {styles === undefined ? (
+          children
+        ) : (
+          <View style={[{ flexGrow: 1, flexShrink: 1 }, semanticStyles?.content]}>{children}</View>
+        )}
+      </RowContext.Provider>
+    </View>
   )
 }

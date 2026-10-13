@@ -5,6 +5,7 @@ import type { DimensionValue, LayoutChangeEvent, StyleProp, TextStyle } from 're
 import { Text } from '../text'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
+import { useMotionConfig } from '../motion/useMotionConfig'
 import { ProgressCircle } from './progress-circle'
 import type { ProgressProps } from './types'
 import { getProgressStyles } from './style'
@@ -44,6 +45,7 @@ function ProgressComponent({
 }: ProgressProps) {
   const { token: themeToken } = useToken()
   const token = useComponentToken('Progress', getProgressToken)
+  const motion = useMotionConfig()
   const normalizedPercentage = normalizePercentage(percentage)
   const resolvedSize = resolvePositiveNumber(size, token.progress_circle_size)
   const resolvedStrokeWidth = resolvePositiveNumber(
@@ -55,6 +57,7 @@ function ProgressComponent({
   const [animatedPercentage, setAnimatedPercentage] = useState(normalizedPercentage)
   const resolvedPivotText = pivotText ?? `${normalizedPercentage}%`
   const [pivotWidth, setPivotWidth] = useState<number>()
+  const [railWidth, setRailWidth] = useState<number>()
   const resolvedProps: ProgressProps = {
     ...viewProps,
     color,
@@ -77,7 +80,7 @@ function ProgressComponent({
     { ...resolvedProps, size: resolvedSize, strokeWidth: resolvedStrokeWidth },
     state,
   )
-  const animationDuration = themeToken.motion ? token.progress_animation_duration : 0
+  const animationDuration = motion.duration(token.progress_animation_duration)
 
   useEffect(() => {
     const listenerId = progress.addListener(({ value }) => {
@@ -123,6 +126,12 @@ function ProgressComponent({
     setPivotWidth((current) => (current === width ? current : width))
   }
 
+  const handleRailLayout = (event: LayoutChangeEvent) => {
+    const width = event.nativeEvent.layout.width
+    if (!Number.isFinite(width) || width < 0) return
+    setRailWidth((current) => (current === width ? current : width))
+  }
+
   if (type === 'circle') {
     return (
       <View
@@ -135,6 +144,7 @@ function ProgressComponent({
         <ProgressCircle
           circleStyle={[resolved.circle, semantic?.body]}
           color={color ?? token.progress_color}
+          labelContainerStyle={semantic?.indicatorContainer}
           labelStyle={[resolved.circleLabel, semantic?.indicator]}
           percentage={animatedPercentage}
           pivotText={pivotText}
@@ -149,7 +159,13 @@ function ProgressComponent({
   }
 
   const portionWidth: DimensionValue = `${animatedPercentage}%`
-  const pivotLeft: DimensionValue = `${animatedPercentage}%`
+  const pivotLeft: DimensionValue =
+    railWidth === undefined || pivotWidth === undefined
+      ? `${animatedPercentage}%`
+      : Math.max(
+          0,
+          Math.min(railWidth - pivotWidth, (railWidth * animatedPercentage) / 100 - pivotWidth / 2),
+        )
 
   return (
     <View
@@ -159,7 +175,7 @@ function ProgressComponent({
       accessibilityValue={accessibilityValue}
       style={[resolved.root, semantic?.root, style]}
     >
-      <View style={[resolved.track, semantic?.rail]}>
+      <View onLayout={handleRailLayout} style={[resolved.track, semantic?.rail]}>
         <View style={[resolved.portion, semantic?.track, { width: portionWidth }]} />
         {showPivot ? (
           <View
@@ -167,11 +183,16 @@ function ProgressComponent({
             pointerEvents="none"
             style={[
               resolved.pivot,
-              {
-                left: pivotLeft,
-                transform: pivotWidth === undefined ? undefined : [{ translateX: -pivotWidth / 2 }],
-              },
               semantic?.indicatorContainer,
+              {
+                position: 'absolute',
+                top: resolved.pivot.top,
+                left: pivotLeft,
+                transform:
+                  railWidth === undefined && pivotWidth !== undefined
+                    ? [{ translateX: (-pivotWidth * animatedPercentage) / 100 }]
+                    : undefined,
+              },
             ]}
           >
             {renderPivot(resolvedPivotText, [

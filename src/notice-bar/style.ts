@@ -6,6 +6,7 @@ export type NoticeBarItemMode = 'measure' | 'scroll' | 'ellipsis' | 'wrap'
 export interface NoticeBarResolvedStyles {
   root: ViewStyle
   contentRoot: ViewStyle
+  content: ViewStyle
   leftIcon: ViewStyle
   wrap: ViewStyle
   rightIcon: ViewStyle
@@ -50,6 +51,10 @@ export function getNoticeBarStyles(
       flexDirection: 'row',
       minWidth: 0,
       ...(wrapable ? {} : { height }),
+    },
+    content: {
+      flex: 1,
+      minWidth: 0,
     },
     leftIcon: {
       alignItems: 'center',

@@ -13,9 +13,13 @@ export interface SwitchStyleState {
 }
 
 export interface SwitchSemanticStyles {
+  /** Interaction root and external layout; style takes precedence. */
   root?: StyleProp<ViewStyle>
+  /** Track geometry and appearance; backgroundColor overrides animated colors. */
   track?: StyleProp<ViewStyle>
+  /** Movable thumb; its transform is composed after the component translation. */
   indicator?: StyleProp<ViewStyle>
+  /** Loading container inside the indicator. */
   loading?: StyleProp<ViewStyle>
 }
 

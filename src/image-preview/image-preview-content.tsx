@@ -14,6 +14,7 @@ import {
   FlatList,
   Platform,
   Pressable as NativePressable,
+  StyleSheet,
   View,
 } from 'react-native'
 import type { LayoutChangeEvent, ListRenderItemInfo } from 'react-native'
@@ -154,6 +155,12 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
     const normalizedStart = normalizeStartPosition(startPosition, count, loop)
     const [activeIndex, setActiveIndex] = useState(normalizedStart)
     const [transition, setTransition] = useState<TransitionState | null>(null)
+    const [transitionReady, setTransitionReady] = useState(false)
+    const [transitionLayoutReady, setTransitionLayoutReady] = useState(false)
+    const [rootLayoutReady, setRootLayoutReady] = useState(false)
+    const [openingPrepared, setOpeningPrepared] = useState(false)
+    const [previewReady, setPreviewReady] = useState(false)
+    const [openingAnimationComplete, setOpeningAnimationComplete] = useState(false)
     const [openingTransitionMode, setOpeningTransitionMode] = useState<OpeningTransitionMode>(
       visible ? getOpeningTransitionMode(sourceRect, getSourceRect) : 'none',
     )
@@ -301,7 +308,7 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
     })
     const { getLogicalIndex, reset: resetPaging, scrollToIndex } = paging
 
-    const onItemReady = useCallback(
+    const recordImageReady = useCallback(
       (index: number, dimensions?: { width: number; height: number }) => {
         markImageReady(index, dimensions)
         if (index === activeIndexRef.current && dimensions) {
@@ -310,18 +317,57 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
       },
       [markImageReady, updateImageDimensions],
     )
+    const onItemReady = useCallback(
+      (index: number, dimensions?: { width: number; height: number }) => {
+        recordImageReady(index, dimensions)
+        if (phaseRef.current === 'opening' && index === activeIndexRef.current) {
+          setPreviewReady(true)
+        }
+      },
+      [recordImageReady],
+    )
+    const onItemError = useCallback((index: number) => {
+      if (phaseRef.current === 'opening' && index === activeIndexRef.current) {
+        setPreviewReady(true)
+      }
+    }, [])
+    const onTransitionLayout = useCallback(() => setTransitionLayoutReady(true), [])
+    const onTransitionImageReady = useCallback(
+      (index: number, dimensions?: { width: number; height: number }) => {
+        recordImageReady(index, dimensions)
+        if (phaseRef.current === 'opening' && index === activeIndexRef.current) {
+          setTransition((current) =>
+            current?.kind === 'opening' ? { ...current, to: fullscreenRect(index) } : current,
+          )
+          setTransitionReady(true)
+        }
+      },
+      [fullscreenRect, recordImageReady],
+    )
+    const onTransitionImageError = useCallback((index: number) => {
+      if (phaseRef.current === 'opening' && index === activeIndexRef.current) {
+        setTransitionReady(true)
+      }
+    }, [])
 
     const runTransition = useCallback(
       (duration: number, onComplete: () => void) => {
+        const lifecycle = lifecycleRef.current
+        const complete = () => {
+          if (lifecycle === lifecycleRef.current) onComplete()
+        }
         transitionProgressSV.value = withTiming(1, { duration }, (finished) => {
           'worklet'
-          if (finished) scheduleOnRN(onComplete)
+          if (finished) scheduleOnRN(complete)
         })
-        if (duration === 0) onComplete()
+        if (duration === 0) complete()
       },
       [transitionProgressSV],
     )
 
+    const onOpenAnimationComplete = useCallback(() => {
+      if (phaseRef.current === 'opening') setOpeningAnimationComplete(true)
+    }, [])
     const finishOpenTransition = useCallback(() => {
       if (phaseRef.current !== 'opening') return
       phaseRef.current = 'open'
@@ -352,6 +398,7 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
       setOpeningTransitionMode('none')
       setTransition(null)
       transitionProgressSV.value = 0
+      setTransitionReady(false)
       const index = activeIndexRef.current
       const target = await readSourceRect(index, false)
       if (lifecycle !== lifecycleRef.current) return
@@ -386,6 +433,7 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
         return
       }
       const lifecycle = ++lifecycleRef.current
+      const rootMounted = phaseRef.current !== 'closed'
       closeFromRectRef.current = null
       openingIndexRef.current = normalizedStart
       activeIndexRef.current = normalizedStart
@@ -398,6 +446,12 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
       setOpeningTransitionMode(getOpeningTransitionMode(sourceRect, getSourceRect))
       setTransition(null)
       transitionProgressSV.value = 0
+      setTransitionReady(false)
+      setTransitionLayoutReady(false)
+      if (!rootMounted) setRootLayoutReady(false)
+      setOpeningPrepared(false)
+      setPreviewReady(false)
+      setOpeningAnimationComplete(false)
       onOpen?.()
       const source = await readSourceRect(normalizedStart, true)
       if (lifecycle !== lifecycleRef.current || !visibleRef.current) return
@@ -412,11 +466,13 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
           kind: 'opening',
           imageIndex: normalizedStart,
         })
+        setTransitionReady(Boolean(renderImage) || duration === 0)
+      } else {
+        setTransition(null)
       }
-      runTransition(duration, finishOpenTransition)
+      setOpeningPrepared(true)
     }, [
       count,
-      finishOpenTransition,
       fullscreenRect,
       normalizedStart,
       onOpen,
@@ -424,13 +480,54 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
       readSourceRect,
       resetGesture,
       resetPaging,
-      runTransition,
       themeToken.motion,
       token.animationDuration,
       transitionDuration,
       transitionProgressSV,
       getSourceRect,
       sourceRect,
+      renderImage,
+    ])
+
+    useEffect(() => {
+      if (phase !== 'opening' || !openingPrepared) return
+      if (transition?.kind === 'opening' && !transitionReady) return
+      const duration =
+        themeToken.motion === false ? 0 : Math.max(0, transitionDuration ?? token.animationDuration)
+      if (duration > 0) {
+        if (transition ? !transitionLayoutReady : !rootLayoutReady) return
+      }
+      runTransition(duration, onOpenAnimationComplete)
+    }, [
+      onOpenAnimationComplete,
+      openingPrepared,
+      phase,
+      rootLayoutReady,
+      runTransition,
+      themeToken.motion,
+      token.animationDuration,
+      transition,
+      transitionReady,
+      transitionLayoutReady,
+      transitionDuration,
+    ])
+
+    useEffect(() => {
+      if (phase !== 'opening' || !openingAnimationComplete) return
+      const duration =
+        themeToken.motion === false ? 0 : Math.max(0, transitionDuration ?? token.animationDuration)
+      if (transition && !previewReady && !renderImage && duration > 0) return
+      finishOpenTransition()
+    }, [
+      finishOpenTransition,
+      openingAnimationComplete,
+      phase,
+      previewReady,
+      renderImage,
+      themeToken.motion,
+      token.animationDuration,
+      transition,
+      transitionDuration,
     ])
 
     useImperativeHandle(
@@ -470,49 +567,69 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
     const pagerOpacityStyle = useAnimatedStyle(
       () => ({
         opacity:
-          phase === 'opening'
-            ? transition
-              ? 0
-              : 1
-            : phase === 'closing'
-              ? transition
-                ? 0
-                : 1 - transitionProgressSV.value
-              : 1,
+          phase === 'closed'
+            ? 0
+            : phase === 'opening'
+              ? openingTransitionMode !== 'none'
+                ? transitionProgressSV.value >= 1
+                  ? 1
+                  : 0
+                : transitionProgressSV.value
+              : phase === 'closing'
+                ? transition
+                  ? 0
+                  : 1 - transitionProgressSV.value
+                : 1,
       }),
-      [phase, transition, transitionProgressSV],
+      [openingTransitionMode, phase, transition, transitionProgressSV],
     )
     const controlsOpacityStyle = useAnimatedStyle(() => {
       const transitionOpacity =
-        phase === 'closing'
-          ? 1 - transitionProgressSV.value
-          : phase === 'opening' && openingTransitionMode === 'source'
-            ? transitionProgressSV.value
-            : phase === 'opening' && openingTransitionMode === 'pending'
-              ? 0
+        phase === 'closed'
+          ? 0
+          : phase === 'closing'
+            ? 1 - transitionProgressSV.value
+            : phase === 'opening'
+              ? transitionProgressSV.value
               : 1
       const gestureOpacity = Math.max(0, 1 - Math.max(0, dismissTranslateY.value) / 50)
 
       return {
         opacity: transitionOpacity * gestureOpacity,
       }
-    }, [dismissTranslateY, openingTransitionMode, phase, transitionProgressSV])
+    }, [dismissTranslateY, phase, transitionProgressSV])
     const overlayTransitionStyle = useAnimatedStyle(
       () => ({
         opacity:
-          (phase === 'opening'
-            ? transitionProgressSV.value
-            : phase === 'closing'
-              ? 1 - transitionProgressSV.value
-              : 1) * interpolateClamped(Math.max(0, dismissTranslateY.value), 0, 200, 1, 0),
+          (phase === 'closed'
+            ? 0
+            : phase === 'opening'
+              ? transitionProgressSV.value
+              : phase === 'closing'
+                ? 1 - transitionProgressSV.value
+                : 1) * interpolateClamped(Math.max(0, dismissTranslateY.value), 0, 200, 1, 0),
       }),
       [dismissTranslateY, phase, transitionProgressSV],
+    )
+    const transitionVisibilityStyle = useAnimatedStyle(
+      () => ({
+        opacity:
+          phase === 'closed'
+            ? 0
+            : phase === 'opening'
+              ? transitionProgressSV.value > 0
+                ? 1
+                : 0
+              : 1,
+      }),
+      [phase, transitionProgressSV],
     )
 
     const handleLayout = useCallback(
       (event: LayoutChangeEvent) => {
         const { width, height } = event.nativeEvent.layout
         if (width > 0 && height > 0) {
+          setRootLayoutReady(true)
           setViewport((current) =>
             current.width === width && current.height === height ? current : { width, height },
           )
@@ -534,6 +651,7 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
               index={index}
               initiallyReady={isImageReady(index)}
               normalized={normalizedImages[index]}
+              onImageError={onItemError}
               onImageReady={onItemReady}
               ready={isImageReady(index)}
               renderImage={renderImage}
@@ -546,6 +664,7 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
         animatedStyle,
         images,
         normalizedImages,
+        onItemError,
         onItemReady,
         getLogicalIndex,
         isImageReady,
@@ -590,16 +709,25 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
       ) : null
     const transitionIndex = transition?.imageIndex ?? activeIndex
     const transitionImage = transition ? (
-      <ImagePreviewTransition
-        fromRect={transition.from}
-        image={images[transitionIndex] ?? ''}
-        index={transitionIndex}
-        normalized={normalizedImages[transitionIndex]}
-        onImageReady={onItemReady}
-        progress={transitionProgressSV}
-        renderImage={renderImage}
-        toRect={transition.to}
-      />
+      <Animated.View
+        key={transition.kind}
+        pointerEvents="none"
+        onLayout={onTransitionLayout}
+        testID="image-preview-transition-layer"
+        style={[StyleSheet.absoluteFill, transitionVisibilityStyle]}
+      >
+        <ImagePreviewTransition
+          fromRect={transition.from}
+          image={images[transitionIndex] ?? ''}
+          index={transitionIndex}
+          normalized={normalizedImages[transitionIndex]}
+          onImageError={onTransitionImageError}
+          onImageReady={onTransitionImageReady}
+          progress={transitionProgressSV}
+          renderImage={renderImage}
+          toRect={transition.to}
+        />
+      </Animated.View>
     ) : null
 
     return (
@@ -611,6 +739,7 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewConte
         testID="image-preview"
       >
         <Animated.View
+          testID="image-preview-mask"
           pointerEvents={closeOnPressOverlay ? 'auto' : 'none'}
           style={[resolved.overlay, semantic?.mask, overlayTransitionStyle]}
         >

@@ -14,7 +14,7 @@ export default function FieldInputFixture() {
       <FieldInput
         center
         title="用户名"
-        label="请输入登录用户名"
+        description="请输入登录用户名"
         onChange={setName}
         placeholder="请输入用户名"
         clearable

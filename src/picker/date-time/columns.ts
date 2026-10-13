@@ -4,6 +4,7 @@ import {
   clampDateTimeFields,
   fieldsToPickerValues,
   fieldsToSelectedValues,
+  formatDateTimeValue,
   getDaysInMonth,
   normalizeDateTimeFields,
   pickerValuesToFields,
@@ -50,6 +51,15 @@ const NATURAL_RANGES: Record<DateTimeColumnType, NumericRange> = {
   year: { max: 9999, min: 1 },
 }
 const TIME_FIELD_ORDER = ['hour', 'minute', 'second'] as const
+
+export const dateTimeColumns = new WeakSet<object>()
+const optionTypes = new WeakMap<PickerOption, DateTimeColumnType>()
+
+export function pickerOptionsToSelectedValues(options: readonly PickerOption[]): string[] {
+  return options.map((option) =>
+    formatDateTimeValue(optionTypes.get(option)!, Number(option.value)),
+  )
+}
 
 function sameDate(fields: DateTimeFields, date: Date): boolean {
   return (
@@ -332,8 +342,9 @@ function resolveRequestedValues(
   columnsType: readonly DateTimeColumnType[],
 ): readonly PickerValue[] {
   const values = [...(context.requestedValues ?? context.selectedValues)]
-  context.selectedValues.forEach((value, index) => {
-    values[index] = value
+  let valueIndex = 0
+  context.selectedIndexes.forEach((index, columnIndex) => {
+    if (index >= 0) values[columnIndex] = context.selectedValues[valueIndex++]
   })
   return values.slice(0, columnsType.length)
 }
@@ -362,7 +373,10 @@ function resolveOptions(
 
   return filtered.flatMap((option) => {
     const canonical = options.find((item) => Object.is(item.value, option.value))
-    return canonical ? [{ ...option, value: canonical.value }] : []
+    if (!canonical) return []
+    const selectedOption = { ...option, value: canonical.value }
+    optionTypes.set(selectedOption, type)
+    return [selectedOption]
   })
 }
 
@@ -370,7 +384,7 @@ export function createDateTimeColumns(config: DateTimeColumnsConfig): PickerColu
   const baseFields = config.baseFields ?? DEFAULT_DATE_TIME_FIELDS
   const canonicalFieldsCache = new WeakMap<object, DateTimeFields>()
 
-  return config.columnsType.map((type) => (context: PickerColumnContext) => {
+  const columns = config.columnsType.map((type) => (context: PickerColumnContext) => {
     const values = resolveRequestedValues(context, config.columnsType)
     const requestedReference = context.requestedValues ?? context.selectedValues
     const cachedFields =
@@ -391,16 +405,20 @@ export function createDateTimeColumns(config: DateTimeColumnsConfig): PickerColu
     // The generic Picker resolves columns in visual order. Apply only the already
     // resolved prefix to the complete semantic fields, preserving the canonical
     // correction for fields that appear later in a reordered layout.
-    context.selectedValues.forEach((value, index) => {
-      const numericValue = Number(value)
-      if (Number.isFinite(numericValue) && config.columnsType[index]) {
-        requestedFields[config.columnsType[index]] = Math.trunc(numericValue)
+    let valueIndex = 0
+    context.selectedIndexes.forEach((index, columnIndex) => {
+      if (index < 0) return
+      const numericValue = Number(context.selectedValues[valueIndex++])
+      if (Number.isFinite(numericValue) && config.columnsType[columnIndex]) {
+        requestedFields[config.columnsType[columnIndex]] = Math.trunc(numericValue)
       }
     })
 
     const fields = normalizeRequestedFields(requestedFields, config)
     return resolveOptions(type, fields, config)
   })
+  dateTimeColumns.add(columns)
+  return columns
 }
 
 export function normalizeDateTimePickerValues(

@@ -16,6 +16,15 @@ export default function Example() {
       <Radio variant="button" disabled>
         Disabled button
       </Radio>
+      <View style={{ width: 140, gap: 12 }}>
+        <Radio variant="button">内容较长时按可用宽度换行，按钮高度随内容增长</Radio>
+        <Radio variant="button">
+          <View>
+            <Text>自定义标签</Text>
+            <Text>第二行说明</Text>
+          </View>
+        </Radio>
+      </View>
       <Radio.Group
         value={value}
         onChange={setValue}

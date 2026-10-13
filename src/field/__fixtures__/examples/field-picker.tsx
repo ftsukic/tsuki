@@ -23,7 +23,7 @@ export default function FieldPickerFixture() {
       onChange={setValue}
       columns={cities}
       placeholder="请选择城市"
-      isLink
+      showArrow
     />
   )
 }

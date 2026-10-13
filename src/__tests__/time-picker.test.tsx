@@ -203,6 +203,7 @@ describe('TimePicker', () => {
   it('keeps complete time bounds semantic when columns are reordered', async () => {
     const onChange = jest.fn()
     await renderPicker({
+      virtual: false,
       columnsType: ['minute', 'hour'],
       defaultValue: ['20', '18'],
       maxTime: '18:20:30',

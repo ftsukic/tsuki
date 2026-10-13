@@ -1,11 +1,12 @@
 import { act, cleanup, render, screen } from '@testing-library/react-native'
-import { Animated, StyleSheet, Text } from 'react-native'
+import { Animated, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import type { RenderResult } from '@testing-library/react-native'
 import type { TestInstance } from 'test-renderer'
 import { ConfigProvider, FloatingPanel, PortalHost } from '..'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
+import FloatingPanelTopExample from '../floating-panel/__fixtures__/examples/top'
 
 type TouchEvent = ReturnType<typeof touchEvent>
 
@@ -16,6 +17,7 @@ type ResponderProps = {
   onResponderGrant: (event: TouchEvent) => boolean
   onResponderMove: (event: TouchEvent) => void
   onResponderRelease: (event: TouchEvent) => void
+  onResponderTerminate: (event: TouchEvent) => void
 }
 
 type ScrollViewProps = {
@@ -127,6 +129,251 @@ describe('FloatingPanel', () => {
     cleanup()
     jest.restoreAllMocks()
   })
+
+  it('settles the controlled top example without overshoot or restarting the completed animation', async () => {
+    const start = jest.fn()
+    const timing = jest.spyOn(Animated, 'timing').mockReturnValue({
+      start,
+      stop: jest.fn(),
+      reset: jest.fn(),
+    } as unknown as Animated.CompositeAnimation)
+    const view = await render(
+      <AppProvider theme={{ seed: { motion: true } }}>
+        <FloatingPanelTopExample />
+      </AppProvider>,
+    )
+    await drag(getResponders(view)[1], 40)
+    expect(timing).toHaveBeenCalledTimes(1)
+    const curve = timing.mock.calls[0][1].easing!
+    let previous = 0
+    for (let frame = 0; frame <= 20; frame++) {
+      const progress = curve(frame / 20)
+      expect(progress).toBeGreaterThanOrEqual(previous)
+      expect(progress).toBeLessThanOrEqual(1)
+      previous = progress
+    }
+    await act(async () => {
+      start.mock.calls[0][0]({ finished: true })
+    })
+    expect(timing).toHaveBeenCalledTimes(1)
+    expect(getPanelHeight('floating-panel-top')).toBe(356)
+    await view.unmount()
+  })
+
+  it('uses measured week and calendar heights for the top example and preserves the settled state when insets change', async () => {
+    const preview = (top: number) => (
+      <SafeAreaInsetsContext.Provider value={{ top, bottom: 34, left: 0, right: 0 }}>
+        <AppProvider>
+          <FloatingPanelTopExample />
+        </AppProvider>
+      </SafeAreaInsetsContext.Provider>
+    )
+    const view = await render(preview(24))
+    await act(async () => {
+      screen
+        .getByTestId('floating-panel-top-summary')
+        .props.onLayout({ nativeEvent: { layout: { height: 110 } } })
+      screen
+        .getByTestId('floating-panel-top-calendar')
+        .props.onLayout({ nativeEvent: { layout: { height: 334 } } })
+    })
+    expect(getPanelHeight('floating-panel-top')).toBe(110 + 40 + 30 + 24)
+    await view.rerender(preview(0))
+    expect(getPanelHeight('floating-panel-top')).toBe(110 + 40 + 30)
+    await drag(getResponders(view)[1], 40)
+    expect(getPanelHeight('floating-panel-top')).toBe(334 + 30)
+    await view.rerender(preview(24))
+    expect(getPanelHeight('floating-panel-top')).toBe(334 + 30 + 24)
+    await drag(getResponders(view)[1], -40)
+    expect(getPanelHeight('floating-panel-top')).toBe(110 + 40 + 30 + 24)
+    await view.unmount()
+  })
+
+  it('keeps a page-scoped panel inside its page and removes it while the application host remains', async () => {
+    function Preview({ mounted }: { mounted: boolean }) {
+      return (
+        <AppProvider>
+          <Text>Previous screen</Text>
+          {mounted ? (
+            <View testID="preview-page">
+              <PortalHost>
+                <FloatingPanel testID="page-panel">
+                  <Text>Page panel content</Text>
+                </FloatingPanel>
+              </PortalHost>
+            </View>
+          ) : null}
+        </AppProvider>
+      )
+    }
+    const view = await render(<Preview mounted />)
+    let ancestor = screen.getByTestId('page-panel').parent
+    while (ancestor && ancestor.props.testID !== 'preview-page') ancestor = ancestor.parent
+    expect(ancestor).toBe(screen.getByTestId('preview-page'))
+    await view.rerender(<Preview mounted={false} />)
+    expect(screen.queryByTestId('page-panel')).toBeNull()
+    expect(screen.getByText('Previous screen')).toBeTruthy()
+    await view.unmount()
+  })
+
+  it.each([
+    ['bottom', 520, 40, 200, 300],
+    ['top', 520, -40, 200, 300],
+    ['bottom', 520, 12, 10, 300],
+    ['top', 520, -12, 10, 300],
+    ['bottom', 100, -40, 200, 300],
+    ['top', 100, 40, 200, 300],
+    ['bottom', 520, 12, 200, 520],
+    ['bottom', 520, 4, 1, 520],
+    ['bottom', 520, 400, 1000, 100],
+  ] as const)(
+    'snaps %s from %ipx after a %ipx swipe over %ims to %ipx',
+    async (placement, defaultHeight, distance, elapsed, expected) => {
+      const view = await render(
+        <AppProvider>
+          <FloatingPanel
+            testID="short-swipe"
+            placement={placement}
+            defaultHeight={defaultHeight}
+            anchors={[100, 300, 520]}
+          />
+        </AppProvider>,
+      )
+      const header = getResponders(view)[placement === 'top' ? 1 : 0]
+      await act(async () => {
+        const props = getResponderProps(header)
+        const start = touchEvent(0, 0, 0)
+        props.onStartShouldSetResponderCapture(start)
+        props.onResponderGrant(start)
+        props.onResponderMove(touchEvent(distance, 0, elapsed))
+        props.onResponderRelease(touchEvent(distance, distance, elapsed + 1))
+      })
+      expect(getPanelHeight('short-swipe')).toBe(expected)
+      await view.unmount()
+    },
+  )
+
+  it('does not treat a cancelled short swipe as a request to collapse', async () => {
+    const onHeightChangeEnd = jest.fn()
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel
+          testID="cancel-swipe"
+          defaultHeight={520}
+          anchors={[100, 520]}
+          onHeightChangeEnd={onHeightChangeEnd}
+        />
+      </AppProvider>,
+    )
+    await act(async () => {
+      const props = getResponderProps(getResponders(view)[0])
+      const start = touchEvent(0, 0, 0)
+      props.onStartShouldSetResponderCapture(start)
+      props.onResponderGrant(start)
+      props.onResponderMove(touchEvent(40, 0, 10))
+      props.onResponderTerminate(touchEvent(40, 40, 11))
+    })
+    expect(getPanelHeight('cancel-swipe')).toBe(520)
+    expect(onHeightChangeEnd).toHaveBeenCalledWith(520)
+    await view.unmount()
+  })
+
+  it('keeps animation height authoritative over semantic container height', async () => {
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel
+          testID="semantic-height"
+          anchors={[100, 520]}
+          styles={{ container: { height: 999, shadowOpacity: 0.4 } }}
+        />
+      </AppProvider>,
+    )
+    expect(getPanelHeight('semantic-height')).toBe(100)
+    expect(StyleSheet.flatten(getPanelContainer('semantic-height').props.style).shadowOpacity).toBe(
+      0.4,
+    )
+    await drag(getResponders(view)[0], -40)
+    expect(getPanelHeight('semantic-height')).toBe(520)
+    await view.unmount()
+  })
+
+  it('adjusts height through default handle accessibility actions and ignores unknown actions', async () => {
+    const onHeightChangeEnd = jest.fn()
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel
+          testID="accessible-panel"
+          anchors={[100, 300, 520]}
+          onHeightChangeEnd={onHeightChangeEnd}
+        />
+      </AppProvider>,
+    )
+    const action = async (actionName: string) => {
+      await act(async () => {
+        screen.getByRole('adjustable').props.onAccessibilityAction({ nativeEvent: { actionName } })
+      })
+    }
+    expect(screen.getByRole('adjustable').props.accessibilityValue).toEqual({
+      min: 100,
+      max: 520,
+      now: 100,
+    })
+    await action('increment')
+    expect(getPanelHeight('accessible-panel')).toBe(300)
+    await action('increment')
+    expect(getPanelHeight('accessible-panel')).toBe(520)
+    await action('increment')
+    await action('activate')
+    expect(onHeightChangeEnd).toHaveBeenCalledTimes(2)
+    await action('decrement')
+    expect(getPanelHeight('accessible-panel')).toBe(300)
+    await view.unmount()
+  })
+
+  it.each([{ draggable: false }, { header: <Text>Custom header</Text> }])(
+    'preserves custom header semantics and does not expose a disabled default handle: %p',
+    async (props) => {
+      const view = await render(
+        <AppProvider>
+          <FloatingPanel {...props} />
+        </AppProvider>,
+      )
+      expect(screen.queryByRole('adjustable')).toBeNull()
+      await view.unmount()
+    },
+  )
+
+  it.each([false, true])(
+    'reconciles accessible height requests with controlled writeback=%s',
+    async (writeback) => {
+      const onHeightChangeEnd = jest.fn()
+      function ControlledPanel() {
+        const [height, setHeight] = useState(100)
+        return (
+          <FloatingPanel
+            testID="accessible-controlled"
+            height={height}
+            anchors={[100, 300]}
+            onHeightChange={writeback ? setHeight : undefined}
+            onHeightChangeEnd={onHeightChangeEnd}
+          />
+        )
+      }
+      const view = await render(
+        <AppProvider>
+          <ControlledPanel />
+        </AppProvider>,
+      )
+      await act(async () => {
+        screen
+          .getByRole('adjustable')
+          .props.onAccessibilityAction({ nativeEvent: { actionName: 'increment' } })
+      })
+      expect(onHeightChangeEnd).toHaveBeenCalledWith(300)
+      expect(getPanelHeight('accessible-controlled')).toBe(writeback ? 300 : 100)
+      await view.unmount()
+    },
+  )
 
   it('renders through PortalHost with Vant-inspired default geometry', async () => {
     const view = await render(

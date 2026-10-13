@@ -3,13 +3,14 @@ import { forwardRef, useContext, useEffect, useMemo, useRef, useState } from 're
 import { BackHandler, Platform, StyleSheet, View, useWindowDimensions } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import Animated, { useAnimatedStyle } from 'react-native-reanimated'
-import { useTransitionProgress } from '../motion/useTransitionProgress'
+import { useTransitionProgressState } from '../motion/useTransitionProgress'
+import { useMotionConfig } from '../motion/useMotionConfig'
 import { OverlaySurface } from '../overlay/overlay-surface'
 import { Portal } from '../portal'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import type { PopupProps } from './types'
-import { getPopupStyles } from './style'
+import { getPopupBottomPadding, getPopupStyles } from './style'
 import { getPopupToken } from './token'
 
 export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(props, ref) {
@@ -36,9 +37,18 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
     onClose,
     onClosed,
     children,
+    onLayout,
     ...viewProps
   } = props
-  const { width, height } = useWindowDimensions()
+  const { width } = useWindowDimensions()
+  const [wrapperWidth, setWrapperWidth] = useState<number>()
+  const [panelSize, setPanelSize] = useState<{
+    width: number
+    height: number
+    position: PopupProps['position']
+  }>()
+  const latestPanelSize = useRef<typeof panelSize>(undefined)
+  const motionPolicy = useMotionConfig()
   const normalizedDuration = Number.isFinite(duration)
     ? Math.max(0, duration)
     : token.animationDuration
@@ -100,6 +110,10 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
       if (destroyOnClosedRef.current) {
         renderedRef.current = false
         setRendered(false)
+        setPanelSize(undefined)
+        latestPanelSize.current = undefined
+      } else {
+        setPanelSize(latestPanelSize.current)
       }
       onClosedRef.current?.()
     },
@@ -162,6 +176,7 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
       if (transitionVisible) {
         if (!visibleRef.current || openedNotifiedRef.current) return
         openedNotifiedRef.current = true
+        setPanelSize(latestPanelSize.current)
         onOpenedRef.current?.()
         return
       }
@@ -181,9 +196,21 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
     state: { visible, position: effectivePosition, rendered },
   })
   const panelResolvedStyle = StyleSheet.flatten(semantic?.container)
+  const safeAreaStyle =
+    bottomInset > 0
+      ? {
+          paddingBottom: getPopupBottomPadding(
+            panelResolvedStyle,
+            wrapperWidth ?? width,
+            bottomInset,
+          ),
+        }
+      : null
   const panelOpacity =
     typeof panelResolvedStyle?.opacity === 'number' ? panelResolvedStyle.opacity : 1
   const overlayResolvedStyle = StyleSheet.flatten(semantic?.mask)
+  const overlayMaskStyle = { ...overlayResolvedStyle }
+  delete overlayMaskStyle.opacity
   const overlayOpacity =
     typeof overlayResolvedStyle?.opacity === 'number' ? overlayResolvedStyle.opacity : 1
   const motionPreset = useMemo(() => {
@@ -201,10 +228,14 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
         return OVERLAY_PRESETS.dialog
     }
   }, [effectivePosition])
-  const transitionDistance =
-    effectivePosition === 'top' || effectivePosition === 'bottom'
-      ? Math.max(height, 1)
-      : Math.max(width, 1)
+  const isSlide = effectivePosition !== 'center'
+  const measured = panelSize?.position === effectivePosition
+  const transitionDistance = measured
+    ? effectivePosition === 'top' || effectivePosition === 'bottom'
+      ? panelSize.height
+      : panelSize.width
+    : 0
+  const ready = !isSlide || measured || !motionPolicy.enabled || animationDuration === 0
   const enteringConfig = useMemo(
     () => overlayAnimation(animationDuration, true),
     [animationDuration],
@@ -213,19 +244,24 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
     () => overlayAnimation(animationDuration, false),
     [animationDuration],
   )
-  const { progress, animatedStyle: animatedPanelStyle } = useTransitionProgress({
-    visible,
-    preset: motionPreset,
-    distance: transitionDistance,
-    // Keep the opacity key present when switching from the center scale
-    // transition to a positional slide before the first frame is committed.
-    opacity: panelOpacity,
-    entering: enteringConfig,
-    leaving: leavingConfig,
-    onTransitionEnd: handleTransitionEnd,
-  })
+  const { progress, animatedStyle: animatedPanelStyle } = useTransitionProgressState(
+    {
+      visible,
+      preset: motionPreset,
+      distance: transitionDistance,
+      // Keep the opacity key present when switching from the center scale
+      // transition to a positional slide before the first frame is committed.
+      // Animated styles override ordinary styles on Web, including the first
+      // cached style applied when a lazily rendered panel mounts.
+      opacity: ready ? panelOpacity : 0,
+      entering: enteringConfig,
+      leaving: leavingConfig,
+      onTransitionEnd: handleTransitionEnd,
+    },
+    ready || !visible,
+  )
   const animatedOverlayStyle = useAnimatedStyle(() => ({
-    opacity: progress.value * overlayOpacity,
+    opacity: ready ? progress.value * overlayOpacity : 0,
   }))
 
   const handleOverlayPress = (event: Parameters<NonNullable<PopupProps['onPressOverlay']>>[0]) => {
@@ -238,7 +274,9 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
   return (
     <View
       collapsable={false}
-      pointerEvents={visible ? (overlay ? 'auto' : 'box-none') : 'none'}
+      accessibilityElementsHidden={!visible || !ready}
+      importantForAccessibility={visible && ready ? 'auto' : 'no-hide-descendants'}
+      pointerEvents={visible && ready ? (overlay ? 'auto' : 'box-none') : 'none'}
       style={[resolvedStyles.root, { zIndex }, semantic?.root, style]}
     >
       {overlay ? (
@@ -249,23 +287,47 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
           zIndex={zIndex}
           onPress={handleOverlayPress}
           animatedStyle={animatedOverlayStyle}
-          style={[resolvedStyles.overlay, semantic?.mask]}
-          pressableStyle={semantic?.mask}
+          styles={{
+            mask: [resolvedStyles.overlay, overlayMaskStyle],
+          }}
         />
       ) : null}
       <View
         pointerEvents="box-none"
+        onLayout={(event) => setWrapperWidth(event.nativeEvent.layout.width)}
         style={[resolvedStyles.container, { zIndex: zIndex + 1 }, semantic?.wrapper]}
       >
         <Animated.View
           ref={ref}
           {...viewProps}
-          pointerEvents={visible ? 'auto' : 'none'}
+          onLayout={(event) => {
+            const { width: panelWidth, height: panelHeight } = event.nativeEvent.layout
+            if (panelWidth > 0 && panelHeight > 0) {
+              latestPanelSize.current = {
+                width: panelWidth,
+                height: panelHeight,
+                position: effectivePosition,
+              }
+              // Freeze only in transit; stable content may resize before the next exit.
+              setPanelSize((previous) =>
+                previous?.position === effectivePosition &&
+                ((!openedNotifiedRef.current && visible) || isExiting)
+                  ? previous
+                  : previous?.position === effectivePosition &&
+                      previous.width === panelWidth &&
+                      previous.height === panelHeight
+                    ? previous
+                    : { width: panelWidth, height: panelHeight, position: effectivePosition },
+              )
+            }
+            onLayout?.(event)
+          }}
+          pointerEvents={visible && ready ? 'auto' : 'none'}
           style={[
             resolvedStyles.panel,
             { zIndex: zIndex + 1 },
             semantic?.container,
-            bottomInset > 0 ? { paddingBottom: bottomInset } : null,
+            safeAreaStyle,
             animatedPanelStyle,
           ]}
         >

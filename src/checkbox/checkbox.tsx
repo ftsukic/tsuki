@@ -155,7 +155,7 @@ export const Checkbox = forwardRef<React.ComponentRef<typeof Pressable>, Checkbo
               {children}
             </Text>
           ) : children !== undefined && children !== null && typeof children !== 'boolean' ? (
-            <View>{children}</View>
+            <View style={[{ flexShrink: 1 }, semantic?.label]}>{children}</View>
           ) : null
 
           if (resolvedVariant === 'button') return label

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Cell, Checkbox, FieldCheckbox } from '../../..'
 import type { CheckboxOption, CheckboxValue } from '../../..'
+import { Text } from 'react-native'
 
 /**
  * @title FieldCheckbox
@@ -24,7 +25,7 @@ export default function FieldCheckboxFixture() {
         onChange={setValue}
         direction="horizontal"
         gap={8}
-        buttonColumns={4}
+        buttonColumns={2}
         buttonLayout="equal"
       >
         <Checkbox name="email">邮件</Checkbox>
@@ -37,6 +38,18 @@ export default function FieldCheckboxFixture() {
         <Checkbox name="activity">活动</Checkbox>
       </FieldCheckbox>
       <FieldCheckbox title="快捷配置" value={value} onChange={setValue} options={options} />
+      <FieldCheckbox
+        title="附加内容"
+        variant="button"
+        buttonVariant="outlined"
+        direction="horizontal"
+        buttonColumns={2}
+        style={{ width: 300 }}
+        valueExtra={<Text style={{ width: 32 }}>说明</Text>}
+        value={value}
+        onChange={setValue}
+        options={options}
+      />
     </Cell.Group>
   )
 }

@@ -15,16 +15,16 @@ function findViewWithBackground(node: JsonNode | null, color: string): JsonEleme
 }
 
 describe('Badge', () => {
-  it('renders canonical content and the count compatibility alias', async () => {
+  it('renders content and custom nodes', async () => {
     await render(
       <ConfigProvider>
         <Badge content={1} />
         <Badge content={10} />
         <Badge content="New" />
         <Badge content={0} />
-        <Badge count={7} />
-        <Badge content={5} count={7} />
-        <Badge content={null} count={8} />
+        <Badge content={7} />
+        <Badge content={5} />
+        <Badge content={null} />
         <Badge content={<Text>自定义</Text>} />
       </ConfigProvider>,
     )
@@ -40,21 +40,20 @@ describe('Badge', () => {
     expect(screen.getAllByText('7')).toHaveLength(1)
   })
 
-  it('applies max only when explicitly provided and prefers canonical props', async () => {
+  it('applies only valid explicit max values', async () => {
     await render(
       <ConfigProvider>
         <Badge content={100} />
         <Badge content={100} max={99} />
         <Badge content={99} max={99} />
-        <Badge count={100} overflowCount={99} />
-        <Badge content={100} max={50} overflowCount={99} />
+        <Badge content={100} max={50} />
         <Badge content={100} max={Infinity} />
         <Badge content={100} max={-1} />
       </ConfigProvider>,
     )
 
     expect(screen.getAllByText('100')).toHaveLength(3)
-    expect(screen.getAllByText('99+')).toHaveLength(2)
+    expect(screen.getAllByText('99+')).toHaveLength(1)
     expect(screen.getByText('99')).toBeTruthy()
     expect(screen.getByText('50+')).toBeTruthy()
   })
@@ -184,7 +183,7 @@ describe('Badge', () => {
       left: 0,
     })
     expect(StyleSheet.flatten(indicator.props.style).transform).toEqual([
-      { translateX: -8 },
+      { translateX: -18 },
       { translateY: 8 },
     ])
 
@@ -204,7 +203,7 @@ describe('Badge', () => {
     const styles = jest.fn(({ state }) => ({
       root: { opacity: state.visible ? 1 : 0.5 },
       indicator: { opacity: state.visible ? 1 : 0.5 },
-      text: { fontSize: 16, lineHeight: 28 },
+      content: { fontSize: 16, lineHeight: 28 },
     }))
     const { toJSON } = await render(
       <ConfigProvider>
@@ -222,7 +221,7 @@ describe('Badge', () => {
               paddingHorizontal: 0,
               borderRadius: 14,
             },
-            text: { fontSize: 16, lineHeight: 28 },
+            content: { fontSize: 16, lineHeight: 28 },
           }}
         />
         <Badge content={8} styles={styles} />
@@ -296,7 +295,7 @@ describe('Badge', () => {
     expect(statusStyle.height).toBeUndefined()
   })
 
-  it('preserves status text and size compatibility', async () => {
+  it('renders status text at the selected size', async () => {
     await render(
       <ConfigProvider>
         <Badge testID="status-only" status="success" />
@@ -329,5 +328,101 @@ describe('Badge', () => {
     })
     expect(StyleSheet.flatten(statusDot?.props.style).minWidth).toBeUndefined()
     expect(StyleSheet.flatten(statusDot?.props.style).minHeight).toBeUndefined()
+  })
+  it('hides empty content and treats empty children as standalone', async () => {
+    await render(
+      <>
+        <Badge testID="empty-string" content="" />
+        <Badge testID="boolean" content={true} />
+        <Badge testID="empty-array" content={[null, false, '']} />
+        <Badge testID="empty-fragment" content={<>{false}</>} />
+        <Badge content={4}>{[]}</Badge>
+      </>,
+    )
+    for (const id of ['empty-string', 'boolean', 'empty-array', 'empty-fragment']) {
+      expect(screen.queryByTestId(id)).toBeNull()
+    }
+    expect(StyleSheet.flatten(screen.getByText('4').parent?.props.style).position).toBeUndefined()
+  })
+
+  it('renders mixed arrays and fragments with text styles only on generated text', async () => {
+    await render(
+      <>
+        <Badge
+          content={
+            <>
+              A
+              {[
+                false,
+                'B',
+                <Text key="custom" style={{ color: 'blue' }}>
+                  custom
+                </Text>,
+              ]}
+            </>
+          }
+          styles={{ content: { color: 'red' } }}
+        />
+        <Badge status="success" text={['在', <>{'线'}</>]} styles={{ text: { color: 'green' } }} />
+        <Badge content={3}>目标</Badge>
+      </>,
+    )
+    expect(StyleSheet.flatten(screen.getByText('AB').props.style).color).toBe('red')
+    expect(StyleSheet.flatten(screen.getByText('custom').props.style).color).toBe('blue')
+    expect(StyleSheet.flatten(screen.getByText('在线').props.style).color).toBe('green')
+    expect(screen.getByText('目标')).toBeTruthy()
+  })
+
+  it('centers resized dots using measured dimensions', async () => {
+    const { toJSON } = await render(
+      <Badge dot styles={{ indicator: { width: 20, height: 20, backgroundColor: 'purple' } }}>
+        <Text>目标</Text>
+      </Badge>,
+    )
+    const dot = findViewWithBackground(toJSON(), 'purple')
+    await act(async () =>
+      dot?.props.onLayout({ nativeEvent: { layout: { width: 20, height: 20 } } }),
+    )
+    expect(
+      StyleSheet.flatten(findViewWithBackground(toJSON(), 'purple')?.props.style).transform,
+    ).toEqual([{ translateX: 10 }, { translateY: -10 }])
+  })
+
+  it('applies indicator styles to the status dot and text styles to its description', async () => {
+    const { toJSON } = await render(
+      <Badge
+        status="success"
+        text="在线"
+        styles={{ indicator: { width: 12, backgroundColor: 'purple' }, text: { color: 'green' } }}
+      />,
+    )
+    expect(StyleSheet.flatten(findViewWithBackground(toJSON(), 'purple')?.props.style).width).toBe(
+      12,
+    )
+    expect(StyleSheet.flatten(screen.getByText('在线').parent?.props.style).backgroundColor).toBe(
+      'transparent',
+    )
+    expect(StyleSheet.flatten(screen.getByText('在线').props.style).color).toBe('green')
+  })
+
+  it('labels standalone indicators and respects explicit accessibility props', async () => {
+    await render(
+      <>
+        <Badge testID="count-label" content={100} max={99} />
+        <Badge testID="status-label" status="success" />
+        <Badge testID="dot-label" dot accessibilityLabel="有未读消息" />
+        <Badge testID="opt-out" content={2} accessible={false} />
+        <Badge testID="attached" dot>
+          <Text accessibilityRole="button">打开</Text>
+        </Badge>
+      </>,
+    )
+    expect(screen.getByTestId('count-label').props.accessibilityLabel).toBe('99+')
+    expect(screen.getByTestId('status-label').props.accessibilityLabel).toBe('成功')
+    expect(screen.getByTestId('status-label').props.accessible).toBe(true)
+    expect(screen.getByTestId('dot-label').props.accessibilityLabel).toBe('有未读消息')
+    expect(screen.getByTestId('opt-out').props.accessible).toBe(false)
+    expect(screen.getByTestId('attached').props.accessible).toBeUndefined()
+    expect(screen.getByRole('button')).toBeTruthy()
   })
 })

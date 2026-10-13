@@ -15,7 +15,7 @@ export interface BadgeStyleState {
 export interface BadgeSemanticStyles {
   root?: StyleProp<ViewStyle>
   indicator?: StyleProp<ViewStyle>
-  dot?: StyleProp<ViewStyle>
+  content?: StyleProp<TextStyle>
   text?: StyleProp<TextStyle>
 }
 
@@ -32,10 +32,6 @@ export interface BadgeProps extends Omit<ViewProps, 'children' | 'style'> {
   showZero?: boolean
   style?: StyleProp<ViewStyle>
   styles?: BadgeStyles
-  /** @deprecated Use content instead. */
-  count?: ReactNode
-  /** @deprecated Use max instead. */
-  overflowCount?: number
   size?: BadgeSize
   status?: BadgeStatus
   text?: ReactNode

@@ -23,6 +23,7 @@ export interface ImagePreviewItemProps {
     context: ImagePreviewRenderImageContext,
   ) => React.ReactNode
   onImageReady?: (index: number, dimensions?: { width: number; height: number }) => void
+  onImageError?: (index: number) => void
 }
 
 /** A virtualized page renderer. Viewer-level gesture state is intentionally not owned here. */
@@ -36,6 +37,7 @@ export const ImagePreviewItem = memo(function ImagePreviewItem({
   animatedStyle,
   renderImage,
   onImageReady,
+  onImageError,
 }: ImagePreviewItemProps) {
   const normalized = useMemo(
     () => normalizedProp ?? normalizeImageSource(image),
@@ -46,7 +48,8 @@ export const ImagePreviewItem = memo(function ImagePreviewItem({
   imageReadyRef.current = imageReady
   const loadingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const loadErrorRef = useRef(false)
-  const readyReportedRef = useRef(imageReady)
+  // A cached URI must still report readiness for this newly mounted image node.
+  const readyReportedRef = useRef(false)
   const [loading, setLoading] = useState(false)
   const [loadError, setLoadError] = useState(false)
   const onImageReadyRef = useRef(onImageReady)
@@ -72,7 +75,7 @@ export const ImagePreviewItem = memo(function ImagePreviewItem({
     clearLoadingTimer()
     setLoadError(false)
     loadErrorRef.current = false
-    readyReportedRef.current = imageReadyRef.current
+    readyReportedRef.current = false
     if (imageReadyRef.current) {
       setLoading(false)
       return
@@ -114,7 +117,8 @@ export const ImagePreviewItem = memo(function ImagePreviewItem({
     loadErrorRef.current = true
     setLoading(false)
     setLoadError(true)
-  }, [clearLoadingTimer])
+    onImageError?.(index)
+  }, [clearLoadingTimer, index, onImageError])
 
   const renderContext: ImagePreviewRenderImageContext = {
     source: normalized.source,
@@ -171,7 +175,7 @@ export const ImagePreviewItem = memo(function ImagePreviewItem({
 
 const styles = StyleSheet.create({
   loading: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     alignItems: 'center',
     justifyContent: 'center',
   },

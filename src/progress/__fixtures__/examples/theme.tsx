@@ -28,7 +28,14 @@ export default function ProgressThemeExample() {
             rail: { height: 10 },
           }}
         />
-        <Progress percentage={76} styles={{ indicator: { fontWeight: '700' } }} type="circle" />
+        <Progress
+          percentage={76}
+          styles={{
+            indicatorContainer: { padding: 8 },
+            indicator: { fontWeight: '700' },
+          }}
+          type="circle"
+        />
       </View>
     </ConfigProvider>
   )

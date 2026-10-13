@@ -5,6 +5,7 @@ import type { LoadingToken } from '../theme'
 export interface LoadingResolvedStyles {
   root: ViewStyle
   indicator: ViewStyle
+  content: ViewStyle
   text: TextStyle
 }
 
@@ -28,12 +29,16 @@ export function getLoadingStyles(
       justifyContent: 'center',
       width: size,
     },
+    content: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      marginLeft: state.vertical ? 0 : token.textGap,
+      marginTop: state.vertical ? token.textGap : 0,
+    },
     text: {
       color: props.textColor ?? token.textColor,
       fontSize: textSize,
       lineHeight: textSize + 6,
-      marginLeft: state.vertical ? 0 : token.textGap,
-      marginTop: state.vertical ? token.textGap : 0,
     },
   }
 }

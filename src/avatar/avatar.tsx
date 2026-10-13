@@ -61,9 +61,11 @@ export const Avatar = forwardRef<ViewComponent, AvatarProps>(function Avatar(
 ) {
   const token = useComponentToken('Avatar', getAvatarToken)
   const [imageError, setImageError] = useState(false)
-  const resolvedSize = resolveSize(size, token)
-  const fontSize = resolveFontSize(size, token)
-  const iconSize = resolveIconSize(size, resolvedSize, token)
+  const normalizedSize =
+    typeof size === 'number' && (!Number.isFinite(size) || size <= 0) ? 'medium' : size
+  const resolvedSize = resolveSize(normalizedSize, token)
+  const fontSize = resolveFontSize(normalizedSize, token)
+  const iconSize = resolveIconSize(normalizedSize, resolvedSize, token)
   const source = useMemo(() => (src === undefined ? undefined : normalizeSource(src)), [src])
   const semantic = resolveStyles(styles, {
     props: {

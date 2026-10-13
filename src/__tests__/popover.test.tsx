@@ -1,19 +1,25 @@
+import * as Worklets from 'react-native-worklets'
 import type { SwipeCellRef } from '../swipe-cell'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { createRef, memo, type ReactNode } from 'react'
-import { Button, ConfigProvider, Icon, Popover, Provider, SwipeCell } from '..'
+import { Button, ConfigProvider, Icon, Popover, Provider, SwipeCell, Text as TsukiText } from '..'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { StyleSheet, Text, View } from 'react-native'
 
 jest.mock('react-native-popover-view', () => {
   const React = jest.requireActual('react')
   const { View: NativeView } = jest.requireActual('react-native')
+  const settings = { keepMounted: false }
   const MockPopover = jest.fn(
     ({ children, isVisible }: { children?: ReactNode; isVisible?: boolean }) =>
-      React.createElement(NativeView, { testID: 'native-popover' }, isVisible ? children : null),
+      React.createElement(
+        NativeView,
+        { testID: 'native-popover' },
+        isVisible || settings.keepMounted ? children : null,
+      ),
   )
 
-  return { __esModule: true, default: MockPopover }
+  return { __esModule: true, default: MockPopover, settings }
 })
 
 interface NativePopoverTestProps {
@@ -65,8 +71,16 @@ async function press(testID: string) {
 }
 
 describe('Popover', () => {
+  let scheduleOnUI: jest.SpyInstance
+  beforeEach(() => {
+    scheduleOnUI = jest
+      .spyOn(Worklets, 'scheduleOnUI')
+      .mockImplementation((worklet, ...args) => worklet(...args))
+  })
   afterEach(async () => {
+    scheduleOnUI.mockRestore()
     await cleanup()
+    jest.requireMock('react-native-popover-view').settings.keepMounted = false
     jest.useRealTimers()
     jest.clearAllMocks()
   })
@@ -96,9 +110,11 @@ describe('Popover', () => {
       </Provider>,
     )
     await act(async () => {
-      screen.getByTestId('popover-owner-right-action').props.onLayout({
-        nativeEvent: { layout: { width: 100, height: 48, x: 0, y: 0 } },
-      })
+      screen
+        .getByTestId('popover-owner-right-action', { includeHiddenElements: true })
+        .props.onLayout({
+          nativeEvent: { layout: { width: 100, height: 48, x: 0, y: 0 } },
+        })
       ref.current?.open()
     })
     expect(onOpen).toHaveBeenCalledTimes(1)
@@ -233,7 +249,7 @@ describe('Popover', () => {
     expect(reference.props.collapsable).toBe(false)
     expect(reference.props.renderToHardwareTextureAndroid).toBe(true)
 
-    const event = fireEvent(reference, 'touchEnd')
+    const event = fireEvent.press(reference)
     await event
 
     expect(onVisibleChange).toHaveBeenCalledWith(true)
@@ -247,7 +263,7 @@ describe('Popover', () => {
       <Popover actions={[{ text: '图标触发' }]} onVisibleChange={onVisibleChange}>
         <Button
           accessibilityLabel="打开 Popover"
-          circle
+          shape="circle"
           icon={<Icon name="PlusOutlined" />}
           testID="icon-trigger"
         />
@@ -445,9 +461,7 @@ describe('Popover', () => {
       </Popover>,
     )
 
-    expect(
-      flattenStyle(screen.getByTestId('popover-content').props.style).backgroundColor,
-    ).toBeTruthy()
+    expect(flattenStyle(getNativePopoverProps().popoverStyle).backgroundColor).toBeTruthy()
     expect(flattenStyle(screen.getByTestId('popover-actions').props.style)).toMatchObject({
       flexDirection: 'row',
     })
@@ -475,7 +489,9 @@ describe('Popover', () => {
       </Popover>,
     )
 
-    expect(flattenStyle(screen.getByTestId('memo-icon').props.style)).toMatchObject({
+    expect(
+      flattenStyle(screen.getByTestId('memo-icon', { includeHiddenElements: true }).props.style),
+    ).toMatchObject({
       color: '#1989fa',
     })
   })
@@ -496,63 +512,69 @@ describe('Popover', () => {
     expect(screen.queryByTestId('popover-action-0')).toBeNull()
   })
 
-  it('maps lifecycle callbacks to the native adapter', async () => {
+  it('reports lifecycle completion only after the native close completes', async () => {
+    jest.useFakeTimers()
     const onOpen = jest.fn()
     const onOpened = jest.fn()
     const onClose = jest.fn()
     const onClosed = jest.fn()
-
-    await renderWithSafeArea(
-      <Popover
-        actions={[{ text: '生命周期' }]}
-        onClose={onClose}
-        onClosed={onClosed}
-        onOpen={onOpen}
-        onOpened={onOpened}
-      >
-        <Button>打开</Button>
-      </Popover>,
+    const make = (visible: boolean) => (
+      <SafeAreaInsetsContext.Provider value={{ bottom: 0, left: 0, right: 0, top: 0 }}>
+        <Popover
+          visible={visible}
+          onOpen={onOpen}
+          onOpened={onOpened}
+          onClose={onClose}
+          onClosed={onClosed}
+        >
+          <Button>打开</Button>
+        </Popover>
+      </SafeAreaInsetsContext.Provider>
     )
-
-    const nativeProps = getNativePopoverProps()
+    const view = await render(make(true))
     await act(async () => {
-      nativeProps.onOpenStart?.()
-      nativeProps.onOpenComplete?.()
-      nativeProps.onCloseStart?.()
-      nativeProps.onCloseComplete?.()
+      getNativePopoverProps().onOpenStart?.()
+      getNativePopoverProps().onOpenComplete?.()
     })
-
+    await view.rerender(make(false))
+    await act(async () => {
+      getNativePopoverProps().onCloseStart?.()
+      jest.advanceTimersByTime(1000)
+    })
+    expect(onClosed).not.toHaveBeenCalled()
+    await act(async () => {
+      getNativePopoverProps().onCloseComplete?.()
+      getNativePopoverProps().onCloseComplete?.()
+    })
     expect(onOpen).toHaveBeenCalledTimes(1)
     expect(onOpened).toHaveBeenCalledTimes(1)
     expect(onClose).toHaveBeenCalledTimes(1)
     expect(onClosed).toHaveBeenCalledTimes(1)
   })
 
-  it('keeps onClosed working when the RN modal adapter omits close completion', async () => {
-    jest.useFakeTimers()
+  it('ignores a previous close completion after reopening and starting another close', async () => {
     const onClosed = jest.fn()
-
-    await renderWithSafeArea(
-      <Popover actions={[{ text: '关闭完成' }]} onClosed={onClosed}>
-        <Button>打开</Button>
-      </Popover>,
+    const make = (visible: boolean) => (
+      <SafeAreaInsetsContext.Provider value={{ bottom: 0, left: 0, right: 0, top: 0 }}>
+        <Popover visible={visible} onClosed={onClosed}>
+          <Button>打开</Button>
+        </Popover>
+      </SafeAreaInsetsContext.Provider>
     )
-
-    const nativeProps = getNativePopoverProps()
+    const view = await render(make(true))
+    await view.rerender(make(false))
+    const oldClose = getNativePopoverProps()
+    await act(async () => oldClose.onCloseStart?.())
+    await view.rerender(make(true))
+    await act(async () => oldClose.onCloseComplete?.())
+    expect(onClosed).not.toHaveBeenCalled()
+    await view.rerender(make(false))
     await act(async () => {
-      nativeProps.onCloseStart?.()
-      jest.advanceTimersByTime(349)
+      getNativePopoverProps().onCloseStart?.()
+      oldClose.onCloseComplete?.()
     })
     expect(onClosed).not.toHaveBeenCalled()
-
-    await act(async () => {
-      jest.advanceTimersByTime(1)
-    })
-    expect(onClosed).toHaveBeenCalledTimes(1)
-
-    await act(async () => {
-      nativeProps.onCloseComplete?.()
-    })
+    await act(async () => getNativePopoverProps().onCloseComplete?.())
     expect(onClosed).toHaveBeenCalledTimes(1)
   })
 
@@ -617,8 +639,246 @@ describe('Popover', () => {
       minHeight: 52,
       width: 144,
     })
-    expect(flattenStyle(screen.getByTestId('popover-content').props.style)).toMatchObject({
+    expect(flattenStyle(getNativePopoverProps().popoverStyle)).toMatchObject({
       borderRadius: 16,
     })
+  })
+  it('allows independent controlled open and close requests to be retried', async () => {
+    const onVisibleChange = jest.fn()
+    const make = (visible: boolean) => (
+      <SafeAreaInsetsContext.Provider value={{ bottom: 0, left: 0, right: 0, top: 0 }}>
+        <Popover visible={visible} onVisibleChange={onVisibleChange} actions={[{ text: '编辑' }]}>
+          <Button testID="retry-trigger">打开</Button>
+        </Popover>
+      </SafeAreaInsetsContext.Provider>
+    )
+    const view = await render(make(false))
+    await press('retry-trigger')
+    await view.rerender(make(false))
+    await press('retry-trigger')
+    expect(onVisibleChange.mock.calls).toEqual([[true], [true]])
+    await view.rerender(make(true))
+    await press('popover-action-0')
+    await act(async () => getNativePopoverProps().onRequestClose?.())
+    expect(onVisibleChange.mock.calls).toEqual([[true], [true], [false], [false]])
+    expect(getNativePopoverProps().isVisible).toBe(true)
+  })
+
+  it('provides an accessible press target for an opaque visual reference', async () => {
+    function Reference() {
+      return (
+        <View>
+          <Text>自定义 reference</Text>
+        </View>
+      )
+    }
+    const onVisibleChange = jest.fn()
+    await renderWithSafeArea(
+      <Popover accessibilityLabel="打开操作" onVisibleChange={onVisibleChange}>
+        <Reference />
+      </Popover>,
+    )
+    const reference = screen.getByRole('button', { name: '打开操作' })
+    expect(reference.props.accessibilityState).toEqual({ disabled: false, expanded: false })
+    const activation = fireEvent(reference, 'accessibilityAction', {
+      nativeEvent: { actionName: 'activate' },
+    })
+    await activation
+    expect(onVisibleChange).toHaveBeenCalledTimes(1)
+    expect(screen.getByRole('button', { name: '打开操作' }).props.accessibilityState.expanded).toBe(
+      true,
+    )
+  })
+
+  it('supports long press on a visual reference and keeps ordinary taps inactive', async () => {
+    const onVisibleChange = jest.fn()
+    await renderWithSafeArea(
+      <Popover trigger="longPress" onVisibleChange={onVisibleChange}>
+        <View>
+          <Text>长按</Text>
+        </View>
+      </Popover>,
+    )
+    await press('popover-reference')
+    expect(onVisibleChange).not.toHaveBeenCalled()
+    const longPress = fireEvent(screen.getByTestId('popover-reference'), 'longPress')
+    await longPress
+    expect(onVisibleChange).toHaveBeenCalledWith(true)
+  })
+
+  it('preserves child handlers, style and accessibility state on the existing control', async () => {
+    const onPress = jest.fn()
+    const onAccessibilityAction = jest.fn()
+    const onVisibleChange = jest.fn()
+    await renderWithSafeArea(
+      <Popover visible={false} onVisibleChange={onVisibleChange}>
+        <Button
+          testID="preserved-trigger"
+          onPress={onPress}
+          onAccessibilityAction={onAccessibilityAction}
+          accessibilityLabel="已有控件"
+          accessibilityState={{ selected: true }}
+          style={{ margin: 7 }}
+        >
+          打开
+        </Button>
+      </Popover>,
+    )
+    const trigger = screen.getByRole('button', { name: '已有控件' })
+    expect(trigger.props.accessibilityState).toMatchObject({ selected: true, expanded: false })
+    expect(getNodeStyle('preserved-trigger')).toMatchObject({ margin: 7 })
+    expect(screen.getByTestId('popover-reference').props.accessibilityRole).toBeUndefined()
+    await press('preserved-trigger')
+    expect(onPress).toHaveBeenCalledTimes(1)
+    const activation = fireEvent(trigger, 'accessibilityAction', {
+      nativeEvent: { actionName: 'activate' },
+    })
+    await activation
+    expect(onAccessibilityAction).toHaveBeenCalledTimes(1)
+    expect(onVisibleChange).toHaveBeenCalledTimes(2)
+  })
+
+  it('blocks disabled reference activation and leaves manual references untouched', async () => {
+    const onVisibleChange = jest.fn()
+    await renderWithSafeArea(
+      <Popover disabled onVisibleChange={onVisibleChange}>
+        <View>
+          <Text>禁用</Text>
+        </View>
+      </Popover>,
+    )
+    expect(screen.getByRole('button', { name: '禁用' }).props.accessibilityState.disabled).toBe(
+      true,
+    )
+    await press('popover-reference')
+    const activation = fireEvent(screen.getByTestId('popover-reference'), 'accessibilityAction', {
+      nativeEvent: { actionName: 'activate' },
+    })
+    await activation
+    expect(onVisibleChange).not.toHaveBeenCalled()
+    await cleanup()
+    await renderWithSafeArea(
+      <Popover trigger="manual" onVisibleChange={onVisibleChange}>
+        <View>
+          <Text>手动</Text>
+        </View>
+      </Popover>,
+    )
+    expect(screen.queryByRole('button')).toBeNull()
+    await press('popover-reference')
+    expect(onVisibleChange).not.toHaveBeenCalled()
+  })
+
+  it('keeps popup surface styling on root and allows list width to include custom dividers', async () => {
+    await renderWithSafeArea(
+      <Popover
+        defaultVisible
+        actionsDirection="horizontal"
+        actions={[{ text: 'A' }, { text: 'B' }, { text: 'C' }]}
+        styles={{ root: { backgroundColor: '#123456', borderRadius: 20 }, divider: { width: 5 } }}
+        style={{ backgroundColor: '#654321' }}
+      >
+        <Button>打开</Button>
+      </Popover>,
+    )
+    expect(flattenStyle(getNativePopoverProps().popoverStyle)).toMatchObject({
+      backgroundColor: '#654321',
+      borderRadius: 20,
+      overflow: 'hidden',
+    })
+    expect(
+      flattenStyle(screen.getByTestId('popover-content').props.style).backgroundColor,
+    ).toBeUndefined()
+    expect(
+      flattenStyle(screen.getByTestId('popover-actions').props.style).backgroundColor,
+    ).toBeUndefined()
+    expect(flattenStyle(screen.getByTestId('popover-actions').props.style).width).toBeUndefined()
+    expect(flattenStyle(screen.getByTestId('popover-divider-0').props.style).width).toBe(5)
+  })
+
+  it('applies the same text style precedence to primitive and native Text actions', async () => {
+    function CustomText() {
+      return (
+        <Text testID="opaque-text" style={{ color: '#abcdef' }}>
+          自定义
+        </Text>
+      )
+    }
+    await renderWithSafeArea(
+      <Popover
+        defaultVisible
+        styles={{ itemContent: { color: '#123456', fontWeight: '700' } }}
+        actions={[
+          { text: '字符串', color: '#ee0a24' },
+          {
+            text: (
+              <Text testID="native-text" style={{ color: '#ee0a24' }}>
+                原生
+              </Text>
+            ),
+            color: '#ee0a24',
+          },
+          { text: <TsukiText testID="tsuki-text">Tsuki</TsukiText> },
+          { text: <CustomText /> },
+        ]}
+      >
+        <Button>打开</Button>
+      </Popover>,
+    )
+    for (const node of [
+      screen.getByText('字符串'),
+      screen.getByTestId('native-text'),
+      screen.getByTestId('tsuki-text'),
+    ]) {
+      expect(flattenStyle(node.props.style)).toMatchObject({ color: '#123456', fontWeight: '700' })
+    }
+    expect(flattenStyle(screen.getByTestId('opaque-text').props.style).color).toBe('#abcdef')
+  })
+
+  it('excludes decorative icons and accepts an explicit action label', async () => {
+    await renderWithSafeArea(
+      <Popover
+        defaultVisible
+        actions={[
+          {
+            text: (
+              <View>
+                <Text>编辑</Text>
+              </View>
+            ),
+            icon: <Text>★</Text>,
+            accessibilityLabel: '编辑内容',
+          },
+        ]}
+      >
+        <Button>打开</Button>
+      </Popover>,
+    )
+    expect(screen.getByRole('button', { name: '编辑内容' })).toBeTruthy()
+    expect(screen.queryByText('★')).toBeNull()
+    expect(screen.getByText('★', { includeHiddenElements: true })).toBeTruthy()
+  })
+
+  it('blocks action selection and hides retained content during exit', async () => {
+    jest.requireMock('react-native-popover-view').settings.keepMounted = true
+    const onSelect = jest.fn()
+    const make = (visible: boolean) => (
+      <SafeAreaInsetsContext.Provider value={{ bottom: 0, left: 0, right: 0, top: 0 }}>
+        <Popover visible={visible} onSelect={onSelect} actions={[{ text: '编辑' }]}>
+          <Button>打开</Button>
+        </Popover>
+      </SafeAreaInsetsContext.Provider>
+    )
+    const view = await render(make(true))
+    await view.rerender(make(false))
+    expect(screen.queryByRole('button', { name: '编辑' })).toBeNull()
+    const content = screen.getByTestId('popover-content', { includeHiddenElements: true })
+    expect(content.props.pointerEvents).toBe('none')
+    expect(content.props.accessibilityElementsHidden).toBe(true)
+    const pressAction = fireEvent.press(
+      screen.getByTestId('popover-action-0', { includeHiddenElements: true }),
+    )
+    await pressAction
+    expect(onSelect).not.toHaveBeenCalled()
   })
 })

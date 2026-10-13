@@ -11,7 +11,7 @@ import type {
   ImagePreviewRenderImageContext,
 } from './types'
 import type { NormalizedImage } from './utils'
-import { interpolateRect, normalizeImageSource } from './utils'
+import { getTransitionGeometry, normalizeImageSource } from './utils'
 
 export interface ImagePreviewTransitionProps {
   image: ImagePreviewImage
@@ -22,6 +22,7 @@ export interface ImagePreviewTransitionProps {
   index: number
   renderImage?: ImagePreviewProps['renderImage']
   onImageReady?: (index: number, dimensions?: { width: number; height: number }) => void
+  onImageError?: (index: number) => void
 }
 
 /** Renders a single image between two window-coordinate rectangles. */
@@ -34,20 +35,37 @@ export function ImagePreviewTransition({
   index,
   renderImage,
   onImageReady,
+  onImageError,
 }: ImagePreviewTransitionProps) {
   const normalized = useMemo(
     () => normalizedProp ?? normalizeImageSource(image),
     [image, normalizedProp],
   )
 
-  const imageStyle = useAnimatedStyle(() => {
-    const rect = interpolateRect(fromRect, toRect, progress.value)
+  const base = getTransitionGeometry(fromRect, toRect, 0).base
+  const frameStyle = {
+    position: 'absolute' as const,
+    left: base.x,
+    top: base.y,
+    width: base.width,
+    height: base.height,
+    overflow: 'hidden' as const,
+  }
+  const frameTransform = useAnimatedStyle(() => {
+    const geometry = getTransitionGeometry(fromRect, toRect, progress.value)
     return {
-      height: rect.height,
-      left: rect.x,
-      position: 'absolute' as const,
-      top: rect.y,
-      width: rect.width,
+      transform: [
+        { translateX: geometry.translateX },
+        { translateY: geometry.translateY },
+        { scaleX: geometry.scaleX },
+        { scaleY: geometry.scaleY },
+      ],
+    }
+  }, [fromRect, progress, toRect])
+  const imageTransform = useAnimatedStyle(() => {
+    const geometry = getTransitionGeometry(fromRect, toRect, progress.value)
+    return {
+      transform: [{ scaleX: geometry.imageScaleX }, { scaleY: geometry.imageScaleY }],
     }
   }, [fromRect, progress, toRect])
 
@@ -76,7 +94,8 @@ export function ImagePreviewTransition({
   }, [index, onImageReady])
   const handleError = useCallback(() => {
     loadErrorRef.current = true
-  }, [])
+    onImageError?.(index)
+  }, [index, onImageError])
   const renderContext: ImagePreviewRenderImageContext = {
     source: normalized.source,
     style: { flex: 1 },
@@ -89,26 +108,28 @@ export function ImagePreviewTransition({
 
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill} testID="image-preview-transition">
-      <Animated.View style={imageStyle}>
-        {renderImage ? (
-          renderImage(image, index, renderContext)
-        ) : (
-          <Image
-            source={normalized.source}
-            style={{ flex: 1 }}
-            resizeMode="contain"
-            onLoadStart={handleLoadStart}
-            onLoad={(event: ImageLoadEvent) =>
-              handleLoad({
-                width: event.nativeEvent.source.width,
-                height: event.nativeEvent.source.height,
-              })
-            }
-            onLoadEnd={handleLoadEnd}
-            onError={handleError}
-            testID={`image-preview-transition-native-image-${index}`}
-          />
-        )}
+      <Animated.View style={[frameStyle, frameTransform]}>
+        <Animated.View style={[StyleSheet.absoluteFill, imageTransform]}>
+          {renderImage ? (
+            renderImage(image, index, renderContext)
+          ) : (
+            <Image
+              source={normalized.source}
+              style={{ flex: 1 }}
+              resizeMode="contain"
+              onLoadStart={handleLoadStart}
+              onLoad={(event: ImageLoadEvent) =>
+                handleLoad({
+                  width: event.nativeEvent.source.width,
+                  height: event.nativeEvent.source.height,
+                })
+              }
+              onLoadEnd={handleLoadEnd}
+              onError={handleError}
+              testID={`image-preview-transition-native-image-${index}`}
+            />
+          )}
+        </Animated.View>
       </Animated.View>
     </View>
   )

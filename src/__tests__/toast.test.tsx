@@ -1,5 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { useState } from 'react'
+import CheckOutlined from '@ant-design/icons-svg/lib/asn/CheckOutlined'
+import * as transition from '../motion/useTransitionProgress'
 import type { ReactNode } from 'react'
 import { Animated, StyleSheet, Text, View } from 'react-native'
 import {
@@ -88,6 +90,113 @@ describe('Toast', () => {
     })
     expect(screen.queryByText('更新消息')).toBeNull()
     await view.unmount()
+  })
+
+  it('restarts the timer when the same imperative Toast is shown again', async () => {
+    jest.useFakeTimers()
+    await render(<AppProvider />)
+    await act(async () => {
+      showToast('重复提示')
+    })
+    await act(async () => {
+      jest.advanceTimersByTime(1500)
+    })
+    await act(async () => {
+      showToast('重复提示')
+    })
+    await act(async () => {
+      jest.advanceTimersByTime(500)
+    })
+    expect(screen.getByText('重复提示')).toBeTruthy()
+    await act(async () => {
+      jest.advanceTimersByTime(1500)
+    })
+    expect(screen.queryByText('重复提示')).toBeNull()
+  })
+
+  it('keeps the next Toast opened from onClose', async () => {
+    await render(<AppProvider />)
+    await act(async () => {
+      showToast({
+        message: '旧提示',
+        duration: 0,
+        onClose: () => {
+          showToast({ message: '新提示', duration: 0 })
+        },
+      })
+    })
+    await act(async () => {
+      closeToast()
+    })
+    expect(screen.getByText('新提示')).toBeTruthy()
+    await act(async () => {
+      closeToast()
+    })
+    expect(screen.queryByText('新提示')).toBeNull()
+  })
+
+  it('renders Ant Design icon definitions and respects an explicit null icon', async () => {
+    const view = await render(
+      <AppProvider>
+        <Toast show duration={0} icon={CheckOutlined} message="定义图标" />
+      </AppProvider>,
+    )
+    expect(screen.getByRole('alert').queryAll((node) => node.type === 'RNSVGPath')).toHaveLength(1)
+    await view.rerender(
+      <AppProvider>
+        <Toast show duration={0} type="success" icon={null} message="无图标" />
+      </AppProvider>,
+    )
+    expect(screen.getByRole('alert').queryAll((node) => node.type === 'RNSVGPath')).toHaveLength(0)
+  })
+
+  it('applies root styles to the bubble and content styles to custom content', async () => {
+    await render(
+      <AppProvider>
+        <Toast
+          show
+          duration={0}
+          style={{ backgroundColor: '#123456' }}
+          styles={{
+            root: { borderRadius: 12 },
+            content: { padding: 7 },
+          }}
+          message={<View testID="toast-custom" />}
+        />
+      </AppProvider>,
+    )
+    const bubble = screen.getByRole('alert')
+    expect(StyleSheet.flatten(bubble.props.style)).toMatchObject({
+      backgroundColor: '#123456',
+      borderRadius: 12,
+    })
+    expect(StyleSheet.flatten(bubble.parent?.props.style).backgroundColor).toBeUndefined()
+    expect(
+      StyleSheet.flatten(screen.getByTestId('toast-custom').parent?.props.style),
+    ).toMatchObject({ padding: 7 })
+  })
+
+  it('hides accessibility while the exit transition is still running', async () => {
+    const useTransitionProgress = transition.useTransitionProgress
+    jest
+      .spyOn(transition, 'useTransitionProgress')
+      .mockImplementation((options) =>
+        useTransitionProgress({ ...options, onTransitionEnd: undefined }),
+      )
+    const view = await render(
+      <AppProvider>
+        <Toast show duration={0} testID="exiting-toast" message="退出" />
+      </AppProvider>,
+    )
+    await view.rerender(
+      <AppProvider>
+        <Toast show={false} duration={0} testID="exiting-toast" message="退出" />
+      </AppProvider>,
+    )
+    const bubble = screen.getByTestId('exiting-toast', { includeHiddenElements: true })
+    expect(bubble.props.accessible).toBe(false)
+    expect(bubble.props.accessibilityElementsHidden).toBe(true)
+    expect(bubble.props.importantForAccessibility).toBe('no-hide-descendants')
   })
 
   it('renders loading, success, fail, and custom ReactNode content', async () => {

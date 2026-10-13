@@ -10,6 +10,7 @@ import ItemHeightExample from './examples/item-height'
 import ToolbarExample from './examples/toolbar'
 import LoadingExample from './examples/loading'
 import EmptyExample from './examples/empty'
+import SemanticExample from './examples/semantic'
 
 /**
  * @title Picker overview
@@ -20,6 +21,12 @@ export default function PickerOverview() {
     <FixtureOverview
       mode="single"
       examples={[
+        {
+          Component: SemanticExample,
+          description: '完整滚轮区域、独立操作样式，以及空列后的选择值回写。',
+          id: 'semantic',
+          title: '语义样式与空列',
+        },
         {
           Component: BasicExample,
           description: '基础示例由 Cell 打开 Popup，Picker 只负责选择和确认。',

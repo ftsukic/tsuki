@@ -48,6 +48,7 @@ export function AvatarGroup({
   const visibleAvatars =
     normalizedMaxCount === undefined ? avatars : avatars.slice(0, normalizedMaxCount)
   const overflowCount = avatars.length - visibleAvatars.length
+  const OverflowHost = onOverflowPress ? Pressable : View
   const semantic = resolveStyles(styles, {
     props: {
       ...viewProps,
@@ -99,21 +100,23 @@ export function AvatarGroup({
         )
       })}
       {showOverflow && overflowCount > 0 ? (
-        <Pressable
-          disabled={!onOverflowPress}
-          onPress={onOverflowPress}
-          accessibilityRole={onOverflowPress ? 'button' : undefined}
+        <OverflowHost
+          {...(onOverflowPress ? { onPress: onOverflowPress, pressStyle: 'opacity' as const } : {})}
+          accessible
+          accessibilityRole={onOverflowPress ? 'button' : 'image'}
           accessibilityLabel={`还有 ${overflowCount} 个头像`}
-          pressStyle="opacity"
           style={[
             {
-              marginLeft: token.groupOverlapping,
+              marginLeft: visibleAvatars.length > 0 ? token.groupOverlapping : 0,
               borderRadius: resolvedOverflowRadius,
             },
             semantic?.overflow,
           ]}
         >
           <Avatar
+            accessible={false}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
             size={groupSize}
             shape={groupShape}
             borderRadius={borderRadius}
@@ -124,7 +127,7 @@ export function AvatarGroup({
           >
             {`+${overflowCount}`}
           </Avatar>
-        </Pressable>
+        </OverflowHost>
       ) : null}
     </View>
   )

@@ -9,7 +9,6 @@ export interface NotifyStyleState {
 
 export interface NotifySemanticStyles {
   root?: StyleProp<ViewStyle>
-  container?: StyleProp<ViewStyle>
   content?: StyleProp<TextStyle>
 }
 

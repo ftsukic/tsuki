@@ -64,6 +64,11 @@ describe('Picker imperative API', () => {
     await act(async () => {
       resultPromise = showPicker({ columns: options, value: ['first'], onChange, onConfirm })
     })
+    // React 19 commits the layout state update asynchronously.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(screen.getByTestId('picker', { includeHiddenElements: true }), 'layout', {
+      nativeEvent: { layout: { width: 320, height: 280, x: 0, y: 0 } },
+    })
     await press(screen.getByTestId('picker-item-0-1'))
     expect(finish).toEqual(expect.any(Function))
     await press(screen.getByTestId('picker-confirm'))

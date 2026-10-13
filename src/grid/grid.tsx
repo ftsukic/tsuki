@@ -43,9 +43,11 @@ export function GridComponent({
     <View {...viewProps} style={style}>
       <GridContext.Provider value={context}>
         <View
+          accessible={false}
           style={{
             flexDirection: 'row',
             flexWrap: 'wrap',
+            minWidth: 0,
             marginHorizontal: -halfGutter,
             marginVertical: -halfGutter,
           }}
@@ -53,8 +55,11 @@ export function GridComponent({
           {items.map((item, index) => (
             <View
               key={index}
+              accessible={false}
               style={{
                 flexBasis: `${100 / resolvedColumnNum}%`,
+                width: `${100 / resolvedColumnNum}%`,
+                minWidth: 0,
                 flexGrow: 0,
                 flexShrink: 0,
                 paddingHorizontal: halfGutter,

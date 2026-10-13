@@ -27,6 +27,7 @@ export function getSegmentedStyles(
       overflow: 'hidden',
       padding: token.padding,
       position: 'relative',
+      width: block ? '100%' : undefined,
     },
     selectedBackground: {
       backgroundColor: disabled

@@ -9,7 +9,7 @@ export default function LoadingTextFixture() {
   return (
     <View style={styles.container}>
       <Loading color="#1989FA" textColor="#344054" textSize={14}>
-        正在加载
+        正在加载 {3} 项
       </Loading>
     </View>
   )

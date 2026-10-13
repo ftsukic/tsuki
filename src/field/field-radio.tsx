@@ -1,3 +1,4 @@
+import { getFieldAccessibility } from './accessibility'
 import type { ReactNode } from 'react'
 import type { DimensionValue } from 'react-native'
 import type { CellProps } from '../cell'
@@ -19,7 +20,7 @@ type RadioAdapterProps = Omit<
 export interface FieldRadioProps extends FieldCellProps, RadioAdapterProps {
   title?: ReactNode
   titleExtra?: ReactNode
-  label?: ReactNode
+  description?: ReactNode
   value?: RadioValue
   defaultValue?: RadioValue
   onChange?: (value: RadioValue) => void
@@ -44,12 +45,12 @@ export function FieldRadio(props: FieldRadioProps) {
     gap,
     title,
     titleExtra,
-    label,
+    description,
     value,
     defaultValue,
     onChange,
     valueExtra,
-    extra,
+    trailing,
     required,
     disabled,
     readOnly,
@@ -61,8 +62,8 @@ export function FieldRadio(props: FieldRadioProps) {
     titleWidth,
     titleAlign,
     valueAlign,
-    icon,
-    isLink,
+    leading,
+    showArrow,
     clickable,
     arrowDirection,
     onPress,
@@ -90,11 +91,12 @@ export function FieldRadio(props: FieldRadioProps) {
     <Cell
       title={title}
       titleExtra={titleExtra}
-      label={label}
+      description={description}
       value={
         <Radio.Group
           {...groupProps}
-          style={semantic?.content}
+          {...getFieldAccessibility(props)}
+          style={[{ minWidth: 0, flexShrink: 1 }, semantic?.control]}
           options={options}
           value={currentValue}
           onChange={setValue}
@@ -111,14 +113,14 @@ export function FieldRadio(props: FieldRadioProps) {
         </Radio.Group>
       }
       valueExtra={valueExtra}
-      extra={extra}
+      trailing={trailing}
       required={required}
       disabled={disabled}
       vertical={vertical}
       valueAlign={valueAlign}
       center={props.center}
-      icon={icon}
-      isLink={isLink}
+      leading={leading}
+      showArrow={showArrow}
       clickable={clickable}
       arrowDirection={arrowDirection}
       onPress={onPress}

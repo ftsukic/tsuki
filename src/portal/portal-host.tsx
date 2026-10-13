@@ -2,12 +2,14 @@ import { Component } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { PortalContext } from './context'
 import { PortalManager } from './portal-manager'
+import { BackgroundScrollLockContext, createScrollLockStore } from './scroll-lock'
 import type { PortalHostProps, PortalKey, PortalMethods } from './types'
 import type { ReactNode } from 'react'
 
 let activeManager: PortalMethods | null = null
 const hostRegistry: PortalMethods[] = []
 let nextPortalKey = 0
+const portalOwners = new Map<PortalKey, PortalMethods>()
 
 type Operation =
   | { type: 'mount'; key: number; children: ReactNode }
@@ -23,6 +25,7 @@ const styles = StyleSheet.create({
 export class PortalHost extends Component<PortalHostProps> {
   static displayName = 'Portal.Host'
 
+  private readonly scrollLock = createScrollLockStore()
   private manager: PortalManager | null = null
   private queue: Operation[] = []
 
@@ -47,6 +50,9 @@ export class PortalHost extends Component<PortalHostProps> {
     if (hostIndex >= 0) hostRegistry.splice(hostIndex, 1)
     activeManager = hostRegistry[hostRegistry.length - 1] ?? null
     this.queue = []
+    for (const [key, owner] of portalOwners) {
+      if (owner === this.methods) portalOwners.delete(key)
+    }
   }
 
   private flushQueue() {
@@ -121,14 +127,16 @@ export class PortalHost extends Component<PortalHostProps> {
 
   render() {
     return (
-      <PortalContext.Provider value={this.methods}>
-        <View collapsable={false} style={styles.container}>
+      <BackgroundScrollLockContext.Provider value={this.scrollLock}>
+        <PortalContext.Provider value={this.methods}>
           <View collapsable={false} style={styles.container}>
-            {this.props.children}
+            <View collapsable={false} style={styles.container}>
+              {this.props.children}
+            </View>
+            <PortalManager ref={this.setManager} />
           </View>
-          <PortalManager ref={this.setManager} />
-        </View>
-      </PortalContext.Provider>
+        </PortalContext.Provider>
+      </BackgroundScrollLockContext.Provider>
     )
   }
 }
@@ -138,13 +146,18 @@ export function mountPortal(children: ReactNode): PortalKey {
     throw new Error('PortalHost must be rendered before mounting an imperative portal')
   }
 
-  return activeManager.mount(children)
+  const owner = activeManager
+  const key = owner.mount(children)
+  portalOwners.set(key, owner)
+  return key
 }
 
 export function updatePortal(key: PortalKey, children: ReactNode): void {
-  activeManager?.update(key, children)
+  portalOwners.get(key)?.update(key, children)
 }
 
 export function unmountPortal(key: PortalKey): void {
-  activeManager?.unmount(key)
+  const owner = portalOwners.get(key)
+  portalOwners.delete(key)
+  owner?.unmount(key)
 }

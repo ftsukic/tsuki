@@ -1,6 +1,6 @@
 import * as Reanimated from 'react-native-reanimated'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { getButtonToken } from '../button/token'
 import { getSegmentedStyles } from '../segmented/style'
 import { ConfigProvider, Segmented, getDesignToken, getSegmentedToken } from '..'
@@ -60,6 +60,31 @@ describe('Segmented', () => {
     expect(screen.getAllByRole('radio')[0].props.accessibilityState?.selected).toBe(true)
   })
 
+  it('keeps the selected option controlled by value', async () => {
+    const onChange = jest.fn()
+    const options = ['one', 'two'] as const
+
+    const view = await render(<Segmented value="one" onChange={onChange} options={options} />)
+
+    await press(screen.getAllByRole('radio')[1])
+
+    expect(onChange).toHaveBeenCalledWith('two')
+    expect(screen.getAllByRole('radio')[0].props.accessibilityState?.selected).toBe(true)
+    expect(screen.getAllByRole('radio')[1].props.accessibilityState?.selected).toBe(false)
+
+    view.rerender(<Segmented value="two" onChange={onChange} options={options} />)
+
+    expect(screen.getAllByRole('radio')[1].props.accessibilityState?.selected).toBe(true)
+  })
+
+  it('uses an option accessibilityLabel for custom labels without text', async () => {
+    await render(
+      <Segmented options={[{ label: <View />, value: 'icon', accessibilityLabel: '图标模式' }]} />,
+    )
+
+    expect(screen.getByRole('radio', { name: '图标模式' })).toBeTruthy()
+  })
+
   it('selects the first enabled option and blocks disabled options and controls', async () => {
     const onChange = jest.fn()
 
@@ -111,6 +136,27 @@ describe('Segmented', () => {
 
     expect(activeItemStyle.backgroundColor).toBeUndefined()
     expect(labelStyle).toMatchObject({ color: token.colorText, fontWeight: '600', fontSize: 16 })
+  })
+
+  it('passes inherited View props to the semantic style resolver', async () => {
+    await render(
+      <Segmented
+        testID="semantic-props"
+        accessibilityLabel="筛选模式"
+        options={['one', 'two']}
+        styles={({ props }) => ({
+          root: { opacity: props.accessibilityLabel === '筛选模式' ? 0.8 : 0.2 },
+        })}
+      />,
+    )
+
+    expect(StyleSheet.flatten(screen.getByTestId('semantic-props').props.style).opacity).toBe(0.8)
+  })
+
+  it('sets the root width when block is enabled', async () => {
+    await render(<Segmented block testID="block" options={['one', 'two']} />)
+
+    expect(StyleSheet.flatten(screen.getByTestId('block').props.style).width).toBe('100%')
   })
 
   it('applies selectedTextColor to the active item without changing inactive labels', async () => {

@@ -11,11 +11,21 @@ export function isInputAffixVisible(value: ReactNode): boolean {
   return value !== null && value !== undefined && value !== false
 }
 
-export function renderInputAffix(value: ReactNode, style: StyleProp<TextStyle>, wrapNode = false) {
+export function renderInputAffix(
+  value: ReactNode,
+  style: StyleProp<ViewStyle>,
+  textStyle?: StyleProp<TextStyle>,
+) {
   if (!isInputAffixVisible(value)) return null
-  if (typeof value === 'string' || typeof value === 'number')
-    return <Text style={style}>{value}</Text>
-  return wrapNode ? <View style={style as StyleProp<ViewStyle>}>{value}</View> : value
+  return (
+    <View style={style}>
+      {typeof value === 'string' || typeof value === 'number' ? (
+        <Text style={textStyle}>{value}</Text>
+      ) : (
+        value
+      )}
+    </View>
+  )
 }
 
 export function InputClear({
@@ -56,6 +66,9 @@ export function InputClear({
     <Pressable
       accessibilityRole="button"
       accessibilityLabel="清除输入"
+      accessibilityElementsHidden={!showClear}
+      importantForAccessibility={showClear ? 'auto' : 'no-hide-descendants'}
+      accessible={showClear}
       hitSlop={{
         top: token.paddingHorizontal,
         bottom: token.paddingHorizontal,

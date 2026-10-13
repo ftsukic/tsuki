@@ -19,10 +19,12 @@ export default function FieldThemeFixture() {
     >
       <FieldPicker
         title="城市"
+        description="标题下说明"
+        help="控件下帮助文字"
         defaultValue={['shanghai']}
         columns={cities}
         errorMessage="请选择城市"
-        styles={{ extra: { fontStyle: 'italic' } }}
+        styles={{ help: { fontStyle: 'italic' } }}
       />
     </ConfigProvider>
   )

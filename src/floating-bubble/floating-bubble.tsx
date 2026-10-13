@@ -1,8 +1,11 @@
 import {
+  cloneElement,
   forwardRef,
+  isValidElement,
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useReducer,
   useRef,
@@ -15,9 +18,13 @@ import { Gesture, GestureDetector } from '../gesture'
 import { Pressable } from '../pressable'
 import { Portal } from '../portal'
 import { resolveStyles } from '../style'
-import { useComponentToken, useToken } from '../theme'
+import { useComponentToken } from '../theme'
+import { Icon } from '../icon'
+import type { IconProps } from '../icon'
+import { snapMagneticOffset } from '../motion/gesture'
+import { useMotionConfig } from '../motion/useMotionConfig'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
-import { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
+import { cancelAnimation, useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { getFloatingBubbleStyles } from './style'
 import { getFloatingBubbleToken } from './token'
@@ -133,10 +140,14 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
     },
     ref,
   ) {
-    const { width: viewportWidth, height: viewportHeight } = useWindowDimensions()
+    const window = useWindowDimensions()
+    const [portalSize, setPortalSize] = useState<{ width: number; height: number }>()
+    const viewportWidth = portalSize?.width ?? window.width
+    const viewportHeight = portalSize?.height ?? window.height
     const safeAreaInsets = useContext(SafeAreaInsetsContext)
-    const { token: themeToken } = useToken()
     const token = useComponentToken('FloatingBubble', getFloatingBubbleToken)
+    const policy = useMotionConfig()
+    const animationDuration = policy.duration(token.animationDuration)
     const disabled = disabledProp === true
     const resolvedGap = Number.isFinite(gap) ? Math.max(0, gap as number) : token.gap
     const topInset = safeAreaInsetTop ? (safeAreaInsets?.top ?? 0) : 0
@@ -149,7 +160,8 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
       0,
     )
     const initializedRef = useRef(false)
-    const currentOffsetRef = useRef<FloatingBubbleOffset>({ x: 0, y: 0 })
+    const mountedRef = useRef(false)
+    const committedSessionRef = useRef(-1)
     const boundsRef = useRef<FloatingBubbleBounds>({ minX: 0, maxX: 0, minY: 0, maxY: 0 })
     const offsetPropRef = useRef(offset)
     const onOffsetChangeRef = useRef(onOffsetChange)
@@ -183,16 +195,42 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
       [bottomInset, bubbleSize, resolvedGap, topInset, viewportHeight, viewportWidth],
     )
     boundsRef.current = bounds
+    const viewportBounds = useMemo(
+      () =>
+        resolveBounds({
+          viewportWidth,
+          viewportHeight,
+          bubbleWidth: bubbleSize?.width ?? 0,
+          bubbleHeight: bubbleSize?.height ?? 0,
+          gap: 0,
+          topInset,
+          bottomInset,
+        }),
+      [viewportWidth, viewportHeight, bubbleSize, topInset, bottomInset],
+    )
 
     const commitOffset = useCallback(
-      (x: number, y: number) => {
+      (x: number, y: number, session: number) => {
+        if (
+          !mountedRef.current ||
+          session !== dragSession.value ||
+          committedSessionRef.current === session
+        )
+          return
+        committedSessionRef.current = session
         const next = { x, y }
-        currentOffsetRef.current = next
         onOffsetChangeRef.current?.(next)
         onOffsetChangeEndRef.current?.(next)
         if (offsetPropRef.current !== undefined) requestControlledReconcile()
       },
-      [requestControlledReconcile],
+      [dragSession, requestControlledReconcile],
+    )
+
+    const updateDragging = useCallback(
+      (value: boolean, session: number) => {
+        if (mountedRef.current && session === dragSession.value) setDragging(value)
+      },
+      [dragSession],
     )
 
     const handleLayout = useCallback(
@@ -208,29 +246,56 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
       [userOnLayout],
     )
 
+    const handlePortalLayout = useCallback((event: LayoutChangeEvent) => {
+      const { width, height } = event.nativeEvent.layout
+      if (Number.isFinite(width) && Number.isFinite(height)) {
+        setPortalSize((current) =>
+          current?.width === width && current.height === height ? current : { width, height },
+        )
+      }
+    }, [])
+
     useEffect(() => {
+      mountedRef.current = true
+      return () => {
+        mountedRef.current = false
+        dragSession.value += 1
+        cancelAnimation(translateX)
+        cancelAnimation(translateY)
+      }
+    }, [dragSession, translateX, translateY])
+
+    const offsetX = offset?.x
+    const offsetY = offset?.y
+    const defaultOffsetRef = useRef(defaultOffset)
+    defaultOffsetRef.current = defaultOffset
+
+    useLayoutEffect(() => {
+      dragSession.value += 1
+      cancelAnimation(translateX)
+      cancelAnimation(translateY)
+      draggingSV.value = false
+      setDragging(false)
       minX.value = bounds.minX
       maxX.value = bounds.maxX
       minY.value = bounds.minY
       maxY.value = bounds.maxY
 
-      if (!bubbleSize || viewportWidth <= 0 || viewportHeight <= 0) return
+      if (!portalSize || !bubbleSize || viewportWidth <= 0 || viewportHeight <= 0) return
 
       if (!initializedRef.current) {
-        const next = getInitialOffset(offset ?? defaultOffset, bounds)
+        const next = getInitialOffset(offsetPropRef.current ?? defaultOffsetRef.current, bounds)
         translateX.value = next.x
         translateY.value = next.y
-        currentOffsetRef.current = next
         initializedRef.current = true
         setReady(true)
         return
       }
 
-      if (offset !== undefined) {
-        const next = getInitialOffset(offset, bounds)
+      if (offsetX !== undefined && offsetY !== undefined) {
+        const next = getInitialOffset({ x: offsetX, y: offsetY }, bounds)
         translateX.value = next.x
         translateY.value = next.y
-        currentOffsetRef.current = next
         return
       }
 
@@ -239,16 +304,46 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
     }, [
       bounds,
       bubbleSize,
-      defaultOffset,
+      portalSize,
+      dragSession,
+      draggingSV,
       maxX,
       maxY,
       minX,
       minY,
-      offset,
+      offsetX,
+      offsetY,
       translateX,
       translateY,
       viewportHeight,
       viewportWidth,
+    ])
+
+    useLayoutEffect(() => {
+      const wasDragging = draggingSV.value
+      dragSession.value += 1
+      cancelAnimation(translateX)
+      cancelAnimation(translateY)
+      draggingSV.value = false
+      setDragging(false)
+      if (wasDragging && (disabled || axis === 'lock')) {
+        const current = clampOffset({ x: translateX.value, y: translateY.value }, boundsRef.current)
+        commitOffset(current.x, current.y, dragSession.value)
+      } else if (offsetPropRef.current !== undefined) {
+        const controlled = clampOffset(offsetPropRef.current, boundsRef.current)
+        translateX.value = controlled.x
+        translateY.value = controlled.y
+      }
+    }, [
+      axis,
+      disabled,
+      magnetic,
+      animationDuration,
+      commitOffset,
+      dragSession,
+      draggingSV,
+      translateX,
+      translateY,
     ])
 
     useEffect(() => {
@@ -257,37 +352,50 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
       const controlled = clampOffset(offsetPropRef.current, boundsRef.current)
       translateX.value = controlled.x
       translateY.value = controlled.y
-      currentOffsetRef.current = controlled
     }, [controlledCommitVersion, translateX, translateY])
 
     const gesture = useMemo(() => {
       const pan = Gesture.Pan()
-        .enabled(!disabled && axis !== 'lock')
+        .enabled(ready && !disabled && axis !== 'lock')
         .minDistance(GESTURE_MIN_DISTANCE)
         .maxPointers(1)
         .onStart(() => {
           'worklet'
           dragSession.value += 1
+          cancelAnimation(translateX)
+          cancelAnimation(translateY)
+          const current = clampOffset({ x: translateX.value, y: translateY.value }, viewportBounds)
+          translateX.value = current.x
+          translateY.value = current.y
           dragStartX.value = translateX.value
           dragStartY.value = translateY.value
           draggingSV.value = true
-          scheduleOnRN(setDragging, true)
+          scheduleOnRN(updateDragging, true, dragSession.value)
         })
         .onUpdate((event) => {
           'worklet'
+          if (!draggingSV.value) return
           if (axis !== 'y') {
-            translateX.value = clamp(dragStartX.value + event.translationX, minX.value, maxX.value)
+            translateX.value = clamp(
+              dragStartX.value + event.translationX,
+              Math.min(minX.value, dragStartX.value),
+              Math.max(maxX.value, dragStartX.value),
+            )
           }
           if (axis !== 'x') {
-            translateY.value = clamp(dragStartY.value + event.translationY, minY.value, maxY.value)
+            translateY.value = clamp(
+              dragStartY.value + event.translationY,
+              Math.min(minY.value, dragStartY.value),
+              Math.max(maxY.value, dragStartY.value),
+            )
           }
         })
-        .onEnd((_, success) => {
+        .onEnd((event, success) => {
           'worklet'
           if (!draggingSV.value) return
 
           draggingSV.value = false
-          scheduleOnRN(setDragging, false)
+          scheduleOnRN(updateDragging, false, dragSession.value)
           const current = clampOffset(
             { x: translateX.value, y: translateY.value },
             { minX: minX.value, maxX: maxX.value, minY: minY.value, maxY: maxY.value },
@@ -295,7 +403,7 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
           translateX.value = current.x
           translateY.value = current.y
           if (!success) {
-            scheduleOnRN(commitOffset, current.x, current.y)
+            scheduleOnRN(commitOffset, current.x, current.y, dragSession.value)
             return
           }
 
@@ -307,31 +415,48 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
           const changedX = target.x !== current.x
           const changedY = target.y !== current.y
           const session = dragSession.value
-          const duration = themeToken.motion ? Math.max(0, token.animationDuration) : 0
+          const duration = animationDuration
           const finish = (finished?: boolean) => {
             'worklet'
             if (finished && session === dragSession.value) {
-              scheduleOnRN(commitOffset, target.x, target.y)
+              scheduleOnRN(commitOffset, target.x, target.y, session)
             }
           }
 
           if (!changedX && !changedY) {
-            scheduleOnRN(commitOffset, current.x, current.y)
+            scheduleOnRN(commitOffset, current.x, current.y, session)
             return
           }
 
           if (duration === 0) {
             translateX.value = target.x
             translateY.value = target.y
-            scheduleOnRN(commitOffset, target.x, target.y)
+            scheduleOnRN(commitOffset, target.x, target.y, session)
             return
           }
 
           if (changedX) {
-            translateX.value = withTiming(target.x, { duration }, finish)
+            translateX.value = snapMagneticOffset(
+              target.x,
+              duration,
+              finish,
+              axis === 'y' ? 0 : event.velocityX,
+            )
           }
           if (changedY) {
-            translateY.value = withTiming(target.y, { duration }, changedX ? undefined : finish)
+            translateY.value = snapMagneticOffset(
+              target.y,
+              duration,
+              changedX ? undefined : finish,
+              axis === 'x' ? 0 : event.velocityY,
+            )
+          }
+        })
+        .onFinalize(() => {
+          'worklet'
+          if (draggingSV.value) {
+            draggingSV.value = false
+            scheduleOnRN(updateDragging, false, dragSession.value)
           }
         })
 
@@ -346,9 +471,10 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
       const testID = pressableProps.testID
       if (testID) pan.withTestId(`${testID}-gesture`)
 
-      return Gesture.Exclusive(pan, Gesture.Native().enabled(!disabled))
+      return Gesture.Exclusive(pan, Gesture.Native().enabled(ready && !disabled))
     }, [
       axis,
+      animationDuration,
       commitOffset,
       disabled,
       dragSession,
@@ -361,17 +487,22 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
       minX,
       minY,
       pressableProps.testID,
-      themeToken.motion,
-      token.animationDuration,
+      ready,
       translateX,
       translateY,
+      updateDragging,
+      viewportBounds,
     ])
 
     const animatedStyle = useAnimatedStyle(
       () => ({
-        transform: [{ translateX: translateX.value }, { translateY: translateY.value }],
+        // Allow a small rebound inside the gap, without crossing the visible safe viewport.
+        transform: [
+          { translateX: clamp(translateX.value, viewportBounds.minX, viewportBounds.maxX) },
+          { translateY: clamp(translateY.value, viewportBounds.minY, viewportBounds.maxY) },
+        ],
       }),
-      [translateX, translateY],
+      [translateX, translateY, viewportBounds],
     )
     const resolvedStyles = useMemo(() => getFloatingBubbleStyles(token), [token])
     const bubbleProps: FloatingBubbleProps = {
@@ -397,17 +528,36 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
       props: bubbleProps,
       state: { dragging },
     })
-    const content = children ?? icon
+    const resolvedIcon =
+      isValidElement<IconProps>(icon) && icon.type === Icon
+        ? cloneElement(icon, {
+            color: icon.props.color ?? token.color,
+            size: icon.props.size ?? token.iconSize,
+          })
+        : icon
+    const content = children !== undefined ? children : resolvedIcon
 
     return (
       <Portal>
-        <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+        <View
+          pointerEvents="box-none"
+          style={StyleSheet.absoluteFill}
+          onLayout={handlePortalLayout}
+        >
           <GestureDetector gesture={gesture}>
             <Pressable
               ref={ref as Ref<never>}
               {...pressableProps}
               accessibilityRole={pressableProps.accessibilityRole ?? 'button'}
-              disabled={disabled}
+              accessible={ready ? pressableProps.accessible : false}
+              accessibilityElementsHidden={
+                ready ? pressableProps.accessibilityElementsHidden : true
+              }
+              importantForAccessibility={
+                ready ? pressableProps.importantForAccessibility : 'no-hide-descendants'
+              }
+              pointerEvents={ready ? pressableProps.pointerEvents : 'none'}
+              disabled={disabled || !ready}
               onLayout={handleLayout}
               onPress={onPress}
               pressStyle="opacity"

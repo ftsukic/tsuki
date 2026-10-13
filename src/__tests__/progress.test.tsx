@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react-native'
-import { Animated, StyleSheet, View } from 'react-native'
+import { act, render, screen } from '@testing-library/react-native'
+import { Animated, PlatformColor, StyleSheet, Text, View } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
 import { ConfigProvider, Progress } from '..'
 
@@ -111,11 +111,12 @@ describe('Progress', () => {
     expect(portion).toBeTruthy()
   })
 
-  it('animates percentage updates with the Progress token duration', async () => {
+  it.each([1, 3])('scales the Progress animation duration by %s', async (durationScale) => {
     const timing = jest.spyOn(Animated, 'timing')
     const view = await render(
       <ConfigProvider
         theme={{
+          motion: { durationScale },
           components: { Progress: { progress_animation_duration: 240 } },
         }}
       >
@@ -128,6 +129,7 @@ describe('Progress', () => {
     await view.rerender(
       <ConfigProvider
         theme={{
+          motion: { durationScale },
           components: { Progress: { progress_animation_duration: 240 } },
         }}
       >
@@ -138,7 +140,7 @@ describe('Progress', () => {
     expect(timing).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
-        duration: 240,
+        duration: 240 * durationScale,
         easing: expect.any(Function),
         toValue: 80,
         useNativeDriver: false,
@@ -146,6 +148,98 @@ describe('Progress', () => {
     )
     await view.unmount()
     timing.mockRestore()
+  })
+
+  it('preserves native colors for both circle strokes', async () => {
+    const color = PlatformColor('labelColor')
+    const trackColor = PlatformColor('secondaryLabelColor')
+    await renderWithoutMotion(<Progress color={color} trackColor={trackColor} type="circle" />)
+
+    const circles = screen.getByRole('progressbar').queryAll((node) => node.type === 'RNSVGCircle')
+    expect(circles.map((circle) => circle.props.stroke)).toEqual([
+      { type: 0, payload: trackColor },
+      { type: 0, payload: color },
+    ])
+  })
+
+  it('applies circle container and text styles to separate semantic regions', async () => {
+    await renderWithoutMotion(
+      <Progress
+        accessibilityLabel="下载"
+        percentage={60}
+        style={{ width: 120 }}
+        styles={{
+          root: { width: 100 },
+          body: { backgroundColor: '#eee' },
+          indicatorContainer: { backgroundColor: '#123456', padding: 8 },
+          indicator: { fontWeight: '700' },
+        }}
+        type="circle"
+      />,
+    )
+
+    const label = screen.getByText('60%')
+    expect(StyleSheet.flatten(label.props.style)).toMatchObject({ fontWeight: '700' })
+    expect(StyleSheet.flatten(label.props.style).position).toBeUndefined()
+    expect(StyleSheet.flatten(label.parent?.props.style)).toMatchObject({
+      position: 'absolute',
+      backgroundColor: '#123456',
+      padding: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+    })
+    expect(StyleSheet.flatten(label.parent?.parent?.props.style)).toMatchObject({
+      backgroundColor: '#eee',
+    })
+    expect(
+      StyleSheet.flatten(screen.getByRole('progressbar', { name: '下载' }).props.style),
+    ).toMatchObject({ width: 120 })
+  })
+
+  it.each([0, 5, 50, 95, 100])(
+    'keeps the line label inside the rail at %s%%',
+    async (percentage) => {
+      await renderWithoutMotion(
+        <Progress
+          percentage={percentage}
+          styles={{
+            indicatorContainer: {
+              left: -999,
+              transform: [{ translateX: -999 }],
+              paddingHorizontal: 8,
+            },
+          }}
+        />,
+      )
+      const pivot = screen.getByText(`${percentage}%`).parent!
+      const rail = pivot.parent!
+      await act(() => {
+        rail.props.onLayout({ nativeEvent: { layout: { width: 200 } } })
+        pivot.props.onLayout({ nativeEvent: { layout: { width: 40 } } })
+      })
+
+      expect(StyleSheet.flatten(pivot.props.style)).toMatchObject({
+        left: Math.max(0, Math.min(160, percentage * 2 - 20)),
+        transform: undefined,
+        paddingHorizontal: 8,
+      })
+      await act(() => rail.props.onLayout({ nativeEvent: { layout: { width: 100 } } }))
+      expect(StyleSheet.flatten(pivot.props.style).left).toBe(
+        Math.max(0, Math.min(60, percentage - 20)),
+      )
+    },
+  )
+
+  it('styles the circle container without changing custom pivot content', async () => {
+    await renderWithoutMotion(
+      <Progress
+        pivotText={<Text style={{ color: '#abcdef' }}>自定义</Text>}
+        styles={{ indicator: { color: '#123456' }, indicatorContainer: { padding: 6 } }}
+        type="circle"
+      />,
+    )
+    expect(StyleSheet.flatten(screen.getByText('自定义').props.style).color).toBe('#abcdef')
+    expect(StyleSheet.flatten(screen.getByText('自定义').parent?.props.style).padding).toBe(6)
   })
 
   it('renders the animated circle percentage after an update', async () => {

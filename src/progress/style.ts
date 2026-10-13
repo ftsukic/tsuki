@@ -44,6 +44,7 @@ export function getProgressStyles(
       borderRadius: pivotHeight / 2,
       justifyContent: 'center',
       minHeight: pivotHeight,
+      maxWidth: '100%',
       paddingHorizontal: 4,
       position: 'absolute',
       top: (lineHeight - pivotHeight) / 2,
@@ -57,7 +58,6 @@ export function getProgressStyles(
     circleLabel: {
       color: props.color ?? token.progress_color,
       fontSize: token.progress_pivot_font_size,
-      position: 'absolute',
       textAlign: 'center',
     },
   }

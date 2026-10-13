@@ -31,9 +31,7 @@ export default function NotifyThemeExample() {
           duration={0}
           message="这是主题化的通知"
           backgroundColor="#334e68"
-          color="#ffffff"
-
-          styles={{ content: styles.notifyText, container: styles.notify }}
+          styles={{ content: styles.notifyText, root: styles.notify }}
           onClosed={() => setVisible(false)}
         />
         <Button variant="outlined" disabled={!visible} onPress={() => setVisible(false)}>

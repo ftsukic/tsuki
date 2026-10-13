@@ -1,29 +1,31 @@
 import type { TextStyle, ViewStyle } from 'react-native'
 import type { CellProps, CellStyleState } from './types'
 import type { CellToken } from '../theme'
+import { normalizeCellLayout } from './normalize'
+import type { CellLayoutState } from './normalize'
 
-export function isCellInteractive(props: Pick<CellProps, 'clickable' | 'onPress' | 'isLink'>) {
-  return props.clickable ?? Boolean(props.onPress || props.isLink)
+export function isCellInteractive(props: Pick<CellProps, 'clickable' | 'onPress' | 'onLongPress'>) {
+  return props.clickable ?? Boolean(props.onPress || props.onLongPress)
 }
 
 export interface CellResolvedStyles {
   root: ViewStyle
-  row: ViewStyle
+  container: ViewStyle
   main: ViewStyle
-  titleArea: ViewStyle
+  titleContainer: ViewStyle
   titleRow: ViewStyle
   titleExtraContainer: ViewStyle
-  icon: ViewStyle
-  valueArea: ViewStyle
+  leading: ViewStyle
+  valueContainer: ViewStyle
   valueExtraContainer: ViewStyle
-  extraContainer: ViewStyle
+  trailingContainer: ViewStyle
   title: TextStyle
   titleExtra: TextStyle
-  label: TextStyle
+  description: TextStyle
   value: TextStyle
   valueExtra: TextStyle
-  extra: TextStyle
-  suffix: ViewStyle
+  trailing: TextStyle
+  arrow: ViewStyle
   required: TextStyle
   divider: ViewStyle
 }
@@ -32,15 +34,11 @@ export function getCellStyles(
   token: CellToken,
   props: CellProps,
   state: CellStyleState,
+  layout: CellLayoutState = normalizeCellLayout(props),
 ): CellResolvedStyles {
-  const valueAlign = props.valueAlign ?? (props.vertical ? 'left' : 'right')
+  const valueAlign = layout.valueAlign
   const valueAlignItems =
     valueAlign === 'left' ? 'flex-start' : valueAlign === 'center' ? 'center' : 'flex-end'
-  const hasTitleArea =
-    props.title !== undefined ||
-    props.titleExtra !== undefined ||
-    props.label !== undefined ||
-    props.required === true
 
   return {
     root: {
@@ -48,25 +46,26 @@ export function getCellStyles(
       opacity: state.disabled ? 0.4 : 1,
       position: 'relative',
     },
-    row: {
+    container: {
       minHeight: props.size === 'large' ? token.largeMinHeight : token.minHeight,
       paddingHorizontal: token.paddingHorizontal,
       paddingVertical: props.size === 'large' ? token.largePaddingVertical : token.paddingVertical,
       flexDirection: 'row',
-      alignItems: props.center ? 'center' : 'stretch',
+      alignItems: props.center ? 'center' : 'flex-start',
     },
     main: {
       flex: 1,
       minWidth: 0,
       flexDirection: props.vertical ? 'column' : 'row',
+      alignItems: props.vertical ? 'stretch' : props.center ? 'center' : 'flex-start',
     },
-    titleArea: {
+    titleContainer: {
       flexGrow: props.vertical ? undefined : 0,
       flexShrink: 1,
       flexBasis: props.vertical ? undefined : 'auto',
       width: props.vertical ? '100%' : undefined,
       minWidth: 0,
-      marginRight: props.vertical ? undefined : token.iconGap,
+      marginRight: !props.vertical && layout.hasValueArea ? token.iconGap : undefined,
       justifyContent: props.center ? 'center' : 'flex-start',
     },
     titleRow: {
@@ -76,11 +75,11 @@ export function getCellStyles(
       position: 'relative',
     },
     titleExtraContainer: {
-      marginLeft: token.titleExtraGap,
+      marginLeft: layout.hasTitle ? token.titleExtraGap : undefined,
       flexShrink: 0,
       alignSelf: 'center',
     },
-    icon: {
+    leading: {
       marginRight: token.iconGap,
       minWidth: token.iconSize,
       minHeight: token.lineHeight,
@@ -88,26 +87,29 @@ export function getCellStyles(
       justifyContent: 'center',
       flexShrink: 0,
     },
-    valueArea: {
+    valueContainer: {
       flex: props.vertical ? undefined : 1,
       width: props.vertical ? '100%' : undefined,
       minWidth: 0,
       flexDirection: 'row',
       justifyContent: valueAlignItems,
       alignItems: props.center ? 'center' : 'flex-start',
-      marginTop: props.vertical && hasTitleArea ? token.verticalGap : undefined,
+      marginTop:
+        props.vertical && layout.hasTitleArea && layout.hasValueArea
+          ? token.verticalGap
+          : undefined,
     },
     valueExtraContainer: {
-      marginLeft: token.valueExtraGap,
+      marginLeft: layout.hasValue ? token.valueExtraGap : undefined,
       flexShrink: 0,
       alignSelf: 'center',
     },
-    extraContainer: {
-      flexShrink: 1,
+    trailingContainer: {
+      flexShrink: 0,
       marginLeft: token.iconGap,
-      alignSelf: props.vertical && !props.center ? 'flex-start' : undefined,
-      minHeight: props.vertical && !props.center ? token.lineHeight : undefined,
-      justifyContent: props.vertical || props.center ? 'center' : 'flex-start',
+      minWidth: 0,
+      minHeight: token.lineHeight,
+      justifyContent: 'center',
     },
     title: {
       fontFamily: token.fontFamily,
@@ -123,12 +125,15 @@ export function getCellStyles(
       lineHeight: token.lineHeight,
       flexShrink: 1,
     },
-    label: {
+    description: {
       fontFamily: token.fontFamily,
       color: token.labelColor,
       fontSize: props.size === 'large' ? token.largeLabelFontSize : token.labelFontSize,
       lineHeight: token.lineHeightSM,
-      marginTop: token.labelMarginTop,
+      marginTop:
+        layout.hasTitle || layout.hasTitleExtra || props.required
+          ? token.labelMarginTop
+          : undefined,
     },
     value: {
       fontFamily: token.fontFamily,
@@ -145,14 +150,15 @@ export function getCellStyles(
       lineHeight: token.lineHeight,
       flexShrink: 1,
     },
-    extra: {
+    trailing: {
       fontFamily: token.fontFamily,
       color: token.extraColor,
       fontSize: token.extraFontSize,
       lineHeight: token.extraLineHeight,
       flexShrink: 1,
     },
-    suffix: {
+    arrow: {
+      flexShrink: 0,
       height: token.lineHeight,
       marginLeft: token.iconGap,
       alignItems: 'center',

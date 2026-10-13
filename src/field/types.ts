@@ -7,19 +7,19 @@ export type FieldTitleAlign = 'left' | 'center' | 'right'
 
 export type FieldCellProps = Pick<
   CellProps,
-  | 'icon'
+  | 'leading'
   | 'title'
   | 'titleExtra'
-  | 'label'
+  | 'description'
   | 'valueExtra'
-  | 'extra'
+  | 'trailing'
   | 'vertical'
   | 'center'
   | 'valueAlign'
   | 'required'
   | 'border'
   | 'divider'
-  | 'isLink'
+  | 'showArrow'
   | 'clickable'
   | 'arrowDirection'
   | 'onPress'
@@ -32,11 +32,11 @@ export interface FieldStyleState {
 
 export interface FieldSemanticStyles {
   root?: StyleProp<ViewStyle>
-  label?: StyleProp<TextStyle>
-  content?: StyleProp<ViewStyle>
-  help?: StyleProp<ViewStyle>
-  helpItem?: StyleProp<TextStyle>
-  extra?: StyleProp<TextStyle>
+  title?: StyleProp<TextStyle>
+  control?: StyleProp<ViewStyle>
+  feedback?: StyleProp<ViewStyle>
+  error?: StyleProp<TextStyle>
+  help?: StyleProp<TextStyle>
 }
 
 export type FieldStyles<Props = unknown> = StyleResolver<

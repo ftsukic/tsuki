@@ -21,7 +21,6 @@ export function getRadioStyles(
   state: RadioStyleState,
   buttonLayout: SelectionButtonLayout = 'intrinsic',
 ): RadioResolvedStyles {
-  const labelOnLeft = props.labelPosition === 'left'
   const checkedColor = props.checkedColor ?? token.checkedColor
   const isDotShape = props.shape === 'dot'
   const checkedBackgroundColor = isDotShape ? 'transparent' : checkedColor
@@ -48,6 +47,7 @@ export function getRadioStyles(
             disabledLabelColor: token.disabledLabelColor,
             disabledOpacity: token.disabledOpacity,
             fontSize: token.fontSize,
+            lineHeight: token.lineHeight,
             fontFamily: token.fontFamily,
           },
           state,
@@ -60,10 +60,12 @@ export function getRadioStyles(
       flexDirection: 'row',
       alignItems: 'center',
       alignSelf: 'flex-start',
+      gap: token.gap,
     },
     indicator: {
       width: token.indicatorSize,
       height: token.indicatorSize,
+      flexShrink: 0,
       borderWidth: token.borderWidth,
       borderColor: state.disabled
         ? token.disabledBorderColor
@@ -87,8 +89,6 @@ export function getRadioStyles(
     },
     label: buttonStyles?.label ?? {
       fontFamily: token.fontFamily,
-      marginLeft: labelOnLeft ? 0 : token.gap,
-      marginRight: labelOnLeft ? token.gap : 0,
       color: state.disabled ? token.disabledLabelColor : token.labelColor,
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,

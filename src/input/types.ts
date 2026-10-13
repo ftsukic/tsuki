@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react'
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native'
 import type { StyleInfo, StyleResolver } from '../style'
-import type { TextInputInstance, TextInputProps } from '../text-input'
+import type { TextInput as NativeTextInput, TextInputProps } from 'react-native'
 
 export type InputType = 'text' | 'password' | 'number' | 'tel'
-export type InputInstance = TextInputInstance
+export type InputInstance = NativeTextInput
 export type InputSize = 'large' | 'normal' | 'small'
 export type InputClearTrigger = 'always' | 'focus'
 export type InputFormatTrigger = 'onEndEditing' | 'onChangeText'
@@ -21,13 +21,14 @@ export interface InputStyleState {
 
 export interface InputSemanticStyles {
   root?: StyleProp<ViewStyle>
+  container?: StyleProp<ViewStyle>
   input?: StyleProp<TextStyle>
-  prefix?: StyleProp<TextStyle>
-  suffix?: StyleProp<TextStyle>
+  prefix?: StyleProp<ViewStyle>
+  suffix?: StyleProp<ViewStyle>
   clear?: StyleProp<ViewStyle>
   count?: StyleProp<TextStyle>
-  addonBefore?: StyleProp<TextStyle>
-  addonAfter?: StyleProp<TextStyle>
+  addonBefore?: StyleProp<ViewStyle>
+  addonAfter?: StyleProp<ViewStyle>
 }
 
 export type InputStyles = StyleResolver<InputProps, InputStyleState, InputSemanticStyles>
@@ -38,7 +39,7 @@ export interface InputProps extends Omit<TextInputProps, 'style'> {
   type?: InputType
   size?: InputSize
   bordered?: boolean
-  /** Keeps the normal border color while focused when set to false. */
+  /** Enables the highlighted border color while focused. Defaults to false. */
   focusedBordered?: boolean
   clearable?: boolean
   clearTrigger?: InputClearTrigger

@@ -20,7 +20,12 @@ export default function PickerToolbarExample() {
         onCancel={() => setMessage('已取消（带 divider）')}
         onConfirm={() => setMessage('已确认（带 divider）')}
         showDivider
-        title="显示 divider"
+        title="较长的标题会在中间区域截断，不覆盖取消和确认按钮"
+        styles={{
+          titleContainer: { paddingHorizontal: 8 },
+          cancel: { opacity: 0.6 },
+          confirmContent: { fontWeight: '700' },
+        }}
       />
       <Text>{message}</Text>
     </View>

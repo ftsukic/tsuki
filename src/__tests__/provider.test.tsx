@@ -1,6 +1,6 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
-import type { ReactNode } from 'react'
-import { Text } from 'react-native'
+import { useState, type ReactNode } from 'react'
+import { Pressable, Text } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import {
   closeNotify,
@@ -80,6 +80,69 @@ describe('Provider', () => {
     fireEvent.press(screen.getByTestId('dialog-confirm-button'))
     await expect(pending).resolves.toBe('confirm')
     await view.unmount()
+  })
+
+  it('updates and closes Toast in its original Provider after another root mounts', async () => {
+    const theme = { seed: { motion: false } }
+    const view = await render(
+      <>
+        <Provider key="first" theme={theme} />
+      </>,
+    )
+    let instance!: ReturnType<typeof showToast>
+    await act(async () => {
+      instance = showToast({ duration: 0, message: '原宿主' })
+    })
+    await view.rerender(
+      <>
+        <Provider key="first" theme={theme} />
+        <Provider key="second" theme={theme} />
+      </>,
+    )
+    await act(async () => {
+      instance.message = '原宿主更新'
+    })
+    expect(screen.getByText('原宿主更新')).toBeTruthy()
+    await act(async () => {
+      closeToast()
+    })
+    expect(screen.queryByText('原宿主更新')).toBeNull()
+  })
+
+  it.each([
+    { gesture: false, safeArea: false },
+    { gesture: true, safeArea: true },
+  ])('keeps initialized root capabilities and child state for %j', async (initial) => {
+    function Counter() {
+      const [count, setCount] = useState(0)
+      return (
+        <Pressable onPress={() => setCount(count + 1)}>
+          <Text testID="counter">{count}</Text>
+        </Pressable>
+      )
+    }
+    const view = await render(
+      <Provider {...initial} theme={{ seed: { colorPrimary: '#123456' } }}>
+        <Counter />
+        <ThemeProbe />
+      </Provider>,
+    )
+    // RNTL 14 的事件返回 Promise；当前 lint 规则仍按旧版同步签名判断。
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.press(screen.getByTestId('counter'))
+    expect(screen.getByTestId('counter')).toHaveTextContent('1')
+    await view.rerender(
+      <Provider
+        gesture={!initial.gesture}
+        safeArea={!initial.safeArea}
+        theme={{ seed: { colorPrimary: '#654321' } }}
+      >
+        <Counter />
+        <ThemeProbe />
+      </Provider>,
+    )
+    expect(screen.getByTestId('counter')).toHaveTextContent('1')
+    expect(screen.getByTestId('theme-probe')).toHaveTextContent('#654321')
   })
 
   it('supports multiple provider roots', async () => {

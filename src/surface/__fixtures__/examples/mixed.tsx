@@ -8,8 +8,8 @@ export default function SurfaceMixedFixture() {
   return (
     <Surface inset>
       <Cell.Group title="群组信息" extra="5 人">
-        <Cell title="群管理员" value="林默" isLink />
-        <Cell title="群公告" value="查看详情" isLink />
+        <Cell title="群管理员" value="林默" showArrow />
+        <Cell title="群公告" value="查看详情" showArrow />
       </Cell.Group>
       <Grid columnNum={4} gutter={12} square border center>
         <Grid.Item icon={<Icon name="MessageOutlined" size={22} color="#1989FA" />} text="聊天" />

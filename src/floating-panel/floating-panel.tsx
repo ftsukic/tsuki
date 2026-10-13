@@ -8,10 +8,11 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Animated, Easing, ScrollView, useWindowDimensions, View } from 'react-native'
+import { Animated, ScrollView, useWindowDimensions, View } from 'react-native'
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { useResponderPanGesture } from '../gesture/useResponderPanGesture'
 import type { ResponderPanState } from '../gesture/useResponderPanGesture'
+import { easeOut } from '../motion/easing'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { Portal } from '../portal'
 import { resolveStyles } from '../style'
@@ -23,6 +24,10 @@ import type { FloatingPanelProps } from './types'
 const DEFAULT_MIN_HEIGHT = 100
 const DEFAULT_MAX_HEIGHT_RATIO = 0.6
 const DAMP = 0.2
+const SNAP_DISTANCE = 32
+const FLICK_DISTANCE = 8
+// PanResponder velocity is measured in logical pixels per millisecond.
+const FLICK_VELOCITY = 0.5
 
 type DragSource = 'header' | 'content'
 
@@ -71,6 +76,15 @@ function getClosestAnchor(anchors: readonly number[], target: number) {
   return anchors.reduce((previous, current) =>
     Math.abs(current - target) <= Math.abs(previous - target) ? current : previous,
   )
+}
+
+function getAdjacentAnchor(anchors: readonly number[], height: number, direction: number) {
+  return direction > 0
+    ? (anchors.find((anchor) => anchor > height) ?? anchors[anchors.length - 1])
+    : (anchors
+        .slice()
+        .reverse()
+        .find((anchor) => anchor < height) ?? anchors[0])
 }
 
 function getDampedHeight(
@@ -199,7 +213,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
         const nextAnimation = Animated.timing(animatedValue, {
           toValue: nextValue,
           duration: config.duration,
-          easing: Easing.bezier(0.18, 0.89, 0.32, 1.28),
+          easing: easeOut,
           isInteraction: false,
           useNativeDriver: false,
         })
@@ -263,33 +277,54 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       [panelHeight, setVisualHeight],
     )
 
-    const finishDrag = useCallback(() => {
-      if (!draggingRef.current) return
+    const finishDrag = useCallback(
+      (gesture?: ResponderPanState) => {
+        if (!draggingRef.current) return
 
-      draggingRef.current = false
-      setDragging(false)
-      maxScrollRef.current = -1
+        draggingRef.current = false
+        setDragging(false)
+        maxScrollRef.current = -1
 
-      const config = configRef.current
-      const current = currentHeightRef.current
-      const nextHeight = config.magnetic
-        ? getClosestAnchor(config.anchors, current)
-        : clamp(current, config.minHeight, config.maxHeight)
-      const startedAt = startHeightRef.current
-      const notifyHeightChangeEnd = () => {
-        onHeightChangeEndRef.current?.(nextHeight)
-        requestControlledHeightReconcile()
-      }
+        const config = configRef.current
+        const current = currentHeightRef.current
+        let nextHeight = config.magnetic
+          ? getClosestAnchor(config.anchors, current)
+          : clamp(current, config.minHeight, config.maxHeight)
+        const startedAt = startHeightRef.current
+        if (config.magnetic && gesture) {
+          const direction = config.placement === 'top' ? 1 : -1
+          const distance = gesture.distance * direction
+          const velocity = gesture.velocity * direction
+          const flick = Math.abs(distance) >= FLICK_DISTANCE && Math.abs(velocity) >= FLICK_VELOCITY
+          if (flick || Math.abs(distance) >= SNAP_DISTANCE) {
+            const adjacent = getAdjacentAnchor(
+              config.anchors,
+              startedAt,
+              flick ? velocity : distance,
+            )
+            // A long drag can pass several anchors; a short swipe advances at least one.
+            nextHeight =
+              (flick ? velocity : distance) > 0
+                ? Math.max(nextHeight, adjacent)
+                : Math.min(nextHeight, adjacent)
+          }
+        }
+        const notifyHeightChangeEnd = () => {
+          onHeightChangeEndRef.current?.(nextHeight)
+          requestControlledHeightReconcile()
+        }
 
-      if (!Object.is(current, nextHeight)) {
-        setVisualHeight(nextHeight, true)
-        animateToHeight(nextHeight, notifyHeightChangeEnd)
-      } else if (!Object.is(startedAt, nextHeight)) {
-        notifyHeightChangeEnd()
-      } else {
-        requestControlledHeightReconcile()
-      }
-    }, [animateToHeight, requestControlledHeightReconcile, setVisualHeight])
+        if (!Object.is(current, nextHeight)) {
+          setVisualHeight(nextHeight, true)
+          animateToHeight(nextHeight, notifyHeightChangeEnd)
+        } else if (!Object.is(startedAt, nextHeight)) {
+          notifyHeightChangeEnd()
+        } else {
+          requestControlledHeightReconcile()
+        }
+      },
+      [animateToHeight, requestControlledHeightReconcile, setVisualHeight],
+    )
 
     const headerResponder = useResponderPanGesture({
       axis: 'vertical',
@@ -297,6 +332,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       onStart: beginDrag,
       onChange: ({ distance }) => updateDrag(distance),
       onEnd: finishDrag,
+      onCancel: () => finishDrag(),
     })
 
     const contentResponder = useResponderPanGesture({
@@ -305,6 +341,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       onStart: beginDrag,
       onChange: ({ distance }) => updateDrag(distance),
       onEnd: finishDrag,
+      onCancel: () => finishDrag(),
     })
 
     const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -326,6 +363,15 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       if (draggingRef.current) return
 
       const nextHeight = resolveHeight(height, currentHeightRef.current, minHeight, maxHeight)
+      if (
+        initializedRef.current &&
+        !boundsChanged &&
+        !placementChanged &&
+        !Object.is(previousHeightProp, height) &&
+        Object.is(nextHeight, currentHeightRef.current)
+      ) {
+        return
+      }
       setVisualHeight(nextHeight, false)
 
       if (
@@ -383,10 +429,54 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
     const topInset = placement === 'top' && useTopSafeArea ? (safeAreaInsets?.top ?? 0) : 0
     const contentPadding =
       placement === 'top' ? { paddingTop: topInset } : { paddingBottom: bottomInset }
+    const defaultHandle = header === undefined || header === null
+    const handleAccessibilityAction = (action: string) => {
+      if (!configRef.current.draggable || draggingRef.current) return
+      if (action !== 'increment' && action !== 'decrement') return
+      const nextHeight = getAdjacentAnchor(
+        configRef.current.anchors,
+        currentHeightRef.current,
+        action === 'increment' ? 1 : -1,
+      )
+      if (Object.is(nextHeight, currentHeightRef.current)) return
+      setVisualHeight(nextHeight, true)
+      animateToHeight(nextHeight, () => {
+        onHeightChangeEndRef.current?.(nextHeight)
+        requestControlledHeightReconcile()
+      })
+    }
     const dragArea = header ?? <View style={[resolvedStyles.bar, semantic?.bar]} />
     const headerView =
       header !== undefined || draggable ? (
-        <View {...headerResponder.panHandlers} style={[resolvedStyles.header, semantic?.header]}>
+        <View
+          {...headerResponder.panHandlers}
+          accessible={defaultHandle && draggable ? true : undefined}
+          accessibilityRole={defaultHandle && draggable ? 'adjustable' : undefined}
+          accessibilityLabel={defaultHandle && draggable ? '面板高度' : undefined}
+          accessibilityValue={
+            defaultHandle && draggable
+              ? {
+                  min: minHeight,
+                  max: maxHeight,
+                  now: clamp(currentHeight, minHeight, maxHeight),
+                }
+              : undefined
+          }
+          accessibilityActions={
+            defaultHandle && draggable
+              ? [
+                  { name: 'increment', label: '展开' },
+                  { name: 'decrement', label: '收起' },
+                ]
+              : undefined
+          }
+          onAccessibilityAction={
+            defaultHandle && draggable
+              ? (event) => handleAccessibilityAction(event.nativeEvent.actionName)
+              : undefined
+          }
+          style={[resolvedStyles.header, semantic?.header]}
+        >
           {dragArea}
         </View>
       ) : null
@@ -405,7 +495,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
 
     return (
       <Animated.View
-        style={[resolvedStyles.container, { height: panelHeight }, semantic?.container]}
+        style={[resolvedStyles.container, semantic?.container, { height: panelHeight }]}
       >
         <View
           ref={ref}

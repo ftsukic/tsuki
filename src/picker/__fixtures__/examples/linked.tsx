@@ -38,7 +38,7 @@ export default function PickerLinkedExample() {
 
   return (
     <View style={{ gap: 12 }}>
-      <Cell title="选择地区" value={committed.join(' / ')} isLink onPress={handleOpen} />
+      <Cell title="选择地区" value={committed.join(' / ')} showArrow onPress={handleOpen} />
       <Text>{committed.join(' / ')}</Text>
       <Popup
         visible={visible}

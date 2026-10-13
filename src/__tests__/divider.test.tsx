@@ -9,19 +9,37 @@ function dividerStyle(view: { toJSON: () => unknown }) {
 }
 
 describe('Divider', () => {
-  it('uses the theme hairline defaults and does not intercept pointer events', async () => {
+  it('uses the theme hairline defaults and exposes a horizontal separator', async () => {
     const view = await render(<Divider testID="divider" />)
     const style = dividerStyle(view)
     const token = getDesignToken()
 
     expect(style).toMatchObject({
+      alignSelf: 'stretch',
       backgroundColor: token.colorBorder,
       height: token.lineWidthHairline,
       marginHorizontal: 0,
     })
+    expect(screen.getByTestId('divider').props.role).toBe('separator')
     expect(StyleSheet.flatten(screen.getByTestId('divider').props.style)).toMatchObject({
       pointerEvents: 'none',
     })
+  })
+
+  it('preserves explicit role and accessibilityRole overrides', async () => {
+    await render(
+      <>
+        <Divider testID="decorative" accessible={false} role="none" />
+        <Divider testID="legacy-role" accessibilityRole="none" />
+      </>,
+    )
+
+    expect(screen.getByTestId('decorative').props).toMatchObject({
+      accessible: false,
+      role: 'none',
+    })
+    expect(screen.getByTestId('legacy-role').props.accessibilityRole).toBe('none')
+    expect(screen.getByTestId('legacy-role').props.role).toBeUndefined()
   })
 
   it('supports color, thickness, inset, and style overrides', async () => {

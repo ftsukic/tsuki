@@ -14,11 +14,16 @@ import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
 import { getTagStyles } from './style'
 import { getTagToken } from './token'
+import { normalizeTagContent } from './normalize'
 import type { TagProps, TagStyleState } from './types'
 
 function renderChild(child: ReactNode, labelStyle: StyleProp<TextStyle>) {
   if (typeof child === 'string' || typeof child === 'number') {
-    return <Text style={labelStyle}>{child}</Text>
+    return (
+      <Text numberOfLines={1} ellipsizeMode="tail" style={labelStyle}>
+        {child}
+      </Text>
+    )
   }
 
   return child
@@ -37,6 +42,7 @@ export const Tag = forwardRef<ViewComponent, TagProps>(function Tag(
     closeable = false,
     disabled = false,
     onClose,
+    closeAccessibilityLabel,
     style,
     styles,
     accessibilityState,
@@ -59,12 +65,22 @@ export const Tag = forwardRef<ViewComponent, TagProps>(function Tag(
     closeable,
     disabled,
     onClose,
+    closeAccessibilityLabel,
+    accessibilityState,
     style,
     styles,
   }
   const state: TagStyleState = { type, size, plain, round, mark, closeable, disabled }
   const semantic = resolveStyles(styles, { props: tagProps, state })
   const resolved = getTagStyles(token, tagToken, tagProps, state)
+  const content = normalizeTagContent(children)
+  const contentText = content.every(
+    (child) => typeof child === 'string' || typeof child === 'number',
+  )
+    ? content.join('')
+    : undefined
+  const closeLabel =
+    closeAccessibilityLabel ?? (contentText ? `关闭「${contentText}」` : '关闭标签')
 
   const handleClose = useCallback(
     (event: GestureResponderEvent) => {
@@ -82,10 +98,10 @@ export const Tag = forwardRef<ViewComponent, TagProps>(function Tag(
       style={[resolved.root, semantic?.root, style]}
     >
       <View style={resolved.content}>
-        {Children.map(children, (child) => renderChild(child, [resolved.label, semantic?.content]))}
+        {Children.map(content, (child) => renderChild(child, [resolved.label, semantic?.content]))}
         {closeable ? (
           <Pressable
-            accessibilityLabel="关闭标签"
+            accessibilityLabel={closeLabel}
             accessibilityRole="button"
             accessibilityState={{ disabled }}
             disabled={disabled}

@@ -3,7 +3,7 @@ import { Tab, Tabs, getTabsToken } from '../tabs'
 import { getTabScrollOffset } from '../tabs/tabs'
 import { ConfigProvider, getDesignToken } from '../theme'
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
-import { Animated, ScrollView, StyleSheet, Text } from 'react-native'
+import { Animated, Platform, ScrollView, StyleSheet, Text } from 'react-native'
 import { State } from 'react-native-gesture-handler'
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils'
 import * as Reanimated from 'react-native-reanimated'
@@ -33,6 +33,13 @@ describe('Tabs', () => {
     )
 
     expect(screen.getByTestId('controlled-message').props.accessibilityState?.selected).toBe(true)
+    const messageTab = screen.getByTestId('controlled-message')
+    const messagePanel = screen
+      .getByTestId('controlled-content')
+      .queryAll((instance) => instance.props.role === 'tabpanel')
+      .find((panel) => panel.props.accessibilityLabelledBy === messageTab.props.nativeID)
+    expect(messagePanel?.props['aria-labelledby']).toBe(messageTab.props.nativeID)
+    expect(messagePanel?.props.accessibilityLabelledBy).toBe(messageTab.props.nativeID)
     expect(screen.getByText('消息内容')).toBeTruthy()
     expect(screen.queryByText('通知内容')).toBeNull()
 
@@ -199,10 +206,68 @@ describe('Tabs', () => {
       </>,
     )
 
-    expect(screen.getByTestId('card').props.accessibilityRole).toBe('tablist')
+    expect(screen.getByTestId('card').props.accessibilityRole).toBeUndefined()
+    const navigations = screen.getAllByTestId('tabs-nav')
+    expect(navigations).toHaveLength(2)
+    expect(navigations.map((navigation) => navigation.props.accessibilityRole)).toEqual([
+      'tablist',
+      'tablist',
+    ])
     expect(screen.getByTestId('card-first').props.accessibilityRole).toBe('tab')
     expect(screen.getByTestId('scrollable')).toBeTruthy()
     expect(screen.queryByText('首页内容')).toBeNull()
+  })
+
+  it('labels the tab list from Tabs accessibility props', async () => {
+    await render(
+      <Tabs testID="labeled-tabs" accessibilityLabel="账户区域">
+        <Tab title="概览" />
+      </Tabs>,
+    )
+
+    expect(screen.getByTestId('tabs-nav').props.accessibilityLabel).toBe('账户区域')
+    expect(screen.getByTestId('labeled-tabs').props.accessibilityLabel).toBeUndefined()
+  })
+
+  it('links web tabs and content panels with aria attributes', async () => {
+    const platform = jest.replaceProperty(Platform, 'OS', 'web')
+    try {
+      await render(
+        <Tabs testID="web-tabs">
+          <Tab testID="web-first" name="first" title="第一项">
+            <Text>第一内容</Text>
+          </Tab>
+        </Tabs>,
+      )
+      const first = screen.getByTestId('web-first')
+      const firstPanel = screen
+        .getByTestId('web-tabs-content')
+        .queryAll((instance) => instance.props.role === 'tabpanel')
+        .find((panel) => panel.props.accessibilityLabelledBy === first.props.nativeID)
+      expect(first.props['aria-controls']).toBe(firstPanel?.props.nativeID)
+      expect(firstPanel?.props['aria-labelledby']).toBe(first.props.nativeID)
+    } finally {
+      platform.restore()
+    }
+  })
+
+  it('warns when explicit names collide with implicit index values', async () => {
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+
+    await render(
+      <Tabs defaultValue={1}>
+        <Tab name={1} title="显式名称" />
+        <Tab title="隐式索引" />
+      </Tabs>,
+    )
+
+    expect(consoleError).toHaveBeenCalledWith(
+      expect.stringContaining('each Tab to resolve to a unique name'),
+    )
+    expect(screen.getAllByRole('tab').map((tab) => tab.props.accessibilityState?.selected)).toEqual(
+      [true, false],
+    )
+    consoleError.mockRestore()
   })
 
   it('uses themed dimensions and semantic styles without changing the press contract', async () => {

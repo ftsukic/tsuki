@@ -35,6 +35,15 @@ function renderViewContent(
   return value
 }
 
+function hasViewContent(value: ReactNode): boolean {
+  if (value === null || value === undefined || typeof value === 'boolean') return false
+  if (Array.isArray(value)) return value.some(hasViewContent)
+  if (isValidElement<{ children?: ReactNode }>(value) && value.type === Fragment) {
+    return hasViewContent(value.props.children)
+  }
+  return true
+}
+
 const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonProps>(
   function Button(
     {
@@ -50,9 +59,6 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
       pressedOverlayColor,
       shape,
       block = false,
-      round = false,
-      square = false,
-      circle = false,
       hairline = false,
       disabled = false,
       loading = false,
@@ -72,9 +78,7 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
     const buttonToken = useComponentToken('Button', getButtonToken)
     const groupContext = useContext(ButtonGroupContext)
     const mergedSize = size ?? groupContext.size ?? 'normal'
-    const explicitShape =
-      shape ?? (circle ? 'circle' : square ? 'square' : round ? 'round' : undefined)
-    const mergedShape = explicitShape ?? groupContext.shape ?? 'default'
+    const mergedShape = shape ?? groupContext.shape ?? 'default'
     const isDisabled = disabled || loading
     const resolvedVariant = variant ?? groupContext.variant
     const buttonProps = {
@@ -90,9 +94,6 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
       pressedOverlayColor,
       shape: mergedShape,
       block,
-      round,
-      square,
-      circle,
       hairline,
       disabled,
       loading,
@@ -140,9 +141,15 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
           const resolved = getButtonStyles(themeToken, buttonToken, buttonProps, state)
           const semantic = resolveStyles(styles, { props: buttonProps, state })
           const content = children
-          const renderedContent = renderViewContent(content, (text) => (
-            <Text style={[resolved.content, semantic?.content]}>{text}</Text>
-          ))
+          const renderedContent = hasViewContent(content) ? (
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', minWidth: 0, flexShrink: 1 }}
+            >
+              {renderViewContent(content, (text) => (
+                <Text style={[resolved.content, semantic?.content]}>{text}</Text>
+              ))}
+            </View>
+          ) : null
 
           const iconNode = loading ? (
             <View style={[resolved.icon, semantic?.icon]}>

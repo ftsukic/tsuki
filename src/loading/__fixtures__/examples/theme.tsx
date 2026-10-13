@@ -26,10 +26,14 @@ export default function LoadingThemeFixture() {
           styles={{
             indicator: { backgroundColor: '#F4F0FF', borderRadius: 8 },
             root: { backgroundColor: '#FFFFFF', borderRadius: 12, padding: 16 },
+            content: { backgroundColor: '#F4F0FF', padding: 4, borderRadius: 4 },
             text: { fontWeight: '600' },
           }}
         >
           自定义主题
+        </Loading>
+        <Loading styles={{ content: { padding: 4 } }}>
+          <Text style={styles.caption}>自定义内容</Text>
         </Loading>
         <Text style={styles.caption}>Loading token + semantic slots</Text>
       </View>

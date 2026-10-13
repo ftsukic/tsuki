@@ -12,12 +12,178 @@ import {
   PortalHost,
 } from '..'
 import { ImagePreviewItem } from '../image-preview/image-preview-item'
+import { getImagePreviewStyles } from '../image-preview/style'
 
 async function renderWithHost(element: React.ReactNode) {
   return render(<PortalHost>{element}</PortalHost>)
 }
 
+async function layoutPreview(testID = 'image-preview') {
+  // eslint-disable-next-line testing-library/no-await-sync-events
+  await fireEvent(screen.getByTestId(testID), 'layout', {
+    nativeEvent: { layout: { width: 400, height: 800, x: 0, y: 0 } },
+  })
+}
+
 describe('ImagePreview', () => {
+  it('keeps fullscreen regions filled without the removed absoluteFillObject alias', () => {
+    const alias = jest.replaceProperty(StyleSheet, 'absoluteFillObject', undefined as never)
+    try {
+      const styles = getImagePreviewStyles(getImagePreviewToken(getDesignToken()))
+      for (const region of [styles.root, styles.overlay, styles.pager, styles.controls]) {
+        expect(StyleSheet.flatten(region)).toMatchObject({
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+        })
+      }
+      expect(StyleSheet.flatten(styles.root)).not.toHaveProperty('backgroundColor')
+      expect(StyleSheet.flatten(styles.overlay).backgroundColor).toBe('#000000')
+    } finally {
+      alias.restore()
+    }
+  })
+
+  it.each(['load', 'error'])('waits for the transition image %s before opening', async (event) => {
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value) => value as never)
+    try {
+      await render(
+        <ImagePreviewContent
+          visible
+          images={[`transition-ready-${event}`]}
+          sourceRect={{ x: 100, y: 600, width: 72, height: 96 }}
+        />,
+      )
+      const image = await screen.findByTestId('image-preview-transition-native-image-0')
+      expect(timing).not.toHaveBeenCalled()
+      expect(
+        StyleSheet.flatten(screen.getByTestId('image-preview-pager-layer').props.style),
+      ).toMatchObject({ opacity: 0 })
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent(image, event, { nativeEvent: { source: { width: 1200, height: 800 } } })
+      expect(timing).not.toHaveBeenCalled()
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent(screen.getByTestId('image-preview-transition-layer'), 'layout', {
+        nativeEvent: { layout: { width: 400, height: 800, x: 0, y: 0 } },
+      })
+      await waitFor(() => expect(timing).toHaveBeenCalledTimes(1))
+    } finally {
+      timing.mockRestore()
+    }
+  })
+
+  it('starts an ordinary first opening with all presentation layers transparent', async () => {
+    let complete: ((finished?: boolean) => void) | undefined
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((_value, _config, callback) => {
+        complete = callback
+        return 0 as never
+      })
+    try {
+      await render(
+        <ImagePreviewContent visible={false} closeable images={['first-ordinary-opening']} />,
+      )
+      await screen.rerender(
+        <ImagePreviewContent visible closeable images={['first-ordinary-opening']} />,
+      )
+      for (const id of [
+        'image-preview-mask',
+        'image-preview-pager-layer',
+        'image-preview-controls',
+      ]) {
+        expect(StyleSheet.flatten(screen.getByTestId(id).props.style)).toMatchObject({ opacity: 0 })
+      }
+      expect(timing).not.toHaveBeenCalled()
+      await layoutPreview()
+      expect(timing).toHaveBeenCalledTimes(1)
+      await act(async () => complete?.(true))
+      for (const id of [
+        'image-preview-mask',
+        'image-preview-pager-layer',
+        'image-preview-controls',
+      ]) {
+        expect(StyleSheet.flatten(screen.getByTestId(id).props.style)).toMatchObject({ opacity: 1 })
+      }
+    } finally {
+      timing.mockRestore()
+    }
+  })
+
+  it('reopens during closing without waiting for another layout or accepting the old completion', async () => {
+    const completions: Array<((finished?: boolean) => void) | undefined> = []
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((value, _config, callback) => {
+        completions.push(callback)
+        return value as never
+      })
+    const onOpened = jest.fn()
+    const onClosed = jest.fn()
+    const props = { images: ['opening-reversal'], onOpened, onClosed }
+    try {
+      await render(<ImagePreviewContent {...props} visible />)
+      await layoutPreview()
+      await act(async () => completions[0]?.(true))
+      await screen.rerender(<ImagePreviewContent {...props} visible={false} />)
+      await waitFor(() => expect(completions).toHaveLength(2))
+      await screen.rerender(<ImagePreviewContent {...props} visible />)
+      await waitFor(() => expect(completions).toHaveLength(3))
+      await act(async () => completions[1]?.(true))
+      expect(onClosed).not.toHaveBeenCalled()
+      await act(async () => completions[2]?.(true))
+      expect(onOpened).toHaveBeenCalledTimes(2)
+      expect(screen.getByTestId('image-preview')).toBeTruthy()
+    } finally {
+      timing.mockRestore()
+    }
+  })
+
+  it.each(['load', 'error'])(
+    'keeps the transition image until the preview page reports %s',
+    async (event) => {
+      let complete: ((finished?: boolean) => void) | undefined
+      const timing = jest
+        .spyOn(Reanimated, 'withTiming')
+        .mockImplementation((value, _config, callback) => {
+          complete = callback
+          return value as never
+        })
+      const onOpened = jest.fn()
+      try {
+        await render(
+          <ImagePreviewContent
+            visible
+            images={[`first-page-${event}`]}
+            onOpened={onOpened}
+            sourceRect={{ x: 100, y: 600, width: 72, height: 96 }}
+          />,
+        )
+        const transitionImage = await screen.findByTestId('image-preview-transition-native-image-0')
+        const load = { nativeEvent: { source: { width: 1200, height: 800 } } }
+        // eslint-disable-next-line testing-library/no-await-sync-events
+        await fireEvent(transitionImage, 'load', load)
+        // eslint-disable-next-line testing-library/no-await-sync-events
+        await fireEvent(screen.getByTestId('image-preview-transition-layer'), 'layout', {
+          nativeEvent: { layout: { width: 400, height: 800, x: 0, y: 0 } },
+        })
+        await act(async () => complete?.(true))
+        expect(onOpened).not.toHaveBeenCalled()
+        expect(screen.getByTestId('image-preview-transition-native-image-0')).toBeTruthy()
+        // eslint-disable-next-line testing-library/no-await-sync-events
+        await fireEvent(screen.getByTestId('image-preview-native-image-0'), event, load)
+        await waitFor(() => expect(onOpened).toHaveBeenCalledTimes(1))
+        expect(screen.queryByTestId('image-preview-transition-native-image-0')).toBeNull()
+      } finally {
+        timing.mockRestore()
+      }
+    },
+  )
+
   it('exports the component and ref API', async () => {
     const ref = React.createRef<ImagePreviewRef>()
     expect(ImagePreview).toBeTruthy()
@@ -206,10 +372,14 @@ describe('ImagePreview', () => {
     expect(onRequestClose).not.toHaveBeenCalled()
   })
 
-  it('keeps ordinary opening controls visible above the image layers', async () => {
+  it('fades ordinary opening controls above the image layers after layout', async () => {
+    let complete: ((finished?: boolean) => void) | undefined
     const timing = jest
       .spyOn(Reanimated, 'withTiming')
-      .mockImplementation((value) => value as never)
+      .mockImplementation((value, _config, callback) => {
+        complete = callback
+        return value as never
+      })
 
     try {
       await render(
@@ -222,6 +392,11 @@ describe('ImagePreview', () => {
         />,
       )
 
+      expect(
+        StyleSheet.flatten(screen.getByTestId('image-preview-controls').props.style),
+      ).toMatchObject({ opacity: 0, zIndex: 2 })
+      await layoutPreview()
+      await act(async () => complete?.(true))
       expect(
         StyleSheet.flatten(screen.getByTestId('image-preview-controls').props.style),
       ).toMatchObject({
@@ -241,9 +416,13 @@ describe('ImagePreview', () => {
           resolveSourceRect = resolve
         }),
     )
+    let complete: ((finished?: boolean) => void) | undefined
     const timing = jest
       .spyOn(Reanimated, 'withTiming')
-      .mockImplementation((value) => value as never)
+      .mockImplementation((value, _config, callback) => {
+        complete = callback
+        return value as never
+      })
 
     try {
       await render(
@@ -255,7 +434,9 @@ describe('ImagePreview', () => {
         StyleSheet.flatten(screen.getByTestId('image-preview-controls').props.style),
       ).toMatchObject({ opacity: 0 })
 
+      await layoutPreview()
       await act(async () => resolveSourceRect(null))
+      await act(async () => complete?.(true))
 
       expect(
         StyleSheet.flatten(screen.getByTestId('image-preview-controls').props.style),
@@ -333,6 +514,31 @@ describe('ImagePreview', () => {
 
     await act(async () => context.onLoad({ width: 320, height: 240 }))
     expect(onImageReady).toHaveBeenCalledWith(0, { width: 320, height: 240 })
+  })
+
+  it('reports this image node readiness even when its URI is already cached', async () => {
+    let context!: ImagePreviewRenderImageContext
+    const onImageReady = jest.fn()
+    await render(
+      <ImagePreviewItem
+        image="cached-node-ready"
+        index={0}
+        ready
+        onImageReady={onImageReady}
+        renderImage={(_image, _index, nextContext) => {
+          context = nextContext
+          return <Text>cached image</Text>
+        }}
+      />,
+    )
+    await act(async () => {
+      context.onLoadStart()
+      context.onLoadEnd()
+      context.onLoadEnd()
+    })
+    expect(onImageReady).toHaveBeenCalledTimes(1)
+    expect(onImageReady).toHaveBeenCalledWith(0)
+    expect(screen.queryByTestId('image-preview-loading')).toBeNull()
   })
 
   it('delays the custom renderer loading indicator by 140ms', async () => {
@@ -597,6 +803,7 @@ describe('ImagePreview', () => {
 
     try {
       await render(<ControlledPreview />)
+      await layoutPreview()
       await waitFor(() => expect(completions).toHaveLength(1))
 
       await act(async () => completions[0]?.(true))

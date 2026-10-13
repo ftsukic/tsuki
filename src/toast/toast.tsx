@@ -19,7 +19,9 @@ function isRenderable(value: unknown): boolean {
 }
 
 function isIconDefinition(value: unknown): value is IconDefinition {
-  return Boolean(value && typeof value === 'object' && 'icon' in value && 'iconViewBox' in value)
+  return Boolean(
+    value && typeof value === 'object' && 'icon' in value && 'name' in value && 'theme' in value,
+  )
 }
 
 function getDefaultIcon(type: ToastType) {
@@ -38,11 +40,16 @@ function renderMessage(value: ToastProps['message']) {
   return value
 }
 
-export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(props, ref) {
+interface ToastContentProps extends ToastProps {
+  timerKey?: number
+}
+
+export const ToastContent = forwardRef<View, ToastContentProps>(function ToastContent(props, ref) {
   const { token: themeToken } = useToken()
   const token = useComponentToken('Toast', getToastToken)
   const {
     show = false,
+    timerKey,
     type = 'text',
     message,
     children,
@@ -88,7 +95,7 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
 
     const timer = setTimeout(() => onShowChangeRef.current?.(false), normalizedDuration)
     return () => clearTimeout(timer)
-  }, [message, normalizedDuration, show, type])
+  }, [message, normalizedDuration, show, type, timerKey])
 
   const showRef = useRef(show)
   showRef.current = show
@@ -136,7 +143,7 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
 
   if (!rendered) return null
 
-  const resolvedIcon: ToastIcon = icon ?? getDefaultIcon(type)
+  const resolvedIcon: ToastIcon = icon === undefined ? getDefaultIcon(type) : icon
   const iconNode = resolvedIcon ? (
     typeof resolvedIcon === 'string' && isIconName(resolvedIcon) ? (
       <Icon
@@ -178,7 +185,9 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
     <Animated.View
       ref={ref}
       {...viewProps}
-      accessible
+      accessible={show}
+      accessibilityElementsHidden={!show}
+      importantForAccessibility={show ? viewProps.importantForAccessibility : 'no-hide-descendants'}
       accessibilityLiveRegion="polite"
       accessibilityRole="alert"
       pointerEvents={closeOnClick || children !== undefined ? 'auto' : 'none'}
@@ -202,7 +211,8 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
               paddingVertical: token.defaultPaddingVertical,
               width: token.defaultWidth,
             },
-        semantic?.container,
+        semantic?.root,
+        style,
         animatedStyle,
       ]}
     >
@@ -226,7 +236,9 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
             {messageNode}
           </Text>
         ) : (
-          messageNode
+          <View style={[{ marginTop: iconNode ? token.iconTextGap : 0 }, semantic?.content]}>
+            {messageNode}
+          </View>
         )
       ) : null}
     </Animated.View>
@@ -235,7 +247,7 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
   return (
     <View
       pointerEvents={show ? (intercepts ? 'auto' : 'box-none') : 'none'}
-      style={[StyleSheet.absoluteFill, { zIndex }, semantic?.root, style]}
+      style={[StyleSheet.absoluteFill, { zIndex }]}
     >
       {overlay ? (
         <Pressable
@@ -250,10 +262,7 @@ export const ToastContent = forwardRef<View, ToastProps>(function ToastContent(p
       ) : forbidClick ? (
         <View pointerEvents="auto" style={StyleSheet.absoluteFillObject} />
       ) : null}
-      <View
-        pointerEvents="box-none"
-        style={[StyleSheet.absoluteFill, positionStyle, semantic?.wrapper]}
-      >
+      <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, positionStyle]}>
         {closeOnClick ? (
           <Pressable onPress={() => onShowChange?.(false)}>{bubble}</Pressable>
         ) : (

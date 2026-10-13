@@ -9,6 +9,7 @@ interface ToastRecord {
   key: PortalKey | null
   options: ToastOptions
   show: boolean
+  timerKey: number
   instance: ToastInstance
 }
 
@@ -86,9 +87,10 @@ function ToastMethod({ record }: { record: ToastRecord }) {
     <ToastContent
       {...record.options}
       show={record.show}
+      timerKey={record.timerKey}
       onClose={() => {
-        record.options.onClose?.()
         removeRecord(record)
+        record.options.onClose?.()
       }}
       onShowChange={(show) => {
         if (!show) updateRecord(record, { show: false })
@@ -115,7 +117,7 @@ function resolveOptions(type: ToastType | undefined, input?: ToastOptions | stri
 function showResolvedToast(options: ToastOptions): ToastInstance {
   if (!allowMultiple && records.length > 0) {
     const record = records[records.length - 1]
-    updateRecord(record, { options, show: true })
+    updateRecord(record, { options, show: true, timerKey: record.timerKey + 1 })
     return record.instance
   }
 
@@ -124,6 +126,7 @@ function showResolvedToast(options: ToastOptions): ToastInstance {
     key: null,
     options,
     show: true,
+    timerKey: 0,
     instance: createInstance(nextId - 1),
   }
   records = [...records, record]

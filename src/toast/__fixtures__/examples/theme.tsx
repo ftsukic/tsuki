@@ -28,7 +28,7 @@ export default function ToastThemeExample() {
               message: '使用 Toast token 定制',
               styles: ({ state }) => ({
                 content: { fontWeight: state.show ? '700' : '400' },
-                container: { borderWidth: 1, borderColor: '#52c41a' },
+                root: { borderWidth: 1, borderColor: '#52c41a' },
               }),
             })
           }

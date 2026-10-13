@@ -30,9 +30,10 @@ export default function PopupThemeExample() {
           round
           closeOnPressOverlay
           onRequestClose={() => setVisible(false)}
+          style={{ margin: 4 }}
           styles={{
-            container: { borderWidth: 1, borderColor: '#486581' },
-            root: { padding: 4 },
+            container: { width: 260, padding: 20, borderWidth: 1, borderColor: '#486581' },
+            mask: { opacity: 0.8 },
           }}
         >
           <View style={styles.panel}>
@@ -49,6 +50,6 @@ export default function PopupThemeExample() {
 
 const styles = StyleSheet.create({
   container: { gap: 12 },
-  panel: { width: 260, gap: 16, padding: 20 },
+  panel: { gap: 16 },
   text: { color: '#f0f4f8', lineHeight: 22 },
 })

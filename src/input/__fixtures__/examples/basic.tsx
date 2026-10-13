@@ -23,9 +23,9 @@ export default function InputBasicFixture() {
       <Input disabled defaultValue="禁用输入" bordered />
       <Input readOnly defaultValue="只读输入" bordered />
       <Text>自定义边框</Text>
-      <Input styles={{ root: { borderRadius: 50 } }} bordered placeholder="没有边框" />
+      <Input styles={{ container: { borderRadius: 50 } }} bordered placeholder="没有边框" />
       <Input
-        styles={{ root: { borderRadius: 16, backgroundColor: '#f055D' } }}
+        styles={{ container: { borderRadius: 16, backgroundColor: '#f055D' } }}
         bordered
         placeholder="没有边框"
       />

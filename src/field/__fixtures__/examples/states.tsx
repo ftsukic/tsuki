@@ -9,7 +9,7 @@ export default function FieldStatesFixture() {
     <Cell.Group border={false}>
       <FieldInput
         title="备注"
-        label="补充说明"
+        description="补充说明"
         maxLength={80}
         vertical
         multiline

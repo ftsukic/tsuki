@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { LayoutChangeEvent } from 'react-native'
+import type { LayoutChangeEvent, StyleProp, TextStyle } from 'react-native'
 import { View } from 'react-native'
 import {
   Easing,
@@ -25,6 +25,7 @@ interface NoticeBarContentProps {
   scrollable?: boolean
   speed?: number
   styles: NoticeBarResolvedStyles
+  textStyle?: StyleProp<TextStyle>
   wrapable: boolean
 }
 
@@ -50,6 +51,7 @@ export function NoticeBarContent({
   scrollable,
   speed,
   styles,
+  textStyle,
   wrapable,
 }: NoticeBarContentProps) {
   const [wrapWidth, setWrapWidth] = useState(0)
@@ -69,11 +71,6 @@ export function NoticeBarContent({
     translateX.value = 0
     setScrolling(false)
   }, [translateX])
-
-  useEffect(() => {
-    setContentWidth(0)
-    resetAnimation()
-  }, [content, resetAnimation])
 
   useEffect(() => {
     resetAnimation()
@@ -104,7 +101,17 @@ export function NoticeBarContent({
     setScrolling(true)
 
     return () => cancelAnimation(translateX)
-  }, [contentWidth, delay, motion, resetAnimation, shouldScroll, speed, translateX, wrapWidth])
+  }, [
+    content,
+    contentWidth,
+    delay,
+    motion,
+    resetAnimation,
+    shouldScroll,
+    speed,
+    translateX,
+    wrapWidth,
+  ])
 
   const handleWrapLayout = useCallback((event: LayoutChangeEvent) => {
     const width = getLayoutWidth(event)
@@ -119,17 +126,37 @@ export function NoticeBarContent({
   }, [])
 
   const mode = wrapable ? 'wrap' : scrolling ? 'scroll' : contentWidth > 0 ? 'ellipsis' : 'measure'
+  const primitive = typeof content === 'string' || typeof content === 'number'
 
   return (
     <View onLayout={handleWrapLayout} style={styles.wrap}>
       <NoticeBarItem
         animatedStyle={scrolling ? animatedStyle : undefined}
-        mode={mode}
-        onLayout={mode === 'measure' ? handleContentLayout : undefined}
+        mode={!primitive && !wrapable && !scrolling ? 'measure' : mode}
+        onLayout={!primitive && !wrapable ? handleContentLayout : undefined}
         styles={styles}
+        textStyle={textStyle}
       >
         {content}
       </NoticeBarItem>
+      {primitive && !wrapable ? (
+        <View
+          accessible={false}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          pointerEvents="none"
+          style={{ position: 'absolute', left: 0, top: 0, opacity: 0, flexDirection: 'row' }}
+        >
+          <NoticeBarItem
+            mode="measure"
+            onLayout={handleContentLayout}
+            styles={styles}
+            textStyle={textStyle}
+          >
+            {content}
+          </NoticeBarItem>
+        </View>
+      ) : null}
     </View>
   )
 }

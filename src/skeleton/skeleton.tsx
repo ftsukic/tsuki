@@ -71,7 +71,7 @@ function SkeletonComponent({
       accessible={viewProps.accessible ?? loading}
       accessibilityRole={viewProps.accessibilityRole ?? (loading ? 'progressbar' : undefined)}
       accessibilityState={
-        loading ? { ...viewProps.accessibilityState, busy: true } : viewProps.accessibilityState
+        loading ? { busy: true, ...viewProps.accessibilityState } : viewProps.accessibilityState
       }
       style={[resolved.root, semantic?.root, style]}
     >
@@ -89,8 +89,8 @@ function SkeletonComponent({
                 <View
                   style={[
                     resolved.rows,
-                    semantic?.paragraph,
                     title ? { marginTop: token.titleRowGap } : null,
+                    semantic?.paragraph,
                   ]}
                 >
                   {Array.from({ length: rowCount }, (_, index) => (

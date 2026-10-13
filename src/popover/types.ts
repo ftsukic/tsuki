@@ -15,6 +15,7 @@ export interface PopoverAction {
   icon?: ReactNode
   color?: ColorValue
   disabled?: boolean
+  accessibilityLabel?: string
 }
 
 export interface PopoverStyleState {
@@ -43,6 +44,7 @@ export type PopoverStyleInfo = StyleInfo<PopoverProps, PopoverStyleState>
 
 export interface PopoverProps {
   children: ReactElement
+  accessibilityLabel?: string
   actions?: readonly PopoverAction[]
   content?: ReactNode
   visible?: boolean

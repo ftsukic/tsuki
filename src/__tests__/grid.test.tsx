@@ -17,9 +17,27 @@ describe('Grid', () => {
 
     expect(wrapperStyle).toMatchObject({
       flexBasis: '20%',
+      width: '20%',
+      minWidth: 0,
       flexGrow: 0,
       flexShrink: 0,
     })
+  })
+
+  it('keeps internal layout wrappers out of accessibility element semantics', async () => {
+    await render(
+      <Grid testID="grid">
+        <Grid.Item testID="item" text="成员" onPress={() => {}} />
+      </Grid>,
+    )
+
+    const item = screen.getByTestId('item')
+    const columnWrapper = item.parent!
+    const layoutWrapper = columnWrapper.parent!
+
+    expect(columnWrapper.props.accessible).toBe(false)
+    expect(layoutWrapper.props.accessible).toBe(false)
+    expect(item.props.accessibilityRole).toBe('button')
   })
 
   it('keeps gutter spacing private to the item wrapper', async () => {

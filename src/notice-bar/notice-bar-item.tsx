@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import Animated, { type AnimatedStyle } from 'react-native-reanimated'
-import type { LayoutChangeEvent, ViewStyle } from 'react-native'
+import type { LayoutChangeEvent, StyleProp, TextStyle, ViewStyle } from 'react-native'
 import { Text } from '../text'
 import {
   getNoticeBarItemStyle,
@@ -13,6 +13,7 @@ interface NoticeBarItemProps {
   mode: NoticeBarItemMode
   onLayout?: (event: LayoutChangeEvent) => void
   styles: NoticeBarResolvedStyles
+  textStyle?: StyleProp<TextStyle>
   animatedStyle?: AnimatedStyle<ViewStyle>
 }
 
@@ -25,11 +26,13 @@ export function NoticeBarItem({
   mode,
   onLayout,
   styles,
+  textStyle: semanticTextStyle,
   animatedStyle,
 }: NoticeBarItemProps) {
   const textStyle = [
     styles.text,
     { includeFontPadding: false, textAlignVertical: 'center' as const },
+    semanticTextStyle,
     mode === 'measure' || mode === 'scroll' ? undefined : { flex: 1, flexShrink: 1 },
   ]
 

@@ -29,6 +29,7 @@ export const OVERLAY_PRESETS = {
 } satisfies Record<string, MotionPreset>
 
 export const GESTURE_PRESET = { mode: 'spring' as const, ...MOTION_SPRING.responsive }
+export const MAGNETIC_PRESET = { mode: 'spring' as const, ...MOTION_SPRING.magnetic }
 export const FEEDBACK_PRESETS = {
   spin: {
     mode: 'timing' as const,

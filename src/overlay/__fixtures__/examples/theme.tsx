@@ -29,7 +29,7 @@ export default function OverlayThemeExample() {
           onPress={() => setShow(false)}
           styles={{
             content: { alignItems: 'center', justifyContent: 'center' },
-            root: { borderWidth: 2, borderColor: '#486581' },
+            mask: { borderWidth: 2, borderColor: '#486581' },
           }}
         >
           <View style={styles.card}>

@@ -195,6 +195,62 @@ describe('Watermark', () => {
     )
   })
 
+  it('keeps large negative offsets equivalent to their visible grid phase', async () => {
+    const view = await render(
+      <Watermark
+        testID="watermark-root"
+        content="Tsuki"
+        offsetX={-5000}
+        offsetY={-5000}
+        rotate={0}
+      />,
+    )
+    await triggerLayout(view)
+
+    const positions = () =>
+      getMarks(view).map((mark) => {
+        const { left, top } = StyleSheet.flatten(mark.props.style as StyleProp<ViewStyle>)
+        return { left, top }
+      })
+    const largeOffsetPositions = positions()
+    expect(largeOffsetPositions).toContainEqual({ left: 84, top: 32 })
+
+    await view.rerender(
+      <Watermark testID="watermark-root" content="Tsuki" offsetX={-40} offsetY={-116} rotate={0} />,
+    )
+    expect(positions()).toEqual(largeOffsetPositions)
+  })
+
+  it.each([
+    [Number.NaN, 0],
+    [0, Number.POSITIVE_INFINITY],
+    [-1, -1],
+  ])('falls back to valid theme dimensions for width=%s and height=%s', async (width, height) => {
+    const view = await render(
+      <ConfigProvider theme={{ components: { Watermark: { width: 72, height: 48 } } }}>
+        <Watermark testID="watermark-root" content="Tsuki" width={width} height={height} />
+      </ConfigProvider>,
+    )
+    await triggerLayout(view)
+
+    expect(StyleSheet.flatten(getMarks(view)[0].props.style as StyleProp<ViewStyle>)).toMatchObject(
+      { width: 72, height: 48 },
+    )
+  })
+
+  it('uses built-in dimensions when both props and theme dimensions are invalid', async () => {
+    const view = await render(
+      <ConfigProvider theme={{ components: { Watermark: { width: 0, height: Number.NaN } } }}>
+        <Watermark testID="watermark-root" content="Tsuki" width={-1} height={0} />
+      </ConfigProvider>,
+    )
+    await triggerLayout(view)
+
+    expect(StyleSheet.flatten(getMarks(view)[0].props.style as StyleProp<ViewStyle>)).toMatchObject(
+      { width: 100, height: 100 },
+    )
+  })
+
   it('falls back from invalid dimensions without dividing by zero', async () => {
     const view = await render(
       <Watermark testID="watermark-root" content="Tsuki" height={-1} width={Number.NaN} />,

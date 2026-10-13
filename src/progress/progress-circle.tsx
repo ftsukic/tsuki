@@ -14,11 +14,8 @@ export interface ProgressCircleProps {
   strokeWidth: number
   trackColor: ColorValue
   circleStyle?: StyleProp<ViewStyle>
+  labelContainerStyle?: StyleProp<ViewStyle>
   labelStyle?: StyleProp<TextStyle>
-}
-
-function toColorString(color: ColorValue): string {
-  return typeof color === 'string' ? color : String(color)
 }
 
 function renderPivot(value: ReactNode, style: StyleProp<TextStyle>) {
@@ -32,6 +29,7 @@ function renderPivot(value: ReactNode, style: StyleProp<TextStyle>) {
 export function ProgressCircle({
   circleStyle,
   color,
+  labelContainerStyle,
   labelStyle,
   percentage,
   pivotText,
@@ -59,7 +57,7 @@ export function ProgressCircle({
           originY={size / 2}
           r={radius}
           rotation={-90}
-          stroke={toColorString(trackColor)}
+          stroke={trackColor}
           strokeLinecap={strokeLinecap}
           strokeWidth={resolvedStrokeWidth}
         />
@@ -71,7 +69,7 @@ export function ProgressCircle({
           originY={size / 2}
           r={radius}
           rotation={-90}
-          stroke={toColorString(color)}
+          stroke={color}
           strokeDasharray={`${circumference} ${circumference}`}
           strokeDashoffset={offset}
           strokeLinecap={strokeLinecap}
@@ -81,15 +79,18 @@ export function ProgressCircle({
       {showPivot ? (
         <View
           pointerEvents="none"
-          style={{
-            alignItems: 'center',
-            bottom: 0,
-            justifyContent: 'center',
-            left: 0,
-            position: 'absolute',
-            right: 0,
-            top: 0,
-          }}
+          style={[
+            {
+              alignItems: 'center',
+              bottom: 0,
+              justifyContent: 'center',
+              left: 0,
+              position: 'absolute',
+              right: 0,
+              top: 0,
+            },
+            labelContainerStyle,
+          ]}
         >
           {renderPivot(resolvedPivotText, labelStyle)}
         </View>

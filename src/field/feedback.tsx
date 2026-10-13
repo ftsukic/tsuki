@@ -25,17 +25,21 @@ function renderFeedback(value: ReactNode, style: StyleProp<TextStyle>) {
 }
 
 export function renderFieldFeedback(
-  description: ReactNode,
+  help: ReactNode,
   errorMessage: ReactNode,
   resolved: FieldResolvedStyles,
   semantic?: FieldSemanticStyles,
 ): ReactElement | null {
-  if (!isVisible(description) && !isVisible(errorMessage)) return null
+  if (!isVisible(help) && !isVisible(errorMessage)) return null
 
   return (
-    <View style={[resolved.feedback, semantic?.help]}>
-      {renderFeedback(description, [resolved.description, semantic?.extra])}
-      {renderFeedback(errorMessage, [resolved.error, semantic?.helpItem])}
+    <View style={[resolved.feedback, semantic?.feedback]}>
+      {renderFeedback(help, [resolved.description, semantic?.help])}
+      {isVisible(errorMessage) ? (
+        <View accessibilityRole="alert" accessibilityLiveRegion="polite">
+          {renderFeedback(errorMessage, [resolved.error, semantic?.error])}
+        </View>
+      ) : null}
     </View>
   )
 }

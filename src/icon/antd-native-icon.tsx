@@ -4,7 +4,7 @@ import { Pressable } from '../pressable'
 import type { AntdNativeIconProps } from './types'
 import type { AbstractNode, IconDefinition } from '@ant-design/icons-svg/lib/types'
 import { memo, type ReactNode } from 'react'
-import type { ColorValue, PressableProps, StyleProp, ViewStyle } from 'react-native'
+import type { ColorValue, PressableProps, StyleProp, ViewProps, ViewStyle } from 'react-native'
 import { View } from 'react-native'
 import {
   Circle,
@@ -23,7 +23,7 @@ import {
   Use,
 } from 'react-native-svg'
 
-type NativeSvgAttributes = Record<string, string>
+type NativeSvgAttributes = Record<string, string | ColorValue>
 type NativeSvgProps = Omit<
   AntdNativeIconProps,
   | 'definition'
@@ -59,21 +59,17 @@ const attributeAliases: Record<string, string> = {
   'stroke-width': 'strokeWidth',
 }
 
-function toColorString(color: ColorValue): string {
-  return typeof color === 'string' ? color : String(color)
-}
-
 function resolveTwoToneColors(
-  color: string,
+  color: ColorValue,
   twoToneColor: AntdNativeIconProps['twoToneColor'],
   fallbackSecondaryColor: string,
-): readonly [string, string] {
+): readonly [ColorValue, ColorValue] {
   if (twoToneColor && typeof twoToneColor !== 'string') return twoToneColor
   if (twoToneColor) return [twoToneColor, twoToneColor]
   return [color, fallbackSecondaryColor]
 }
 
-function resolveAttributes(attrs: NativeSvgAttributes, color: string): NativeSvgAttributes {
+function resolveAttributes(attrs: NativeSvgAttributes, color: ColorValue): NativeSvgAttributes {
   return Object.entries(attrs).reduce<NativeSvgAttributes>((result, [key, value]) => {
     const normalizedKey = attributeAliases[key] ?? key
     result[normalizedKey] = value === 'currentColor' ? color : value
@@ -81,17 +77,11 @@ function resolveAttributes(attrs: NativeSvgAttributes, color: string): NativeSvg
   }, {})
 }
 
-function getNodeColor(attrs: NativeSvgAttributes, color: string): NativeSvgAttributes {
-  const resolved = resolveAttributes(attrs, color)
-  if (resolved.fill === undefined && resolved.stroke === undefined) resolved.fill = color
-  return resolved
-}
-
 function renderNode(
   node: AbstractNode,
   key: string,
   size: number,
-  primaryColor: string,
+  primaryColor: ColorValue,
   svgStyle: AntdNativeIconProps['svgStyle'],
   svgProps: NativeSvgProps,
 ): ReactNode {
@@ -104,6 +94,7 @@ function renderNode(
       const attrs = resolveAttributes(node.attrs, primaryColor)
       return (
         <Svg
+          fill={primaryColor}
           {...svgProps}
           {...attrs}
           pointerEvents="none"
@@ -118,24 +109,24 @@ function renderNode(
     }
     case 'g':
       return (
-        <G {...getNodeColor(node.attrs, primaryColor)} key={key}>
+        <G {...resolveAttributes(node.attrs, primaryColor)} key={key}>
           {children}
         </G>
       )
     case 'path':
-      return <Path {...getNodeColor(node.attrs, primaryColor)} key={key} />
+      return <Path {...resolveAttributes(node.attrs, primaryColor)} key={key} />
     case 'circle':
-      return <Circle {...getNodeColor(node.attrs, primaryColor)} key={key} />
+      return <Circle {...resolveAttributes(node.attrs, primaryColor)} key={key} />
     case 'ellipse':
-      return <Ellipse {...getNodeColor(node.attrs, primaryColor)} key={key} />
+      return <Ellipse {...resolveAttributes(node.attrs, primaryColor)} key={key} />
     case 'line':
-      return <Line {...getNodeColor(node.attrs, primaryColor)} key={key} />
+      return <Line {...resolveAttributes(node.attrs, primaryColor)} key={key} />
     case 'polygon':
-      return <Polygon {...getNodeColor(node.attrs, primaryColor)} key={key} />
+      return <Polygon {...resolveAttributes(node.attrs, primaryColor)} key={key} />
     case 'polyline':
-      return <Polyline {...getNodeColor(node.attrs, primaryColor)} key={key} />
+      return <Polyline {...resolveAttributes(node.attrs, primaryColor)} key={key} />
     case 'rect':
-      return <Rect {...getNodeColor(node.attrs, primaryColor)} key={key} />
+      return <Rect {...resolveAttributes(node.attrs, primaryColor)} key={key} />
     case 'defs':
       return (
         <Defs {...node.attrs} key={key}>
@@ -167,9 +158,16 @@ function renderNode(
   }
 }
 
-function getIconNode(definition: IconDefinition, primaryColor: string, secondaryColor: string) {
+function getIconNode(
+  definition: IconDefinition,
+  primaryColor: ColorValue,
+  secondaryColor: ColorValue,
+) {
   return typeof definition.icon === 'function'
-    ? definition.icon(primaryColor, secondaryColor)
+    ? definition.icon(
+        typeof primaryColor === 'string' ? primaryColor : 'currentColor',
+        typeof secondaryColor === 'string' ? secondaryColor : 'currentColor',
+      )
     : definition.icon
 }
 
@@ -196,20 +194,40 @@ export function AntdNativeIcon({
   const { token } = useToken()
   const contextSize = useIconSize()
   const resolvedSize = size ?? contextSize ?? 24
-  const resolvedColor = toColorString(color ?? token.colorIcon)
+  const resolvedColor = color ?? token.colorIcon
   const [primaryColor, secondaryColor] = resolveTwoToneColors(
     resolvedColor,
     twoToneColor,
     token.colorFillSecondary,
   )
   const iconNode = getIconNode(definition, primaryColor, secondaryColor)
+  const rootProps: ViewProps = {}
+  const nativeSvgProps = { ...svgProps }
+  // Accessibility belongs to the interactive root, outside the SVG touch boundary.
+  for (const key of Object.keys(nativeSvgProps)) {
+    if (
+      key.startsWith('accessibility') ||
+      key.startsWith('onAccessibility') ||
+      key.startsWith('aria-') ||
+      [
+        'accessible',
+        'importantForAccessibility',
+        'screenReaderFocusable',
+        'onMagicTap',
+        'role',
+      ].includes(key)
+    ) {
+      Object.assign(rootProps, { [key]: nativeSvgProps[key as keyof typeof nativeSvgProps] })
+      delete nativeSvgProps[key as keyof typeof nativeSvgProps]
+    }
+  }
   const renderedIcon = renderNode(
     iconNode,
     definition.name,
     resolvedSize,
     primaryColor,
     svgStyle,
-    svgProps,
+    nativeSvgProps,
   )
   const iconContent =
     rotation === undefined ? (
@@ -220,10 +238,16 @@ export function AntdNativeIcon({
   const touchBoundary = <View pointerEvents="none">{iconContent}</View>
   const resolvedStyle = [defaultStyle, disabled && { opacity: 0.4 }, style] as StyleProp<ViewStyle>
 
-  if (!onPress) return <View style={resolvedStyle}>{touchBoundary}</View>
+  if (!onPress)
+    return (
+      <View {...rootProps} style={resolvedStyle}>
+        {touchBoundary}
+      </View>
+    )
 
   return (
     <Pressable
+      {...rootProps}
       disabled={disabled}
       onPress={onPress}
       hitSlop={getIconHitSlop(resolvedSize, touchableSize, hitSlop)}

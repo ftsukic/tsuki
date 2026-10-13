@@ -1,5 +1,5 @@
 import { forwardRef, useCallback, useContext, useEffect, useRef } from 'react'
-import { View } from 'react-native'
+import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import type { ReactNode } from 'react'
 import type { StyleProp, TextStyle } from 'react-native'
@@ -34,6 +34,7 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
   function ActionSheetContent(props, ref) {
     const token = useComponentToken('ActionSheet', getActionSheetToken)
     const safeAreaInsets = useContext(SafeAreaInsetsContext)
+    const { height: windowHeight } = useWindowDimensions()
     const {
       visible = false,
       title,
@@ -88,6 +89,9 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
     const hasTitle = isRenderable(title)
     const hasCancel = isRenderable(cancelText)
     const bottomInset = safeAreaInsetBottom ? Math.max(0, safeAreaInsets?.bottom ?? 0) : 0
+    const maxHeight = Math.max(0, windowHeight - (safeAreaInsets?.top ?? 0))
+    const { backgroundColor: cancelBackgroundColor, ...cancelContentStyle } =
+      StyleSheet.flatten(semantic?.cancel) ?? {}
 
     const renderContent = (value: ReactNode, textStyle: StyleProp<TextStyle>) =>
       isTextContent(value) ? <Text style={textStyle}>{value}</Text> : value
@@ -118,9 +122,15 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
             try {
               action.callback?.(action)
             } finally {
-              onSelect?.(action, index)
-              onAction?.(action)
-              if (closeOnAction) requestClose('action')
+              try {
+                onSelect?.(action, index)
+              } finally {
+                try {
+                  onAction?.(action)
+                } finally {
+                  if (closeOnAction) requestClose('action')
+                }
+              }
             }
           }}
           style={[
@@ -152,7 +162,6 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
       <PopupContent
         visible={visible}
         position="bottom"
-        round
         overlay={overlay}
         closeOnPressOverlay={closeOnPressOverlay}
         safeAreaInsetBottom={false}
@@ -166,7 +175,7 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
           root: semantic?.root,
           mask: semantic?.mask,
           wrapper: semantic?.wrapper,
-          container: resolved.popupPanel,
+          container: [resolved.popupPanel, { maxHeight }],
         }}
         onOpened={onOpened}
         onClosed={onClosed}
@@ -175,7 +184,7 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
           ref={ref}
           {...viewProps}
           accessibilityViewIsModal
-          style={[resolved.root, semantic?.container]}
+          style={[resolved.root, { maxHeight }, semantic?.container]}
         >
           <View testID="action-sheet-actions" style={[resolved.actions, semantic?.body]}>
             {hasTitle ? (
@@ -187,7 +196,9 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
                 {renderContent(title, [resolved.title, semantic?.title])}
               </View>
             ) : null}
-            {actions.map(renderAction)}
+            <ScrollView style={resolved.list} bounces={false} testID="action-sheet-list">
+              {actions.map(renderAction)}
+            </ScrollView>
           </View>
           {hasCancel ? (
             <>
@@ -207,12 +218,12 @@ export const ActionSheetContent = forwardRef<View, ActionSheetContentProps>(
                       requestClose('cancel')
                     }
                   }}
-                  style={resolved.cancelPressable}
+                  style={[resolved.cancelPressable, { backgroundColor: cancelBackgroundColor }]}
                   testID="action-sheet-cancel-button"
                 >
                   <>
                     <View
-                      style={[resolved.cancel, semantic?.cancel]}
+                      style={[resolved.cancel, cancelContentStyle]}
                       testID="action-sheet-cancel-content"
                     >
                       {renderContent(cancelText, [resolved.cancelLabel, semantic?.cancelLabel])}

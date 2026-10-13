@@ -26,7 +26,7 @@ export default function PickerBasicExample() {
 
   return (
     <View style={{ gap: 12 }}>
-      <Cell title="选择城市" value={selectedText} isLink onPress={handleOpen} />
+      <Cell title="选择城市" value={selectedText} showArrow onPress={handleOpen} />
       <Text>当前值：{selectedText}</Text>
       <Popup
         visible={visible}

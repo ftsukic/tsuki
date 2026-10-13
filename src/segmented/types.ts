@@ -10,6 +10,8 @@ export interface SegmentedOption {
   label: ReactNode
   value: SegmentedValue
   disabled?: boolean
+  /** Accessible name for option labels without readable text. */
+  accessibilityLabel?: string
 }
 
 export type SegmentedOptionInput = string | SegmentedOption

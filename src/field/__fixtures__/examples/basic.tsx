@@ -13,7 +13,7 @@ export default function FieldBasicFixture() {
       title="自定义项"
       value={<Text>{city}</Text>}
       valueExtra={<Text type="secondary">必填</Text>}
-      isLink
+      showArrow
       onPress={() => setCity(city === '上海' ? '北京' : '上海')}
     />
   )

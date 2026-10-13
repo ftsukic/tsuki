@@ -111,14 +111,6 @@ export function fieldsToSelectedValues(
   return columnsType.map((type) => formatDateTimeValue(type, fields[type]))
 }
 
-export function pickerValuesToSelectedValues(
-  values: readonly PickerValue[],
-  columnsType: readonly DateTimeColumnType[],
-  base: DateTimeFields = DEFAULT_DATE_TIME_FIELDS,
-): string[] {
-  return fieldsToSelectedValues(pickerValuesToFields(values, columnsType, base), columnsType)
-}
-
 export function selectedValuesToPickerValues(
   values: readonly string[],
   columnsType: readonly DateTimeColumnType[],

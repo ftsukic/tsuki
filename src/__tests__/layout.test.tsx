@@ -1,5 +1,5 @@
 import { Col, Row } from '..'
-import { render, screen } from '@testing-library/react-native'
+import { fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet, View } from 'react-native'
 
 function getStyle(testID: string) {
@@ -75,9 +75,9 @@ describe('Layout Row and Col', () => {
     })
   })
 
-  it('groups direct columns into logical rows for horizontal and vertical gutter', async () => {
+  it('uses grid rows initially and native rowGap for vertical gutter', async () => {
     await render(
-      <Row gutter={[16, 8]}>
+      <Row testID="row" gutter={[16, 8]}>
         <Col testID="first" span={16} />
         <Col testID="second" span={16} />
         <Col testID="third" span={12} />
@@ -85,13 +85,14 @@ describe('Layout Row and Col', () => {
       </Row>,
     )
 
+    expect(getStyle('row').rowGap).toBe(8)
     expect(getStyle('first')).toMatchObject({
       paddingLeft: 0,
       paddingRight: 0,
       paddingTop: 0,
-      paddingBottom: 8,
+      paddingBottom: 0,
     })
-    expect(getStyle('second')).toMatchObject({ paddingLeft: 0, paddingRight: 0, paddingBottom: 8 })
+    expect(getStyle('second')).toMatchObject({ paddingLeft: 0, paddingRight: 0, paddingBottom: 0 })
     expect(getStyle('third')).toMatchObject({ paddingLeft: 0, paddingRight: 8, paddingBottom: 0 })
     expect(getStyle('fourth')).toMatchObject({ paddingLeft: 8, paddingRight: 0, paddingBottom: 0 })
   })
@@ -110,7 +111,7 @@ describe('Layout Row and Col', () => {
     expect(getStyle('third')).toMatchObject({ paddingLeft: 8, paddingRight: 0 })
   })
 
-  it('counts offset and span together when deciding a logical row', async () => {
+  it('counts offset and span together for initial horizontal spacing', async () => {
     await render(
       <Row gutter={[16, 8]}>
         <Col testID="first" span={8} offset={4} />
@@ -119,9 +120,9 @@ describe('Layout Row and Col', () => {
       </Row>,
     )
 
-    expect(getStyle('first').paddingBottom).toBe(8)
-    expect(getStyle('second').paddingBottom).toBe(8)
-    expect(getStyle('third').paddingBottom).toBe(0)
+    expect(getStyle('first').paddingRight).toBe(8)
+    expect(getStyle('second').paddingLeft).toBe(8)
+    expect(getStyle('third')).toMatchObject({ paddingLeft: 0, paddingRight: 0 })
   })
 
   it('does not form vertical logical rows when wrapping is disabled', async () => {
@@ -133,6 +134,7 @@ describe('Layout Row and Col', () => {
     )
 
     expect(getStyle('row').flexWrap).toBe('nowrap')
+    expect(getStyle('row').rowGap).toBe(0)
     expect(getStyle('first').paddingBottom).toBe(0)
     expect(getStyle('second').paddingBottom).toBe(0)
   })
@@ -159,6 +161,114 @@ describe('Layout Row and Col', () => {
     )
 
     expect(getStyle('row').flexWrap).toBe('nowrap')
+    expect(getStyle('row').rowGap).toBe(0)
     expect(getStyle('col')).toMatchObject({ flexBasis: '40%', paddingLeft: 20 })
+  })
+})
+
+describe('Layout semantic content and native rows', () => {
+  function layout(testID: string, x: number, y: number, width: number, height = 40) {
+    return fireEvent(screen.getByTestId(testID), 'layout', {
+      nativeEvent: { layout: { x, y, width, height } },
+    })
+  }
+
+  it('keeps root styles and resolves content styles with the original props', async () => {
+    const resolver = jest.fn(({ props }) => ({
+      content: { backgroundColor: 'blue', padding: props.span },
+    }))
+    await render(
+      <Col testID="col" span={12} style={{ backgroundColor: 'red', height: 80 }} styles={resolver}>
+        <View testID="child" />
+      </Col>,
+    )
+    expect(getStyle('col')).toMatchObject({ backgroundColor: 'red', height: 80 })
+    expect(StyleSheet.flatten(screen.getByTestId('child').parent?.props.style)).toMatchObject({
+      backgroundColor: 'blue',
+      padding: 12,
+    })
+    expect(resolver).toHaveBeenCalledWith(
+      expect.objectContaining({ props: expect.objectContaining({ span: 12 }), state: {} }),
+    )
+  })
+
+  it('uses native rows when flexBasis overrides the grid and preserves onLayout', async () => {
+    const onLayout = jest.fn()
+    await render(
+      <Row testID="row" gutter={[16, 8]}>
+        <Col testID="first" span={12} style={{ flexBasis: '60%' }} onLayout={onLayout} />
+        <Col testID="second" span={12} style={{ flexBasis: '60%' }} />
+      </Row>,
+    )
+    await layout('first', 0, 0, 180)
+    await layout('second', 0, 48, 180)
+    expect(getStyle('row').rowGap).toBe(8)
+    expect(getStyle('first').paddingRight).toBe(0)
+    expect(getStyle('second').paddingLeft).toBe(0)
+    expect(onLayout).toHaveBeenCalledTimes(1)
+    // Resize back into one actual line.
+    await layout('first', 0, 0, 150)
+    await layout('second', 150, 0, 150)
+    expect(getStyle('first').paddingRight).toBe(8)
+    expect(getStyle('second').paddingLeft).toBe(8)
+  })
+
+  it('keeps different-height centered columns in the same native row', async () => {
+    await render(
+      <Row gutter={16} align="center">
+        <Col testID="first" span={12} />
+        <Col testID="second" span={12} />
+      </Row>,
+    )
+    await layout('first', 0, 24, 150, 40)
+    await layout('second', 150, 0, 150, 88)
+    expect(getStyle('first').paddingRight).toBe(8)
+    expect(getStyle('second').paddingLeft).toBe(8)
+  })
+
+  it('corrects spacing when a non-Col child causes native wrapping', async () => {
+    await render(
+      <Row gutter={16}>
+        <Col testID="first" span={12} />
+        <View style={{ width: 20 }} />
+        <Col testID="second" span={12} />
+      </Row>,
+    )
+    await layout('first', 0, 0, 150)
+    await layout('second', 0, 56, 150)
+    expect(getStyle('first').paddingRight).toBe(0)
+    expect(getStyle('second').paddingLeft).toBe(0)
+  })
+
+  it('uses the effective wrap style for vertical gutter', async () => {
+    await render(
+      <Row testID="row" gutter={[16, 8]} style={{ flexWrap: 'nowrap' }}>
+        <Col span={16} />
+        <Col span={16} />
+      </Row>,
+    )
+    expect(getStyle('row').rowGap).toBe(0)
+  })
+
+  it('isolates nested rows and descendants from outer spacing', async () => {
+    await render(
+      <Row gutter={[16, 8]}>
+        <Col span={12}>
+          <Row>
+            <>
+              <Col testID="inner" />
+            </>
+          </Row>
+          <Col testID="standalone" />
+        </Col>
+        <Col span={12} />
+      </Row>,
+    )
+    expect(getStyle('inner')).toMatchObject({ paddingLeft: 0, paddingRight: 0, paddingBottom: 0 })
+    expect(getStyle('standalone')).toMatchObject({
+      paddingLeft: 0,
+      paddingRight: 0,
+      paddingBottom: 0,
+    })
   })
 })

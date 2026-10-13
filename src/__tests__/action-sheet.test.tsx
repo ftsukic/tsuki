@@ -1,6 +1,6 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react-native'
 import { useState } from 'react'
-import { StyleSheet, Text } from 'react-native'
+import { StyleSheet, Text, useWindowDimensions } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import {
   ActionSheet,
@@ -90,6 +90,110 @@ describe('ActionSheet', () => {
     await view.unmount()
   })
 
+  it('keeps the header and cancel outside the scrollable long action list', async () => {
+    let windowHeight = 0
+    function LongSheet() {
+      windowHeight = useWindowDimensions().height
+      return (
+        <ActionSheet
+          visible
+          title="选择操作"
+          actions={Array.from({ length: 30 }, (_, index) => ({ name: `操作 ${index}` }))}
+          testID="long-sheet"
+        />
+      )
+    }
+    const view = await render(
+      <ConfigProvider theme={{ seed: { motion: false } }}>
+        <SafeAreaInsetsContext.Provider value={{ top: 24, right: 0, bottom: 20, left: 0 }}>
+          <PortalHost>
+            <LongSheet />
+          </PortalHost>
+        </SafeAreaInsetsContext.Provider>
+      </ConfigProvider>,
+    )
+    expect(StyleSheet.flatten(screen.getByTestId('long-sheet').props.style).maxHeight).toBe(
+      windowHeight - 24,
+    )
+    const list = within(screen.getByTestId('action-sheet-list'))
+    expect(list.getByText('操作 29')).toBeTruthy()
+    expect(list.queryByTestId('action-sheet-title')).toBeNull()
+    expect(list.queryByTestId('action-sheet-cancel-button')).toBeNull()
+    await view.unmount()
+  })
+
+  it('lets ActionSheet own square corners even when Popup has rounded corners', async () => {
+    const view = await render(
+      <ConfigProvider
+        theme={{
+          seed: { motion: false },
+          components: {
+            ActionSheet: { borderRadius: 0 },
+            Popup: { borderRadius: 24 },
+          },
+        }}
+      >
+        <PortalHost>
+          <ActionSheet visible testID="square-sheet" />
+        </PortalHost>
+      </ConfigProvider>,
+    )
+    const sheet = screen.getByTestId('square-sheet')
+    expect(StyleSheet.flatten(sheet.props.style).borderTopLeftRadius).toBe(0)
+    expect(StyleSheet.flatten(sheet.parent?.props.style)).not.toHaveProperty('borderTopLeftRadius')
+    await view.unmount()
+  })
+
+  it('shares the custom cancel background with safe area without covering pressed feedback', async () => {
+    const view = await render(
+      <AppProvider>
+        <ActionSheet
+          visible
+          styles={{ cancel: { backgroundColor: '#123456', paddingVertical: 20 } }}
+        />
+      </AppProvider>,
+    )
+    expect(pressableStyle('action-sheet-cancel-button', false).backgroundColor).toBe('#123456')
+    const contentStyle = StyleSheet.flatten(
+      screen.getByTestId('action-sheet-cancel-content').props.style,
+    )
+    expect(contentStyle.paddingVertical).toBe(20)
+    expect(contentStyle).not.toHaveProperty('backgroundColor')
+    await firePressState(screen.getByTestId('action-sheet-cancel-button'), 'pressIn')
+    expect(pressableStyle('action-sheet-cancel-button', true).backgroundColor).toBe(
+      getDesignToken().pressedBackgroundColor,
+    )
+    await view.unmount()
+  })
+
+  it.each([true, false])(
+    'settles throwing onSelect with closeOnAction=%s',
+    async (closeOnAction) => {
+      const action = { name: '选择' }
+      const error = new Error('consumer onSelect failed')
+      const view = await render(<AppProvider />)
+      let result!: Promise<unknown>
+      await act(async () => {
+        result = showActionSheet({
+          actions: [action],
+          closeOnAction,
+          onSelect: () => {
+            throw error
+          },
+        })
+      })
+      await act(async () => {
+        await expect(fireEvent.press(screen.getByTestId('action-sheet-action-0'))).rejects.toThrow(
+          error,
+        )
+      })
+      await expect(result).resolves.toBe(action)
+      if (closeOnAction) expect(screen.queryByText('选择')).toBeNull()
+      else expect(screen.getByText('选择')).toBeTruthy()
+      await view.unmount()
+    },
+  )
+
   it('uses custom color, disabled, and loading action states', async () => {
     const events: string[] = []
     const colorCallback = jest.fn((action) => {
@@ -156,6 +260,15 @@ describe('ActionSheet', () => {
       </ConfigProvider>,
     )
 
+    // React 19 commits the layout state update asynchronously.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(
+      screen.getByTestId('action-sheet-actions', { includeHiddenElements: true }),
+      'layout',
+      {
+        nativeEvent: { layout: { width: 320, height: 280, x: 0, y: 0 } },
+      },
+    )
     expect(timing.mock.calls.filter(([, config]) => config?.duration === 200)).toHaveLength(1)
     await view.unmount()
   })
@@ -195,6 +308,15 @@ describe('ActionSheet', () => {
       </ConfigProvider>,
     )
 
+    // React 19 commits the layout state update asynchronously.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(
+      screen.getByTestId('action-sheet-actions', { includeHiddenElements: true }),
+      'layout',
+      {
+        nativeEvent: { layout: { width: 320, height: 280, x: 0, y: 0 } },
+      },
+    )
     await act(async () => animations[0]?.complete())
     // eslint-disable-next-line testing-library/no-unnecessary-act
     await act(async () => fireEvent.press(screen.getByTestId('action-sheet-action-0')))

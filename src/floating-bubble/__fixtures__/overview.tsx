@@ -4,6 +4,8 @@ import BasicExample from './examples/basic'
 import ControlledExample from './examples/controlled'
 import CustomExample from './examples/custom'
 import MagneticExample from './examples/magnetic'
+import MotionExample from './examples/motion'
+import SemanticExample from './examples/semantic'
 import SafeAreaExample from './examples/safe-area'
 import ThemeExample from './examples/theme'
 
@@ -57,6 +59,18 @@ export default function FloatingBubbleOverview() {
           description: '通过 FloatingBubble token 和 semantic styles 定制外观。',
           id: 'theme',
           title: '主题定制',
+        },
+        {
+          Component: SemanticExample,
+          description: '定制 root、content、icon，并查看拖动状态样式。',
+          id: 'semantic',
+          title: '语义样式',
+        },
+        {
+          Component: MotionExample,
+          description: '切换动画开关、Reduced Motion 和磁吸时长倍率。',
+          id: 'motion',
+          title: '动画策略',
         },
       ]}
     />

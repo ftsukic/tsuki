@@ -73,7 +73,7 @@ export function createFieldCellStyles(
     return {
       ...custom,
       root: [semantic?.root, custom?.root],
-      header: [
+      titleContainer: [
         vertical
           ? {
               width: '100%',
@@ -87,17 +87,17 @@ export function createFieldCellStyles(
               flexBasis: 'auto',
               marginRight: fieldToken.titleGap,
             },
-        custom?.header,
+        custom?.titleContainer,
       ],
-      title: [{ textAlign: titleAlign }, semantic?.label, custom?.title],
-      body: [
+      title: [{ textAlign: titleAlign }, semantic?.title, custom?.title],
+      valueContainer: [
         vertical
           ? { width: '100%' }
           : {
               flex: 1,
               minWidth: 0,
             },
-        custom?.body,
+        custom?.valueContainer,
       ],
     }
   }

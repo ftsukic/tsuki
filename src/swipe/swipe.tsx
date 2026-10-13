@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import type { ReactElement } from 'react'
+import type { ComponentPropsWithRef, ReactElement } from 'react'
 import { View } from 'react-native'
 import type { LayoutChangeEvent } from 'react-native'
 import { Easing } from 'react-native-reanimated'
@@ -22,12 +22,14 @@ import { scheduleOnRN } from 'react-native-worklets'
 import { SwipeItem } from './swipe-item'
 import { getSwipeStyles } from './style'
 import { getSwipeToken } from './token'
-import type { SwipeItemProps, SwipeProps, SwipeRef, SwipeToOptions } from './types'
+import type { SwipeProps, SwipeRef, SwipeSemanticStyles, SwipeToOptions } from './types'
+
+type SwipeItemElement = ReactElement<ComponentPropsWithRef<typeof SwipeItem>>
 
 const VANT_SPEED_THRESHOLD = 0.25
 const LOCK_DISTANCE = 10
 
-function isSwipeItem(value: unknown): value is ReactElement<SwipeItemProps> {
+function isSwipeItem(value: unknown): value is SwipeItemElement {
   return isValidElement(value) && value.type === SwipeItem
 }
 
@@ -52,7 +54,9 @@ function getLazyIndices(index: number) {
 }
 
 interface SwipeItemSlotProps {
-  item: ReactElement<SwipeItemProps>
+  item: SwipeItemElement
+  active: boolean
+  style: SwipeSemanticStyles['item']
   index: number
   count: number
   loop: boolean
@@ -66,6 +70,8 @@ interface SwipeItemSlotProps {
 
 function SwipeItemSlot({
   item,
+  active,
+  style,
   index,
   count,
   loop,
@@ -76,6 +82,7 @@ function SwipeItemSlot({
   offsetSV,
   sizeSV,
 }: SwipeItemSlotProps) {
+  const { ref, children, style: childStyle, ...viewProps } = item.props
   const itemStyle = useAnimatedStyle(() => {
     const minOffset = sizeSV.value - sizeSV.value * count
     let itemOffset = 0
@@ -95,8 +102,16 @@ function SwipeItemSlot({
   }, [autoHeight, count, index, loop, offsetSV, sizeSV, vertical])
 
   return (
-    <Animated.View key={item.key ?? index} {...item.props} style={[item.props.style, itemStyle]}>
-      {!lazyRender || rendered ? item.props.children : null}
+    <Animated.View
+      {...viewProps}
+      ref={ref}
+      accessibilityElementsHidden={active ? viewProps.accessibilityElementsHidden : true}
+      importantForAccessibility={
+        active ? viewProps.importantForAccessibility : 'no-hide-descendants'
+      }
+      style={[style, childStyle, itemStyle]}
+    >
+      {!lazyRender || rendered ? children : null}
     </Animated.View>
   )
 }
@@ -467,6 +482,8 @@ const SwipeComponent = forwardRef<SwipeRef, SwipeProps>(function Swipe(
     <SwipeItemSlot
       key={item.key ?? index}
       item={item}
+      active={index === activeIndex}
+      style={[resolvedStyles.item, semanticStyles?.item]}
       index={index}
       count={count}
       loop={resolvedLoop}

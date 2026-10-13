@@ -1,5 +1,5 @@
-import { SwipeCell } from '../../..'
-import { useState } from 'react'
+import { SwipeCell, useToken } from '../../..'
+import { useRef, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 const messages = [
@@ -13,6 +13,8 @@ const messages = [
  * @description 微信消息列表风格的右滑 action、稳定 id 和主体点击态。
  */
 export default function SwipeCellWeChatFixture() {
+  const { token } = useToken()
+  const pendingActions = useRef(new Map<string, () => void>())
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(new Set())
   const [unreadIds, setUnreadIds] = useState<Set<string>>(new Set())
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
@@ -21,7 +23,7 @@ export default function SwipeCellWeChatFixture() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>微信消息列表</Text>
+      <Text style={[styles.heading, { color: token.colorText }]}>微信消息列表</Text>
       {visibleMessages.map((message) => {
         const isPinned = pinnedIds.has(message.id)
         const isUnread = unreadIds.has(message.id)
@@ -30,17 +32,26 @@ export default function SwipeCellWeChatFixture() {
           <SwipeCell
             key={message.id}
             id={message.id}
+            testID={`wechat-${message.id}`}
+            onClose={() => {
+              const action = pendingActions.current.get(message.id)
+              pendingActions.current.delete(message.id)
+              action?.()
+            }}
             actions={[
               {
                 key: 'pin',
                 text: isPinned ? '取消置顶' : '置顶',
-                backgroundColor: '#969799',
+                backgroundColor: token.colorBgElevated,
+                textColor: token.colorText,
                 onPress: () => {
-                  setPinnedIds((current) => {
-                    const next = new Set(current)
-                    if (next.has(message.id)) next.delete(message.id)
-                    else next.add(message.id)
-                    return next
+                  pendingActions.current.set(message.id, () => {
+                    setPinnedIds((current) => {
+                      const next = new Set(current)
+                      if (next.has(message.id)) next.delete(message.id)
+                      else next.add(message.id)
+                      return next
+                    })
                   })
                 },
               },
@@ -49,7 +60,9 @@ export default function SwipeCellWeChatFixture() {
                 text: '未读',
                 color: 'primary',
                 onPress: () => {
-                  setUnreadIds((current) => new Set(current).add(message.id))
+                  pendingActions.current.set(message.id, () => {
+                    setUnreadIds((current) => new Set(current).add(message.id))
+                  })
                 },
               },
               {
@@ -57,21 +70,30 @@ export default function SwipeCellWeChatFixture() {
                 text: '删除',
                 color: 'danger',
                 onPress: () => {
-                  setDeletedIds((current) => new Set(current).add(message.id))
+                  pendingActions.current.set(message.id, () => {
+                    setDeletedIds((current) => new Set(current).add(message.id))
+                  })
                 },
               },
             ]}
           >
             <View style={styles.row}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{message.name.slice(0, 1)}</Text>
+              <View style={[styles.avatar, { backgroundColor: token.colorSuccess }]}>
+                <Text style={[styles.avatarText, { color: token.colorTextLightSolid }]}>
+                  {message.name.slice(0, 1)}
+                </Text>
               </View>
               <View style={styles.message}>
                 <View style={styles.titleRow}>
-                  <Text style={styles.name}>{message.name}</Text>
-                  <Text style={styles.time}>{message.time}</Text>
+                  <Text style={[styles.name, { color: token.colorText }]}>{message.name}</Text>
+                  <Text style={[styles.time, { color: token.colorTextSecondary }]}>
+                    {message.time}
+                  </Text>
                 </View>
-                <Text numberOfLines={1} style={styles.preview}>
+                <Text
+                  numberOfLines={1}
+                  style={[styles.preview, { color: token.colorTextSecondary }]}
+                >
                   {isUnread ? '未读 · ' : ''}
                   {message.preview}
                 </Text>
@@ -86,20 +108,19 @@ export default function SwipeCellWeChatFixture() {
 
 const styles = StyleSheet.create({
   container: { gap: 12 },
-  heading: { color: '#333333', fontSize: 16, fontWeight: '600' },
-  row: { alignItems: 'center', backgroundColor: '#ffffff', flexDirection: 'row', padding: 14 },
+  heading: { fontSize: 16, fontWeight: '600' },
+  row: { alignItems: 'center', flexDirection: 'row', padding: 14 },
   avatar: {
     alignItems: 'center',
-    backgroundColor: '#07c160',
     borderRadius: 22,
     height: 44,
     justifyContent: 'center',
     width: 44,
   },
-  avatarText: { color: '#ffffff', fontSize: 18, fontWeight: '600' },
+  avatarText: { fontSize: 18, fontWeight: '600' },
   message: { flex: 1, gap: 4, marginLeft: 12 },
   titleRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
-  name: { color: '#222222', fontSize: 16, fontWeight: '600' },
-  time: { color: '#999999', fontSize: 12 },
-  preview: { color: '#999999', fontSize: 13 },
+  name: { fontSize: 16, fontWeight: '600' },
+  time: { fontSize: 12 },
+  preview: { fontSize: 13 },
 })

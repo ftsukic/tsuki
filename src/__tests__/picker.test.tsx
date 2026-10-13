@@ -173,7 +173,7 @@ describe('Picker', () => {
     expect(pickerRef.current?.getSelectedValues()).toEqual(['third'])
   })
 
-  it('keeps the controlled visual selection until the external value changes', async () => {
+  it('keeps the controlled selected value until the external value changes', async () => {
     const onChange = jest.fn()
     const pickerRef = createRef<PickerRef>()
     const timing = jest
@@ -304,7 +304,7 @@ describe('Picker', () => {
     expect(onConfirm).toHaveBeenCalledTimes(1)
   })
 
-  it('keeps a controlled pending selection after immediate confirm', async () => {
+  it('confirms a pending target without changing the controlled selected value', async () => {
     const callbacks: Array<(finished?: boolean) => void> = []
     const onChange = jest.fn()
     const onConfirm = jest.fn()
@@ -479,7 +479,13 @@ describe('Picker', () => {
         return value as never
       })
     await render(
-      <Picker columns={longOptions} defaultValue={['999']} ref={pickerRef} showToolbar={false} />,
+      <Picker
+        columns={longOptions}
+        defaultValue={['999']}
+        ref={pickerRef}
+        showToolbar={false}
+        virtual={false}
+      />,
     )
 
     expect(screen.getByTestId('picker-item-0-0')).toBeTruthy()

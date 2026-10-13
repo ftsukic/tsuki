@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { Button, mountPortal, unmountPortal, updatePortal } from '@ftsukic/tsuki'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Text, View } from 'react-native'
 import type { PortalKey } from '@ftsukic/tsuki'
 
@@ -11,16 +11,25 @@ import type { PortalKey } from '@ftsukic/tsuki'
  */
 export default function PortalImperativeExample() {
   const [key, setKey] = useState<PortalKey | null>(null)
+  const keyRef = useRef<PortalKey | null>(null)
+
+  useEffect(
+    () => () => {
+      if (keyRef.current !== null) unmountPortal(keyRef.current)
+      keyRef.current = null
+    },
+    [],
+  )
 
   const mount = () => {
-    if (key !== null) return
-    setKey(
-      mountPortal(
-        <View style={{ backgroundColor: '#fff7e6', padding: 16 }}>
-          <Text>命令式 Portal 内容</Text>
-        </View>,
-      ),
+    if (keyRef.current !== null) return
+    const nextKey = mountPortal(
+      <View style={{ backgroundColor: '#fff7e6', padding: 16 }}>
+        <Text>命令式 Portal 内容</Text>
+      </View>,
     )
+    keyRef.current = nextKey
+    setKey(nextKey)
   }
 
   const update = () => {
@@ -37,6 +46,7 @@ export default function PortalImperativeExample() {
   const unmount = () => {
     if (key !== null) {
       unmountPortal(key)
+      keyRef.current = null
       setKey(null)
     }
   }

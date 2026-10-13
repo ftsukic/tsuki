@@ -106,6 +106,7 @@ describe('DateTimePicker', () => {
 
   it('cascades complete minDate and maxDate timestamp constraints', async () => {
     await renderPicker({
+      virtual: false,
       columnsType: ['year', 'month', 'day', 'hour', 'minute', 'second'],
       defaultValue: ['2026', '09', '13', '10', '20', '30'],
       maxDate: new Date(2026, 8, 13, 12, 40, 0),

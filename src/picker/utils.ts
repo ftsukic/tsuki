@@ -6,8 +6,10 @@ import type {
   PickerOption,
   PickerValue,
 } from './types'
+import { MOTION_DURATION } from '../motion/token'
+import { dateTimeColumns } from './date-time/columns'
 
-export const DEFAULT_DURATION = 200
+export const DEFAULT_DURATION = MOTION_DURATION.normal
 export const MOMENTUM_TIME = 300
 export const MOMENTUM_DISTANCE = 15
 export const MOMENTUM_DECELERATION = 0.003
@@ -116,16 +118,17 @@ function resolveIndex(
     previousValue !== undefined && !items.some((item) => Object.is(item.value, previousValue))
   const requested = requestedIndex >= 0 && !items[requestedIndex].disabled
   const requestedNumber = Number(requestedValue)
-  const nearestIndex = Number.isFinite(requestedNumber)
-    ? items.reduce<number | undefined>((nearest, item, index) => {
-        if (item.disabled || !Number.isFinite(Number(item.value))) return nearest
-        if (nearest === undefined) return index
-        return Math.abs(Number(item.value) - requestedNumber) <
-          Math.abs(Number(items[nearest].value) - requestedNumber)
-          ? index
-          : nearest
-      }, undefined)
-    : undefined
+  const nearestIndex =
+    !requested && Number.isFinite(requestedNumber)
+      ? items.reduce<number | undefined>((nearest, item, index) => {
+          if (item.disabled || !Number.isFinite(Number(item.value))) return nearest
+          if (nearest === undefined) return index
+          return Math.abs(Number(item.value) - requestedNumber) <
+            Math.abs(Number(items[nearest].value) - requestedNumber)
+            ? index
+            : nearest
+        }, undefined)
+      : undefined
   const index = requested
     ? requestedIndex
     : (nearestIndex ??
@@ -147,6 +150,13 @@ export function resolvePickerColumns(
 ): readonly ResolvedPickerColumn[] {
   const sources = getColumnSources(columns)
   if (sources) {
+    const positional = dateTimeColumns.has(columns)
+    if (positional && previousState && requestedValues.length < sources.length) {
+      let valueIndex = 0
+      requestedValues = previousState.indexes.map((index) =>
+        index >= 0 ? requestedValues[valueIndex++] : Number.NaN,
+      )
+    }
     const result: ResolvedPickerColumn[] = []
     const indexes: number[] = []
     const values: PickerValue[] = []
@@ -158,9 +168,11 @@ export function resolvePickerColumns(
           : source
       const resolved = resolveIndex(
         items,
-        requestedValues[columnIndex],
+        requestedValues[positional ? columnIndex : values.length],
         previousState?.indexes[columnIndex],
-        previousState?.values[columnIndex],
+        previousState?.values[
+          previousState.indexes.slice(0, columnIndex).filter((index) => index >= 0).length
+        ],
       )
       result.push({ items, ...resolved })
       indexes.push(resolved.index)

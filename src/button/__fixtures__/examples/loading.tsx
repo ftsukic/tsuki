@@ -24,7 +24,7 @@ export default function ButtonLoadingFixture() {
           保存
         </Button>
       </View>
-      <Text style={styles.caption}>需要变化文案时，通过 children 控制。</Text>
+      <Text style={styles.caption}>图标与文字由容器 gap 分隔；切换文案通过 children 控制。</Text>
       <Button type="primary" loading={loading} loadingType="spinner">
         {loading ? '提交中' : '提交'}
       </Button>

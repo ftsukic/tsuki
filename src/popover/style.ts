@@ -4,7 +4,6 @@ import type { PopoverToken } from '../theme'
 
 export interface PopoverResolvedStyles {
   popover: ViewStyle
-  content: ViewStyle
   actions: ViewStyle
   action: ViewStyle
   actionIcon: ViewStyle
@@ -53,13 +52,7 @@ export function getPopoverStyles(
       borderRadius: token.borderRadius,
       overflow: 'hidden',
     },
-    content: {
-      backgroundColor,
-      borderRadius: token.borderRadius,
-      overflow: 'hidden',
-    },
     actions: {
-      backgroundColor,
       flexDirection: actionsDirection === 'horizontal' ? 'row' : 'column',
       width: actionsDirection === 'vertical' ? token.actionWidth : undefined,
     },

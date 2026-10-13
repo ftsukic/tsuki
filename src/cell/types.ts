@@ -12,34 +12,38 @@ export interface CellStyleState {
 
 export interface CellSemanticStyles {
   root?: StyleProp<ViewStyle>
-  header?: StyleProp<ViewStyle>
-  icon?: StyleProp<ViewStyle>
-  title?: StyleProp<TextStyle>
-  titleExtra?: StyleProp<TextStyle>
-  description?: StyleProp<TextStyle>
-  body?: StyleProp<ViewStyle>
-  content?: StyleProp<TextStyle>
-  valueExtra?: StyleProp<TextStyle>
-  extra?: StyleProp<TextStyle>
-  actions?: StyleProp<ViewStyle>
-  required?: StyleProp<TextStyle>
+  container?: StyleProp<ViewStyle>
+  leading?: StyleProp<ViewStyle>
+  titleContainer?: StyleProp<ViewStyle>
+  titleExtraContainer?: StyleProp<ViewStyle>
+  valueContainer?: StyleProp<ViewStyle>
+  valueExtraContainer?: StyleProp<ViewStyle>
+  trailingContainer?: StyleProp<ViewStyle>
+  arrow?: StyleProp<ViewStyle>
   divider?: StyleProp<ViewStyle>
+  title?: StyleProp<TextStyle>
+  description?: StyleProp<TextStyle>
+  titleExtra?: StyleProp<TextStyle>
+  value?: StyleProp<TextStyle>
+  valueExtra?: StyleProp<TextStyle>
+  trailing?: StyleProp<TextStyle>
+  required?: StyleProp<TextStyle>
 }
 
 export type CellStyles = StyleResolver<CellProps, CellStyleState, CellSemanticStyles>
 
 export interface CellProps extends Omit<PressableProps, 'children' | 'style'> {
-  icon?: ReactNode
+  leading?: ReactNode
   title?: ReactNode
   titleExtra?: ReactNode
-  label?: ReactNode
+  description?: ReactNode
   value?: ReactNode
   valueExtra?: ReactNode
-  extra?: ReactNode
+  trailing?: ReactNode
   vertical?: boolean
   center?: boolean
   valueAlign?: 'left' | 'center' | 'right'
-  isLink?: boolean
+  showArrow?: boolean
   clickable?: boolean
   border?: boolean
   divider?: boolean
@@ -56,6 +60,8 @@ export interface CellProps extends Omit<PressableProps, 'children' | 'style'> {
 export type CellStyleInfo = StyleInfo<CellProps, CellStyleState>
 
 export interface CellGroupSemanticStyles {
+  header?: StyleProp<ViewStyle>
+  extraContainer?: StyleProp<ViewStyle>
   root?: StyleProp<ViewStyle>
   title?: StyleProp<TextStyle>
   extra?: StyleProp<TextStyle>

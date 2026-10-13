@@ -6,6 +6,7 @@ import {
   Collapse,
   CollapseItem,
   ConfigProvider,
+  Icon,
   getCellToken,
   getCollapseToken,
   getDesignToken,
@@ -205,16 +206,23 @@ describe('Collapse', () => {
 
     expect(collapseToken.headerHeight).toBe(cellToken.minHeight)
     expect(styles.header).toMatchObject({
+      columnGap: cellToken.iconGap,
       minHeight: cellToken.minHeight,
       overflow: 'hidden',
       paddingHorizontal: cellToken.paddingHorizontal,
       position: 'relative',
     })
     expect(styles.title).toMatchObject({
-      flexShrink: 1,
       lineHeight: cellToken.lineHeight,
     })
-    expect(styles.content).toMatchObject({
+    expect(styles.titleContainer).toMatchObject({
+      flexShrink: 1,
+      minWidth: 0,
+    })
+    expect(styles.leading).not.toHaveProperty('marginRight')
+    expect(styles.leading).not.toHaveProperty('width')
+    expect(styles.icon).not.toHaveProperty('marginLeft')
+    expect(styles.contentMeasure).toMatchObject({
       left: 0,
       position: 'absolute',
       right: 0,
@@ -270,6 +278,74 @@ describe('Collapse', () => {
       (node) => StyleSheet.flatten(node.props.style)?.bottom === 0,
     ).length
     expect(expandedDividerCount).toBe(1)
+  })
+
+  it('maps style and semantic styles to stable public regions', async () => {
+    const collapseToken = getCollapseToken(getDesignToken())
+    const styleResolver = jest.fn(() => ({
+      root: { marginTop: 3 },
+      header: { backgroundColor: '#111111' },
+      leading: { width: 21 },
+      titleContainer: { maxWidth: 160 },
+      title: { color: '#222222' },
+      icon: { opacity: 0.4 },
+      body: { paddingHorizontal: 17 },
+      bodyText: { color: '#333333' },
+    }))
+
+    await render(
+      <Collapse defaultValue="semantic" testID="semantic-collapse">
+        <CollapseItem
+          icon={<Icon name="InfoCircleOutlined" />}
+          name="semantic"
+          style={{ borderRadius: 9 }}
+          styles={styleResolver}
+          testID="semantic-header"
+          title="语义标题"
+        >
+          语义内容
+        </CollapseItem>
+      </Collapse>,
+    )
+
+    expect(styleResolver).toHaveBeenCalledWith(
+      expect.objectContaining({
+        props: expect.objectContaining({ name: 'semantic' }),
+        state: { active: true, disabled: false },
+      }),
+    )
+
+    const header = screen.getByTestId('semantic-header')
+    expect(StyleSheet.flatten(header.props.style)).toMatchObject({ backgroundColor: '#111111' })
+    expect(StyleSheet.flatten(header.parent?.props.style)).toMatchObject({
+      borderRadius: 9,
+      marginTop: 3,
+    })
+
+    const root = screen.getByTestId('semantic-collapse')
+    const iconWidths = findNodes(
+      root,
+      (node) => node.props.bbWidth !== undefined || node.props.width !== undefined,
+    ).map((node) => node.props.bbWidth ?? node.props.width)
+    expect(iconWidths).toEqual([collapseToken.iconSize, collapseToken.iconSize])
+    expect(
+      findNode(root, (node) => StyleSheet.flatten(node.props.style)?.width === 21),
+    ).toBeTruthy()
+    expect(
+      findNode(root, (node) => StyleSheet.flatten(node.props.style)?.maxWidth === 160),
+    ).toBeTruthy()
+    expect(
+      findNode(root, (node) => StyleSheet.flatten(node.props.style)?.color === '#222222'),
+    ).toBeTruthy()
+    expect(
+      findNode(root, (node) => StyleSheet.flatten(node.props.style)?.opacity === 0.4),
+    ).toBeTruthy()
+    expect(
+      findNode(root, (node) => StyleSheet.flatten(node.props.style)?.paddingHorizontal === 17),
+    ).toBeTruthy()
+    expect(
+      findNode(root, (node) => StyleSheet.flatten(node.props.style)?.color === '#333333'),
+    ).toBeTruthy()
   })
 
   it('uses Vant arrow orientation and animates height and arrow with the theme duration', async () => {

@@ -16,7 +16,9 @@ export default function Example() {
           <Avatar size="small" style={{ backgroundColor: '#1989FA' }}>
             A
           </Avatar>
-          <Avatar style={{ backgroundColor: '#07C160' }}>A</Avatar>
+          <Avatar size="medium" style={{ backgroundColor: '#07C160' }}>
+            A
+          </Avatar>
           <Avatar size="large" style={{ backgroundColor: '#FF976A' }}>
             A
           </Avatar>

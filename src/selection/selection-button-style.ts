@@ -28,6 +28,7 @@ export interface SelectionButtonStyleToken {
   disabledLabelColor: ColorValue
   disabledOpacity: number
   fontSize: number
+  lineHeight: number
   fontFamily: string
 }
 
@@ -48,6 +49,8 @@ export function getSelectionButtonStyles(
   buttonLayout: SelectionButtonLayout = 'intrinsic',
 ): SelectionButtonResolvedStyles {
   const isBorderless = token.variant === 'filled' || token.variant === 'text'
+  const borderWidth = isBorderless ? 0 : token.borderWidth
+  const lineHeight = Math.max(token.fontSize + 4, token.lineHeight)
   const isTransparent =
     token.variant === 'outlined' || token.variant === 'dashed' || token.variant === 'text'
   const backgroundColor = state.disabled
@@ -86,8 +89,10 @@ export function getSelectionButtonStyles(
       borderColor,
       borderRadius: token.borderRadius,
       borderStyle: token.variant === 'dashed' ? 'dashed' : 'solid',
-      borderWidth: isBorderless ? 0 : token.borderWidth,
+      borderWidth,
       flexDirection: 'row',
+      flexShrink: 1,
+      maxWidth: '100%',
       ...(buttonLayout === 'equal'
         ? {
             flexGrow: 0,
@@ -95,19 +100,19 @@ export function getSelectionButtonStyles(
             width: '100%' as const,
           }
         : {}),
-      height: token.height,
       justifyContent: 'center',
       minHeight: token.height,
-      minWidth: token.minWidth,
+      minWidth: buttonLayout === 'equal' ? 0 : token.minWidth,
       ...(state.disabled ? { opacity: token.disabledOpacity } : {}),
       paddingHorizontal: token.paddingHorizontal,
+      paddingVertical: Math.max(0, (token.height - lineHeight - borderWidth * 2) / 2),
     },
     label: {
       color: labelColor,
       flexShrink: 1,
       fontFamily: token.fontFamily,
       fontSize: token.fontSize,
-      lineHeight: Math.max(token.fontSize + 4, token.height - token.borderWidth * 2),
+      lineHeight,
       textAlign: 'center',
     },
   }

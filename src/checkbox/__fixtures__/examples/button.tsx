@@ -16,6 +16,15 @@ export default function Example() {
       <Checkbox variant="button" disabled>
         Disabled button
       </Checkbox>
+      <View style={{ width: 140, gap: 12 }}>
+        <Checkbox variant="button">内容较长时按可用宽度换行，按钮高度随内容增长</Checkbox>
+        <Checkbox variant="button">
+          <View>
+            <Text>自定义标签</Text>
+            <Text>第二行说明</Text>
+          </View>
+        </Checkbox>
+      </View>
       <Checkbox.Group
         direction="horizontal"
         gap={8}

@@ -142,7 +142,7 @@ export const Radio = forwardRef<React.ComponentRef<typeof Pressable>, RadioProps
             {children}
           </Text>
         ) : children !== undefined && children !== null && typeof children !== 'boolean' ? (
-          <View style={semantic?.label}>{children}</View>
+          <View style={{ flexShrink: 1 }}>{children}</View>
         ) : null
 
         if (resolvedVariant === 'button') return label

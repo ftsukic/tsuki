@@ -53,9 +53,9 @@ export default function NoticeBarOverview() {
         },
         {
           Component: NoticeBarThemeExample,
-          description: '展示通过 ConfigProvider 覆盖语义颜色和间距。',
+          description: '展示主题覆盖、语义样式和独立的主体与关闭操作。',
           id: 'theme',
-          title: 'Theme',
+          title: 'Theme and semantic styles',
         },
       ]}
       fullBleedExamples

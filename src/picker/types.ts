@@ -58,10 +58,14 @@ export type PickerStyles = StyleResolver<PickerProps, PickerStyleState, PickerSe
 
 export interface PickerProps extends Omit<ViewProps, 'children' | 'style'> {
   columns: PickerColumns
+  /** Labels used to identify each wheel column to screen readers. */
+  columnLabels?: readonly string[]
   value?: readonly PickerValue[]
   defaultValue?: readonly PickerValue[]
   itemHeight?: number
   visibleItemCount?: number
+  /** Window long columns. Screen readers retain the complete option list. */
+  virtual?: boolean
   loading?: boolean
   title?: ReactNode
   showToolbar?: boolean

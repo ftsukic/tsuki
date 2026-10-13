@@ -67,8 +67,11 @@ export function getWatermarkGrid({
   const normalizedGapY = nonNegativeOrFallback(gapY, 0)
   const tileWidth = positiveOrFallback(normalizedWidth + normalizedGapX, normalizedWidth)
   const tileHeight = positiveOrFallback(normalizedHeight + normalizedGapY, normalizedHeight)
-  const normalizedOffsetX = finiteOrFallback(offsetX, 0)
-  const normalizedOffsetY = finiteOrFallback(offsetY, 0)
+  const finiteOffsetX = finiteOrFallback(offsetX, 0)
+  const finiteOffsetY = finiteOrFallback(offsetY, 0)
+  // Skip whole offscreen periods while retaining one boundary tile.
+  const normalizedOffsetX = finiteOffsetX < 0 ? finiteOffsetX % tileWidth : finiteOffsetX
+  const normalizedOffsetY = finiteOffsetY < 0 ? finiteOffsetY % tileHeight : finiteOffsetY
   const safeContainerWidth = Number.isFinite(containerWidth) ? Math.max(0, containerWidth) : 0
   const safeContainerHeight = Number.isFinite(containerHeight) ? Math.max(0, containerHeight) : 0
   const calculatedColumns =
@@ -120,8 +123,14 @@ export function Watermark({
   const token = useComponentToken('Watermark', getWatermarkToken)
   const hasImage = hasValue(image)
   const hasContent = hasValue(content)
-  const resolvedWidth = positiveOrFallback(width ?? token.width, WATERMARK_DEFAULTS.width)
-  const resolvedHeight = positiveOrFallback(height ?? token.height, WATERMARK_DEFAULTS.height)
+  const resolvedWidth = positiveOrFallback(
+    width ?? token.width,
+    positiveOrFallback(token.width, WATERMARK_DEFAULTS.width),
+  )
+  const resolvedHeight = positiveOrFallback(
+    height ?? token.height,
+    positiveOrFallback(token.height, WATERMARK_DEFAULTS.height),
+  )
   const resolvedGapX = nonNegativeOrFallback(gapX ?? token.gapX, WATERMARK_DEFAULTS.gapX)
   const resolvedGapY = nonNegativeOrFallback(gapY ?? token.gapY, WATERMARK_DEFAULTS.gapY)
   const resolvedOffsetX = finiteOrFallback(offsetX, 0)

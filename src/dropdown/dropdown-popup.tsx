@@ -2,8 +2,11 @@ import { ReduceMotion } from 'react-native-reanimated'
 import { animateValue } from '../motion/animation'
 import { overlayAnimation } from '../motion/presets'
 import { useMotionConfig } from '../motion/useMotionConfig'
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { StyleSheet, View } from 'react-native'
+import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Platform, StyleSheet, View } from 'react-native'
+import type { RefObject } from 'react'
+import { BackgroundScrollLockContext } from '../portal/scroll-lock'
+import { lockWebBackgroundScroll } from './web-scroll-lock'
 import { cancelAnimation, useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { Animated } from '../motion'
@@ -15,6 +18,8 @@ import type { DropdownDirection } from './types'
 import type { DropdownItemRegistration } from './context'
 
 interface DropdownPopupProps {
+  anchorRef: RefObject<View | null>
+  onAnchorScroll: () => void
   visible: boolean
   direction: DropdownDirection
   overlay: boolean
@@ -44,6 +49,8 @@ interface TransitionCycle {
 }
 
 export function DropdownPopup({
+  anchorRef,
+  onAnchorScroll,
   visible,
   direction,
   overlay,
@@ -57,6 +64,12 @@ export function DropdownPopup({
   onRequestClose,
 }: DropdownPopupProps) {
   const motion = useMotionConfig()
+  const scrollLock = useContext(BackgroundScrollLockContext)
+  const panelRef = useRef<View>(null)
+  const requestCloseRef = useRef(onRequestClose)
+  const anchorScrollRef = useRef(onAnchorScroll)
+  requestCloseRef.current = onRequestClose
+  anchorScrollRef.current = onAnchorScroll
   const token = useComponentToken('Dropdown', getDropdownToken)
   const normalizedDuration = Number.isFinite(duration)
     ? Math.max(0, duration as number)
@@ -75,6 +88,7 @@ export function DropdownPopup({
   const transitionIdRef = useRef(0)
   const transitionCycleRef = useRef<TransitionCycle | undefined>(undefined)
   const openedItemIdRef = useRef<symbol | undefined>(undefined)
+  const restoreFocusOnCloseRef = useRef(false)
   const openItemsRef = useRef(new Set<symbol>())
   const visibleRef = useRef(visible)
   const panelProgress = useSharedValue(0)
@@ -114,7 +128,7 @@ export function DropdownPopup({
   const startTransitionCycle = useCallback(
     (kind: TransitionKind) => {
       cancelAnimation(panelProgress)
-      if (kind !== 'switching-out' && kind !== 'switching-in' && kind !== 'reopening') {
+      if (kind !== 'switching-out' && kind !== 'switching-in') {
         cancelAnimation(overlayProgress)
       } else if (kind === 'switching-out' && overlayProgress.value < 1) {
         cancelAnimation(overlayProgress)
@@ -156,9 +170,10 @@ export function DropdownPopup({
         return
       }
 
-      if (cycle.kind === 'reopening' && cycle.panelFinished) {
+      if (cycle.kind === 'reopening' && cycle.panelFinished && cycle.overlayFinished) {
         if (!display || !visibleRef.current || activeItemRef.current?.id !== display.id) return
         updateTransitionState('opened')
+        signalOpened(display)
         return
       }
 
@@ -190,6 +205,10 @@ export function DropdownPopup({
         !visibleRef.current
       ) {
         signalClosed(display)
+        if (restoreFocusOnCloseRef.current) {
+          restoreFocusOnCloseRef.current = false
+          display?.restoreFocus?.()
+        }
         displayItemRef.current = undefined
         setDisplayItem(undefined)
         pendingItemRef.current = undefined
@@ -233,6 +252,7 @@ export function DropdownPopup({
     const state = transitionStateRef.current
 
     if (!activeItem) {
+      signalClose(pendingItemRef.current)
       pendingItemRef.current = undefined
       if (!display) {
         updateTransitionState('closed')
@@ -296,8 +316,9 @@ export function DropdownPopup({
     updateTransitionState,
   ])
 
+  const measuredDisplayId = displayItem?.id
   useLayoutEffect(() => {
-    if (!displayItem) {
+    if (measuredDisplayId === undefined) {
       setMeasuredItemId(undefined)
       setMeasuredHeight(undefined)
       return
@@ -305,7 +326,7 @@ export function DropdownPopup({
 
     setMeasuredItemId(undefined)
     setMeasuredHeight(undefined)
-  }, [displayItem, displayItem?.estimatedHeight, displayItem?.id])
+  }, [measuredDisplayId])
 
   const displayItemId = displayItem?.id
   const estimatedHeight = displayItem?.estimatedHeight
@@ -338,6 +359,7 @@ export function DropdownPopup({
     }
 
     if (transitionState === 'reopening' && cycle.kind === 'reopening') {
+      if (!cycle.overlayStarted) animateChannel('overlay', 1, cycle.id)
       if (panelReady && !cycle.panelStarted) animateChannel('panel', 1, cycle.id)
       return
     }
@@ -379,12 +401,58 @@ export function DropdownPopup({
         }
 
   const portalItem = activeItem && displayItem?.id === activeItem.id ? activeItem : displayItem
+  const rendered = displayItem !== undefined || activeItem !== undefined
+  const interactive =
+    visible && panelReady && transitionState !== 'closing' && transitionState !== 'switching-out'
+  const interactiveRef = useRef(interactive)
+  interactiveRef.current = interactive
+  useLayoutEffect(() => {
+    if (!rendered) return
+    const release = scrollLock?.acquire()
+    const releaseWeb =
+      Platform.OS === 'web'
+        ? lockWebBackgroundScroll(
+            anchorRef.current,
+            () => (interactiveRef.current ? panelRef.current : null),
+            () => {
+              restoreFocusOnCloseRef.current = true
+              requestCloseRef.current()
+            },
+            () => anchorScrollRef.current(),
+          )
+        : undefined
+    return () => {
+      releaseWeb?.()
+      release?.()
+    }
+  }, [rendered, scrollLock, anchorRef])
+  useEffect(
+    () => () => {
+      transitionIdRef.current += 1
+      transitionCycleRef.current = undefined
+      cancelAnimation(panelProgress)
+      cancelAnimation(overlayProgress)
+    },
+    [panelProgress, overlayProgress],
+  )
   const portalContent = portalItem ? (
     <View
       collapsable={false}
-      pointerEvents={visible ? 'auto' : 'none'}
+      pointerEvents="auto"
+      onMoveShouldSetResponder={() => !interactive}
+      onResponderTerminationRequest={() => false}
       style={[StyleSheet.absoluteFill, rootStyle, { zIndex }]}
     >
+      <View
+        testID="dropdown-scroll-guard"
+        style={StyleSheet.absoluteFill}
+        onStartShouldSetResponder={() => true}
+        onMoveShouldSetResponder={() => true}
+        onResponderTerminationRequest={() => false}
+        accessible={false}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      />
       {overlay ? (
         <OverlaySurface
           testID="dropdown-overlay"
@@ -395,7 +463,6 @@ export function DropdownPopup({
           onPress={closeOnPressOverlay ? onRequestClose : undefined}
           animatedStyle={animatedOverlayStyle}
           style={portalItem.overlayStyle}
-          pressableStyle={portalItem.overlayStyle}
         />
       ) : null}
       <View
@@ -411,16 +478,22 @@ export function DropdownPopup({
         ]}
       >
         <Animated.View
+          ref={panelRef}
           testID="dropdown-panel"
           onLayout={(event) => {
             if (displayItemRef.current?.id !== portalItem.id) return
-            if (portalItem.estimatedHeight !== undefined) return
             const nextHeight = event.nativeEvent.layout.height
-            if (nextHeight <= 0) return
+            if (!Number.isFinite(nextHeight) || nextHeight < 0) return
             setMeasuredItemId(portalItem.id)
             setMeasuredHeight(nextHeight)
           }}
-          pointerEvents={visible && transitionState !== 'closing' ? 'auto' : 'none'}
+          pointerEvents={interactive ? 'auto' : 'none'}
+          accessibilityElementsHidden={!interactive}
+          importantForAccessibility={interactive ? 'auto' : 'no-hide-descendants'}
+          onAccessibilityEscape={() => {
+            restoreFocusOnCloseRef.current = true
+            onRequestClose()
+          }}
           style={[
             {
               backgroundColor: token.contentBackgroundColor,
@@ -428,6 +501,7 @@ export function DropdownPopup({
               zIndex: (zIndex ?? token.zIndex) + 1,
             },
             portalItem.contentStyle,
+            { maxHeight: Math.max(0, direction === 'down' ? windowHeight - menuBottom : menuTop) },
             needsMeasurement ? { opacity: 0 } : null,
             animatedPanelStyle,
           ]}
@@ -438,7 +512,31 @@ export function DropdownPopup({
     </View>
   ) : null
 
-  return <Portal>{portalContent}</Portal>
+  return (
+    <Portal>
+      {rendered ? (
+        <View
+          testID="dropdown-background-blocker"
+          onStartShouldSetResponder={() => true}
+          onMoveShouldSetResponder={() => true}
+          onResponderTerminationRequest={() => false}
+          accessible={false}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            ...(direction === 'down'
+              ? { top: 0, height: Math.max(0, menuTop) }
+              : { top: Math.max(0, menuBottom), bottom: 0 }),
+            zIndex,
+          }}
+        />
+      ) : null}
+      {portalContent}
+    </Portal>
+  )
 }
 
 DropdownPopup.displayName = 'DropdownPopup'

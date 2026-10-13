@@ -5,5 +5,15 @@ import { Search } from '../../..'
  * @description Customize the outer Search background independently from its input surface.
  */
 export default function SearchBackgroundFixture() {
-  return <Search background="#eaf3ff" shape="round" placeholder="搜索联系人" />
+  return (
+    <Search
+      background="#eaf3ff"
+      shape="round"
+      placeholder="搜索联系人"
+      styles={{
+        container: { backgroundColor: '#ffffff', borderRadius: 8 },
+        prefix: { marginRight: 12 },
+      }}
+    />
+  )
 }

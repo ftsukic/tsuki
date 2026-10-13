@@ -1,19 +1,18 @@
 import type { TextStyle, ViewStyle } from 'react-native'
 import type { CollapseToken } from '../theme'
-
-export interface CollapseItemStyleState {
-  active: boolean
-  disabled: boolean
-}
+import type { CollapseItemStyleState } from './types'
 
 export interface CollapseResolvedStyles {
+  root: ViewStyle
   header: ViewStyle
   title: TextStyle
+  titleContainer: ViewStyle
+  leading: ViewStyle
   icon: ViewStyle
-  arrow: ViewStyle
   contentWrapper: ViewStyle
-  content: ViewStyle
-  contentText: TextStyle
+  contentMeasure: ViewStyle
+  body: ViewStyle
+  bodyText: TextStyle
 }
 
 export function getCollapseDividerStyle(token: CollapseToken): ViewStyle {
@@ -53,9 +52,11 @@ export function getCollapseStyles(
   state: CollapseItemStyleState,
 ): CollapseResolvedStyles {
   return {
+    root: {},
     header: {
       alignItems: 'center',
       backgroundColor: token.contentBackgroundColor,
+      columnGap: token.iconGap,
       flexDirection: 'row',
       minHeight: token.headerHeight,
       opacity: state.disabled ? token.disabledOpacity : 1,
@@ -65,39 +66,41 @@ export function getCollapseStyles(
     },
     title: {
       color: state.disabled ? token.disabledColor : token.titleColor,
-      flex: 1,
-      flexShrink: 1,
       fontFamily: token.fontFamily,
       fontSize: token.titleFontSize,
       lineHeight: token.titleLineHeight,
+    },
+    titleContainer: {
+      flex: 1,
+      flexShrink: 1,
+      minWidth: 0,
+    },
+    leading: {
+      alignItems: 'center',
+      height: token.titleLineHeight,
+      justifyContent: 'center',
     },
     icon: {
       alignItems: 'center',
       height: token.titleLineHeight,
       justifyContent: 'center',
-      marginRight: token.iconGap,
-      width: token.iconSize,
-    },
-    arrow: {
-      alignItems: 'center',
-      height: token.titleLineHeight,
-      justifyContent: 'center',
-      marginLeft: token.iconGap,
       width: token.iconSize,
     },
     contentWrapper: {
       backgroundColor: token.contentBackgroundColor,
       overflow: 'hidden',
     },
-    content: {
+    contentMeasure: {
       left: 0,
-      paddingHorizontal: token.contentPaddingHorizontal,
-      paddingVertical: token.contentPaddingVertical,
       position: 'absolute',
       right: 0,
       top: 0,
     },
-    contentText: {
+    body: {
+      paddingHorizontal: token.contentPaddingHorizontal,
+      paddingVertical: token.contentPaddingVertical,
+    },
+    bodyText: {
       color: token.contentTextColor,
       fontFamily: token.fontFamily,
       fontSize: token.contentFontSize,

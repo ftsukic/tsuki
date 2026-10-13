@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native'
+import { Animated, StyleSheet } from 'react-native'
 import type { StyleProp, ViewStyle } from 'react-native'
 import type { PopupPosition } from './types'
 import type { PopupToken } from '../theme'
@@ -8,6 +8,28 @@ export interface PopupResolvedStyles {
   container: StyleProp<ViewStyle>
   panel: ViewStyle
   overlay: StyleProp<ViewStyle>
+}
+
+export function getPopupBottomPadding(
+  style: ViewStyle | undefined,
+  width: number,
+  inset: number,
+): ViewStyle['paddingBottom'] {
+  const padding =
+    style?.paddingBottom ??
+    style?.paddingBlockEnd ??
+    style?.paddingBlock ??
+    style?.paddingVertical ??
+    style?.padding ??
+    0
+  if (typeof padding === 'object') return Animated.add(padding, inset)
+  const resolved =
+    typeof padding === 'number'
+      ? padding
+      : padding.endsWith('%')
+        ? (parseFloat(padding) / 100) * width
+        : 0
+  return Math.max(0, resolved) + inset
 }
 
 function getRoundStyles(position: PopupPosition, radius: number): ViewStyle {

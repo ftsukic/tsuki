@@ -1,3 +1,4 @@
+import { getFieldAccessibility } from './accessibility'
 import { forwardRef, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import type { DimensionValue } from 'react-native'
@@ -7,7 +8,7 @@ import type { InputProps, InputStyleState, InputStyles } from '../input'
 import { InputInternal } from '../input/input-internal'
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
-import type { TextInputInstance } from '../text-input'
+import type { TextInput as NativeTextInput } from 'react-native'
 import { createFieldCellStyles } from './style'
 import { getFieldToken } from './token'
 import type { FieldCellProps, FieldStyles, FieldTitleAlign } from './types'
@@ -29,7 +30,7 @@ type InputAdapterProps = Omit<
 export interface FieldInputProps extends FieldCellProps, InputAdapterProps {
   title?: ReactNode
   titleExtra?: ReactNode
-  label?: ReactNode
+  description?: ReactNode
   value?: string
   defaultValue?: string
   onChange?: (value: string) => void
@@ -64,17 +65,17 @@ function createEmbeddedInputStyles(
   }
 }
 
-export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
+export const FieldInput = forwardRef<NativeTextInput, FieldInputProps>(
   function FieldInput(props, ref) {
     const {
       title,
       titleExtra,
-      label,
+      description,
       value,
       defaultValue,
       onChange,
       valueExtra,
-      extra,
+      trailing,
       required,
       disabled,
       readOnly,
@@ -83,8 +84,8 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
       titleWidth,
       titleAlign,
       valueAlign,
-      icon,
-      isLink,
+      leading,
+      showArrow,
       clickable,
       arrowDirection,
       onPress,
@@ -119,10 +120,11 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
       <Cell
         title={title}
         titleExtra={titleExtra}
-        label={label}
+        description={description}
         value={
           <InputInternal
             {...inputControlProps}
+            {...getFieldAccessibility(props)}
             value={currentValue ?? ''}
             onChangeText={setValue}
             embedded
@@ -132,19 +134,19 @@ export const FieldInput = forwardRef<TextInputInstance, FieldInputProps>(
             readOnly={readOnly}
             textAlign={inputControlProps.textAlign ?? resolvedValueAlign}
             ref={ref}
-            style={[semantic?.content, inputStyle]}
+            style={[semantic?.control, inputStyle]}
             styles={embeddedInputStyles}
           />
         }
         valueExtra={valueExtra}
-        extra={extra}
+        trailing={trailing}
         required={required}
         disabled={disabled}
         vertical={vertical}
         valueAlign={resolvedValueAlign}
         center={center}
-        icon={icon}
-        isLink={isLink}
+        leading={leading}
+        showArrow={showArrow}
         clickable={clickable}
         arrowDirection={arrowDirection}
         onPress={onPress}

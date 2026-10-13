@@ -3,6 +3,7 @@ import {
   clampTranslation,
   getContainSize,
   getZoomBounds,
+  getTransitionGeometry,
   interpolateRect,
   normalizeImageSource,
   normalizeStartPosition,
@@ -11,6 +12,30 @@ import {
 } from '../image-preview/utils'
 
 describe('ImagePreview utilities', () => {
+  it.each(['opening', 'closing'])(
+    'keeps %s bounds aligned and image scaling proportional',
+    (kind) => {
+      const thumbnail = { x: 100, y: 600, width: 72, height: 96 }
+      const fullscreen = { x: 0, y: 300, width: 400, height: 200 }
+      const [from, to] = kind === 'opening' ? [thumbnail, fullscreen] : [fullscreen, thumbnail]
+
+      for (const progress of [0, 0.25, 0.5, 0.75, 1]) {
+        const geometry = getTransitionGeometry(from, to, progress)
+        const rect = interpolateRect(from, to, progress)
+        const { base, scaleX, scaleY, translateX, translateY } = geometry
+        expect(base.x + base.width / 2 + translateX - (base.width * scaleX) / 2).toBeCloseTo(rect.x)
+        expect(base.y + base.height / 2 + translateY - (base.height * scaleY) / 2).toBeCloseTo(
+          rect.y,
+        )
+        expect(base.width * scaleX).toBeCloseTo(rect.width)
+        expect(base.height * scaleY).toBeCloseTo(rect.height)
+        expect(scaleX * geometry.imageScaleX).toBeCloseTo(scaleY * geometry.imageScaleY)
+        expect(geometry.imageScaleX).toBeGreaterThanOrEqual(1)
+        expect(geometry.imageScaleY).toBeGreaterThanOrEqual(1)
+      }
+    },
+  )
+
   it('normalizes string and metadata image sources', () => {
     expect(normalizeImageSource('https://example.com/a.png')).toEqual({
       source: { uri: 'https://example.com/a.png' },

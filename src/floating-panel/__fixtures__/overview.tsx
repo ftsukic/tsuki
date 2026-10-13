@@ -63,8 +63,7 @@ export default function FloatingPanelOverview() {
         },
         {
           Component: TopExample,
-          description:
-            'placement="top" 从顶部展开，默认适配顶部 safe-area，拖拽条位于底部并使用底部圆角和阴影。',
+          description: '收起保留月份、星期标题和一周日期，下拉展开完整月历，高度跟随内容与安全区。',
           id: 'top',
           title: '顶部下拉',
         },

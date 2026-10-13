@@ -38,7 +38,7 @@ export default function NextStep() {
       <Cell
         title="选择日期和时间"
         value={formatDateTime(committedDate, committedTime)}
-        isLink
+        showArrow
         onPress={handleOpen}
       />
       <Popup

@@ -50,6 +50,7 @@ export function getCheckboxStyles(
           disabledLabelColor: token.disabledColor,
           disabledOpacity: token.disabledOpacity,
           fontSize: token.fontSize,
+          lineHeight: token.lineHeight,
           fontFamily: token.fontFamily,
         },
         state,

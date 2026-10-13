@@ -15,6 +15,7 @@ import {
   getFieldToken,
   Provider,
   Radio,
+  Text,
 } from '..'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { createRef, useState } from 'react'
@@ -27,7 +28,7 @@ import type { PickerValue } from '../picker'
 import type { DatePickerValue } from '../date-picker'
 import type { DateTimePickerValue } from '../date-time-picker'
 import type { TimePickerValue } from '../time-picker'
-import type { TextInputInstance } from '../text-input'
+import type { TextInput as NativeTextInput } from 'react-native'
 
 interface JsonNode {
   children?: JsonNode[] | null
@@ -95,13 +96,13 @@ describe('FieldInput', () => {
   })
 
   it('passes divider through another Field adapter', async () => {
-    const view = await render(<FieldSwitch divider label="通知" />)
+    const view = await render(<FieldSwitch divider description="通知" />)
 
     expect(dividerCount(view.toJSON())).toBe(1)
   })
 
   it('centers the Cell row by default', async () => {
-    const view = await render(<FieldInput label="用户名" defaultValue="张三" />)
+    const view = await render(<FieldInput description="用户名" defaultValue="张三" />)
     const cellRows = findNodes(view.toJSON(), (node) => {
       const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
       return (
@@ -123,7 +124,7 @@ describe('FieldInput', () => {
 
     await render(
       <FieldInput
-        label="手机号"
+        description="手机号"
         value="138"
         onChange={onChange}
         placeholder="请输入手机号"
@@ -144,7 +145,7 @@ describe('FieldInput', () => {
   })
 
   it('keeps the embedded Input flat while Cell owns the field spacing', async () => {
-    const view = await render(<FieldInput label="手机号" testID="bordered-field-input" />)
+    const view = await render(<FieldInput description="手机号" testID="bordered-field-input" />)
     const cellRows = findNodes(view.toJSON(), (node) => {
       const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
       return style?.paddingHorizontal === 16 && style?.paddingVertical === 10
@@ -173,11 +174,12 @@ describe('FieldInput', () => {
   it('supports uncontrolled multiline values with Cell spacing outside the embedded Input', async () => {
     const view = await render(
       <FieldInput
-        label="备注"
+        description="备注"
         defaultValue="初始"
         onChange={() => undefined}
         multiline
         vertical
+        allowFontScaling={false}
         testID="textarea-input"
       />,
     )
@@ -208,7 +210,7 @@ describe('FieldInput', () => {
   it('allows an explicit embedded Input border without restoring its padding', async () => {
     const token = getInputToken(getDesignToken())
     const view = await render(
-      <FieldInput label="手机号" bordered testID="explicit-bordered-field-input" />,
+      <FieldInput description="手机号" bordered testID="explicit-bordered-field-input" />,
     )
     const shells = findNodes(view.toJSON(), (node) => {
       const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
@@ -227,11 +229,12 @@ describe('FieldInput', () => {
   it('uses textarea metrics for autoSize inside FieldInput', async () => {
     await render(
       <FieldInput
-        label="备注"
+        description="备注"
         vertical
         multiline
         autoSize={{ minRows: 1, maxRows: 5 }}
         defaultValue="初始"
+        allowFontScaling={false}
         testID="embedded-auto-size"
       />,
     )
@@ -277,7 +280,7 @@ describe('FieldInput', () => {
   })
 
   it('uses Cell title, titleExtra, and label semantics directly', async () => {
-    await render(<FieldInput title="手机号" titleExtra="必填" label="用于接收验证码" />)
+    await render(<FieldInput title="手机号" titleExtra="必填" description="用于接收验证码" />)
 
     expect(screen.getByText('手机号')).toBeTruthy()
     expect(screen.getByText('必填')).toBeTruthy()
@@ -291,13 +294,13 @@ describe('FieldInput', () => {
   })
 
   it('gives FieldInput disabled/readOnly state precedence and preserves the ref', async () => {
-    const ref = createRef<TextInputInstance>()
+    const ref = createRef<NativeTextInput>()
 
     await render(
       <>
-        <FieldInput label="禁用" disabled testID="disabled-input" editable />
-        <FieldInput label="只读" readOnly testID="read-only-input" editable />
-        <FieldInput ref={ref} label="姓名" testID="ref-input" />
+        <FieldInput description="禁用" disabled testID="disabled-input" editable />
+        <FieldInput description="只读" readOnly testID="read-only-input" editable />
+        <FieldInput ref={ref} description="姓名" testID="ref-input" />
       </>,
     )
 
@@ -315,7 +318,7 @@ describe('FieldRadio', () => {
 
     await render(
       <FieldRadio
-        label="尺寸"
+        description="尺寸"
         defaultValue="small"
         onChange={onChange}
         testID="radio-group"
@@ -346,7 +349,7 @@ describe('FieldRadio', () => {
   it('uses equal-width button options by default and wraps them through Grid', async () => {
     const view = await render(
       <FieldRadio
-        label="尺寸"
+        description="尺寸"
         variant="button"
         direction="horizontal"
         buttonColumns={5}
@@ -378,7 +381,7 @@ describe('FieldRadio', () => {
   it('passes buttonVariant from FieldRadio to its Radio.Group', async () => {
     await render(
       <FieldRadio
-        label="样式"
+        description="样式"
         variant="button"
         buttonVariant="outlined"
         options={[{ value: 'outline', label: 'Outline' }]}
@@ -395,13 +398,13 @@ describe('FieldRadio', () => {
     await render(
       <>
         <FieldRadio
-          label="横向"
+          description="横向"
           testID="horizontal-radio-group"
           direction="horizontal"
           options={[{ value: 'one', label: '一' }]}
         />
         <FieldRadio
-          label="纵向"
+          description="纵向"
           vertical
           testID="vertical-radio-group"
           direction="horizontal"
@@ -423,7 +426,7 @@ describe('FieldRadio', () => {
 
     await render(
       <FieldRadio
-        label="只读选项"
+        description="只读选项"
         value="first"
         readOnly
         onChange={onChange}
@@ -446,7 +449,7 @@ describe('FieldCheckbox', () => {
 
     await render(
       <FieldCheckbox
-        label="通知方式"
+        description="通知方式"
         defaultValue={['email']}
         onChange={onChange}
         testID="checkbox-group"
@@ -471,7 +474,7 @@ describe('FieldCheckbox', () => {
 
     await render(
       <FieldCheckbox
-        label="通知方式"
+        description="通知方式"
         defaultValue={['email']}
         onChange={onChange}
         options={[
@@ -492,11 +495,11 @@ describe('FieldCheckbox', () => {
   it('delegates value alignment to Cell without an extra control wrapper', async () => {
     await render(
       <>
-        <FieldCheckbox label="横向" testID="horizontal-checkbox-group" direction="horizontal">
+        <FieldCheckbox description="横向" testID="horizontal-checkbox-group" direction="horizontal">
           <Checkbox name="one">一</Checkbox>
         </FieldCheckbox>
         <FieldCheckbox
-          label="纵向"
+          description="纵向"
           vertical
           testID="vertical-checkbox-group"
           direction="horizontal"
@@ -519,7 +522,7 @@ describe('FieldCheckbox', () => {
 
     await render(
       <FieldCheckbox
-        label="只读"
+        description="只读"
         value={['email']}
         readOnly
         onChange={onChange}
@@ -539,7 +542,7 @@ describe('FieldCheckbox', () => {
   it('uses equal-width button options and wraps them through the existing Grid', async () => {
     const view = await render(
       <FieldCheckbox
-        label="通知方式"
+        description="通知方式"
         variant="button"
         direction="horizontal"
         buttonColumns={5}
@@ -569,7 +572,7 @@ describe('FieldCheckbox', () => {
   it('passes buttonVariant from FieldCheckbox to its Checkbox.Group', async () => {
     await render(
       <FieldCheckbox
-        label="样式"
+        description="样式"
         variant="button"
         buttonVariant="text"
         options={[{ value: 'text', label: 'Text' }]}
@@ -588,7 +591,12 @@ describe('FieldSwitch', () => {
     const onChange = jest.fn()
 
     await render(
-      <FieldSwitch label="通知" defaultValue={false} onChange={onChange} testID="field-switch" />,
+      <FieldSwitch
+        description="通知"
+        defaultValue={false}
+        onChange={onChange}
+        testID="field-switch"
+      />,
     )
 
     const fieldSwitch = screen.getByTestId('field-switch')
@@ -605,7 +613,7 @@ describe('FieldSwitch', () => {
 
     await render(
       <FieldSwitch
-        label="连接"
+        description="连接"
         defaultValue="off"
         activeValue="on"
         inactiveValue="off"
@@ -624,7 +632,7 @@ describe('FieldSwitch', () => {
 
     await render(
       <FieldSwitch
-        label="只读"
+        description="只读"
         defaultValue={false}
         readOnly
         onChange={onChange}
@@ -644,7 +652,7 @@ describe('FieldSwitch', () => {
 
     await render(
       <FieldSwitch
-        label="禁用"
+        description="禁用"
         defaultValue={false}
         disabled
         onChange={onChange}
@@ -664,7 +672,7 @@ describe('FieldSwitch', () => {
 
     await render(
       <FieldSwitch
-        label="确认"
+        description="确认"
         defaultValue={false}
         beforeChange={() => false}
         onChange={onChange}
@@ -698,7 +706,7 @@ describe('FieldPicker', () => {
       return (
         <Provider theme={{ seed: { motion: false } }}>
           <FieldPicker
-            label="城市"
+            description="城市"
             value={value}
             onChange={(nextValue) => {
               onChange(nextValue)
@@ -739,9 +747,9 @@ describe('FieldPicker', () => {
   it('supports placeholder and formatValue while keeping Picker separate from Cell', async () => {
     const view = await render(
       <Provider theme={{ seed: { motion: false } }}>
-        <FieldPicker label="城市" columns={options} placeholder="请选择城市" />
+        <FieldPicker description="城市" columns={options} placeholder="请选择城市" />
         <FieldPicker
-          label="格式化城市"
+          description="格式化城市"
           columns={options}
           defaultValue={['shanghai']}
           formatValue={(selectedOptions, values) =>
@@ -778,7 +786,7 @@ describe('FieldDatePicker', () => {
       return (
         <Provider theme={{ seed: { motion: false } }}>
           <FieldDatePicker
-            label="日期"
+            description="日期"
             value={currentValue}
             onChange={(nextValue) => {
               onChange(nextValue)
@@ -816,9 +824,9 @@ describe('FieldDatePicker', () => {
   it('supports placeholder, formatValue, and date picker props', async () => {
     await render(
       <Provider theme={{ seed: { motion: false } }}>
-        <FieldDatePicker label="日期" placeholder="请选择日期" {...bounds} />
+        <FieldDatePicker description="日期" placeholder="请选择日期" {...bounds} />
         <FieldDatePicker
-          label="格式化日期"
+          description="格式化日期"
           defaultValue={['2026', '09']}
           formatValue={(_options, values) => values.join('/')}
           columnsType={['year', 'month']}
@@ -839,7 +847,7 @@ describe('FieldTimePicker', () => {
       const [value, setValue] = useState<TimePickerValue>(['09', '30'])
       return (
         <FieldTimePicker
-          label="时间"
+          description="时间"
           value={value}
           onChange={(next) => {
             onChange(next)
@@ -856,7 +864,7 @@ describe('FieldTimePicker', () => {
     )
     expect(screen.getByText('09:30')).toBeTruthy()
     await press(screen.getByText('09:30'))
-    await press(screen.getByTestId('picker-item-1-31'))
+    await press(await screen.findByTestId('picker-item-1-31'))
     expect(onChange).not.toHaveBeenCalled()
     await press(screen.getByTestId('picker-confirm'))
     expect(onChange).toHaveBeenCalledWith(['09', '31'])
@@ -868,8 +876,12 @@ describe('FieldDateTimePicker', () => {
     const value: DateTimePickerValue = ['2026', '09', '13', '13', '30']
     await render(
       <Provider theme={{ seed: { motion: false } }}>
-        <FieldDateTimePicker label="日期时间" value={value} />
-        <FieldDateTimePicker label="时间" value={['13', '30']} columnsType={['hour', 'minute']} />
+        <FieldDateTimePicker description="日期时间" value={value} />
+        <FieldDateTimePicker
+          description="时间"
+          value={['13', '30']}
+          columnsType={['hour', 'minute']}
+        />
       </Provider>,
     )
     expect(screen.getByText('2026-09-13 13:30')).toBeTruthy()
@@ -881,10 +893,10 @@ describe('Field picker alignment', () => {
   it('centers all picker field rows by default', async () => {
     const view = await render(
       <Provider theme={{ seed: { motion: false } }}>
-        <FieldPicker label="城市" columns={[{ text: '上海', value: 'shanghai' }]} />
-        <FieldDatePicker label="日期" />
-        <FieldTimePicker label="时间" />
-        <FieldDateTimePicker label="日期时间" />
+        <FieldPicker description="城市" columns={[{ text: '上海', value: 'shanghai' }]} />
+        <FieldDatePicker description="日期" />
+        <FieldTimePicker description="时间" />
+        <FieldDateTimePicker description="日期时间" />
       </Provider>,
     )
     const rows = findNodes(view.toJSON(), (node) => {
@@ -908,7 +920,7 @@ describe('Field picker alignment', () => {
   it('allows opting out of centered alignment', async () => {
     const view = await render(
       <Provider theme={{ seed: { motion: false } }}>
-        <FieldTimePicker label="时间" center={false} />
+        <FieldTimePicker description="时间" center={false} />
       </Provider>,
     )
     const optOutRow = findNodes(view.toJSON(), (node) => {
@@ -947,4 +959,128 @@ describe('Field style helpers', () => {
     expect(token.errorColor).toBe(theme.colorError)
     expect(token.warningColor).toBe(theme.colorWarning)
   })
+  it('keeps title descriptions separate from picker help and applies Cell container styles', async () => {
+    const view = await render(
+      <Provider theme={{ seed: { motion: false } }}>
+        <FieldPicker
+          title="城市"
+          description="标题说明"
+          help="控件帮助"
+          columns={[]}
+          cellProps={{
+            styles: { titleContainer: { width: 123 }, valueContainer: { borderRadius: 17 } },
+          }}
+        />
+        <FieldDatePicker title="日期" description="日期说明" help="日期帮助" />
+        <FieldTimePicker title="时间" description="时间说明" help="时间帮助" />
+        <FieldDateTimePicker title="日期时间" description="日期时间说明" help="日期时间帮助" />
+      </Provider>,
+    )
+    for (const text of [
+      '标题说明',
+      '控件帮助',
+      '日期说明',
+      '日期帮助',
+      '时间说明',
+      '时间帮助',
+      '日期时间说明',
+      '日期时间帮助',
+    ]) {
+      expect(screen.getByText(text)).toBeTruthy()
+    }
+    const nodes = findNodes(
+      view.toJSON(),
+      (node) => StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)?.width === 123,
+    )
+    expect(nodes).toHaveLength(1)
+    expect(
+      findNodes(
+        view.toJSON(),
+        (node) => StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)?.borderRadius === 17,
+      ),
+    ).toHaveLength(1)
+  })
+})
+
+describe('Field semantic structure', () => {
+  it('names real controls from titles and preserves explicit accessibility text', async () => {
+    await render(
+      <>
+        <FieldInput title="用户名" required description="登录账号" testID="named-input" />
+        <FieldSwitch title="通知" testID="named-switch" />
+        <FieldRadio title="尺寸" testID="named-radio" options={[{ value: 's', label: '小' }]} />
+        <FieldCheckbox title="渠道" testID="named-checkbox" options={[]} />
+        <FieldInput
+          title={<Text>自定义标题</Text>}
+          required
+          accessibilityLabel="业务名称"
+          accessibilityHint="业务说明"
+          testID="custom-label"
+        />
+      </>,
+    )
+    expect(screen.getByTestId('named-input').props.accessibilityLabel).toBe('用户名')
+    expect(screen.getByTestId('named-input').props.accessibilityHint).toBe('必填，登录账号')
+    expect(screen.getByTestId('named-switch').props.accessibilityLabel).toBe('通知')
+    expect(screen.getByTestId('named-radio').props.accessibilityLabel).toBe('尺寸')
+    expect(screen.getByTestId('named-checkbox').props.accessibilityLabel).toBe('渠道')
+    expect(screen.getByTestId('custom-label').props.accessibilityLabel).toBe('业务名称')
+    expect(screen.getByTestId('custom-label').props.accessibilityHint).toBe('业务说明')
+  })
+
+  it.each([FieldPicker, FieldDatePicker, FieldTimePicker, FieldDateTimePicker])(
+    'keeps picker control styles outside feedback and names the entry (%p)',
+    async (Component) => {
+      const view = await render(
+        <Provider theme={{ seed: { motion: false } }}>
+          <Component
+            columns={[]}
+            title="选择字段"
+            placeholder="未选择"
+            required
+            readOnly
+            help="帮助文字"
+            errorMessage="错误文字"
+            styles={{
+              title: { letterSpacing: 3 },
+              control: { borderRadius: 13 },
+              feedback: { borderRadius: 19 },
+              help: { letterSpacing: 5 },
+              error: { letterSpacing: 7 },
+            }}
+          />
+        </Provider>,
+      )
+      const entry = screen
+        .getAllByRole('text', { name: '选择字段' })
+        .find((node) => node.props.accessibilityState?.expanded === false)!
+      expect(entry.props.accessibilityState).toMatchObject({ disabled: false, expanded: false })
+      expect(entry.props.accessibilityValue).toEqual({ text: '未选择' })
+      expect(entry.props.accessibilityHint).toBe('必填，只读，帮助文字，错误文字')
+      const control = findNodes(
+        view.toJSON(),
+        (node) => StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)?.borderRadius === 13,
+      )[0]
+      const feedback = findNodes(
+        view.toJSON(),
+        (node) => StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)?.borderRadius === 19,
+      )[0]
+      expect(control).toBeDefined()
+      expect(feedback).toBeDefined()
+      expect(findNodes(control, (node) => node.props.accessibilityRole === 'alert')).toHaveLength(0)
+      expect(findNodes(feedback, (node) => node.props.accessibilityRole === 'alert')).toHaveLength(
+        1,
+      )
+      expect(
+        findNodes(feedback, (node) => node.props.accessibilityLiveRegion === 'polite'),
+      ).toHaveLength(1)
+      expect(
+        findNodes(
+          control,
+          (node) =>
+            StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)?.borderRadius === 19,
+        ),
+      ).toHaveLength(0)
+    },
+  )
 })

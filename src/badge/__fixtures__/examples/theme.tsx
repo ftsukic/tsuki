@@ -13,10 +13,10 @@ export default function Example() {
       <View style={{ gap: 24 }}>
         <Badge
           content={8}
+          offset={[3, -3]}
           styles={({ state }) => ({
             root: { opacity: state.visible ? 1 : 0.5 },
-            indicator: { transform: [{ translateX: 3 }, { translateY: -3 }] },
-            text: { fontWeight: '700' },
+            content: { fontWeight: '700' },
           })}
         >
           <Avatar style={{ backgroundColor: '#1989FA' }}>A</Avatar>
@@ -32,7 +32,7 @@ export default function Example() {
               paddingHorizontal: 0,
               borderRadius: 14,
             },
-            text: {
+            content: {
               fontSize: 16,
               lineHeight: 28,
             },

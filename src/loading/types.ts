@@ -12,6 +12,7 @@ export interface LoadingStyleState {
 export interface LoadingSemanticStyles {
   root?: StyleProp<ViewStyle>
   indicator?: StyleProp<ViewStyle>
+  content?: StyleProp<ViewStyle>
   text?: StyleProp<TextStyle>
 }
 
@@ -22,7 +23,7 @@ export interface LoadingProps extends Omit<ViewProps, 'children' | 'style' | 'ac
   type?: LoadingType
   /** Indicator diameter in logical pixels. */
   size?: number
-  /** Indicator and default text color. */
+  /** Indicator color. */
   color?: ColorValue
   /** Duration of one full indicator rotation in milliseconds. */
   duration?: number

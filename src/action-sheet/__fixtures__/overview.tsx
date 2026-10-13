@@ -5,6 +5,7 @@ import ActionSheetDisabledFixture from './examples/disabled'
 import ActionSheetLoadingFixture from './examples/loading'
 import ActionSheetTitleFixture from './examples/title'
 import ActionSheetSubnameFixture from './examples/custom-subname'
+import ActionSheetLongListFixture from './examples/long-list'
 
 /**
  * @title ActionSheet overview
@@ -14,6 +15,12 @@ export default function ActionSheetOverview() {
   return (
     <FixtureOverview
       examples={[
+        {
+          Component: ActionSheetLongListFixture,
+          description: '操作列表滚动，标题和取消区保持可见；打开后可以增加操作。',
+          id: 'long-list',
+          title: '长操作列表',
+        },
         {
           Component: ActionSheetBasicFixture,
           description: 'Show a simple bottom action menu with a cancel button.',

@@ -265,3 +265,27 @@ export function isValidRect(rect: ImagePreviewRect | null | undefined): rect is 
     rect.height > 0,
   )
 }
+
+/** Keep the image proportional while a clipped thumbnail expands to its full bounds. */
+export function getTransitionGeometry(
+  from: ImagePreviewRect,
+  to: ImagePreviewRect,
+  progress: number,
+) {
+  'worklet'
+
+  const base = from.width * from.height > to.width * to.height ? from : to
+  const rect = interpolateRect(from, to, progress)
+  const scaleX = rect.width / base.width
+  const scaleY = rect.height / base.height
+  const imageScale = Math.max(scaleX, scaleY)
+  return {
+    base,
+    scaleX,
+    scaleY,
+    translateX: rect.x + rect.width / 2 - (base.x + base.width / 2),
+    translateY: rect.y + rect.height / 2 - (base.y + base.height / 2),
+    imageScaleX: imageScale / scaleX,
+    imageScaleY: imageScale / scaleY,
+  }
+}

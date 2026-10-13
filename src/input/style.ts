@@ -1,18 +1,18 @@
-import { Platform, type TextStyle, type ViewStyle } from 'react-native'
+import { Platform, StyleSheet, type StyleProp, type TextStyle, type ViewStyle } from 'react-native'
 import type { InputToken } from '../theme'
 import type { InputProps, InputStyleState } from './types'
 
 export interface InputResolvedStyles {
   root: ViewStyle
-  addonGroup: ViewStyle
   addon: TextStyle
-  addonBefore: TextStyle
-  addonAfter: TextStyle
+  affixText: TextStyle
+  addonBefore: ViewStyle
+  addonAfter: ViewStyle
   shell: ViewStyle
   content: ViewStyle
   input: TextStyle
-  prefix: TextStyle
-  suffix: TextStyle
+  prefix: ViewStyle
+  suffix: ViewStyle
   clear: ViewStyle
   clearHidden: ViewStyle
   wordLimit: TextStyle
@@ -81,8 +81,13 @@ export function getInputMetrics(
   )
 }
 
-export function getTextareaMetrics(token: InputToken, size: InputProps['size']): InputMetrics {
-  return createInputMetrics(
+export function getTextareaMetrics(
+  token: InputToken,
+  size: InputProps['size'],
+  inputStyle?: StyleProp<TextStyle>,
+): InputMetrics {
+  const custom = StyleSheet.flatten(inputStyle)
+  const metrics = createInputMetrics(
     token,
     size,
     false,
@@ -94,6 +99,15 @@ export function getTextareaMetrics(token: InputToken, size: InputProps['size']):
     token.textareaPaddingHorizontal,
     token.textareaPaddingVertical,
   )
+  return {
+    ...metrics,
+    fontSize: custom?.fontSize ?? metrics.fontSize,
+    lineHeight:
+      custom?.lineHeight ??
+      (custom?.fontSize === undefined
+        ? metrics.lineHeight
+        : Math.max(metrics.lineHeight, custom.fontSize)),
+  }
 }
 
 export function getInputStyles(
@@ -101,28 +115,37 @@ export function getInputStyles(
   props: InputProps,
   state: InputStyleState,
   embedded = false,
+  inputStyle?: StyleProp<TextStyle>,
+  fontScale = 1,
 ): InputResolvedStyles {
   const textarea = props.multiline === true
   const isIOSSingle = Platform.OS === 'ios' && !textarea
   const singleMetrics = getInputMetrics(token, props.size, embedded)
-  const textareaMetrics = getTextareaMetrics(token, props.size)
+  const textareaMetrics = getTextareaMetrics(token, props.size, inputStyle)
   const metrics = textarea ? textareaMetrics : singleMetrics
   const wordLimitLineHeight = textarea ? token.textareaLineHeightSM : token.lineHeightSM
   const wordLimitPadding =
-    props.showWordLimit && props.maxLength !== undefined
-      ? wordLimitLineHeight + metrics.paddingVertical
+    textarea && props.showWordLimit && props.maxLength !== undefined
+      ? wordLimitLineHeight * fontScale + metrics.paddingVertical
       : 0
+  const customInput = StyleSheet.flatten(inputStyle)
+  const top =
+    customInput?.paddingTop ??
+    customInput?.paddingVertical ??
+    customInput?.padding ??
+    metrics.paddingVertical
+  const bottom =
+    customInput?.paddingBottom ??
+    customInput?.paddingVertical ??
+    customInput?.padding ??
+    metrics.paddingVertical + wordLimitPadding
   const textareaMinHeight =
-    metrics.lineHeight * Math.max(1, props.rows ?? 2) +
-    metrics.paddingVertical * 2 +
-    wordLimitPadding
+    metrics.lineHeight * fontScale * Math.max(1, props.rows ?? 2) +
+    (typeof top === 'number' ? top : 0) +
+    (typeof bottom === 'number' ? bottom : 0)
 
   return {
     root: {
-      width: '100%',
-      minWidth: 0,
-    },
-    addonGroup: {
       width: '100%',
       minWidth: 0,
       flexDirection: 'row',
@@ -148,7 +171,7 @@ export function getInputStyles(
       paddingHorizontal: metrics.paddingHorizontal,
       borderWidth: props.bordered ? token.borderWidth : 0,
       borderColor:
-        state.focused && props.focusedBordered !== false
+        state.focused && props.focusedBordered === true
           ? token.focusedBorderColor
           : token.borderColor,
       borderRadius: props.bordered || !embedded ? token.borderRadius : 0,
@@ -171,35 +194,33 @@ export function getInputStyles(
       flex: 1,
       minWidth: 0,
       paddingHorizontal: 0,
-      paddingTop: textarea ? metrics.paddingVertical : 0,
-      paddingBottom:
-        textarea && props.showWordLimit && props.maxLength !== undefined
-          ? metrics.paddingVertical + wordLimitLineHeight + metrics.paddingVertical
-          : textarea
-            ? metrics.paddingVertical
-            : 0,
+      paddingTop: textarea ? top : 0,
+      paddingBottom: textarea ? bottom : 0,
       color: state.disabled ? token.disabledColor : token.textColor,
       fontSize: metrics.fontSize,
       lineHeight: isIOSSingle ? undefined : metrics.lineHeight,
       textAlignVertical: textarea ? 'top' : 'center',
+      includeFontPadding: Platform.OS === 'android' ? false : undefined,
       ...Platform.select({
-        android: {
-          includeFontPadding: false,
-        },
         web: {
           outlineColor: 'transparent',
           outlineStyle: 'solid',
         },
       }),
     },
-    prefix: {
+    affixText: {
       fontFamily: token.fontFamily,
       color: token.prefixColor,
+      fontSize: metrics.fontSize,
+    },
+    prefix: {
+      alignItems: 'center',
+      justifyContent: 'center',
       marginRight: token.paddingHorizontal / 2,
     },
     suffix: {
-      fontFamily: token.fontFamily,
-      color: token.prefixColor,
+      alignItems: 'center',
+      justifyContent: 'center',
       marginLeft: token.paddingHorizontal,
     },
     clear: {
@@ -223,9 +244,13 @@ export function getInputStyles(
       color: token.wordLimitColor,
       fontSize: token.wordLimitFontSize,
       lineHeight: wordLimitLineHeight,
-      position: 'absolute',
-      right: metrics.paddingHorizontal,
-      bottom: metrics.paddingVertical,
+      ...(textarea
+        ? {
+            position: 'absolute' as const,
+            right: metrics.paddingHorizontal,
+            bottom: metrics.paddingVertical,
+          }
+        : { marginLeft: metrics.paddingHorizontal, flexShrink: 0, alignSelf: 'center' as const }),
     },
     passwordToggle: {
       width: token.fontSizeLG,
@@ -233,7 +258,6 @@ export function getInputStyles(
       flexShrink: 0,
       alignItems: 'center',
       justifyContent: 'center',
-      marginLeft: token.paddingHorizontal / 2,
     },
     singleShell: {
       alignItems: 'center',

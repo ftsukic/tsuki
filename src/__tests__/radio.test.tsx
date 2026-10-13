@@ -1,6 +1,6 @@
 import { ConfigProvider, getDesignToken, Radio, RadioGroup } from '..'
 import { fireEvent, render, screen } from '@testing-library/react-native'
-import { StyleSheet } from 'react-native'
+import { StyleSheet, Text } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
 import { getRadioStyles } from '../radio/style'
 import { getRadioToken } from '../radio/token'
@@ -42,6 +42,67 @@ function findIndicator(
 }
 
 describe('Radio', () => {
+  it.each(['left', 'right'] as const)(
+    'keeps text and custom labels spaced and shrinkable on the %s',
+    async (labelPosition) => {
+      const { toJSON } = await render(
+        <ConfigProvider theme={{ components: { Radio: { gap: 12 } } }}>
+          <Radio testID="text-label" labelPosition={labelPosition} style={{ width: 100 }}>
+            普通标签
+          </Radio>
+          <Radio testID="custom-label" labelPosition={labelPosition} style={{ width: 100 }}>
+            <Text testID="custom-content">自定义长标签</Text>
+          </Radio>
+        </ConfigProvider>,
+      )
+
+      expect(styleOf('text-label')).toMatchObject({ gap: 12, width: 100 })
+      expect(styleOf('custom-label')).toMatchObject({ gap: 12, width: 100 })
+      const labelStyle = StyleSheet.flatten(screen.getByText('普通标签').props.style)
+      expect(labelStyle.flexShrink).toBe(1)
+      expect(labelStyle.marginLeft).toBeUndefined()
+      expect(labelStyle.marginRight).toBeUndefined()
+      expect(
+        StyleSheet.flatten(screen.getByTestId('custom-content').parent?.props.style),
+      ).toMatchObject({ flexShrink: 1 })
+      const indicators = findNodes(toJSON(), (node) => {
+        const style = StyleSheet.flatten(node.props.style)
+        return style?.width === getRadioToken(getDesignToken()).indicatorSize
+      })
+      expect(indicators).toHaveLength(2)
+      indicators.forEach((indicator) => {
+        expect(StyleSheet.flatten(indicator.props.style).flexShrink).toBe(0)
+      })
+    },
+  )
+
+  it.each(['default', 'button'] as const)(
+    'applies label styles only to generated text in the %s variant',
+    async (variant) => {
+      await render(
+        <ConfigProvider>
+          <Radio variant={variant} styles={{ label: { color: '#ff0000', marginTop: 7 } }}>
+            自动标签
+          </Radio>
+          <Radio variant={variant} styles={{ label: { color: '#ff0000', marginTop: 7 } }}>
+            <Text testID="custom-content" style={{ color: '#0000ff' }}>
+              自定义标签
+            </Text>
+          </Radio>
+        </ConfigProvider>,
+      )
+
+      expect(StyleSheet.flatten(screen.getByText('自动标签').props.style)).toMatchObject({
+        color: '#ff0000',
+        marginTop: 7,
+      })
+      expect(styleOf('custom-content').color).toBe('#0000ff')
+      expect(StyleSheet.flatten(screen.getByTestId('custom-content').parent?.props.style)).toEqual({
+        flexShrink: 1,
+      })
+    },
+  )
+
   it('supports standalone controlled and uncontrolled selection', async () => {
     const controlledChange = jest.fn()
     const uncontrolledChange = jest.fn()
@@ -105,12 +166,12 @@ describe('Radio', () => {
 
     const buttonStyle = styleOf('button')
     expect(buttonStyle).toMatchObject({
-      height: getRadioToken(getDesignToken()).buttonHeight,
       minHeight: getRadioToken(getDesignToken()).buttonHeight,
       minWidth: getRadioToken(getDesignToken()).buttonMinWidth,
       paddingHorizontal: getRadioToken(getDesignToken()).buttonPaddingHorizontal,
     })
     expect(buttonStyle.width).toBeUndefined()
+    expect(buttonStyle.height).toBeUndefined()
     expect(buttonStyle.flex).toBeUndefined()
     expect(screen.getByText('Apple')).toBeTruthy()
     expect(screen.getByTestId('disabled-button').props.accessibilityState?.disabled).toBe(true)
@@ -302,7 +363,7 @@ describe('Radio', () => {
     )
 
     expect(styleOf('button-apple')).toMatchObject({
-      height: getRadioToken(getDesignToken()).buttonHeight,
+      minHeight: getRadioToken(getDesignToken()).buttonHeight,
       paddingHorizontal: getRadioToken(getDesignToken()).buttonPaddingHorizontal,
     })
     expect(
@@ -364,7 +425,7 @@ describe('Radio', () => {
     expect(screen.getByText('Orange')).toBeTruthy()
     expect(styleOf('default-child').flexDirection).toBe('row')
     expect(styleOf('button-child')).toMatchObject({
-      height: getRadioToken(getDesignToken()).buttonHeight,
+      minHeight: getRadioToken(getDesignToken()).buttonHeight,
       paddingHorizontal: getRadioToken(getDesignToken()).buttonPaddingHorizontal,
     })
     expect(findIndicator(toJSON(), getRadioToken(getDesignToken()).indicatorSize, 1)).toBeDefined()
@@ -406,6 +467,7 @@ describe('Radio', () => {
       alignSelf: 'stretch',
       flexGrow: 0,
       flexShrink: 0,
+      minWidth: 0,
       width: '100%',
     })
     expect(screen.getByText('一个很长的选项').props.numberOfLines).toBe(1)

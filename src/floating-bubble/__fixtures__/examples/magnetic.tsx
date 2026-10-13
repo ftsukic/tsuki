@@ -1,20 +1,25 @@
 import { StyleSheet, View } from 'react-native'
 import { FloatingBubble, Text } from '@ftsukic/tsuki'
+import { useState } from 'react'
 
 /**
  * @title 横向磁吸
  * @description magnetic="x" 保持 y 坐标不变，松手后将气泡吸附到最近的左右边界。
  */
 export default function FloatingBubbleMagneticExample() {
+  const [completed, setCompleted] = useState(0)
   return (
     <View style={styles.page}>
       <Text style={styles.title}>左右磁吸</Text>
-      <Text style={styles.description}>拖动气泡到任意位置，松手后观察它吸附到最近一侧。</Text>
+      <Text style={styles.description}>
+        松手后快速吸附并轻微回弹；吸附途中可以再次拖动。完成次数：{completed}
+      </Text>
       <FloatingBubble
         axis="xy"
         magnetic="x"
         defaultOffset={{ x: 140, y: 180 }}
         accessibilityLabel="可磁吸的浮动气泡"
+        onOffsetChangeEnd={() => setCompleted((value) => value + 1)}
       >
         <Text style={styles.bubbleText}>吸</Text>
       </FloatingBubble>

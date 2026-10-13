@@ -22,8 +22,6 @@ export interface ToastSemanticStyles {
   icon?: StyleProp<ViewStyle>
   loading?: StyleProp<ViewStyle>
   mask?: StyleProp<ViewStyle>
-  wrapper?: StyleProp<ViewStyle>
-  container?: StyleProp<ViewStyle>
 }
 
 export type ToastStyles = StyleResolver<ToastProps, ToastStyleState, ToastSemanticStyles>

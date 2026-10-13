@@ -1,9 +1,9 @@
-import { BottomBar, Button, Input as TextInput } from '../../..'
+import { BottomBar, Button, Input } from '../../..'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 /**
  * @title 输入操作区
- * @description 将 TextInput 和 Button 作为任意 children 组合到页面底部。
+ * @description 将 Input 和 Button 作为任意 children 组合到页面底部。
  */
 export default function BottomBarInputFixture() {
   return (
@@ -13,7 +13,7 @@ export default function BottomBarInputFixture() {
         <Text>BottomBar 不实现输入或提交逻辑，只提供底部布局空间。</Text>
       </ScrollView>
       <BottomBar>
-        <TextInput style={styles.input} bordered placeholder="输入内容" />
+        <Input style={styles.input} bordered placeholder="输入内容" />
         <Button type="primary">发送</Button>
       </BottomBar>
     </View>

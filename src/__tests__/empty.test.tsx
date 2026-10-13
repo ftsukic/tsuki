@@ -3,6 +3,7 @@ import { act, render, screen } from '@testing-library/react-native'
 import { StyleSheet, Text, View } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
 import type { ButtonStyleInfo } from '../button'
+import type { EmptyStyleInfo } from '../empty'
 
 function isElement(node: JsonNode | undefined): node is JsonElement {
   return node !== undefined && typeof node !== 'string'
@@ -21,6 +22,133 @@ function findPressedOverlay(node: JsonNode | null): JsonElement | undefined {
 }
 
 describe('Empty', () => {
+  it('hides decorative images and exposes one image with a label', async () => {
+    const view = await render(<Empty image="https://example.com/empty.png" />)
+    expect(screen.queryAllByRole('image')).toHaveLength(0)
+
+    await view.rerender(
+      <Empty image="https://example.com/empty.png" imageAccessibilityLabel="空文件夹" />,
+    )
+    expect(screen.getAllByRole('image')).toHaveLength(1)
+    expect(screen.getByRole('image', { name: '空文件夹' })).toBeTruthy()
+
+    await view.rerender(<Empty imageAccessibilityLabel="默认插画" />)
+    expect(screen.getAllByRole('image')).toHaveLength(1)
+    expect(screen.getByRole('image', { name: '默认插画' })).toBeTruthy()
+
+    await view.rerender(<Empty />)
+    expect(screen.queryAllByRole('image')).toHaveLength(0)
+  })
+
+  it('preserves custom image accessibility without assigning a wrapper role', async () => {
+    await render(
+      <Empty
+        imageAccessibilityLabel="不覆盖自定义节点"
+        image={<View accessible accessibilityRole="image" accessibilityLabel="自定义图片" />}
+      />,
+    )
+    expect(screen.getAllByRole('image')).toHaveLength(1)
+    expect(screen.getByRole('image', { name: '自定义图片' })).toBeTruthy()
+    expect(screen.queryByLabelText('不覆盖自定义节点')).toBeNull()
+  })
+
+  it('wraps scalar image and action content in Text, including zero and arrays', async () => {
+    await render(
+      <Empty image={0} description={0}>
+        {['重新加载', 0]}
+      </Empty>,
+    )
+    expect(screen.getByText('重新加载').type).toBe('Text')
+    expect(screen.getAllByText('0')).toHaveLength(3)
+    for (const node of screen.getAllByText('0')) expect(node.type).toBe('Text')
+  })
+
+  it('scales description line height with its component font size', async () => {
+    await render(
+      <ConfigProvider
+        theme={{
+          seed: { fontSize: 16 },
+          token: { lineHeight: 24 },
+          components: { Empty: { empty_description_font_size: 32 } },
+        }}
+      >
+        <Empty description={'第一行\n第二行'} />
+      </ConfigProvider>,
+    )
+    expect(StyleSheet.flatten(screen.getByText('第一行\n第二行').props.style)).toMatchObject({
+      fontSize: 32,
+      lineHeight: 48,
+    })
+  })
+
+  it('resolves semantic regions and gives root style the highest priority', async () => {
+    const styles = jest.fn((info: EmptyStyleInfo) => ({
+      root: { paddingVertical: info.state.hasAction ? 8 : 0 },
+      image: { backgroundColor: 'red', width: 100 },
+      descriptionContainer: { paddingHorizontal: 4 },
+      description: { color: 'blue', lineHeight: 40 },
+      footer: { marginTop: 6, flexDirection: 'row' as const },
+    }))
+    await render(
+      <Empty
+        testID="empty"
+        image={<View testID="image" />}
+        description="暂无数据"
+        style={{ paddingVertical: 12 }}
+        styles={styles}
+      >
+        <View testID="action" />
+      </Empty>,
+    )
+    expect(styles).toHaveBeenCalledWith(
+      expect.objectContaining({
+        state: { hasImage: true, hasDescription: true, hasAction: true },
+        props: expect.objectContaining({ description: '暂无数据' }),
+      }),
+    )
+    expect(StyleSheet.flatten(screen.getByTestId('empty').props.style).paddingVertical).toBe(12)
+    expect(StyleSheet.flatten(screen.getByTestId('image').parent?.props.style)).toMatchObject({
+      width: 100,
+      backgroundColor: 'red',
+    })
+    expect(StyleSheet.flatten(screen.getByText('暂无数据').parent?.props.style)).toMatchObject({
+      paddingHorizontal: 4,
+    })
+    expect(StyleSheet.flatten(screen.getByText('暂无数据').props.style)).toMatchObject({
+      color: 'blue',
+      lineHeight: 40,
+    })
+    expect(StyleSheet.flatten(screen.getByTestId('action').parent?.props.style)).toMatchObject({
+      marginTop: 6,
+      flexDirection: 'row',
+    })
+  })
+
+  it('leaves custom description styles to the caller', async () => {
+    const view = await render(
+      <Empty
+        description={
+          <Text testID="custom" style={{ color: 'green' }}>
+            自定义说明
+          </Text>
+        }
+        styles={{ description: { color: 'red' } }}
+      />,
+    )
+    expect(StyleSheet.flatten(screen.getByTestId('custom').props.style).color).toBe('green')
+    await view.rerender(
+      <Empty
+        image={null}
+        description={false}
+        styles={({ state }) => {
+          expect(state).toEqual({ hasImage: false, hasDescription: false, hasAction: false })
+          return {}
+        }}
+      />,
+    )
+    expect(view.toJSON()?.children).toHaveLength(0)
+  })
+
   it('preserves Button pressed feedback and presses inside the action area', async () => {
     const onPress = jest.fn()
     const styles = jest.fn((info: ButtonStyleInfo) => ({

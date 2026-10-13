@@ -4,6 +4,7 @@ import { ConfigProvider, Swipe, SwipeItem, getSwipeToken, getDesignToken } from 
 import type { SwipeRef } from '../swipe'
 import { act, render, screen } from '@testing-library/react-native'
 import { StyleSheet, Text } from 'react-native'
+import type { View } from 'react-native'
 
 function slides(count = 3) {
   return Array.from({ length: count }, (_, index) => (
@@ -31,7 +32,7 @@ describe('Swipe', () => {
       </Swipe>,
     )
     expect(screen.getByText('0/4')).toBeTruthy()
-    expect(screen.getAllByText(/slide-/)).toHaveLength(4)
+    expect(screen.getAllByText(/slide-/, { includeHiddenElements: true })).toHaveLength(4)
   })
 
   it('normalizes initialSwipe and exposes imperative navigation', async () => {
@@ -245,6 +246,104 @@ describe('Swipe', () => {
       </ConfigProvider>,
     )
     expect(getSwipeToken(getDesignToken()).indicatorSize).toBe(6)
+  })
+
+  it('applies item semantic styles while preserving child overrides and page geometry', async () => {
+    const ref = React.createRef<SwipeRef>()
+    await render(
+      <Swipe
+        ref={ref}
+        width={100}
+        styles={({ state }) => ({
+          item: { backgroundColor: state.activeIndex === 0 ? 'red' : 'blue', padding: 12 },
+        })}
+      >
+        <Swipe.Item testID="semantic-item" style={{ padding: 4, width: 999 }}>
+          <Text>first</Text>
+        </Swipe.Item>
+        <Swipe.Item testID="semantic-second">
+          <Text>second</Text>
+        </Swipe.Item>
+      </Swipe>,
+    )
+
+    expect(StyleSheet.flatten(screen.getByTestId('semantic-item').props.style)).toMatchObject({
+      backgroundColor: 'red',
+      padding: 4,
+      width: 100,
+    })
+    await act(async () => ref.current?.swipeTo(1, { immediate: true }))
+    expect(StyleSheet.flatten(screen.getByTestId('semantic-second').props.style)).toMatchObject({
+      backgroundColor: 'blue',
+      padding: 12,
+      width: 100,
+    })
+  })
+
+  it('exposes only the current page to accessibility and preserves its explicit props', async () => {
+    const ref = React.createRef<SwipeRef>()
+    await render(
+      <Swipe ref={ref} width={100}>
+        <Swipe.Item testID="first-page">
+          <Text>visible first</Text>
+        </Swipe.Item>
+        <Swipe.Item
+          testID="second-page"
+          accessibilityElementsHidden={false}
+          importantForAccessibility="yes"
+          accessibilityLabel="second page"
+        >
+          <Text>visible second</Text>
+        </Swipe.Item>
+        <Swipe.Item accessibilityElementsHidden>
+          <Text>explicitly hidden</Text>
+        </Swipe.Item>
+      </Swipe>,
+    )
+
+    expect(screen.getByText('visible first')).toBeTruthy()
+    expect(screen.queryByText('visible second')).toBeNull()
+    const hidden = screen.getByTestId('second-page', { includeHiddenElements: true })
+    expect(hidden.props.accessibilityElementsHidden).toBe(true)
+    expect(hidden.props.importantForAccessibility).toBe('no-hide-descendants')
+
+    await act(async () => ref.current?.swipeTo(1, { immediate: true }))
+    expect(screen.queryByText('visible first')).toBeNull()
+    expect(screen.getByText('visible second')).toBeTruthy()
+    expect(screen.getByTestId('second-page').props).toMatchObject({
+      accessibilityElementsHidden: false,
+      importantForAccessibility: 'yes',
+      accessibilityLabel: 'second page',
+    })
+    await act(async () => ref.current?.swipeTo(2, { immediate: true }))
+    expect(screen.queryByText('explicitly hidden')).toBeNull()
+  })
+
+  it('keeps item native refs attached across navigation and clears them on unmount', async () => {
+    const ref = React.createRef<SwipeRef>()
+    const itemRef = React.createRef<View>()
+    const callbackRef = jest.fn()
+    const view = await render(
+      <Swipe ref={ref} width={100}>
+        <Swipe.Item ref={itemRef}>
+          <Text>object ref</Text>
+        </Swipe.Item>
+        <Swipe.Item ref={callbackRef}>
+          <Text>callback ref</Text>
+        </Swipe.Item>
+      </Swipe>,
+    )
+    const node = itemRef.current
+    expect(node).not.toBeNull()
+    expect(node?.measure).toEqual(expect.any(Function))
+    expect(callbackRef).toHaveBeenCalledWith(
+      expect.objectContaining({ measure: expect.any(Function) }),
+    )
+    await act(async () => ref.current?.swipeTo(1, { immediate: true }))
+    expect(itemRef.current).toBe(node)
+    await view.unmount()
+    expect(itemRef.current).toBeNull()
+    expect(callbackRef).toHaveBeenLastCalledWith(null)
   })
 
   it('keeps loop transitions to one page and uses the Vant default duration', async () => {
