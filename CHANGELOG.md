@@ -1,5 +1,11 @@
 # @ftsukic/tsuki
 
+## 0.1.2
+
+### Patch Changes
+
+- 04c2eb9: 修复 Dialog 圆角按钮文字行高与按钮高度不匹配导致的垂直错位。
+
 ## 0.1.1
 
 ### Patch Changes
