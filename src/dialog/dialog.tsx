@@ -211,9 +211,12 @@ export const DialogContent = forwardRef<View, DialogContentProps>(
         : (cancelButtonColor ?? (isRound ? undefined : token.cancelButtonColor))
       const actionProps = confirm ? confirmButtonProps : cancelButtonProps
       const buttonStyles = isRound
-        ? textColor === undefined
-          ? undefined
-          : { content: { color: textColor } }
+        ? {
+            content: {
+              lineHeight: themeToken.lineHeight,
+              ...(textColor === undefined ? {} : { color: textColor }),
+            },
+          }
         : {
             root: { opacity: disabled ? token.buttonDisabledOpacity : 1 },
             content: { color: textColor, fontSize: token.buttonFontSize },
