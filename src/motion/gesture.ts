@@ -1,4 +1,4 @@
-import { ReduceMotion } from 'react-native-reanimated'
+import { ReduceMotion, withDecay } from 'react-native-reanimated'
 import { animateValue } from './animation'
 import { GESTURE_PRESET, MAGNETIC_PRESET } from './presets'
 import { MOTION_EASING } from './easing'
@@ -97,6 +97,7 @@ export function snapGesture(
   enabled: boolean,
   onFinished?: (finished?: boolean) => void,
   durationScale = 1,
+  velocity?: number,
 ) {
   'worklet'
   if (!enabled) {
@@ -108,6 +109,7 @@ export function snapGesture(
     { ...GESTURE_PRESET, reduceMotion: ReduceMotion.Never },
     onFinished,
     durationScale,
+    Number.isFinite(velocity) ? velocity : undefined,
   )
 }
 
@@ -134,4 +136,33 @@ export function snapSwipeCellOffset(
     },
     onFinished,
   )
+}
+
+/** Resist overscroll progressively while keeping movement continuous at the edge. */
+export function resistGestureOffset(offset: number, limit: number, viewport: number) {
+  'worklet'
+  const bounded = Math.max(-limit, Math.min(limit, offset))
+  const excess = offset - bounded
+  const distance = Math.abs(excess) * SWIPE_PRESET.resistance
+  return bounded + (Math.sign(excess) * distance * viewport) / (viewport + distance)
+}
+
+/** Image panning rebounds from overscroll and otherwise retains native inertia. */
+export function coastGestureOffset(
+  current: number,
+  velocity: number,
+  limit: number,
+  enabled: boolean,
+  durationScale = 1,
+) {
+  'worklet'
+  const bounded = Math.max(-limit, Math.min(limit, current))
+  if (current !== bounded) return snapGesture(bounded, enabled, undefined, durationScale, velocity)
+  if (!enabled || !Number.isFinite(velocity) || velocity === 0 || limit <= 0) return current
+  return withDecay({
+    velocity,
+    clamp: [-limit, limit],
+    rubberBandEffect: false,
+    reduceMotion: ReduceMotion.Never,
+  })
 }

@@ -1,74 +1,53 @@
-import { useCallback, useRef, useState } from 'react'
-import { ImagePreview } from '../..'
+import { useState } from 'react'
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
-import type { ImagePreviewRect } from '../..'
+import { ImagePreview } from '../..'
+import { NETWORK_PHOTOS } from '../../../image-preview/__fixtures__/examples/network-photo-data'
+import PreviewToolbar from '../../../image-preview/__fixtures__/examples/preview-toolbar'
 
-/** @title Thumbnail transition @description Measure the tapped thumbnail and animate to the fullscreen image. */
+const ITEMS = NETWORK_PHOTOS.slice(8, 11).map((item) => ({ ...item, id: `transition-${item.id}` }))
+
+/** @title 缩略图过渡 @description 来源包装器仅登记位置，完整图片序列由 ImagePreview 管理。 */
 export default function Transition() {
-  const images = [
-    'https://picsum.photos/id/1043/900/1200',
-    'https://picsum.photos/id/1044/1200/800',
-    'https://picsum.photos/id/1045/900/900',
-  ]
-  const refs = useRef<Array<Image | null>>([])
   const [visible, setVisible] = useState(false)
-  const [startPosition, setStartPosition] = useState(0)
-  const [sourceRect, setSourceRect] = useState<ImagePreviewRect | null>(null)
-
-  const open = (index: number) => {
-    refs.current[index]?.measureInWindow((x, y, width, height) => {
-      const rect = { x, y, width, height }
-      setSourceRect(rect)
-      setStartPosition(index)
-      setVisible(true)
-    })
-  }
-
-  const getSourceRect = useCallback(
-    (index: number) =>
-      new Promise<ImagePreviewRect | null>((resolve) => {
-        const image = refs.current[index]
-        if (!image) {
-          resolve(null)
-          return
-        }
-        image.measureInWindow((x, y, width, height) => resolve({ x, y, width, height }))
-      }),
-    [],
-  )
-
+  const [activeId, setActiveId] = useState(ITEMS[0].id)
   return (
     <View>
       <View style={styles.row}>
-        {images.map((image, index) => (
-          <Pressable key={image} accessibilityRole="button" onPress={() => open(index)}>
-            <Image
-              ref={(value) => {
-                refs.current[index] = value
-              }}
-              source={{ uri: image }}
-              style={styles.thumbnail}
-            />
+        {ITEMS.map((item, index) => (
+          <View key={item.id} style={styles.card}>
+            <ImagePreview.Source imageId={item.id} style={styles.thumbnail}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`打开第 ${index + 1} 张图片`}
+                style={styles.image}
+                onPress={() => {
+                  setActiveId(item.id)
+                  setVisible(true)
+                }}
+              >
+                <Image source={item.thumbnail} resizeMode="cover" style={styles.image} />
+              </Pressable>
+            </ImagePreview.Source>
             <Text style={styles.label}>{`第 ${index + 1} 张`}</Text>
-          </Pressable>
+          </View>
         ))}
       </View>
       <ImagePreview
-        getSourceRect={getSourceRect}
         visible={visible}
-        images={images}
-        startPosition={startPosition}
-        sourceRect={sourceRect}
+        items={ITEMS}
+        activeId={activeId}
         closeable
+        renderToolbar={(params) => <PreviewToolbar {...params} />}
+        onChange={({ id }) => setActiveId(id)}
         onRequestClose={() => setVisible(false)}
-        onClosed={() => setVisible(false)}
       />
     </View>
   )
 }
-
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 8 },
+  card: { gap: 4 },
   label: { textAlign: 'center' },
-  thumbnail: { height: 96, width: 72 },
+  thumbnail: { height: 96, width: 96, backgroundColor: '#202020' },
+  image: { width: '100%', height: '100%' },
 })

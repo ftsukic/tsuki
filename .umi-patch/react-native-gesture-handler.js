@@ -7,6 +7,7 @@ function createGesture() {
     activeOffsetX: () => gesture,
     activeOffsetY: () => gesture,
     enabled: () => gesture,
+    withTestId: () => gesture,
     failOffsetX: () => gesture,
     failOffsetY: () => gesture,
     minDistance: () => gesture,
@@ -29,6 +30,7 @@ export const Gesture = {
   Pan: createGesture,
   Tap: createGesture,
   Simultaneous: createGesture,
+  Race: createGesture,
 }
 
 export const GestureDetector = ({ children }) => children ?? null

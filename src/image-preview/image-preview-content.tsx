@@ -8,850 +8,498 @@ import {
   useRef,
   useState,
 } from 'react'
-import {
-  BackHandler,
-  Dimensions,
-  FlatList,
-  Platform,
-  Pressable as NativePressable,
-  StyleSheet,
-  View,
-} from 'react-native'
-import type { LayoutChangeEvent, ListRenderItemInfo } from 'react-native'
-import { initialWindowMetrics, SafeAreaInsetsContext } from 'react-native-safe-area-context'
-import { scheduleOnRN } from 'react-native-worklets'
-import { Animated, useAnimatedStyle, useSharedValue, withTiming } from '../animation'
+import type { ReactNode } from 'react'
+import { BackHandler, Dimensions, Platform, View } from 'react-native'
+import type { FlatList, LayoutChangeEvent, ListRenderItemInfo } from 'react-native'
+import Animated, {
+  runOnUI,
+  scrollTo,
+  useAnimatedReaction,
+  useAnimatedRef,
+  useAnimatedStyle,
+  useDerivedValue,
+} from 'react-native-reanimated'
+import { SafeAreaInsetsContext, initialWindowMetrics } from 'react-native-safe-area-context'
 import { GestureDetector } from '../gesture'
 import { Pressable } from '../pressable'
-import { resolveStyles } from '../style'
 import { Text } from '../text'
-import { useComponentToken, useToken } from '../theme'
-import type {
-  ImagePreviewCloseReason,
-  ImagePreviewProps,
-  ImagePreviewRect,
-  ImagePreviewRef,
-} from './types'
-import { ImagePreviewItem } from './image-preview-item'
-import { ImagePreviewTransition } from './image-preview-transition'
+import { resolveStyles } from '../style'
+import { useToken, useComponentToken } from '../theme'
 import { getImagePreviewStyles } from './style'
 import { getImagePreviewToken } from './token'
-import type { NormalizedImage } from './utils'
-import {
-  getCachedImageDimensions,
-  getContainSize,
-  interpolateClamped,
-  isValidRect,
-  normalizeImageSource,
-  normalizeStartPosition,
-} from './utils'
-import { useImagePreviewGesture } from './useImagePreviewGesture'
+import { containRect } from './geometry'
+import { ImagePreviewPage } from './image-preview-page'
+import { useImagePreviewInteraction } from './useImagePreviewInteraction'
+import type { ImagePreviewInteractionState } from './useImagePreviewInteraction'
+import { useImagePreviewSession } from './useImagePreviewSession'
 import { useImagePreviewLoader } from './useImagePreviewLoader'
-import { useImagePreviewPaging } from './useImagePreviewPaging'
-
-const initialWindow = Dimensions.get('window')
-
-interface TransitionState {
-  from: ImagePreviewRect
-  to: ImagePreviewRect
-  kind: 'opening' | 'closing'
-  imageIndex: number
+import type {
+  ImagePreviewProps,
+  ImagePreviewRef,
+  ImagePreviewImage,
+  ImagePreviewCloseReason,
+  ImagePreviewLoadState,
+} from './types'
+const windowSize = Dimensions.get('window')
+function slot(node: ReactNode) {
+  return typeof node === 'string' || typeof node === 'number' ? <Text>{node}</Text> : node
 }
-
-type ImagePreviewPhase = 'closed' | 'opening' | 'open' | 'closing'
-type OpeningTransitionMode = 'none' | 'pending' | 'source'
-
-interface ImagePreviewContentProps extends ImagePreviewProps {
-  internal?: boolean
-}
-
-function getImageDimensions(image: NormalizedImage, width: number, height: number) {
-  const cached = getCachedImageDimensions(image)
-  return getContainSize(
-    image.width ?? cached?.width ?? width,
-    image.height ?? cached?.height ?? height,
-    width,
-    height,
-  )
-}
-
-function renderSlot(value: React.ReactNode, style?: object) {
-  return typeof value === 'string' || typeof value === 'number' ? (
-    <Text style={style}>{value}</Text>
-  ) : (
-    value
-  )
-}
-
-function getOpeningTransitionMode(
-  sourceRect: ImagePreviewRect | null | undefined,
-  getSourceRect?: ImagePreviewProps['getSourceRect'],
-): OpeningTransitionMode {
-  return isValidRect(sourceRect) ? 'source' : getSourceRect ? 'pending' : 'none'
-}
-
-export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewContentProps>(
-  function ImagePreviewContent(
-    {
+export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewProps>(
+  function ImagePreviewContent(props, ref) {
+    const {
       visible = false,
-      images,
-      startPosition = 0,
-      loop = true,
-      showIndex = true,
-      showIndicators = false,
-      safeAreaInsetTop = true,
-      safeAreaInsetBottom = true,
-      minZoom = 0.5,
-      maxZoom = 3,
-      doubleTapZoom = 2,
-      closeable = false,
-      closeOnPressImage = true,
-      closeOnPressOverlay = true,
+      items,
+      activeId,
+      closeable = true,
       closeOnGesture = true,
-      sourceRect = null,
-      getSourceRect,
-      swipeDuration,
+      showIndex = false,
+      interactionDisabled = false,
       transitionDuration,
-      renderImage,
+      getSourceRect,
+      imageAdapter,
+      renderMedia,
       renderIndex,
       renderToolbar,
+      renderOverlay,
       onChange,
-      onScale,
+      onLongPress,
       onRequestClose,
       onOpen,
       onOpened,
       onClose,
       onClosed,
-      onLayout: userOnLayout,
+      onLayout,
       style,
       styles,
-      internal,
       ...viewProps
-    },
-    ref,
-  ) {
-    void internal
-    // Native paging owns its own timing; keep the prop for source compatibility.
-    void swipeDuration
-
+    } = props
     const { token: themeToken } = useToken()
     const token = useComponentToken('ImagePreview', getImagePreviewToken)
     const resolved = getImagePreviewStyles(token)
-    const safeAreaInsets = useContext(SafeAreaInsetsContext)
-    const fallbackInsets = initialWindowMetrics?.insets
-    const topInset = safeAreaInsetTop
-      ? Math.max(0, safeAreaInsets?.top ?? fallbackInsets?.top ?? 0)
-      : 0
-    const bottomInset = safeAreaInsetBottom
-      ? Math.max(0, safeAreaInsets?.bottom ?? fallbackInsets?.bottom ?? 0)
-      : 0
-    const count = images.length
-    const normalizedImages = useMemo(() => Array.from(images, normalizeImageSource), [images])
-    const safeMinZoom = Number.isFinite(minZoom) && minZoom > 0 ? minZoom : 0.5
-    const safeMaxZoom = Number.isFinite(maxZoom) ? Math.max(safeMinZoom, maxZoom) : 3
-    const safeDoubleTapZoom = Number.isFinite(doubleTapZoom)
-      ? Math.min(safeMaxZoom, Math.max(1, doubleTapZoom))
-      : 2
-    const normalizedStart = normalizeStartPosition(startPosition, count, loop)
-    const [activeIndex, setActiveIndex] = useState(normalizedStart)
-    const [transition, setTransition] = useState<TransitionState | null>(null)
-    const [transitionReady, setTransitionReady] = useState(false)
-    const [transitionLayoutReady, setTransitionLayoutReady] = useState(false)
-    const [rootLayoutReady, setRootLayoutReady] = useState(false)
-    const [openingPrepared, setOpeningPrepared] = useState(false)
-    const [previewReady, setPreviewReady] = useState(false)
-    const [openingAnimationComplete, setOpeningAnimationComplete] = useState(false)
-    const [openingTransitionMode, setOpeningTransitionMode] = useState<OpeningTransitionMode>(
-      visible ? getOpeningTransitionMode(sourceRect, getSourceRect) : 'none',
-    )
-    const [phase, setPhase] = useState<ImagePreviewPhase>(visible ? 'opening' : 'closed')
+    const safeArea = useContext(SafeAreaInsetsContext) ?? initialWindowMetrics?.insets
+    const topInset = Math.max(0, safeArea?.top ?? 0),
+      bottomInset = Math.max(0, safeArea?.bottom ?? 0)
+    const [selectedId, setSelectedId] = useState(activeId ?? items[0]?.id)
     const [viewport, setViewport] = useState({
-      width: Math.max(1, initialWindow.width),
-      height: Math.max(1, initialWindow.height),
+      x: 0,
+      y: 0,
+      width: Math.max(1, windowSize.width),
+      height: Math.max(1, windowSize.height),
     })
-    const phaseRef = useRef<ImagePreviewPhase>(phase)
-    const activeIndexRef = useRef(normalizedStart)
-    const visibleRef = useRef(visible)
-    const wasVisibleRef = useRef(visible)
-    const startedRef = useRef(false)
-    const openingIndexRef = useRef(normalizedStart)
-    const closeFromRectRef = useRef<ImagePreviewRect | null>(null)
-    const closeCompletedRef = useRef(false)
-    const lifecycleRef = useRef(0)
-    const onScaleRef = useRef(onScale)
-    const transitionProgressSV = useSharedValue(0)
-
-    visibleRef.current = visible
-    phaseRef.current = phase
-    onScaleRef.current = onScale
-
-    const { isImageReady, loadedIndices, markImageReady } = useImagePreviewLoader(
-      normalizedImages,
-      activeIndex,
-      visible,
-      loop,
-      !renderImage,
+    const [layoutReady, setLayoutReady] = useState(false)
+    const [interactionState, setInteractionState] = useState<ImagePreviewInteractionState>('idle')
+    const [originals, setOriginals] = useState<
+      Record<string, { attempt: number; status: ImagePreviewLoadState }>
+    >({})
+    const [displayed, setDisplayed] = useState<Record<string, boolean>>({})
+    const galleryRef = useRef(items)
+    if (!selectedId || items.some((entry) => entry.id === selectedId)) galleryRef.current = items
+    const gallery = galleryRef.current
+    const activeIndex = Math.max(
+      0,
+      gallery.findIndex((entry) => entry.id === selectedId),
     )
-    const opening = phase === 'opening'
-    const closing = phase === 'closing'
-    const rendered = phase !== 'closed'
-
-    const semantic = resolveStyles(styles, {
-      props: { ...viewProps, visible, images },
-      state: { visible, activeIndex, total: count, opening, closing },
-    })
-
-    const fullscreenRect = useCallback(
-      (index: number): ImagePreviewRect => {
-        const size = getImageDimensions(
-          normalizedImages[index] ?? normalizeImageSource(''),
-          viewport.width,
-          viewport.height,
-        )
-        return {
-          x: (viewport.width - size.width) / 2,
-          y: (viewport.height - size.height) / 2,
-          width: size.width,
-          height: size.height,
-        }
-      },
-      [normalizedImages, viewport.height, viewport.width],
+    const item = gallery[activeIndex],
+      count = gallery.length
+    const ids = useMemo(() => gallery.map((entry) => entry.id), [gallery])
+    const images = useMemo(
+      () => gallery.map((entry) => containRect(entry, viewport.width, viewport.height)),
+      [gallery, viewport.width, viewport.height],
     )
-
-    const readSourceRect = useCallback(
-      async (index: number, openingTransition: boolean) => {
-        if (openingTransition) {
-          if (isValidRect(sourceRect)) return sourceRect
-          if (!getSourceRect) return null
-        } else {
-          if (getSourceRect) {
-            try {
-              const value = await getSourceRect(index)
-              return isValidRect(value) ? value : null
-            } catch {
-              return null
-            }
-          }
-          return index === openingIndexRef.current && isValidRect(sourceRect) ? sourceRect : null
-        }
-
-        try {
-          const value = await getSourceRect(index)
-          return isValidRect(value) ? value : null
-        } catch {
-          return null
-        }
-      },
-      [getSourceRect, sourceRect],
-    )
-
-    const requestClose = useCallback(
-      (reason: ImagePreviewCloseReason, fromRect?: ImagePreviewRect) => {
-        if (!visibleRef.current || closing) return
-        closeFromRectRef.current = fromRect ?? null
-        onRequestClose?.(reason)
-      },
-      [closing, onRequestClose],
-    )
-    const requestCloseRef = useRef(requestClose)
-    requestCloseRef.current = requestClose
-    const stableRequestClose = useCallback(
-      (reason: ImagePreviewCloseReason, fromRect?: ImagePreviewRect) => {
-        requestCloseRef.current(reason, fromRect)
-      },
-      [],
-    )
-
-    const gestureEnabled = rendered && visible && !opening && !closing
-    const gesture = useImagePreviewGesture({
-      activeIndex,
+    const pageWidth = viewport.width + themeToken.paddingSM
+    const pager = useAnimatedRef<FlatList<ImagePreviewImage>>()
+    const root = useRef<View>(null)
+    const enabled = visible && !interactionDisabled
+    const callbacks = useRef({ onChange, onLongPress, onRequestClose })
+    callbacks.current = { onChange, onLongPress, onRequestClose }
+    const select = useCallback((id: string) => {
+      const index = galleryRef.current.findIndex((entry) => entry.id === id),
+        entry = galleryRef.current[index]
+      if (!entry) return
+      setSelectedId(id)
+      callbacks.current.onChange?.({ id, item: entry, index, count: galleryRef.current.length })
+    }, [])
+    const requestRef = useRef<(reason: ImagePreviewCloseReason) => void>(() => {})
+    const close = useCallback((reason: 'image' | 'gesture') => requestRef.current(reason), [])
+    const longPress = useCallback(() => {
+      const current = interactionRef.current
+      const id = current?.selected.value
+      const index = galleryRef.current.findIndex((entry) => entry.id === id),
+        entry = galleryRef.current[index]
+      if (entry)
+        callbacks.current.onLongPress?.({
+          id: entry.id,
+          item: entry,
+          index,
+          count: galleryRef.current.length,
+        })
+    }, [])
+    const interaction = useImagePreviewInteraction({
+      enabled,
+      ids,
+      images,
+      activeId: selectedId,
+      viewport,
+      pageWidth,
       closeOnGesture,
-      closeOnPressImage,
-      closeOnPressOverlay,
-      doubleTapZoom: safeDoubleTapZoom,
-      enabled: gestureEnabled,
-      maxZoom: safeMaxZoom,
-      minZoom: safeMinZoom,
-      normalized: normalizedImages[activeIndex],
-      onRequestClose: stableRequestClose,
-      onScale: (params) => onScaleRef.current?.(params),
-      viewportHeight: viewport.height,
-      viewportWidth: viewport.width,
+      onSelect: select,
+      onClose: close,
+      onLongPress: longPress,
+      onStateChange: setInteractionState,
     })
-    const {
-      animatedStyle,
-      dismissTranslateY,
-      isPinching,
-      isZoomed,
-      nativeScrollGesture,
-      reset: resetGesture,
-      updateImageDimensions,
-    } = gesture
-
-    const handleChange = useCallback(
-      (index: number) => {
-        const previous = activeIndexRef.current
-        activeIndexRef.current = index
-        if (previous === index) return
-        resetGesture()
-        setActiveIndex(index)
-        onChange?.(index)
+    const interactionRef = useRef(interaction)
+    interactionRef.current = interaction
+    const onBegin = useCallback(
+      (reopening: boolean) => {
+        galleryRef.current = items
+        setSelectedId((current) =>
+          items.some((entry) => entry.id === (activeId ?? current))
+            ? (activeId ?? current)
+            : items[0]?.id,
+        )
+        if (!reopening) {
+          setOriginals({})
+          setDisplayed({})
+          setLayoutReady(false)
+        }
       },
-      [onChange, resetGesture],
+      [items, activeId],
     )
-    const paging = useImagePreviewPaging({
-      count,
-      initialIndex: normalizedStart,
-      loop,
-      onIndexChange: handleChange,
-      viewportWidth: viewport.width,
+    const session = useImagePreviewSession({
+      props: { ...props, getSourceRect, onOpen, onOpened, onClose, onClosed },
+      id: selectedId,
+      viewport,
+      layoutReady,
+      displayReady: Boolean(displayed[selectedId ?? '']),
+      duration: transitionDuration ?? token.animationDuration,
+      pageWidth,
+      interaction,
+      onBegin,
     })
-    const { getLogicalIndex, reset: resetPaging, scrollToIndex } = paging
-
-    const recordImageReady = useCallback(
-      (index: number, dimensions?: { width: number; height: number }) => {
-        markImageReady(index, dimensions)
-        if (index === activeIndexRef.current && dimensions) {
-          updateImageDimensions(dimensions.width, dimensions.height)
-        }
-      },
-      [markImageReady, updateImageDimensions],
-    )
-    const onItemReady = useCallback(
-      (index: number, dimensions?: { width: number; height: number }) => {
-        recordImageReady(index, dimensions)
-        if (phaseRef.current === 'opening' && index === activeIndexRef.current) {
-          setPreviewReady(true)
-        }
-      },
-      [recordImageReady],
-    )
-    const onItemError = useCallback((index: number) => {
-      if (phaseRef.current === 'opening' && index === activeIndexRef.current) {
-        setPreviewReady(true)
-      }
-    }, [])
-    const onTransitionLayout = useCallback(() => setTransitionLayoutReady(true), [])
-    const onTransitionImageReady = useCallback(
-      (index: number, dimensions?: { width: number; height: number }) => {
-        recordImageReady(index, dimensions)
-        if (phaseRef.current === 'opening' && index === activeIndexRef.current) {
-          setTransition((current) =>
-            current?.kind === 'opening' ? { ...current, to: fullscreenRect(index) } : current,
-          )
-          setTransitionReady(true)
-        }
-      },
-      [fullscreenRect, recordImageReady],
-    )
-    const onTransitionImageError = useCallback((index: number) => {
-      if (phaseRef.current === 'opening' && index === activeIndexRef.current) {
-        setTransitionReady(true)
-      }
-    }, [])
-
-    const runTransition = useCallback(
-      (duration: number, onComplete: () => void) => {
-        const lifecycle = lifecycleRef.current
-        const complete = () => {
-          if (lifecycle === lifecycleRef.current) onComplete()
-        }
-        transitionProgressSV.value = withTiming(1, { duration }, (finished) => {
-          'worklet'
-          if (finished) scheduleOnRN(complete)
+    const phase = session.phase
+    const requestClose = useCallback(
+      (reason: ImagePreviewCloseReason) => {
+        if (
+          !visible ||
+          phase === 'closing' ||
+          (interactionDisabled && reason !== 'removed' && reason !== 'imperative')
+        )
+          return
+        callbacks.current.onRequestClose?.(reason)
+        requestAnimationFrame(() => {
+          if (interactionRef.current && visibleRef.current)
+            runOnUI(interactionRef.current.restore)()
         })
-        if (duration === 0) complete()
       },
-      [transitionProgressSV],
+      [visible, phase, interactionDisabled],
     )
-
-    const onOpenAnimationComplete = useCallback(() => {
-      if (phaseRef.current === 'opening') setOpeningAnimationComplete(true)
-    }, [])
-    const finishOpenTransition = useCallback(() => {
-      if (phaseRef.current !== 'opening') return
-      phaseRef.current = 'open'
-      setPhase('open')
-      setTransition(null)
-      transitionProgressSV.value = 1
-      onOpened?.()
-    }, [onOpened, transitionProgressSV])
-
-    const finishClose = useCallback(() => {
-      if (phaseRef.current !== 'closing' || closeCompletedRef.current) return
-      closeCompletedRef.current = true
-      phaseRef.current = 'closed'
-      setPhase('closed')
-      setTransition(null)
-      closeFromRectRef.current = null
-      transitionProgressSV.value = 0
-      resetGesture()
-      onClosed?.()
-    }, [onClosed, resetGesture, transitionProgressSV])
-
-    const startClose = useCallback(async () => {
-      if (!rendered || closing) return
-      const lifecycle = ++lifecycleRef.current
-      closeCompletedRef.current = false
-      phaseRef.current = 'closing'
-      setPhase('closing')
-      setOpeningTransitionMode('none')
-      setTransition(null)
-      transitionProgressSV.value = 0
-      setTransitionReady(false)
-      const index = activeIndexRef.current
-      const target = await readSourceRect(index, false)
-      if (lifecycle !== lifecycleRef.current) return
-      const from = isValidRect(closeFromRectRef.current)
-        ? closeFromRectRef.current
-        : fullscreenRect(index)
-      if (isValidRect(target)) {
-        setTransition({ from, to: target, kind: 'closing', imageIndex: index })
-      }
-      const duration =
-        themeToken.motion === false ? 0 : Math.max(0, transitionDuration ?? token.animationDuration)
-      runTransition(duration, finishClose)
-    }, [
-      closing,
-      finishClose,
-      fullscreenRect,
-      readSourceRect,
-      rendered,
-      runTransition,
-      themeToken.motion,
-      token.animationDuration,
-      transitionDuration,
-      transitionProgressSV,
-    ])
-
-    const startOpen = useCallback(async () => {
-      if (count === 0) {
-        phaseRef.current = 'open'
-        setPhase('open')
-        onOpen?.()
-        onOpened?.()
-        return
-      }
-      const lifecycle = ++lifecycleRef.current
-      const rootMounted = phaseRef.current !== 'closed'
-      closeFromRectRef.current = null
-      openingIndexRef.current = normalizedStart
-      activeIndexRef.current = normalizedStart
-      setActiveIndex(normalizedStart)
-      resetGesture()
-      resetPaging(normalizedStart)
-      closeCompletedRef.current = false
-      phaseRef.current = 'opening'
-      setPhase('opening')
-      setOpeningTransitionMode(getOpeningTransitionMode(sourceRect, getSourceRect))
-      setTransition(null)
-      transitionProgressSV.value = 0
-      setTransitionReady(false)
-      setTransitionLayoutReady(false)
-      if (!rootMounted) setRootLayoutReady(false)
-      setOpeningPrepared(false)
-      setPreviewReady(false)
-      setOpeningAnimationComplete(false)
-      onOpen?.()
-      const source = await readSourceRect(normalizedStart, true)
-      if (lifecycle !== lifecycleRef.current || !visibleRef.current) return
-      const duration =
-        themeToken.motion === false ? 0 : Math.max(0, transitionDuration ?? token.animationDuration)
-      const hasTransition = isValidRect(source)
-      setOpeningTransitionMode(hasTransition ? 'source' : 'none')
-      if (hasTransition) {
-        setTransition({
-          from: source,
-          to: fullscreenRect(normalizedStart),
-          kind: 'opening',
-          imageIndex: normalizedStart,
-        })
-        setTransitionReady(Boolean(renderImage) || duration === 0)
-      } else {
-        setTransition(null)
-      }
-      setOpeningPrepared(true)
-    }, [
-      count,
-      fullscreenRect,
-      normalizedStart,
-      onOpen,
-      onOpened,
-      readSourceRect,
-      resetGesture,
-      resetPaging,
-      themeToken.motion,
-      token.animationDuration,
-      transitionDuration,
-      transitionProgressSV,
-      getSourceRect,
-      sourceRect,
-      renderImage,
-    ])
-
+    const visibleRef = useRef(visible)
+    visibleRef.current = visible
+    requestRef.current = requestClose
+    const previousProp = useRef(activeId)
     useEffect(() => {
-      if (phase !== 'opening' || !openingPrepared) return
-      if (transition?.kind === 'opening' && !transitionReady) return
-      const duration =
-        themeToken.motion === false ? 0 : Math.max(0, transitionDuration ?? token.animationDuration)
-      if (duration > 0) {
-        if (transition ? !transitionLayoutReady : !rootLayoutReady) return
-      }
-      runTransition(duration, onOpenAnimationComplete)
-    }, [
-      onOpenAnimationComplete,
-      openingPrepared,
-      phase,
-      rootLayoutReady,
-      runTransition,
-      themeToken.motion,
-      token.animationDuration,
-      transition,
-      transitionReady,
-      transitionLayoutReady,
-      transitionDuration,
-    ])
-
+      if (previousProp.current === activeId) return
+      previousProp.current = activeId
+      if (activeId && items.some((entry) => entry.id === activeId)) setSelectedId(activeId)
+    }, [activeId, items])
     useEffect(() => {
-      if (phase !== 'opening' || !openingAnimationComplete) return
-      const duration =
-        themeToken.motion === false ? 0 : Math.max(0, transitionDuration ?? token.animationDuration)
-      if (transition && !previewReady && !renderImage && duration > 0) return
-      finishOpenTransition()
-    }, [
-      finishOpenTransition,
-      openingAnimationComplete,
-      phase,
-      previewReady,
-      renderImage,
-      themeToken.motion,
-      token.animationDuration,
-      transition,
-      transitionDuration,
-    ])
-
-    useImperativeHandle(
-      ref,
-      () => ({
-        resetScale: resetGesture,
-        swipeTo: (index, options) => scrollToIndex(index, options?.immediate),
-      }),
-      [resetGesture, scrollToIndex],
-    )
-
+      if (visible && selectedId && !items.some((entry) => entry.id === selectedId))
+        requestClose('removed')
+    }, [items, visible, selectedId, requestClose])
     useEffect(() => {
-      if (visible && (!wasVisibleRef.current || !startedRef.current)) {
-        startedRef.current = true
-        void startOpen()
-      }
-      if (!visible && wasVisibleRef.current) {
-        onClose?.()
-        void startClose()
-      }
-      wasVisibleRef.current = visible
-    }, [onClose, startClose, startOpen, visible])
-
-    useEffect(() => {
-      if (!visible && !rendered) startedRef.current = false
-    }, [rendered, visible])
-
-    useEffect(() => {
-      if (!rendered || !visible || Platform.OS !== 'android') return undefined
+      if (!enabled || Platform.OS !== 'android') return
       const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
         requestClose('back')
         return true
       })
       return () => subscription.remove()
-    }, [rendered, requestClose, visible])
-
-    const pagerOpacityStyle = useAnimatedStyle(
-      () => ({
-        opacity:
-          phase === 'closed'
-            ? 0
-            : phase === 'opening'
-              ? openingTransitionMode !== 'none'
-                ? transitionProgressSV.value >= 1
-                  ? 1
-                  : 0
-                : transitionProgressSV.value
-              : phase === 'closing'
-                ? transition
-                  ? 0
-                  : 1 - transitionProgressSV.value
-                : 1,
-      }),
-      [openingTransitionMode, phase, transition, transitionProgressSV],
+    }, [enabled, requestClose])
+    useImagePreviewLoader(gallery, activeIndex, visible, imageAdapter)
+    const { position, dragY, state: gestureState } = interaction
+    const { mask, paging, progress, presentation } = session
+    useAnimatedReaction(
+      () => position.value,
+      (offset) => {
+        scrollTo(pager, offset, 0, false)
+      },
+      [pager, position],
     )
-    const controlsOpacityStyle = useAnimatedStyle(() => {
-      const transitionOpacity =
-        phase === 'closed'
-          ? 0
-          : phase === 'closing'
-            ? 1 - transitionProgressSV.value
-            : phase === 'opening'
-              ? transitionProgressSV.value
-              : 1
-      const gestureOpacity = Math.max(0, 1 - Math.max(0, dismissTranslateY.value) / 50)
-
+    useEffect(() => {
+      if (!layoutReady) return
+      pager.current?.scrollToOffset({ offset: position.value, animated: false })
+    }, [layoutReady, pageWidth, pager, position])
+    useImperativeHandle(
+      ref,
+      () => ({
+        resetScale: () => runOnUI(interaction.reset)(),
+        swipeTo: (id, options) => {
+          if (!enabled) return
+          const index = ids.indexOf(id)
+          if (index >= 0) runOnUI(interaction.settlePage)(index, options?.immediate ?? false)
+        },
+      }),
+      [interaction, enabled, ids],
+    )
+    const maskStyle = useAnimatedStyle(() => ({ opacity: mask.value }), [mask])
+    const pagerStyle = useAnimatedStyle(
+      () => ({ opacity: presentation.value * (paging.value ? progress.value : 1) }),
+      [paging, progress, presentation],
+    )
+    const controlsStyle = useAnimatedStyle(() => {
+      const distance = Math.abs(position.value - Math.round(position.value / pageWidth) * pageWidth)
       return {
-        opacity: transitionOpacity * gestureOpacity,
+        opacity:
+          phase === 'closed' ||
+          phase === 'closing' ||
+          presentation.value === 0 ||
+          !layoutReady ||
+          dragY.value > 0
+            ? 0
+            : Math.max(0, 1 - distance / (viewport.width / 4)),
       }
-    }, [dismissTranslateY, phase, transitionProgressSV])
-    const overlayTransitionStyle = useAnimatedStyle(
-      () => ({
-        opacity:
-          (phase === 'closed'
-            ? 0
-            : phase === 'opening'
-              ? transitionProgressSV.value
-              : phase === 'closing'
-                ? 1 - transitionProgressSV.value
-                : 1) * interpolateClamped(Math.max(0, dismissTranslateY.value), 0, 200, 1, 0),
-      }),
-      [dismissTranslateY, phase, transitionProgressSV],
+    }, [phase, layoutReady, position, dragY, pageWidth, viewport.width, presentation])
+    const hidePeers = useDerivedValue(
+      () => (phase === 'closing' && !paging.value) || gestureState.value === 'dismiss',
+      [phase, gestureState, paging],
     )
-    const transitionVisibilityStyle = useAnimatedStyle(
-      () => ({
-        opacity:
-          phase === 'closed'
-            ? 0
-            : phase === 'opening'
-              ? transitionProgressSV.value > 0
-                ? 1
-                : 0
-              : 1,
-      }),
-      [phase, transitionProgressSV],
+    const originalState = useCallback(
+      (id: string, status: ImagePreviewLoadState) =>
+        setOriginals((current) =>
+          !current[id] || current[id].status === status
+            ? current
+            : { ...current, [id]: { ...current[id], status } },
+        ),
+      [],
     )
-
-    const handleLayout = useCallback(
-      (event: LayoutChangeEvent) => {
-        const { width, height } = event.nativeEvent.layout
-        if (width > 0 && height > 0) {
-          setRootLayoutReady(true)
-          setViewport((current) =>
-            current.width === width && current.height === height ? current : { width, height },
-          )
-        }
-        userOnLayout?.(event)
-      },
-      [userOnLayout],
-    )
-
+    const displayState = useCallback((id: string, status: ImagePreviewLoadState) => {
+      if (status === 'loaded' || status === 'error')
+        setDisplayed((current) => (current[id] ? current : { ...current, [id]: true }))
+    }, [])
     const renderPage = useCallback(
-      ({ item: physicalIndex }: ListRenderItemInfo<number>) => {
-        const index = getLogicalIndex(physicalIndex)
-        return (
-          <View style={{ height: viewport.height, width: viewport.width }}>
-            <ImagePreviewItem
-              active={activeIndex === index}
-              animatedStyle={activeIndex === index ? animatedStyle : undefined}
-              image={images[index]}
-              index={index}
-              initiallyReady={isImageReady(index)}
-              normalized={normalizedImages[index]}
-              onImageError={onItemError}
-              onImageReady={onItemReady}
-              ready={isImageReady(index)}
-              renderImage={renderImage}
-            />
-          </View>
-        )
-      },
+      ({ item: page, index }: ListRenderItemInfo<ImagePreviewImage>) => (
+        <ImagePreviewPage
+          item={page}
+          width={viewport.width}
+          height={viewport.height}
+          pageWidth={index === count - 1 ? viewport.width : pageWidth}
+          selected={interaction.selected}
+          rect={session.rect}
+          clip={session.clip}
+          opacity={session.opacity}
+          hidden={hidePeers}
+          imageAdapter={imageAdapter}
+          renderMedia={renderMedia}
+          active={page.id === selectedId}
+          playing={page.id === selectedId && phase === 'open' && enabled}
+          originalRequested={Boolean(originals[page.id])}
+          originalAttempt={originals[page.id]?.attempt ?? 0}
+          onOriginalStateChange={originalState}
+          onDisplayStateChange={displayState}
+        />
+      ),
       [
-        activeIndex,
-        animatedStyle,
-        images,
-        normalizedImages,
-        onItemError,
-        onItemReady,
-        getLogicalIndex,
-        isImageReady,
-        renderImage,
-        viewport.height,
         viewport.width,
+        viewport.height,
+        pageWidth,
+        count,
+        interaction.selected,
+        session.rect,
+        session.clip,
+        session.opacity,
+        hidePeers,
+        imageAdapter,
+        renderMedia,
+        selectedId,
+        phase,
+        enabled,
+        originals,
+        originalState,
+        displayState,
       ],
     )
-
-    if (!rendered) return null
-
-    const indexPositionStyle = {
-      top: topInset + token.indexTop,
+    const semantic =
+      resolveStyles(styles, {
+        props,
+        state: {
+          visible,
+          activeIndex,
+          total: count,
+          opening: phase === 'opening',
+          closing: phase === 'closing',
+        },
+      }) ?? {}
+    const handleLayout = (event: LayoutChangeEvent) => {
+      const { width, height } = event.nativeEvent.layout
+      if (width > 0 && height > 0) {
+        setViewport((current) => ({ ...current, width, height }))
+        // Source conversion only starts after the host's window origin has been measured.
+        let complete = false
+        const finish = (x = 0, y = 0) => {
+          if (complete) return
+          complete = true
+          clearTimeout(timer)
+          setViewport({ x, y, width, height })
+          setLayoutReady(true)
+        }
+        const timer = setTimeout(() => finish(), 160)
+        root.current?.measureInWindow((x, y) => finish(x, y))
+      }
+      onLayout?.(event)
     }
-    const indexStyle = [resolved.index, indexPositionStyle, semantic?.index]
-    const customIndex =
-      showIndex && count > 0 ? renderIndex?.({ index: activeIndex, total: count }) : null
-    const renderIndexContent =
-      showIndex && count > 0 ? (
-        renderIndex ? (
-          customIndex == null ? null : typeof customIndex === 'string' ||
-            typeof customIndex === 'number' ? (
-            renderSlot(customIndex, indexStyle)
-          ) : (
-            <View
-              pointerEvents="box-none"
-              style={[
-                {
-                  position: 'absolute',
-                  width: '100%',
-                },
-                indexPositionStyle,
-                semantic?.index,
-              ]}
-            >
-              {customIndex}
-            </View>
-          )
-        ) : (
-          <Text style={indexStyle}>{`${activeIndex + 1}/${count}`}</Text>
-        )
-      ) : null
-    const transitionIndex = transition?.imageIndex ?? activeIndex
-    const transitionImage = transition ? (
-      <Animated.View
-        key={transition.kind}
-        pointerEvents="none"
-        onLayout={onTransitionLayout}
-        testID="image-preview-transition-layer"
-        style={[StyleSheet.absoluteFill, transitionVisibilityStyle]}
-      >
-        <ImagePreviewTransition
-          fromRect={transition.from}
-          image={images[transitionIndex] ?? ''}
-          index={transitionIndex}
-          normalized={normalizedImages[transitionIndex]}
-          onImageError={onTransitionImageError}
-          onImageReady={onTransitionImageReady}
-          progress={transitionProgressSV}
-          renderImage={renderImage}
-          toRect={transition.to}
-        />
-      </Animated.View>
-    ) : null
-
+    if (phase === 'closed') return null
+    const params = item ? { id: item.id, item, index: activeIndex, count } : null
     return (
-      <View
-        {...viewProps}
-        collapsable={false}
-        onLayout={handleLayout}
-        style={[resolved.root, semantic?.root, style]}
-        testID="image-preview"
-      >
-        <Animated.View
-          testID="image-preview-mask"
-          pointerEvents={closeOnPressOverlay ? 'auto' : 'none'}
-          style={[resolved.overlay, semantic?.mask, overlayTransitionStyle]}
+      <>
+        <View
+          {...viewProps}
+          ref={root}
+          testID={viewProps.testID ?? 'image-preview'}
+          onLayout={handleLayout}
+          style={[resolved.root, style, semantic.root]}
+          pointerEvents={interactionDisabled ? 'none' : 'auto'}
+          onStartShouldSetResponder={
+            phase === 'closing' ? () => true : viewProps.onStartShouldSetResponder
+          }
+          onAccessibilityEscape={() => {
+            viewProps.onAccessibilityEscape?.()
+            requestClose('back')
+          }}
+          accessibilityViewIsModal={!interactionDisabled}
+          accessibilityElementsHidden={phase === 'closing' || interactionDisabled}
+          importantForAccessibility={
+            phase === 'closing' || interactionDisabled ? 'no-hide-descendants' : 'yes'
+          }
         >
-          {closeOnPressOverlay ? (
-            <NativePressable
-              accessibilityLabel="Close image preview"
-              onPress={() => requestClose('overlay')}
-              style={{ flex: 1 }}
-              testID="image-preview-overlay"
-            />
-          ) : null}
-        </Animated.View>
-        <GestureDetector gesture={gesture.gesture}>
           <Animated.View
-            style={[resolved.pager, semantic?.pager, pagerOpacityStyle]}
-            testID="image-preview-pager-layer"
-          >
-            <GestureDetector gesture={nativeScrollGesture}>
-              <FlatList
-                data={paging.data}
-                extraData={[activeIndex, loadedIndices]}
-                getItemLayout={paging.getItemLayout}
-                horizontal
-                initialNumToRender={1}
-                initialScrollIndex={paging.initialScrollIndex}
-                keyExtractor={paging.keyExtractor}
-                maxToRenderPerBatch={3}
-                onMomentumScrollEnd={paging.onMomentumScrollEnd}
-                onScrollToIndexFailed={paging.onScrollToIndexFailed}
-                pagingEnabled
-                ref={paging.listRef}
-                removeClippedSubviews={false}
-                renderItem={renderPage}
-                scrollEnabled={gestureEnabled && !isZoomed && !isPinching}
-                showsHorizontalScrollIndicator={false}
-                testID="image-preview-pager"
-                windowSize={3}
-              />
-            </GestureDetector>
-          </Animated.View>
-        </GestureDetector>
-        {transitionImage}
-        <Animated.View
-          pointerEvents="box-none"
-          style={[resolved.controls, semantic?.controls, controlsOpacityStyle]}
-          testID="image-preview-controls"
-        >
-          {renderIndexContent}
-          {closeable ? (
-            <Pressable
-              accessibilityLabel="Close image preview"
-              accessibilityRole="button"
-              onPress={() => requestClose('close-icon')}
-              style={[
-                resolved.closeButton,
-                {
-                  top: topInset + Math.max(0, token.closeIconTop - 8),
-                },
-                semantic?.close,
-              ]}
-              pressStyle="opacity"
-              testID="image-preview-close"
+            testID="image-preview-mask"
+            pointerEvents="none"
+            style={[resolved.overlay, semantic.mask, maskStyle]}
+          />
+          <GestureDetector gesture={interaction.gesture}>
+            <Animated.View
+              style={[resolved.pager, semantic.pager, pagerStyle]}
+              testID="image-preview-pager-layer"
             >
-              <Text style={[resolved.closeLabel, semantic?.closeContent]}>×</Text>
-            </Pressable>
-          ) : null}
-          <View
-            pointerEvents="box-none"
-            style={[
-              resolved.bottomControls,
-              {
-                paddingBottom: bottomInset,
-              },
-              semantic?.bottomControls,
-            ]}
-            testID="image-preview-bottom-controls"
+              <Animated.FlatList
+                key={session.session}
+                ref={pager}
+                testID="image-preview-pager"
+                data={gallery}
+                renderItem={renderPage}
+                keyExtractor={(entry) => entry.id}
+                horizontal
+                scrollEnabled={false}
+                showsHorizontalScrollIndicator={false}
+                initialScrollIndex={activeIndex}
+                getItemLayout={(_data, index) => ({
+                  length: index === count - 1 ? viewport.width : pageWidth,
+                  offset: pageWidth * index,
+                  index,
+                })}
+                initialNumToRender={3}
+                maxToRenderPerBatch={2}
+                windowSize={5}
+                removeClippedSubviews={false}
+                extraData={{ selectedId, originals }}
+              />
+            </Animated.View>
+          </GestureDetector>
+          <Animated.View
+            pointerEvents={enabled && interactionState === 'idle' ? 'box-none' : 'none'}
+            testID="image-preview-controls"
+            style={[resolved.controls, semantic.controls, controlsStyle]}
           >
-            {showIndicators && count > 1 ? (
+            {params && (showIndex || renderIndex) ? (
               <View
+                testID="image-preview-index"
                 pointerEvents="none"
-                style={[resolved.indicators, semantic?.indicators]}
-                testID="image-preview-indicators"
+                style={{
+                  position: 'absolute',
+                  top: topInset + token.indexTop,
+                  left: 0,
+                  right: 0,
+                  alignItems: 'center',
+                }}
               >
-                {Array.from({ length: count }, (_, index) => (
-                  <View
-                    key={index}
+                {renderIndex ? (
+                  slot(renderIndex(params))
+                ) : (
+                  <Text
                     style={[
-                      resolved.indicator,
-                      semantic?.indicator,
-                      index === activeIndex && [
-                        resolved.activeIndicator,
-                        semantic?.activeIndicator,
-                      ],
+                      { color: token.indexColor, fontSize: token.indexFontSize },
+                      semantic.index,
                     ]}
-                  />
-                ))}
+                  >
+                    {activeIndex + 1}/{count}
+                  </Text>
+                )}
               </View>
             ) : null}
-            {renderToolbar ? (
-              <View
-                pointerEvents="auto"
-                style={[resolved.toolbar, semantic?.toolbar]}
-                testID="image-preview-toolbar"
+            {closeable ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="关闭图片预览"
+                testID="image-preview-close"
+                onPress={() => requestClose('close-icon')}
+                style={[
+                  resolved.closeButton,
+                  {
+                    top: topInset + token.closeIconTop - 8,
+                    right:
+                      Math.max(0, token.closeIconRight - 8) + Math.max(0, safeArea?.right ?? 0),
+                  },
+                  semantic.close,
+                ]}
               >
-                {renderSlot(renderToolbar({ index: activeIndex, total: count }))}
+                <Text style={[resolved.closeLabel, semantic.closeContent]}>×</Text>
+              </Pressable>
+            ) : null}
+            {params && renderToolbar ? (
+              <View
+                testID="image-preview-bottom-controls"
+                pointerEvents="box-none"
+                style={[
+                  resolved.bottomControls,
+                  {
+                    paddingLeft: themeToken.padding + Math.max(0, safeArea?.left ?? 0),
+                    paddingRight: themeToken.padding + Math.max(0, safeArea?.right ?? 0),
+                    paddingBottom: bottomInset + themeToken.paddingSM,
+                  },
+                ]}
+              >
+                <View
+                  testID="image-preview-toolbar"
+                  pointerEvents="auto"
+                  style={[resolved.toolbar, semantic.toolbar]}
+                >
+                  {slot(
+                    renderToolbar({
+                      ...params,
+                      close: () => requestClose('imperative'),
+                      original: {
+                        available: Boolean(item?.original),
+                        status: originals[params.id]?.status ?? 'idle',
+                        load: () => {
+                          if (!item?.original || !enabled) return
+                          setOriginals((current) => ({
+                            ...current,
+                            [params.id]: {
+                              attempt: (current[params.id]?.attempt ?? 0) + 1,
+                              status: 'loading',
+                            },
+                          }))
+                        },
+                      },
+                    }),
+                  )}
+                </View>
               </View>
             ) : null}
-          </View>
-        </Animated.View>
-      </View>
+          </Animated.View>
+        </View>
+        {params ? renderOverlay?.(params) : null}
+      </>
     )
   },
 )
-
 ImagePreviewContent.displayName = 'ImagePreview.Content'

@@ -1,5 +1,9 @@
 import { useEffect, useRef } from 'react'
-import { mountPortal, unmountPortal, updatePortal } from '../portal'
+import {
+  mountPreviewPortal as mountPortal,
+  unmountPreviewPortal as unmountPortal,
+  updatePreviewPortal as updatePortal,
+} from './preview-host'
 import type { PortalKey } from '../portal'
 import { ImagePreviewContent } from './image-preview-content'
 import type { ImagePreviewCloseReason, ImagePreviewImperativeOptions } from './types'
@@ -13,17 +17,9 @@ interface ImagePreviewRecord {
 let currentRecord: ImagePreviewRecord | null = null
 
 const defaultOptions: ImagePreviewImperativeOptions = {
-  images: [],
-  startPosition: 0,
-  loop: true,
-  showIndex: true,
-  showIndicators: false,
-  minZoom: 0.5,
-  maxZoom: 3,
-  doubleTapZoom: 2,
-  closeable: false,
-  closeOnPressImage: true,
-  closeOnPressOverlay: true,
+  items: [],
+  showIndex: false,
+  closeable: true,
   closeOnGesture: true,
 }
 
@@ -46,6 +42,7 @@ function ImagePreviewMethod({ record }: { record: ImagePreviewRecord }) {
   useEffect(
     () => () => {
       if (currentRecord === recordRef.current) currentRecord = null
+      if (recordRef.current.key !== null) unmountPortal(recordRef.current.key)
     },
     [],
   )

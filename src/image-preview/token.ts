@@ -9,7 +9,7 @@ export function getImagePreviewToken(token: AliasToken): ImagePreviewToken {
     indexLineHeight: token.lineHeight,
     indexTop: token.paddingLG,
     closeIconColor: '#ffffff',
-    closeIconSize: 28,
+    closeIconSize: 36,
     closeIconTop: token.paddingLG,
     closeIconRight: token.paddingLG,
     animationDuration: Math.max(0, token.motionDurationMid),

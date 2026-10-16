@@ -1,16 +1,33 @@
-import { forwardRef } from 'react'
+import { ImagePreviewProvider } from './image-preview-provider'
+import { ImagePreviewSource } from './image-preview-source'
+import { forwardRef, useContext } from 'react'
 import { Portal } from '../portal'
+import { PortalContext, PortalDestinationContext } from '../portal/context'
+import { ImagePreviewSourcesContext } from './context'
 import { ImagePreviewContent } from './image-preview-content'
 import type { ImagePreviewProps, ImagePreviewRef } from './types'
 
-export const ImagePreview = forwardRef<ImagePreviewRef, ImagePreviewProps>(
+const ImagePreviewComponent = forwardRef<ImagePreviewRef, ImagePreviewProps>(
   function ImagePreview(props, ref) {
-    return (
+    const sources = useContext(ImagePreviewSourcesContext)
+    const content = (
       <Portal>
-        <ImagePreviewContent {...props} ref={ref} />
+        <ImagePreviewSourcesContext.Provider value={sources}>
+          <ImagePreviewContent {...props} ref={ref} />
+        </ImagePreviewSourcesContext.Provider>
       </Portal>
+    )
+    if (!sources) return content
+    return (
+      <PortalDestinationContext.Provider value={sources.rootDestination}>
+        <PortalContext.Provider value={sources.rootManager}>{content}</PortalContext.Provider>
+      </PortalDestinationContext.Provider>
     )
   },
 )
+ImagePreviewComponent.displayName = 'ImagePreview'
 
-ImagePreview.displayName = 'ImagePreview'
+export const ImagePreview = Object.assign(ImagePreviewComponent, {
+  Provider: ImagePreviewProvider,
+  Source: ImagePreviewSource,
+})
