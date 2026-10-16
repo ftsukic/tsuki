@@ -152,4 +152,4 @@ Radio 暴露 `radio` 无障碍角色和 `selected`、`disabled` 状态；Group �
 
 ## 动画
 
-选中圆点通过 MotionView 执行透明度与 0.6 → 1 的 normal spring 入场，取消选中即时移除。外圈保持既有状态颜色，遵循 `Provider motion` 的关闭与 Reduced Motion。
+选中圆点通过 MotionView 执行透明度与 0.6 → 1 的 normal spring 入场，取消选中即时移除。外圈保持既有状态颜色，遵循 `TsukiProvider motion` 的关闭与 Reduced Motion。

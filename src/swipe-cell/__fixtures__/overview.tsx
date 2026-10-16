@@ -39,9 +39,9 @@ export default function SwipeCellOverview() {
         },
         {
           Component: SwipeCellCoordinationExample,
-          description: '展示同一 Provider 下打开新 cell 自动关闭旧 cell。',
+          description: '展示同一 TsukiProvider 下打开新 cell 自动关闭旧 cell。',
           id: 'coordination',
-          title: 'Provider coordination',
+          title: 'TsukiProvider coordination',
         },
         {
           Component: SwipeCellWeChatExample,

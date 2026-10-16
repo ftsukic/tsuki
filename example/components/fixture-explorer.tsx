@@ -64,6 +64,12 @@ export default function FixtureExplorer() {
             />
             <Cell.Group title="交互实验室" border={false} styles={{ body: styles.groupBody }}>
               <Cell
+                title="字号设置"
+                description="聊天预览 · 七档字号 · 全局生效"
+                showArrow
+                onPress={() => router.push('/labs/font-size')}
+              />
+              <Cell
                 title="键盘与聊天"
                 description="键盘联动 · 消息滚动 · 输入面板"
                 showArrow

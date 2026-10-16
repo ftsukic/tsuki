@@ -6,7 +6,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@ftsukic/tsuki": ["../src"]
+      "@ftsukic/tsuki": ["../src"],
+      "@ftsukic/tsuki/teleport": ["../src/teleport.ts"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"]

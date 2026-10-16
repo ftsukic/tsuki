@@ -24,15 +24,21 @@ ActionSheet 用于从底部展示一组操作。它复用 Popup 的 bottom 定�
 ## 引入
 
 ```tsx | pure
-import { ActionSheet, ConfigProvider, PortalHost, Provider, showActionSheet } from '@ftsukic/tsuki'
+import {
+  ActionSheet,
+  ConfigProvider,
+  PortalHost,
+  TsukiProvider,
+  showActionSheet,
+} from '@ftsukic/tsuki'
 ```
 
-受控组件和命令式 API 都需要当前应用存在 `PortalHost`。应用通常直接使用同时提供主题和 Portal 宿主的 `Provider`：
+受控组件和命令式 API 都需要当前应用存在 `PortalHost`。应用通常直接使用同时提供主题和 Portal 宿主的 `TsukiProvider`：
 
 ```tsx | pure
-<Provider>
+<TsukiProvider>
   <App />
-</Provider>
+</TsukiProvider>
 ```
 
 ## 代码演示
@@ -172,6 +178,6 @@ if (result) {
 
 ## 动画
 
-ActionSheet 复用 Popup 的底部平移和遮罩渐变，整个面板一起运动。遵循 `Provider motion` 的开关、Reduced Motion 和时长倍率；Portal 在退出完成后卸载。
+ActionSheet 复用 Popup 的底部平移和遮罩渐变，整个面板一起运动。遵循 `TsukiProvider motion` 的开关、Reduced Motion 和时长倍率；Portal 在退出完成后卸载。
 
 进入和退出期间固定平移距离，稳定展示时更新面板测量；操作数量或内容高度变化后，退出使用最新高度。面板圆角仅由 ActionSheet 的 token 或 `styles.container` 管理，不受 Popup 圆角 token 影响。

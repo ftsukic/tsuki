@@ -170,7 +170,7 @@ Picker 不维护 Popup 的 draft/commit 生命周期；上例中的 `draft`、`c
 
 ### 命令式 API
 
-`showPicker(options)` 需要在 `Provider` 下调用，返回 `Promise<PickerResult>`；确认或取消后分别返回 `action: 'confirm'` 或 `action: 'cancel'`，并包含规范化的 `values` 和 `options`。命令式调用中的 `value` 和 `defaultValue` 都只用于初始化，后续 draft 由 adapter 自己维护。`Picker.open` 是 `showPicker` 的同义入口，`closePicker()` 以 cancel 结果结束当前命令式 Picker；如果 imperative host 被卸载，pending command 也按 cancel 结束。
+`showPicker(options)` 需要在 `TsukiProvider` 下调用，返回 `Promise<PickerResult>`；确认或取消后分别返回 `action: 'confirm'` 或 `action: 'cancel'`，并包含规范化的 `values` 和 `options`。命令式调用中的 `value` 和 `defaultValue` 都只用于初始化，后续 draft 由 adapter 自己维护。`Picker.open` 是 `showPicker` 的同义入口，`closePicker()` 以 cancel 结果结束当前命令式 Picker；如果 imperative host 被卸载，pending command 也按 cancel 结束。
 
 命令式 `PickerOptions` 在 `PickerProps` 基础上允许配置 `overlay`、`closeOnPressOverlay`、`safeAreaInsetBottom` 和 `duration`，这些属性只由命令式 Popup adapter 消费，不会传给基础 Picker。
 
@@ -197,4 +197,4 @@ Picker 不维护 Popup 的 draft/commit 生命周期；上例中的 `draft`、`c
 
 `virtual` 默认开启。长列只挂载可视范围及上下缓冲选项，完整数据仍用于选值、联动和确认；`virtual={false}` 保留全量渲染。首次挂载长列时，选项等待原生读屏状态查询完成后再显示，查询失败回退全量渲染。DatePicker、DateTimePicker、TimePicker、Field 选择适配器及 `Picker.open()` 同样支持此配置。窗口随拖动和吸附的真实偏移更新；JS 线程长时间阻塞时仍可能出现补充节点延迟，原生高速滚动体验需在目标设备验证。
 
-PickerColumn 使用 `Gesture.Pan`、SharedValue 和共享 Motion 吸附能力，遵循 `ConfigProvider` / `Provider` 的 enabled、reducedMotion 和 durationScale。点击默认 200ms，滑动采用 swipeDuration；关闭动画或减少动态效果时直接结算。iOS、Android 的实际 tap/pan 冲突、速度和视觉效果仍需在目标设备确认。
+PickerColumn 使用 `Gesture.Pan`、SharedValue 和共享 Motion 吸附能力，遵循 `ConfigProvider` / `TsukiProvider` 的 enabled、reducedMotion 和 durationScale。点击默认 200ms，滑动采用 swipeDuration；关闭动画或减少动态效果时直接结算。iOS、Android 的实际 tap/pan 冲突、速度和视觉效果仍需在目标设备确认。

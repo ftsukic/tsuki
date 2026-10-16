@@ -138,4 +138,4 @@ Popover 不提供 `showPopover()` imperative API，也不是 Tooltip、Dropdown 
 
 ## 动画
 
-Popover 遵循 `Provider motion` 的开关、Reduced Motion 和 timing 时长倍率。定位和动画仍由 `react-native-popover-view` 的 RN Animated 引擎管理，尚未迁移到 Reanimated Primitive。
+Popover 遵循 `TsukiProvider motion` 的开关、Reduced Motion 和 timing 时长倍率。定位和动画仍由 `react-native-popover-view` 的 RN Animated 引擎管理，尚未迁移到 Reanimated Primitive。

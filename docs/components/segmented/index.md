@@ -141,4 +141,4 @@ interface SegmentedOption {
 
 ## 动画
 
-选中背景通过统一 layout preset 更新位置与宽度，保留首次测量立即定位和受控状态语义。遵循 `Provider motion` 的开关、Reduced Motion 与 timing 时长倍率。
+选中背景通过统一 layout preset 更新位置与宽度，保留首次测量立即定位和受控状态语义。遵循 `TsukiProvider motion` 的开关、Reduced Motion 与 timing 时长倍率。

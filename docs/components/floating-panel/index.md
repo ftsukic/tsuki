@@ -24,15 +24,15 @@ FloatingPanel 用于在视口顶部或底部展示可拖动面板，支持多个
 ## 引入
 
 ```tsx | pure
-import { FloatingPanel, Provider } from '@ftsukic/tsuki'
+import { FloatingPanel, TsukiProvider } from '@ftsukic/tsuki'
 ```
 
-FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `Provider` 内：
+FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `TsukiProvider` 内：
 
 ```tsx | pure
-<Provider>
+<TsukiProvider>
   <App />
-</Provider>
+</TsukiProvider>
 ```
 
 ## 代码演示
@@ -96,7 +96,7 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `Provider` 内�
 
 ### 无障碍与平台说明
 
-FloatingPanel 不替换 children 的无障碍语义；交互内容应自行提供 `accessible`、`accessibilityRole` 和 `accessibilityLabel`。允许拖动时，默认手柄提供 `adjustable` role、当前高度和范围，并通过 `increment` / `decrement` action 展开或收起一档；受控模式仍需父组件回写高度。自定义 header 保留其内部无障碍语义，组件不将它合并成一个调节控件。组件直接读取 `react-native-safe-area-context` 的 inset；宿主应用需要安装该 peer dependency，并在应用根节点按需挂载 `SafeAreaProvider`。推荐的 `Provider` 不会重复创建 Safe Area context。
+FloatingPanel 不替换 children 的无障碍语义；交互内容应自行提供 `accessible`、`accessibilityRole` 和 `accessibilityLabel`。允许拖动时，默认手柄提供 `adjustable` role、当前高度和范围，并通过 `increment` / `decrement` action 展开或收起一档；受控模式仍需父组件回写高度。自定义 header 保留其内部无障碍语义，组件不将它合并成一个调节控件。组件直接读取 `react-native-safe-area-context` 的 inset；宿主应用需要安装该 peer dependency，并在应用根节点按需挂载 `SafeAreaProvider`。推荐的 `TsukiProvider` 不会重复创建 Safe Area context。
 
 H5 文档使用 `react-native-web` 预览；Jest 只验证状态、样式和 responder 逻辑，不代表 iOS、Android 或 HarmonyOS 的真实设备触摸表现。
 

@@ -9,7 +9,7 @@ import type {
   TimePickerRef,
   TimePickerValue,
 } from '../time-picker'
-import { Provider } from '../provider'
+import { TsukiProvider } from '../provider'
 
 afterEach(cleanup)
 
@@ -20,9 +20,9 @@ async function press(testID: string) {
 
 async function renderPicker(props: TimePickerProps & { ref?: Ref<TimePickerRef> }) {
   return render(
-    <Provider theme={{ seed: { motion: false } }}>
+    <TsukiProvider theme={{ seed: { motion: false } }}>
       <TimePicker {...props} />
-    </Provider>,
+    </TsukiProvider>,
   )
 }
 
@@ -40,9 +40,9 @@ describe('TimePicker', () => {
 
   it('opts into seconds', async () => {
     await render(
-      <Provider theme={{ seed: { motion: false } }}>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
         <TimePicker columnsType={['hour', 'minute', 'second']} defaultValue={['21', '30', '15']} />
-      </Provider>,
+      </TsukiProvider>,
     )
     expect(screen.getAllByTestId(/^picker-column-\d+$/)).toHaveLength(3)
     expect(screen.getByTestId('picker-item-2-15').props.accessibilityState).toMatchObject({
@@ -239,9 +239,9 @@ describe('TimePicker', () => {
       )
     }
     await render(
-      <Provider theme={{ seed: { motion: false } }}>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
         <Controlled />
-      </Provider>,
+      </TsukiProvider>,
     )
     await press('picker-item-1-31')
     expect(screen.getByTestId('controlled-time').props.children).toBe('12:31')

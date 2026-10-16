@@ -26,6 +26,7 @@ export const componentCategories = [
       'checkbox',
       'radio',
       'switch',
+      'slider',
       'search',
       'picker',
       'picker-group',

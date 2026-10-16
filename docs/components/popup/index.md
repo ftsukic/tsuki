@@ -24,15 +24,15 @@ Popup 用于在当前页面上方展示内容，支持居中、四边定位、�
 ## 引入
 
 ```tsx | pure
-import { Popup, Provider } from '@ftsukic/tsuki'
+import { Popup, TsukiProvider } from '@ftsukic/tsuki'
 ```
 
-Popup 推荐挂载在应用根节点的 `Provider` 内：
+Popup 推荐挂载在应用根节点的 `TsukiProvider` 内：
 
 ```tsx | pure
-<Provider>
+<TsukiProvider>
   <App />
-</Provider>
+</TsukiProvider>
 ```
 
 ## 代码演示
@@ -49,12 +49,19 @@ Popup 推荐挂载在应用根节点的 `Provider` 内：
 
 <code src="../../../src/popup/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 Popup token 和 semantic styles 定制浮层。"></code>
 
+<code src="../../../src/popup/__fixtures__/examples/keyboard.tsx" title="输入框与键盘避让"></code>
+
+开启 `keyboardAvoiding` 后，面板在键盘上方的可用区域布局，遮罩仍覆盖整个宿主。居中面板仅在底部被键盘遮挡时上移，底部面板贴近键盘上沿，顶部面板保持顶部位置。避让使用独立的 Reanimated 位移，并采用键盘事件的时长。该能力位于 Portal 内；仅在页面外包裹 KeyboardAvoidingView 无法保证作用于弹层。
+
+Popup 限制面板可用高度，长内容需要调用方提供可收缩的 ScrollView，并将固定按钮放在滚动区域外。 Android 宿主窗口被键盘缩小时，按实际布局与键盘的重叠区域避让；不要同时叠加业务侧键盘高度。宿主应覆盖需要避让的页面区域，嵌套或带偏移的 PortalHost 需要单独验证。Web 和 Harmony 的软键盘行为需要在目标宿主验证。
+
 ## API
 
 ### PopupProps
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
+| `keyboardAvoiding` | `boolean` | `false` | 是否在 Portal 内为面板避让软键盘 |
 | visible | `boolean` | `false` | 是否显示；Popup 是受控组件 |
 | position | `'center' \| 'top' \| 'bottom' \| 'left' \| 'right'` | `'center'` | 弹出位置 |
 | overlay | `boolean` | `true` | 是否显示全屏遮罩；遮罩默认拦截底层触摸 |
@@ -106,4 +113,8 @@ Popup 不会自动修改 `visible`。`closeOnPressOverlay` 和 Android 返回键
 
 ## 动画
 
-面板和遮罩复用 Motion 浮层 preset 与共享进度。遵循 `Provider motion` 的全局开关、Reduced Motion 和时长倍率；快速切换从当前进度继续，退出完成后才执行 `destroyOnClosed`。
+面板和遮罩复用 Motion 浮层 preset 与共享进度。遵循 `TsukiProvider motion` 的全局开关、Reduced Motion 和时长倍率；快速切换从当前进度继续，退出完成后才执行 `destroyOnClosed`。
+
+### Portal 内的受控输入
+
+编辑状态应由弹层内挂载的表单组件持有：传入 `<Form />`，并在 Form 内使用 `useState` 驱动 `Input.value`。若状态放在 Portal 外，每次输入的 value 更新需要经由 Portal 内容转发，原生输入框可能在中间提交收到旧值并打断组合输入。外层通过 ref 读取草稿或调用表单的赋值、重置方法；不要在每个字符输入时同步更新外层 state 后再传回 value。

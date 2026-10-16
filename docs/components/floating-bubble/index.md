@@ -95,7 +95,7 @@ import { FloatingBubble, Icon } from '@ftsukic/tsuki'
 
 磁吸采用快速靠边、轻微回弹的 spring，并接续吸附轴的松手速度；过大的速度会被限制，回弹视觉位置不会越过可用区域的安全边界。只吸附对应轴，不改变另一轴。
 
-磁吸和按压反馈遵循 Provider 的 `motion`（或 ConfigProvider 的 `theme.motion`）：`enabled`、`reducedMotion` 和 `durationScale`，以及 `theme.seed.motion`。保留 `animationDuration` token，以 300ms 为 spring 的基准速度配置：增大时减慢、减小时加快，不表示精确结束时刻。关闭动画、要求减弱动态、时长或倍率为零时立即到达目标。
+磁吸和按压反馈遵循 TsukiProvider 的 `motion`（或 ConfigProvider 的 `theme.motion`）：`enabled`、`reducedMotion` 和 `durationScale`，以及 `theme.seed.motion`。保留 `animationDuration` token，以 300ms 为 spring 的基准速度配置：增大时减慢、减小时加快，不表示精确结束时刻。关闭动画、要求减弱动态、时长或倍率为零时立即到达目标。
 
 再次开始拖动会取消两轴磁吸，并从当前位置接续。磁吸完成后才调用两个位置回调，各一次；被新拖动、外部位置/边界更新、禁用、锁定或卸载打断的旧磁吸不会再通知。拖动被取消，或拖动中禁用/锁定时，提交当前已移动的位置并清理拖动状态，不再磁吸。切换拖动轴、磁吸轴或动画策略也会取消当前 session。
 

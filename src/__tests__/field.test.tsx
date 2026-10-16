@@ -13,7 +13,7 @@ import {
   FieldTimePicker,
   getDesignToken,
   getFieldToken,
-  Provider,
+  TsukiProvider,
   Radio,
   Text,
 } from '..'
@@ -704,7 +704,7 @@ describe('FieldPicker', () => {
     function Harness() {
       const [value, setValue] = useState<readonly PickerValue[]>(['shanghai'])
       return (
-        <Provider theme={{ seed: { motion: false } }}>
+        <TsukiProvider theme={{ seed: { motion: false } }}>
           <FieldPicker
             description="城市"
             value={value}
@@ -716,7 +716,7 @@ describe('FieldPicker', () => {
             title="选择城市"
             testID="field-picker"
           />
-        </Provider>
+        </TsukiProvider>
       )
     }
 
@@ -746,7 +746,7 @@ describe('FieldPicker', () => {
 
   it('supports placeholder and formatValue while keeping Picker separate from Cell', async () => {
     const view = await render(
-      <Provider theme={{ seed: { motion: false } }}>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
         <FieldPicker description="城市" columns={options} placeholder="请选择城市" />
         <FieldPicker
           description="格式化城市"
@@ -756,7 +756,7 @@ describe('FieldPicker', () => {
             `${selectedOptions[0]?.text ?? '无'}:${String(values[0] ?? 'empty')}`
           }
         />
-      </Provider>,
+      </TsukiProvider>,
     )
 
     expect(screen.getByText('请选择城市')).toBeTruthy()
@@ -784,7 +784,7 @@ describe('FieldDatePicker', () => {
     function Harness() {
       const [currentValue, setCurrentValue] = useState<DatePickerValue>(value)
       return (
-        <Provider theme={{ seed: { motion: false } }}>
+        <TsukiProvider theme={{ seed: { motion: false } }}>
           <FieldDatePicker
             description="日期"
             value={currentValue}
@@ -794,7 +794,7 @@ describe('FieldDatePicker', () => {
             }}
             {...bounds}
           />
-        </Provider>
+        </TsukiProvider>
       )
     }
 
@@ -823,7 +823,7 @@ describe('FieldDatePicker', () => {
 
   it('supports placeholder, formatValue, and date picker props', async () => {
     await render(
-      <Provider theme={{ seed: { motion: false } }}>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
         <FieldDatePicker description="日期" placeholder="请选择日期" {...bounds} />
         <FieldDatePicker
           description="格式化日期"
@@ -832,7 +832,7 @@ describe('FieldDatePicker', () => {
           columnsType={['year', 'month']}
           {...bounds}
         />
-      </Provider>,
+      </TsukiProvider>,
     )
 
     expect(screen.getByText('请选择日期')).toBeTruthy()
@@ -858,9 +858,9 @@ describe('FieldTimePicker', () => {
     }
 
     await render(
-      <Provider theme={{ seed: { motion: false } }}>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
         <Harness />
-      </Provider>,
+      </TsukiProvider>,
     )
     expect(screen.getByText('09:30')).toBeTruthy()
     await press(screen.getByText('09:30'))
@@ -875,14 +875,14 @@ describe('FieldDateTimePicker', () => {
   it('formats the default value according to the selected columns', async () => {
     const value: DateTimePickerValue = ['2026', '09', '13', '13', '30']
     await render(
-      <Provider theme={{ seed: { motion: false } }}>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
         <FieldDateTimePicker description="日期时间" value={value} />
         <FieldDateTimePicker
           description="时间"
           value={['13', '30']}
           columnsType={['hour', 'minute']}
         />
-      </Provider>,
+      </TsukiProvider>,
     )
     expect(screen.getByText('2026-09-13 13:30')).toBeTruthy()
     expect(screen.getByText('13:30')).toBeTruthy()
@@ -892,12 +892,12 @@ describe('FieldDateTimePicker', () => {
 describe('Field picker alignment', () => {
   it('centers all picker field rows by default', async () => {
     const view = await render(
-      <Provider theme={{ seed: { motion: false } }}>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
         <FieldPicker description="城市" columns={[{ text: '上海', value: 'shanghai' }]} />
         <FieldDatePicker description="日期" />
         <FieldTimePicker description="时间" />
         <FieldDateTimePicker description="日期时间" />
-      </Provider>,
+      </TsukiProvider>,
     )
     const rows = findNodes(view.toJSON(), (node) => {
       const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
@@ -919,9 +919,9 @@ describe('Field picker alignment', () => {
 
   it('allows opting out of centered alignment', async () => {
     const view = await render(
-      <Provider theme={{ seed: { motion: false } }}>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
         <FieldTimePicker description="时间" center={false} />
-      </Provider>,
+      </TsukiProvider>,
     )
     const optOutRow = findNodes(view.toJSON(), (node) => {
       const style = StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>)
@@ -961,7 +961,7 @@ describe('Field style helpers', () => {
   })
   it('keeps title descriptions separate from picker help and applies Cell container styles', async () => {
     const view = await render(
-      <Provider theme={{ seed: { motion: false } }}>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
         <FieldPicker
           title="城市"
           description="标题说明"
@@ -974,7 +974,7 @@ describe('Field style helpers', () => {
         <FieldDatePicker title="日期" description="日期说明" help="日期帮助" />
         <FieldTimePicker title="时间" description="时间说明" help="时间帮助" />
         <FieldDateTimePicker title="日期时间" description="日期时间说明" help="日期时间帮助" />
-      </Provider>,
+      </TsukiProvider>,
     )
     for (const text of [
       '标题说明',
@@ -1032,7 +1032,7 @@ describe('Field semantic structure', () => {
     'keeps picker control styles outside feedback and names the entry (%p)',
     async (Component) => {
       const view = await render(
-        <Provider theme={{ seed: { motion: false } }}>
+        <TsukiProvider theme={{ seed: { motion: false } }}>
           <Component
             columns={[]}
             title="选择字段"
@@ -1049,7 +1049,7 @@ describe('Field semantic structure', () => {
               error: { letterSpacing: 7 },
             }}
           />
-        </Provider>,
+        </TsukiProvider>,
       )
       const entry = screen
         .getAllByRole('text', { name: '选择字段' })

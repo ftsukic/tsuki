@@ -24,20 +24,20 @@ Notify 用于在页面顶部展示需要即时反馈的通知，支持四种语�
 ## 引入
 
 ```tsx | pure
-import { ConfigProvider, Notify, Provider, closeNotify, showNotify } from '@ftsukic/tsuki'
+import { ConfigProvider, Notify, TsukiProvider, closeNotify, showNotify } from '@ftsukic/tsuki'
 ```
 
-Notify 使用 Portal 渲染。受控组件和命令式 API 都需要当前应用存在 `PortalHost`，应用入口可以使用同时提供主题和 Portal 宿主的 `Provider`：
+Notify 使用 Portal 渲染。受控组件和命令式 API 都需要当前应用存在 `PortalHost`，应用入口可以使用同时提供主题和 Portal 宿主的 `TsukiProvider`：
 
 ```tsx | pure
-<Provider>
+<TsukiProvider>
   <App />
-</Provider>
+</TsukiProvider>
 ```
 
 也可以直接组合 `ConfigProvider` 和 `PortalHost`。
 
-需要读取系统顶部安全区时，使用 `<Provider safeArea>`，或在宿主应用中自行挂载 `SafeAreaProvider`；`Provider` 的 `safeArea` 默认值为 `false`。
+需要读取系统顶部安全区时，使用 `<TsukiProvider safeArea>`，或在宿主应用中自行挂载 `SafeAreaProvider`；`TsukiProvider` 的 `safeArea` 默认值为 `false`。
 
 ## 代码演示
 

@@ -42,8 +42,13 @@ function DemoStack() {
             contentStyle: { backgroundColor: token.colorBgLayout },
           }}
         >
+          <Stack.Screen name="labs/shared-transition" options={{ headerShown: false }} />
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="components/[id]" options={{ title: '组件预览' }} />
+          <Stack.Screen
+            name="labs/font-size"
+            options={{ headerShown: false, gestureEnabled: false }}
+          />
           <Stack.Screen name="labs/keyboard-chat" options={{ headerShown: false }} />
         </Stack>
       </View>

@@ -17,7 +17,7 @@ group:
 
 ## 介绍
 
-SwipeCell 用于在列表行上通过水平滑动展示操作，提供 Vant 风格的左右多 action、吸附阈值、命令式控制和 Provider 级单开协调。
+SwipeCell 用于在列表行上通过水平滑动展示操作，提供 Vant 风格的左右多 action、吸附阈值、命令式控制和 TsukiProvider 级单开协调。
 
 </section>
 
@@ -37,7 +37,7 @@ import { SwipeCell, SwipeCellAction, SwipeCellGroup, useSwipeCellController } fr
 
 <code src="../../../src/swipe-cell/__fixtures__/examples/multiple-actions.tsx" title="多个 action" description="展示同一侧多个 action 及其总宽度。"></code>
 
-<code src="../../../src/swipe-cell/__fixtures__/examples/coordination.tsx" title="Provider 级单开" description="展示不依赖 SwipeCellGroup 的全局单开行为。"></code>
+<code src="../../../src/swipe-cell/__fixtures__/examples/coordination.tsx" title="TsukiProvider 级单开" description="展示不依赖 SwipeCellGroup 的全局单开行为。"></code>
 
 <code src="../../../src/swipe-cell/__fixtures__/examples/wechat.tsx" title="微信消息列表" description="展示微信消息列表风格的稳定 id、右侧 action 和主体布局。"></code>
 
@@ -59,7 +59,7 @@ import { SwipeCell, SwipeCellAction, SwipeCellGroup, useSwipeCellController } fr
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
-| id | `string` | 自动生成 | 业务稳定 id；用于 FlashList recycle 和 Provider 内互斥管理 |
+| id | `string` | 自动生成 | 业务稳定 id；用于 FlashList recycle 和 TsukiProvider 内互斥管理 |
 | children | `ReactNode` | — | 行的主体内容，位于 action 层上方 |
 | actions | `SwipeCellActionItem[]` | — | 微信消息列表风格的右侧 action 简写 |
 | leftActions | `SwipeCellActionItem[]` | — | 从左侧滑入的多个 action；展开方向为向右 |
@@ -89,7 +89,7 @@ SwipeCell 继承 React Native `ViewProps`，但由组件管理 `children` 和 `s
 
 `actions` 是 `rightActions` 的简写；每一项可以使用 `text`、`color` 和 `onPress`。`leftActions` 和 `rightActions` 的每一项都会独立渲染为 `SwipeCellAction`，action slot 的测量宽度是所有 action 的总宽度。传入 action 数组时，数组优先于对应的旧 `leftAction` / `rightAction`。旧的 `label` 字段继续兼容，推荐新代码使用 `text`。
 
-`Provider` 会自动安装 SwipeCell manager。同一 Provider 下任意 SwipeCell 打开时，之前展开的 SwipeCell 会自动关闭，不需要包裹 `SwipeCellGroup`。`Provider` 中其它组件库交互控件（例如 `Cell`、`Button`）开始按下时，也会关闭当前展开项；SwipeCell 主体和 action 会保留自己的 press 语义。开始滚动列表时，业务可以通过控制 hook 主动关闭当前项：
+`TsukiProvider` 会自动安装 SwipeCell manager。同一 TsukiProvider 下任意 SwipeCell 打开时，之前展开的 SwipeCell 会自动关闭，不需要包裹 `SwipeCellGroup`。`TsukiProvider` 中其它组件库交互控件（例如 `Cell`、`Button`）开始按下时，也会关闭当前展开项；SwipeCell 主体和 action 会保留自己的 press 语义。开始滚动列表时，业务可以通过控制 hook 主动关闭当前项：
 
 ```tsx | pure
 const swipeCell = useSwipeCellController()
@@ -147,7 +147,7 @@ ref.current?.close()
 
 ### SwipeCellGroup
 
-`SwipeCellGroup` 继承 React Native `ViewProps`。它保留旧版局部 grouping 行为：任意一个 cell 通过拖动或 ref 打开时，其他已注册 cell 会自动关闭。Provider coordinator 已经保证同一 Provider 下的全局单开，因此新列表不需要使用 Group；Group 不提供 overlay 或 outside press 行为。
+`SwipeCellGroup` 继承 React Native `ViewProps`。它保留旧版局部 grouping 行为：任意一个 cell 通过拖动或 ref 打开时，其他已注册 cell 会自动关闭。TsukiProvider coordinator 已经保证同一 TsukiProvider 下的全局单开，因此新列表不需要使用 Group；Group 不提供 overlay 或 outside press 行为。
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -182,4 +182,4 @@ ref.current?.close()
 
 ### 按压协调边界
 
-最近的 Provider 提供 SwipeCellManager，嵌套 Provider 各自协调。内容点击关闭自身，内容按下仅关闭其它项，操作区按下保留自身，操作完成是否关闭由 `closeOnActionPress` 决定；外部库内 Pressable 按下关闭当前展开项，disabled 不通知。内容及自定义操作中的库内 Pressable 自动读取所属 cell，无需 `interactionId`。Portal 与 Popover 浮层内容清除所属 cell。自定义 React Native Modal 会继承调用处 Context，不属于库内浮层边界；需要外部按压语义时，应通过库内 Portal 承载。没有 Provider 时不提供全局单开或外部按压关闭，Group 仍提供组内打开互斥。
+最近的 TsukiProvider 提供 SwipeCellManager，嵌套 TsukiProvider 各自协调。内容点击关闭自身，内容按下仅关闭其它项，操作区按下保留自身，操作完成是否关闭由 `closeOnActionPress` 决定；外部库内 Pressable 按下关闭当前展开项，disabled 不通知。内容及自定义操作中的库内 Pressable 自动读取所属 cell，无需 `interactionId`。Portal 与 Popover 浮层内容清除所属 cell。自定义 React Native Modal 会继承调用处 Context，不属于库内浮层边界；需要外部按压语义时，应通过库内 Portal 承载。没有 TsukiProvider 时不提供全局单开或外部按压关闭，Group 仍提供组内打开互斥。

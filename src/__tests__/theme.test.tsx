@@ -1,6 +1,6 @@
 import {
   ConfigProvider,
-  Provider,
+  TsukiProvider,
   darkAlgorithm,
   defaultAlgorithm,
   getButtonToken,
@@ -154,7 +154,7 @@ describe('theme configuration', () => {
       return <Text>{`${name}:${token.colorBgContainer}`}</Text>
     }
     const tree = (mode: 'light' | 'dark') => (
-      <Provider theme={{ mode }}>
+      <TsukiProvider theme={{ mode }}>
         <ConfigProvider theme={{ mode: undefined }}>
           <Probe name="inherited" />
         </ConfigProvider>
@@ -164,7 +164,7 @@ describe('theme configuration', () => {
         <ConfigProvider theme={{ inherit: false }}>
           <Probe name="isolated" />
         </ConfigProvider>
-      </Provider>
+      </TsukiProvider>
     )
     const view = await render(tree('dark'))
     expect(screen.getByText('inherited:#1e1e1e')).toBeTruthy()

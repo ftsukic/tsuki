@@ -2,7 +2,15 @@ import * as Worklets from 'react-native-worklets'
 import type { SwipeCellRef } from '../swipe-cell'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { createRef, memo, type ReactNode } from 'react'
-import { Button, ConfigProvider, Icon, Popover, Provider, SwipeCell, Text as TsukiText } from '..'
+import {
+  Button,
+  ConfigProvider,
+  Icon,
+  Popover,
+  TsukiProvider,
+  SwipeCell,
+  Text as TsukiText,
+} from '..'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { StyleSheet, Text, View } from 'react-native'
 
@@ -90,7 +98,7 @@ describe('Popover', () => {
     const onOpen = jest.fn()
     const onClose = jest.fn()
     await renderWithSafeArea(
-      <Provider motion={{ enabled: false }}>
+      <TsukiProvider motion={{ enabled: false }}>
         <SwipeCell
           ref={ref}
           testID="popover-owner"
@@ -107,7 +115,7 @@ describe('Popover', () => {
             </Popover>
           }
         />
-      </Provider>,
+      </TsukiProvider>,
     )
     await act(async () => {
       screen

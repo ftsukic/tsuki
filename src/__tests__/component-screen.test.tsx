@@ -1,7 +1,7 @@
 import { act, cleanup, render, screen } from '@testing-library/react-native'
 import { Text, View } from 'react-native'
 import ComponentScreen from '../../example/app/components/[id]'
-import { mountPortal, Provider } from '..'
+import { mountPortal, TsukiProvider } from '..'
 import type { TestInstance } from 'test-renderer'
 
 let mockFocused = true
@@ -17,6 +17,13 @@ jest.mock(
   { virtual: true },
 )
 jest.mock('expo-router/stack', () => ({ Stack: { Screen: () => null } }), { virtual: true })
+jest.mock(
+  'react-native-keyboard-controller',
+  () => ({
+    KeyboardToolbar: Object.assign(() => null, { Done: () => null }),
+  }),
+  { virtual: true },
+)
 jest.mock('react-native-safe-area-context', () => {
   const actual = jest.requireActual('react-native-safe-area-context')
   const { View } = jest.requireActual('react-native')
@@ -63,11 +70,11 @@ function isInsidePage(node: TestInstance) {
 
 function App({ showPage = true }: { showPage?: boolean }) {
   return (
-    <Provider theme={{ seed: { motion: false } }}>
+    <TsukiProvider theme={{ seed: { motion: false } }}>
       <View testID="route-boundary" style={{ flex: 1 }}>
         {showPage ? <ComponentScreen /> : null}
       </View>
-    </Provider>
+    </TsukiProvider>
   )
 }
 

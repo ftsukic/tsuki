@@ -44,7 +44,7 @@ import {
 </ConfigProvider>
 ```
 
-应用也可以使用同时提供主题和 Portal 宿主的 `Provider`；它是上述组合的便捷入口。
+应用也可以使用同时提供主题和 Portal 宿主的 `TsukiProvider`；它是上述组合的便捷入口。
 
 ## 代码演示
 
@@ -66,12 +66,19 @@ import {
 
 <code src="../../../src/dialog/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 Dialog token 和 semantic styles 定制视觉。"></code>
 
+<code src="../../../src/dialog/__fixtures__/examples/keyboard.tsx" title="输入框与键盘避让"></code>
+
+开启 `keyboardAvoiding` 后，面板在键盘上方的可用区域布局，遮罩仍覆盖整个宿主。居中面板仅在底部被键盘遮挡时上移，底部面板贴近键盘上沿，顶部面板保持顶部位置。避让使用独立的 Reanimated 位移，并采用键盘事件的时长。该能力位于 Portal 内；仅在页面外包裹 KeyboardAvoidingView 无法保证作用于弹层。
+
+Dialog 会收缩并滚动正文，保留标题和底部按钮。 Android 宿主窗口被键盘缩小时，按实际布局与键盘的重叠区域避让；不要同时叠加业务侧键盘高度。宿主应覆盖需要避让的页面区域，嵌套或带偏移的 PortalHost 需要单独验证。Web 和 Harmony 的软键盘行为需要在目标宿主验证。
+
 ## API
 
 ### DialogProps
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
+| `keyboardAvoiding` | `boolean` | `false` | 是否在 Portal 内为面板避让软键盘 |
 | `show` | `boolean` | `false` | 是否显示，配合 `onShowChange` 使用 |
 | `title` | `ReactNode` | — | 标题；字符串和数字使用主题标题样式 |
 | `message` | `ReactNode` | — | 正文；`children` 存在时被替换 |
@@ -182,4 +189,8 @@ resetDialogDefaultOptions(): void
 
 ## 动画
 
-Dialog 复用 Popup 的 Motion preset 和 Portal 生命周期，保留现有居中缩放及回调语义。遵循 `Provider motion`；关闭或中断时不会提前卸载正在退出的面板。
+Dialog 复用 Popup 的 Motion preset 和 Portal 生命周期，保留现有居中缩放及回调语义。遵循 `TsukiProvider motion`；关闭或中断时不会提前卸载正在退出的面板。
+
+### Portal 内的受控输入
+
+编辑状态应由弹层内挂载的表单组件持有：传入 `<Form />`，并在 Form 内使用 `useState` 驱动 `Input.value`。若状态放在 Portal 外，每次输入的 value 更新需要经由 Portal 内容转发，原生输入框可能在中间提交收到旧值并打断组合输入。外层通过 ref 读取草稿或调用表单的赋值、重置方法；不要在每个字符输入时同步更新外层 state 后再传回 value。

@@ -19,6 +19,7 @@ function readTag(source, tag) {
 }
 
 function componentTitle(component) {
+  if (component === 'provider') return 'TsukiProvider'
   return component
     .split('/')
     .map((part) => part.replace(/[-_]+(.)/g, (_, character) => character.toUpperCase()))

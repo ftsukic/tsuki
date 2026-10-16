@@ -102,3 +102,13 @@ import { ConfigProvider, Input } from '@ftsukic/tsuki'
 自动高度的隐藏测量节点采用可见输入框的实际布局宽度；Web 在受控值更新后重新读取 scrollHeight，测量节点高度归零以支持删除后的缩回。
 
 iOS 在内容或实际宽度变化时重新创建隐藏测量节点，避免原生 contentSize 沿用旧值；可见输入节点保持挂载，保留焦点和选择。隐藏节点只在 Web 设置 numberOfLines=1，原生测量不限制行数。
+
+### 中文组合输入
+
+未传 `value` 且未配置 `formatter` 时，原生输入框保管编辑文本，`defaultValue` 仅用于初始化。`onChangeText`、字数统计和自动测量继续更新，避免每次输入都通过 JS 的 `value` 回写。传入 `value` 时保持受控行为；formatter 需要回写文本，中文输入建议使用 `formatTrigger="onEndEditing"`。该路径不保证修复 iOS Fabric 的所有组合输入问题，需要用目标设备对照验证。
+
+<code src="../../../src/input/__fixtures__/examples/ime.tsx" title="中文组合输入对照"></code>
+
+### Portal 内的受控输入
+
+编辑状态应由弹层内挂载的表单组件持有：传入 `<Form />`，并在 Form 内使用 `useState` 驱动 `Input.value`。若状态放在 Portal 外，每次输入的 value 更新需要经由 Portal 内容转发，原生输入框可能在中间提交收到旧值并打断组合输入。外层通过 ref 读取草稿或调用表单的赋值、重置方法；不要在每个字符输入时同步更新外层 state 后再传回 value。

@@ -46,7 +46,7 @@ import {
 </ConfigProvider>
 ```
 
-应用也可以使用同时提供主题和 Portal 宿主的 `Provider`；它是上述组合的便捷入口。
+应用也可以使用同时提供主题和 Portal 宿主的 `TsukiProvider`；它是上述组合的便捷入口。
 
 ## 代码演示
 

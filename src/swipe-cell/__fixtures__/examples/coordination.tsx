@@ -2,7 +2,7 @@ import { SwipeCell } from '../../..'
 import { StyleSheet, Text, View } from 'react-native'
 
 /**
- * @title Provider coordination
+ * @title TsukiProvider coordination
  * @description Open one cell at a time without wrapping the rows in SwipeCellGroup.
  */
 export default function SwipeCellCoordinationFixture() {
@@ -10,7 +10,7 @@ export default function SwipeCellCoordinationFixture() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Provider 级单开</Text>
+      <Text style={styles.heading}>TsukiProvider 级单开</Text>
       {rows.map((title) => (
         <SwipeCell key={title} rightActions={[{ label: '删除' }]}>
           <View style={styles.content}>

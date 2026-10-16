@@ -29,18 +29,18 @@ features:
 
 <div className="tsuki-home-section">
 
-## Provider
+## TsukiProvider
 
-在应用入口包裹一次 `Provider`，为组件提供主题和 Portal 上下文。单个组件示例不需要重复包裹 Provider。
+在应用入口包裹一次 `TsukiProvider`，为组件提供主题和 Portal 上下文。单个组件示例不需要重复包裹 TsukiProvider。
 
 ```tsx | pure
-import { Provider } from '@ftsukic/tsuki'
+import { TsukiProvider } from '@ftsukic/tsuki'
 
 export default function App() {
   return (
-    <Provider>
+    <TsukiProvider>
       <AppRoutes />
-    </Provider>
+    </TsukiProvider>
   )
 }
 ```

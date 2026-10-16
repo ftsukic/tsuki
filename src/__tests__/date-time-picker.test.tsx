@@ -11,7 +11,7 @@ import type {
   DateTimePickerRef,
   DateTimePickerValue,
 } from '../date-time-picker'
-import { Provider } from '../provider'
+import { TsukiProvider } from '../provider'
 
 afterEach(cleanup)
 
@@ -22,9 +22,9 @@ async function press(testID: string) {
 
 async function renderPicker(props: DateTimePickerProps & { ref?: Ref<DateTimePickerRef> }) {
   return render(
-    <Provider theme={{ seed: { motion: false } }}>
+    <TsukiProvider theme={{ seed: { motion: false } }}>
       <DateTimePicker {...props} />
-    </Provider>,
+    </TsukiProvider>,
   )
 }
 
@@ -133,13 +133,13 @@ describe('DateTimePicker', () => {
     expect(screen.getAllByTestId(/^picker-item-2-\d+$/)).toHaveLength(29)
 
     await view.rerender(
-      <Provider theme={{ seed: { motion: false } }}>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
         <DateTimePicker
           columnsType={['year', 'month', 'day']}
           value={['2027', '02', '31']}
           ref={ref}
         />
-      </Provider>,
+      </TsukiProvider>,
     )
     expect(screen.getAllByTestId(/^picker-item-2-\d+$/)).toHaveLength(28)
     expect(ref.current?.getSelectedValues()).toEqual(['2027', '02', '28'])
@@ -213,9 +213,9 @@ describe('DateTimePicker', () => {
       )
     }
     await render(
-      <Provider theme={{ seed: { motion: false } }}>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
         <Controlled />
-      </Provider>,
+      </TsukiProvider>,
     )
     await press('picker-item-3-13')
     expect(screen.getByTestId('controlled-date-time').props.children).toBe('2026 09 13 13 30')

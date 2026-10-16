@@ -27,7 +27,7 @@ Dropdown 用于在菜单栏下方或上方展开一个选项面板。它复用 P
 import { DropdownItem, DropdownMenu, useBackgroundScrollLocked } from '@ftsukic/tsuki'
 ```
 
-组件需要放在 `PortalHost` 或 `Provider` 内；应用已经提供 Portal 宿主时不需要为每个 Dropdown 额外添加宿主。
+组件需要放在 `PortalHost` 或 `TsukiProvider` 内；应用已经提供 Portal 宿主时不需要为每个 Dropdown 额外添加宿主。
 
 ## 代码演示
 
@@ -123,7 +123,7 @@ Dropdown 从开始打开到退出动画完成持续持有背景滚动锁；切�
 
 Web 自动锁定菜单所在页面与可滚动祖先，保留原有 overflow 样式；面板内滚动和菜单横向滚动可用，列表边界不继续带动背景。背景祖先通过程序改变滚动位置时关闭菜单，避免旧锚点造成错位。Escape 关闭后恢复触发器焦点。
 
-React Native 通过透明交互层阻断菜单之外的背景手势。宿主列表应在最近的 `PortalHost` / `Provider` **内部**使用 `useBackgroundScrollLocked()`，连接 `scrollEnabled`，停止背景列表自身的滚动能力；Portal 无法直接设置任意父列表的属性。
+React Native 通过透明交互层阻断菜单之外的背景手势。宿主列表应在最近的 `PortalHost` / `TsukiProvider` **内部**使用 `useBackgroundScrollLocked()`，连接 `scrollEnabled`，停止背景列表自身的滚动能力；Portal 无法直接设置任意父列表的属性。
 
 ```tsx | pure
 function Page() {
@@ -134,7 +134,7 @@ function Page() {
     </ScrollView>
   )
 }
-// <Provider><Page /></Provider>
+// <TsukiProvider><Page /></TsukiProvider>
 ```
 
 已有 `scrollEnabled` 条件应保留，例如 `scrollEnabled={pageScrollEnabled && !locked}`。Hook 按最近的 PortalHost 隔离；PortalHost 外返回 `false`。示例浏览器已接入背景锁。
@@ -183,4 +183,4 @@ ref 方法复用同一套 `DropdownMenu` 状态，不会创建第二套 visible 
 
 ## 动画
 
-面板、遮罩和箭头使用统一 Motion 配置与浮层 preset，保留原有向上/向下展开和 item 切换语义。关闭期间保留面板；快速切换取消旧完成回调，遵循 `Provider motion`。
+面板、遮罩和箭头使用统一 Motion 配置与浮层 preset，保留原有向上/向下展开和 item 切换语义。关闭期间保留面板；快速切换取消旧完成回调，遵循 `TsukiProvider motion`。

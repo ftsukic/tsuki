@@ -11,7 +11,7 @@ import type { TestInstance } from 'test-renderer'
 import {
   Cell,
   ConfigProvider,
-  Provider,
+  TsukiProvider,
   Portal,
   SwipeCell,
   SwipeCellAction,
@@ -45,7 +45,7 @@ function TestProvider({ children }: { children: React.ReactNode }) {
 }
 
 function SwipeCellProvider({ children }: { children: React.ReactNode }) {
-  return <Provider theme={{ seed: { motion: false } }}>{children}</Provider>
+  return <TsukiProvider theme={{ seed: { motion: false } }}>{children}</TsukiProvider>
 }
 
 function getTranslation(testID: string) {
@@ -482,9 +482,9 @@ describe('SwipeCell', () => {
       })
     try {
       await render(
-        <Provider>
+        <TsukiProvider>
           <SwipeCell ref={ref} testID="default-duration" rightAction="删除" />
-        </Provider>,
+        </TsukiProvider>,
       )
       await layoutAction('default-duration', 'right', 100)
       await act(async () => ref.current?.open())
@@ -646,7 +646,7 @@ describe('SwipeCell', () => {
     expect(secondOpen).toHaveBeenCalledTimes(1)
   })
 
-  it('keeps only one cell open through the Provider coordinator without a Group', async () => {
+  it('keeps only one cell open through the TsukiProvider coordinator without a Group', async () => {
     const firstRef = React.createRef<SwipeCellRef>()
     const secondRef = React.createRef<SwipeCellRef>()
     const firstClose = jest.fn()
@@ -758,9 +758,9 @@ describe('SwipeCell', () => {
         })
       try {
         await render(
-          <Provider>
+          <TsukiProvider>
             <SwipeCellWeChatFixture />
-          </Provider>,
+          </TsukiProvider>,
         )
         await layoutAction('wechat-team', 'right', 240)
         await drag('wechat-team', -180)
@@ -800,12 +800,12 @@ describe('SwipeCell', () => {
         })
       try {
         await render(
-          <Provider theme={{ components: { SwipeCell: { animationDuration: 300 } } }}>
+          <TsukiProvider theme={{ components: { SwipeCell: { animationDuration: 300 } } }}>
             <SwipeCell ref={ref} testID="animated-source" rightAction="删除" onClose={onClose}>
               <Text>主体</Text>
             </SwipeCell>
             <Cell testID="outside-source" title="其它 Cell" />
-          </Provider>,
+          </TsukiProvider>,
         )
         await layoutAction('animated-source', 'right', 100)
         await act(async () => ref.current?.open())
@@ -1171,12 +1171,12 @@ describe('SwipeCell', () => {
     const onClose = jest.fn()
     const user = userEvent.setup()
     await render(
-      <Provider theme={{ seed: { motion: false } }}>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
         <SwipeCell ref={ref} testID="outside-close" rightAction="删除" onClose={onClose}>
           <Text>内容</Text>
         </SwipeCell>
         <Cell testID="outside-cell" title="外部区域" />
-      </Provider>,
+      </TsukiProvider>,
     )
 
     await layoutAction('outside-close', 'right', 100)
@@ -1297,7 +1297,7 @@ describe('SwipeCell', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
-  it('isolates nested Provider managers and outside presses', async () => {
+  it('isolates nested TsukiProvider managers and outside presses', async () => {
     const outer = React.createRef<SwipeCellRef>()
     const inner = React.createRef<SwipeCellRef>()
     const outerClose = jest.fn()
@@ -1326,7 +1326,7 @@ describe('SwipeCell', () => {
     expect(outerClose).toHaveBeenCalledTimes(1)
   })
 
-  it('does not introduce global coordination without a Provider', async () => {
+  it('does not introduce global coordination without a TsukiProvider', async () => {
     const first = React.createRef<SwipeCellRef>()
     const second = React.createRef<SwipeCellRef>()
     const onClose = jest.fn()
@@ -1355,7 +1355,7 @@ describe('SwipeCell', () => {
     expect(onClose).not.toHaveBeenCalled()
   })
 
-  it('coordinates Group drags without a Provider', async () => {
+  it('coordinates Group drags without a TsukiProvider', async () => {
     const first = React.createRef<SwipeCellRef>()
     const firstClose = jest.fn()
     const secondOpen = jest.fn()

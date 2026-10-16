@@ -24,15 +24,15 @@ Overlay 用于创建全屏遮罩，强调当前操作并阻止用户操作底层
 ## 引入
 
 ```tsx | pure
-import { Overlay, Provider } from '@ftsukic/tsuki'
+import { Overlay, TsukiProvider } from '@ftsukic/tsuki'
 ```
 
-Overlay 内部使用 `Portal`，推荐放在应用根节点的 `Provider` 中：
+Overlay 内部使用 `Portal`，推荐放在应用根节点的 `TsukiProvider` 中：
 
 ```tsx | pure
-<Provider>
+<TsukiProvider>
   <App />
-</Provider>
+</TsukiProvider>
 ```
 
 ## 代码演示

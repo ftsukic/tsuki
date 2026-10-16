@@ -9,7 +9,7 @@ const messages = Array.from({ length: 1000 }, (_, index) => ({
 
 /**
  * @title FlashList with 1000 messages
- * @description 使用稳定 id 和 Provider manager 支持 FlashList 回收大量 SwipeCell。
+ * @description 使用稳定 id 和 TsukiProvider manager 支持 FlashList 回收大量 SwipeCell。
  */
 export default function SwipeCellFlashListFixture() {
   const swipeCell = useSwipeCellController()

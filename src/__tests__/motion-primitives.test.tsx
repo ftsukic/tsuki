@@ -1,7 +1,7 @@
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { AccessibilityInfo, Platform, StyleSheet, Text } from 'react-native'
 import * as Reanimated from 'react-native-reanimated'
-import { ConfigProvider, MotionPressable, MotionView, Provider, Transition } from '..'
+import { ConfigProvider, MotionPressable, MotionView, TsukiProvider, Transition } from '..'
 import { resolveSwipeOffset, resolveSwipeTarget } from '../motion/gesture'
 
 describe('Motion primitives', () => {
@@ -150,18 +150,18 @@ describe('Motion primitives', () => {
   })
 
   it.each([{ enabled: false }, { reducedMotion: 'always' as const }, { durationScale: 0 }])(
-    'settles timing, spring and exit callbacks through Provider policy %j',
+    'settles timing, spring and exit callbacks through TsukiProvider policy %j',
     async (motion) => {
       const timing = jest.spyOn(Reanimated, 'withTiming').mockImplementation((value) => value)
       const spring = jest.spyOn(Reanimated, 'withSpring').mockImplementation((value) => value)
       const onExited = jest.fn()
       const tree = (visible: boolean) => (
-        <Provider gesture={false} motion={motion}>
+        <TsukiProvider gesture={false} motion={motion}>
           <Transition visible={visible} onExited={onExited} unmountOnExit>
             <Text>overlay</Text>
           </Transition>
           <MotionView animate={{ scale: 1 }} initial={{ scale: 0.9 }} spring="normal" />
-        </Provider>
+        </TsukiProvider>
       )
       const view = await render(tree(true))
       await view.rerender(tree(false))

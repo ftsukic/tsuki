@@ -8,7 +8,7 @@ import { PickerGroup } from '../picker-group'
 import type { PickerGroupRef } from '../picker-group'
 import { TimePicker } from '../time-picker'
 import type { TimePickerRef } from '../time-picker'
-import { Provider } from '../provider'
+import { TsukiProvider } from '../provider'
 
 afterEach(cleanup)
 
@@ -54,7 +54,7 @@ describe('picker domain selections', () => {
       const onChange = jest.fn()
       const onConfirm = jest.fn()
       await render(
-        <Provider theme={{ seed: { motion: false } }}>
+        <TsukiProvider theme={{ seed: { motion: false } }}>
           <TimePicker
             ref={ref}
             {...(controlled ? { value: ['10', '30'] } : { defaultValue: ['10', '30'] })}
@@ -62,7 +62,7 @@ describe('picker domain selections', () => {
             onChange={onChange}
             onConfirm={onConfirm}
           />
-        </Provider>,
+        </TsukiProvider>,
       )
       expect(ref.current?.getSelectedValues()).toEqual(['30'])
       expect(ref.current?.getSelectedOptions()).toEqual([{ text: '30', value: 30 }])

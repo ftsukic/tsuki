@@ -146,4 +146,4 @@ import { ConfigProvider, Switch } from '@ftsukic/tsuki'
 
 ## 动画
 
-轨道颜色使用 timing 插值，thumb 使用统一 normal spring 平移。`animationDuration` 控制轨道时长，物理 spring 由预设决定；遵循 `Provider motion`，关闭或 Reduced Motion 时即时切换。
+轨道颜色使用 timing 插值，thumb 使用统一 normal spring 平移。`animationDuration` 控制轨道时长，物理 spring 由预设决定；遵循 `TsukiProvider motion`，关闭或 Reduced Motion 时即时切换。

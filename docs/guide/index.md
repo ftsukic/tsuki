@@ -40,7 +40,7 @@ npx expo install react-native-gesture-handler react-native-reanimated react-nati
 import 'react-native-gesture-handler'
 ```
 
-然后由业务 App 在最外层提供根节点，或者让 Provider 按需提供：
+然后由业务 App 在最外层提供根节点，或者让 TsukiProvider 按需提供：
 
 ```tsx
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
@@ -54,24 +54,24 @@ export default function App() {
 }
 ```
 
-Provider 默认提供 `GestureHandlerRootView`，因此 SwipeCell 等手势组件可以直接放在 `<Provider>` 下；已有外部 root 时可使用 `Provider gesture={false}` 避免增加内部 wrapper。
+TsukiProvider 默认提供 `GestureHandlerRootView`，因此 SwipeCell 等手势组件可以直接放在 `<TsukiProvider>` 下；已有外部 root 时可使用 `TsukiProvider gesture={false}` 避免增加内部 wrapper。
 
-如果应用已经使用 `Provider`，也可以开启它的可选 gesture capability：
+如果应用已经使用 `TsukiProvider`，也可以开启它的可选 gesture capability：
 
 ```tsx
-<Provider gesture>
+<TsukiProvider gesture>
   <Routes />
-</Provider>
+</TsukiProvider>
 ```
 
-`Provider gesture={false}` 与外部 `GestureHandlerRootView` 可以组合使用；默认 `gesture={true}`，会增加一个内部 root。
+`TsukiProvider gesture={false}` 与外部 `GestureHandlerRootView` 可以组合使用；默认 `gesture={true}`，会增加一个内部 root。
 
-如果应用需要安全区 inset，可以同样开启 `Provider` 的 `safeArea` capability：
+如果应用需要安全区 inset，可以同样开启 `TsukiProvider` 的 `safeArea` capability：
 
 ```tsx
-<Provider safeArea>
+<TsukiProvider safeArea>
   <Routes />
-</Provider>
+</TsukiProvider>
 ```
 
 默认 `safeArea={false}`，已有外部 `SafeAreaProvider` 时保持默认值即可。
@@ -91,21 +91,21 @@ module.exports = {
 
 ## 应用入口
 
-Provider 只需要在应用入口使用一次：
+TsukiProvider 只需要在应用入口使用一次：
 
 ```tsx
-import { Provider } from '@ftsukic/tsuki'
+import { TsukiProvider } from '@ftsukic/tsuki'
 
 export default function App() {
   return (
-    <Provider>
+    <TsukiProvider>
       <Routes />
-    </Provider>
+    </TsukiProvider>
   )
 }
 ```
 
-组件示例本身不包含 Provider，因此可以直接复用到 Expo demo、测试和业务页面中。
+组件示例本身不包含 TsukiProvider，因此可以直接复用到 Expo demo、测试和业务页面中。
 
 ## 使用组件
 

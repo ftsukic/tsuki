@@ -4,7 +4,7 @@ title: Motion System 仓库评估
 
 # Motion System 仓库评估
 
-当前 Motion 使用现有 Provider / ThemeContext，按 Component → Preset → Primitive → Reanimated / RNGH 组织。直接统一当前设计，不维护旧版本别名或兼容参数分支。
+当前 Motion 使用现有 TsukiProvider / ThemeContext，按 Component → Preset → Primitive → Reanimated / RNGH 组织。直接统一当前设计，不维护旧版本别名或兼容参数分支。
 
 ## 文件职责
 

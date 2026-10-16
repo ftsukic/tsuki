@@ -6,7 +6,7 @@ import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-han
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import * as Reanimated from 'react-native-reanimated'
 import * as Worklets from 'react-native-worklets'
-import { FloatingBubble, Icon, Provider } from '..'
+import { FloatingBubble, Icon, TsukiProvider } from '..'
 import type { FloatingBubbleProps, MotionConfig } from '..'
 import { MAGNETIC_PRESET } from '../motion/presets'
 import { sampleSpring } from '../motion/animation'
@@ -17,7 +17,7 @@ import {
 } from '../floating-bubble/floating-bubble'
 
 function TestProvider({ children }: { children: React.ReactNode }) {
-  return <Provider theme={{ seed: { motion: false } }}>{children}</Provider>
+  return <TsukiProvider theme={{ seed: { motion: false } }}>{children}</TsukiProvider>
 }
 
 async function layout(
@@ -98,7 +98,7 @@ function holdAnimations() {
 
 function animatedBubble(props: Partial<FloatingBubbleProps> = {}, motion: MotionConfig = {}) {
   return (
-    <Provider motion={{ reducedMotion: 'never', ...motion }}>
+    <TsukiProvider motion={{ reducedMotion: 'never', ...motion }}>
       <FloatingBubble
         testID="animated"
         axis="xy"
@@ -108,7 +108,7 @@ function animatedBubble(props: Partial<FloatingBubbleProps> = {}, motion: Motion
       >
         <Text>磁吸</Text>
       </FloatingBubble>
-    </Provider>
+    </TsukiProvider>
   )
 }
 
@@ -497,9 +497,9 @@ describe('FloatingBubble', () => {
 
   it('defaults direct icon props from tokens while preserving explicit props and children', async () => {
     const tree = (content: Partial<FloatingBubbleProps>) => (
-      <Provider theme={{ components: { FloatingBubble: { color: '#ff1234', iconSize: 30 } } }}>
+      <TsukiProvider theme={{ components: { FloatingBubble: { color: '#ff1234', iconSize: 30 } } }}>
         <FloatingBubble testID="icon-token" {...content} />
-      </Provider>
+      </TsukiProvider>
     )
     const view = await render(
       tree({ icon: <Icon testID="token-svg" name="CustomerServiceOutlined" /> }),
@@ -548,7 +548,7 @@ describe('FloatingBubble', () => {
     const onOffsetChange = jest.fn()
     const onOffsetChangeEnd = jest.fn()
     await render(
-      <Provider
+      <TsukiProvider
         motion={{ reducedMotion: 'never', durationScale: 2 }}
         theme={{ components: { FloatingBubble: { animationDuration: 180 } } }}
       >
@@ -560,7 +560,7 @@ describe('FloatingBubble', () => {
           onOffsetChange={onOffsetChange}
           onOffsetChangeEnd={onOffsetChangeEnd}
         />
-      </Provider>,
+      </TsukiProvider>,
     )
     await layout('animated')
     await drag('animated', -40, 30)

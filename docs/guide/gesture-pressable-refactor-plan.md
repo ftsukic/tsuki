@@ -129,7 +129,7 @@ Interaction 当前仅保留协调和 responder；`interactionId` 与 SwipeCell �
 
 ## 2026-10-10 SwipeCell 协调收敛
 
-删除 InteractionCoordinator、useInteraction 及其协调类型，移除 Pressable 和 SwipeCellAction 的 interactionId。Provider 仅提供 SwipeCellManager；Pressable 使用 SwipeCell 私有按压协调 Hook，内容与操作区提供归属，Portal 和 Popover 浮层清除归属。保留 Group、无 Provider 和嵌套 Provider 的既有范围，以及公开 useSwipeCellController。Interaction 仅剩 responder，尚未迁移 Gesture。
+删除 InteractionCoordinator、useInteraction 及其协调类型，移除 Pressable 和 SwipeCellAction 的 interactionId。TsukiProvider 仅提供 SwipeCellManager；Pressable 使用 SwipeCell 私有按压协调 Hook，内容与操作区提供归属，Portal 和 Popover 浮层清除归属。保留 Group、无 TsukiProvider 和嵌套 TsukiProvider 的既有范围，以及公开 useSwipeCellController。Interaction 仅剩 responder，尚未迁移 Gesture。
 
 ## 2026-10-10 Interaction 模块移除
 

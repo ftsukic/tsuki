@@ -43,7 +43,9 @@ export default function ThemeAlgorithmsFixture() {
         <Cell title="Theme" value={dark ? 'Dark' : 'Light'} border={false} />
         <TextInput bordered placeholder="The provider supplies tokens" />
         <Text style={styles.sectionTitle}>当前输入配置</Text>
-        <Text type="secondary">通过 mode 切换明暗主题，其余字段来自传入 Provider 的配置。</Text>
+        <Text type="secondary">
+          通过 mode 切换明暗主题，其余字段来自传入 TsukiProvider 的配置。
+        </Text>
         <Text selectable style={styles.code}>
           {JSON.stringify(theme, null, 2)}
         </Text>

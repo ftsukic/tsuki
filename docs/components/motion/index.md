@@ -24,7 +24,7 @@ Motion 统一动画策略、Token、Preset 和 Primitive。组件用法使用 `T
 ## 引入
 
 ```tsx | pure
-import { Provider, Transition, MotionView, MotionPressable } from '@ftsukic/tsuki'
+import { TsukiProvider, Transition, MotionView, MotionPressable } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
@@ -73,12 +73,12 @@ Collapse 的 height 和指示器背景的 width 属于布局语义例外。不�
 
 ### MotionConfig
 
-在现有 Provider 上使用 `motion`，或通过 `ConfigProvider theme={{ motion: ... }}` 配置。两者使用同一个 ThemeContext；Provider 的 `motion` 覆盖同层 `theme.motion`。
+在现有 TsukiProvider 上使用 `motion`，或通过 `ConfigProvider theme={{ motion: ... }}` 配置。两者使用同一个 ThemeContext；TsukiProvider 的 `motion` 覆盖同层 `theme.motion`。
 
 ```tsx | pure
-<Provider motion={{ enabled: true, reducedMotion: 'system', durationScale: 1 }}>
+<TsukiProvider motion={{ enabled: true, reducedMotion: 'system', durationScale: 1 }}>
   {children}
-</Provider>
+</TsukiProvider>
 ```
 
 | 属性 | 类型 | 默认值 | 说明 |
