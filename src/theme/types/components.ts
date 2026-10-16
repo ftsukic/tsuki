@@ -621,6 +621,16 @@ export interface SwitchToken {
   animationDuration: number
 }
 
+export interface SliderToken {
+  railColor: ColorValue
+  trackColor: ColorValue
+  thumbColor: ColorValue
+  thumbBorderColor: ColorValue
+  railHeight: number
+  thumbSize: number
+  disabledOpacity: number
+}
+
 export interface ProgressToken {
   progress_height: number
   progress_track_color: string
@@ -723,6 +733,7 @@ export interface ComponentTokenOverrides {
   Loading?: Partial<LoadingToken>
   Skeleton?: Partial<SkeletonToken>
   Switch?: Partial<SwitchToken>
+  Slider?: Partial<SliderToken>
   Progress?: Partial<ProgressToken>
   Watermark?: Partial<WatermarkToken>
   Notify?: Partial<NotifyToken>
@@ -760,6 +771,7 @@ export interface ComponentTokenMap {
   Loading: LoadingToken
   Skeleton: SkeletonToken
   Switch: SwitchToken
+  Slider: SliderToken
   Progress: ProgressToken
   Watermark: WatermarkToken
   Notify: NotifyToken
