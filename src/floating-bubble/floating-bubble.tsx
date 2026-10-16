@@ -13,7 +13,7 @@ import {
 } from 'react'
 import type { Ref } from 'react'
 import { StyleSheet, useWindowDimensions, View } from 'react-native'
-import type { LayoutChangeEvent, View as ViewComponent } from 'react-native'
+import type { LayoutChangeEvent, StyleProp, View as ViewComponent, ViewStyle } from 'react-native'
 import { Gesture, GestureDetector } from '../gesture'
 import { Pressable } from '../pressable'
 import { Portal } from '../portal'
@@ -566,7 +566,7 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
                 resolvedStyles.root,
                 semantic?.root,
                 style,
-                animatedStyle,
+                animatedStyle as unknown as StyleProp<ViewStyle>,
                 ready ? undefined : { opacity: 0 },
               ]}
             >

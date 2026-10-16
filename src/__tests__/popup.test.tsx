@@ -934,7 +934,7 @@ describe('Popup', () => {
 
     expect(container?.parent).toBe(root)
     expect(flattenStyle(root)).toMatchObject({
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
       zIndex: 1800,
       marginTop: 8,
     })
@@ -1168,7 +1168,7 @@ describe('Popup', () => {
   it('handles Android back only when onRequestClose is provided', async () => {
     const previousPlatformOS = Platform.OS
     ;(Platform as unknown as { OS: string }).OS = 'android'
-    let handleBack: (() => boolean | null | undefined) | undefined
+    let handleBack: Parameters<typeof BackHandler.addEventListener>[1] | undefined
     jest.spyOn(BackHandler, 'addEventListener').mockImplementation((_eventName, handler) => {
       handleBack = handler
       return { remove: jest.fn() }
@@ -1182,7 +1182,7 @@ describe('Popup', () => {
       </AppProvider>,
     )
 
-    expect(handleBack?.()).toBe(true)
+    expect(handleBack?.(undefined as never)).toBe(true)
     expect(onRequestClose).toHaveBeenCalledTimes(1)
     await view.unmount()
     ;(Platform as unknown as { OS: string }).OS = previousPlatformOS

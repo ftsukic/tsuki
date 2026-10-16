@@ -2,7 +2,8 @@ const path = require('node:path')
 
 module.exports = {
   rootDir: __dirname,
-  preset: 'react-native',
+  preset: '@react-native/jest-preset',
+  resolver: 'react-native-reanimated/jest/resolver',
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
   transform: {

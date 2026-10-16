@@ -15,7 +15,9 @@ describe('Gesture Fixture thread boundaries', () => {
       },
     )
     const code = result?.code ?? ''
-    const closures = [...code.matchAll(/__closure\s*=\s*\{([^}]*?)\}/gs)].map((match) => match[1])
+    const closures = [...code.matchAll(/__closure\s*=\s*(?:\{([^}]*?)\}|\[([^\]]*?)\])/gs)].map(
+      (match) => match[1] ?? match[2],
+    )
     expect(closures.length).toBeGreaterThan(0)
     for (const closure of closures) {
       expect(closure).not.toMatch(/\b(setCount|setStatus|timer)\s*:/)

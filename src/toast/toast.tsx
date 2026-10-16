@@ -253,14 +253,10 @@ export const ToastContent = forwardRef<View, ToastContentProps>(function ToastCo
         <Pressable
           accessibilityElementsHidden
           onPress={closeOnClickOverlay ? () => onShowChange?.(false) : undefined}
-          style={[
-            StyleSheet.absoluteFillObject,
-            { backgroundColor: token.overlayColor },
-            semantic?.mask,
-          ]}
+          style={[StyleSheet.absoluteFill, { backgroundColor: token.overlayColor }, semantic?.mask]}
         />
       ) : forbidClick ? (
-        <View pointerEvents="auto" style={StyleSheet.absoluteFillObject} />
+        <View pointerEvents="auto" style={StyleSheet.absoluteFill} />
       ) : null}
       <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, positionStyle]}>
         {closeOnClick ? (

@@ -152,7 +152,7 @@ describe('Portal', () => {
     expect(StyleSheet.flatten(hostContent?.props.style)).toMatchObject({ flex: 1 })
     expect(hostContent?.props.pointerEvents).toBeUndefined()
     expect(hostContent?.props.collapsable).toBe(false)
-    expect(StyleSheet.flatten(entry?.props.style)).toMatchObject(StyleSheet.absoluteFillObject)
+    expect(StyleSheet.flatten(entry?.props.style)).toMatchObject(StyleSheet.absoluteFill)
     expect(entry?.props.pointerEvents).toBe('box-none')
     expect(entry?.props.collapsable).toBe(false)
   })

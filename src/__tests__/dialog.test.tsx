@@ -109,7 +109,7 @@ describe('Dialog', () => {
     expect(overlay).toBeTruthy()
     expect(popupContainer?.parent).toBe(popupRoot)
     expect(StyleSheet.flatten(popupRoot?.props.style)).toMatchObject({
-      ...StyleSheet.absoluteFillObject,
+      ...StyleSheet.absoluteFill,
     })
     expect(StyleSheet.flatten(popupContainer?.props.style).zIndex).toBe(
       StyleSheet.flatten(overlayLayer?.props.style).zIndex + 1,
