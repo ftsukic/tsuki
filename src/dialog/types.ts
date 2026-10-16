@@ -66,6 +66,8 @@ export interface DialogProps extends Omit<ViewProps, 'children' | 'style'> {
   confirmButtonDisabled?: boolean
   confirmButtonProps?: Pick<ButtonProps, 'style' | 'styles'>
   cancelButtonProps?: Pick<ButtonProps, 'style' | 'styles'>
+  /** Keep the panel inside the available area above the software keyboard. */
+  keyboardAvoiding?: boolean
   overlay?: boolean
   closeOnClickOverlay?: boolean
   zIndex?: number

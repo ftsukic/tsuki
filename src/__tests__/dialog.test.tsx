@@ -58,6 +58,20 @@ async function firePressState(instance: TestInstance, eventName: 'pressIn' | 'pr
 }
 
 describe('Dialog', () => {
+  it('allows the input body to shrink while retaining handled keyboard taps', async () => {
+    await render(
+      <AppProvider>
+        <Dialog show keyboardAvoiding title="Input dialog">
+          <Text>Input form</Text>
+        </Dialog>
+      </AppProvider>,
+    )
+    const body = screen.getByTestId('dialog-content')
+    expect(StyleSheet.flatten(body.props.style).flexShrink).toBe(1)
+    expect(body.props.keyboardShouldPersistTaps).toBe('handled')
+    expect(screen.getByTestId('dialog-confirm-button')).toBeTruthy()
+  })
+
   afterEach(() => {
     resetDialogDefaultOptions()
   })

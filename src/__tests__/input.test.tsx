@@ -7,6 +7,7 @@ import { getInputToken } from '../input/token'
 import type { InputProps } from '../input'
 
 const mockTextInputFocus = jest.fn()
+const mockTextInputClear = jest.fn()
 let mockWebScrollHeight = 36
 const mockWebMeasurementStyle = { height: '' }
 
@@ -19,7 +20,7 @@ jest.mock('react-native', () => {
         ref,
         () => ({
           focus: mockTextInputFocus,
-          clear: jest.fn(),
+          clear: mockTextInputClear,
           get scrollHeight() {
             return mockWebScrollHeight
           },
@@ -39,6 +40,7 @@ jest.mock('react-native', () => {
 
 describe('Input', () => {
   beforeEach(() => {
+    mockTextInputClear.mockClear()
     jest.spyOn(PixelRatio, 'getFontScale').mockReturnValue(1)
   })
   afterEach(() => {
@@ -742,6 +744,42 @@ describe('Input', () => {
     await waitFor(() => expect(getInputStyle('feedback-loop-auto-size').height).toBe(44))
   })
 
+  it.each([false, true])(
+    'keeps native ownership during Chinese input (multiline=%s)',
+    async (multiline) => {
+      const onChangeText = jest.fn()
+      const view = await render(
+        <Input
+          testID="ime"
+          multiline={multiline}
+          defaultValue=""
+          showWordLimit
+          maxLength={60}
+          onChangeText={onChangeText}
+        />,
+      )
+      for (const text of ['z', 'zh', 'zhong', '中国']) {
+        // eslint-disable-next-line testing-library/no-await-sync-events
+        await fireEvent.changeText(screen.getByTestId('ime'), text)
+        expect(onChangeText).toHaveBeenLastCalledWith(text)
+        expect(screen.getByTestId('ime').props.value).toBeUndefined()
+      }
+      expect(screen.getByText('2/60')).toBeTruthy()
+      await view.rerender(
+        <Input
+          testID="ime"
+          multiline={multiline}
+          defaultValue="replacement"
+          showWordLimit
+          maxLength={60}
+          onChangeText={onChangeText}
+        />,
+      )
+      expect(screen.getByTestId('ime').props.defaultValue).toBe('')
+      expect(screen.getByText('2/60')).toBeTruthy()
+    },
+  )
+
   it('supports uncontrolled values and preserves native and string change handlers', async () => {
     const onChange = jest.fn()
     const onChangeText = jest.fn()
@@ -757,7 +795,7 @@ describe('Input', () => {
     await fireEvent.changeText(screen.getByTestId('input'), 'hello')
 
     expect(onChangeText).toHaveBeenLastCalledWith('hello')
-    await waitFor(() => expect(screen.getByTestId('input').props.value).toBe('hello'))
+    expect(screen.getByTestId('input').props.value).toBeUndefined()
 
     // `onChange` remains the native event callback and is not replaced by the string callback.
     // eslint-disable-next-line testing-library/no-await-sync-events
@@ -777,13 +815,14 @@ describe('Input', () => {
     )
 
     const input = screen.getByTestId('number-input')
-    expect(input.props.value).toBe('001')
+    expect(input.props.value).toBeUndefined()
+    expect(input.props.defaultValue).toBe('001')
     expect(input.props.keyboardType).toBe('numeric')
 
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent.changeText(input, '0010')
     expect(onChangeText).toHaveBeenLastCalledWith('0010')
-    await waitFor(() => expect(screen.getByTestId('number-input').props.value).toBe('0010'))
+    expect(screen.getByTestId('number-input').props.value).toBeUndefined()
   })
 
   it('maps tel, disabled and readOnly input modes', async () => {
@@ -959,7 +998,12 @@ describe('Input', () => {
 
     expect(onClear).toHaveBeenCalledTimes(1)
     expect(onChangeText).toHaveBeenLastCalledWith('')
-    await waitFor(() => expect(screen.getByTestId('clear-input').props.value).toBe(''))
+    expect(mockTextInputClear).toHaveBeenCalledTimes(1)
+    await waitFor(() =>
+      expect(
+        screen.getByLabelText('清除输入', { includeHiddenElements: true }).props.pointerEvents,
+      ).toBe('none'),
+    )
   })
 
   it('keeps an always-visible clear button clickable before focus', async () => {
@@ -980,7 +1024,12 @@ describe('Input', () => {
     fireEvent.press(clearButton)
 
     expect(onClear).toHaveBeenCalledTimes(1)
-    await waitFor(() => expect(screen.getByTestId('always-clear-input').props.value).toBe(''))
+    expect(mockTextInputClear).toHaveBeenCalledTimes(1)
+    await waitFor(() =>
+      expect(
+        screen.getByLabelText('清除输入', { includeHiddenElements: true }).props.pointerEvents,
+      ).toBe('none'),
+    )
   })
 
   it('keeps the clear node mounted but ignores a hidden clear press', async () => {
@@ -995,7 +1044,8 @@ describe('Input', () => {
     fireEvent.press(clearButton)
 
     expect(onClear).not.toHaveBeenCalled()
-    expect(screen.getByTestId('hidden-clear-input').props.value).toBe('hello')
+    expect(mockTextInputClear).not.toHaveBeenCalled()
+    expect(screen.getByTestId('hidden-clear-input').props.defaultValue).toBe('hello')
   })
 
   it('toggles uncontrolled and controlled password visibility', async () => {

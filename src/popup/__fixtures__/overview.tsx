@@ -1,3 +1,4 @@
+import PopupKeyboardExample from './examples/keyboard'
 import { FixtureOverview } from '../../fixture-overview'
 import PopupBasicExample from './examples/basic'
 import PopupAnimationPlayground from './examples/animation-playground'
@@ -16,6 +17,12 @@ export default function PopupOverview() {
     <FixtureOverview
       mode="single"
       examples={[
+        {
+          Component: PopupKeyboardExample,
+          description: '键盘弹出时调整面板位置，滚动正文并保留操作按钮。',
+          id: 'keyboard',
+          title: '输入框与键盘避让',
+        },
         {
           Component: PopupAnimationPlayground,
           description: '验证打开、关闭、快速反转、销毁和 Android 返回键等动画生命周期。',

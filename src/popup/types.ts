@@ -23,6 +23,8 @@ export interface PopupProps extends Omit<ViewProps, 'children' | 'style'> {
   children?: ReactNode
   visible?: boolean
   position?: PopupPosition
+  /** Keep the panel inside the available area above the software keyboard. */
+  keyboardAvoiding?: boolean
   overlay?: boolean
   closeOnPressOverlay?: boolean
   safeAreaInsetBottom?: boolean

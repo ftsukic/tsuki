@@ -61,7 +61,8 @@ describe('Search', () => {
       </>,
     )
 
-    expect(screen.getByTestId('default-search').props.value).toBe('Alice')
+    expect(screen.getByTestId('default-search').props.value).toBeUndefined()
+    expect(screen.getByTestId('default-search').props.defaultValue).toBe('Alice')
     expect(screen.getByTestId('controlled-search').props.value).toBe('Bob')
   })
 
@@ -75,7 +76,7 @@ describe('Search', () => {
 
     expect(onChange).toHaveBeenCalledTimes(1)
     expect(onChange).toHaveBeenCalledWith('Alice')
-    await waitFor(() => expect(screen.getByTestId('search').props.value).toBe('Alice'))
+    expect(screen.getByTestId('search').props.value).toBeUndefined()
   })
 
   it('submits the latest value and defaults the return key to search', async () => {
@@ -111,7 +112,11 @@ describe('Search', () => {
 
     expect(onChange).toHaveBeenLastCalledWith('')
     expect(onClear).toHaveBeenCalledTimes(1)
-    await waitFor(() => expect(screen.getByTestId('search').props.value).toBe(''))
+    await waitFor(() =>
+      expect(
+        screen.getByLabelText('清除输入', { includeHiddenElements: true }).props.pointerEvents,
+      ).toBe('none'),
+    )
   })
 
   it('passes disabled and readOnly to Input', async () => {

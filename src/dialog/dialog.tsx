@@ -43,6 +43,7 @@ export const DialogContent = forwardRef<View, DialogContentProps>(
       confirmButtonDisabled = false,
       confirmButtonProps,
       cancelButtonProps,
+      keyboardAvoiding = false,
       overlay = true,
       closeOnClickOverlay = false,
       zIndex = token.zIndex,
@@ -272,6 +273,7 @@ export const DialogContent = forwardRef<View, DialogContentProps>(
       <PopupContent
         visible={show}
         overlay={overlay}
+        keyboardAvoiding={keyboardAvoiding}
         closeOnPressOverlay={closeOnClickOverlay}
         onRequestClose={closeOnClickOverlay ? handleOverlayClose : undefined}
         destroyOnClosed
@@ -293,7 +295,11 @@ export const DialogContent = forwardRef<View, DialogContentProps>(
           accessible
           accessibilityRole="alert"
           accessibilityViewIsModal
-          style={[resolved.panel, semantic?.container]}
+          style={[
+            resolved.panel,
+            semantic?.container,
+            keyboardAvoiding ? { maxHeight: '100%', flexShrink: 1 } : null,
+          ]}
         >
           {titleOnly || titleWithMessage ? (
             <View testID="dialog-header" style={[resolved.header, semantic?.header]}>
@@ -307,7 +313,12 @@ export const DialogContent = forwardRef<View, DialogContentProps>(
           {messageOnly || titleWithMessage ? (
             <ScrollView
               testID="dialog-content"
-              style={[resolved.content, semantic?.body]}
+              style={[
+                resolved.content,
+                semantic?.body,
+                keyboardAvoiding ? { flexShrink: 1 } : null,
+              ]}
+              keyboardShouldPersistTaps={keyboardAvoiding ? 'handled' : undefined}
               showsVerticalScrollIndicator={false}
               accessibilityRole="none"
             >

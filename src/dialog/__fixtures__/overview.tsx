@@ -1,3 +1,4 @@
+import DialogKeyboardExample from './examples/keyboard'
 import { FixtureOverview } from '../../fixture-overview'
 import DialogBasicExample from './examples/basic'
 import DialogBeforeCloseExample from './examples/before-close'
@@ -18,6 +19,12 @@ export default function DialogOverview() {
     <FixtureOverview
       mode="single"
       examples={[
+        {
+          Component: DialogKeyboardExample,
+          description: '键盘弹出时调整面板位置，滚动正文并保留操作按钮。',
+          id: 'keyboard',
+          title: '输入框与键盘避让',
+        },
         {
           Component: DialogBasicExample,
           description: 'showDialog 默认展示一个确认按钮，Promise 在确认后 resolve。',

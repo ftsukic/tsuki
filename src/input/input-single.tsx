@@ -99,7 +99,6 @@ export const InputSingle = forwardRef<NativeTextInput, InputSingleProps>(functio
         <TextInput
           {...coreProps}
           ref={assignInputRef}
-          value={value}
           multiline={false}
           style={[styles.input, styles.singleInput, semantic?.input]}
           onChangeText={onChangeText}

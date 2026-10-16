@@ -1,7 +1,7 @@
 import { useComponentToken } from '../theme'
 import { resolveStyles } from '../style'
 import type { TextInput as NativeTextInput, TextInputProps } from 'react-native'
-import { forwardRef, useCallback, useMemo, useState } from 'react'
+import { forwardRef, useCallback, useMemo, useRef, useState } from 'react'
 import { PixelRatio, Platform, StyleSheet, View } from 'react-native'
 import type { InputProps, InputStyleState } from './types'
 import { getInputMetrics, getInputStyles, getTextareaMetrics } from './style'
@@ -58,6 +58,7 @@ export const InputInternal = forwardRef<NativeTextInput, InputInternalProps>(fun
   ref,
 ) {
   const token = useComponentToken('Input', getInputToken)
+  const initialValue = useRef(defaultValue)
   const [focused, setFocused] = useState(false)
   const [internalPasswordVisible, setInternalPasswordVisible] = useState(defaultPasswordVisible)
   const isTextarea = nativeProps.multiline === true
@@ -228,6 +229,8 @@ export const InputInternal = forwardRef<NativeTextInput, InputInternalProps>(fun
 
   const coreProps: TextInputProps = {
     ...nativeProps,
+    value: value !== undefined || formatter ? currentValue : undefined,
+    defaultValue: initialValue.current,
     editable: isEditable,
     keyboardType,
     secureTextEntry,

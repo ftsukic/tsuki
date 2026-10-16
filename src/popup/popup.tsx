@@ -12,6 +12,7 @@ import { useComponentToken, useToken } from '../theme'
 import type { PopupProps } from './types'
 import { getPopupBottomPadding, getPopupStyles } from './style'
 import { getPopupToken } from './token'
+import { usePopupKeyboard } from './usePopupKeyboard'
 
 export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(props, ref) {
   const { token: themeToken } = useToken()
@@ -23,6 +24,7 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
     overlay = true,
     closeOnPressOverlay = false,
     safeAreaInsetBottom = false,
+    keyboardAvoiding = false,
     onPressOverlay,
     onRequestClose,
     duration = token.animationDuration,
@@ -133,8 +135,15 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
     : isExiting
       ? renderedPositionRef.current
       : settledPosition
+  const keyboard = usePopupKeyboard(
+    keyboardAvoiding && rendered,
+    panelSize?.height ?? 0,
+    effectivePosition,
+  )
   const bottomInset =
-    effectivePosition === 'bottom' && safeAreaInsetBottom ? (safeAreaInsets?.bottom ?? 0) : 0
+    effectivePosition === 'bottom' && safeAreaInsetBottom && keyboard.overlap === 0
+      ? (safeAreaInsets?.bottom ?? 0)
+      : 0
 
   useEffect(() => {
     if (Platform.OS !== 'android' || !visible || !rendered) return
@@ -271,8 +280,61 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
 
   if (!rendered) return null
 
+  const positionedPanel = (
+    <View
+      pointerEvents="box-none"
+      onLayout={(event) => setWrapperWidth(event.nativeEvent.layout.width)}
+      style={[resolvedStyles.container, { zIndex: zIndex + 1 }, semantic?.wrapper]}
+    >
+      <Animated.View
+        ref={ref}
+        {...viewProps}
+        onLayout={(event) => {
+          const { width: panelWidth, height: panelHeight } = event.nativeEvent.layout
+          if (panelWidth > 0 && panelHeight > 0) {
+            latestPanelSize.current = {
+              width: panelWidth,
+              height: panelHeight,
+              position: effectivePosition,
+            }
+            // Freeze only in transit; stable content may resize before the next exit.
+            setPanelSize((previous) =>
+              previous?.position === effectivePosition &&
+              ((!openedNotifiedRef.current && visible) || isExiting)
+                ? previous
+                : previous?.position === effectivePosition &&
+                    previous.width === panelWidth &&
+                    previous.height === panelHeight
+                  ? previous
+                  : { width: panelWidth, height: panelHeight, position: effectivePosition },
+            )
+          }
+          onLayout?.(event)
+        }}
+        pointerEvents={visible && ready ? 'auto' : 'none'}
+        style={[
+          resolvedStyles.panel,
+          { zIndex: zIndex + 1 },
+          semantic?.container,
+          keyboardAvoiding
+            ? {
+                maxHeight: keyboard.measured ? keyboard.availableHeight : '100%',
+                flexShrink: 1,
+              }
+            : null,
+          safeAreaStyle,
+          animatedPanelStyle,
+        ]}
+      >
+        {children}
+      </Animated.View>
+    </View>
+  )
+
   return (
     <View
+      ref={keyboard.hostRef}
+      onLayout={keyboardAvoiding ? keyboard.onLayout : undefined}
       collapsable={false}
       accessibilityElementsHidden={!visible || !ready}
       importantForAccessibility={visible && ready ? 'auto' : 'no-hide-descendants'}
@@ -292,48 +354,16 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
           }}
         />
       ) : null}
-      <View
-        pointerEvents="box-none"
-        onLayout={(event) => setWrapperWidth(event.nativeEvent.layout.width)}
-        style={[resolvedStyles.container, { zIndex: zIndex + 1 }, semantic?.wrapper]}
-      >
+      {keyboardAvoiding ? (
         <Animated.View
-          ref={ref}
-          {...viewProps}
-          onLayout={(event) => {
-            const { width: panelWidth, height: panelHeight } = event.nativeEvent.layout
-            if (panelWidth > 0 && panelHeight > 0) {
-              latestPanelSize.current = {
-                width: panelWidth,
-                height: panelHeight,
-                position: effectivePosition,
-              }
-              // Freeze only in transit; stable content may resize before the next exit.
-              setPanelSize((previous) =>
-                previous?.position === effectivePosition &&
-                ((!openedNotifiedRef.current && visible) || isExiting)
-                  ? previous
-                  : previous?.position === effectivePosition &&
-                      previous.width === panelWidth &&
-                      previous.height === panelHeight
-                    ? previous
-                    : { width: panelWidth, height: panelHeight, position: effectivePosition },
-              )
-            }
-            onLayout?.(event)
-          }}
-          pointerEvents={visible && ready ? 'auto' : 'none'}
-          style={[
-            resolvedStyles.panel,
-            { zIndex: zIndex + 1 },
-            semantic?.container,
-            safeAreaStyle,
-            animatedPanelStyle,
-          ]}
+          pointerEvents="box-none"
+          style={[StyleSheet.absoluteFill, { zIndex: zIndex + 1 }, keyboard.animatedStyle]}
         >
-          {children}
+          {positionedPanel}
         </Animated.View>
-      </View>
+      ) : (
+        positionedPanel
+      )}
     </View>
   )
 })

@@ -1,3 +1,4 @@
+import InputImeExample from './examples/ime'
 import { FixtureOverview } from '../../fixture-overview'
 import InputAutoSizeFixture from './examples/auto-size'
 import InputBasicFixture from './examples/basic'
@@ -15,6 +16,12 @@ export default function InputOverview() {
   return (
     <FixtureOverview
       examples={[
+        {
+          Component: InputImeExample,
+          description: '对照原生与 Tsuki 输入、受控模式、Portal 宿主和键盘避让。',
+          id: 'ime',
+          title: '中文组合输入对照',
+        },
         {
           Component: InputAutoSizeFixture,
           description: '内容增长到 maxRows 后内部滚动，删除内容时自动缩回。',

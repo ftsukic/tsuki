@@ -75,7 +75,6 @@ export const InputTextarea = forwardRef<NativeTextInput, InputTextareaProps>(fun
           setInputWidth((previous) => (previous === width ? previous : width))
           coreProps.onLayout?.(event)
         }}
-        value={value}
         multiline
         textAlignVertical="top"
         numberOfLines={autoSize ? undefined : rows}

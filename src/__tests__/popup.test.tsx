@@ -2,7 +2,7 @@ import { resolveStyles } from '../style/resolve-styles'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { useEffect, useState } from 'react'
 import { Button, ConfigProvider, Popup, PortalHost } from '..'
-import { BackHandler, Platform, StyleSheet, Text, View } from 'react-native'
+import { BackHandler, Keyboard, Platform, StyleSheet, Text, View } from 'react-native'
 import { Easing } from 'react-native-reanimated'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import * as Reanimated from 'react-native-reanimated'
@@ -30,6 +30,72 @@ describe('Popup', () => {
     cleanup()
     jest.clearAllMocks()
     jest.restoreAllMocks()
+  })
+
+  it('avoids only keyboard overlap and clears it when the keyboard hides', async () => {
+    const timing = jest.spyOn(Reanimated, 'withTiming').mockImplementation((value) => value)
+    const listeners = new Map<string, Parameters<typeof Keyboard.addListener>[1]>()
+    const addListener = Keyboard.addListener.bind(Keyboard)
+    jest.spyOn(Keyboard, 'addListener').mockImplementation((name, listener) => {
+      listeners.set(name, listener)
+      return addListener(name, listener)
+    })
+    const tree = () => (
+      <AppProvider motion>
+        <Popup visible keyboardAvoiding testID="keyboard-panel">
+          <Text>input form</Text>
+        </Popup>
+      </AppProvider>
+    )
+    const view = await render(tree())
+    const findViewport = () =>
+      // Native layout is needed to simulate keyboard overlap without a device.
+      // eslint-disable-next-line testing-library/no-container
+      view.container.queryAll((node) => node.props.onLayout && node.props.collapsable === false)[0]
+    const findOffset = () =>
+      // eslint-disable-next-line testing-library/no-container
+      view.container.queryAll(
+        (node) => node.props.pointerEvents === 'box-none' && Boolean(flattenStyle(node).transform),
+      )[0]
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(screen.getByTestId('keyboard-panel'), 'layout', {
+      nativeEvent: { layout: { x: 0, y: 0, width: 300, height: 300 } },
+    })
+    await act(async () => {
+      await findViewport().props.onLayout({
+        persist: () => {},
+        nativeEvent: { layout: { x: 0, y: 0, width: 390, height: 800 } },
+      })
+      listeners.get(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow')?.({
+        duration: 250,
+        easing: 'keyboard',
+        startCoordinates: { screenY: 800, screenX: 0, width: 390, height: 0 },
+        endCoordinates: { screenY: 500, screenX: 0, width: 390, height: 300 },
+      })
+    })
+    await view.rerender(tree())
+    expect(flattenStyle(findOffset()).transform).toEqual([{ translateY: -50 }])
+    expect(timing).toHaveBeenCalledWith(-50, expect.objectContaining({ duration: 250 }), undefined)
+    expect(flattenStyle(screen.getByTestId('keyboard-panel')).maxHeight).toBe(500)
+    // A resized host already ending at the keyboard must not subtract it twice.
+    await act(async () => {
+      await findViewport().props.onLayout({
+        persist: () => {},
+        nativeEvent: { layout: { x: 0, y: 0, width: 390, height: 500 } },
+      })
+    })
+    await view.rerender(tree())
+    expect(flattenStyle(findOffset()).transform).toEqual([{ translateY: 0 }])
+    await act(async () => {
+      listeners.get(Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide')?.({
+        duration: 0,
+        easing: 'keyboard',
+        startCoordinates: { screenY: 500, screenX: 0, width: 390, height: 300 },
+        endCoordinates: { screenY: 800, screenX: 0, width: 390, height: 0 },
+      })
+    })
+    await view.rerender(tree())
+    expect(flattenStyle(findOffset()).transform).toEqual([{ translateY: 0 }])
   })
 
   it.each(['bottom', 'top', 'left', 'right'] as const)(

@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from 'react-native'
 import { MOTION_EASING } from './easing'
 import { springScalePreset, transitionPresets } from './effects'
 import { MOTION_LOOP_DURATION, MOTION_SCALE, MOTION_SPRING } from './token'
@@ -8,6 +9,25 @@ export function overlayAnimation(duration: number, entering: boolean): MotionAni
     duration,
     easing: entering ? MOTION_EASING.overlayEnter : MOTION_EASING.overlayExit,
     mode: 'timing',
+  }
+}
+
+// iOS supplies its keyboard timing; use the platform easing where it is expressible.
+export function keyboardAnimation(
+  duration?: number,
+  easing?: KeyboardEvent['easing'],
+): MotionAnimationConfig {
+  return {
+    ...LAYOUT_PRESET,
+    duration,
+    easing:
+      easing === 'linear'
+        ? MOTION_EASING.linear
+        : easing === 'easeIn'
+          ? MOTION_EASING.exit
+          : easing === 'easeOut'
+            ? MOTION_EASING.enter
+            : MOTION_EASING.standard,
   }
 }
 
