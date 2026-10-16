@@ -1,3 +1,4 @@
+import PortalControlledInputExample from './examples/controlled-input'
 import { FixtureOverview } from '../../fixture-overview'
 import PortalBasicExample from './examples/basic'
 import PortalImperativeExample from './examples/imperative'
@@ -11,6 +12,12 @@ export default function PortalOverview() {
     <FixtureOverview
       mode="single"
       examples={[
+        {
+          Component: PortalControlledInputExample,
+          description: '页面父级持有 value，验证中文输入和外部赋值、清空。',
+          id: 'controlled-input',
+          title: '父级受控输入',
+        },
         {
           Component: PortalBasicExample,
           description: 'Portal 会将内容渲染到 PortalHost 的宿主层。',

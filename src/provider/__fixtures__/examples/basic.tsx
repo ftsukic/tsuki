@@ -1,5 +1,5 @@
 import { Text } from 'react-native'
-import { Provider } from '../../..'
+import { TsukiProvider } from '../../..'
 
 /**
  * @title Application entry
@@ -7,8 +7,8 @@ import { Provider } from '../../..'
  */
 export default function ProviderBasicFixture() {
   return (
-    <Provider>
+    <TsukiProvider>
       <Text>Application content</Text>
-    </Provider>
+    </TsukiProvider>
   )
 }

@@ -1,6 +1,6 @@
 import { Text } from 'react-native'
 
-import { Provider } from '../../..'
+import { TsukiProvider } from '../../..'
 
 /**
  * @title Optional safe-area root
@@ -8,8 +8,8 @@ import { Provider } from '../../..'
  */
 export default function ProviderSafeAreaFixture() {
   return (
-    <Provider safeArea>
+    <TsukiProvider safeArea>
       <Text>Safe-area-aware application</Text>
-    </Provider>
+    </TsukiProvider>
   )
 }

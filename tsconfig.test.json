@@ -5,7 +5,8 @@
     "noEmit": true,
     "paths": {
       "@ftsukic/tsuki": ["src"],
-      "@/*": ["example/*"]
+      "@/*": ["example/*"],
+      "@ftsukic/tsuki/teleport": ["src/teleport.ts"]
     }
   },
   "include": ["src"]

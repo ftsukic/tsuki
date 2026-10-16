@@ -28,6 +28,11 @@ const requiredFiles = [
   'lib/typescript/commonjs/index.d.ts',
   'lib/typescript/module/index.d.ts',
   'src/index.ts',
+  'src/teleport.ts',
+  'lib/commonjs/teleport.js',
+  'lib/module/teleport.js',
+  'lib/typescript/commonjs/teleport.d.ts',
+  'lib/typescript/module/teleport.d.ts',
 ]
 const forbiddenPatterns = [
   /(^|\/)__tests__(\/|$)/,

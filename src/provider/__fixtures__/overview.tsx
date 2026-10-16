@@ -4,8 +4,8 @@ import ProviderGestureExample from './examples/gesture'
 import ProviderSafeAreaExample from './examples/safe-area'
 
 /**
- * @title Provider overview
- * @description Provider 汇总应用级主题和 Portal 上下文入口示例。
+ * @title TsukiProvider overview
+ * @description TsukiProvider 汇总应用级主题和 Portal 上下文入口示例。
  */
 export default function ProviderOverview() {
   return (
@@ -20,7 +20,7 @@ export default function ProviderOverview() {
         {
           Component: ProviderGestureExample,
           description:
-            'Provider enables the shared GestureHandlerRootView by default for gesture content.',
+            'TsukiProvider enables the shared GestureHandlerRootView by default for gesture content.',
           id: 'gesture',
           title: 'Default gesture root',
         },

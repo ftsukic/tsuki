@@ -1,21 +1,23 @@
 import { memo, useMemo, useRef } from 'react'
 
-import { Portal } from '../portal'
+import { PortalHost } from '../portal/portal-host'
 import { SwipeCellContext, SwipeCellPressContext } from '../swipe-cell/context'
 import { SwipeCellManager } from '../swipe-cell/manager'
 import { ConfigProvider } from '../theme'
 import { definedValues } from '../theme/resolve-theme'
 import { GestureProvider } from './gesture-provider'
 import { SafeAreaProvider } from './safe-area-provider'
-import type { ProviderProps } from './types'
+import type { TsukiProviderProps } from './types'
 
-export const Provider = memo(function Provider({
+export const TsukiProvider = memo(function TsukiProvider({
   children,
+  teleport = false,
+  portalBackend,
   gesture = true,
   safeArea = false,
   theme,
   motion,
-}: ProviderProps) {
+}: TsukiProviderProps) {
   const swipeCellManager = useRef(new SwipeCellManager()).current
 
   const resolvedTheme = useMemo(
@@ -29,7 +31,9 @@ export const Provider = memo(function Provider({
         <ConfigProvider theme={resolvedTheme}>
           <SwipeCellContext.Provider value={swipeCellManager}>
             <SwipeCellPressContext.Provider value={null}>
-              <Portal.Host>{children}</Portal.Host>
+              <PortalHost portalBackend={portalBackend} teleport={teleport}>
+                {children}
+              </PortalHost>
             </SwipeCellPressContext.Provider>
           </SwipeCellContext.Provider>
         </ConfigProvider>
@@ -38,4 +42,7 @@ export const Provider = memo(function Provider({
   )
 })
 
-Provider.displayName = 'Provider'
+TsukiProvider.displayName = 'TsukiProvider'
+
+/** @deprecated Use TsukiProvider. */
+export const Provider = TsukiProvider

@@ -7,7 +7,7 @@ import {
   closeToast,
   GestureProvider,
   Popup,
-  Provider,
+  TsukiProvider,
   resetDialogDefaultOptions,
   resetNotifyDefaultOptions,
   resetToastDefaultOptions,
@@ -35,7 +35,7 @@ function ThemeProbe() {
   return <Text testID="theme-probe">{token.colorPrimary}</Text>
 }
 
-describe('Provider', () => {
+describe('TsukiProvider', () => {
   afterEach(() => {
     cleanup()
     resetDialogDefaultOptions()
@@ -46,11 +46,11 @@ describe('Provider', () => {
 
   it('provides theme and Portal context to floating content', async () => {
     const view = await render(
-      <Provider theme={{ seed: { colorPrimary: '#123456', motion: false } }}>
+      <TsukiProvider theme={{ seed: { colorPrimary: '#123456', motion: false } }}>
         <Popup visible>
           <ThemeProbe />
         </Popup>
-      </Provider>,
+      </TsukiProvider>,
     )
 
     expect(screen.getByTestId('theme-probe')).toHaveTextContent('#123456')
@@ -58,7 +58,7 @@ describe('Provider', () => {
   })
 
   it('mounts Dialog, Toast, and Notify command APIs without individual providers', async () => {
-    const view = await render(<Provider theme={{ seed: { motion: false } }} />)
+    const view = await render(<TsukiProvider theme={{ seed: { motion: false } }} />)
 
     await act(async () => {
       showToast({ duration: 0, message: '统一 Toast' })
@@ -82,11 +82,11 @@ describe('Provider', () => {
     await view.unmount()
   })
 
-  it('updates and closes Toast in its original Provider after another root mounts', async () => {
+  it('updates and closes Toast in its original TsukiProvider after another root mounts', async () => {
     const theme = { seed: { motion: false } }
     const view = await render(
       <>
-        <Provider key="first" theme={theme} />
+        <TsukiProvider key="first" theme={theme} />
       </>,
     )
     let instance!: ReturnType<typeof showToast>
@@ -95,8 +95,8 @@ describe('Provider', () => {
     })
     await view.rerender(
       <>
-        <Provider key="first" theme={theme} />
-        <Provider key="second" theme={theme} />
+        <TsukiProvider key="first" theme={theme} />
+        <TsukiProvider key="second" theme={theme} />
       </>,
     )
     await act(async () => {
@@ -122,24 +122,24 @@ describe('Provider', () => {
       )
     }
     const view = await render(
-      <Provider {...initial} theme={{ seed: { colorPrimary: '#123456' } }}>
+      <TsukiProvider {...initial} theme={{ seed: { colorPrimary: '#123456' } }}>
         <Counter />
         <ThemeProbe />
-      </Provider>,
+      </TsukiProvider>,
     )
     // RNTL 14 的事件返回 Promise；当前 lint 规则仍按旧版同步签名判断。
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent.press(screen.getByTestId('counter'))
     expect(screen.getByTestId('counter')).toHaveTextContent('1')
     await view.rerender(
-      <Provider
+      <TsukiProvider
         gesture={!initial.gesture}
         safeArea={!initial.safeArea}
         theme={{ seed: { colorPrimary: '#654321' } }}
       >
         <Counter />
         <ThemeProbe />
-      </Provider>,
+      </TsukiProvider>,
     )
     expect(screen.getByTestId('counter')).toHaveTextContent('1')
     expect(screen.getByTestId('theme-probe')).toHaveTextContent('#654321')
@@ -148,12 +148,12 @@ describe('Provider', () => {
   it('supports multiple provider roots', async () => {
     await render(
       <>
-        <Provider>
+        <TsukiProvider>
           <Text testID="first-provider">first</Text>
-        </Provider>
-        <Provider>
+        </TsukiProvider>
+        <TsukiProvider>
           <Text testID="second-provider">second</Text>
-        </Provider>
+        </TsukiProvider>
       </>,
     )
 
@@ -163,22 +163,22 @@ describe('Provider', () => {
 
   it('adds a gesture root by default for gesture-enabled components', async () => {
     const view = await render(
-      <Provider>
+      <TsukiProvider>
         <Text testID="default-provider-child">child</Text>
-      </Provider>,
+      </TsukiProvider>,
     )
 
     expect(screen.getByTestId('default-provider-child')).toHaveTextContent('child')
-    // The tree shape verifies that Provider supplies the root required by GestureDetector.
+    // The tree shape verifies that TsukiProvider supplies the root required by GestureDetector.
     expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(2)
     await view.unmount()
   })
 
   it('optionally wraps content with GestureHandlerRootView', async () => {
     const view = await render(
-      <Provider gesture>
+      <TsukiProvider gesture>
         <Text testID="gesture-provider-child">child</Text>
-      </Provider>,
+      </TsukiProvider>,
     )
 
     expect(screen.getByTestId('gesture-provider-child')).toHaveTextContent('child')
@@ -189,9 +189,9 @@ describe('Provider', () => {
 
   it('optionally wraps content with SafeAreaProvider', async () => {
     const view = await render(
-      <Provider safeArea>
+      <TsukiProvider safeArea>
         <Text testID="safe-area-provider-child">child</Text>
-      </Provider>,
+      </TsukiProvider>,
     )
 
     expect(screen.getByTestId('safe-area-provider-child')).toHaveTextContent('child')
@@ -204,14 +204,14 @@ describe('Provider', () => {
   it('works inside an externally provided gesture root', async () => {
     const view = await render(
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <Provider>
+        <TsukiProvider>
           <Text testID="external-gesture-provider-child">child</Text>
-        </Provider>
+        </TsukiProvider>
       </GestureHandlerRootView>,
     )
 
     expect(screen.getByTestId('external-gesture-provider-child')).toHaveTextContent('child')
-    // Provider owns its root so bare Provider usage is gesture-ready even in a nested tree.
+    // TsukiProvider owns its root so bare TsukiProvider usage is gesture-ready even in a nested tree.
     expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(3)
     await view.unmount()
   })

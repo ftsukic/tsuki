@@ -1,5 +1,5 @@
-export { Provider } from './provider'
-export type { ProviderProps } from './types'
+export { TsukiProvider, Provider } from './provider'
+export type { TsukiProviderProps, ProviderProps } from './types'
 export { GestureProvider } from './gesture-provider'
 export type { GestureProviderProps } from './gesture-provider'
 export { SafeAreaProvider } from './safe-area-provider'

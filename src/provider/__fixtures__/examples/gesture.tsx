@@ -1,15 +1,15 @@
 import { Text } from 'react-native'
 
-import { Provider } from '../../..'
+import { TsukiProvider } from '../../..'
 
 /**
  * @title Default gesture root
- * @description Provider enables the shared GestureHandlerRootView by default for gesture content.
+ * @description TsukiProvider enables the shared GestureHandlerRootView by default for gesture content.
  */
 export default function ProviderGestureFixture() {
   return (
-    <Provider>
+    <TsukiProvider>
       <Text>Gesture-enabled application</Text>
-    </Provider>
+    </TsukiProvider>
   )
 }

@@ -33,7 +33,7 @@ export class PortalConsumer extends Component<PortalConsumerProps> {
     const { manager } = this.props
     if (!manager) {
       throw new Error(
-        'Looks like you forgot to wrap your root component with `Provider` component from `@ftsukic/tsuki`.',
+        'Looks like you forgot to wrap your root component with `TsukiProvider` component from `@ftsukic/tsuki`.',
       )
     }
     return manager

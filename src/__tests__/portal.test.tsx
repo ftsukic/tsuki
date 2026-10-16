@@ -8,6 +8,7 @@ import {
   updatePortal,
   useToken,
 } from '..'
+import { PortalHostContainer } from '../portal/portal-host'
 import type { PortalManager } from '../portal/portal-manager'
 import { StyleSheet, Text, View } from 'react-native'
 import { useEffect, type ReactNode } from 'react'
@@ -168,7 +169,7 @@ describe('Portal', () => {
       update: jest.fn(),
       unmount: jest.fn(),
     } as unknown as PortalManager
-    const host = new PortalHost({ children: null })
+    const host = new PortalHostContainer({ children: null })
     const internals = host as unknown as HostInternals
     const retainedKey = internals.mount(<Text>first</Text>)
     internals.update(retainedKey, <Text>updated</Text>)

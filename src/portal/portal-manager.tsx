@@ -1,3 +1,4 @@
+import type { PortalBackend } from './types'
 import { PureComponent } from 'react'
 import { StyleSheet, View } from 'react-native'
 import type { ReactNode } from 'react'
@@ -12,7 +13,10 @@ interface PortalManagerState {
 }
 
 /** Renders the portal entries managed by the nearest PortalHost. */
-export class PortalManager extends PureComponent<Record<string, unknown>, PortalManagerState> {
+export class PortalManager extends PureComponent<
+  { backend?: PortalBackend; hostName?: string },
+  PortalManagerState
+> {
   static displayName = 'PortalManager'
 
   state: PortalManagerState = { portals: [] }
@@ -38,10 +42,25 @@ export class PortalManager extends PureComponent<Record<string, unknown>, Portal
   }
 
   render() {
-    return this.state.portals.map(({ key, children }) => (
-      <View key={key} collapsable={false} pointerEvents="box-none" style={StyleSheet.absoluteFill}>
-        {children}
-      </View>
-    ))
+    const NativePortal = this.props.backend?.Portal
+    return this.state.portals.map(({ key, children }) => {
+      const layer = (
+        <View
+          key={key}
+          collapsable={false}
+          pointerEvents="box-none"
+          style={StyleSheet.absoluteFill}
+        >
+          {children}
+        </View>
+      )
+      return NativePortal && this.props.hostName ? (
+        <NativePortal key={key} hostName={this.props.hostName}>
+          {layer}
+        </NativePortal>
+      ) : (
+        layer
+      )
+    })
   }
 }

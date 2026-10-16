@@ -1,14 +1,15 @@
 import { Component } from 'react'
+import { PortalBackendProvider } from './backend-provider'
 import { StyleSheet, View } from 'react-native'
-import { PortalContext } from './context'
+import { PortalBackendContext, PortalDestinationContext, PortalContext } from './context'
 import { PortalManager } from './portal-manager'
 import { BackgroundScrollLockContext, createScrollLockStore } from './scroll-lock'
 import type { PortalHostProps, PortalKey, PortalMethods } from './types'
-import type { ReactNode } from 'react'
+import type { ContextType, ReactNode } from 'react'
 
-let activeManager: PortalMethods | null = null
 const hostRegistry: PortalMethods[] = []
 let nextPortalKey = 0
+let nextHostKey = 0
 const portalOwners = new Map<PortalKey, PortalMethods>()
 
 type Operation =
@@ -22,8 +23,10 @@ const styles = StyleSheet.create({
   },
 })
 
-export class PortalHost extends Component<PortalHostProps> {
+export class PortalHostContainer extends Component<PortalHostProps> {
   static displayName = 'Portal.Host'
+  static contextType = PortalBackendContext
+  private readonly hostName = `tsuki-portal-${nextHostKey++}`
 
   private readonly scrollLock = createScrollLockStore()
   private manager: PortalManager | null = null
@@ -41,14 +44,12 @@ export class PortalHost extends Component<PortalHostProps> {
 
   componentDidMount() {
     hostRegistry.push(this.methods)
-    activeManager = this.methods
     this.flushQueue()
   }
 
   componentWillUnmount() {
     const hostIndex = hostRegistry.indexOf(this.methods)
     if (hostIndex >= 0) hostRegistry.splice(hostIndex, 1)
-    activeManager = hostRegistry[hostRegistry.length - 1] ?? null
     this.queue = []
     for (const [key, owner] of portalOwners) {
       if (owner === this.methods) portalOwners.delete(key)
@@ -126,15 +127,24 @@ export class PortalHost extends Component<PortalHostProps> {
   }
 
   render() {
+    const backend = this.context as ContextType<typeof PortalBackendContext>
+    const NativeHost = backend?.Host
     return (
       <BackgroundScrollLockContext.Provider value={this.scrollLock}>
         <PortalContext.Provider value={this.methods}>
-          <View collapsable={false} style={styles.container}>
+          <PortalDestinationContext.Provider value={{ backend, hostName: this.hostName }}>
             <View collapsable={false} style={styles.container}>
-              {this.props.children}
+              <View collapsable={false} style={styles.container}>
+                {this.props.children}
+              </View>
+              <PortalManager ref={this.setManager} backend={backend} hostName={this.hostName} />
+              {NativeHost ? (
+                <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
+                  <NativeHost name={this.hostName} style={styles.container} />
+                </View>
+              ) : null}
             </View>
-            <PortalManager ref={this.setManager} />
-          </View>
+          </PortalDestinationContext.Provider>
         </PortalContext.Provider>
       </BackgroundScrollLockContext.Provider>
     )
@@ -142,11 +152,11 @@ export class PortalHost extends Component<PortalHostProps> {
 }
 
 export function mountPortal(children: ReactNode): PortalKey {
-  if (!activeManager) {
+  const owner = hostRegistry[hostRegistry.length - 1]
+  if (!owner) {
     throw new Error('PortalHost must be rendered before mounting an imperative portal')
   }
 
-  const owner = activeManager
   const key = owner.mount(children)
   portalOwners.set(key, owner)
   return key
@@ -161,3 +171,14 @@ export function unmountPortal(key: PortalKey): void {
   portalOwners.delete(key)
   owner?.unmount(key)
 }
+
+/** Select a backend once, or inherit the nearest Provider/Host configuration. */
+export function PortalHost({ children, teleport, portalBackend }: PortalHostProps) {
+  return (
+    <PortalBackendProvider backend={portalBackend} teleport={teleport}>
+      <PortalHostContainer>{children}</PortalHostContainer>
+    </PortalBackendProvider>
+  )
+}
+
+PortalHost.displayName = 'Portal.Host'
