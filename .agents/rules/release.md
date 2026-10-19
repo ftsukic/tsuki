@@ -10,6 +10,6 @@
 ## 发布流程的事实来源
 
 - 使用 `docs/releasing.md`、`.github/workflows/publish.yml`、`.changeset/`、`scripts/validate-release.cjs` 和 `scripts/validate-package.cjs` 作为 release fact。本 Rule 不复制 workflow implementation。
-- 文档化流程是 Changeset 合并到 `main`、执行 release versioning 并 review、commit 和 push、CI 通过、创建匹配的 `vX.Y.Z` tag、push tag、GitHub Actions 以及 npm Trusted Publishing。
+- 文档化流程是 Changeset 合并到对应发布分支（`0.*` 使用 `0.x`，新主版本使用 `main`）、执行 release versioning 并 review、commit 和 push、CI 通过、创建匹配的 `vX.Y.Z` tag、push tag、GitHub Actions 以及 npm Trusted Publishing。
 - 不要将本地 `npm publish`、本地 npm credential、token 或 OTP 引入为标准 release path。
 - 不要在 component 或 Agent Context work 中顺便修改 release workflow、validation script、package content 或 versioning。
