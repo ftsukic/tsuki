@@ -1,3 +1,4 @@
+import { PortalHost } from './test-host'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { useState } from 'react'
 import CheckOutlined from '@ant-design/icons-svg/lib/asn/CheckOutlined'
@@ -8,7 +9,6 @@ import {
   allowMultipleToast,
   closeToast,
   ConfigProvider,
-  PortalHost,
   resetToastDefaultOptions,
   setToastDefaultOptions,
   showFailToast,
@@ -269,7 +269,7 @@ describe('Toast', () => {
     expect(
       findNode(spinnerToJSON(), (node) => {
         const style = StyleSheet.flatten(node.props.style)
-        const transforms = style.transform as Array<{ rotate?: string }> | undefined
+        const transforms = style?.transform as Array<{ rotate?: string }> | undefined
         return transforms?.some((item) => item.rotate === '45deg') ?? false
       }),
     ).toBeTruthy()
@@ -298,14 +298,10 @@ describe('Toast', () => {
         <ControlledToast />
       </AppProvider>,
     )
-    let portalLayer = screen.getByRole('alert').parent
-    while (
-      portalLayer &&
-      !(portalLayer.props.collapsable === false && portalLayer.props.pointerEvents === 'box-none')
-    ) {
-      portalLayer = portalLayer.parent
-    }
-    expect(portalLayer).toBeTruthy()
+    let teleportPortal = screen.getByRole('alert').parent
+    while (teleportPortal && teleportPortal.type !== 'Portal')
+      teleportPortal = teleportPortal.parent
+    expect(teleportPortal).toBeTruthy()
 
     // RNTL's fireEvent schedules the controlled state update through async act in React 19.
     // eslint-disable-next-line testing-library/no-unnecessary-act
@@ -407,9 +403,9 @@ describe('Toast', () => {
     await view.unmount()
   })
 
-  it('requires PortalHost and clears timers on host unmount', async () => {
-    expect(() => showToast('没有宿主')).toThrow(
-      'PortalHost must be rendered before mounting an imperative portal',
+  it('requires the TsukiProvider renderer and clears timers on provider unmount', async () => {
+    expect(() => showToast('没有 TsukiProvider')).toThrow(
+      'Mount TsukiProvider inside react-native-teleport PortalProvider before showing overlays',
     )
 
     jest.useFakeTimers()
@@ -436,14 +432,13 @@ describe('Toast', () => {
     await view.unmount()
   })
 
-  it('requires a Portal.Host', async () => {
-    await expect(
-      render(
-        <ConfigProvider>
-          <Toast show message="没有 Portal 宿主" />
-        </ConfigProvider>,
-      ),
-    ).rejects.toThrow()
+  it('renders controlled Toast inside the application Teleport provider', async () => {
+    await render(
+      <AppProvider>
+        <Toast show message="Teleport root" />
+      </AppProvider>,
+    )
+    expect(screen.getByText('Teleport root')).toBeTruthy()
   })
 
   it('does not restart the entrance animation when only the provider rerenders', async () => {

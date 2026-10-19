@@ -1,3 +1,4 @@
+import { PortalHost } from './test-host'
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react-native'
 import { useState } from 'react'
 import { StyleSheet, Text, useWindowDimensions } from 'react-native'
@@ -8,7 +9,6 @@ import {
   ConfigProvider,
   getActionSheetToken,
   getDesignToken,
-  PortalHost,
   resetActionSheetDefaultOptions,
   showActionSheet,
 } from '..'

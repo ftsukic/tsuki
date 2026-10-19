@@ -4,7 +4,7 @@ import {
   unmountPreviewPortal as unmountPortal,
   updatePreviewPortal as updatePortal,
 } from './preview-host'
-import type { PortalKey } from '../portal'
+import type { PortalKey } from '../portal/types'
 import { ImagePreviewContent } from './image-preview-content'
 import type { ImagePreviewCloseReason, ImagePreviewImperativeOptions } from './types'
 

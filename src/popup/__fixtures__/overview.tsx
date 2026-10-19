@@ -31,7 +31,7 @@ export default function PopupOverview() {
         },
         {
           Component: PopupBasicExample,
-          description: 'Popup 通过 visible 受控显示，默认居中并使用 PortalHost 承载浮层。',
+          description: 'Popup 通过 visible 受控显示，默认居中并使用 Teleport 承载浮层。',
           id: 'basic',
           title: '基础用法',
         },

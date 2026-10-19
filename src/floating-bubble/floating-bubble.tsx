@@ -16,7 +16,7 @@ import { StyleSheet, useWindowDimensions, View } from 'react-native'
 import type { LayoutChangeEvent, StyleProp, View as ViewComponent, ViewStyle } from 'react-native'
 import { Gesture, GestureDetector } from '../gesture'
 import { Pressable } from '../pressable'
-import { Portal } from '../portal'
+import { TeleportPortal as Portal } from '../portal/teleport-portal'
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
 import { Icon } from '../icon'
@@ -538,7 +538,7 @@ export const FloatingBubble = forwardRef<ViewComponent, FloatingBubbleProps>(
     const content = children !== undefined ? children : resolvedIcon
 
     return (
-      <Portal>
+      <Portal hostName="root">
         <View
           pointerEvents="box-none"
           style={StyleSheet.absoluteFill}

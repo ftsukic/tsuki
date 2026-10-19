@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
 import { ImagePreviewSourcesContext } from './context'
 import type { ImagePreviewSourcesContextValue } from './context'
-import { PortalContext, PortalDestinationContext } from '../portal/context'
-import { mountPortal, updatePortal, unmountPortal } from '../portal/portal-host'
+import { mountPortal, updatePortal, unmountPortal } from '../portal/imperative'
 
 const hosts: ImagePreviewSourcesContextValue[] = []
 const entries = new Map<
@@ -24,29 +23,22 @@ export function registerPreviewHost(host: ImagePreviewSourcesContextValue) {
 }
 export function mountPreviewPortal(node: ReactNode): number {
   const host = hosts[hosts.length - 1]
-  const manager = host?.rootManager
   const wrap = (child: ReactNode) =>
     host ? (
-      <PortalContext.Provider value={manager}>
-        <PortalDestinationContext.Provider value={host.rootDestination}>
-          <ImagePreviewSourcesContext.Provider value={host}>
-            {child}
-          </ImagePreviewSourcesContext.Provider>
-        </PortalDestinationContext.Provider>
-      </PortalContext.Provider>
+      <ImagePreviewSourcesContext.Provider value={host}>
+        {child}
+      </ImagePreviewSourcesContext.Provider>
     ) : (
       child
     )
-  const nativeKey = manager ? manager.mount(wrap(node)) : mountPortal(node)
+  const nativeKey = mountPortal(wrap(node))
   const key = nextKey--
   entries.set(key, {
     host,
-    update: (child) =>
-      manager ? manager.update(nativeKey, wrap(child)) : updatePortal(nativeKey, child),
+    update: (child) => updatePortal(nativeKey, wrap(child)),
     unmount: () => {
       entries.delete(key)
-      if (manager) manager.unmount(nativeKey)
-      else unmountPortal(nativeKey)
+      unmountPortal(nativeKey)
     },
   })
   return key

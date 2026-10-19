@@ -1,12 +1,11 @@
+import { PortalHost } from './test-host'
 import * as interactionModule from '../image-preview/useImagePreviewInteraction'
 /* eslint-disable testing-library/no-await-sync-events -- The installed fireEvent API returns a Promise. */
-import React, { useContext, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import * as Reanimated from 'react-native-reanimated'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { Text, View } from 'react-native'
-import { ImagePreview, Popup, PortalHost } from '..'
-import { PortalContext, PortalDestinationContext } from '../portal/context'
-import type { PortalMethods } from '../portal/types'
+import { ImagePreview } from '..'
 import type { ImagePreviewImage, ImagePreviewImageRenderProps } from '../image-preview/types'
 import { ImagePreviewContent } from '../image-preview/image-preview-content'
 
@@ -76,63 +75,6 @@ describe('ImagePreview source destinations', () => {
     }
   })
 
-  it('mounts an overlay Popup in the viewer root host when its page has another host', async () => {
-    let rootManager!: PortalMethods
-    function RootProbe() {
-      rootManager = useContext(PortalContext)!
-      return null
-    }
-    const nested: PortalMethods = {
-      mount: jest.fn(() => 10),
-      update: jest.fn(),
-      unmount: jest.fn(),
-    }
-    const tree = (showMenu: boolean) => (
-      <PortalHost>
-        <RootProbe />
-        <ImagePreview.Provider>
-          <PortalContext.Provider value={nested}>
-            <PortalDestinationContext.Provider value={{ backend: undefined, hostName: 'page' }}>
-              <ImagePreview
-                visible
-                items={[items[0]]}
-                interactionDisabled={showMenu}
-                transitionDuration={0}
-                renderOverlay={({ id }) =>
-                  showMenu ? (
-                    <Popup
-                      visible
-                      duration={0}
-                      position="bottom"
-                      styles={{ container: { height: 200 } }}
-                    >
-                      <Text>{`Menu for ${id}`}</Text>
-                    </Popup>
-                  ) : null
-                }
-              />
-            </PortalDestinationContext.Provider>
-          </PortalContext.Provider>
-        </ImagePreview.Provider>
-      </PortalHost>
-    )
-    const view = await render(tree(false))
-    await layoutPreview()
-    const mount = jest.spyOn(rootManager, 'mount')
-    try {
-      await view.rerender(tree(true))
-      await waitFor(() => expect(mount).toHaveBeenCalledTimes(1))
-      expect(nested.mount).not.toHaveBeenCalled()
-      expect(screen.getByText('Menu for a')).toBeTruthy()
-      expect(
-        screen.getByTestId('image-preview-controls', { includeHiddenElements: true }).props
-          .pointerEvents,
-      ).toBe('none')
-    } finally {
-      mount.mockRestore()
-    }
-  })
-
   it('finishes opening when the provider context changes during source measurement', async () => {
     let resolveSource!: (rect: null) => void
     const getSourceRect = jest.fn(
@@ -142,32 +84,28 @@ describe('ImagePreview source destinations', () => {
         }),
     )
     const opened = jest.fn()
-    const tree = (revision: number) => (
-      <PortalDestinationContext.Provider
-        value={{ backend: undefined, hostName: `root-${revision}` }}
-      >
-        <ImagePreview.Provider>
-          <ImagePreview.Source imageId="a" testID="source">
-            <Text>Thumbnail</Text>
-          </ImagePreview.Source>
-          <ImagePreviewContent
-            visible
-            items={[items[0]]}
-            getSourceRect={getSourceRect}
-            transitionDuration={0}
-            onOpened={opened}
-          />
-        </ImagePreview.Provider>
-      </PortalDestinationContext.Provider>
+    const tree = () => (
+      <ImagePreview.Provider>
+        <ImagePreview.Source imageId="a" testID="source">
+          <Text>Thumbnail</Text>
+        </ImagePreview.Source>
+        <ImagePreviewContent
+          visible
+          items={[items[0]]}
+          getSourceRect={getSourceRect}
+          transitionDuration={0}
+          onOpened={opened}
+        />
+      </ImagePreview.Provider>
     )
-    const view = await render(tree(0))
+    const view = await render(tree())
     await waitFor(() => {
       expect(screen.getByTestId('image-preview-pager-layer')).toHaveStyle({ opacity: 0 })
       expect(screen.getByTestId('image-preview-mask')).toHaveStyle({ opacity: 0 })
       expect(screen.getByTestId('image-preview-controls')).toHaveStyle({ opacity: 0 })
     })
     await layoutPreview()
-    await view.rerender(tree(1))
+    await view.rerender(tree())
     await act(() => resolveSource(null))
     await waitFor(() => expect(opened).toHaveBeenCalledTimes(1))
     expect(getSourceRect).toHaveBeenCalledTimes(1)
@@ -204,26 +142,6 @@ describe('ImagePreview source destinations', () => {
     await waitFor(() =>
       expect(screen.queryByTestId('image-preview', { includeHiddenElements: true })).toBeNull(),
     )
-  })
-
-  it('uses the captured root host even when opened from a nested page host', async () => {
-    const root: PortalMethods = { mount: jest.fn(() => 1), update: jest.fn(), unmount: jest.fn() }
-    const nested: PortalMethods = { mount: jest.fn(() => 2), update: jest.fn(), unmount: jest.fn() }
-    await render(
-      <PortalContext.Provider value={root}>
-        <PortalDestinationContext.Provider value={null}>
-          <ImagePreview.Provider>
-            <PortalContext.Provider value={nested}>
-              <PortalDestinationContext.Provider value={{ backend: undefined, hostName: 'nested' }}>
-                <ImagePreview visible items={items} transitionDuration={0} />
-              </PortalDestinationContext.Provider>
-            </PortalContext.Provider>
-          </ImagePreview.Provider>
-        </PortalDestinationContext.Provider>
-      </PortalContext.Provider>,
-    )
-    expect(root.mount).toHaveBeenCalledTimes(1)
-    expect(nested.mount).not.toHaveBeenCalled()
   })
 
   it('hides the source through opening and closing, restoring it only after the return completes', async () => {

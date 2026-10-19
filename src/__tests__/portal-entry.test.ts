@@ -41,11 +41,12 @@ function dependencies(entry: string, visited = new Set<string>()) {
   return visited
 }
 
-it('keeps Teleport outside the default runtime dependency graph', () => {
+it('uses Teleport in the package runtime and removes the optional backend entry', () => {
   expect(dependencies(path.resolve(__dirname, '../index.ts')).has('react-native-teleport')).toBe(
-    false,
-  )
-  expect(dependencies(path.resolve(__dirname, '../teleport.ts')).has('react-native-teleport')).toBe(
     true,
   )
+  const manifest = JSON.parse(
+    fs.readFileSync(path.resolve(__dirname, '../../package.json'), 'utf8'),
+  )
+  expect(manifest.exports['./teleport']).toBeUndefined()
 })

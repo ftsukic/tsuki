@@ -11,7 +11,7 @@ import { cancelAnimation, useAnimatedStyle, useSharedValue } from 'react-native-
 import { scheduleOnRN } from 'react-native-worklets'
 import { Animated } from '../motion'
 import { OverlaySurface } from '../overlay/overlay-surface'
-import { Portal } from '../portal'
+import { TeleportPortal as Portal } from '../portal/teleport-portal'
 import { useComponentToken } from '../theme'
 import { getDropdownToken } from './token'
 import type { DropdownDirection } from './types'
@@ -513,7 +513,7 @@ export function DropdownPopup({
   ) : null
 
   return (
-    <Portal>
+    <Portal hostName="root">
       {rendered ? (
         <View
           testID="dropdown-background-blocker"

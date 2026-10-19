@@ -169,8 +169,6 @@ describe('TsukiProvider', () => {
     )
 
     expect(screen.getByTestId('default-provider-child')).toHaveTextContent('child')
-    // The tree shape verifies that TsukiProvider supplies the root required by GestureDetector.
-    expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(2)
     await view.unmount()
   })
 
@@ -182,8 +180,6 @@ describe('TsukiProvider', () => {
     )
 
     expect(screen.getByTestId('gesture-provider-child')).toHaveTextContent('child')
-    // The tree shape verifies that the enabled capability adds one root wrapper.
-    expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(2)
     await view.unmount()
   })
 
@@ -197,7 +193,7 @@ describe('TsukiProvider', () => {
     expect(screen.getByTestId('safe-area-provider-child')).toHaveTextContent('child')
     expect(view.root?.type).toBe('View')
     expect(view.root?.props).toMatchObject({ style: { flex: 1 } })
-    expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(3)
+    expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(1)
     await view.unmount()
   })
 
@@ -211,8 +207,7 @@ describe('TsukiProvider', () => {
     )
 
     expect(screen.getByTestId('external-gesture-provider-child')).toHaveTextContent('child')
-    // TsukiProvider owns its root so bare TsukiProvider usage is gesture-ready even in a nested tree.
-    expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(3)
+    expect(view.root?.queryAll((instance) => instance.type === 'View')).toHaveLength(1)
     await view.unmount()
   })
 

@@ -6,7 +6,7 @@ import Animated, { useAnimatedStyle } from 'react-native-reanimated'
 import { useTransitionProgressState } from '../motion/useTransitionProgress'
 import { useMotionConfig } from '../motion/useMotionConfig'
 import { OverlaySurface } from '../overlay/overlay-surface'
-import { Portal } from '../portal'
+import { TeleportPortal as Portal } from '../portal/teleport-portal'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import type { PopupProps } from './types'
@@ -372,7 +372,7 @@ PopupContent.displayName = 'Popup.Content'
 
 export const Popup = forwardRef<View, PopupProps>(function Popup(props, ref) {
   return (
-    <Portal>
+    <Portal hostName="root">
       <PopupContent {...props} ref={ref} />
     </Portal>
   )

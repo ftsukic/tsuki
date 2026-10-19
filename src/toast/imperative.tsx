@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { ToastContent } from './toast'
 import type { ToastInstance, ToastMessage, ToastOptions, ToastType } from './types'
-import { mountPortal, unmountPortal, updatePortal } from '../portal'
-import type { PortalKey } from '../portal'
+import { mountPortal, unmountPortal, updatePortal } from '../portal/imperative'
+import type { PortalKey } from '../portal/imperative'
 
 interface ToastRecord {
   id: number
@@ -141,7 +141,7 @@ function showResolvedToast(options: ToastOptions): ToastInstance {
   return record.instance
 }
 
-/** Displays a Toast through the active PortalHost. */
+/** Displays a Toast through the TsukiProvider Teleport renderer. */
 export function showToast(input?: ToastOptions | string | number): ToastInstance {
   return showResolvedToast(resolveOptions(undefined, input))
 }

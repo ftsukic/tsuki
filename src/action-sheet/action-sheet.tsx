@@ -6,7 +6,7 @@ import type { StyleProp, TextStyle } from 'react-native'
 import { Pressable } from '../pressable'
 import { Loading } from '../loading'
 import { PopupContent } from '../popup/popup'
-import { Portal } from '../portal'
+import { TeleportPortal as Portal } from '../portal/teleport-portal'
 import { resolveStyles } from '../style'
 import { Text } from '../text'
 import { useComponentToken } from '../theme'
@@ -255,7 +255,7 @@ ActionSheetContent.displayName = 'ActionSheet.Content'
 
 export const ActionSheet = forwardRef<View, ActionSheetProps>(function ActionSheet(props, ref) {
   return (
-    <Portal>
+    <Portal hostName="root">
       <ActionSheetContent {...props} ref={ref} />
     </Portal>
   )

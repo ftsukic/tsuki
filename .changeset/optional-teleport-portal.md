@@ -1,5 +1,5 @@
 ---
-'@ftsukic/tsuki': minor
+'@ftsukic/tsuki': major
 ---
 
-新增独立 @ftsukic/tsuki/teleport 入口，通过 portalBackend 配置 Teleport。默认 JS 入口无需安装 Teleport。teleport 属性弃用，启用时须迁移到显式后端配置。声明式浮层使用稳定的非阻塞容器，保持子节点重建时的叠放顺序。
+移除 Tsuki JS Portal 实现与可选后端配置，改为直接依赖 react-native-teleport。应用必须在 TsukiProvider 外挂载 PortalProvider；函数式弹层由 TsukiProvider 内的 React 承载器渲染至 Teleport root。移除 Tsuki 的 Portal、PortalHost 和底层 mount/update/unmount 导出。

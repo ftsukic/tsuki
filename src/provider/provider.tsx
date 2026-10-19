@@ -1,6 +1,7 @@
 import { memo, useMemo, useRef } from 'react'
 
-import { PortalHost } from '../portal/portal-host'
+import { ImperativePortalRenderer } from '../portal/imperative'
+import { BackgroundScrollLockContext, createScrollLockStore } from '../portal/scroll-lock'
 import { SwipeCellContext, SwipeCellPressContext } from '../swipe-cell/context'
 import { SwipeCellManager } from '../swipe-cell/manager'
 import { ConfigProvider } from '../theme'
@@ -11,14 +12,13 @@ import type { TsukiProviderProps } from './types'
 
 export const TsukiProvider = memo(function TsukiProvider({
   children,
-  teleport = false,
-  portalBackend,
   gesture = true,
   safeArea = false,
   theme,
   motion,
 }: TsukiProviderProps) {
   const swipeCellManager = useRef(new SwipeCellManager()).current
+  const scrollLock = useRef(createScrollLockStore()).current
 
   const resolvedTheme = useMemo(
     () => (motion ? { ...theme, motion: { ...theme?.motion, ...definedValues(motion) } } : theme),
@@ -31,9 +31,10 @@ export const TsukiProvider = memo(function TsukiProvider({
         <ConfigProvider theme={resolvedTheme}>
           <SwipeCellContext.Provider value={swipeCellManager}>
             <SwipeCellPressContext.Provider value={null}>
-              <PortalHost portalBackend={portalBackend} teleport={teleport}>
+              <BackgroundScrollLockContext.Provider value={scrollLock}>
+                <ImperativePortalRenderer />
                 {children}
-              </PortalHost>
+              </BackgroundScrollLockContext.Provider>
             </SwipeCellPressContext.Provider>
           </SwipeCellContext.Provider>
         </ConfigProvider>

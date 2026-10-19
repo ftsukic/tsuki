@@ -1,3 +1,4 @@
+import { TeleportPortal as Portal } from '../portal/teleport-portal'
 /* RNTL 14 fireEvent returns a Promise; the lint plugin still assumes sync events. */
 /* eslint testing-library/no-await-sync-events: "off" */
 import React from 'react'
@@ -12,7 +13,6 @@ import {
   Cell,
   ConfigProvider,
   TsukiProvider,
-  Portal,
   SwipeCell,
   SwipeCellAction,
   SwipeCellGroup,
@@ -1282,11 +1282,9 @@ describe('SwipeCell', () => {
           onClose={onClose}
           closeOnActionPress={false}
           rightAction={
-            <Portal.Host>
-              <Portal>
-                <Cell testID="floating-action" title="浮层" />
-              </Portal>
-            </Portal.Host>
+            <Portal hostName="root">
+              <Cell testID="floating-action" title="浮层" />
+            </Portal>
           }
         />
       </SwipeCellProvider>,

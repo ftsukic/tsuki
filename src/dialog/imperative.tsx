@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { DialogContent } from './dialog'
 import type { DialogAction, DialogBeforeClose, DialogOptions } from './types'
-import { mountPortal, unmountPortal, updatePortal } from '../portal'
-import type { PortalKey } from '../portal'
+import { mountPortal, unmountPortal, updatePortal } from '../portal/imperative'
+import type { PortalKey } from '../portal/imperative'
 
 interface DialogRecord {
   identity: object
@@ -128,7 +128,7 @@ function DialogMethod({ record }: { record: DialogRecord }) {
   )
 }
 
-/** Displays a Dialog through the active PortalHost. */
+/** Displays a Dialog through the TsukiProvider Teleport renderer. */
 export function showDialog(options: DialogOptions = {}): Promise<DialogAction | undefined> {
   let resolvePromise!: (action: DialogAction | undefined) => void
   let rejectPromise!: (action: 'cancel') => void

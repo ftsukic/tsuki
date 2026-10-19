@@ -7,7 +7,7 @@ import type { IconDefinition } from '@ant-design/icons-svg/lib/types'
 import { Icon } from '../icon'
 import { isIconName } from '../icon/icon-definitions'
 import { Loading } from '../loading'
-import { Portal } from '../portal'
+import { TeleportPortal as Portal } from '../portal/teleport-portal'
 import { resolveStyles } from '../style'
 import { Text } from '../text'
 import { useComponentToken, useToken } from '../theme'
@@ -271,7 +271,7 @@ export const ToastContent = forwardRef<View, ToastContentProps>(function ToastCo
 
 export const Toast = forwardRef<View, ToastProps>(function Toast(props, ref) {
   return (
-    <Portal>
+    <Portal hostName="root">
       <ToastContent {...props} ref={ref} />
     </Portal>
   )

@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 
-/** A lock belongs to the nearest PortalHost, not to every screen in the app. */
+/** A lock belongs to the current TsukiProvider subtree. */
 export function createScrollLockStore() {
   const holders = new Set<symbol>()
   const listeners = new Set<() => void>()

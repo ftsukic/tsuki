@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { ReactNode } from 'react'
-import { mountPortal, unmountPortal, updatePortal } from '../portal'
-import type { PortalKey } from '../portal'
+import { mountPortal, unmountPortal, updatePortal } from '../portal/imperative'
+import type { PortalKey } from '../portal/imperative'
 import { NotifyContent } from './notify'
 import type { NotifyMethods, NotifyProps } from './types'
 

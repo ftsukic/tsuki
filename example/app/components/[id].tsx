@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react'
 import { KeyboardToolbar } from 'react-native-keyboard-controller'
 import { FixtureKeyboardToolbarContext } from '../../../src/input/__fixtures__/keyboard-toolbar-context'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
-import { Portal, PortalHost, Text, useToken } from '@ftsukic/tsuki'
+import { Text, useToken } from '@ftsukic/tsuki'
+import { Portal, PortalHost } from 'react-native-teleport'
 import { componentCatalog } from '@/fixtures/catalog'
 
 const TOOLBAR_COMPONENTS = new Set(['input', 'dialog', 'popup', 'portal'])
@@ -74,7 +75,7 @@ export default function ComponentScreen() {
         ) : null}
       </FixtureKeyboardToolbarContext.Provider>
       {hasToolbar && keyboardVisible ? (
-        <Portal>
+        <Portal hostName="root">
           <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { zIndex: 10000 }]}>
             <KeyboardToolbar
               onLayout={(event) => setToolbarHeight(event.nativeEvent.layout.height)}
@@ -88,9 +89,17 @@ export default function ComponentScreen() {
       ) : null}
     </SafeAreaView>
   )
-  return hasPagePortal ? (
-    <SafeAreaProvider>{isFocused ? <PortalHost>{preview}</PortalHost> : preview}</SafeAreaProvider>
-  ) : (
-    preview
-  )
+  if (!hasPagePortal) return preview
+
+  const pageScopedPreview =
+    fixture.id === 'floating-panel' ? (
+      <View style={{ flex: 1 }}>
+        {preview}
+        <PortalHost name="floating-panel-tabs" style={StyleSheet.absoluteFill} />
+      </View>
+    ) : (
+      preview
+    )
+
+  return <SafeAreaProvider>{isFocused ? pageScopedPreview : null}</SafeAreaProvider>
 }

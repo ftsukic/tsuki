@@ -1,6 +1,6 @@
+import { PortalHost } from './test-host'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { afterEach, describe, expect, it, jest } from '@jest/globals'
-import { PortalHost } from '../portal'
 import { closePicker, Picker, showPicker } from '../picker'
 import { ConfigProvider } from '../theme'
 import type { PickerResult } from '../picker'

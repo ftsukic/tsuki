@@ -1,7 +1,8 @@
+import { PortalHost } from './test-host'
 import { resolveStyles } from '../style/resolve-styles'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { useEffect, useState } from 'react'
-import { Button, ConfigProvider, Popup, PortalHost } from '..'
+import { Button, ConfigProvider, Popup } from '..'
 import { BackHandler, Keyboard, Platform, StyleSheet, Text, View } from 'react-native'
 import { Easing } from 'react-native-reanimated'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
@@ -372,14 +373,10 @@ describe('Popup', () => {
       </AppProvider>,
     )
 
-    // eslint-disable-next-line testing-library/no-container
-    const entries = view.container.queryAll(
-      (node) =>
-        node.props.collapsable === false &&
-        node.props.pointerEvents === 'box-none' &&
-        StyleSheet.flatten(node.props.style)?.position === 'absolute',
-    )
-    expect(entries).toHaveLength(1)
+    let teleportPortal = screen.getByText('single entry').parent
+    while (teleportPortal && teleportPortal.type !== 'Portal')
+      teleportPortal = teleportPortal.parent
+    expect(teleportPortal).toBeTruthy()
     await view.unmount()
   })
 

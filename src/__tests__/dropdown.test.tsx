@@ -1,3 +1,4 @@
+import { PortalHost } from './test-host'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet, Text, View } from 'react-native'
 import * as Reanimated from 'react-native-reanimated'
@@ -8,7 +9,6 @@ import {
   DropdownItem,
   DropdownMenu,
   getDesignToken,
-  PortalHost,
   useBackgroundScrollLocked,
 } from '..'
 import type { DropdownItemRef, DropdownMenuRef } from '..'

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, type PropsWithChildren } from 'react'
 import { useColorScheme } from 'react-native'
-import { teleportPortalBackend } from '@ftsukic/tsuki/teleport'
+import { PortalProvider } from 'react-native-teleport'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { ImagePreview, darkAlgorithm, defaultAlgorithm, TsukiProvider } from '@ftsukic/tsuki'
 
@@ -18,19 +18,17 @@ export function DemoProvider({ children }: PropsWithChildren) {
   const scheme = useColorScheme()
   const [mode, setMode] = useState<ThemeMode>('system')
   const dark = mode === 'system' ? scheme === 'dark' : mode === 'dark'
-  const teleport =
-    process.env.EXPO_PUBLIC_TSUKI_PORTAL === 'teleport' ||
-    process.env.EXPO_PUBLIC_TSUKI_PORTAL === 'true'
   return (
     <DemoThemeContext.Provider value={{ mode, dark, setMode, fontSize, setFontSize }}>
       <KeyboardProvider preload={false}>
-        <TsukiProvider
-          safeArea
-          portalBackend={teleport ? teleportPortalBackend : undefined}
-          theme={{ algorithm: dark ? darkAlgorithm : defaultAlgorithm, seed: { fontSize } }}
-        >
-          <ImagePreview.Provider>{children}</ImagePreview.Provider>
-        </TsukiProvider>
+        <PortalProvider>
+          <TsukiProvider
+            safeArea
+            theme={{ algorithm: dark ? darkAlgorithm : defaultAlgorithm, seed: { fontSize } }}
+          >
+            <ImagePreview.Provider>{children}</ImagePreview.Provider>
+          </TsukiProvider>
+        </PortalProvider>
       </KeyboardProvider>
     </DemoThemeContext.Provider>
   )

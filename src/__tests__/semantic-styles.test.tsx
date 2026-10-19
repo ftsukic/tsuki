@@ -1,15 +1,7 @@
+import { PortalHost } from './test-host'
 import { render, screen } from '@testing-library/react-native'
 import { StyleSheet } from 'react-native'
-import {
-  Button,
-  ConfigProvider,
-  FieldInput,
-  Input,
-  Notify,
-  PickerToolbar,
-  Tag,
-  PortalHost,
-} from '..'
+import { Button, ConfigProvider, FieldInput, Input, Notify, PickerToolbar, Tag } from '..'
 
 const flatten = (testID: string) => StyleSheet.flatten(screen.getByTestId(testID).props.style)
 

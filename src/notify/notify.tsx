@@ -13,7 +13,7 @@ import {
 import { StyleSheet, View } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { Animated, useTransitionProgress } from '../motion'
-import { Portal } from '../portal'
+import { TeleportPortal as Portal } from '../portal/teleport-portal'
 import { Text } from '../text'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
@@ -221,7 +221,7 @@ NotifyContent.displayName = 'Notify.Content'
 
 export const Notify = forwardRef<NotifyMethods, NotifyProps>(function Notify(props, ref) {
   return (
-    <Portal>
+    <Portal hostName="root">
       <NotifyContent {...props} ref={ref} />
     </Portal>
   )

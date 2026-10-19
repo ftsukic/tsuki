@@ -1,7 +1,8 @@
+import { PortalHost } from './test-host'
 import { act, cleanup, render, screen } from '@testing-library/react-native'
 import { createRef } from 'react'
 import { ScrollView } from 'react-native'
-import { DropdownItem, DropdownMenu, PortalHost, useBackgroundScrollLocked } from '..'
+import { DropdownItem, DropdownMenu, useBackgroundScrollLocked } from '..'
 import type { DropdownMenuRef } from '..'
 
 function Background({ id }: { id: string }) {

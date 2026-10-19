@@ -1,3 +1,4 @@
+import { PortalHost } from './test-host'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { useState } from 'react'
 import { StyleSheet, Text } from 'react-native'
@@ -8,7 +9,6 @@ import {
   Dialog,
   getDialogToken,
   getDesignToken,
-  PortalHost,
   resetDialogDefaultOptions,
   setDialogDefaultOptions,
   showConfirmDialog,
@@ -1076,9 +1076,9 @@ describe('Dialog', () => {
     await view.unmount()
   })
 
-  it('requires PortalHost for imperative calls and makes close safe without an instance', async () => {
-    expect(() => showDialog({ message: '没有 PortalHost' })).toThrow(
-      'PortalHost must be rendered before mounting an imperative portal',
+  it('requires the TsukiProvider renderer for imperative calls and makes close safe without an instance', async () => {
+    expect(() => showDialog({ message: '没有 TsukiProvider' })).toThrow(
+      'Mount TsukiProvider inside react-native-teleport PortalProvider before showing overlays',
     )
     expect(() => closeDialog()).not.toThrow()
   })
@@ -1291,13 +1291,12 @@ describe('Dialog', () => {
     await view.unmount()
   })
 
-  it('requires PortalHost for controlled rendering', async () => {
-    await expect(
-      render(
-        <ConfigProvider theme={{ seed: { motion: false } }}>
-          <Dialog show message="没有 Portal.Host" />
-        </ConfigProvider>,
-      ),
-    ).rejects.toThrow()
+  it('renders controlled Dialog inside the application Teleport provider', async () => {
+    await render(
+      <AppProvider>
+        <Dialog show message="Teleport root" />
+      </AppProvider>,
+    )
+    expect(screen.getByText('Teleport root')).toBeTruthy()
   })
 })

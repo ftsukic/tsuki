@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { PopupContent } from '../popup/popup'
-import { mountPortal, unmountPortal, updatePortal } from '../portal'
+import { mountPortal, unmountPortal, updatePortal } from '../portal/imperative'
 import { Picker } from './picker'
-import type { PortalKey } from '../portal'
+import type { PortalKey } from '../portal/imperative'
 import type { PickerOptions, PickerResult } from './types'
 import { resolvePickerState } from './utils'
 

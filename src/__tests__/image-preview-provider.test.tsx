@@ -4,8 +4,6 @@ import { act, render, screen } from '@testing-library/react-native'
 import { ImagePreview } from '../image-preview'
 import { ImagePreviewSourcesContext } from '../image-preview/context'
 import type { ImagePreviewSourcesContextValue } from '../image-preview/context'
-import { PortalContext, PortalDestinationContext } from '../portal/context'
-import type { PortalMethods } from '../portal/types'
 
 let sources: ImagePreviewSourcesContextValue
 function Probe() {
@@ -50,8 +48,6 @@ it('registers an ordinary thumbnail without a Portal backend or an overlay', asy
     await render(<Tree />)
     expect(await sources.measure('a')).toEqual({ x: 20, y: 100, width: 80, height: 120 })
     expect(await sources.measure('missing')).toBeNull()
-    expect(sources.rootDestination).toBeNull()
-    expect(sources.rootManager).toBeNull()
     expect(screen.getByTestId('thumbnail')).toHaveStyle({ width: 80, height: 120, opacity: 0.8 })
   } finally {
     measure.mockRestore()
@@ -152,30 +148,6 @@ it('notifies only subscriptions for an id whose visibility changes', async () =>
   unsubscribeB()
   await act(() => sources.hide(owner, null))
   expect(b).toHaveBeenCalledTimes(1)
-})
-
-it('captures the root portal destination before descendants introduce another host', async () => {
-  const rootDestination = { backend: undefined, hostName: 'root' }
-  const rootManager: PortalMethods = { mount: jest.fn(), update: jest.fn(), unmount: jest.fn() }
-  const nestedManager: PortalMethods = { mount: jest.fn(), update: jest.fn(), unmount: jest.fn() }
-  await render(
-    <PortalContext.Provider value={rootManager}>
-      <PortalDestinationContext.Provider value={rootDestination}>
-        <ImagePreview.Provider>
-          <PortalContext.Provider value={nestedManager}>
-            <PortalDestinationContext.Provider value={{ backend: undefined, hostName: 'nested' }}>
-              <Probe />
-              <Source />
-            </PortalDestinationContext.Provider>
-          </PortalContext.Provider>
-        </ImagePreview.Provider>
-      </PortalDestinationContext.Provider>
-    </PortalContext.Provider>,
-  )
-  expect(sources.rootDestination).toEqual(rootDestination)
-  expect(sources.rootManager).toBe(rootManager)
-  expect(rootManager.mount).not.toHaveBeenCalled()
-  expect(nestedManager.mount).not.toHaveBeenCalled()
 })
 
 it('does not restore the old id or apply its measurement after a message cell is recycled', async () => {

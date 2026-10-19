@@ -313,7 +313,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview34,
     component: 'portal',
-    description: 'Portal 通过 selector 汇总组件式和命令式挂载示例，每次只挂载一个 Portal 案例。',
+    description: 'Tsuki 的浮层组件直接使用 react-native-teleport，应用负责提供 PortalProvider。',
     id: 'portal',
     title: 'Portal',
   },

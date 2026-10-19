@@ -1,3 +1,5 @@
+import { Portal } from 'react-native-teleport'
+import { PortalHost } from './test-host'
 import {
   ConfigProvider,
   TsukiProvider,
@@ -8,8 +10,6 @@ import {
   useComponentToken,
   useToken,
   useOptionalToken,
-  Portal,
-  PortalHost,
 } from '..'
 import { render, screen } from '@testing-library/react-native'
 import { StyleSheet, Text } from 'react-native'
@@ -265,7 +265,7 @@ describe('theme configuration', () => {
       <ConfigProvider theme={{ seed: { colorPrimary } }}>
         <PortalHost>
           <ConfigProvider>
-            <Portal>
+            <Portal hostName="root">
               <Probe />
             </Portal>
           </ConfigProvider>

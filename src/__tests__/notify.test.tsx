@@ -1,8 +1,9 @@
+import { PortalHost } from './test-host'
 import { act, cleanup, render, screen } from '@testing-library/react-native'
 import * as Reanimated from 'react-native-reanimated'
 import { StyleSheet, Text, View } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
-import { closeNotify, ConfigProvider, Notify, PortalHost, showNotify } from '..'
+import { closeNotify, ConfigProvider, Notify, showNotify } from '..'
 import type { ReactNode } from 'react'
 
 function AppProvider({ children }: { children?: ReactNode }) {

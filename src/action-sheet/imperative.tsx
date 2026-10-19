@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { mountPortal, unmountPortal, updatePortal } from '../portal'
-import type { PortalKey } from '../portal'
+import { mountPortal, unmountPortal, updatePortal } from '../portal/imperative'
+import type { PortalKey } from '../portal/imperative'
 import { ActionSheetContent } from './action-sheet'
 import type { ActionSheetAction, ActionSheetOptions, ActionSheetResult } from './types'
 

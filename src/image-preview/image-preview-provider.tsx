@@ -1,9 +1,8 @@
 import { registerPreviewHost } from './preview-host'
-import { useContext, useLayoutEffect, useMemo, useRef } from 'react'
+import { useLayoutEffect, useMemo, useRef } from 'react'
 import type { RefObject } from 'react'
 import type { View } from 'react-native'
 import type { ImagePreviewRect } from './types'
-import { PortalContext, PortalDestinationContext } from '../portal/context'
 import { ImagePreviewSourcesContext } from './context'
 import type { ImagePreviewSourcesContextValue, ImagePreviewSourceRect } from './context'
 import type { ImagePreviewProviderProps } from './types'
@@ -18,7 +17,7 @@ interface SourceEntry {
   pending: Set<Measurement>
 }
 
-type SourceStore = Omit<ImagePreviewSourcesContextValue, 'rootDestination' | 'rootManager'>
+type SourceStore = ImagePreviewSourcesContextValue
 
 function createSourceStore(): SourceStore {
   const entries = new Map<string, SourceEntry>()
@@ -130,25 +129,11 @@ function createSourceStore(): SourceStore {
   }
 }
 
-/** Captures the root portal destination and keeps only mounted thumbnail anchors. */
+/** Keeps mounted thumbnail anchors and shared preview visibility state. */
 export function ImagePreviewProvider({ children }: ImagePreviewProviderProps) {
-  const inherited = useContext(ImagePreviewSourcesContext)
-  const destination = useContext(PortalDestinationContext)
-  const manager = useContext(PortalContext)
   const storeRef = useRef<SourceStore | null>(null)
   if (!storeRef.current) storeRef.current = createSourceStore()
-  const selectedDestination = inherited ? inherited.rootDestination : destination
-  const hostName = selectedDestination?.hostName
-  const backend = selectedDestination?.backend
-  const rootDestination = useMemo(
-    () => (hostName ? { hostName, backend } : null),
-    [hostName, backend],
-  )
-  const rootManager = inherited ? inherited.rootManager : manager
-  const value = useMemo<ImagePreviewSourcesContextValue>(
-    () => ({ ...storeRef.current!, rootDestination, rootManager }),
-    [rootDestination, rootManager],
-  )
+  const value = useMemo<ImagePreviewSourcesContextValue>(() => storeRef.current!, [])
 
   useLayoutEffect(() => registerPreviewHost(value), [value])
   return (

@@ -27,17 +27,6 @@
         "types": "./lib/typescript/commonjs/index.d.ts",
         "default": "./lib/commonjs/index.js"
       }
-    },
-    "./teleport": {
-      "react-native": "./src/teleport.ts",
-      "import": {
-        "types": "./lib/typescript/module/teleport.d.ts",
-        "default": "./lib/module/teleport.js"
-      },
-      "require": {
-        "types": "./lib/typescript/commonjs/teleport.d.ts",
-        "default": "./lib/commonjs/teleport.js"
-      }
     }
   },
   "files": [
@@ -78,7 +67,7 @@
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "lint": "eslint src example --ext .ts,.tsx && eslint --no-ignore .eslintrc.cjs babel.config.cjs jest.config.cjs commitlint.config.mjs lint-staged.config.mjs scripts/changeset-status.cjs",
     "test": "jest --config jest.config.cjs --runInBand",
-    "example:dev": "EXPO_PUBLIC_TSUKI_PORTAL=teleport yarn --cwd example start",
+    "example:dev": "yarn --cwd example start",
     "example:typecheck": "yarn --cwd example typecheck",
     "example:config": "yarn --cwd example run config",
     "example:export": "yarn --cwd example run export:web",

@@ -1,7 +1,8 @@
-import { act, cleanup, render, screen } from '@testing-library/react-native'
-import { Text, View } from 'react-native'
+import { cleanup, render, screen } from '@testing-library/react-native'
+import { PortalProvider } from 'react-native-teleport'
+import { View } from 'react-native'
 import ComponentScreen from '../../example/app/components/[id]'
-import { mountPortal, TsukiProvider } from '..'
+import { TsukiProvider } from '..'
 import type { TestInstance } from 'test-renderer'
 
 let mockFocused = true
@@ -19,9 +20,7 @@ jest.mock(
 jest.mock('expo-router/stack', () => ({ Stack: { Screen: () => null } }), { virtual: true })
 jest.mock(
   'react-native-keyboard-controller',
-  () => ({
-    KeyboardToolbar: Object.assign(() => null, { Done: () => null }),
-  }),
+  () => ({ KeyboardToolbar: Object.assign(() => null, { Done: () => null }) }),
   { virtual: true },
 )
 jest.mock('react-native-safe-area-context', () => {
@@ -70,62 +69,37 @@ function isInsidePage(node: TestInstance) {
 
 function App({ showPage = true }: { showPage?: boolean }) {
   return (
-    <TsukiProvider theme={{ seed: { motion: false } }}>
-      <View testID="route-boundary" style={{ flex: 1 }}>
-        {showPage ? <ComponentScreen /> : null}
-      </View>
-    </TsukiProvider>
+    <PortalProvider>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
+        <View testID="route-boundary" style={{ flex: 1 }}>
+          {showPage ? <ComponentScreen /> : null}
+        </View>
+      </TsukiProvider>
+    </PortalProvider>
   )
 }
 
-describe('page-owned floating previews', () => {
-  afterEach(async () => {
-    await cleanup()
-    mockFocused = true
-    mockComponentId = 'floating-bubble'
-  })
+afterEach(async () => {
+  await cleanup()
+  mockFocused = true
+  mockComponentId = 'floating-bubble'
+})
 
-  it.each(['floating-bubble', 'floating-panel'])(
-    'keeps %s inside its page and releases its host on blur',
-    async (id) => {
-      mockComponentId = id
-      const view = await render(<App showPage={false} />)
-      await view.rerender(<App />)
-      expect(
-        isInsidePage(screen.getByTestId('page-preview', { includeHiddenElements: true })),
-      ).toBe(true)
-      await act(async () => {
-        mountPortal(<Text testID="local-imperative">local</Text>)
-      })
-      expect(isInsidePage(screen.getByTestId('local-imperative'))).toBe(true)
+it.each(['floating-bubble', 'floating-panel'])(
+  'renders %s through the Teleport provider',
+  async (id) => {
+    mockComponentId = id
+    await render(<App />)
+    expect(isInsidePage(screen.getByTestId('page-preview', { includeHiddenElements: true }))).toBe(
+      true,
+    )
+  },
+)
 
-      mockFocused = false
-      await view.rerender(<App />)
-      expect(screen.queryByTestId('page-preview', { includeHiddenElements: true })).toBeNull()
-      expect(screen.queryByTestId('local-imperative')).toBeNull()
-      await act(async () => {
-        mountPortal(<Text testID="global-imperative">global</Text>)
-      })
-      expect(isInsidePage(screen.getByTestId('global-imperative'))).toBe(false)
-
-      mockFocused = true
-      await view.rerender(<App />)
-      expect(
-        isInsidePage(screen.getByTestId('page-preview', { includeHiddenElements: true })),
-      ).toBe(true)
-      expect(screen.getByTestId('global-imperative')).toBeTruthy()
-    },
-  )
-
-  it('keeps ordinary previews mounted when the page loses focus', async () => {
-    mockComponentId = 'button'
-    const view = await render(<App />)
-    mockFocused = false
-    await view.rerender(<App />)
-    expect(screen.getByTestId('ordinary-preview')).toBeTruthy()
-    await act(async () => {
-      mountPortal(<Text testID="ordinary-global">global</Text>)
-    })
-    expect(isInsidePage(screen.getByTestId('ordinary-global'))).toBe(false)
-  })
+it('keeps ordinary previews mounted when the page loses focus', async () => {
+  mockComponentId = 'button'
+  const view = await render(<App />)
+  mockFocused = false
+  await view.rerender(<App />)
+  expect(screen.getByTestId('ordinary-preview')).toBeTruthy()
 })

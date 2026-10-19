@@ -1,8 +1,9 @@
+import { PortalHost } from './test-host'
 /* eslint-disable testing-library/no-await-sync-events -- Installed fireEvent is asynchronous. */
 import React, { useEffect } from 'react'
 import { Text } from 'react-native'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
-import { ImagePreview, PortalHost, ConfigProvider } from '..'
+import { ImagePreview, ConfigProvider } from '..'
 import { ImagePreviewContent } from '../image-preview/image-preview-content'
 import * as interactionModule from '../image-preview/useImagePreviewInteraction'
 import type {

@@ -1,10 +1,10 @@
+import { PortalHost } from './test-host'
 /* eslint-disable testing-library/no-await-sync-events -- The installed fireEvent API returns a Promise. */
 import * as Reanimated from 'react-native-reanimated'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import {
   ImagePreview,
   closeImagePreview,
-  PortalHost,
   resetImagePreviewDefaultOptions,
   setImagePreviewDefaultOptions,
   showImagePreview,

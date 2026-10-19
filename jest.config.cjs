@@ -20,7 +20,7 @@ module.exports = {
   setupFiles: ['<rootDir>/node_modules/react-native-gesture-handler/jestSetup.js'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
   moduleNameMapper: {
-    '^@ftsukic/tsuki/teleport$': '<rootDir>/src/teleport.ts',
+    '^react-native-teleport$': '<rootDir>/node_modules/react-native-teleport/jest/index.js',
     '^@ftsukic/tsuki$': '<rootDir>/src',
     '^@/(.*)$': '<rootDir>/example/$1',
     '^react$': '<rootDir>/node_modules/react',
