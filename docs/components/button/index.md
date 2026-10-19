@@ -26,6 +26,8 @@ import { Button, Icon } from '@ftsukic/tsuki'
 
 - [按下反馈：比较 text Button 默认透明度反馈和显式 overlay 配置。](../../../src/button/__fixtures__/examples/press-feedback.tsx)
 
+- [禁用与加载恢复：切换状态，检查按钮颜色恢复和点击计数。](../../../src/button/__fixtures__/examples/state-recovery.tsx)
+
 升级已有用法请参阅 [Button API 迁移](../../guide/button-migration.md)。
 
 ## API

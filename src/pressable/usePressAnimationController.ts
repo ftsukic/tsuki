@@ -99,7 +99,7 @@ export function usePressAnimationController({
   const animatedStyle = useAnimatedStyle(() => {
     return {
       ...(hasOpacity
-        ? { opacity: rootOpacity ?? (pressStyle === 'opacity' ? opacity.value : undefined) }
+        ? { opacity: rootOpacity ?? (pressStyle === 'opacity' ? opacity.value : 1) }
         : {}),
       ...(hasTransform
         ? {
