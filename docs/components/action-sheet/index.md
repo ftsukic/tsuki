@@ -1,41 +1,20 @@
----
-title: ActionSheet 动作面板
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # ActionSheet 动作面板
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 ActionSheet 用于从底部展示一组操作。它复用 Popup 的 bottom 定位、底部安全区、滑入动画和 Overlay 遮罩，并使用统一的 `Pressable` 提供点击反馈。
 
-</section>
-
-<code src="../../../src/action-sheet/__fixtures__/overview.tsx" title="组件预览" description="ActionSheet 的基础菜单、标题、自定义颜色、禁用、加载和自定义内容预览。"></code>
+- [组件预览：ActionSheet 的基础菜单、标题、自定义颜色、禁用、加载和自定义内容预览。](../../../src/action-sheet/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
-import {
-  ActionSheet,
-  ConfigProvider,
-  PortalHost,
-  TsukiProvider,
-  showActionSheet,
-} from '@ftsukic/tsuki'
+```tsx
+import { ActionSheet, ConfigProvider, TsukiProvider, showActionSheet } from '@ftsukic/tsuki'
 ```
 
-受控组件和命令式 API 都需要当前应用存在 `PortalHost`。应用通常直接使用同时提供主题和 Portal 宿主的 `TsukiProvider`：
+受控组件和命令式 API 要求应用在 `TsukiProvider` 外层挂载 `react-native-teleport` 的 `PortalProvider`：
 
-```tsx | pure
+```tsx
 <TsukiProvider>
   <App />
 </TsukiProvider>
@@ -43,19 +22,19 @@ import {
 
 ## 代码演示
 
-<code src="../../../src/action-sheet/__fixtures__/examples/basic.tsx" title="基础用法" description="展示普通 action 和取消按钮。"></code>
+- [基础用法：展示普通 action 和取消按钮。](../../../src/action-sheet/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/action-sheet/__fixtures__/examples/title.tsx" title="带标题" description="标题仅用于说明，不参与点击。"></code>
+- [带标题：标题仅用于说明，不参与点击。](../../../src/action-sheet/__fixtures__/examples/title.tsx)
 
-<code src="../../../src/action-sheet/__fixtures__/examples/custom-color.tsx" title="自定义颜色 action" description="使用 color 设置删除等破坏性操作的颜色。"></code>
+- [自定义颜色 action：使用 color 设置删除等破坏性操作的颜色。](../../../src/action-sheet/__fixtures__/examples/custom-color.tsx)
 
-<code src="../../../src/action-sheet/__fixtures__/examples/disabled.tsx" title="禁用 action" description="禁用项仍然展示，但不会响应点击。"></code>
+- [禁用 action：禁用项仍然展示，但不会响应点击。](../../../src/action-sheet/__fixtures__/examples/disabled.tsx)
 
-<code src="../../../src/action-sheet/__fixtures__/examples/loading.tsx" title="加载 action" description="加载项显示 Loading 并禁止重复触发。"></code>
+- [加载 action：加载项显示 Loading 并禁止重复触发。](../../../src/action-sheet/__fixtures__/examples/loading.tsx)
 
-<code src="../../../src/action-sheet/__fixtures__/examples/custom-subname.tsx" title="自定义 subname" description="name 和 subname 都可以传入 ReactNode。"></code>
+- [自定义 subname：name 和 subname 都可以传入 ReactNode。](../../../src/action-sheet/__fixtures__/examples/custom-subname.tsx)
 
-<code src="../../../src/action-sheet/__fixtures__/examples/long-list.tsx" title="长操作列表" description="列表滚动，标题和取消区保持可见；打开后增加操作，检查退出动画和取消背景。"></code>
+- [长操作列表：列表滚动，标题和取消区保持可见；打开后增加操作，检查退出动画和取消背景。](../../../src/action-sheet/__fixtures__/examples/long-list.tsx)
 
 ## API
 
@@ -119,7 +98,7 @@ ActionSheet 级别的 `onSelect` 接收 `(action, index)`，在 action 的 `call
 
 ### 命令式 API
 
-```tsx | pure
+```tsx
 const result = await showActionSheet({
   title: '请选择',
   actions: [
@@ -141,7 +120,7 @@ if (result) {
 | setActionSheetDefaultOptions | `(options: ActionSheetOptions) => void` | 设置命令式默认参数，显式参数优先 |
 | resetActionSheetDefaultOptions | `() => void` | 恢复默认参数 |
 
-命令式实例通过当前 `PortalHost` 挂载，关闭动画完成后才卸载 Portal。新的 `showActionSheet` 会先以 `undefined` 结算前一个 pending Promise，再接管当前实例。`closeActionSheet()` 同样以 `undefined` 结算当前 Promise；宿主卸载时 pending Promise 也会以 `undefined` 结束。选择 action 返回用户传入的原始 action 对象，因此自定义字段会被保留并由 TypeScript 自动推导。没有 `PortalHost` 时 `showActionSheet` 会抛出 Portal 宿主错误。
+命令式实例挂载到 Teleport 的 `root` 宿主，关闭动画完成后才卸载 Portal。新的 `showActionSheet` 会先以 `undefined` 结算前一个 pending Promise，再接管当前实例。`closeActionSheet()` 同样以 `undefined` 结算当前 Promise；TsukiProvider 卸载时 pending Promise 也会以 `undefined` 结束。选择 action 返回用户传入的原始 action 对象，因此自定义字段会被保留并由 TypeScript 自动推导。没有挂载 TsukiProvider 内部承载器时 `showActionSheet` 会抛出明确错误。
 
 ## 主题定制
 

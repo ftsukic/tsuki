@@ -1,45 +1,30 @@
----
-title: Segmented 分段控制器
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Segmented 分段控制器
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Segmented 是互斥选择型分段控制器，适合通知已读状态、筛选条件和页面模式。它使用统一的 `Pressable` 点击反馈，并通过滑动 thumb 表示选中状态。
 
-</section>
-
-<code src="../../../src/segmented/__fixtures__/overview.tsx" title="组件预览" description="Segmented 的通知、筛选、尺寸、布局、形状和禁用用法。"></code>
+- [组件预览：Segmented 的通知、筛选、尺寸、布局、形状和禁用用法。](../../../src/segmented/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Segmented } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/segmented/__fixtures__/examples/notice.tsx" title="未读 / 已读通知" description="用 Segmented 实现通知状态切换。"></code>
+- [未读 / 已读通知：用 Segmented 实现通知状态切换。](../../../src/segmented/__fixtures__/examples/notice.tsx)
 
-<code src="../../../src/segmented/__fixtures__/examples/filter.tsx" title="筛选示例" description="展示字符串 option、对象 option、size 和 block。"></code>
+- [筛选示例：展示字符串 option、对象 option、size 和 block。](../../../src/segmented/__fixtures__/examples/filter.tsx)
 
-<code src="../../../src/segmented/__fixtures__/examples/disabled.tsx" title="禁用状态" description="整体禁用和单项禁用都不会触发 onChange。"></code>
+- [禁用状态：整体禁用和单项禁用都不会触发 onChange。](../../../src/segmented/__fixtures__/examples/disabled.tsx)
 
-<code src="../../../src/segmented/__fixtures__/examples/custom-label.tsx" title="自定义标签" description="option 的 label 支持自定义 ReactNode。"></code>
+- [自定义标签：option 的 label 支持自定义 ReactNode。](../../../src/segmented/__fixtures__/examples/custom-label.tsx)
 
-<code src="../../../src/segmented/__fixtures__/examples/shapes.tsx" title="形状与自定义圆角" description="对比 default、round 和单实例自定义圆角。"></code>
+- [形状与自定义圆角：对比 default、round 和单实例自定义圆角。](../../../src/segmented/__fixtures__/examples/shapes.tsx)
 
-<code src="../../../src/segmented/__fixtures__/examples/theme.tsx" title="主题与语义样式" description="通过组件 token、单实例选中颜色和 styles 定制胶囊控件。"></code>
+- [主题与语义样式：通过组件 token、单实例选中颜色和 styles 定制胶囊控件。](../../../src/segmented/__fixtures__/examples/theme.tsx)
 
 ## API
 
@@ -79,7 +64,7 @@ interface SegmentedOption {
 
 ## 语义样式
 
-```tsx | pure
+```tsx
 <Segmented
   options={['全部', '未读', '已读']}
   styles={({ state }) => ({
@@ -97,7 +82,7 @@ interface SegmentedOption {
 
 默认 track 背景使用 `colorFillTertiary`，selected thumb 使用 `colorBgContainer`，选中文字使用 `colorText`。可同时用 `styles.label.color` 设置选项文字颜色、用 `selectedTextColor` 单独设置激活文字颜色；禁用文字仍使用 `disabledColor`。如需统一调整多个实例，可通过 `ConfigProvider` 的 `theme.components.Segmented` 覆盖组件 token：
 
-```tsx | pure
+```tsx
 <Segmented
   defaultValue="list"
   selectedTextColor="#1677ff"
@@ -121,7 +106,7 @@ interface SegmentedOption {
 
 尺寸和排版不在 Segmented 中重复定义，复用 `Button` token 的 `height`、`paddingHorizontal` 和字体；未选中 option 按下时使用 `pressedBackgroundColor`，按压层的 `borderRadius` 与 selected thumb 保持一致，`round` 形态始终保持胶囊轮廓。已选项不再叠加第二层按压面。
 
-```tsx | pure
+```tsx
 <ConfigProvider
   theme={{
     components: {

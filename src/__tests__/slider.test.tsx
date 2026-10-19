@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import * as Reanimated from 'react-native-reanimated'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { State } from 'react-native-gesture-handler'
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils'
@@ -183,28 +182,4 @@ it('includes the thumb edge in the touch target and subtracts the track inset', 
   await waitFor(() => expect(screen.getByRole('adjustable').props.accessibilityValue.now).toBe(50))
   await tap(324)
   await waitFor(() => expect(screen.getByRole('adjustable').props.accessibilityValue.now).toBe(100))
-})
-
-it('keeps the Dumi static adapter interactive through responder events', async () => {
-  const original = Reanimated.useSharedValue
-  const spy = jest
-    .spyOn(Reanimated, 'useSharedValue')
-    .mockImplementation((value) => Object.assign(original(value), { __tsukiStaticAdapter: true }))
-  try {
-    const complete = jest.fn()
-    await render(<Slider testID="slider" defaultValue={0} onChangeComplete={complete} />)
-    await measure()
-    fireEvent(screen.getByTestId('slider'), 'responderGrant', {
-      nativeEvent: { locationX: 150 },
-    })
-    await waitFor(() =>
-      expect(screen.getByRole('adjustable').props.accessibilityValue.now).toBe(50),
-    )
-    fireEvent(screen.getByTestId('slider'), 'responderRelease', {
-      nativeEvent: { locationX: 240 },
-    })
-    await waitFor(() => expect(complete).toHaveBeenCalledWith(80))
-  } finally {
-    spy.mockRestore()
-  }
 })

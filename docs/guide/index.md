@@ -1,18 +1,8 @@
----
-title: 快速开始
-order: 0
-nav:
-  title: 指南
-group:
-  title: 开发指南
-  path: /guide
----
-
 # 快速开始
 
 Tsuki 是一个面向 React Native 和 Expo 的 UI 组件库。
 
-组件节点定制与破坏性迁移请参阅 [语义结构与样式](/guide/semantic-styles)。
+组件节点定制与破坏性迁移请参阅 [语义结构与样式](./semantic-styles.md)。
 
 ## 安装
 
@@ -109,7 +99,7 @@ export default function App() {
 
 ## 使用组件
 
-```tsx | pure
+```tsx
 import { Button } from '@ftsukic/tsuki'
 
 export function SubmitButton() {
@@ -121,7 +111,7 @@ export function SubmitButton() {
 
 使用 `ConfigProvider` 为应用或局部组件树覆盖主题：
 
-```tsx | pure
+```tsx
 import { Button, ConfigProvider } from '@ftsukic/tsuki'
 
 export function ThemedButton() {

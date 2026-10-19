@@ -1,35 +1,20 @@
----
-title: Overlay 遮罩层
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Overlay 遮罩层
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Overlay 用于创建全屏遮罩，强调当前操作并阻止用户操作底层内容。支持受控显示、淡入淡出、嵌入内容、遮罩点击和主题定制。
 
-</section>
-
-<code src="../../../src/overlay/__fixtures__/overview.tsx" title="组件预览"></code>
+- [组件预览](../../../src/overlay/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Overlay, TsukiProvider } from '@ftsukic/tsuki'
 ```
 
 Overlay 内部使用 `Portal`，推荐放在应用根节点的 `TsukiProvider` 中：
 
-```tsx | pure
+```tsx
 <TsukiProvider>
   <App />
 </TsukiProvider>
@@ -37,13 +22,13 @@ Overlay 内部使用 `Portal`，推荐放在应用根节点的 `TsukiProvider` �
 
 ## 代码演示
 
-<code src="../../../src/overlay/__fixtures__/examples/basic.tsx" title="基础用法" description="使用 show 受控显示遮罩，点击遮罩后由调用方关闭。"></code>
+- [基础用法：使用 show 受控显示遮罩，点击遮罩后由调用方关闭。](../../../src/overlay/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/overlay/__fixtures__/examples/embedded.tsx" title="嵌入内容" description="通过 children 放置自定义内容和交互控件。"></code>
+- [嵌入内容：通过 children 放置自定义内容和交互控件。](../../../src/overlay/__fixtures__/examples/embedded.tsx)
 
-<code src="../../../src/overlay/__fixtures__/examples/interactions.tsx" title="透明遮罩与动画" description="自定义背景色并使用 duration 控制淡入淡出速度。"></code>
+- [透明遮罩与动画：自定义背景色并使用 duration 控制淡入淡出速度。](../../../src/overlay/__fixtures__/examples/interactions.tsx)
 
-<code src="../../../src/overlay/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 Overlay token 和 semantic styles 定制外观。"></code>
+- [主题定制：通过 Overlay token 和 semantic styles 定制外观。](../../../src/overlay/__fixtures__/examples/theme.tsx)
 
 ## API
 
@@ -75,7 +60,7 @@ Overlay 内部使用 `Portal`，推荐放在应用根节点的 `TsukiProvider` �
 
 通过 `ConfigProvider` 的 `theme.components.Overlay` 配置默认背景色、动画时长和层级：
 
-```tsx | pure
+```tsx
 <ConfigProvider
   theme={{
     components: {

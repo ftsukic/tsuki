@@ -1,57 +1,42 @@
----
-title: Picker 选择器
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Picker 选择器
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Picker 是纯滚轮选择器，负责列数据、选中值、吸附动画和 Toolbar 操作。它不会自动创建 Popup；需要弹层时由调用方组合 `Cell` 和 `Popup`。
 
-</section>
-
-<code src="../../../src/picker/__fixtures__/overview.tsx" title="组件预览" description="Picker 汇总 Cell + Popup 组合、Toolbar、单列、多列、级联、Loading、空数据和 FieldPicker 联动示例。"></code>
+- [组件预览：Picker 汇总 Cell + Popup 组合、Toolbar、单列、多列、级联、Loading、空数据和 FieldPicker 联动示例。](../../../src/picker/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Cell, Picker, PickerToolbar, Popup, showPicker } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/picker/__fixtures__/examples/basic.tsx" title="Cell + Popup" description="由 Cell 打开底部 Popup，Picker 只负责滚轮选择和确认。"></code>
+- [Cell + Popup：由 Cell 打开底部 Popup，Picker 只负责滚轮选择和确认。](../../../src/picker/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/picker/__fixtures__/examples/loading.tsx" title="Loading" description="Loading 覆盖滚轮内容并暂时禁止列交互，同时保留面板高度和 Toolbar。"></code>
+- [Loading：Loading 覆盖滚轮内容并暂时禁止列交互，同时保留面板高度和 Toolbar。](../../../src/picker/__fixtures__/examples/loading.tsx)
 
-<code src="../../../src/picker/__fixtures__/examples/empty.tsx" title="暂无数据" description="将暂无数据作为 disabled option 展示，不扩展 Picker 的空状态 API。"></code>
+- [暂无数据：将暂无数据作为 disabled option 展示，不扩展 Picker 的空状态 API。](../../../src/picker/__fixtures__/examples/empty.tsx)
 
-<code src="../../../src/picker/__fixtures__/examples/long-list.tsx" title="长列表 Picker" description="验证长列表的首尾居中、滚轮吸附和受控值更新。"></code>
+- [长列表 Picker：验证长列表的首尾居中、滚轮吸附和受控值更新。](../../../src/picker/__fixtures__/examples/long-list.tsx)
 
-<code src="../../../src/picker/__fixtures__/examples/multi-column.tsx" title="多列 Picker" description="同时渲染多个独立滚轮列。"></code>
+- [多列 Picker：同时渲染多个独立滚轮列。](../../../src/picker/__fixtures__/examples/multi-column.tsx)
 
-<code src="../../../src/picker/__fixtures__/examples/safe-area.tsx" title="底部安全区" description="由 Popup 面板统一处理 bottom safe-area，并保持背景连续。"></code>
+- [底部安全区：由 Popup 面板统一处理 bottom safe-area，并保持背景连续。](../../../src/picker/__fixtures__/examples/safe-area.tsx)
 
-<code src="../../../src/picker/__fixtures__/examples/toolbar.tsx" title="PickerToolbar" description="独立使用 Toolbar，并复用统一的交互按钮。"></code>
+- [PickerToolbar：独立使用 Toolbar，并复用统一的交互按钮。](../../../src/picker/__fixtures__/examples/toolbar.tsx)
 
-<code src="../../../src/picker/__fixtures__/examples/linked.tsx" title="级联 Picker" description="父级变化后自动刷新并校正子级列。"></code>
+- [级联 Picker：父级变化后自动刷新并校正子级列。](../../../src/picker/__fixtures__/examples/linked.tsx)
 
-<code src="../../../src/picker/__fixtures__/examples/field.tsx" title="FieldPicker 联动" description="FieldPicker 组合 Cell、Popup 与 Picker，确认后回写字段展示值。"></code>
+- [FieldPicker 联动：FieldPicker 组合 Cell、Popup 与 Picker，确认后回写字段展示值。](../../../src/picker/__fixtures__/examples/field.tsx)
 
-<code src="../../../src/picker/__fixtures__/examples/item-height.tsx" title="自定义行高" description="Picker 支持自定义 itemHeight 和 visibleItemCount。"></code>
+- [自定义行高：Picker 支持自定义 itemHeight 和 visibleItemCount。](../../../src/picker/__fixtures__/examples/item-height.tsx)
 
-<code src="../../../src/picker/__fixtures__/examples/picker-view.tsx" title="无 Toolbar Picker" description="使用 showToolbar=false 渲染不带 Toolbar 的滚轮。"></code>
+- [无 Toolbar Picker：使用 showToolbar=false 渲染不带 Toolbar 的滚轮。](../../../src/picker/__fixtures__/examples/picker-view.tsx)
 
-<code src="../../../src/picker/__fixtures__/examples/semantic.tsx" title="语义样式与空列" description="定制完整滚轮区域和独立操作样式；空列之后的选中值仍可正常回写。"></code>
+- [语义样式与空列：定制完整滚轮区域和独立操作样式；空列之后的选中值仍可正常回写。](../../../src/picker/__fixtures__/examples/semantic.tsx)
 
 ## API
 
@@ -98,7 +83,7 @@ Picker 继承 React Native `ViewProps`，但不接受 `children` 和被组件接
 
 受控 Picker 的显示值始终由 `value` 派生。用户请求新值后调用 `onChange`；如果父组件不回写，滚轮会恢复到当前受控值，回写后则停在新位置。确认会结算当前正在吸附的用户目标，但不会修改受控 `value`。非受控 Picker 使用 `defaultValue` 初始化，并在吸附完成后内部更新。
 
-```tsx | pure
+```tsx
 const [visible, setVisible] = useState(false)
 const [committed, setCommitted] = useState<readonly PickerValue[]>(['beijing'])
 const [draft, setDraft] = useState(committed)

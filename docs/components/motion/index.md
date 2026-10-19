@@ -1,53 +1,38 @@
----
-title: Motion 动画
-componentDoc: true
-toc: false
-nav:
-  title: 基础能力
-group:
-  title: 基础组件
-  order: 1
----
-
 # Motion 动画
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Motion 统一动画策略、Token、Preset 和 Primitive。组件用法使用 `Transition`、`MotionView` 和 `MotionPressable`；需要自行管理容器时使用 `useTransitionProgress` 与 `useAnimatedTransition`。
 
-</section>
-
-<code src="../../../src/motion/__fixtures__/overview.tsx" title="组件预览"></code>
+- [组件预览](../../../src/motion/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { TsukiProvider, Transition, MotionView, MotionPressable } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/motion/__fixtures__/examples/transition-lifecycle.tsx" title="退出与卸载" description="只观察卡片的生命周期与卸载空态。"></code>
+- [退出与卸载：只观察卡片的生命周期与卸载空态。](../../../src/motion/__fixtures__/examples/transition-lifecycle.tsx)
 
-<code src="../../../src/motion/__fixtures__/examples/property-animation.tsx" title="属性动画" description="在固定展示区域内改变属性，始终保持挂载。"></code>
+- [属性动画：在固定展示区域内改变属性，始终保持挂载。](../../../src/motion/__fixtures__/examples/property-animation.tsx)
 
-<code src="../../../src/motion/__fixtures__/examples/transition-effects.tsx" title="基础过渡效果" description="十一种效果独立展示隐藏状态。"></code>
+- [基础过渡效果：十一种效果独立展示隐藏状态。](../../../src/motion/__fixtures__/examples/transition-effects.tsx)
 
-<code src="../../../src/motion/__fixtures__/examples/motion-config.tsx" title="动效策略" description="全局、局部开关与减少动态效果。"></code>
+- [动效策略：全局、局部开关与减少动态效果。](../../../src/motion/__fixtures__/examples/motion-config.tsx)
 
-<code src="../../../src/motion/__fixtures__/examples/semantic-presets.tsx" title="语义预设" description="比较浮层与强调场景的 preset。"></code>
+- [语义预设：比较浮层与强调场景的 preset。](../../../src/motion/__fixtures__/examples/semantic-presets.tsx)
 
-<code src="../../../src/motion/__fixtures__/examples/interruption.tsx" title="快速反转" description="动画途中反向切换与最终完成事件。"></code>
+- [快速反转：动画途中反向切换与最终完成事件。](../../../src/motion/__fixtures__/examples/interruption.tsx)
 
-<code src="../../../src/motion/__fixtures__/examples/feedback.tsx" title="反馈动效" description="旋转、呼吸和错误反馈。"></code>
+- [反馈动效：旋转、呼吸和错误反馈。](../../../src/motion/__fixtures__/examples/feedback.tsx)
 
-<code src="../../../src/motion/__fixtures__/examples/component-motion.tsx" title="组件动效" description="Popup 退出与 Collapse 动态内容。"></code>
+- [组件动效：Popup 退出与 Collapse 动态内容。](../../../src/motion/__fixtures__/examples/component-motion.tsx)
 
-<code src="../../../src/motion/__fixtures__/examples/transition-hooks.tsx" title="过渡 Hook" description="自行承载 animated style 的用法。"></code>
+- [过渡 Hook：自行承载 animated style 的用法。](../../../src/motion/__fixtures__/examples/transition-hooks.tsx)
 
-<code src="../../../src/motion/__fixtures__/examples/shared-progress.tsx" title="共享进度" description="同一个 progress 驱动多个样式。"></code>
+- [共享进度：同一个 progress 驱动多个样式。](../../../src/motion/__fixtures__/examples/shared-progress.tsx)
 
 ## API
 
@@ -75,7 +60,7 @@ Collapse 的 height 和指示器背景的 width 属于布局语义例外。不�
 
 在现有 TsukiProvider 上使用 `motion`，或通过 `ConfigProvider theme={{ motion: ... }}` 配置。两者使用同一个 ThemeContext；TsukiProvider 的 `motion` 覆盖同层 `theme.motion`。
 
-```tsx | pure
+```tsx
 <TsukiProvider motion={{ enabled: true, reducedMotion: 'system', durationScale: 1 }}>
   {children}
 </TsukiProvider>
@@ -135,7 +120,7 @@ Token、语义 Preset、数值驱动、测量和手势 resolver 均为 internal�
 
 ### useTransitionProgress
 
-```tsx | pure
+```tsx
 const { progress, animatedStyle } = useTransitionProgress(options)
 ```
 
@@ -145,7 +130,7 @@ const { progress, animatedStyle } = useTransitionProgress(options)
 
 ### useAnimatedTransition
 
-```tsx | pure
+```tsx
 const animatedStyle = useAnimatedTransition(options)
 ```
 

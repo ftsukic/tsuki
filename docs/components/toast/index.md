@@ -1,32 +1,16 @@
----
-title: Toast 轻提示
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Toast 轻提示
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Toast 用于反馈操作结果或展示短暂状态。支持受控组件、命令式调用、加载/成功/失败类型、位置、遮罩、点击行为和主题 token。
 
-</section>
-
-<code src="../../../src/toast/__fixtures__/overview.tsx" title="组件预览"></code>
+- [组件预览](../../../src/toast/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import {
   ConfigProvider,
-  PortalHost,
   Toast,
   closeToast,
   showFailToast,
@@ -36,31 +20,21 @@ import {
 } from '@ftsukic/tsuki'
 ```
 
-命令式 API 和受控 `Toast` 需要 `PortalHost`。可以直接组合 `ConfigProvider` 和 `PortalHost`：
-
-```tsx
-<ConfigProvider>
-  <PortalHost>
-    <App />
-  </PortalHost>
-</ConfigProvider>
-```
-
-应用也可以使用同时提供主题和 Portal 宿主的 `TsukiProvider`；它是上述组合的便捷入口。
+命令式 API 和受控 `Toast` 需要 Teleport `PortalProvider` 与 TsukiProvider。应用应将 PortalProvider 放在 TsukiProvider 外层。
 
 ## 代码演示
 
-<code src="../../../src/toast/__fixtures__/examples/basic.tsx" title="基础类型" description="通过 text、loading、success 和 fail 展示不同语义的提示。"></code>
+- [基础类型：通过 text、loading、success 和 fail 展示不同语义的提示。](../../../src/toast/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/toast/__fixtures__/examples/positions.tsx" title="位置" description="使用 position 将提示放在顶部、中间或底部。"></code>
+- [位置：使用 position 将提示放在顶部、中间或底部。](../../../src/toast/__fixtures__/examples/positions.tsx)
 
-<code src="../../../src/toast/__fixtures__/examples/interactions.tsx" title="持续显示与交互" description="duration 为 0 时保持显示，可通过实例 close、closeToast、overlay 和 forbidClick 控制生命周期与触摸行为。"></code>
+- [持续显示与交互：duration 为 0 时保持显示，可通过实例 close、closeToast、overlay 和 forbidClick 控制生命周期与触摸行为。](../../../src/toast/__fixtures__/examples/interactions.tsx)
 
-<code src="../../../src/toast/__fixtures__/examples/multiple.tsx" title="单例与多实例" description="默认复用当前提示，开启 allowMultipleToast 后可以同时展示多个提示。"></code>
+- [单例与多实例：默认复用当前提示，开启 allowMultipleToast 后可以同时展示多个提示。](../../../src/toast/__fixtures__/examples/multiple.tsx)
 
-<code src="../../../src/toast/__fixtures__/examples/controlled.tsx" title="受控组件" description="直接使用 Toast，通过 show 和 onShowChange 管理显示状态。"></code>
+- [受控组件：直接使用 Toast，通过 show 和 onShowChange 管理显示状态。](../../../src/toast/__fixtures__/examples/controlled.tsx)
 
-<code src="../../../src/toast/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 ConfigProvider 的 Toast token 和 semantic styles 定制外观。"></code>
+- [主题定制：通过 ConfigProvider 的 Toast token 和 semantic styles 定制外观。](../../../src/toast/__fixtures__/examples/theme.tsx)
 
 ## API
 
@@ -90,9 +64,9 @@ import {
 
 组件继承 React Native `ViewProps`，`style` 和 `styles.root` 作用于提示气泡，其他 View props 也透传到气泡 root。定位使用 `position`，不公开内部定位层样式。`styles.content` 对字符串和数字作用于文本，对 ReactNode 或 `children` 作用于内容容器。`styles` 可以是对象或函数；函数接收 `{ props, state: { show, type, position } }`。组件使用无障碍 `alert` 语义和 `polite` live region，退出期间隐藏无障碍内容。
 
-### PortalHost 与命令式 API
+### Teleport 与命令式 API
 
-命令式 Toast 实例直接挂载到当前 `PortalHost`；Toast 内容通过统一的 Portal 宿主渲染到应用内容上方。未挂载 `PortalHost` 时调用 `showToast` 会抛错；`closeToast()` 在没有当前实例时安全无效。`ConfigProvider` 只负责主题，不会替代 `PortalHost`。
+命令式 Toast 由 TsukiProvider 内部承载器管理，并通过 Teleport 渲染到 `root` 宿主。使用前应用需挂载 Teleport `PortalProvider` 和 TsukiProvider。
 
 ### 命令式 API
 

@@ -1,37 +1,22 @@
----
-title: Text 文本
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Text 文本
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Text 是跟随 Theme 的基础文本组件。它将 React Native 文本能力和 `colorText`、`fontFamily`、字号、行高及语义颜色结合起来，不引入 Web Heading 体系。
 
-</section>
-
-<code src="../../../src/text/__fixtures__/overview.tsx" title="组件预览"></code>
+- [组件预览](../../../src/text/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { ConfigProvider, darkAlgorithm, Text } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/text/__fixtures__/examples/basic.tsx" title="基础文本" description="默认文本跟随主题，显式 style 可以覆盖默认颜色。"></code>
+- [基础文本：默认文本跟随主题，显式 style 可以覆盖默认颜色。](../../../src/text/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/text/__fixtures__/examples/semantic.tsx" title="语义、尺寸和字重" description="使用 default、secondary、tertiary、disabled 及三种字号表达文本层级。"></code>
+- [语义、尺寸和字重：使用 default、secondary、tertiary、disabled 及三种字号表达文本层级。](../../../src/text/__fixtures__/examples/semantic.tsx)
 
 ## API
 
@@ -49,7 +34,7 @@ Text 不提供 `Heading1`~`Heading5`、Web `linkDecoration`、hover 或 focus to
 
 ## 主题定制
 
-```tsx | pure
+```tsx
 <ConfigProvider theme={{ algorithm: darkAlgorithm }}>
   <Text type="secondary">跟随暗色主题的说明</Text>
 </ConfigProvider>

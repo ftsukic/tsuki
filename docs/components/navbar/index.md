@@ -1,67 +1,52 @@
----
-title: Navbar 导航栏
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Navbar 导航栏
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Navbar 提供 Vant 4 风格的顶部导航栏。它使用左侧、标题、右侧三个可选布局区域：左右内容固定在两侧，标题通过自身的左右 auto margin 保持居中。
 
-</section>
-
-<code src="../../../src/navbar/__fixtures__/overview.tsx" title="组件预览" description="Navbar 的基础操作、固定定位、安全区和 custom slot 用法。"></code>
+- [组件预览：Navbar 的基础操作、固定定位、安全区和 custom slot 用法。](../../../src/navbar/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Navbar, Pressable } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/navbar/__fixtures__/examples/basic.tsx" title="基础用法" description="默认显示居中标题，不显示返回箭头。"></code>
+- [基础用法：默认显示居中标题，不显示返回箭头。](../../../src/navbar/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/title-only.tsx" title="仅标题" description="展示没有左右操作内容的导航栏。"></code>
+- [仅标题：展示没有左右操作内容的导航栏。](../../../src/navbar/__fixtures__/examples/title-only.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/left-arrow.tsx" title="返回按钮" description="通过 leftArrow 显示内置返回箭头。"></code>
+- [返回按钮：通过 leftArrow 显示内置返回箭头。](../../../src/navbar/__fixtures__/examples/left-arrow.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/left-text.tsx" title="左侧文字" description="组合返回箭头和左侧文字。"></code>
+- [左侧文字：组合返回箭头和左侧文字。](../../../src/navbar/__fixtures__/examples/left-text.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/right-action.tsx" title="右侧按钮" description="使用 rightText 和 onPressRight 创建右侧操作。"></code>
+- [右侧按钮：使用 rightText 和 onPressRight 创建右侧操作。](../../../src/navbar/__fixtures__/examples/right-action.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/disabled-actions.tsx" title="禁用操作" description="左右操作独立禁用，但仍保留各自的布局区域。"></code>
+- [禁用操作：左右操作独立禁用，但仍保留各自的布局区域。](../../../src/navbar/__fixtures__/examples/disabled-actions.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/custom-left.tsx" title="自定义左侧内容" description="使用 left 自定义渲染，并覆盖默认左侧内容。"></code>
+- [自定义左侧内容：使用 left 自定义渲染，并覆盖默认左侧内容。](../../../src/navbar/__fixtures__/examples/custom-left.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/custom-right.tsx" title="自定义右侧内容" description="使用 right 自定义渲染，并覆盖默认右侧文字。"></code>
+- [自定义右侧内容：使用 right 自定义渲染，并覆盖默认右侧文字。](../../../src/navbar/__fixtures__/examples/custom-right.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/three-sections.tsx" title="三个槽位" description="使用单一 custom slot 和 Navbar 级回调。"></code>
+- [三个槽位：使用单一 custom slot 和 Navbar 级回调。](../../../src/navbar/__fixtures__/examples/three-sections.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/two-sections.tsx" title="多个 Action" description="在一个 custom slot 内组合多个独立 Pressable。"></code>
+- [多个 Action：在一个 custom slot 内组合多个独立 Pressable。](../../../src/navbar/__fixtures__/examples/two-sections.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/long-title.tsx" title="长标题" description="长标题单行显示并尾部省略，仍保持物理居中。"></code>
+- [长标题：长标题单行显示并尾部省略，仍保持物理居中。](../../../src/navbar/__fixtures__/examples/long-title.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/long-actions.tsx" title="长操作" description="左右操作变长时，标题中心和三槽定位保持稳定。"></code>
+- [长操作：左右操作变长时，标题中心和三槽定位保持稳定。](../../../src/navbar/__fixtures__/examples/long-actions.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/long-left-text.tsx" title="长左侧文字" description="展示左侧文字的单行行为。"></code>
+- [长左侧文字：展示左侧文字的单行行为。](../../../src/navbar/__fixtures__/examples/long-left-text.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/long-right-action.tsx" title="长右侧操作" description="展示右侧文字的单行行为。"></code>
+- [长右侧操作：展示右侧文字的单行行为。](../../../src/navbar/__fixtures__/examples/long-right-action.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/fixed.tsx" title="固定顶部" description="fixed 在 React Native 中使用 absolute top/left/right 定位。"></code>
+- [固定顶部：fixed 在 React Native 中使用 absolute top/left/right 定位。](../../../src/navbar/__fixtures__/examples/fixed.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/fixed-placeholder.tsx" title="固定并占位" description="fixed 和 placeholder 组合时为页面内容保留 Navbar 高度。"></code>
+- [固定并占位：fixed 和 placeholder 组合时为页面内容保留 Navbar 高度。](../../../src/navbar/__fixtures__/examples/fixed-placeholder.tsx)
 
-<code src="../../../src/navbar/__fixtures__/examples/safe-area.tsx" title="顶部安全区" description="safeAreaInsetTop 在 46 点内容区上方加入顶部 inset。"></code>
+- [顶部安全区：safeAreaInsetTop 在 46 点内容区上方加入顶部 inset。](../../../src/navbar/__fixtures__/examples/safe-area.tsx)
 
 ## 布局行为
 

@@ -1,43 +1,28 @@
----
-title: Empty 空状态
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Empty 空状态
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Empty 用于在列表、页面或内容区域没有可展示数据时提供统一的空状态反馈。默认图片使用项目内置的 Vant 默认空状态插画，不依赖网络或 Icon。
 
-</section>
-
-<code src="../../../src/empty/__fixtures__/overview.tsx" title="组件预览" description="Empty 汇总默认图片、描述、操作区、自定义图片和主题定制示例。"></code>
+- [组件预览：Empty 汇总默认图片、描述、操作区、自定义图片和主题定制示例。](../../../src/empty/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Button, Empty, Text } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/empty/__fixtures__/examples/basic.tsx" title="默认 Empty" description="使用本地 Vant 默认空状态插画，不依赖网络或 Icon。"></code>
+- [默认 Empty：使用本地 Vant 默认空状态插画，不依赖网络或 Icon。](../../../src/empty/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/empty/__fixtures__/examples/custom-description.tsx" title="自定义 description" description="description 支持自定义 ReactNode。"></code>
+- [自定义 description：description 支持自定义 ReactNode。](../../../src/empty/__fixtures__/examples/custom-description.tsx)
 
-<code src="../../../src/empty/__fixtures__/examples/custom-image.tsx" title="自定义 image" description="image 支持自定义 ReactNode，imageSize 可调整容器尺寸。"></code>
+- [自定义 image：image 支持自定义 ReactNode，imageSize 可调整容器尺寸。](../../../src/empty/__fixtures__/examples/custom-image.tsx)
 
-<code src="../../../src/empty/__fixtures__/examples/action.tsx" title="带 Button 操作" description="children 会渲染在只负责间距布局的底部操作区域。"></code>
+- [带 Button 操作：children 会渲染在只负责间距布局的底部操作区域。](../../../src/empty/__fixtures__/examples/action.tsx)
 
-<code src="../../../src/empty/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 Empty component token 调整图片尺寸、描述文字和底部间距。"></code>
+- [主题定制：通过 Empty component token 调整图片尺寸、描述文字和底部间距。](../../../src/empty/__fixtures__/examples/theme.tsx)
 
 ## API
 

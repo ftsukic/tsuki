@@ -1,7 +1,3 @@
----
-title: Button API 迁移
----
-
 # Button API 迁移
 
 Button 将常用外观与配色分开。`type` 支持 default、primary、dashed、text；`danger`、`success`、`warning` 是互斥的配色快捷属性，仅改变颜色。
@@ -20,7 +16,7 @@ Checkbox、Radio 和 FieldRadio 的 `buttonVariant="outline"` 同样改为 `butt
 
 显式 color 优先于快捷配色属性；显式 variant 优先于 Group variant，再由 type 推导。color 支持 default、primary、success、warning、danger 以及自定义 ColorValue。原先依赖自定义 color 的实心按钮应显式设置 variant="solid"。
 
-```tsx | pure
+```tsx
 <Button type="primary" success>完成</Button>
 <Button danger>删除</Button>
 <Button color="#7232DD" variant="solid">自定义颜色</Button>

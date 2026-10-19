@@ -1,43 +1,28 @@
----
-title: DateTimePicker 日期时间选择器
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # DateTimePicker 日期时间选择器
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 `DateTimePicker` 是在一个纯滚轮选择器中组合日期和时间字段的公共组件。仅日期使用 `DatePicker`，仅时间使用 `TimePicker`；三者的 Popup、draft 和提交状态都由外层组合负责。
 
-</section>
-
-<code src="../../../src/date-time-picker/__fixtures__/overview.tsx" title="组件预览" description="DateTimePicker 的列子集、完整范围、格式化和 Popup 组合示例。"></code>
+- [组件预览：DateTimePicker 的列子集、完整范围、格式化和 Popup 组合示例。](../../../src/date-time-picker/__fixtures__/overview.tsx)
 
 ## 代码演示
 
-<code src="../../../src/date-time-picker/__fixtures__/examples/basic.tsx" title="基础选择" description="默认选择 year、month、day、hour、minute 五列。"></code>
+- [基础选择：默认选择 year、month、day、hour、minute 五列。](../../../src/date-time-picker/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/date-time-picker/__fixtures__/examples/columns.tsx" title="列子集" description="展示按语义顺序省略字段，不允许颠倒。"></code>
+- [列子集：展示按语义顺序省略字段，不允许颠倒。](../../../src/date-time-picker/__fixtures__/examples/columns.tsx)
 
-<code src="../../../src/date-time-picker/__fixtures__/examples/seconds.tsx" title="带秒" description="显式加入 second 列。"></code>
+- [带秒：显式加入 second 列。](../../../src/date-time-picker/__fixtures__/examples/seconds.tsx)
 
-<code src="../../../src/date-time-picker/__fixtures__/examples/range.tsx" title="完整范围" description="展示 minDate 和 maxDate 的日期时间边界联动。"></code>
+- [完整范围：展示 minDate 和 maxDate 的日期时间边界联动。](../../../src/date-time-picker/__fixtures__/examples/range.tsx)
 
-<code src="../../../src/date-time-picker/__fixtures__/examples/step.tsx" title="时间步进" description="展示 hourStep、minuteStep 和 secondStep。"></code>
+- [时间步进：展示 hourStep、minuteStep 和 secondStep。](../../../src/date-time-picker/__fixtures__/examples/step.tsx)
 
-<code src="../../../src/date-time-picker/__fixtures__/examples/formatter.tsx" title="formatter" description="覆盖日期和时间列的显示文案。"></code>
+- [formatter：覆盖日期和时间列的显示文案。](../../../src/date-time-picker/__fixtures__/examples/formatter.tsx)
 
-<code src="../../../src/date-time-picker/__fixtures__/examples/filter.tsx" title="filter" description="根据完整 string values 过滤选项。"></code>
+- [filter：根据完整 string values 过滤选项。](../../../src/date-time-picker/__fixtures__/examples/filter.tsx)
 
-<code src="../../../src/date-time-picker/__fixtures__/examples/popup.tsx" title="Popup 集成" description="通过 Cell + Popup 组合 DateTimePicker，并在外层维护 draft。"></code>
+- [Popup 集成：通过 Cell + Popup 组合 DateTimePicker，并在外层维护 draft。](../../../src/date-time-picker/__fixtures__/examples/popup.tsx)
 
 ## API
 

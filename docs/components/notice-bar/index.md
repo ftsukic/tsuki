@@ -1,47 +1,32 @@
----
-title: NoticeBar 通知栏
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # NoticeBar 通知栏
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 NoticeBar 用于展示需要持续关注的消息通知，支持 Vant 风格的单行滚动、文本省略和多行换行。
 
-</section>
-
-<code src="../../../src/notice-bar/__fixtures__/overview.tsx" title="组件预览" description="展示 NoticeBar 的基础、组合内容、滚动、换行、交互、禁用和主题示例。"></code>
+- [组件预览：展示 NoticeBar 的基础、组合内容、滚动、换行、交互、禁用和主题示例。](../../../src/notice-bar/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { NoticeBar } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/notice-bar/__fixtures__/examples/NoticeBar.tsx" title="基础通知" description="展示基础通知和左侧自定义图标。"></code>
+- [基础通知：展示基础通知和左侧自定义图标。](../../../src/notice-bar/__fixtures__/examples/NoticeBar.tsx)
 
-<code src="../../../src/notice-bar/__fixtures__/examples/custom-content.tsx" title="组合内容" description="展示 children 自定义内容和静态右侧图标。"></code>
+- [组合内容：展示 children 自定义内容和静态右侧图标。](../../../src/notice-bar/__fixtures__/examples/custom-content.tsx)
 
-<code src="../../../src/notice-bar/__fixtures__/examples/scrollable.tsx" title="滚动配置" description="展示短内容循环滚动以及 speed、delay 配置。"></code>
+- [滚动配置：展示短内容循环滚动以及 speed、delay 配置。](../../../src/notice-bar/__fixtures__/examples/scrollable.tsx)
 
-<code src="../../../src/notice-bar/__fixtures__/examples/wrapable.tsx" title="换行" description="展示关闭滚动后的多行换行。"></code>
+- [换行：展示关闭滚动后的多行换行。](../../../src/notice-bar/__fixtures__/examples/wrapable.tsx)
 
-<code src="../../../src/notice-bar/__fixtures__/examples/interaction.tsx" title="交互" description="展示 onClick 计数和 onClose 隐藏当前通知。"></code>
+- [交互：展示 onClick 计数和 onClose 隐藏当前通知。](../../../src/notice-bar/__fixtures__/examples/interaction.tsx)
 
-<code src="../../../src/notice-bar/__fixtures__/examples/disabled.tsx" title="禁用" description="展示通知栏和关闭操作的禁用状态。"></code>
+- [禁用：展示通知栏和关闭操作的禁用状态。](../../../src/notice-bar/__fixtures__/examples/disabled.tsx)
 
-<code src="../../../src/notice-bar/__fixtures__/examples/theme.tsx" title="主题和语义样式" description="展示主题覆盖、语义样式和独立的主体与关闭操作。"></code>
+- [主题和语义样式：展示主题覆盖、语义样式和独立的主体与关闭操作。](../../../src/notice-bar/__fixtures__/examples/theme.tsx)
 
 ## API
 

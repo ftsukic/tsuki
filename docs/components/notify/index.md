@@ -1,55 +1,38 @@
----
-title: Notify 通知
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Notify 通知
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Notify 用于在页面顶部展示需要即时反馈的通知，支持四种语义类型、受控组件、命令式调用、自动关闭、顶部安全区和主题定制。
 
-</section>
-
-<code src="../../../src/notify/__fixtures__/overview.tsx" title="组件预览" description="Notify 汇总类型、受控显示、命令式交互、主题和顶部安全区示例。"></code>
+- [组件预览：Notify 汇总类型、受控显示、命令式交互、主题和顶部安全区示例。](../../../src/notify/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { ConfigProvider, Notify, TsukiProvider, closeNotify, showNotify } from '@ftsukic/tsuki'
 ```
 
-Notify 使用 Portal 渲染。受控组件和命令式 API 都需要当前应用存在 `PortalHost`，应用入口可以使用同时提供主题和 Portal 宿主的 `TsukiProvider`：
+Notify 使用 Teleport Portal 渲染。应用需在 TsukiProvider 外层挂载 `react-native-teleport` 的 `PortalProvider`：
 
-```tsx | pure
+```tsx
 <TsukiProvider>
   <App />
 </TsukiProvider>
 ```
 
-也可以直接组合 `ConfigProvider` 和 `PortalHost`。
-
 需要读取系统顶部安全区时，使用 `<TsukiProvider safeArea>`，或在宿主应用中自行挂载 `SafeAreaProvider`；`TsukiProvider` 的 `safeArea` 默认值为 `false`。
 
 ## 代码演示
 
-<code src="../../../src/notify/__fixtures__/examples/types.tsx" title="通知类型" description="通过 type 展示 primary、success、warning 和 error 四种通知颜色。"></code>
+- [通知类型：通过 type 展示 primary、success、warning 和 error 四种通知颜色。](../../../src/notify/__fixtures__/examples/types.tsx)
 
-<code src="../../../src/notify/__fixtures__/examples/controlled.tsx" title="受控组件" description="使用 visible 管理显示状态，并通过 ref.close 请求关闭。"></code>
+- [受控组件：使用 visible 管理显示状态，并通过 ref.close 请求关闭。](../../../src/notify/__fixtures__/examples/controlled.tsx)
 
-<code src="../../../src/notify/__fixtures__/examples/interactions.tsx" title="命令式交互" description="showNotify 返回的实例可以更新 message 或关闭当前单例通知。"></code>
+- [命令式交互：showNotify 返回的实例可以更新 message 或关闭当前单例通知。](../../../src/notify/__fixtures__/examples/interactions.tsx)
 
-<code src="../../../src/notify/__fixtures__/examples/theme.tsx" title="主题和样式" description="通过 Notify token 和单次样式定制通知外观。"></code>
+- [主题和样式：通过 Notify token 和单次样式定制通知外观。](../../../src/notify/__fixtures__/examples/theme.tsx)
 
-<code src="../../../src/notify/__fixtures__/examples/safe-area.tsx" title="顶部安全区" description="默认适配顶部安全区，也可以通过 safeAreaInsetTop 显式关闭。"></code>
+- [顶部安全区：默认适配顶部安全区，也可以通过 safeAreaInsetTop 显式关闭。](../../../src/notify/__fixtures__/examples/safe-area.tsx)
 
 ## API
 
@@ -77,7 +60,7 @@ Notify 使用 Portal 渲染。受控组件和命令式 API 都需要当前应用
 
 ### 受控显示
 
-```tsx | pure
+```tsx
 const [visible, setVisible] = useState(false)
 
 <Notify
@@ -92,7 +75,7 @@ const [visible, setVisible] = useState(false)
 
 ### 命令式 API
 
-```tsx | pure
+```tsx
 const notify = showNotify({
   message: '正在保存',
   duration: 0,
@@ -110,13 +93,13 @@ closeNotify()
 | setNotifyDefaultOptions | `(options: Partial<NotifyProps>) => void` | 设置命令式调用的默认参数，显式参数优先 |
 | resetNotifyDefaultOptions | `() => void` | 清除命令式默认参数 |
 
-`NotifyMethods` 提供 `close()` 和 `setMessage(message)`。新的 `showNotify` 调用会先关闭当前实例，再创建新的单例；命令式实例通过当前 `PortalHost` 挂载。
+`NotifyMethods` 提供 `close()` 和 `setMessage(message)`。新的 `showNotify` 调用会先关闭当前实例，再创建新的单例；命令式实例挂载到 Teleport 的 `root` 宿主。
 
 ## 主题定制
 
 通过 `ConfigProvider` 的 `theme.components.Notify` 覆盖默认类型颜色、文字和间距：
 
-```tsx | pure
+```tsx
 <ConfigProvider
   theme={{
     components: {

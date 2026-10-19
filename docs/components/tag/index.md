@@ -1,43 +1,28 @@
----
-title: Tag 标签
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Tag 标签
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Tag 用于标记关键词和概括主要内容，支持语义类型、尺寸、形状、空心和可关闭样式。
 
-</section>
-
-<code src="../../../src/tag/__fixtures__/overview.tsx" title="组件预览"></code>
+- [组件预览](../../../src/tag/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Tag } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/tag/__fixtures__/examples/basic.tsx" title="基础类型" description="展示 default、primary、success、warning 和 danger 五种类型。"></code>
+- [基础类型：展示 default、primary、success、warning 和 danger 五种类型。](../../../src/tag/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/tag/__fixtures__/examples/shapes.tsx" title="形状和空心样式" description="展示 plain、round 和 mark。"></code>
+- [形状和空心样式：展示 plain、round 和 mark。](../../../src/tag/__fixtures__/examples/shapes.tsx)
 
-<code src="../../../src/tag/__fixtures__/examples/sizes.tsx" title="尺寸" description="展示 small、medium 和 large 三种尺寸。"></code>
+- [尺寸：展示 small、medium 和 large 三种尺寸。](../../../src/tag/__fixtures__/examples/sizes.tsx)
 
-<code src="../../../src/tag/__fixtures__/examples/closeable.tsx" title="可关闭和禁用" description="关闭事件只通知外层，卸载由调用方控制。"></code>
+- [可关闭和禁用：关闭事件只通知外层，卸载由调用方控制。](../../../src/tag/__fixtures__/examples/closeable.tsx)
 
-<code src="../../../src/tag/__fixtures__/examples/custom-color.tsx" title="自定义颜色" description="展示 color、textColor 和 plain 的组合。"></code>
+- [自定义颜色：展示 color、textColor 和 plain 的组合。](../../../src/tag/__fixtures__/examples/custom-color.tsx)
 
 ## API
 

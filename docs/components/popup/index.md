@@ -1,35 +1,20 @@
----
-title: Popup 弹出层
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Popup 弹出层
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Popup 用于在当前页面上方展示内容，支持居中、四边定位、遮罩、圆角、懒渲染、销毁和按 Native Stack 语义实现的滑入动画。
 
-</section>
-
-<code src="../../../src/popup/__fixtures__/overview.tsx" title="组件预览"></code>
+- [组件预览](../../../src/popup/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Popup, TsukiProvider } from '@ftsukic/tsuki'
 ```
 
 Popup 推荐挂载在应用根节点的 `TsukiProvider` 内：
 
-```tsx | pure
+```tsx
 <TsukiProvider>
   <App />
 </TsukiProvider>
@@ -37,23 +22,23 @@ Popup 推荐挂载在应用根节点的 `TsukiProvider` 内：
 
 ## 代码演示
 
-<code src="../../../src/popup/__fixtures__/examples/basic.tsx" title="基础用法" description="使用 visible 受控显示居中弹层。"></code>
+- [基础用法：使用 visible 受控显示居中弹层。](../../../src/popup/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/popup/__fixtures__/examples/positions.tsx" title="五种位置" description="支持 center、top、bottom、left 和 right，并按位置处理 round 圆角。"></code>
+- [五种位置：支持 center、top、bottom、left 和 right，并按位置处理 round 圆角。](../../../src/popup/__fixtures__/examples/positions.tsx)
 
-<code src="../../../src/popup/__fixtures__/examples/safe-area.tsx" title="底部安全区" description="bottom Popup 可将宿主提供的底部 safe-area inset 叠加到面板已有的底部内边距。"></code>
+- [底部安全区：bottom Popup 可将宿主提供的底部 safe-area inset 叠加到面板已有的底部内边距。](../../../src/popup/__fixtures__/examples/safe-area.tsx)
 
-<code src="../../../src/popup/__fixtures__/examples/interactions.tsx" title="遮罩交互" description="通过 overlay、onPressOverlay 和 closeOnPressOverlay 管理遮罩点击。"></code>
+- [遮罩交互：通过 overlay、onPressOverlay 和 closeOnPressOverlay 管理遮罩点击。](../../../src/popup/__fixtures__/examples/interactions.tsx)
 
-<code src="../../../src/popup/__fixtures__/examples/lifecycle.tsx" title="生命周期与销毁" description="观察打开、关闭回调，并使用 destroyOnClosed 销毁内容。"></code>
+- [生命周期与销毁：观察打开、关闭回调，并使用 destroyOnClosed 销毁内容。](../../../src/popup/__fixtures__/examples/lifecycle.tsx)
 
-<code src="../../../src/popup/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 Popup token 和 semantic styles 定制浮层。"></code>
+- [主题定制：通过 Popup token 和 semantic styles 定制浮层。](../../../src/popup/__fixtures__/examples/theme.tsx)
 
-<code src="../../../src/popup/__fixtures__/examples/keyboard.tsx" title="输入框与键盘避让"></code>
+- [输入框与键盘避让](../../../src/popup/__fixtures__/examples/keyboard.tsx)
 
 开启 `keyboardAvoiding` 后，面板在键盘上方的可用区域布局，遮罩仍覆盖整个宿主。居中面板仅在底部被键盘遮挡时上移，底部面板贴近键盘上沿，顶部面板保持顶部位置。避让使用独立的 Reanimated 位移，并采用键盘事件的时长。该能力位于 Portal 内；仅在页面外包裹 KeyboardAvoidingView 无法保证作用于弹层。
 
-Popup 限制面板可用高度，长内容需要调用方提供可收缩的 ScrollView，并将固定按钮放在滚动区域外。 Android 宿主窗口被键盘缩小时，按实际布局与键盘的重叠区域避让；不要同时叠加业务侧键盘高度。宿主应覆盖需要避让的页面区域，嵌套或带偏移的 PortalHost 需要单独验证。Web 和 Harmony 的软键盘行为需要在目标宿主验证。
+Popup 限制面板可用高度，长内容需要调用方提供可收缩的 ScrollView，并将固定按钮放在滚动区域外。 Android 宿主窗口被键盘缩小时，按实际布局与键盘的重叠区域避让；不要同时叠加业务侧键盘高度。宿主应覆盖需要避让的页面区域，自建命名宿主和带偏移布局需要单独验证。Web 和 Harmony 的软键盘行为需要在目标宿主验证。
 
 ## API
 

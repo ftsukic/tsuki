@@ -1,75 +1,60 @@
----
-title: Cell 单元格
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Cell 单元格
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Cell 是通用的 Item 布局原语：`title`/`description` 属于标题区，`value` 属于值区；`titleExtra`、`valueExtra` 和 `trailing` 分别提供相邻扩展与独立右侧内容。它同时支持普通列表的 horizontal 布局和表单项常用的 vertical 布局。
 
-</section>
-
-<code src="../../../src/cell/__fixtures__/overview.tsx" title="组件预览" description="Cell 和 CellGroup 的完整组合用法。"></code>
+- [组件预览：Cell 和 CellGroup 的完整组合用法。](../../../src/cell/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Cell } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/cell/__fixtures__/examples/basic.tsx" title="基础用法" description="只有 title 的普通 Cell。"></code>
+- [基础用法：只有 title 的普通 Cell。](../../../src/cell/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/horizontal.tsx" title="Horizontal" description="title 按内容占位，value 使用剩余空间并支持省略。"></code>
+- [Horizontal：title 按内容占位，value 使用剩余空间并支持省略。](../../../src/cell/__fixtures__/examples/horizontal.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/vertical.tsx" title="Vertical" description="只改变 Main 内部排列，trailing 和 arrow 保持在主体右侧。"></code>
+- [Vertical：只改变 Main 内部排列，trailing 和 arrow 保持在主体右侧。](../../../src/cell/__fixtures__/examples/vertical.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/title-extra.tsx" title="Title extra" description="紧邻 title 的扩展节点。"></code>
+- [Title extra：紧邻 title 的扩展节点。](../../../src/cell/__fixtures__/examples/title-extra.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/value-extra.tsx" title="Value extra" description="紧邻 value 的扩展节点。"></code>
+- [Value extra：紧邻 value 的扩展节点。](../../../src/cell/__fixtures__/examples/value-extra.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/value.tsx" title="Value" description="右侧 value 和 valueAlign。"></code>
+- [Value：右侧 value 和 valueAlign。](../../../src/cell/__fixtures__/examples/value.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/label.tsx" title="Description" description="标题下方的辅助文本。"></code>
+- [Description：标题下方的辅助文本。](../../../src/cell/__fixtures__/examples/label.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/long-content.tsx" title="多行内容" description="primitive title/value 的行数控制。"></code>
+- [多行内容：primitive title/value 的行数控制。](../../../src/cell/__fixtures__/examples/long-content.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/icon.tsx" title="Leading" description="左侧任意节点组合。"></code>
+- [Leading：左侧任意节点组合。](../../../src/cell/__fixtures__/examples/icon.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/required.tsx" title="Required" description="TitleRow 内的必填标记。"></code>
+- [Required：TitleRow 内的必填标记。](../../../src/cell/__fixtures__/examples/required.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/link.tsx" title="Link" description="showArrow 展示箭头，事件控制点击反馈。"></code>
+- [Link：showArrow 展示箭头，事件控制点击反馈。](../../../src/cell/__fixtures__/examples/link.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/center.tsx" title="Center" description="独立于 vertical 的垂直居中。"></code>
+- [Center：独立于 vertical 的垂直居中。](../../../src/cell/__fixtures__/examples/center.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/divider.tsx" title="Divider" description="standalone 与连续 Cell 的显式 divider 控制。"></code>
+- [Divider：standalone 与连续 Cell 的显式 divider 控制。](../../../src/cell/__fixtures__/examples/divider.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/large.tsx" title="Size" description="normal 与 large 尺寸。"></code>
+- [Size：normal 与 large 尺寸。](../../../src/cell/__fixtures__/examples/large.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/group.tsx" title="CellGroup" description="CellGroup 基础组合。"></code>
+- [CellGroup：CellGroup 基础组合。](../../../src/cell/__fixtures__/examples/group.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/group-title.tsx" title="CellGroup title" description="分组标题。"></code>
+- [CellGroup title：分组标题。](../../../src/cell/__fixtures__/examples/group-title.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/group-inset.tsx" title="CellGroup inset" description="inset 分组容器。"></code>
+- [CellGroup inset：inset 分组容器。](../../../src/cell/__fixtures__/examples/group-inset.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/disabled.tsx" title="Disabled" description="禁用交互。"></code>
+- [Disabled：禁用交互。](../../../src/cell/__fixtures__/examples/disabled.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/composition.tsx" title="组合与对齐" description="Avatar、选择控件、多行说明与独立右侧内容。"></code>
+- [组合与对齐：Avatar、选择控件、多行说明与独立右侧内容。](../../../src/cell/__fixtures__/examples/composition.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/semantic.tsx" title="语义样式" description="CellStyles 插槽。"></code>
+- [语义样式：CellStyles 插槽。](../../../src/cell/__fixtures__/examples/semantic.tsx)
 
-<code src="../../../src/cell/__fixtures__/examples/theme.tsx" title="主题定制" description="Cell component token。"></code>
+- [主题定制：Cell component token。](../../../src/cell/__fixtures__/examples/theme.tsx)
 
 ## API
 

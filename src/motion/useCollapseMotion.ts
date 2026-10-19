@@ -4,7 +4,7 @@ import { useAnimatedRef, useAnimatedStyle } from 'react-native-reanimated'
 import { LAYOUT_PRESET } from './presets'
 import { useMotionValue } from './useMotionValue'
 
-/** Web layout events trigger a render, including the static documentation adapter. */
+/** Web layout events trigger a render for the measured content height. */
 export function useCollapseMotion(active: boolean, requestedDuration: number) {
   const contentRef = useAnimatedRef<View>()
   const [contentHeight, setContentHeight] = useState<number | null>(null)

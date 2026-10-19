@@ -3,7 +3,6 @@ import { Gesture } from '../gesture'
 import { useSharedValue } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import { sliderValueAtPosition } from './value'
-import type { GestureResponderEvent } from 'react-native'
 
 interface SliderGestureOptions {
   value: number
@@ -107,40 +106,5 @@ export function useSliderGesture(options: SliderGestureOptions) {
     finish,
     testID,
   ])
-  // Dumi's static Reanimated adapter needs React updates and RN responder input.
-  const staticAdapter = '__tsukiStaticAdapter' in position
-  const updateStatic = (event: GestureResponderEvent) => {
-    if (!enabled || width <= 0 || max <= min) return
-    const next = sliderValueAtPosition(
-      event.nativeEvent.locationX,
-      width,
-      offset,
-      min,
-      max,
-      step,
-      reverse,
-    )
-    if (next !== position.value) {
-      position.value = next
-      notify(next)
-    }
-  }
-  const responderHandlers = staticAdapter
-    ? {
-        onStartShouldSetResponder: () => enabled && width > 0 && max > min,
-        onResponderGrant: (event: GestureResponderEvent) => {
-          initial.value = position.value
-          start()
-          updateStatic(event)
-        },
-        onResponderMove: updateStatic,
-        onResponderRelease: (event: GestureResponderEvent) => {
-          updateStatic(event)
-          finish(position.value, position.value !== initial.value, true)
-        },
-        onResponderTerminate: () => finish(position.value, false, false),
-        onResponderTerminationRequest: () => false,
-      }
-    : {}
-  return { gesture, position, dragging, staticAdapter, responderHandlers }
+  return { gesture, position, dragging }
 }

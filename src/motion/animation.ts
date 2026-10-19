@@ -53,7 +53,7 @@ export function animateValue(
       )
 }
 
-/** Dumi uses a static Reanimated adapter, so its preview needs a spring sampler. */
+/** Samples a spring trajectory for deterministic calculations and assertions. */
 export function sampleSpring(
   elapsed: number,
   start: number,

@@ -1,51 +1,36 @@
----
-title: FloatingBubble 悬浮气泡
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # FloatingBubble 悬浮气泡
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 FloatingBubble 是一个通过 Portal 挂载到宿主浮层区域的悬浮操作气泡，默认位于右下区域，支持拖动、方向限制、边界磁吸、安全区和受控位置。
 
-</section>
-
-<code src="../../../src/floating-bubble/__fixtures__/overview.tsx" title="组件预览" description="FloatingBubble 的定位、拖动、磁吸、受控、自定义内容、安全区和主题预览。"></code>
+- [组件预览：FloatingBubble 的定位、拖动、磁吸、受控、自定义内容、安全区和主题预览。](../../../src/floating-bubble/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { FloatingBubble, Icon } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/basic.tsx" title="基础用法" description="默认右下定位和点击反馈。"></code>
+- [基础用法：默认右下定位和点击反馈。](../../../src/floating-bubble/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/axis.tsx" title="拖动方向" description="展示横向、纵向、自由拖动和锁定。"></code>
+- [拖动方向：展示横向、纵向、自由拖动和锁定。](../../../src/floating-bubble/__fixtures__/examples/axis.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/magnetic.tsx" title="横向磁吸" description="松手吸附到最近的左右边界。"></code>
+- [横向磁吸：松手吸附到最近的左右边界。](../../../src/floating-bubble/__fixtures__/examples/magnetic.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/controlled.tsx" title="受控位置" description="使用 offset 和 onOffsetChange 持有最终坐标。"></code>
+- [受控位置：使用 offset 和 onOffsetChange 持有最终坐标。](../../../src/floating-bubble/__fixtures__/examples/controlled.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/custom.tsx" title="自定义内容" description="使用 children 和自定义尺寸。"></code>
+- [自定义内容：使用 children 和自定义尺寸。](../../../src/floating-bubble/__fixtures__/examples/custom.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/safe-area.tsx" title="安全区" description="避开顶部和底部系统安全区。"></code>
+- [安全区：避开顶部和底部系统安全区。](../../../src/floating-bubble/__fixtures__/examples/safe-area.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/theme.tsx" title="主题定制" description="覆盖 FloatingBubble token 和 semantic styles。"></code>
+- [主题定制：覆盖 FloatingBubble token 和 semantic styles。](../../../src/floating-bubble/__fixtures__/examples/theme.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/semantic.tsx" title="语义样式" description="分别定制气泡、内容和图标区域，以及拖动状态。"></code>
+- [语义样式：分别定制气泡、内容和图标区域，以及拖动状态。](../../../src/floating-bubble/__fixtures__/examples/semantic.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/motion.tsx" title="动画策略" description="统一控制按压反馈和磁吸动画。"></code>
+- [动画策略：统一控制按压反馈和磁吸动画。](../../../src/floating-bubble/__fixtures__/examples/motion.tsx)
 
 ## API
 
@@ -58,7 +43,7 @@ import { FloatingBubble, Icon } from '@ftsukic/tsuki'
 | axis | `'x' \| 'y' \| 'xy' \| 'lock'` | `'y'` | `x` 只横向拖动，`y` 只纵向拖动，`xy` 自由拖动，`lock` 禁止拖动但仍可点击 |
 | magnetic | `'x' \| 'y'` | — | 松手后吸附到对应轴上最近的边界；不改变另一轴 |
 | gap | `number` | `24` | 气泡拖动及最终定位到 Host 可用区域边界的间距，优先于 token；回弹可短暂进入间距区域 |
-| offset | `FloatingBubbleOffset` | — | 受控的 Portal.Host 可用区域左上角坐标，表示气泡左上角位置 |
+| offset | `FloatingBubbleOffset` | — | 受控的 Teleport root 宿主可用区域左上角坐标，表示气泡左上角位置 |
 | defaultOffset | `FloatingBubbleOffset` | 右下边界 | 非受控模式的初始坐标 |
 | onOffsetChange | `(offset) => void` | — | 一次拖动或磁吸完成后通知最终坐标，不会逐帧触发 |
 | onOffsetChangeEnd | `(offset) => void` | — | 拖动/磁吸最终位置完成后通知 |
@@ -69,13 +54,13 @@ import { FloatingBubble, Icon } from '@ftsukic/tsuki'
 
 组件继承 React Native `PressableProps`，但自行管理 `children` 和 `style`；`disabled` 会同时禁用点击和拖动，`accessibilityRole` 默认是 `button`。图标型气泡应提供 `accessibilityLabel`：
 
-```tsx | pure
+```tsx
 <FloatingBubble accessibilityLabel="打开客服" onPress={openSupport}>
   <Icon name="CustomerServiceOutlined" size={24} />
 </FloatingBubble>
 ```
 
-气泡位置使用最近 Portal.Host 可用区域的左上角坐标系；全屏 Host 下与 viewport 坐标一致。组件会测量实际 Portal 层和 bubble layout，根据 `gap` 和 safe-area 计算边界，并对 `offset`、`defaultOffset` 和拖动结果统一 clamp；容器很小时会退化为单一合法位置。Host 区域尺寸变化、旋转或气泡尺寸变化后会重新 clamp。
+气泡位置使用Teleport root 宿主可用区域的左上角坐标系；全屏 Host 下与 viewport 坐标一致。组件会测量实际 Portal 层和 bubble layout，根据 `gap` 和 safe-area 计算边界，并对 `offset`、`defaultOffset` 和拖动结果统一 clamp；容器很小时会退化为单一合法位置。Host 区域尺寸变化、旋转或气泡尺寸变化后会重新 clamp。
 
 首次测量并完成定位前，气泡透明、不参与交互，并从无障碍树隐藏；定位后恢复调用方的交互和无障碍配置。
 
@@ -111,7 +96,7 @@ import { FloatingBubble, Icon } from '@ftsukic/tsuki'
 
 ### Portal 行为与边界
 
-FloatingBubble 通过现有 `Portal` 挂载到最近的 `Portal.Host`，外层是 `absoluteFill` 且 `pointerEvents="box-none"`，只有气泡本身参与 hit testing，不会阻塞页面其他区域。
+FloatingBubble 通过现有 `Portal` 挂载到Teleport `root` 宿主，外层是 `absoluteFill` 且 `pointerEvents="box-none"`，只有气泡本身参与 hit testing，不会阻塞页面其他区域。
 
 页面内的常驻气泡应使用页面级 Host，让气泡随页面转场。导航页面失焦但被保留时，宿主应用还需卸载气泡；需要恢复全局命令式浮层归属时，也应卸载该页面的 Host。Example 对 FloatingBubble 和 FloatingPanel 使用这一策略，重新进入页面时重建预览。
 

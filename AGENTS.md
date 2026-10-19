@@ -3,7 +3,7 @@
 ## 项目定位
 
 - `@ftsukic/tsuki` 是一个 React Native UI 组件库。源码入口是 `src/index.ts`。
-- Dumi 组件文档位于 `docs/`；Expo Example 位于 `example/`。
+- Markdown 指南和组件文档位于 `docs/`；Expo Example 位于 `example/`。
 - `.agents/` 包含显式的项目 Context。不要假设每个 Agent 都会自动加载它。
 
 ## 执行原则
@@ -31,7 +31,7 @@
 | Props、types、callback、ref、compatibility、accessibility | `.agents/rules/api-design.md` |
 | Theme token、provider、style、semantic slot | `.agents/rules/theme-style.md` |
 | Motion、动画策略、过渡生命周期、手势吸附 | `.agents/rules/motion-animation.md` |
-| Fixture、Dumi 文档、Expo Example 复用 | `.agents/rules/docs-fixtures.md` |
+| Fixture、组件文档、Expo Example 复用 | `.agents/rules/docs-fixtures.md` |
 | 测试范围和行为覆盖 | `.agents/rules/testing.md` |
 | Changeset、versioning、publishing | `.agents/rules/release.md` |
 

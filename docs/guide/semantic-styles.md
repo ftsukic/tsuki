@@ -1,20 +1,10 @@
----
-title: 语义结构与样式
-order: 3
-nav:
-  title: 指南
-group:
-  title: 开发指南
-  path: /guide
----
-
 # 语义结构与样式
 
 Tsuki 参照 Ant Design 的 Semantic DOM，为组件公开有明确视觉职责的语义槽。React Native 使用 `styles`，不提供 DOM、CSS 选择器或 `classNames`。组件的实际节点由布局、原生控件和动画需求决定；槽位名称尽量与对应的 Ant Design 组件保持一致。
 
 ## 使用方式
 
-```tsx | pure
+```tsx
 <Button
   type="primary"
   style={{ marginTop: 12 }}
@@ -52,7 +42,7 @@ Popover 的 root 是底层原生弹出边界，reference 是触发区域，conta
 
 ## 组合组件
 
-```tsx | pure
+```tsx
 <DropdownItem
   options={[{ text: '全部', value: 'all' }]}
   styles={{

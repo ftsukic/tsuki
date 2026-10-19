@@ -1,35 +1,20 @@
----
-title: Tabs 标签页
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Tabs 标签页
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Tabs 用于在多个页面、筛选项或内容分区之间切换。组件提供 Vant 风格的 `line` 和 `card` 两种导航样式；Tab 标题和可选内容分开声明，省略内容时可以只作为导航使用。
 
-</section>
-
-<code src="../../../src/tabs/__fixtures__/overview.tsx" title="组件预览" description="Tabs 的 line、card、禁用、滚动、shrink、受控、手势和 lazyRender 用法。"></code>
+- [组件预览：Tabs 的 line、card、禁用、滚动、shrink、受控、手势和 lazyRender 用法。](../../../src/tabs/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Tab, Tabs } from '@ftsukic/tsuki'
 ```
 
 也可以使用 compound API：
 
-```tsx | pure
+```tsx
 import { Tabs } from '@ftsukic/tsuki'
 
 ;<Tabs>
@@ -39,25 +24,25 @@ import { Tabs } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-<code src="../../../src/tabs/__fixtures__/examples/line-basic.tsx" title="Line 基础用法" description="默认 line 样式可以同时作为内容切换器和导航。"></code>
+- [Line 基础用法：默认 line 样式可以同时作为内容切换器和导航。](../../../src/tabs/__fixtures__/examples/line-basic.tsx)
 
-<code src="../../../src/tabs/__fixtures__/examples/card-basic.tsx" title="Card 基础用法" description="使用 card 样式展示 Vant 风格的卡片标签。"></code>
+- [Card 基础用法：使用 card 样式展示 Vant 风格的卡片标签。](../../../src/tabs/__fixtures__/examples/card-basic.tsx)
 
-<code src="../../../src/tabs/__fixtures__/examples/disabled.tsx" title="禁用 Tab" description="禁用项仍然展示，但不响应点击。"></code>
+- [禁用 Tab：禁用项仍然展示，但不响应点击。](../../../src/tabs/__fixtures__/examples/disabled.tsx)
 
-<code src="../../../src/tabs/__fixtures__/examples/scrollable.tsx" title="横向滚动" description="scrollable 适合较多 Tab 的横向导航。"></code>
+- [横向滚动：scrollable 适合较多 Tab 的横向导航。](../../../src/tabs/__fixtures__/examples/scrollable.tsx)
 
-<code src="../../../src/tabs/__fixtures__/examples/shrink.tsx" title="Shrink 布局" description="shrink 让标题按内容布局，并支持 styles.label。"></code>
+- [Shrink 布局：shrink 让标题按内容布局，并支持 styles.label。](../../../src/tabs/__fixtures__/examples/shrink.tsx)
 
-<code src="../../../src/tabs/__fixtures__/examples/controlled.tsx" title="受控切换" description="使用 value 和 onChange 由页面统一管理激活值。"></code>
+- [受控切换：使用 value 和 onChange 由页面统一管理激活值。](../../../src/tabs/__fixtures__/examples/controlled.tsx)
 
-<code src="../../../src/tabs/__fixtures__/examples/swipeable.tsx" title="手势切换" description="启用 swipeable 后可以通过横向手势切换内容。"></code>
+- [手势切换：启用 swipeable 后可以通过横向手势切换内容。](../../../src/tabs/__fixtures__/examples/swipeable.tsx)
 
-<code src="../../../src/tabs/__fixtures__/examples/animated.tsx" title="内容切换动画" description="显式设置 animated 开启内容区域切换动画。"></code>
+- [内容切换动画：显式设置 animated 开启内容区域切换动画。](../../../src/tabs/__fixtures__/examples/animated.tsx)
 
-<code src="../../../src/tabs/__fixtures__/examples/lazy-render.tsx" title="Lazy render" description="页面首次激活后保持挂载，切换回来时内部状态不丢失。"></code>
+- [Lazy render：页面首次激活后保持挂载，切换回来时内部状态不丢失。](../../../src/tabs/__fixtures__/examples/lazy-render.tsx)
 
-<code src="../../../src/tabs/__fixtures__/examples/theme.tsx" title="主题与语义样式" description="通过组件 token 和 styles 定制 Tabs。"></code>
+- [主题与语义样式：通过组件 token 和 styles 定制 Tabs。](../../../src/tabs/__fixtures__/examples/theme.tsx)
 
 ## API
 
@@ -106,7 +91,7 @@ Tab 标题和 line indicator 的切换动画默认始终开启，scrollable/shri
 
 ## 语义样式
 
-```tsx | pure
+```tsx
 <Tabs
   styles={({ state }) => ({
     nav: { paddingHorizontal: state.scrollable ? 4 : 0 },
@@ -141,7 +126,7 @@ Tab 标题和 line indicator 的切换动画默认始终开启，scrollable/shri
 | cardActiveTextColor              | `colorTextLightSolid`  | card 激活文字颜色   |
 | animationDuration                | `motionDurationFast`   | indicator 动画时长  |
 
-```tsx | pure
+```tsx
 <ConfigProvider theme={{ components: { Tabs: { indicatorWidth: 48, cardRadius: 6 } } }}>
   <Tabs>
     <Tab title="通知" />

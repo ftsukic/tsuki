@@ -57,9 +57,6 @@ jobs:
       - name: Build package
         run: yarn build
 
-      - name: Build documentation
-        run: yarn docs:build
-
       - name: Validate example
         run: yarn example:typecheck && yarn example:config && yarn example:export
 

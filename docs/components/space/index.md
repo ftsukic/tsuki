@@ -1,39 +1,24 @@
----
-title: Space 间距
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Space 间距
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Space 用于排列一组兄弟元素，提供方向、原生 `gap`、换行和交叉轴对齐能力。
 
-</section>
-
-<code src="../../../src/space/__fixtures__/overview.tsx" title="组件预览" description="Space 的横向、纵向、换行和对齐示例。"></code>
+- [组件预览：Space 的横向、纵向、换行和对齐示例。](../../../src/space/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Space } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/space/__fixtures__/examples/basic.tsx" title="横向间距" description="横向排列一组操作项。"></code>
+- [横向间距：横向排列一组操作项。](../../../src/space/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/space/__fixtures__/examples/vertical.tsx" title="纵向间距" description="纵向堆叠内容并保持固定 gap。"></code>
+- [纵向间距：纵向堆叠内容并保持固定 gap。](../../../src/space/__fixtures__/examples/vertical.tsx)
 
-<code src="../../../src/space/__fixtures__/examples/wrap.tsx" title="换行和对齐" description="启用 wrap 并设置交叉轴对齐。"></code>
+- [换行和对齐：启用 wrap 并设置交叉轴对齐。](../../../src/space/__fixtures__/examples/wrap.tsx)
 
 ## API
 

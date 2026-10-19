@@ -1,76 +1,44 @@
----
-title: Dialog 弹出框
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Dialog 弹出框
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Dialog 用于消息提示、操作确认和当前页面内的短交互。支持受控组件、命令式调用、异步关闭、自定义内容、遮罩和两种按钮风格。
 
-</section>
-
-<code src="../../../src/dialog/__fixtures__/overview.tsx" title="组件预览"></code>
+- [组件预览](../../../src/dialog/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
-import {
-  ConfigProvider,
-  Dialog,
-  PortalHost,
-  closeDialog,
-  showConfirmDialog,
-  showDialog,
-} from '@ftsukic/tsuki'
+```tsx
+import { ConfigProvider, Dialog, closeDialog, showConfirmDialog, showDialog } from '@ftsukic/tsuki'
 ```
 
-命令式 API 和受控 Dialog 需要 `PortalHost`。可以直接组合 `ConfigProvider` 和 `PortalHost`：
-
-```tsx | pure
-<ConfigProvider>
-  <PortalHost>
-    <App />
-  </PortalHost>
-</ConfigProvider>
-```
-
-应用也可以使用同时提供主题和 Portal 宿主的 `TsukiProvider`；它是上述组合的便捷入口。
+应用需在 `TsukiProvider` 外层挂载 `react-native-teleport` 的 `PortalProvider`。TsukiProvider 为命令式 API 提供 React 承载器；PortalProvider 提供 Teleport root 宿主。
 
 ## 代码演示
 
-<code src="../../../src/dialog/__fixtures__/examples/basic.tsx" title="基础提示" description="showDialog 默认只展示确认按钮。"></code>
+- [基础提示：showDialog 默认只展示确认按钮。](../../../src/dialog/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/confirm.tsx" title="确认框" description="showConfirmDialog 增加取消按钮并通过 Promise 区分结果。"></code>
+- [确认框：showConfirmDialog 增加取消按钮并通过 Promise 区分结果。](../../../src/dialog/__fixtures__/examples/confirm.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/controlled.tsx" title="受控组件" description="使用 show 和 onShowChange 管理 Dialog 的显示状态。"></code>
+- [受控组件：使用 show 和 onShowChange 管理 Dialog 的显示状态。](../../../src/dialog/__fixtures__/examples/controlled.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/custom.tsx" title="自定义内容" description="使用 ReactNode 标题、children 正文和 footer 自定义底部。"></code>
+- [自定义内容：使用 ReactNode 标题、children 正文和 footer 自定义底部。](../../../src/dialog/__fixtures__/examples/custom.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/before-close.tsx" title="异步关闭" description="beforeClose 可以阻止关闭并在检查期间显示按钮 loading。"></code>
+- [异步关闭：beforeClose 可以阻止关闭并在检查期间显示按钮 loading。](../../../src/dialog/__fixtures__/examples/before-close.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/round.tsx" title="圆角按钮" description="theme 为 round-button 时使用圆角操作按钮。"></code>
+- [圆角按钮：theme 为 round-button 时使用圆角操作按钮。](../../../src/dialog/__fixtures__/examples/round.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/interactions.tsx" title="遮罩与禁用" description="展示遮罩关闭和按钮禁用行为。"></code>
+- [遮罩与禁用：展示遮罩关闭和按钮禁用行为。](../../../src/dialog/__fixtures__/examples/interactions.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/layout.tsx" title="内容布局" description="分别展示仅标题、仅正文和标题加正文三种默认布局。"></code>
+- [内容布局：分别展示仅标题、仅正文和标题加正文三种默认布局。](../../../src/dialog/__fixtures__/examples/layout.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 Dialog token 和 semantic styles 定制视觉。"></code>
+- [主题定制：通过 Dialog token 和 semantic styles 定制视觉。](../../../src/dialog/__fixtures__/examples/theme.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/keyboard.tsx" title="输入框与键盘避让"></code>
+- [输入框与键盘避让](../../../src/dialog/__fixtures__/examples/keyboard.tsx)
 
 开启 `keyboardAvoiding` 后，面板在键盘上方的可用区域布局，遮罩仍覆盖整个宿主。居中面板仅在底部被键盘遮挡时上移，底部面板贴近键盘上沿，顶部面板保持顶部位置。避让使用独立的 Reanimated 位移，并采用键盘事件的时长。该能力位于 Portal 内；仅在页面外包裹 KeyboardAvoidingView 无法保证作用于弹层。
 
-Dialog 会收缩并滚动正文，保留标题和底部按钮。 Android 宿主窗口被键盘缩小时，按实际布局与键盘的重叠区域避让；不要同时叠加业务侧键盘高度。宿主应覆盖需要避让的页面区域，嵌套或带偏移的 PortalHost 需要单独验证。Web 和 Harmony 的软键盘行为需要在目标宿主验证。
+Dialog 会收缩并滚动正文，保留标题和底部按钮。 Android 宿主窗口被键盘缩小时，按实际布局与键盘的重叠区域避让；不要同时叠加业务侧键盘高度。宿主应覆盖需要避让的页面区域，Teleport 使用应用提供的 root 宿主；自建命名宿主和偏移布局需要单独验证。Web 和 Harmony 的软键盘行为需要在目标宿主验证。
 
 ## API
 
@@ -149,7 +117,7 @@ Dialog 使用无障碍 `alert` 和 modal 语义，遮罩不会进入无障碍导
 
 默认 footer 使用固定高度；显示取消按钮时，取消和确认 Button 直接作为 footer 子项并通过 `flex: 1` 平分宽度，整个半区都可点击。`theme="round-button"` 保留 footer 内边距、间隔和圆角按钮样式。
 
-### PortalHost 与命令式 API
+### Teleport 与命令式 API
 
 ```text
 showDialog(options?: DialogOptions): Promise<DialogAction | undefined>
@@ -159,15 +127,15 @@ setDialogDefaultOptions(options: DialogOptions): void
 resetDialogDefaultOptions(): void
 ```
 
-`showDialog` 默认只有确认按钮，点击确认后 Promise resolve `'confirm'`。`showConfirmDialog` 默认增加取消按钮，点击确认时 Promise resolve `'confirm'`，点击取消时 Promise reject `'cancel'`，因此可以使用 `.then(...).catch(...)`。`beforeClose` 阻止关闭时 Promise 保持 pending。两个函数共用一个当前实例；新调用会先以 `undefined` 结算前一个 pending Promise，再更新当前内容。`closeDialog` 会在关闭动画完成后 resolve `undefined`；PortalHost 卸载时 pending Promise 也会以 `undefined` 结束，这些情况不会模拟用户点击取消。
+`showDialog` 默认只有确认按钮，点击确认后 Promise resolve `'confirm'`。`showConfirmDialog` 默认增加取消按钮，点击确认时 Promise resolve `'confirm'`，点击取消时 Promise reject `'cancel'`，因此可以使用 `.then(...).catch(...)`。`beforeClose` 阻止关闭时 Promise 保持 pending。两个函数共用一个当前实例；新调用会先以 `undefined` 结算前一个 pending Promise，再更新当前内容。`closeDialog` 会在关闭动画完成后 resolve `undefined`；TsukiProvider 卸载时 pending Promise 也会以 `undefined` 结束，这些情况不会模拟用户点击取消。
 
-命令式 options 不包含 `show` 和生命周期回调，显式 options 优先于 `setDialogDefaultOptions`。未挂载 `PortalHost` 时，命令式调用会抛出错误；`closeDialog()` 在没有当前实例时安全无效。`ConfigProvider` 只负责主题，不会替代 `PortalHost`。
+命令式 options 不包含 `show` 和生命周期回调，显式 options 优先于 `setDialogDefaultOptions`。没有挂载 TsukiProvider 内部承载器时，命令式调用会抛出错误；`closeDialog()` 在没有当前实例时安全无效。`ConfigProvider` 只负责主题，不会替代 TsukiProvider 内部承载器。
 
 ### 主题定制
 
 通过 `ConfigProvider` 的 `theme.components.Dialog` 配置面板、标题、正文、按钮、间距、动画和层级 token：
 
-```tsx | pure
+```tsx
 <ConfigProvider
   theme={{
     components: {

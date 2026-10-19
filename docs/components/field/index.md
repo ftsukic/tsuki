@@ -1,29 +1,14 @@
----
-title: Field 表单组合
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 表单组件
-  order: 2
----
-
 # Field 表单组合
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Field 系列不是独立的基础 UI 容器，而是表单场景适配器：`FieldInput`、`FieldRadio`、`FieldCheckbox`、`FieldSwitch`、`FieldPicker`、`FieldDatePicker`、`FieldTimePicker` 和 `FieldDateTimePicker` 分别直接组合 `Cell` 与对应控件。需要自定义表单项时，直接组合 `Cell` 和自定义 control。
 
-</section>
-
-<code src="../../../src/field/__fixtures__/overview.tsx" title="组件预览" description="自定义 Cell 表单项、六种具体适配器、布局状态和主题用法。"></code>
+- [组件预览：自定义 Cell 表单项、六种具体适配器、布局状态和主题用法。](../../../src/field/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import {
   Cell,
   FieldCheckbox,
@@ -39,33 +24,33 @@ import {
 
 包不导出运行时 `Field`，也不提供 `FieldProps` 或 `FieldControlContext`。通用的自定义项写法如下：
 
-```tsx | pure
+```tsx
 <Cell title="自定义项" value={<CustomControl />} />
 ```
 
 ## 代码演示
 
-<code src="../../../src/field/__fixtures__/examples/basic.tsx" title="自定义表单项" description="直接组合 Cell 和自定义 control。"></code>
+- [自定义表单项：直接组合 Cell 和自定义 control。](../../../src/field/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/field/__fixtures__/examples/field-input.tsx" title="FieldInput" description="Cell 与 Input 的表单组合。"></code>
+- [FieldInput：Cell 与 Input 的表单组合。](../../../src/field/__fixtures__/examples/field-input.tsx)
 
-<code src="../../../src/field/__fixtures__/examples/field-radio.tsx" title="FieldRadio" description="Cell 与 Radio.Group 的表单组合。"></code>
+- [FieldRadio：Cell 与 Radio.Group 的表单组合。](../../../src/field/__fixtures__/examples/field-radio.tsx)
 
-<code src="../../../src/field/__fixtures__/examples/field-checkbox.tsx" title="FieldCheckbox" description="Cell 与 Checkbox.Group 的表单组合。"></code>
+- [FieldCheckbox：Cell 与 Checkbox.Group 的表单组合。](../../../src/field/__fixtures__/examples/field-checkbox.tsx)
 
-<code src="../../../src/field/__fixtures__/examples/field-switch.tsx" title="FieldSwitch" description="Cell 与 Switch 的表单组合，包含自定义值、状态和 beforeChange。"></code>
+- [FieldSwitch：Cell 与 Switch 的表单组合，包含自定义值、状态和 beforeChange。](../../../src/field/__fixtures__/examples/field-switch.tsx)
 
-<code src="../../../src/field/__fixtures__/examples/field-picker.tsx" title="FieldPicker" description="Cell 选择入口与 Picker 弹层的组合。"></code>
+- [FieldPicker：Cell 选择入口与 Picker 弹层的组合。](../../../src/field/__fixtures__/examples/field-picker.tsx)
 
-<code src="../../../src/field/__fixtures__/examples/field-date-picker.tsx" title="FieldDatePicker" description="Cell 日期入口与 DatePicker 弹层的组合。"></code>
+- [FieldDatePicker：Cell 日期入口与 DatePicker 弹层的组合。](../../../src/field/__fixtures__/examples/field-date-picker.tsx)
 
-<code src="../../../src/field/__fixtures__/examples/field-time-picker.tsx" title="FieldTimePicker" description="Cell 时间入口与 TimePicker 弹层的组合。"></code>
+- [FieldTimePicker：Cell 时间入口与 TimePicker 弹层的组合。](../../../src/field/__fixtures__/examples/field-time-picker.tsx)
 
-<code src="../../../src/field/__fixtures__/examples/field-date-time-picker.tsx" title="FieldDateTimePicker" description="Cell 日期时间入口与 DateTimePicker 弹层的组合。"></code>
+- [FieldDateTimePicker：Cell 日期时间入口与 DateTimePicker 弹层的组合。](../../../src/field/__fixtures__/examples/field-date-time-picker.tsx)
 
-<code src="../../../src/field/__fixtures__/examples/states.tsx" title="布局和状态" description="vertical、readOnly 和 disabled。"></code>
+- [布局和状态：vertical、readOnly 和 disabled。](../../../src/field/__fixtures__/examples/states.tsx)
 
-<code src="../../../src/field/__fixtures__/examples/theme.tsx" title="主题和语义样式" description="Field token 与 FieldPicker feedback 语义样式。"></code>
+- [主题和语义样式：Field token 与 FieldPicker feedback 语义样式。](../../../src/field/__fixtures__/examples/theme.tsx)
 
 ## 共同表单属性
 
@@ -106,7 +91,7 @@ import {
 
 `FieldInput` 直接渲染 `Cell`，并把扁平的 Input props 传给嵌入的 `Input`。`value`、`defaultValue` 和字符串 `onChange` 属于 FieldInput；Input 的原生 `onChangeText` 不单独暴露。适配器默认使用 `bordered={false}`，由 Cell 提供字段的背景、分割线和 10 / 16 外部间距；单行 Input 会移除自身的重复内边距，多行 Textarea 保留自己的 `textarea` 内边距。显式传入 `bordered` 后仍可为嵌入的 Input 开启独立边框，`focusedBordered` 默认保持 `false`。它保留 `password`、formatter、clearable、textarea、prefix/suffix 和 autoSize 能力。`FieldInput` 的 `center` 默认值为 `true`；传入 `center={false}` 可恢复非居中的 Cell 对齐行为。
 
-```tsx | pure
+```tsx
 <FieldInput
   title="手机号"
   value={phone}
@@ -125,7 +110,7 @@ import {
 
 `FieldRadio` 不支持 `help`、`errorMessage`、`status`；需要反馈内容时，应组合 `Cell` 与自定义 control。
 
-```tsx | pure
+```tsx
 <FieldRadio
   title="尺寸"
   value={size}
@@ -148,7 +133,7 @@ Field 的 `vertical` 控制标题与内容是否上下排列，Group 的 `direct
 
 `FieldCheckbox` 不支持 `help`、`errorMessage`、`status`；需要反馈内容时，应组合 `Cell` 与自定义 control。
 
-```tsx | pure
+```tsx
 <FieldCheckbox title="通知方式" value={channels} onChange={setChannels}>
   <Checkbox name="email">邮件</Checkbox>
   <Checkbox name="sms">短信</Checkbox>
@@ -179,7 +164,7 @@ Field 的 `vertical` 控制标题与内容是否上下排列，Group 的 `direct
 
 FieldSwitch 继承 Switch 可安全使用的 React Native `PressableProps`，例如 accessibility props、`testID`、`hitSlop` 和 `pointerEvents`；`children`、Switch 原始 `style`、`disabled` 和 `onPress` 由适配器分别管理或重命名。它支持 root、title、control 语义样式，不支持 Web 专属属性、`checked` 或 `defaultChecked` 别名。
 
-```tsx | pure
+```tsx
 <FieldSwitch
   title="通知"
   value="enabled"
@@ -199,7 +184,7 @@ Picker 类适配器支持 help（控件下帮助文字）、errorMessage 与 sta
 
 `FieldPicker` 将已确认的选项文本直接交给 Cell 展示，并将 `Popup` 与纯 `Picker` 作为 Cell 外部的弹层兄弟节点渲染。Picker 滚动只更新 draft；点击确认后才调用 `onChange`，取消、遮罩关闭或 readOnly 不会提交值。
 
-```tsx | pure
+```tsx
 <FieldPicker
   title="城市"
   value={city}
@@ -217,7 +202,7 @@ Picker 类适配器支持 help（控件下帮助文字）、errorMessage 与 sta
 
 `FieldDatePicker` 是 `Cell + Popup + DatePicker` 的日期表单适配器。它保持 `DatePickerValue` 的 `readonly string[]` 值契约；日期列、`minDate`、`maxDate`、`columnsType`、`formatter` 和 `filter` 等日期能力均透传给 DatePicker。滚动只更新 draft，点击确认后才调用 `onChange`；取消、遮罩关闭、`disabled` 和 `readOnly` 不会提交值。
 
-```tsx | pure
+```tsx
 <FieldDatePicker
   title="日期"
   value={date}

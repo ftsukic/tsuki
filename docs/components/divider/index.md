@@ -1,37 +1,22 @@
----
-title: Divider 分隔线
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Divider 分隔线
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Divider 用于区分不同内容区域，提供横向 hairline、颜色、厚度和统一左右 inset。
 
-</section>
-
-<code src="../../../src/divider/__fixtures__/overview.tsx" title="组件预览" description="Divider 的基础横线和可配置样式预览。"></code>
+- [组件预览：Divider 的基础横线和可配置样式预览。](../../../src/divider/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Divider } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/divider/__fixtures__/examples/basic.tsx" title="基础用法" description="使用主题默认颜色和 hairline 厚度。"></code>
+- [基础用法：使用主题默认颜色和 hairline 厚度。](../../../src/divider/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/divider/__fixtures__/examples/options.tsx" title="颜色、厚度和 inset" description="覆盖颜色、厚度、左右 inset 和根节点样式。"></code>
+- [颜色、厚度和 inset：覆盖颜色、厚度、左右 inset 和根节点样式。](../../../src/divider/__fixtures__/examples/options.tsx)
 
 ## API
 

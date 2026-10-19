@@ -1,53 +1,38 @@
----
-title: Popover 气泡弹出框
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 反馈组件
-  order: 4
----
-
 # Popover 气泡弹出框
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Popover 用于在触发控件附近展示 Vant 风格的操作菜单，也支持完全自定义浮层内容。组件使用 `react-native-popover-view` 处理 React Native 的定位、箭头、屏幕边界、旋转和键盘适配。
 
-</section>
-
-<code src="../../../src/popover/__fixtures__/overview.tsx" title="组件预览" description="Popover 的 action 菜单、定位、主题、触发器和自定义内容预览。"></code>
+- [组件预览：Popover 的 action 菜单、定位、主题、触发器和自定义内容预览。](../../../src/popover/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Popover } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/popover/__fixtures__/examples/basic.tsx" title="基础用法" description="点击触发器打开包含三个 action 的菜单，并显示最后选择的 action。"></code>
+- [基础用法：点击触发器打开包含三个 action 的菜单，并显示最后选择的 action。](../../../src/popover/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/popover/__fixtures__/examples/theme.tsx" title="深色风格" description="比较 light 和 dark 两种 Popover 自身视觉主题。"></code>
+- [深色风格：比较 light 和 dark 两种 Popover 自身视觉主题。](../../../src/popover/__fixtures__/examples/theme.tsx)
 
-<code src="../../../src/popover/__fixtures__/examples/placement.tsx" title="弹出位置" description="验证 auto、top、bottom、left 和 right 五种位置。"></code>
+- [弹出位置：验证 auto、top、bottom、left 和 right 五种位置。](../../../src/popover/__fixtures__/examples/placement.tsx)
 
-<code src="../../../src/popover/__fixtures__/examples/icon.tsx" title="图标" description="在 action 中组合图标，并为单项设置颜色。"></code>
+- [图标：在 action 中组合图标，并为单项设置颜色。](../../../src/popover/__fixtures__/examples/icon.tsx)
 
-<code src="../../../src/popover/__fixtures__/examples/disabled.tsx" title="禁用选项" description="展示禁用 action 和禁用 Popover 触发器。"></code>
+- [禁用选项：展示禁用 action 和禁用 Popover 触发器。](../../../src/popover/__fixtures__/examples/disabled.tsx)
 
-<code src="../../../src/popover/__fixtures__/examples/horizontal.tsx" title="横向排列" description="使用 actionsDirection 横向排列 action。"></code>
+- [横向排列：使用 actionsDirection 横向排列 action。](../../../src/popover/__fixtures__/examples/horizontal.tsx)
 
-<code src="../../../src/popover/__fixtures__/examples/controlled.tsx" title="受控模式" description="使用 visible、onVisibleChange 和 manual trigger 管理可见状态。"></code>
+- [受控模式：使用 visible、onVisibleChange 和 manual trigger 管理可见状态。](../../../src/popover/__fixtures__/examples/controlled.tsx)
 
-<code src="../../../src/popover/__fixtures__/examples/custom-content.tsx" title="自定义内容" description="使用 content 替换 action 菜单，并从自定义内容内部关闭浮层。"></code>
+- [自定义内容：使用 content 替换 action 菜单，并从自定义内容内部关闭浮层。](../../../src/popover/__fixtures__/examples/custom-content.tsx)
 
-<code src="../../../src/popover/__fixtures__/examples/semantic.tsx" title="语义样式" description="通过 semantic styles 定制 reference、container 和 item 插槽。"></code>
+- [语义样式：通过 semantic styles 定制 reference、container 和 item 插槽。](../../../src/popover/__fixtures__/examples/semantic.tsx)
 
-<code src="../../../src/popover/__fixtures__/examples/theme-token.tsx" title="主题 token" description="通过 ConfigProvider 覆盖 Popover component token。"></code>
+- [主题 token：通过 ConfigProvider 覆盖 Popover component token。](../../../src/popover/__fixtures__/examples/theme-token.tsx)
 
 ## API
 

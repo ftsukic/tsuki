@@ -1,43 +1,28 @@
----
-title: TimePicker 时间选择器
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # TimePicker 时间选择器
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 `TimePicker` 是纯时间滚轮选择器，负责生成 hour、minute、second 列和时间范围联动。它不内置 Popup，公开 `value`、`defaultValue` 和事件值都是按 `columnsType` 顺序排列的 `string[]`。
 
-</section>
-
-<code src="../../../src/time-picker/__fixtures__/overview.tsx" title="组件预览" description="TimePicker 的列组合、范围、过滤、步进和 Popup 示例。"></code>
+- [组件预览：TimePicker 的列组合、范围、过滤、步进和 Popup 示例。](../../../src/time-picker/__fixtures__/overview.tsx)
 
 ## 代码演示
 
-<code src="../../../src/time-picker/__fixtures__/examples/basic.tsx" title="基础时间" description="受控选择小时和分钟。"></code>
+- [基础时间：受控选择小时和分钟。](../../../src/time-picker/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/time-picker/__fixtures__/examples/columns.tsx" title="列组合" description="展示时间列子集和任意合法重排。"></code>
+- [列组合：展示时间列子集和任意合法重排。](../../../src/time-picker/__fixtures__/examples/columns.tsx)
 
-<code src="../../../src/time-picker/__fixtures__/examples/seconds.tsx" title="带秒" description="展示 hour、minute、second 三列。"></code>
+- [带秒：展示 hour、minute、second 三列。](../../../src/time-picker/__fixtures__/examples/seconds.tsx)
 
-<code src="../../../src/time-picker/__fixtures__/examples/range.tsx" title="时间范围" description="展示 minTime 和 maxTime 的级联边界。"></code>
+- [时间范围：展示 minTime 和 maxTime 的级联边界。](../../../src/time-picker/__fixtures__/examples/range.tsx)
 
-<code src="../../../src/time-picker/__fixtures__/examples/formatter.tsx" title="formatter" description="只修改时间选项的显示文本。"></code>
+- [formatter：只修改时间选项的显示文本。](../../../src/time-picker/__fixtures__/examples/formatter.tsx)
 
-<code src="../../../src/time-picker/__fixtures__/examples/filter.tsx" title="filter" description="按当前完整 values 过滤时间选项。"></code>
+- [filter：按当前完整 values 过滤时间选项。](../../../src/time-picker/__fixtures__/examples/filter.tsx)
 
-<code src="../../../src/time-picker/__fixtures__/examples/step.tsx" title="步进" description="展示 minuteStep 如何生成真实 options。"></code>
+- [步进：展示 minuteStep 如何生成真实 options。](../../../src/time-picker/__fixtures__/examples/step.tsx)
 
-<code src="../../../src/time-picker/__fixtures__/examples/popup.tsx" title="Popup 集成" description="通过 Cell + Popup 组合 TimePicker，并在外层维护 draft。"></code>
+- [Popup 集成：通过 Cell + Popup 组合 TimePicker，并在外层维护 draft。](../../../src/time-picker/__fixtures__/examples/popup.tsx)
 
 ## API
 

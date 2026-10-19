@@ -1,49 +1,34 @@
----
-title: Radio 单选框
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Radio 单选框
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 单选框用于从一组选项中选择一个值，也可以单独作为可控的布尔选择项使用。支持 Vant 语义的圆形 check、方形 check 和中心圆点指示器、Ant Design 风格的 `button` 变体、子节点分组、`options` 分组、禁用状态和主题定制。
 
-</section>
-
-<code src="../../../src/radio/__fixtures__/overview.tsx" title="组件预览"></code>
+- [组件预览](../../../src/radio/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Radio } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/radio/__fixtures__/examples/standalone.tsx" title="独立 Radio" description="支持受控 checked 和非受控 defaultChecked 两种写法。"></code>
+- [独立 Radio：支持受控 checked 和非受控 defaultChecked 两种写法。](../../../src/radio/__fixtures__/examples/standalone.tsx)
 
-<code src="../../../src/radio/__fixtures__/examples/group.tsx" title="Radio.Group 子节点" description="使用子 Radio 自定义选项，支持受控值、默认值、横向布局和间距。"></code>
+- [Radio.Group 子节点：使用子 Radio 自定义选项，支持受控值、默认值、横向布局和间距。](../../../src/radio/__fixtures__/examples/group.tsx)
 
-<code src="../../../src/radio/__fixtures__/examples/button.tsx" title="Button Radio" description="button 变体隐藏指示器，默认使用内容自适应宽度，并保留 Group 单选行为。"></code>
+- [Button Radio：button 变体隐藏指示器，默认使用内容自适应宽度，并保留 Group 单选行为。](../../../src/radio/__fixtures__/examples/button.tsx)
 
-<code src="../../../src/radio/__fixtures__/examples/options.tsx" title="options 分组" description="使用 options 配置数组快速生成结构一致的选项。"></code>
+- [options 分组：使用 options 配置数组快速生成结构一致的选项。](../../../src/radio/__fixtures__/examples/options.tsx)
 
-<code src="../../../src/radio/__fixtures__/examples/shapes.tsx" title="指示器形状" description="shape 支持 round 和 square，labelPosition 支持左右标签。"></code>
+- [指示器形状：shape 支持 round 和 square，labelPosition 支持左右标签。](../../../src/radio/__fixtures__/examples/shapes.tsx)
 
-<code src="../../../src/radio/__fixtures__/examples/disabled.tsx" title="禁用状态" description="Radio、options 选项和整个 Radio.Group 都支持禁用。"></code>
+- [禁用状态：Radio、options 选项和整个 Radio.Group 都支持禁用。](../../../src/radio/__fixtures__/examples/disabled.tsx)
 
-<code src="../../../src/radio/__fixtures__/examples/styled.tsx" title="自定义内容与语义样式" description="children 支持自定义节点，styles 覆盖 root、icon 和 label。"></code>
+- [自定义内容与语义样式：children 支持自定义节点，styles 覆盖 root、icon 和 label。](../../../src/radio/__fixtures__/examples/styled.tsx)
 
-<code src="../../../src/radio/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 theme.components.Radio 统一覆盖组件 token。"></code>
+- [主题定制：通过 theme.components.Radio 统一覆盖组件 token。](../../../src/radio/__fixtures__/examples/theme.tsx)
 
 ## API
 

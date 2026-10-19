@@ -1,43 +1,28 @@
----
-title: BottomBar 底部布局
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # BottomBar 底部布局
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 BottomBar 是页面底部固定布局容器，用于承载 Button、输入框、操作区域和其他任意 children。它只提供布局能力，不实现 ActionBar、商品操作、icon action、tab navigation 或业务状态。
 
-</section>
-
-<code src="../../../src/bottom-bar/__fixtures__/overview.tsx" title="组件预览" description="BottomBar 的基础、底部按钮组、输入操作区、安全区和自定义样式示例。"></code>
+- [组件预览：BottomBar 的基础、底部按钮组、输入操作区、安全区和自定义样式示例。](../../../src/bottom-bar/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { BottomBar } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/bottom-bar/__fixtures__/examples/basic.tsx" title="基础用法" description="BottomBar 作为页面根容器的底部操作区域，children 由调用方组合。"></code>
+- [基础用法：BottomBar 作为页面根容器的底部操作区域，children 由调用方组合。](../../../src/bottom-bar/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/bottom-bar/__fixtures__/examples/button-group.tsx" title="底部按钮组" description="使用 Button.Group block 在 BottomBar 中展示等宽按钮。"></code>
+- [底部按钮组：使用 Button.Group block 在 BottomBar 中展示等宽按钮。](../../../src/bottom-bar/__fixtures__/examples/button-group.tsx)
 
-<code src="../../../src/bottom-bar/__fixtures__/examples/input.tsx" title="输入操作区" description="将 Input 和 Button 组合到页面底部。"></code>
+- [输入操作区：将 Input 和 Button 组合到页面底部。](../../../src/bottom-bar/__fixtures__/examples/input.tsx)
 
-<code src="../../../src/bottom-bar/__fixtures__/examples/safe-area.tsx" title="底部安全区" description="默认处理底部 safe-area inset。"></code>
+- [底部安全区：默认处理底部 safe-area inset。](../../../src/bottom-bar/__fixtures__/examples/safe-area.tsx)
 
-<code src="../../../src/bottom-bar/__fixtures__/examples/custom-style.tsx" title="自定义样式" description="通过根 style 覆盖背景、圆角和间距。"></code>
+- [自定义样式：通过根 style 覆盖背景、圆角和间距。](../../../src/bottom-bar/__fixtures__/examples/custom-style.tsx)
 
 ## API
 
@@ -62,7 +47,7 @@ BottomBar 使用 `position: 'absolute'` 和 `left/right/bottom: 0`，固定在�
 
 BottomBar 不会自动修改页面内容的底部 padding；调用方需要自行预留空间。不要把它放在需要随内容滚动的 `ScrollView` 内部。
 
-BottomBar 不隐式使用 `Portal`，因此基础布局不要求额外的 `PortalHost`。如果未来多个组件需要相同的 viewport-level 定位，再抽取公共 `BottomFixedContainer`。
+BottomBar 不隐式使用 Teleport Portal，因此基础布局不要求额外的 Portal 宿主。如果未来多个组件需要相同的 viewport-level 定位，再抽取公共 `BottomFixedContainer`。
 
 ## Safe Area 与视觉样式
 

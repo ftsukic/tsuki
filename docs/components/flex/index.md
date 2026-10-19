@@ -1,41 +1,26 @@
----
-title: Flex 弹性布局
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Flex 弹性布局
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Flex 是对 React Native `View` Flexbox 的薄封装，直接使用原生 `gap`，适合一般的行列布局。
 
-</section>
-
-<code src="../../../src/flex/__fixtures__/overview.tsx" title="组件预览" description="Flex 的方向、换行、间距和对齐示例。"></code>
+- [组件预览：Flex 的方向、换行、间距和对齐示例。](../../../src/flex/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Flex } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/flex/__fixtures__/examples/basic.tsx" title="基础用法" description="使用 gap 排列横向兄弟元素。"></code>
+- [基础用法：使用 gap 排列横向兄弟元素。](../../../src/flex/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/flex/__fixtures__/examples/directions.tsx" title="方向" description="比较 row 和 column 两种方向。"></code>
+- [方向：比较 row 和 column 两种方向。](../../../src/flex/__fixtures__/examples/directions.tsx)
 
-<code src="../../../src/flex/__fixtures__/examples/wrap.tsx" title="换行" description="使用 wrap 允许横向子项换行。"></code>
+- [换行：使用 wrap 允许横向子项换行。](../../../src/flex/__fixtures__/examples/wrap.tsx)
 
-<code src="../../../src/flex/__fixtures__/examples/alignment.tsx" title="对齐" description="组合 align 和 justify 完成工具栏布局。"></code>
+- [对齐：组合 align 和 justify 完成工具栏布局。](../../../src/flex/__fixtures__/examples/alignment.tsx)
 
 ## API
 

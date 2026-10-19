@@ -1,45 +1,30 @@
----
-title: Button 按钮
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Button 按钮
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 按钮用于触发操作，支持 Vant 风格的类型、尺寸、视觉变体、加载状态和 `default`、`round`、`square`、`circle` 形状。
 
-</section>
-
-<code src="../../../src/button/__fixtures__/overview.tsx" title="组件预览" description="Button 的类型、状态和形状预览。"></code>
+- [组件预览：Button 的类型、状态和形状预览。](../../../src/button/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Button, Icon } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/button/__fixtures__/examples/variants.tsx" title="类型与变体" description="展示 Button 的类型、五种视觉变体、自定义颜色和语义样式。"></code>
+- [类型与变体：展示 Button 的类型、五种视觉变体、自定义颜色和语义样式。](../../../src/button/__fixtures__/examples/variants.tsx)
 
-<code src="../../../src/button/__fixtures__/examples/sizes.tsx" title="尺寸与布局" description="比较四种尺寸、块级按钮和文字按钮。"></code>
+- [尺寸与布局：比较四种尺寸、块级按钮和文字按钮。](../../../src/button/__fixtures__/examples/sizes.tsx)
 
-<code src="../../../src/button/__fixtures__/examples/loading.tsx" title="图标与加载" description="切换加载状态，观察图标替换、左右位置、内容保留和动态文案。"></code>
+- [图标与加载：切换加载状态，观察图标替换、左右位置、内容保留和动态文案。](../../../src/button/__fixtures__/examples/loading.tsx)
 
-<code src="../../../src/button/__fixtures__/examples/shapes.tsx" title="形状" description="并排比较默认、方角、胶囊和不同尺寸的圆形图标按钮。"></code>
+- [形状：并排比较默认、方角、胶囊和不同尺寸的圆形图标按钮。](../../../src/button/__fixtures__/examples/shapes.tsx)
 
-<code src="../../../src/button/__fixtures__/examples/group.tsx" title="Button.Group" description="展示连接按钮组、统一尺寸、视觉变体、显式尺寸覆盖和单按钮组。"></code>
+- [Button.Group：展示连接按钮组、统一尺寸、视觉变体、显式尺寸覆盖和单按钮组。](../../../src/button/__fixtures__/examples/group.tsx)
 
-<code src="../../../src/button/__fixtures__/examples/press-feedback.tsx" title="按下反馈" description="比较 text Button 默认透明度反馈和显式 overlay 配置。"></code>
+- [按下反馈：比较 text Button 默认透明度反馈和显式 overlay 配置。](../../../src/button/__fixtures__/examples/press-feedback.tsx)
 
 升级已有用法请参阅 [Button API 迁移](../../guide/button-migration.md)。
 
@@ -76,7 +61,7 @@ import { Button, Icon } from '@ftsukic/tsuki'
 
 Button 继承 React Native `PressableProps`，但由组件管理 `children`、`style` 和 `disabled`。默认 `accessibilityRole` 为 `button`；icon-only `circle` 应设置 `accessibilityLabel`：
 
-```tsx | pure
+```tsx
 <Button
   shape="circle"
   icon={<Icon name="PlusOutlined" size={18} />}
@@ -93,7 +78,7 @@ Button 继承 React Native `PressableProps`，但由组件管理 `children`、`s
 
 `color` 支持 `default`、`primary`、`success`、`warning`、`danger` 和自定义 `ColorValue`。配色优先级为显式 color、快捷属性、type 映射；快捷属性只改配色，不改外观。danger、success、warning 互斥，动态调用冲突时开发环境提示，并按 danger > warning > success 解析。
 
-```tsx | pure
+```tsx
 <Button danger>删除</Button>
 <Button type="primary" success>完成</Button>
 <Button warning variant="filled">提醒</Button>
@@ -112,7 +97,7 @@ Button 继承 React Native `PressableProps`，但由组件管理 `children`、`s
 
 通过 `ConfigProvider` 的 `theme.components.Button` 覆盖 Button token。形状相关的 token 包括 `borderRadius`、`heightXS`、`heightSM`、`height`、`heightLG` 以及各尺寸的 `paddingHorizontal`；`pressedOpacity` 控制 `text` 变体的按下透明度，`pressedOverlayColor` 控制实体变体的按下覆盖层；不要为 `circle` 额外定义专用宽高 token。
 
-```tsx | pure
+```tsx
 import { Button, ConfigProvider } from '@ftsukic/tsuki'
 
 ;<ConfigProvider theme={{ components: { Button: { borderRadius: 12 } } }}>
@@ -126,7 +111,7 @@ import { Button, ConfigProvider } from '@ftsukic/tsuki'
 
 `Button.Group` 是 Button 的静态子组件，也可以通过 named export `ButtonGroup` 引入。它默认横向排列直接传入的 Button，并连接相邻按钮的边框与内侧圆角。推荐直接放置 `Button` children；Group 可以统一透传 `size`、`shape` 和 `variant`，子 Button 显式属性优先。
 
-```tsx | pure
+```tsx
 import { Button, ButtonGroup } from '@ftsukic/tsuki'
 
 ;<Button.Group size="small" variant="outlined">

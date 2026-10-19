@@ -1,47 +1,32 @@
----
-title: Input 输入
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 表单组件
-  order: 2
----
-
 # Input 输入
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Input 是面向表单输入的高层组件，统一处理字符串值、清除、格式化、密码可见性和常用键盘模式。底层仍使用 React Native TextInput。
 
-</section>
-
-<code src="../../../src/input/__fixtures__/overview.tsx" title="组件预览" description="Input 汇总基础、密码、数字和多行输入模式。"></code>
+- [组件预览：Input 汇总基础、密码、数字和多行输入模式。](../../../src/input/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Input } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/input/__fixtures__/examples/basic.tsx" title="基础 Input" description="展示受控输入、清除操作和 disabled/readOnly 状态。"></code>
+- [基础 Input：展示受控输入、清除操作和 disabled/readOnly 状态。](../../../src/input/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/input/__fixtures__/examples/password.tsx" title="Password" description="使用眼睛按钮切换密码可见状态。"></code>
+- [Password：使用眼睛按钮切换密码可见状态。](../../../src/input/__fixtures__/examples/password.tsx)
 
-<code src="../../../src/input/__fixtures__/examples/number.tsx" title="Number" description="数字键盘输入仍然保留字符串值，包括前导零。"></code>
+- [Number：数字键盘输入仍然保留字符串值，包括前导零。](../../../src/input/__fixtures__/examples/number.tsx)
 
-<code src="../../../src/input/__fixtures__/examples/textarea.tsx" title="Textarea" description="多行输入支持 rows、清除和字数限制。"></code>
+- [Textarea：多行输入支持 rows、清除和字数限制。](../../../src/input/__fixtures__/examples/textarea.tsx)
 
-<code src="../../../src/input/__fixtures__/examples/auto-size.tsx" title="AutoSize" description="多行输入随内容增长，达到最大行数后内部滚动，删除内容时自动缩回。"></code>
+- [AutoSize：多行输入随内容增长，达到最大行数后内部滚动，删除内容时自动缩回。](../../../src/input/__fixtures__/examples/auto-size.tsx)
 
-<code src="../../../src/input/__fixtures__/examples/layout.tsx" title="尺寸和布局" description="展示尺寸、前后缀和 addon 的组合布局。"></code>
+- [尺寸和布局：展示尺寸、前后缀和 addon 的组合布局。](../../../src/input/__fixtures__/examples/layout.tsx)
 
-<code src="../../../src/input/__fixtures__/examples/scroll-view.tsx" title="ScrollView 场景" description="展示 ScrollView 内的单行输入和 keyboardShouldPersistTaps 配置。"></code>
+- [ScrollView 场景：展示 ScrollView 内的单行输入和 keyboardShouldPersistTaps 配置。](../../../src/input/__fixtures__/examples/scroll-view.tsx)
 
 ## API
 
@@ -83,7 +68,7 @@ Input 继承 React Native `TextInputProps` 的键盘、光标、选择、提交�
 
 Input 使用 `theme.components.Input`。单行输入默认 `normal` 尺寸为 `fontSize: 14`、`lineHeight: 24`、`paddingVertical: 10`、`paddingHorizontal: 16`；多行 Textarea 使用独立的基础文本度量，默认 `lineHeight: 20`、`paddingVertical: 8`、`paddingHorizontal: 16`。字号、行高、内边距、边框、圆角、占位文本色、禁用色、清除按钮和密码按钮均从 Input token 派生。Input 不提供固定 `height` token；整体高度由 lineHeight 与内边距自然形成，需要特殊固定尺寸时，可通过 `styles.container` 显式覆盖，由业务自行承担固定高度布局。
 
-```tsx | pure
+```tsx
 import { ConfigProvider, Input } from '@ftsukic/tsuki'
 
 ;<ConfigProvider theme={{ components: { Input: { paddingVertical: 10, borderRadius: 8 } } }}>
@@ -107,7 +92,7 @@ iOS 在内容或实际宽度变化时重新创建隐藏测量节点，避免原�
 
 未传 `value` 且未配置 `formatter` 时，原生输入框保管编辑文本，`defaultValue` 仅用于初始化。`onChangeText`、字数统计和自动测量继续更新，避免每次输入都通过 JS 的 `value` 回写。传入 `value` 时保持受控行为；formatter 需要回写文本，中文输入建议使用 `formatTrigger="onEndEditing"`。该路径不保证修复 iOS Fabric 的所有组合输入问题，需要用目标设备对照验证。
 
-<code src="../../../src/input/__fixtures__/examples/ime.tsx" title="中文组合输入对照"></code>
+- [中文组合输入对照](../../../src/input/__fixtures__/examples/ime.tsx)
 
 ### Portal 内的受控输入
 

@@ -1,9 +1,3 @@
----
-componentDoc: true
-toc: false
-title: PickerGroup 选择器组
----
-
 # PickerGroup 选择器组
 
 `PickerGroup` 用于把多个 Picker 组合到同一个选择流程中。它提供一个共享 toolbar、tabs 和下一步操作；子 Picker 会自动隐藏自己的 toolbar，所有由 `tabs` 创建的 pane 都保持 mounted。
@@ -12,17 +6,17 @@ title: PickerGroup 选择器组
 
 `activeTab` 对应 Vant 的 `v-model:active-tab`。在受控模式下，点击 tab 只触发 `onChange`，必须由父组件回写新的 `activeTab` 后页面才会切换；不传 `activeTab` 时，使用 `defaultActiveTab` 初始化并由组件内部维护。
 
-<code src="../../../src/picker-group/__fixtures__/overview.tsx" title="组件预览" description="PickerGroup 的共享 toolbar、tabs 和多 Picker 示例。"></code>
+- [组件预览：PickerGroup 的共享 toolbar、tabs 和多 Picker 示例。](../../../src/picker-group/__fixtures__/overview.tsx)
 
 ## 代码演示
 
-<code src="../../../src/picker-group/__fixtures__/examples/basic.tsx" title="基础用法" description="Cell 打开底部 Popup，日期和时间由两个独立 Picker 组合。"></code>
+- [基础用法：Cell 打开底部 Popup，日期和时间由两个独立 Picker 组合。](../../../src/picker-group/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/picker-group/__fixtures__/examples/next-step.tsx" title="下一步" description="设置 nextStepText 后，前面的 tab 先切换到下一步，最后一页才汇总确认。"></code>
+- [下一步：设置 nextStepText 后，前面的 tab 先切换到下一步，最后一页才汇总确认。](../../../src/picker-group/__fixtures__/examples/next-step.tsx)
 
-<code src="../../../src/picker-group/__fixtures__/examples/date-range.tsx" title="日期范围组合" description="使用 PickerGroup 和两个 DatePicker 组合实现日期范围选择。"></code>
+- [日期范围组合：使用 PickerGroup 和两个 DatePicker 组合实现日期范围选择。](../../../src/picker-group/__fixtures__/examples/date-range.tsx)
 
-<code src="../../../src/picker-group/__fixtures__/examples/controlled.tsx" title="受控 activeTab" description="通过 activeTab 和 onChange 控制当前 tab。"></code>
+- [受控 activeTab：通过 activeTab 和 onChange 控制当前 tab。](../../../src/picker-group/__fixtures__/examples/controlled.tsx)
 
 ## API
 
@@ -54,7 +48,7 @@ title: PickerGroup 选择器组
 
 `tabs` 按 Vant PickerGroup 的语义决定 pane 数量，children 按位置映射。children 多于 tabs 时，超出的 child 不会渲染或参与确认；children 少于 tabs 时，缺少 child 的 pane 保留为空，确认结果仍按 tab position 保留空 selection，不会压缩结果。日期范围推荐使用 `PickerGroup + DatePicker + DatePicker` 组合，不提供独立的日期范围组件。需要 Popup 时请显式组合：
 
-```tsx | pure
+```tsx
 <Cell title="选择日期和时间" onPress={() => setVisible(true)} />
 <Popup visible={visible} position="bottom" onRequestClose={() => setVisible(false)}>
   <PickerGroup tabs={['日期', '时间']}>

@@ -1,59 +1,44 @@
----
-title: Search 搜索
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 表单组件
-  order: 2
----
-
 # Search 搜索
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Search 是面向列表过滤和搜索入口的单行输入组件。它组合 `Input` 提供输入、清除、禁用、只读和原生 TextInput 能力，自己负责搜索场景的外层布局、搜索图标、形状和搜索行为。
 
-</section>
-
-<code src="../../../src/search/__fixtures__/overview.tsx" title="组件预览" description="Search 汇总 Vant 风格输入、左右扩展和搜索行为场景。"></code>
+- [组件预览：Search 汇总 Vant 风格输入、左右扩展和搜索行为场景。](../../../src/search/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Search } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/search/__fixtures__/examples/basic.tsx" title="基础 Search" description="默认方角 Search 只显示输入区域。"></code>
+- [基础 Search：默认方角 Search 只显示输入区域。](../../../src/search/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/search/__fixtures__/examples/action.tsx" title="外部操作" description="通过 action 放置取消等外部操作。"></code>
+- [外部操作：通过 action 放置取消等外部操作。](../../../src/search/__fixtures__/examples/action.tsx)
 
-<code src="../../../src/search/__fixtures__/examples/align.tsx" title="输入对齐" description="将输入文字和占位文字居中对齐。"></code>
+- [输入对齐：将输入文字和占位文字居中对齐。](../../../src/search/__fixtures__/examples/align.tsx)
 
-<code src="../../../src/search/__fixtures__/examples/disabled.tsx" title="禁用状态" description="禁用状态由 Input 负责输入状态和视觉。"></code>
+- [禁用状态：禁用状态由 Input 负责输入状态和视觉。](../../../src/search/__fixtures__/examples/disabled.tsx)
 
-<code src="../../../src/search/__fixtures__/examples/divider.tsx" title="底部分割线" description="显示 Search 整体底部分割线。"></code>
+- [底部分割线：显示 Search 整体底部分割线。](../../../src/search/__fixtures__/examples/divider.tsx)
 
-<code src="../../../src/search/__fixtures__/examples/background.tsx" title="自定义背景" description="自定义 Search 外层背景，输入区域保持独立底色。"></code>
+- [自定义背景：自定义 Search 外层背景，输入区域保持独立底色。](../../../src/search/__fixtures__/examples/background.tsx)
 
-<code src="../../../src/search/__fixtures__/examples/label.tsx" title="内部 Label" description="在默认搜索图标后放置地址等内部内容。"></code>
+- [内部 Label：在默认搜索图标后放置地址等内部内容。](../../../src/search/__fixtures__/examples/label.tsx)
 
-<code src="../../../src/search/__fixtures__/examples/button-action.tsx" title="Button 操作" description="使用 Button 作为 Search 外部操作区。"></code>
+- [Button 操作：使用 Button 作为 Search 外部操作区。](../../../src/search/__fixtures__/examples/button-action.tsx)
 
-<code src="../../../src/search/__fixtures__/examples/left.tsx" title="Left 和 Action" description="自定义外部 left 并组合返回箭头和按钮。"></code>
+- [Left 和 Action：自定义外部 left 并组合返回箭头和按钮。](../../../src/search/__fixtures__/examples/left.tsx)
 
-<code src="../../../src/search/__fixtures__/examples/action-extra.tsx" title="组合操作" description="action 可以组合多个按钮或图标节点。"></code>
+- [组合操作：action 可以组合多个按钮或图标节点。](../../../src/search/__fixtures__/examples/action-extra.tsx)
 
-<code src="../../../src/search/__fixtures__/examples/controlled.tsx" title="受控 Search" description="通过 value 和 onChange 管理受控搜索关键词。"></code>
+- [受控 Search：通过 value 和 onChange 管理受控搜索关键词。](../../../src/search/__fixtures__/examples/controlled.tsx)
 
-<code src="../../../src/search/__fixtures__/examples/auto-search.tsx" title="自动搜索" description="输入停止后通过 debounce 触发最新搜索。"></code>
+- [自动搜索：输入停止后通过 debounce 触发最新搜索。](../../../src/search/__fixtures__/examples/auto-search.tsx)
 
-<code src="../../../src/search/__fixtures__/examples/square.tsx" title="Square Search" description="使用 square 形状渲染小圆角搜索框。"></code>
+- [Square Search：使用 square 形状渲染小圆角搜索框。](../../../src/search/__fixtures__/examples/square.tsx)
 
 ## API
 
@@ -92,7 +77,7 @@ Search 继承 Input 支持的原生 TextInput props，包括键盘、选择、�
 
 通过 `ConfigProvider` 的 `theme.components.Search` 覆盖 Search token。`search_background_color` 控制外层背景，`search_content_background_color` 控制内部输入区域背景。
 
-```tsx | pure
+```tsx
 import { ConfigProvider, Search } from '@ftsukic/tsuki'
 
 ;<ConfigProvider

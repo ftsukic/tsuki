@@ -1,39 +1,24 @@
----
-title: Avatar 头像
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Avatar 头像
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 头像用于代表用户或事物，支持图片、图标和字符，并提供图片失败回退、头像分组和分组溢出展示。
 
-</section>
-
-<code src="../../../src/avatar/__fixtures__/overview.tsx" title="组件预览"></code>
+- [组件预览](../../../src/avatar/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Avatar, Badge, Icon } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/avatar/__fixtures__/examples/basic.tsx" title="尺寸和形状" description="支持预设尺寸、自定义尺寸、圆形和方形。"></code>
+- [尺寸和形状：支持预设尺寸、自定义尺寸、圆形和方形。](../../../src/avatar/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/avatar/__fixtures__/examples/sources.tsx" title="图片、图标和字符" description="图片失败后按 icon、children 顺序回退。"></code>
+- [图片、图标和字符：图片失败后按 icon、children 顺序回退。](../../../src/avatar/__fixtures__/examples/sources.tsx)
 
-<code src="../../../src/avatar/__fixtures__/examples/group.tsx" title="头像分组" description="Avatar.Group 支持统一属性、头像叠放和 maxCount 溢出头像。"></code>
+- [头像分组：Avatar.Group 支持统一属性、头像叠放和 maxCount 溢出头像。](../../../src/avatar/__fixtures__/examples/group.tsx)
 
 ## API
 
@@ -85,7 +70,7 @@ React Native 版本不提供 Web 专属的 `srcSet`、`crossOrigin`、`draggable
 
 通过 `ConfigProvider` 的 `theme.components.Avatar` 配置容器尺寸、字体、分组边框和叠放间距。`styles` 用于单个实例的语义样式。
 
-```tsx | pure
+```tsx
 import { Avatar, ConfigProvider } from '@ftsukic/tsuki'
 
 ;<ConfigProvider

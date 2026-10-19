@@ -10,9 +10,6 @@ lib/
 dist/
 docs-dist/
 coverage/
-.dumi/*
-.dumi/tmp/
-.dumi/tmp-*/
 .umi/
 .turbopack/
 *.log
@@ -30,14 +27,3 @@ example/.yarn/
 .vscode/
 !.vscode/
 !.vscode/settings.json
-
-# Keep authored dumi theme overrides, ignore generated runtime files.
-!.dumi/
-!.dumi/app.tsx
-!.dumi/global.less
-!.dumi/variables.less
-!.dumi/theme/
-!.dumi/theme/builtins/
-!.dumi/theme/builtins/Previewer/
-!.dumi/theme/builtins/Previewer.tsx
-!.dumi/theme/builtins/Previewer/index.tsx

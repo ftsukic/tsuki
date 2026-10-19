@@ -1,41 +1,26 @@
----
-title: DatePicker 日期选择器
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # DatePicker 日期选择器
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 `DatePicker` 是纯日期滚轮选择器，负责生成 year、month、day 列和日期边界联动。它不内置 Popup，公开 `value`、`defaultValue` 和事件值都是按 `columnsType` 顺序排列的 `string[]`。
 
-</section>
-
-<code src="../../../src/date-picker/__fixtures__/overview.tsx" title="组件预览" description="DatePicker 的日期列、边界、格式化和 Popup 组合示例。"></code>
+- [组件预览：DatePicker 的日期列、边界、格式化和 Popup 组合示例。](../../../src/date-picker/__fixtures__/overview.tsx)
 
 ## 代码演示
 
-<code src="../../../src/date-picker/__fixtures__/examples/basic.tsx" title="基础日期" description="受控选择 year、month、day。"></code>
+- [基础日期：受控选择 year、month、day。](../../../src/date-picker/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/date-picker/__fixtures__/examples/columns.tsx" title="列组合" description="展示日期列子集和任意合法重排。"></code>
+- [列组合：展示日期列子集和任意合法重排。](../../../src/date-picker/__fixtures__/examples/columns.tsx)
 
-<code src="../../../src/date-picker/__fixtures__/examples/formatter.tsx" title="formatter" description="只修改日期选项的显示文本。"></code>
+- [formatter：只修改日期选项的显示文本。](../../../src/date-picker/__fixtures__/examples/formatter.tsx)
 
-<code src="../../../src/date-picker/__fixtures__/examples/filter.tsx" title="filter" description="根据当前完整 values 过滤日期选项。"></code>
+- [filter：根据当前完整 values 过滤日期选项。](../../../src/date-picker/__fixtures__/examples/filter.tsx)
 
-<code src="../../../src/date-picker/__fixtures__/examples/range.tsx" title="日期范围" description="展示 minDate 和 maxDate 的 year、month、day 联动。"></code>
+- [日期范围：展示 minDate 和 maxDate 的 year、month、day 联动。](../../../src/date-picker/__fixtures__/examples/range.tsx)
 
-<code src="../../../src/date-picker/__fixtures__/examples/leap-year.tsx" title="闰年" description="展示不同年份的二月天数。"></code>
+- [闰年：展示不同年份的二月天数。](../../../src/date-picker/__fixtures__/examples/leap-year.tsx)
 
-<code src="../../../src/date-picker/__fixtures__/examples/popup.tsx" title="Popup 集成" description="通过 Cell + Popup 组合 DatePicker，并在外层维护 draft。"></code>
+- [Popup 集成：通过 Cell + Popup 组合 DatePicker，并在外层维护 draft。](../../../src/date-picker/__fixtures__/examples/popup.tsx)
 
 ## API
 

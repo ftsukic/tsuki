@@ -1,39 +1,24 @@
----
-title: Grid 栅格
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Grid 栅格
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Grid 是面向移动端的图标文字网格，语义对齐 Vant Mobile。它按列数直接计算每个 item 的宽度，并独立维护自己的 gutter。
 
-</section>
-
-<code src="../../../src/grid/__fixtures__/overview.tsx" title="组件预览" description="Grid 的基础、成员和快捷操作网格示例。"></code>
+- [组件预览：Grid 的基础、成员和快捷操作网格示例。](../../../src/grid/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Grid, Icon } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/grid/__fixtures__/examples/basic.tsx" title="基础网格" description="使用四列图标文字网格。"></code>
+- [基础网格：使用四列图标文字网格。](../../../src/grid/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/grid/__fixtures__/examples/member-grid.tsx" title="成员网格" description="展示成员、添加和移除操作。"></code>
+- [成员网格：展示成员、添加和移除操作。](../../../src/grid/__fixtures__/examples/member-grid.tsx)
 
-<code src="../../../src/grid/__fixtures__/examples/action-grid.tsx" title="快捷操作" description="展示聊天、文件、图片和链接操作。"></code>
+- [快捷操作：展示聊天、文件、图片和链接操作。](../../../src/grid/__fixtures__/examples/action-grid.tsx)
 
 ## API
 

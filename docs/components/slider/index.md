@@ -1,29 +1,14 @@
----
-title: Slider 滑块
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 表单组件
-  order: 2
----
-
 # Slider 滑块
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 在指定范围内选择一个数值。支持拖动、点击定位、步长吸附、刻度和自定义滑块，可用于音量、亮度和字号档位选择。使用 RNGH 与 Reanimated，在 UI 线程更新拖动位置；没有额外的过渡动画。
 
-</section>
-
-<code src="../../../src/slider/__fixtures__/overview.tsx" title="组件预览" description="数值选择、步长刻度、状态和外观定制。"></code>
+- [组件预览：数值选择、步长刻度、状态和外观定制。](../../../src/slider/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Slider } from '@ftsukic/tsuki'
 ```
 
@@ -31,7 +16,7 @@ import { Slider } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-<code src="../../../src/slider/__fixtures__/examples/basic.tsx" title="基本用法" description="受控与非受控，实时变化与完成事件。"></code> <code src="../../../src/slider/__fixtures__/examples/steps.tsx" title="步长与刻度" description="离散档位、刻度标签和反向布局。"></code> <code src="../../../src/slider/__fixtures__/examples/states.tsx" title="禁用与只读" description="不可编辑的两种状态。"></code> <code src="../../../src/slider/__fixtures__/examples/theme.tsx" title="样式定制" description="组件 token、语义样式与滑块内容。"></code>
+- [基本用法：受控与非受控，实时变化与完成事件。](../../../src/slider/__fixtures__/examples/basic.tsx) - [步长与刻度：离散档位、刻度标签和反向布局。](../../../src/slider/__fixtures__/examples/steps.tsx) - [禁用与只读：不可编辑的两种状态。](../../../src/slider/__fixtures__/examples/states.tsx) - [样式定制：组件 token、语义样式与滑块内容。](../../../src/slider/__fixtures__/examples/theme.tsx)
 
 ## API
 

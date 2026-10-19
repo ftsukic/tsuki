@@ -1,47 +1,32 @@
----
-title: Collapse 折叠面板
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Collapse 折叠面板
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Collapse 用于将内容组织成可展开和收起的面板，支持多个面板同时展开，也支持 Vant 风格的 accordion 手风琴模式。
 
-</section>
-
-<code src="../../../src/collapse/__fixtures__/overview.tsx" title="组件预览" description="Collapse 的基础、手风琴、默认展开、禁用、受控和主题示例。"></code>
+- [组件预览：Collapse 的基础、手风琴、默认展开、禁用、受控和主题示例。](../../../src/collapse/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/collapse/__fixtures__/examples/basic.tsx" title="基础用法" description="默认允许多个面板同时展开。"></code>
+- [基础用法：默认允许多个面板同时展开。](../../../src/collapse/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/collapse/__fixtures__/examples/accordion.tsx" title="手风琴" description="accordion 模式下同一时间只展开一个面板。"></code>
+- [手风琴：accordion 模式下同一时间只展开一个面板。](../../../src/collapse/__fixtures__/examples/accordion.tsx)
 
-<code src="../../../src/collapse/__fixtures__/examples/default.tsx" title="默认展开" description="使用 defaultValue 设置非受控初始展开项。"></code>
+- [默认展开：使用 defaultValue 设置非受控初始展开项。](../../../src/collapse/__fixtures__/examples/default.tsx)
 
-<code src="../../../src/collapse/__fixtures__/examples/disabled.tsx" title="禁用项" description="禁用项不响应点击，也不会触发 onChange。"></code>
+- [禁用项：禁用项不响应点击，也不会触发 onChange。](../../../src/collapse/__fixtures__/examples/disabled.tsx)
 
-<code src="../../../src/collapse/__fixtures__/examples/controlled.tsx" title="受控模式" description="使用 value 和 onChange 管理展开状态。"></code>
+- [受控模式：使用 value 和 onChange 管理展开状态。](../../../src/collapse/__fixtures__/examples/controlled.tsx)
 
-<code src="../../../src/collapse/__fixtures__/examples/semantic.tsx" title="语义样式" description="通过 CollapseItem styles 定制稳定的公开区域。"></code>
+- [语义样式：通过 CollapseItem styles 定制稳定的公开区域。](../../../src/collapse/__fixtures__/examples/semantic.tsx)
 
-<code src="../../../src/collapse/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 ConfigProvider 覆盖 Collapse component token。"></code>
+- [主题定制：通过 ConfigProvider 覆盖 Collapse component token。](../../../src/collapse/__fixtures__/examples/theme.tsx)
 
 ## API
 
@@ -112,7 +97,7 @@ import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 | borderColor / borderWidth | `colorBorder` / `lineWidthHairline` | 外层边框、面板间和展开标题下的内部分隔线 |
 | animationDuration | `motionDurationSlow`（默认 `300ms`） | 高度和箭头动画时长；缓动为 `ease-in-out` |
 
-```tsx | pure
+```tsx
 <ConfigProvider
   theme={{
     components: {

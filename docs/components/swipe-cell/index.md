@@ -1,57 +1,42 @@
----
-title: SwipeCell 滑动单元格
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # SwipeCell 滑动单元格
 
 展开与关闭均由统一 Motion 驱动无回弹的 timing 动画，时长由 `animationDuration` 和 Motion 时长倍率决定。`overshoot` 默认 `false`；开启后超过 action 实测宽度的位移按 0.25 阻尼处理。松手仍按原有半宽 / 方向速度阈值吸附，`onOpen` / `onClose` 在当前有效动画完成后触发。关闭 Motion 或开启 Reduced Motion 时即时吸附，拖动本身继续跟随手指。
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 SwipeCell 用于在列表行上通过水平滑动展示操作，提供 Vant 风格的左右多 action、吸附阈值、命令式控制和 TsukiProvider 级单开协调。
 
-</section>
-
-<code src="../../../src/swipe-cell/__fixtures__/overview.tsx" title="组件预览" description="SwipeCell 的微信消息列表、多 action、协调、列表、分组和主题示例。"></code>
+- [组件预览：SwipeCell 的微信消息列表、多 action、协调、列表、分组和主题示例。](../../../src/swipe-cell/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { SwipeCell, SwipeCellAction, SwipeCellGroup, useSwipeCellController } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/swipe-cell/__fixtures__/examples/basic.tsx" title="基础用法" description="展示单个右侧 action、滑动吸附和 action 点击反馈。"></code>
+- [基础用法：展示单个右侧 action、滑动吸附和 action 点击反馈。](../../../src/swipe-cell/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/swipe-cell/__fixtures__/examples/both-sides.tsx" title="左右双侧操作" description="展示左右两侧 action 的独立配置。"></code>
+- [左右双侧操作：展示左右两侧 action 的独立配置。](../../../src/swipe-cell/__fixtures__/examples/both-sides.tsx)
 
-<code src="../../../src/swipe-cell/__fixtures__/examples/multiple-actions.tsx" title="多个 action" description="展示同一侧多个 action 及其总宽度。"></code>
+- [多个 action：展示同一侧多个 action 及其总宽度。](../../../src/swipe-cell/__fixtures__/examples/multiple-actions.tsx)
 
-<code src="../../../src/swipe-cell/__fixtures__/examples/coordination.tsx" title="TsukiProvider 级单开" description="展示不依赖 SwipeCellGroup 的全局单开行为。"></code>
+- [TsukiProvider 级单开：展示不依赖 SwipeCellGroup 的全局单开行为。](../../../src/swipe-cell/__fixtures__/examples/coordination.tsx)
 
-<code src="../../../src/swipe-cell/__fixtures__/examples/wechat.tsx" title="微信消息列表" description="展示微信消息列表风格的稳定 id、右侧 action 和主体布局。"></code>
+- [微信消息列表：展示微信消息列表风格的稳定 id、右侧 action 和主体布局。](../../../src/swipe-cell/__fixtures__/examples/wechat.tsx)
 
-<code src="../../../src/swipe-cell/__fixtures__/examples/content-close.tsx" title="点击主体关闭" description="展示关闭展开项时保留主体原有 Pressable 事件。"></code>
+- [点击主体关闭：展示关闭展开项时保留主体原有 Pressable 事件。](../../../src/swipe-cell/__fixtures__/examples/content-close.tsx)
 
-<code src="../../../src/swipe-cell/__fixtures__/examples/list.tsx" title="列表用法" description="展示列表滚动时通过控制 hook 关闭当前项。"></code>
+- [列表用法：展示列表滚动时通过控制 hook 关闭当前项。](../../../src/swipe-cell/__fixtures__/examples/list.tsx)
 
-<code src="../../../src/swipe-cell/__fixtures__/examples/flash-list.tsx" title="FlashList 1000 条" description="展示 FlashList 回收大量 SwipeCell 时的稳定 id 和滚动关闭。"></code>
+- [FlashList 1000 条：展示 FlashList 回收大量 SwipeCell 时的稳定 id 和滚动关闭。](../../../src/swipe-cell/__fixtures__/examples/flash-list.tsx)
 
-<code src="../../../src/swipe-cell/__fixtures__/examples/ref.tsx" title="Ref 控制" description="展示通过 ref 调用 open 和 close。"></code>
+- [Ref 控制：展示通过 ref 调用 open 和 close。](../../../src/swipe-cell/__fixtures__/examples/ref.tsx)
 
-<code src="../../../src/swipe-cell/__fixtures__/examples/group.tsx" title="SwipeCellGroup" description="展示同一 Group 内自动关闭其他 cell。"></code>
+- [SwipeCellGroup：展示同一 Group 内自动关闭其他 cell。](../../../src/swipe-cell/__fixtures__/examples/group.tsx)
 
-<code src="../../../src/swipe-cell/__fixtures__/examples/theme.tsx" title="主题定制" description="展示通过 ConfigProvider 覆盖 SwipeCell component token。"></code>
+- [主题定制：展示通过 ConfigProvider 覆盖 SwipeCell component token。](../../../src/swipe-cell/__fixtures__/examples/theme.tsx)
 
 ## API
 
@@ -91,7 +76,7 @@ SwipeCell 继承 React Native `ViewProps`，但由组件管理 `children` 和 `s
 
 `TsukiProvider` 会自动安装 SwipeCell manager。同一 TsukiProvider 下任意 SwipeCell 打开时，之前展开的 SwipeCell 会自动关闭，不需要包裹 `SwipeCellGroup`。`TsukiProvider` 中其它组件库交互控件（例如 `Cell`、`Button`）开始按下时，也会关闭当前展开项；SwipeCell 主体和 action 会保留自己的 press 语义。开始滚动列表时，业务可以通过控制 hook 主动关闭当前项：
 
-```tsx | pure
+```tsx
 const swipeCell = useSwipeCellController()
 
 <FlatList onScrollBeginDrag={swipeCell.closeCurrent} />
@@ -101,7 +86,7 @@ React Native 没有 Web DOM 的全局 click-outside 事件。页面中的自定�
 
 ### SwipeCellActionItem
 
-```tsx | pure
+```tsx
 interface SwipeCellActionItem {
   key?: React.Key
   text?: ReactNode
@@ -137,7 +122,7 @@ interface SwipeCellActionItem {
 
 ### SwipeCellRef
 
-```tsx | pure
+```tsx
 const ref = useRef<SwipeCellRef>(null)
 
 ref.current?.open('right')
@@ -159,7 +144,7 @@ ref.current?.close()
 
 通过 `ConfigProvider` 的 `theme.components.SwipeCell` 覆盖 action 默认 token：
 
-```tsx | pure
+```tsx
 <ConfigProvider
   theme={{
     components: {

@@ -1,41 +1,26 @@
----
-title: Badge 徽标
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Badge 徽标
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 徽标用于在头像或其他内容附近展示数字、红点和状态信息。
 
-</section>
-
-<code src="../../../src/badge/__fixtures__/overview.tsx" title="组件预览"></code>
+- [组件预览](../../../src/badge/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Avatar, Badge } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/badge/__fixtures__/examples/types.tsx" title="数字、红点和独立展示" description="支持 content、显式 max、红点、零值和 standalone。"></code>
+- [数字、红点和独立展示：支持 content、显式 max、红点、零值和 standalone。](../../../src/badge/__fixtures__/examples/types.tsx)
 
-<code src="../../../src/badge/__fixtures__/examples/position.tsx" title="四角定位和偏移" description="包裹 children 时支持四个角的 position 和 offset。"></code>
+- [四角定位和偏移：包裹 children 时支持四个角的 position 和 offset。](../../../src/badge/__fixtures__/examples/position.tsx)
 
-<code src="../../../src/badge/__fixtures__/examples/status.tsx" title="状态点" description="使用 status 和 text 展示状态。"></code>
+- [状态点：使用 status 和 text 展示状态。](../../../src/badge/__fixtures__/examples/status.tsx)
 
-<code src="../../../src/badge/__fixtures__/examples/theme.tsx" title="主题和语义样式" description="通过组件 token 和 styles 定制 Badge，包括 standalone 固定圆形。"></code>
+- [主题和语义样式：通过组件 token 和 styles 定制 Badge，包括 standalone 固定圆形。](../../../src/badge/__fixtures__/examples/theme.tsx)
 
 ## API
 
@@ -58,7 +43,7 @@ Badge 继承 React Native `ViewProps`，但由组件管理 `children` 和 `style
 
 不传 `children` 时，Badge 按普通内容独立排列：
 
-```tsx | pure
+```tsx
 <Badge content={10} />
 ```
 
@@ -68,7 +53,7 @@ standalone 不使用 `absolute` 定位，`position` 不会制造额外位移；�
 
 需要固定圆形时，通过 semantic styles 显式覆盖 indicator 和 content：
 
-```tsx | pure
+```tsx
 <Badge
   content={10}
   styles={{
@@ -123,7 +108,7 @@ attached 模式不会自动将 children 分组或改写其无障碍标签，交�
 
 通过 `ConfigProvider` 的 `theme.components.Badge` 配置尺寸、颜色、细边框和文字 token；其中 `textColor` 用于数字角标文字，`statusTextColor` 用于 status 模式文字，默认跟随主题普通文本色。`styles` 可进一步定制单个实例。
 
-```tsx | pure
+```tsx
 import { Avatar, Badge, ConfigProvider } from '@ftsukic/tsuki'
 
 ;<ConfigProvider theme={{ components: { Badge: { color: '#7232DD' } } }}>

@@ -1,45 +1,30 @@
----
-title: Loading
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Loading
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Loading 用于表示正在进行的异步操作，提供 Vant 风格的 `circular` 缺口圆环和 `spinner` 径向条段两种指示器。
 
-</section>
-
-<code src="../../../src/loading/__fixtures__/overview.tsx" title="组件预览" description="Loading 的类型、尺寸、文字、布局和主题样式预览。"></code>
+- [组件预览：Loading 的类型、尺寸、文字、布局和主题样式预览。](../../../src/loading/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Loading } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/loading/__fixtures__/examples/basic.tsx" title="基础用法" description="使用默认 token 渲染 circular Loading。"></code>
+- [基础用法：使用默认 token 渲染 circular Loading。](../../../src/loading/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/loading/__fixtures__/examples/type.tsx" title="指示器类型" description="比较 circular 缺口圆环和 spinner 径向条段。"></code>
+- [指示器类型：比较 circular 缺口圆环和 spinner 径向条段。](../../../src/loading/__fixtures__/examples/type.tsx)
 
-<code src="../../../src/loading/__fixtures__/examples/size-color.tsx" title="尺寸和颜色" description="使用同一组 size 和 color API 定制两种指示器。"></code>
+- [尺寸和颜色：使用同一组 size 和 color API 定制两种指示器。](../../../src/loading/__fixtures__/examples/size-color.tsx)
 
-<code src="../../../src/loading/__fixtures__/examples/text.tsx" title="带文字" description="在指示器右侧显示加载文字。"></code>
+- [带文字：在指示器右侧显示加载文字。](../../../src/loading/__fixtures__/examples/text.tsx)
 
-<code src="../../../src/loading/__fixtures__/examples/vertical.tsx" title="垂直布局" description="使用 vertical 将指示器和文字上下排列。"></code>
+- [垂直布局：使用 vertical 将指示器和文字上下排列。](../../../src/loading/__fixtures__/examples/vertical.tsx)
 
-<code src="../../../src/loading/__fixtures__/examples/theme.tsx" title="主题和语义样式" description="通过 Loading token 和 semantic styles 定制组件。"></code>
+- [主题和语义样式：通过 Loading token 和 semantic styles 定制组件。](../../../src/loading/__fixtures__/examples/theme.tsx)
 
 ## API
 
@@ -81,7 +66,7 @@ Loading 根节点使用无障碍 `progressbar` 角色，并将 `accessibilitySta
 | `textGap`           | `marginXS`                        | 指示器和内容区域间距       |
 | `animationDuration` | `1000`                            | 旋转一周的时长，单位为毫秒 |
 
-```tsx | pure
+```tsx
 import { ConfigProvider, Loading } from '@ftsukic/tsuki'
 
 ;<ConfigProvider

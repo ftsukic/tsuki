@@ -1,45 +1,30 @@
----
-title: Watermark 水印
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Watermark 水印
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Watermark 用于在组件自身的布局区域上重复覆盖文字或图片水印。它不使用 Portal，水印层不拦截触摸，也不会把重复文字加入无障碍树。
 
-</section>
-
-<code src="../../../src/watermark/__fixtures__/overview.tsx" title="组件预览" description="Watermark 汇总文字、图片、布局、语义样式和主题 token 示例。"></code>
+- [组件预览：Watermark 汇总文字、图片、布局、语义样式和主题 token 示例。](../../../src/watermark/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Watermark } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/watermark/__fixtures__/examples/basic.tsx" title="基础文字" description="展示默认文字平铺和触摸穿透。"></code>
+- [基础文字：展示默认文字平铺和触摸穿透。](../../../src/watermark/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/watermark/__fixtures__/examples/multiline.tsx" title="多行文字" description="数组内容在同一个水印块中按多行渲染。"></code>
+- [多行文字：数组内容在同一个水印块中按多行渲染。](../../../src/watermark/__fixtures__/examples/multiline.tsx)
 
-<code src="../../../src/watermark/__fixtures__/examples/image.tsx" title="图片水印" description="使用 RN ImageSource 和 contain 模式渲染图片水印。"></code>
+- [图片水印：使用 RN ImageSource 和 contain 模式渲染图片水印。](../../../src/watermark/__fixtures__/examples/image.tsx)
 
-<code src="../../../src/watermark/__fixtures__/examples/layout.tsx" title="间距、旋转和偏移" description="调整水印块尺寸、两轴间距、起始偏移、旋转和透明度。"></code>
+- [间距、旋转和偏移：调整水印块尺寸、两轴间距、起始偏移、旋转和透明度。](../../../src/watermark/__fixtures__/examples/layout.tsx)
 
-<code src="../../../src/watermark/__fixtures__/examples/custom.tsx" title="语义样式" description="通过 styles.root、styles.mark 和 styles.text 定制外观。"></code>
+- [语义样式：通过 styles.root、styles.mark 和 styles.text 定制外观。](../../../src/watermark/__fixtures__/examples/custom.tsx)
 
-<code src="../../../src/watermark/__fixtures__/examples/theme.tsx" title="主题 token" description="通过 ConfigProvider 覆盖 Watermark component token。"></code>
+- [主题 token：通过 ConfigProvider 覆盖 Watermark component token。](../../../src/watermark/__fixtures__/examples/theme.tsx)
 
 ## API
 
@@ -100,7 +85,7 @@ Watermark 继承 React Native `ViewProps`，但由组件管理 `children` 和 `s
 | fontFamily | `token.fontFamily`   | 字体              |
 | fontWeight | —                    | 字重              |
 
-```tsx | pure
+```tsx
 import { ConfigProvider, Watermark } from '@ftsukic/tsuki'
 
 ;<ConfigProvider

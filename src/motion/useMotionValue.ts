@@ -8,7 +8,7 @@ import {
   withSpring,
   withTiming,
 } from 'react-native-reanimated'
-import { getSpringConfig, sampleSpring } from './animation'
+import { getSpringConfig } from './animation'
 import { easeInOut } from './easing'
 import { useMotionConfig } from './useMotionConfig'
 import type { MotionAnimationConfig } from './types'
@@ -40,7 +40,6 @@ export function useMotionValue(
   const onCompleteRef = useRef(onComplete)
   onCompleteRef.current = onComplete
   const [, refresh] = useReducer((value: number) => value + 1, 0)
-  const useJavaScriptTransition = '__tsukiStaticAdapter' in rawProgress
 
   useEffect(() => {
     if (!ready) return
@@ -51,7 +50,6 @@ export function useMotionValue(
     transitionId.value = currentId
     settledTarget.current = null
     cancelAnimation(rawProgress)
-    let frame: number | undefined
 
     const finish = () => {
       // Check again on the RN thread, including callbacks already scheduled
@@ -66,32 +64,6 @@ export function useMotionValue(
     const start = rawProgress.value
     if (!motionEnabled || (mode === 'timing' && duration === 0) || start === target) {
       finish()
-    } else if (useJavaScriptTransition) {
-      // Dumi's static Reanimated adapter requires this preview path. Native
-      // transitions stay on the UI thread; only their completion crosses back.
-      const startedAt = typeof performance === 'undefined' ? Date.now() : performance.now()
-      const easingFunction =
-        typeof easing === 'object' && 'factory' in easing ? easing.factory() : easing
-      const step = (timestamp: number) => {
-        if (generation.current !== currentId) return
-        const elapsed = Math.max(0, timestamp - startedAt - delay)
-        const linearProgress = Math.min(1, Math.max(0, elapsed / duration))
-        const sample =
-          mode === 'spring'
-            ? sampleSpring(elapsed, start, target, { damping, mass, stiffness })
-            : {
-                value: start + (target - start) * easingFunction(linearProgress),
-                finished: linearProgress === 1,
-              }
-        if (sample.finished) {
-          finish()
-          return
-        }
-        rawProgress.value = sample.value
-        refresh()
-        frame = requestAnimationFrame(step)
-      }
-      frame = requestAnimationFrame(step)
     } else {
       const onFinished = (finished?: boolean) => {
         'worklet'
@@ -124,7 +96,6 @@ export function useMotionValue(
     return () => {
       if (generation.current === currentId) generation.current += 1
       transitionId.value = generation.current
-      if (frame !== undefined) cancelAnimationFrame(frame)
       cancelAnimation(rawProgress)
     }
   }, [
@@ -138,7 +109,6 @@ export function useMotionValue(
     reduceMotion,
     stiffness,
     transitionId,
-    useJavaScriptTransition,
     target,
     delay,
     ready,

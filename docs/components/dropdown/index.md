@@ -1,49 +1,34 @@
----
-title: Dropdown 下拉菜单
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Dropdown 下拉菜单
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Dropdown 用于在菜单栏下方或上方展开一个选项面板。它复用 Portal、OverlaySurface 和共享 motion 能力，支持 Vant 风格的 options、自定义内容、禁用状态、受控值、向上展开和 ref 控制。
 
-</section>
-
-<code src="../../../src/dropdown/__fixtures__/overview.tsx" title="组件预览" description="Dropdown 汇总基础、内容、禁用、方向和受控值示例。"></code>
+- [组件预览：Dropdown 汇总基础、内容、禁用、方向和受控值示例。](../../../src/dropdown/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { DropdownItem, DropdownMenu, useBackgroundScrollLocked } from '@ftsukic/tsuki'
 ```
 
-组件需要放在 `PortalHost` 或 `TsukiProvider` 内；应用已经提供 Portal 宿主时不需要为每个 Dropdown 额外添加宿主。
+组件需要放在 TsukiProvider 内，并确保应用外层挂载 Teleport PortalProvider。
 
 ## 代码演示
 
-<code src="../../../src/dropdown/__fixtures__/examples/basic.tsx" title="基础用法" description="使用 options 生成排序面板，并组合自定义筛选面板。"></code>
+- [基础用法：使用 options 生成排序面板，并组合自定义筛选面板。](../../../src/dropdown/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/dropdown/__fixtures__/examples/custom-content.tsx" title="自定义内容" description="children 存在时优先作为面板内容，并可以通过 DropdownItem ref 关闭。"></code>
+- [自定义内容：children 存在时优先作为面板内容，并可以通过 DropdownItem ref 关闭。](../../../src/dropdown/__fixtures__/examples/custom-content.tsx)
 
-<code src="../../../src/dropdown/__fixtures__/examples/disabled.tsx" title="禁用状态" description="展示禁用菜单和禁用选项。"></code>
+- [禁用状态：展示禁用菜单和禁用选项。](../../../src/dropdown/__fixtures__/examples/disabled.tsx)
 
-<code src="../../../src/dropdown/__fixtures__/examples/direction-up.tsx" title="向上展开" description="使用 direction up 将面板锚定在菜单上方。"></code>
+- [向上展开：使用 direction up 将面板锚定在菜单上方。](../../../src/dropdown/__fixtures__/examples/direction-up.tsx)
 
-<code src="../../../src/dropdown/__fixtures__/examples/controlled.tsx" title="受控值" description="由外部状态控制 DropdownItem.value。"></code>
+- [受控值：由外部状态控制 DropdownItem.value。](../../../src/dropdown/__fixtures__/examples/controlled.tsx)
 
-<code src="../../../src/dropdown/__fixtures__/examples/semantic.tsx" title="语义样式" description="单项标题、箭头、面板、选项图标和选中标记，以及打开期间的动态更新。"></code>
+- [语义样式：单项标题、箭头、面板、选项图标和选中标记，以及打开期间的动态更新。](../../../src/dropdown/__fixtures__/examples/semantic.tsx)
 
-<code src="../../../src/dropdown/__fixtures__/examples/scroll-lock.tsx" title="背景滚动锁定" description="锁定背景列表，同时保留长选项列表与横向菜单的滚动。"></code>
+- [背景滚动锁定：锁定背景列表，同时保留长选项列表与横向菜单的滚动。](../../../src/dropdown/__fixtures__/examples/scroll-lock.tsx)
 
 ## API
 
@@ -87,7 +72,7 @@ import { DropdownItem, DropdownMenu, useBackgroundScrollLocked } from '@ftsukic/
 
 ### DropdownOption
 
-```tsx | pure
+```tsx
 interface DropdownOption {
   text: ReactNode
   value: string | number
@@ -119,13 +104,13 @@ DropdownItem 的 styles resolver 只描述触发器自身的 `active`、`disable
 
 ## 背景滚动锁定
 
-Dropdown 从开始打开到退出动画完成持续持有背景滚动锁；切换、关闭途中重开不会释放。`overlay={false}` 只隐藏可见遮罩，背景锁仍生效。完全关闭或卸载释放锁，同一 PortalHost 的多个持有者全部释放后才恢复背景滚动。
+Dropdown 从开始打开到退出动画完成持续持有背景滚动锁；切换、关闭途中重开不会释放。`overlay={false}` 只隐藏可见遮罩，背景锁仍生效。完全关闭或卸载释放锁，同一 TsukiProvider 下的多个持有者全部释放后才恢复背景滚动。
 
 Web 自动锁定菜单所在页面与可滚动祖先，保留原有 overflow 样式；面板内滚动和菜单横向滚动可用，列表边界不继续带动背景。背景祖先通过程序改变滚动位置时关闭菜单，避免旧锚点造成错位。Escape 关闭后恢复触发器焦点。
 
-React Native 通过透明交互层阻断菜单之外的背景手势。宿主列表应在最近的 `PortalHost` / `TsukiProvider` **内部**使用 `useBackgroundScrollLocked()`，连接 `scrollEnabled`，停止背景列表自身的滚动能力；Portal 无法直接设置任意父列表的属性。
+React Native 通过透明交互层阻断菜单之外的背景手势。宿主列表应在TsukiProvider **内部**使用 `useBackgroundScrollLocked()`，连接 `scrollEnabled`，停止背景列表自身的滚动能力；Portal 无法直接设置任意父列表的属性。
 
-```tsx | pure
+```tsx
 function Page() {
   const locked = useBackgroundScrollLocked()
   return (
@@ -137,13 +122,13 @@ function Page() {
 // <TsukiProvider><Page /></TsukiProvider>
 ```
 
-已有 `scrollEnabled` 条件应保留，例如 `scrollEnabled={pageScrollEnabled && !locked}`。Hook 按最近的 PortalHost 隔离；PortalHost 外返回 `false`。示例浏览器已接入背景锁。
+已有 `scrollEnabled` 条件应保留，例如 `scrollEnabled={pageScrollEnabled && !locked}`。Hook 按 TsukiProvider 隔离；TsukiProvider 外返回 `false`。示例浏览器已接入背景锁。
 
 退出、旧面板切换退出和透明测量期间的内容禁用交互并从读屏树隐藏；读屏关闭动作在关闭完成后恢复触发器的可访问焦点。锁定不会阻止调用方通过程序滚动原生列表；需要主动滚动时先调用 `close()`，再执行滚动。
 
 ## Ref API
 
-```tsx | pure
+```tsx
 const menuRef = useRef<DropdownMenuRef>(null)
 const itemRef = useRef<DropdownItemRef>(null)
 
@@ -162,7 +147,7 @@ ref 方法复用同一套 `DropdownMenu` 状态，不会创建第二套 visible 
 
 通过 `ConfigProvider` 的 `theme.components.Dropdown` 覆盖组件 token：
 
-```tsx | pure
+```tsx
 <ConfigProvider
   theme={{
     components: {

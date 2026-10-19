@@ -1,49 +1,34 @@
----
-title: Layout 布局
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Layout 布局
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Layout 提供 Vant 风格的 24 栅格 `Row` / `Col`，用于页面分栏、偏移和跨行布局。
 
-</section>
-
-<code src="../../../src/layout/__fixtures__/overview.tsx" title="组件预览" description="Layout 的栅格、间距、偏移、换行和对齐示例。"></code>
+- [组件预览：Layout 的栅格、间距、偏移、换行和对齐示例。](../../../src/layout/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Col, Row } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/layout/__fixtures__/examples/basic.tsx" title="基础栅格" description="三个 span 为 8 的 Col 组成一行。"></code>
+- [基础栅格：三个 span 为 8 的 Col 组成一行。](../../../src/layout/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/layout/__fixtures__/examples/gutter.tsx" title="横向 gutter" description="相邻 Col 之间使用 16 点横向间距，首尾不增加额外外边距。"></code>
+- [横向 gutter：相邻 Col 之间使用 16 点横向间距，首尾不增加额外外边距。](../../../src/layout/__fixtures__/examples/gutter.tsx)
 
-<code src="../../../src/layout/__fixtures__/examples/vertical-gutter.tsx" title="纵向 gutter" description="使用 [16, 8] 设置横向间距和实际行之间的纵向间距。"></code>
+- [纵向 gutter：使用 [16, 8] 设置横向间距和实际行之间的纵向间距。](../../../src/layout/__fixtures__/examples/vertical-gutter.tsx)
 
-<code src="../../../src/layout/__fixtures__/examples/offset.tsx" title="偏移" description="使用 offset 在 Col 左侧预留栅格。"></code>
+- [偏移：使用 offset 在 Col 左侧预留栅格。](../../../src/layout/__fixtures__/examples/offset.tsx)
 
-<code src="../../../src/layout/__fixtures__/examples/justify.tsx" title="主轴对齐" description="将 justify 映射到 React Native Flexbox。"></code>
+- [主轴对齐：将 justify 映射到 React Native Flexbox。](../../../src/layout/__fixtures__/examples/justify.tsx)
 
-<code src="../../../src/layout/__fixtures__/examples/align.tsx" title="交叉轴对齐" description="将 align 映射到 React Native Flexbox。"></code>
+- [交叉轴对齐：将 align 映射到 React Native Flexbox。](../../../src/layout/__fixtures__/examples/align.tsx)
 
-<code src="../../../src/layout/__fixtures__/examples/wrap.tsx" title="换行" description="按栅格换行，并在实际行间加入纵向 gutter。"></code>
+- [换行：按栅格换行，并在实际行间加入纵向 gutter。](../../../src/layout/__fixtures__/examples/wrap.tsx)
 
-<code src="../../../src/layout/__fixtures__/examples/custom-style.tsx" title="自定义样式" description="Row 和 Col 的 style 作用于根 View，Col.styles.content 控制可见内容。"></code>
+- [自定义样式：Row 和 Col 的 style 作用于根 View，Col.styles.content 控制可见内容。](../../../src/layout/__fixtures__/examples/custom-style.tsx)
 
 ## API
 

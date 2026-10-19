@@ -1,35 +1,20 @@
----
-title: Surface 视觉容器
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Surface 视觉容器
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Surface 是只负责视觉承载的主题背景、圆角和裁剪容器，不包含 Card 的 header、body、footer 语义。
 
-</section>
-
-<code src="../../../src/surface/__fixtures__/overview.tsx" title="组件预览" description="展示 Surface 与 CellGroup、Grid 的组合。"></code>
+- [组件预览：展示 Surface 与 CellGroup、Grid 的组合。](../../../src/surface/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Surface } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/surface/__fixtures__/examples/mixed.tsx" title="Surface Mixed" description="在同一 Surface 中并列组合 CellGroup 和 Mobile Grid。"></code>
+- [Surface Mixed：在同一 Surface 中并列组合 CellGroup 和 Mobile Grid。](../../../src/surface/__fixtures__/examples/mixed.tsx)
 
 ## API
 

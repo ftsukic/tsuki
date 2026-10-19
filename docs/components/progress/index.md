@@ -1,49 +1,34 @@
----
-title: Progress 进度条
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Progress 进度条
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Progress 用于展示任务完成进度，支持 Vant 风格的条形进度条和环形进度条。进度值会自动限制在 `0` 到 `100` 之间，并使用 Animated 平滑过渡更新。
 
-</section>
-
-<code src="../../../src/progress/__fixtures__/overview.tsx" title="组件预览" description="Progress 汇总条形、环形、文字、尺寸和主题 token 示例。"></code>
+- [组件预览：Progress 汇总条形、环形、文字、尺寸和主题 token 示例。](../../../src/progress/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Progress } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/progress/__fixtures__/examples/basic.tsx" title="默认条形" description="使用默认 token 渲染 60% 条形进度。"></code>
+- [默认条形：使用默认 token 渲染 60% 条形进度。](../../../src/progress/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/progress/__fixtures__/examples/line-without-pivot.tsx" title="无文字条形" description="隐藏条形进度的 pivot 文字，仅显示轨道和进度部分。"></code>
+- [无文字条形：隐藏条形进度的 pivot 文字，仅显示轨道和进度部分。](../../../src/progress/__fixtures__/examples/line-without-pivot.tsx)
 
-<code src="../../../src/progress/__fixtures__/examples/line-variants.tsx" title="条形变体" description="展示 50%、100%、自定义颜色以及 round/square 端点。"></code>
+- [条形变体：展示 50%、100%、自定义颜色以及 round/square 端点。](../../../src/progress/__fixtures__/examples/line-variants.tsx)
 
-<code src="../../../src/progress/__fixtures__/examples/circle.tsx" title="环形进度" description="展示默认尺寸、自定义尺寸和不同 strokeWidth 的环形进度。"></code>
+- [环形进度：展示默认尺寸、自定义尺寸和不同 strokeWidth 的环形进度。](../../../src/progress/__fixtures__/examples/circle.tsx)
 
-<code src="../../../src/progress/__fixtures__/examples/circle-animation.tsx" title="环形动画" description="通过按钮更新环形进度，并观察描边和百分比文字平滑过渡。"></code>
+- [环形动画：通过按钮更新环形进度，并观察描边和百分比文字平滑过渡。](../../../src/progress/__fixtures__/examples/circle-animation.tsx)
 
-<code src="../../../src/progress/__fixtures__/examples/custom-text.tsx" title="自定义文字" description="使用 pivotText 替换默认百分比文字。"></code>
+- [自定义文字：使用 pivotText 替换默认百分比文字。](../../../src/progress/__fixtures__/examples/custom-text.tsx)
 
-<code src="../../../src/progress/__fixtures__/examples/dynamic.tsx" title="动态增减" description="使用 Button 组动态增加或减少当前进度。"></code>
+- [动态增减：使用 Button 组动态增加或减少当前进度。](../../../src/progress/__fixtures__/examples/dynamic.tsx)
 
-<code src="../../../src/progress/__fixtures__/examples/theme.tsx" title="主题 token" description="通过 ConfigProvider 覆盖 Progress 的样式 token。"></code>
+- [主题 token：通过 ConfigProvider 覆盖 Progress 的样式 token。](../../../src/progress/__fixtures__/examples/theme.tsx)
 
 ## API
 
@@ -98,7 +83,7 @@ Progress 继承 React Native `ViewProps`，但由组件管理 `children`、`styl
 | `progress_pivot_color`         | `colorPrimary`       | 条形 pivot 背景色               |
 | `progress_animation_duration`  | `300`                | percentage 更新动画时长（毫秒） |
 
-```tsx | pure
+```tsx
 import { ConfigProvider, Progress } from '@ftsukic/tsuki'
 
 ;<ConfigProvider

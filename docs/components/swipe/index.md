@@ -1,35 +1,20 @@
----
-title: Swipe 轮播
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Swipe 轮播
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Swipe 用于横向或纵向切换内容，支持 Vant Swipe 的循环、自动播放、指示器和命令式导航能力。
 
-</section>
-
-<code src="../../../src/swipe/__fixtures__/overview.tsx" title="组件预览" description="Swipe 的基础、自动播放、循环、纵向、自定义指示器和命令式示例。"></code>
+- [组件预览：Swipe 的基础、自动播放、循环、纵向、自定义指示器和命令式示例。](../../../src/swipe/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Swipe } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/swipe/__fixtures__/examples/basic.tsx" title="基础用法" description="横向滑动三个页面。"></code> <code src="../../../src/swipe/__fixtures__/examples/autoplay.tsx" title="自动播放" description="每三秒切换一次。"></code> <code src="../../../src/swipe/__fixtures__/examples/loop.tsx" title="循环播放" description="首尾连续切换。"></code> <code src="../../../src/swipe/__fixtures__/examples/vertical.tsx" title="纵向滚动" description="固定高度的纵向轮播。"></code> <code src="../../../src/swipe/__fixtures__/examples/custom-indicator.tsx" title="自定义 indicator" description="使用 renderIndicator 显示页码。"></code> <code src="../../../src/swipe/__fixtures__/examples/imperative.tsx" title="imperative ref" description="使用 prev、next 和 swipeTo 导航。"></code>
+- [基础用法：横向滑动三个页面。](../../../src/swipe/__fixtures__/examples/basic.tsx) - [自动播放：每三秒切换一次。](../../../src/swipe/__fixtures__/examples/autoplay.tsx) - [循环播放：首尾连续切换。](../../../src/swipe/__fixtures__/examples/loop.tsx) - [纵向滚动：固定高度的纵向轮播。](../../../src/swipe/__fixtures__/examples/vertical.tsx) - [自定义 indicator：使用 renderIndicator 显示页码。](../../../src/swipe/__fixtures__/examples/custom-indicator.tsx) - [imperative ref：使用 prev、next 和 swipeTo 导航。](../../../src/swipe/__fixtures__/examples/imperative.tsx)
 
 ## API
 

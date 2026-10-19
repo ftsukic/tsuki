@@ -1,17 +1,6 @@
----
-title: Icon
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Icon
 
-<code src="../../../src/icon/__fixtures__/overview.tsx"></code>
+- [示例源码](../../../src/icon/__fixtures__/overview.tsx)
 
 `Icon` 使用 `@ant-design/icons-svg` 图标定义，并通过 `react-native-svg` 渲染到 React Native。H5 文档预览使用 `react-native-svg` 的 Web 实现。
 

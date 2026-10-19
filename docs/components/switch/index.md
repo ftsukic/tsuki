@@ -1,41 +1,26 @@
----
-title: Switch 开关
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Switch 开关
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Switch 用于在打开和关闭状态之间进行切换，支持受控、非受控、自定义值、异步切换确认、禁用和加载状态。
 
-</section>
-
-<code src="../../../src/switch/__fixtures__/overview.tsx" title="组件预览" description="Switch 的状态、尺寸、自定义颜色和异步确认示例。"></code>
+- [组件预览：Switch 的状态、尺寸、自定义颜色和异步确认示例。](../../../src/switch/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { Switch } from '@ftsukic/tsuki'
 ```
 
 ## 代码演示
 
-<code src="../../../src/switch/__fixtures__/examples/states.tsx" title="状态和尺寸" description="展示默认、checked、disabled、loading 以及 small、medium、large 尺寸。"></code>
+- [状态和尺寸：展示默认、checked、disabled、loading 以及 small、medium、large 尺寸。](../../../src/switch/__fixtures__/examples/states.tsx)
 
-<code src="../../../src/switch/__fixtures__/examples/colors.tsx" title="自定义颜色" description="通过 activeColor 和 inactiveColor 定制轨道颜色。"></code>
+- [自定义颜色：通过 activeColor 和 inactiveColor 定制轨道颜色。](../../../src/switch/__fixtures__/examples/colors.tsx)
 
-<code src="../../../src/switch/__fixtures__/examples/before-change.tsx" title="异步确认" description="beforeChange 返回 Promise，在确认完成前不提交新的开关值。"></code>
+- [异步确认：beforeChange 返回 Promise，在确认完成前不提交新的开关值。](../../../src/switch/__fixtures__/examples/before-change.tsx)
 
-<code src="../../../src/switch/__fixtures__/examples/semantic.tsx" title="语义样式" description="自定义轨道与滑块尺寸、状态背景及加载区域。"></code>
+- [语义样式：自定义轨道与滑块尺寸、状态背景及加载区域。](../../../src/switch/__fixtures__/examples/semantic.tsx)
 
 ## API
 
@@ -79,7 +64,7 @@ import { Switch } from '@ftsukic/tsuki'
 
 ### 受控和非受控
 
-```tsx | pure
+```tsx
 const [enabled, setEnabled] = useState(false)
 
 <Switch value={enabled} onChange={setEnabled} />
@@ -94,7 +79,7 @@ const [enabled, setEnabled] = useState(false)
 
 `beforeChange` 返回或解析为 `false`，以及 Promise 拒绝时，均取消切换。等待确认本身不会自动进入 loading。将 loading 设为 true 会取消待确认请求，因此不要在希望继续提交的同一次确认中用 loading 表示等待；需要等待提示时可在开关外显示状态。
 
-```tsx | pure
+```tsx
 <Switch
   activeValue="enabled"
   inactiveValue="disabled"
@@ -125,7 +110,7 @@ const [enabled, setEnabled] = useState(false)
 | `pressedOpacity` | `pressedOpacity` | pressed 反馈透明度；移动端不由 hovered 触发 |
 | `animationDuration` | `motionDurationMid` | 轨道颜色动画时长 |
 
-```tsx | pure
+```tsx
 import { ConfigProvider, Switch } from '@ftsukic/tsuki'
 
 ;<ConfigProvider
