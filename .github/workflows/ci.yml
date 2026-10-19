@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, '0.x']
   pull_request:
 
 jobs:
@@ -44,6 +44,9 @@ jobs:
 
       - name: Format check
         run: yarn format:check
+
+      - name: Validate release policy
+        run: node --test scripts/validate-release.test.cjs
 
       - name: Typecheck
         run: yarn typecheck
