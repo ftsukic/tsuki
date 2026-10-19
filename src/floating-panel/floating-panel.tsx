@@ -8,13 +8,17 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Animated, ScrollView, useWindowDimensions, View } from 'react-native'
+import { Animated, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native'
 import type { NativeScrollEvent, NativeSyntheticEvent } from 'react-native'
 import { useResponderPanGesture } from '../gesture/useResponderPanGesture'
 import type { ResponderPanState } from '../gesture/useResponderPanGesture'
 import { easeOut } from '../motion/easing'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
-import { Portal } from '../portal'
+import Reanimated, { useAnimatedStyle } from 'react-native-reanimated'
+import { TeleportPortal as Portal } from '../portal/teleport-portal'
+import { OverlaySurface } from '../overlay/overlay-surface'
+import { OVERLAY_PRESETS, overlayAnimation } from '../motion/presets'
+import { useTransitionProgressState } from '../motion/useTransitionProgress'
 import { resolveStyles } from '../style'
 import { useComponentToken, useToken } from '../theme'
 import { getFloatingPanelStyles } from './style'
@@ -40,6 +44,7 @@ interface PanelConfig {
   draggable: boolean
   contentDraggable: boolean
   duration: number
+  dismissible: boolean
 }
 
 function getDefaultMaxHeight(viewportHeight: number) {
@@ -50,13 +55,19 @@ function getDefaultMaxHeight(viewportHeight: number) {
 }
 
 function resolveAnchors(input: readonly number[] | undefined, viewportHeight: number) {
-  const defaultMaxHeight = getDefaultMaxHeight(viewportHeight)
+  const availableHeight = Math.max(1, viewportHeight)
+  const defaultMinHeight = Math.min(DEFAULT_MIN_HEIGHT, availableHeight)
+  const defaultMaxHeight = Math.max(
+    defaultMinHeight,
+    Math.min(getDefaultMaxHeight(viewportHeight), availableHeight),
+  )
   const validAnchors = (input ?? [])
     .filter((anchor): anchor is number => Number.isFinite(anchor) && anchor > 0)
+    .map((anchor) => Math.min(anchor, availableHeight))
     .slice()
     .sort((left, right) => left - right)
 
-  if (validAnchors.length === 0) return [DEFAULT_MIN_HEIGHT, defaultMaxHeight]
+  if (validAnchors.length === 0) return [defaultMinHeight, defaultMaxHeight]
   if (validAnchors.length === 1) {
     return [validAnchors[0], defaultMaxHeight].sort((left, right) => left - right)
   }
@@ -93,10 +104,12 @@ function getDampedHeight(
   min: number,
   max: number,
   placement: 'top' | 'bottom',
+  dismissible: boolean,
 ) {
   const direction = placement === 'top' ? 1 : -1
   const rawHeight = height + distance * direction
 
+  if (rawHeight < min && placement === 'bottom' && dismissible) return rawHeight
   if (rawHeight > max) return max + (rawHeight - max) * DAMP
   return Math.max(min, rawHeight)
 }
@@ -111,6 +124,12 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       header,
       height,
       defaultHeight,
+      visible,
+      bottomOffset = 0,
+      overlay = false,
+      closeOnPressOverlay = false,
+      onPressOverlay,
+      onRequestClose,
       anchors,
       placement = 'bottom',
       duration = token.animationDuration,
@@ -121,20 +140,29 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       safeAreaInsetTop,
       onHeightChange,
       onHeightChangeEnd,
+      onVisibleChange,
       style,
       styles,
       ...viewProps
     } = props
     const { height: viewportHeight } = useWindowDimensions()
+    const effectiveBottomOffset = placement === 'bottom' ? Math.max(0, bottomOffset) : 0
     const resolvedAnchors = useMemo(
-      () => resolveAnchors(anchors, viewportHeight),
-      [anchors, viewportHeight],
+      () => resolveAnchors(anchors, viewportHeight - effectiveBottomOffset),
+      [anchors, effectiveBottomOffset, viewportHeight],
     )
     const minHeight = resolvedAnchors[0]
     const maxHeight = resolvedAnchors[resolvedAnchors.length - 1]
     const initialHeight = resolveHeight(height, defaultHeight ?? minHeight, minHeight, maxHeight)
     const [currentHeight, setCurrentHeight] = useState(initialHeight)
     const [dragging, setDragging] = useState(false)
+    const isVisible = visible ?? true
+    const [rendered, setRendered] = useState(isVisible)
+    const [transitionVisible, setTransitionVisible] = useState(isVisible)
+    const closingRef = useRef(false)
+    const dismissRequestedRef = useRef(false)
+    const renderedRef = useRef(rendered)
+    renderedRef.current = rendered
     const [controlledCommitVersion, requestControlledReconcile] = useReducer(
       (value: number) => value + 1,
       0,
@@ -152,6 +180,8 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
     const panelHeight = useRef(new Animated.Value(initialHeight)).current
     const onHeightChangeRef = useRef(onHeightChange)
     const onHeightChangeEndRef = useRef(onHeightChangeEnd)
+    const onVisibleChangeRef = useRef(onVisibleChange)
+    const visibleRef = useRef(isVisible)
     const heightPropRef = useRef(height)
     const configRef = useRef<PanelConfig>({
       anchors: resolvedAnchors,
@@ -162,15 +192,26 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       draggable,
       contentDraggable,
       duration: 0,
+      dismissible: false,
     })
 
     const normalizedDuration = Number.isFinite(duration)
       ? Math.max(0, duration)
       : token.animationDuration
     const animationDuration = themeToken.motion ? normalizedDuration : 0
+    const enteringConfig = useMemo(
+      () => overlayAnimation(animationDuration, true),
+      [animationDuration],
+    )
+    const leavingConfig = useMemo(
+      () => overlayAnimation(animationDuration, false),
+      [animationDuration],
+    )
 
     onHeightChangeRef.current = onHeightChange
     onHeightChangeEndRef.current = onHeightChangeEnd
+    onVisibleChangeRef.current = onVisibleChange
+    visibleRef.current = isVisible
     heightPropRef.current = height
     configRef.current = {
       anchors: resolvedAnchors,
@@ -181,6 +222,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       draggable,
       contentDraggable,
       duration: animationDuration,
+      dismissible: visible !== undefined,
     }
 
     const setVisualHeight = useCallback((nextHeight: number, notify: boolean) => {
@@ -229,7 +271,55 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       [panelHeight],
     )
 
+    const handleTransitionEnd = useCallback(
+      (opened: boolean) => {
+        if (opened || transitionVisible || !renderedRef.current) return
+        closingRef.current = false
+        setVisualHeight(0, false)
+        panelHeight.setValue(0)
+        onHeightChangeEndRef.current?.(0)
+        renderedRef.current = false
+        setRendered(false)
+        if (dismissRequestedRef.current) onVisibleChangeRef.current?.(false)
+        dismissRequestedRef.current = false
+      },
+      [panelHeight, setVisualHeight, transitionVisible],
+    )
+    const { progress, animatedStyle: visibilityStyle } = useTransitionProgressState({
+      visible: transitionVisible,
+      preset: OVERLAY_PRESETS.popupBottom,
+      distance: currentHeight,
+      opacity: 1,
+      entering: enteringConfig,
+      leaving: leavingConfig,
+      onTransitionEnd: handleTransitionEnd,
+    })
+    const overlayAnimatedStyle = useAnimatedStyle(() => ({ opacity: progress.value }))
+    const panelRevealStyle = useAnimatedStyle(() => ({ opacity: progress.value > 0 ? 1 : 0 }))
+
+    useEffect(() => {
+      if (isVisible) {
+        closingRef.current = false
+        dismissRequestedRef.current = false
+        renderedRef.current = true
+        setRendered(true)
+        setTransitionVisible(true)
+        if (currentHeightRef.current <= 0) {
+          const nextHeight = resolveHeight(height, defaultHeight ?? minHeight, minHeight, maxHeight)
+          currentHeightRef.current = nextHeight
+          setCurrentHeight(nextHeight)
+          panelHeight.setValue(nextHeight)
+        }
+      } else {
+        if (renderedRef.current) {
+          closingRef.current = true
+          setTransitionVisible(false)
+        }
+      }
+    }, [defaultHeight, height, isVisible, maxHeight, minHeight, panelHeight])
+
     const beginDrag = useCallback(() => {
+      if (!visibleRef.current || !renderedRef.current || closingRef.current) return
       if (!configRef.current.draggable) return
 
       animationRef.current?.stop()
@@ -240,9 +330,20 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
       setDragging(true)
     }, [])
 
+    const handleOverlayPress = useCallback(
+      (event: Parameters<NonNullable<FloatingPanelProps['onPressOverlay']>>[0]) => {
+        onPressOverlay?.(event)
+        if (!closeOnPressOverlay) return
+        if (onRequestClose) onRequestClose()
+        else onVisibleChangeRef.current?.(false)
+      },
+      [closeOnPressOverlay, onPressOverlay, onRequestClose],
+    )
+
     const shouldClaimGesture = useCallback(
       (source: DragSource, gestureState: ResponderPanState) => {
         const config = configRef.current
+        if (!visibleRef.current || !renderedRef.current || closingRef.current) return false
         if (!config.draggable) return false
         if (source === 'header') return true
         if (!config.contentDraggable) return false
@@ -270,6 +371,7 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
           config.minHeight,
           config.maxHeight,
           config.placement,
+          config.dismissible,
         )
         setVisualHeight(nextHeight, true)
         panelHeight.setValue(nextHeight)
@@ -287,6 +389,18 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
 
         const config = configRef.current
         const current = currentHeightRef.current
+        const dismiss =
+          config.dismissible &&
+          config.placement === 'bottom' &&
+          gesture !== undefined &&
+          gesture.distance > 0 &&
+          current < config.minHeight
+        if (dismiss) {
+          closingRef.current = true
+          dismissRequestedRef.current = true
+          setTransitionVisible(false)
+          return
+        }
         let nextHeight = config.magnetic
           ? getClosestAnchor(config.anchors, current)
           : clamp(current, config.minHeight, config.maxHeight)
@@ -494,28 +608,85 @@ export const FloatingPanelContent = forwardRef<View, FloatingPanelProps>(
     )
 
     return (
-      <Animated.View
-        style={[resolvedStyles.container, semantic?.container, { height: panelHeight }]}
+      <View
+        pointerEvents="box-none"
+        style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0 }}
       >
+        {overlay ? (
+          <OverlaySurface
+            show={transitionVisible && rendered}
+            rendered={rendered}
+            zIndex={token.zIndex - 1}
+            animatedStyle={overlayAnimatedStyle}
+            initialOpacity={0}
+            style={{ bottom: effectiveBottomOffset }}
+            onPress={handleOverlayPress}
+          />
+        ) : null}
         <View
-          ref={ref}
-          {...viewProps}
-          collapsable={false}
-          style={[resolvedStyles.root, semantic?.root, style]}
+          pointerEvents="box-none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            bottom: placement === 'bottom' ? effectiveBottomOffset : 0,
+            left: 0,
+            zIndex: token.zIndex,
+            overflow: 'hidden',
+          }}
         >
-          {placement === 'bottom' ? (
-            <>
-              {headerView}
-              {contentView}
-            </>
-          ) : (
-            <>
-              {contentView}
-              {headerView}
-            </>
-          )}
+          <Reanimated.View
+            pointerEvents="box-none"
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                // Keep the panel offscreen on the first Web paint, before the
+                // Reanimated style for the opening transition is committed.
+                transform: [
+                  { translateY: placement === 'bottom' ? currentHeight : -currentHeight },
+                ],
+              },
+              visibilityStyle,
+              panelRevealStyle,
+            ]}
+          >
+            <Animated.View
+              pointerEvents={transitionVisible && renderedRef.current ? 'auto' : 'none'}
+              accessibilityElementsHidden={!transitionVisible || !renderedRef.current}
+              importantForAccessibility={
+                transitionVisible && renderedRef.current ? 'auto' : 'no-hide-descendants'
+              }
+              style={[
+                resolvedStyles.container,
+                semantic?.container,
+                placement === 'bottom' ? { bottom: 0 } : null,
+                { height: panelHeight },
+              ]}
+            >
+              {rendered ? (
+                <View
+                  ref={ref}
+                  {...viewProps}
+                  collapsable={false}
+                  style={[resolvedStyles.root, semantic?.root, style]}
+                >
+                  {placement === 'bottom' ? (
+                    <>
+                      {headerView}
+                      {contentView}
+                    </>
+                  ) : (
+                    <>
+                      {contentView}
+                      {headerView}
+                    </>
+                  )}
+                </View>
+              ) : null}
+            </Animated.View>
+          </Reanimated.View>
         </View>
-      </Animated.View>
+      </View>
     )
   },
 )
@@ -524,9 +695,10 @@ FloatingPanelContent.displayName = 'FloatingPanel.Content'
 
 export const FloatingPanel = forwardRef<View, FloatingPanelProps>(
   function FloatingPanel(props, ref) {
+    const { portalHostName = 'root', ...contentProps } = props
     return (
-      <Portal>
-        <FloatingPanelContent {...props} ref={ref} />
+      <Portal hostName={portalHostName}>
+        <FloatingPanelContent {...contentProps} ref={ref} />
       </Portal>
     )
   },

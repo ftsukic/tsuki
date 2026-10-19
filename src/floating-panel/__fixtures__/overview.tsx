@@ -7,6 +7,7 @@ import MagneticExample from './examples/magnetic'
 import SafeAreaExample from './examples/safe-area'
 import ThemeExample from './examples/theme'
 import TopExample from './examples/top'
+import TabBarDismissExample from './examples/tab-bar-dismiss'
 
 /**
  * @title FloatingPanel overview
@@ -60,6 +61,12 @@ export default function FloatingPanelOverview() {
           description: '通过 FloatingPanel token 和 semantic styles 定制面板背景、圆角和拖拽条。',
           id: 'theme',
           title: '主题定制',
+        },
+        {
+          Component: TabBarDismissExample,
+          description: '点击更多 tab 开关面板；面板位于导航上方，也可下拉越过最小锚点关闭。',
+          id: 'tab-bar-dismiss',
+          title: 'Tab bar 上方与下拉关闭',
         },
         {
           Component: TopExample,

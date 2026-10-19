@@ -12,6 +12,8 @@ import { getOverlayToken } from './token'
 export interface OverlaySurfaceProps extends Omit<OverlayProps, 'duration' | 'onClosed'> {
   /** Internal mount state owned by the component that controls this surface. */
   rendered?: boolean
+  /** Static first-frame opacity used before the animated style is committed. */
+  initialOpacity?: number
   presentation?: {
     resolvedStyle: ViewStyle
     semantic?: OverlaySemanticStyles
@@ -37,7 +39,7 @@ function renderSurface(
   backgroundColor: ColorValue,
   zIndex: number,
 ) {
-  const { show = false, children, onPress, animatedStyle } = props
+  const { show = false, children, onPress, animatedStyle, initialOpacity } = props
   const viewProps = { ...props }
   delete viewProps.show
   delete viewProps.backgroundColor
@@ -49,6 +51,7 @@ function renderSurface(
   delete viewProps.presentation
   delete viewProps.animatedStyle
   delete viewProps.rendered
+  delete viewProps.initialOpacity
   const { resolvedStyle, semantic } =
     props.presentation ?? resolveSurfacePresentation(props, rendered)
   const staticStyle = { ...resolvedStyle }
@@ -64,7 +67,13 @@ function renderSurface(
       pointerEvents={show ? 'auto' : 'none'}
       accessibilityElementsHidden={!show || props.accessibilityElementsHidden}
       importantForAccessibility={!show ? 'no-hide-descendants' : props.importantForAccessibility}
-      style={[StyleSheet.absoluteFill, { zIndex }, staticStyle, animatedStyle]}
+      style={[
+        StyleSheet.absoluteFill,
+        { zIndex },
+        staticStyle,
+        initialOpacity === undefined ? null : { opacity: initialOpacity },
+        animatedStyle,
+      ]}
     >
       <Pressable
         accessibilityElementsHidden

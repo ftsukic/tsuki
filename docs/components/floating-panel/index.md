@@ -1,35 +1,20 @@
----
-title: FloatingPanel 浮动面板
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # FloatingPanel 浮动面板
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 FloatingPanel 用于在视口顶部或底部展示可拖动面板，支持多个高度锚点、磁吸停靠、内容滚动、方向匹配的圆角和阴影。
 
-</section>
-
-<code src="../../../src/floating-panel/__fixtures__/overview.tsx" title="组件预览"></code>
+- [组件预览](../../../src/floating-panel/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { FloatingPanel, TsukiProvider } from '@ftsukic/tsuki'
 ```
 
 FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `TsukiProvider` 内：
 
-```tsx | pure
+```tsx
 <TsukiProvider>
   <App />
 </TsukiProvider>
@@ -37,22 +22,24 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `TsukiProvider` 
 
 ## 代码演示
 
-<code src="../../../src/floating-panel/__fixtures__/examples/basic.tsx" title="基础用法" description="默认从 100px 高度开始，拖动 header 浏览内容。"></code>
+- [基础用法：默认从 100px 高度开始，拖动 header 浏览内容。](../../../src/floating-panel/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/floating-panel/__fixtures__/examples/anchors.tsx" title="自定义锚点" description="使用 height、anchors 和两个高度事件控制面板。"></code>
+- [自定义锚点：使用 height、anchors 和两个高度事件控制面板。](../../../src/floating-panel/__fixtures__/examples/anchors.tsx)
 
-<code src="../../../src/floating-panel/__fixtures__/examples/content-draggable.tsx" title="仅拖动头部" description="关闭 contentDraggable 后，内容区域继续由 ScrollView 负责滚动。"></code>
+- [仅拖动头部：关闭 contentDraggable 后，内容区域继续由 ScrollView 负责滚动。](../../../src/floating-panel/__fixtures__/examples/content-draggable.tsx)
 
-<code src="../../../src/floating-panel/__fixtures__/examples/magnetic.tsx" title="关闭磁吸" description="magnetic=false 时停留在边界内的任意高度。"></code>
+- [关闭磁吸：magnetic=false 时停留在边界内的任意高度。](../../../src/floating-panel/__fixtures__/examples/magnetic.tsx)
 
-<code src="../../../src/floating-panel/__fixtures__/examples/disabled.tsx" title="禁用拖动" description="draggable=false 隐藏拖拽条并固定面板。"></code>
+- [禁用拖动：draggable=false 隐藏拖拽条并固定面板。](../../../src/floating-panel/__fixtures__/examples/disabled.tsx)
 
-<code src="../../../src/floating-panel/__fixtures__/examples/safe-area.tsx" title="底部安全区" description="默认适配底部 safe-area inset，并且不改变锚点高度。"></code>
+- [底部安全区：默认适配底部 safe-area inset，并且不改变锚点高度。](../../../src/floating-panel/__fixtures__/examples/safe-area.tsx)
 
-<code src="../../../src/floating-panel/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 FloatingPanel token 和 semantic styles 定制外观。"></code>
+- [主题定制：通过 FloatingPanel token 和 semantic styles 定制外观。](../../../src/floating-panel/__fixtures__/examples/theme.tsx)
+
+- [Tab bar 上方与下拉关闭：点击“更多”tab 开启或关闭面板，也可以向下拖过最小锚点关闭。](../../../src/floating-panel/__fixtures__/examples/tab-bar-dismiss.tsx)
 
 <!-- prettier-ignore -->
-<code src="../../../src/floating-panel/__fixtures__/examples/top.tsx" title="顶部下拉" description="收起保留月份、星期标题和一周日期，下拉展开完整月历，高度跟随内容与安全区。"></code>
+- [顶部下拉：收起保留月份、星期标题和一周日期，下拉展开完整月历，高度跟随内容与安全区。](../../../src/floating-panel/__fixtures__/examples/top.tsx)
 
 ## API
 
@@ -62,6 +49,13 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `TsukiProvider` 
 | --- | --- | --- | --- |
 | `height` | `number` | — | 受控当前高度，单位为 RN 逻辑像素 |
 | `defaultHeight` | `number` | 第一个锚点 | 非受控初始高度 |
+| `visible` | `boolean` | — | 传入后开启受控可见模式；设为 `false` 隐藏，拖动关闭后通过 `onVisibleChange(false)` 请求更新。未传入时保持原有常驻行为 |
+| `bottomOffset` | `number` | `0` | 底部面板距 Portal 宿主底边的距离；用于将面板放在 tab bar 上方 |
+| `portalHostName` | `string` | `'root'` | 指定 Portal 宿主；在页面内弹出时，可使用页面内的 `PortalHost`，使面板与页面导航栏共享定位坐标 |
+| `overlay` | `boolean` | `false` | 在面板后显示覆盖整个 Portal 宿主的遮罩 |
+| `closeOnPressOverlay` | `boolean` | `false` | 点击遮罩时通过 `onRequestClose` 或 `onVisibleChange(false)` 请求关闭 |
+| `onPressOverlay` | `(event) => void` | — | 点击遮罩时触发 |
+| `onRequestClose` | `() => void` | — | 点击遮罩且 `closeOnPressOverlay` 开启时触发 |
 | `anchors` | `readonly number[]` | `[100, windowHeight * 0.6]` | 高度锚点；无效值会被过滤并按升序处理 |
 | `placement` | `'top' \| 'bottom'` | `'bottom'` | 面板固定在顶部或底部；顶部模式向下展开，底部模式向上展开 |
 | `duration` | `number` | 主题 `animationDuration` | 吸附动画时长，单位为毫秒 |
@@ -73,6 +67,7 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `TsukiProvider` 
 | `header` | `ReactNode` | 默认拖拽条 | 自定义面板头部 |
 | `onHeightChange` | `(height: number) => void` | — | 拖动过程和最终收敛时持续同步高度 |
 | `onHeightChangeEnd` | `(height: number) => void` | — | 松手完成吸附或边界收敛后触发 |
+| `onVisibleChange` | `(visible: boolean) => void` | — | 受控可见模式中，下拉越过最小锚点并完成关闭后触发 `false`；调用方应更新 `visible`，并可设为 `true` 重新打开 |
 | `style` | `StyleProp<ViewStyle>` | — | 面板可见 surface/root 样式 |
 | `styles` | `FloatingPanelStyles` | — | `container / root / header / bar / content / contentContainer` 语义样式 |
 
@@ -82,7 +77,9 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `TsukiProvider` 
 
 面板内部使用 `ScrollView`。`placement="bottom"` 时 header/drag area 位于面板顶部，上拉展开、下拉收起，圆角在顶部，阴影主要向上。`placement="top"` 时内容区域位于 drag area 之前，drag area 位于面板底部，下拉展开、上拉收起，圆角在底部，阴影主要向下。
 
-开启磁吸时，慢滑达到 32px，或滑动至少 8px 且松手速度达到 0.5px/ms，会按滑动方向至少切换到相邻锚点；长拖动仍可跨越多个锚点。未达到上述条件时吸附到最近锚点。手势取消只按当前位置收敛，不触发短滑切换。关闭磁吸时保持任意边界内高度。收起表示回到最小锚点，不会隐藏或卸载面板。
+开启磁吸时，慢滑达到 32px，或滑动至少 8px 且松手速度达到 0.5px/ms，会按滑动方向至少切换到相邻锚点；长拖动仍可跨越多个锚点。未达到上述条件时吸附到最近锚点。手势取消只按当前位置收敛，不触发短滑切换。关闭磁吸时保持任意边界内高度。默认收起表示回到最小锚点；传入 `visible` 后，继续向下拖过最小锚点会关闭面板，动画完成后通知 `onVisibleChange(false)`，调用方应更新 `visible`。再次设置 `visible` 为 `true` 时按 `height` 或初始高度显示。
+
+`bottomOffset` 只调整 bottom placement 面板与 Portal 宿主底边的距离，不会自动测量导航栏。将它设置为 tab bar 高度，即可使面板停在 tab bar 上沿，导航栏继续可见和可交互。
 
 当面板尚未达到最大高度时，内容垂直手势优先拖动面板。bottom 面板达到最大高度后，内容向上滚动交给 `ScrollView`，内容位于顶部并向下拖动时重新接管面板。top 面板达到最大高度后，内容区域始终优先交给 `ScrollView`，建议从底部 drag area 发起收起操作，避免列表无法正常向上滚动。`contentDraggable={false}` 时只有 drag area 拖动，内容仍可滚动。
 
@@ -90,7 +87,7 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `TsukiProvider` 
 
 语义结构为 `container → root → header / content → contentContainer`，默认 `bar` 位于 `header` 内；top placement 的 header 排在 content 之后。`styles.content` 定制滚动视口，`styles.contentContainer` 定制内容布局和 padding。面板高度由 `height`、`defaultHeight`、`anchors` 和手势管理，`styles.container.height` 不能覆盖内部动画高度。
 
-组件没有遮罩，不会阻止面板外部页面交互；不提供 Web 专用的 `lockScroll`、`teleport` 或 imperative API。
+`overlay` 开启时遮罩覆盖整个 Portal 宿主，不受 `bottomOffset` 限制；点击关闭需同时设置 `closeOnPressOverlay`。不提供 Web 专用的 `lockScroll`、`teleport` 或 imperative API。
 
 面板通过 Portal 挂载在宿主层，不会自动跟随导航页面失去焦点而消失。导航栈可能在回退动画结束后才卸载页面；需要回退时立即移除面板的宿主，应使用页面焦点状态条件挂载 FloatingPanel（例如 `isFocused ? <FloatingPanel /> : null`），不要等页面最终卸载。
 
@@ -104,18 +101,19 @@ H5 文档使用 `react-native-web` 预览；Jest 只验证状态、样式和 res
 
 通过 `ConfigProvider` 的 `theme.components.FloatingPanel` 配置：
 
-| Token               | 默认值                | 说明                                      |
-| ------------------- | --------------------- | ----------------------------------------- |
-| `borderRadius`      | `16`                  | 根据 `placement` 应用于顶部或底部左右圆角 |
-| `headerHeight`      | `30`                  | 默认 header 高度                          |
-| `zIndex`            | `zIndexPopupBase - 1` | Portal 层级                               |
-| `backgroundColor`   | `colorBgElevated`     | 面板背景                                  |
-| `barWidth`          | `20`                  | 拖拽条宽度                                |
-| `barHeight`         | `3`                   | 拖拽条高度                                |
-| `barColor`          | `colorTextQuaternary` | 拖拽条颜色                                |
-| `shadowColor`       | `colorShadow`         | 面板阴影颜色                              |
-| `shadowOpacity`     | `0.12`                | 面板阴影透明度                            |
-| `shadowRadius`      | `8`                   | 面板阴影模糊半径                          |
-| `shadowOffset`      | `2`                   | 面板阴影偏移量；top 向下、bottom 向上     |
-| `elevation`         | `4`                   | Android/Harmony 阴影层级                  |
-| `animationDuration` | `motionDurationSlow`  | 吸附动画时长，单位为毫秒                  |
+| Token             | 默认值                | 说明                                      |
+| ----------------- | --------------------- | ----------------------------------------- |
+| `borderRadius`    | `16`                  | 根据 `placement` 应用于顶部或底部左右圆角 |
+| `headerHeight`    | `30`                  | 默认 header 高度                          |
+| `zIndex`          | `zIndexPopupBase - 1` | Portal 层级                               |
+| `backgroundColor` | `colorBgElevated`     | 面板背景                                  |
+| `barWidth`        | `20`                  | 拖拽条宽度                                |
+| `barHeight`       | `3`                   | 拖拽条高度                                |
+| `barColor`        | `colorTextQuaternary` | 拖拽条颜色                                |
+| `shadowColor`     | `colorShadow`         | 顶部面板阴影颜色                          |
+| `shadowOpacity`   | `0.12`                | 顶部面板阴影透明度                        |
+| `shadowRadius`    | `8`                   | 顶部面板阴影模糊半径                      |
+| `shadowOffset`    | `2`                   | 顶部面板阴影偏移量                        |
+| `elevation`       | `4`                   | 顶部面板 Android/Harmony 阴影层级         |
+
+底部面板默认不绘制阴影，避免阴影落在底部导航栏上；顶部面板仍使用上述阴影 Token。| `animationDuration` | `motionDurationSlow` | 吸附动画时长，单位为毫秒 |

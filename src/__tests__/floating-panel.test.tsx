@@ -1,12 +1,29 @@
+import { PortalHost } from './test-host'
 import { act, cleanup, render, screen } from '@testing-library/react-native'
-import { Animated, StyleSheet, Text, View } from 'react-native'
+import { Animated, Dimensions, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import type { RenderResult } from '@testing-library/react-native'
 import type { TestInstance } from 'test-renderer'
-import { ConfigProvider, FloatingPanel, PortalHost } from '..'
+import { ConfigProvider, FloatingPanel } from '..'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import FloatingPanelTopExample from '../floating-panel/__fixtures__/examples/top'
+
+jest.mock('../motion/useTransitionProgress', () => ({
+  useTransitionProgressState: ({
+    visible,
+    onTransitionEnd,
+  }: {
+    visible: boolean
+    onTransitionEnd?: (visible: boolean) => void
+  }) => {
+    const mockReact = jest.requireActual('react') as {
+      useEffect: (effect: () => void, dependencies: unknown[]) => void
+    }
+    mockReact.useEffect(() => onTransitionEnd?.(visible), [onTransitionEnd, visible])
+    return { animatedStyle: {}, progress: { value: visible ? 1 : 0 } }
+  },
+}))
 
 type TouchEvent = ReturnType<typeof touchEvent>
 
@@ -398,6 +415,23 @@ describe('FloatingPanel', () => {
     await view.unmount()
   })
 
+  it('limits panel anchors to the viewport area above the bottom offset', async () => {
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel testID="offset-panel" bottomOffset={200} anchors={[100, 2000]} />
+      </AppProvider>,
+    )
+
+    expect(getPanelHeight('offset-panel')).toBeLessThanOrEqual(
+      Dimensions.get('window').height - 200,
+    )
+    expect(StyleSheet.flatten(getPanelContainer('offset-panel').props.style).bottom).toBe(0)
+    expect(
+      StyleSheet.flatten(getPanelContainer('offset-panel').parent?.parent?.props.style).bottom,
+    ).toBe(200)
+    await view.unmount()
+  })
+
   it('supports uncontrolled drag, magnetic snapping, and separated height events', async () => {
     const onHeightChange = jest.fn()
     const onHeightChangeEnd = jest.fn()
@@ -419,6 +453,33 @@ describe('FloatingPanel', () => {
     expect(onHeightChange).toHaveBeenNthCalledWith(1, 220)
     expect(onHeightChange).toHaveBeenLastCalledWith(300)
     expect(onHeightChangeEnd).toHaveBeenCalledWith(300)
+    await view.unmount()
+  })
+
+  it('closes a controlled panel after dragging below its minimum anchor', async () => {
+    const onVisibleChange = jest.fn()
+    const onHeightChangeEnd = jest.fn()
+    const view = await render(
+      <AppProvider>
+        <FloatingPanel
+          testID="dismissible-panel"
+          visible
+          duration={0}
+          anchors={[100, 300]}
+          defaultHeight={100}
+          onVisibleChange={onVisibleChange}
+          onHeightChangeEnd={onHeightChangeEnd}
+        >
+          <Text>dismissible content</Text>
+        </FloatingPanel>
+      </AppProvider>,
+    )
+
+    await drag(getResponders(view)[0], 140)
+
+    expect(onHeightChangeEnd).toHaveBeenCalledWith(0)
+    expect(onVisibleChange).toHaveBeenCalledWith(false)
+    expect(screen.queryByText('dismissible content')).toBeNull()
     await view.unmount()
   })
 
@@ -1017,10 +1078,10 @@ describe('FloatingPanel', () => {
       borderTopLeftRadius: 20,
     })
     expect(StyleSheet.flatten(getPanelContainer('themed-panel').props.style)).toMatchObject({
-      elevation: 8,
-      shadowOpacity: 0.3,
-      shadowRadius: 12,
-      shadowOffset: { width: 0, height: -6 },
+      elevation: 0,
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      shadowOffset: { width: 0, height: 0 },
       zIndex: 1800,
     })
 
