@@ -45,6 +45,9 @@ jobs:
       - name: Format check
         run: yarn format:check
 
+      - name: Validate release policy
+        run: node --test scripts/validate-release.test.cjs
+
       - name: Typecheck
         run: yarn typecheck
 
