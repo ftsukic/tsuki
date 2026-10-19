@@ -5,6 +5,7 @@ import ButtonShapesFixture from './examples/shapes'
 import ButtonVariantsFixture from './examples/variants'
 import ButtonSizesFixture from './examples/sizes'
 import ButtonLoadingFixture from './examples/loading'
+import ButtonStateRecoveryFixture from './examples/state-recovery'
 
 /**
  * @title 按钮概览
@@ -31,6 +32,12 @@ export default function ButtonOverview() {
           description: '切换加载状态，观察图标位置、替换和文字保留。',
           id: 'loading',
           title: '图标与加载',
+        },
+        {
+          Component: ButtonStateRecoveryFixture,
+          description: '切换禁用与加载状态，检查透明度恢复和点击计数。',
+          id: 'state-recovery',
+          title: '禁用与加载恢复',
         },
         {
           Component: ButtonShapesFixture,

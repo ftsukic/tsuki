@@ -232,6 +232,26 @@ describe('Pressable', () => {
     expect(flattenStyle('user-style').opacity).toBe(0.8)
   })
 
+  it.each(['overlay', 'background', 'scale', 'none'] as const)(
+    'restores opacity after removing a disabled style with %s feedback',
+    async (pressStyle) => {
+      const tree = (disabled: boolean, opacity?: number) => (
+        <Pressable
+          testID="restored-opacity"
+          pressStyle={pressStyle}
+          disabled={disabled}
+          style={opacity === undefined ? undefined : { opacity }}
+        />
+      )
+      const view = await render(tree(true, 0.4))
+      expect(flattenStyle('restored-opacity').opacity).toBe(0.4)
+      await view.rerender(tree(false))
+      expect(flattenStyle('restored-opacity').opacity).toBe(1)
+      await view.rerender(tree(false, 0.8))
+      expect(flattenStyle('restored-opacity').opacity).toBe(0.8)
+    },
+  )
+
   it('suppresses visual feedback when disabled', async () => {
     await render(
       <Pressable disabled testOnly_pressed testID="disabled-visual">

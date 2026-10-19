@@ -86,6 +86,34 @@ function getButtonStyle(testID: string) {
 }
 
 describe('Button', () => {
+  it.each(['disabled', 'loading'] as const)(
+    'restores default overlay buttons after %s ends',
+    async (state) => {
+      const onPress = jest.fn()
+      const tree = (inactive: boolean) => (
+        <Button testID="recovering-button" {...{ [state]: inactive }} onPress={onPress}>
+          确认
+        </Button>
+      )
+      const view = await render(tree(true))
+      expect(StyleSheet.flatten(screen.getByTestId('recovering-button').props.style).opacity).toBe(
+        0.4,
+      )
+      // RNTL 14 fireEvent returns a Promise; the lint plugin still assumes sync events.
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent.press(screen.getByTestId('recovering-button'))
+      expect(onPress).not.toHaveBeenCalled()
+      await view.rerender(tree(false))
+      expect(StyleSheet.flatten(screen.getByTestId('recovering-button').props.style).opacity).toBe(
+        1,
+      )
+      // RNTL 14 fireEvent returns a Promise; the lint plugin still assumes sync events.
+      // eslint-disable-next-line testing-library/no-await-sync-events
+      await fireEvent.press(screen.getByTestId('recovering-button'))
+      expect(onPress).toHaveBeenCalledTimes(1)
+    },
+  )
+
   it('wraps text nodes from arrays and fragments before rendering them in Views', async () => {
     const { toJSON } = await render(
       <ConfigProvider>
