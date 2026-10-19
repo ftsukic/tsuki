@@ -19,7 +19,7 @@ import {
   Polyline,
   Rect,
   Svg,
-  Symbol,
+  Symbol as SvgSymbol,
   Use,
 } from 'react-native-svg'
 
@@ -147,9 +147,9 @@ function renderNode(
       )
     case 'symbol':
       return (
-        <Symbol {...node.attrs} key={key}>
+        <SvgSymbol {...node.attrs} key={key}>
           {children}
-        </Symbol>
+        </SvgSymbol>
       )
     case 'use':
       return <Use {...node.attrs} key={key} />
