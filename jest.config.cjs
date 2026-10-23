@@ -1,11 +1,17 @@
 const path = require('node:path')
 
-module.exports = {
+const nativeConfig = {
+  displayName: 'native',
   rootDir: __dirname,
   preset: '@react-native/jest-preset',
   resolver: 'react-native-reanimated/jest/resolver',
   roots: ['<rootDir>/src'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '\\.web\\.test\\.tsx?$',
+    '/dropdown-web-scroll-lock\\.test\\.ts$',
+  ],
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': [
       'babel-jest',
@@ -29,4 +35,20 @@ module.exports = {
     '^react-native-safe-area-context$': '<rootDir>/node_modules/react-native-safe-area-context',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+}
+
+// DOM suites must not run the RN preset, which replaces JSDOM's window global.
+module.exports = {
+  projects: [
+    nativeConfig,
+    {
+      displayName: 'web',
+      rootDir: __dirname,
+      roots: ['<rootDir>/src'],
+      testEnvironment: 'jsdom',
+      testMatch: ['**/*.web.test.ts', '**/*.web.test.tsx', '**/dropdown-web-scroll-lock.test.ts'],
+      transform: nativeConfig.transform,
+      moduleFileExtensions: nativeConfig.moduleFileExtensions,
+    },
+  ],
 }

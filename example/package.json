@@ -3,31 +3,36 @@
   "main": "index.ts",
   "version": "1.0.0",
   "dependencies": {
-    "@shopify/flash-list": "2.3.2",
-    "expo": "~57.0.28",
+    "@shopify/flash-list": "2.3.3",
+    "expo": "~57.0.31",
     "expo-build-properties": "^57.0.22",
-    "expo-constants": "~57.0.21",
+    "expo-constants": "~57.0.22",
     "expo-dev-client": "~57.0.20",
-    "expo-linking": "~57.0.12",
-    "expo-router": "~57.0.26",
+    "expo-linking": "~57.0.13",
+    "expo-router": "~57.0.29",
     "expo-splash-screen": "~57.0.10",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.3",
-    "react-native-fast-image": "^10.0.0",
-    "react-native-gesture-handler": "~2.32.0",
-    "react-native-keyboard-controller": "1.22.4",
-    "react-native-reanimated": "4.5.1",
-    "react-native-safe-area-context": "~5.7.0",
+    "react-native-fast-image": "^10.8.7",
+    "react-native-gesture-handler": "~2.33.1",
+    "react-native-keyboard-controller": "1.22.8",
+    "react-native-reanimated": "4.7.1",
+    "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.26.0",
-    "react-native-svg": "15.15.4",
+    "react-native-svg": "15.16.0",
     "react-native-teleport": "1.2.2",
     "react-native-video": "^6.19.3",
-    "react-native-web": "~0.21.0",
-    "react-native-worklets": "0.10.1"
+    "react-native-web": "~0.21.4",
+    "react-native-worklets": "0.13.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.7",
+    "@babel/runtime": "^7.29.7",
+    "@react-native/metro-config": "0.86.3",
     "@types/react": "~19.2.2",
+    "babel-preset-expo": "~57.0.16",
+    "react-refresh": "^0.14.2",
     "typescript": "~6.0.3"
   },
   "scripts": {
@@ -40,5 +45,18 @@
     "config": "yarn generate:fixtures && expo config --type public",
     "export:web": "yarn generate:fixtures && expo export --platform web"
   },
-  "private": true
+  "private": true,
+  "expo": {
+    "install": {
+      "exclude": [
+        "react-native-gesture-handler",
+        "react-native-reanimated",
+        "react-native-safe-area-context",
+        "react-native-svg",
+        "react-native-worklets",
+        "react-native-keyboard-controller",
+        "@shopify/flash-list"
+      ]
+    }
+  }
 }
