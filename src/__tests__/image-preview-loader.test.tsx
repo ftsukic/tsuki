@@ -2,6 +2,7 @@
 import React from 'react'
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import { Image, StyleSheet } from 'react-native'
+import * as Reanimated from 'react-native-reanimated'
 import { ImagePreviewItem } from '../image-preview/image-preview-item'
 import { defaultImagePreviewAdapter } from '../image-preview/image-adapter'
 import { useImagePreviewLoader } from '../image-preview/useImagePreviewLoader'
@@ -140,6 +141,32 @@ describe('image preview preloading', () => {
 })
 
 describe('image preview media lifecycle', () => {
+  it('fades in the loaded original while preserving the preview underneath', async () => {
+    const timing = jest.spyOn(Reanimated, 'withTiming')
+    try {
+      await render(
+        <ImagePreviewItem
+          item={{ ...image('photo'), original: { uri: 'https://example.com/original.jpg' } }}
+          originalRequested
+        />,
+      )
+      expect(screen.getByTestId('image-preview-original-photo')).not.toBeVisible()
+      expect(screen.queryByTestId('image-preview-original-photo-loading')).toBeNull()
+      expect(screen.queryByText('正在加载原图')).toBeNull()
+      timing.mockClear()
+      await fireEvent(screen.getByTestId('image-preview-original-photo'), 'load')
+      expect(timing).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ duration: expect.any(Number) }),
+        expect.any(Function),
+      )
+      expect(timing.mock.calls[0][1]?.duration).toBeGreaterThan(0)
+      expect(screen.getByTestId('image-preview-image-photo')).toBeVisible()
+    } finally {
+      timing.mockRestore()
+    }
+  })
+
   it('constrains native images and offers retry without treating a remounted URI as loaded', async () => {
     const item = image('photo')
     const view = await render(<ImagePreviewItem item={item} />)

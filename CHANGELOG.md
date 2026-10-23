@@ -1,5 +1,11 @@
 # @ftsukic/tsuki
 
+## 0.1.5
+
+### Patch Changes
+
+- Fade in the ImagePreview original image after loading while keeping the preview visible underneath without a centered original-image loading indicator. Respect motion settings and reduced motion.
+
 ## 0.1.4
 
 ### Patch Changes

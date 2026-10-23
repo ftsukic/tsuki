@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, StyleSheet, View } from 'react-native'
 import type { ImageSourcePropType } from 'react-native'
+import { Animated, motionPresets, useAnimatedTransition } from '../motion'
 import { Pressable } from '../pressable'
 import { Text } from '../text'
 import { defaultImagePreviewAdapter, getImagePreviewSourceKey } from './image-adapter'
@@ -43,6 +44,12 @@ function SourceLayer({
 }: SourceLayerProps) {
   const [state, setState] = useState<ImagePreviewLoadState>('loading')
   const [attempt, setAttempt] = useState(0)
+  const originalStyle = useAnimatedTransition({
+    visible: !original || state === 'loaded',
+    preset: motionPresets.fade,
+    motion: original,
+    appear: false,
+  })
   const mountedRef = useRef(true)
   const attemptRef = useRef(attempt)
   attemptRef.current = attempt
@@ -75,10 +82,14 @@ function SourceLayer({
   return (
     <View pointerEvents="box-none" style={StyleSheet.absoluteFill}>
       {/* Let native previews draw without waiting for the onLoad round trip to RN. */}
-      <View
+      <Animated.View
         key={attempt}
         pointerEvents="none"
-        style={[StyleSheet.absoluteFill, original && state !== 'loaded' && styles.hidden]}
+        style={[
+          StyleSheet.absoluteFill,
+          original && originalStyle,
+          original && state !== 'loaded' && styles.hidden,
+        ]}
       >
         {adapter.render({
           source,
@@ -88,11 +99,10 @@ function SourceLayer({
           onError: () => updateState('error'),
           testID,
         })}
-      </View>
-      {showStatus && state === 'loading' ? (
+      </Animated.View>
+      {showStatus && !original && state === 'loading' ? (
         <View pointerEvents="none" style={styles.status}>
           <ActivityIndicator color="#ffffff" testID={`${testID}-loading`} />
-          {original ? <Text style={styles.statusLabel}>正在加载原图</Text> : null}
         </View>
       ) : null}
       {showStatus && state === 'error' ? (
