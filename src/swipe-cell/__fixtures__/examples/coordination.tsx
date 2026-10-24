@@ -1,32 +1,24 @@
-import { SwipeCell } from '../../..'
-import { StyleSheet, Text, View } from 'react-native'
+import { Cell, SwipeCell, Text, useSwipeCellDismiss } from '../../..'
+import { View } from 'react-native'
 
 /**
- * @title TsukiProvider coordination
- * @description Open one cell at a time without wrapping the rows in SwipeCellGroup.
+ * @title 页面单开协调
+ * @description 由页面 Hook 管理展开行，多个行之间互斥，不依赖全局 Provider。
  */
 export default function SwipeCellCoordinationFixture() {
-  const rows = ['第一项', '第二项', '第三项']
-
+  const dismiss = useSwipeCellDismiss()
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>TsukiProvider 级单开</Text>
-      {rows.map((title) => (
-        <SwipeCell key={title} rightActions={[{ label: '删除' }]}>
-          <View style={styles.content}>
-            <Text style={styles.title}>{title}</Text>
-            <Text style={styles.subtitle}>打开这一项会自动关闭其它项</Text>
-          </View>
+    <View {...dismiss.containerProps} style={{ gap: 12 }}>
+      <Text>由当前页面维护展开行：展开另一行或触摸本区域外侧内容时收起。</Text>
+      {['第一项', '第二项', '第三项'].map((title) => (
+        <SwipeCell
+          key={title}
+          {...dismiss.getSwipeCellProps(title)}
+          actions={[{ text: '删除', color: 'danger' }]}
+        >
+          <Cell title={title} description="展开另一行时收起当前行" />
         </SwipeCell>
       ))}
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: { gap: 1 },
-  heading: { color: '#333333', fontSize: 16, fontWeight: '600', marginBottom: 11 },
-  content: { backgroundColor: '#ffffff', gap: 4, paddingHorizontal: 16, paddingVertical: 14 },
-  title: { color: '#323233', fontSize: 16 },
-  subtitle: { color: '#969799', fontSize: 13 },
-})

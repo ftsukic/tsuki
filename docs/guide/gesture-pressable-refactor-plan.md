@@ -1,5 +1,7 @@
 # Gesture 与 Pressable 分阶段重构计划
 
+> 后续更新：TsukiProvider 已移除默认 SwipeCellManager 与顶层按压作用域重置；旧 manager/控制器接口也已删除，页面协调使用 `useSwipeCellDismiss()`。下文保留此前迁移阶段记录，当前接入以 SwipeCell 组件文档为准。
+
 日期：2026-10-10。状态：阶段 1–5 的源码、API 与 canonical Fixture 已完成；阶段 6 已完成静态与构建验证，原生设备验收未执行。
 
 范围更新：按用户要求，本轮不处理 Dumi 文档、构建或网页 adapter。第五阶段仅执行 canonical Fixture 与 Expo 示例。

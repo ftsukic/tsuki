@@ -1,38 +1,24 @@
-import { SwipeCell } from '../../..'
+import { Cell, SwipeCell, Text } from '../../..'
 import { useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { View } from 'react-native'
 
 /**
- * @title Multiple actions
- * @description Render independent action items on one side and measure their combined slot width.
+ * @title 多个操作
+ * @description 同侧独立 action，以各项标准宽度之和作为展开距离。
  */
 export default function SwipeCellMultipleActionsFixture() {
-  const [result, setResult] = useState('向左滑动显示两个独立操作')
-
+  const [result, setResult] = useState('向左滑动显示多个操作')
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>多个 action</Text>
+    <View style={{ gap: 12 }}>
       <SwipeCell
-        rightActions={[
-          { label: '更多', backgroundColor: '#1989FA', onPress: () => setResult('已点击更多') },
-          { label: '删除', backgroundColor: '#EE0A24', onPress: () => setResult('已删除') },
+        actions={[
+          { text: '更多', color: 'primary', width: 64, onPress: () => setResult('已点击更多') },
+          { text: '删除', color: 'danger', width: 64, onPress: () => setResult('已点击删除') },
         ]}
       >
-        <View style={styles.content}>
-          <Text style={styles.title}>报告 #1024</Text>
-          <Text style={styles.subtitle}>{result}</Text>
-        </View>
+        <Cell title="报告 #1024" description={result} />
       </SwipeCell>
-      <Text style={styles.caption}>展开距离等于“更多”和“删除”的总宽度，点击后默认关闭。</Text>
+      <Text>两个操作各宽 64pt，总展开距离为 128pt。</Text>
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: { gap: 12 },
-  heading: { color: '#333333', fontSize: 16, fontWeight: '600' },
-  content: { gap: 4, paddingHorizontal: 16, paddingVertical: 14 },
-  title: { color: '#323233', fontSize: 16, fontWeight: '600' },
-  subtitle: { color: '#969799', fontSize: 13 },
-  caption: { color: '#969799', fontSize: 13 },
-})

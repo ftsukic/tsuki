@@ -1,33 +1,29 @@
-import { SwipeCell } from '../../..'
+import { Cell, SwipeCell, useToken } from '../../..'
 import { useState } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 
 /**
- * @title Content press closes
- * @description Press the content after expanding the row; the content press handler still runs.
+ * @title 点击、长按与拖动
+ * @description 收起状态显示按压反馈并响应业务事件；展开状态只关闭 action，拖动取消按压反馈。
  */
 export default function SwipeCellContentCloseFixture() {
-  const [result, setResult] = useState('先向左滑动，再点击主体')
-
+  const { token } = useToken()
+  const [clicks, setClicks] = useState(0)
+  const [holds, setHolds] = useState(0)
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>点击主体关闭</Text>
-      <SwipeCell rightActions={[{ label: '删除' }]}>
-        <Pressable onPress={() => setResult('主体 onPress 已执行')} style={styles.content}>
-          <Text style={styles.title}>可点击的主体</Text>
-          <Text style={styles.subtitle}>{result}</Text>
-        </Pressable>
+    <View style={{ gap: 12 }}>
+      <SwipeCell actions={[{ text: '删除', color: 'danger' }]}>
+        <Cell
+          title="点击或长按这行"
+          description={`业务点击 ${clicks} 次 · 业务长按 ${holds} 次`}
+          onPress={() => setClicks((count) => count + 1)}
+          onLongPress={() => setHolds((count) => count + 1)}
+          styles={({ state }) => ({ root: { opacity: state.pressed ? 0.7 : 1 } })}
+        />
       </SwipeCell>
-      <Text style={styles.caption}>关闭不会阻止主体原有的 Pressable 事件。</Text>
+      <Text style={{ color: token.colorTextSecondary }}>
+        先左滑展开，再点击或长按：只收起操作，计数不变。拖动超过阈值后取消按压样式。
+      </Text>
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: { gap: 12 },
-  heading: { color: '#333333', fontSize: 16, fontWeight: '600' },
-  content: { backgroundColor: '#ffffff', gap: 4, paddingHorizontal: 16, paddingVertical: 14 },
-  title: { color: '#323233', fontSize: 16, fontWeight: '600' },
-  subtitle: { color: '#969799', fontSize: 13 },
-  caption: { color: '#969799', fontSize: 13 },
-})

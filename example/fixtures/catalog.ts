@@ -397,7 +397,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview46,
     component: 'swipe-cell',
-    description: 'SwipeCell 的微信消息列表、多 action、协调、列表、ref、分组和主题示例。',
+    description: '默认展示微信效果，依次演示基础操作、触摸反馈、页面协调、列表和局部分组。',
     id: 'swipe-cell',
     title: 'SwipeCell',
   },

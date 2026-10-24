@@ -12,81 +12,82 @@ import SwipeCellThemeExample from './examples/theme'
 import SwipeCellWeChatExample from './examples/wechat'
 
 /**
- * @title SwipeCell overview
- * @description SwipeCell 的微信消息列表、多 action、协调、列表、ref、分组和主题示例。
+ * @title SwipeCell 示例
+ * @description 默认展示微信效果，依次演示基础操作、触摸反馈、页面协调、列表和局部分组。
  */
 export default function SwipeCellOverview() {
   return (
     <FixtureOverview
+      mode="single"
+      fullBleedExamples
       examples={[
         {
+          Component: SwipeCellWeChatExample,
+          id: 'wechat',
+          title: '微信效果',
+          description: '正文限位、action 撑开与文字遮挡，支持置顶、未读、删除和区域外触摸关闭。',
+        },
+        {
           Component: SwipeCellBasicExample,
-          description: '展示右侧 action、滑动吸附和 action 点击反馈。',
           id: 'basic',
-          title: 'Basic SwipeCell',
+          title: '基础操作',
+          description: '单个右侧 action，展示吸附及操作结果。',
         },
         {
           Component: SwipeCellBothSidesExample,
-          description: '展示左侧和右侧 action 的独立配置。',
           id: 'both-sides',
-          title: 'Left and right actions',
+          title: '左右操作',
+          description: '分别配置左右两侧 action。',
         },
         {
           Component: SwipeCellMultipleActionsExample,
-          description: '展示同一侧多个 action，展开距离等于 action 总宽度。',
           id: 'multiple-actions',
-          title: 'Multiple actions',
-        },
-        {
-          Component: SwipeCellCoordinationExample,
-          description: '展示同一 TsukiProvider 下打开新 cell 自动关闭旧 cell。',
-          id: 'coordination',
-          title: 'TsukiProvider coordination',
-        },
-        {
-          Component: SwipeCellWeChatExample,
-          description: '展示微信消息列表风格的稳定 id、右侧 action 和主体布局。',
-          id: 'wechat',
-          title: 'WeChat message list',
+          title: '多个操作',
+          description: '同侧多个 action，按总宽度展开。',
         },
         {
           Component: SwipeCellContentCloseExample,
-          description: '展示展开后点击主体关闭，同时保留主体自己的 onPress。',
           id: 'content-close',
-          title: 'Content press closes',
-        },
-        {
-          Component: SwipeCellListExample,
-          description: '展示列表开始滚动时通过 useSwipeCellController 关闭当前 cell。',
-          id: 'list',
-          title: 'List usage',
+          title: '点击与按住',
+          description: '收起时响应业务点击、长按；展开时只关闭，拖动取消按压反馈。',
         },
         {
           Component: SwipeCellFlashListExample,
-          description: '展示 FlashList 回收 1000 条 SwipeCell 时的稳定 id 和滚动关闭。',
           id: 'flash-list',
-          title: 'FlashList 1000 items',
+          title: 'FlashList · 1000 条',
+          description: '页面 Hook 统一处理外部触摸、单开、滚动关闭和回收，不新增 Provider。',
+        },
+        {
+          Component: SwipeCellListExample,
+          id: 'list',
+          title: 'FlatList 接入',
+          description: '同一套 useSwipeCellDismiss 也适用于 FlatList。',
         },
         {
           Component: SwipeCellRefExample,
-          description: '展示通过 ref 调用 open 和 close。',
           id: 'ref',
-          title: 'Imperative ref',
-        },
-        {
-          Component: SwipeCellGroupExample,
-          description: '展示 SwipeCellGroup 自动关闭其他 cell 的单开行为。',
-          id: 'group',
-          title: 'SwipeCellGroup',
+          title: 'Ref 控制',
+          description: '通过 open() / close() 手动开关。',
         },
         {
           Component: SwipeCellThemeExample,
-          description: '展示通过 ConfigProvider 覆盖 SwipeCell component token。',
           id: 'theme',
-          title: 'Theme customization',
+          title: '主题样式',
+          description: '覆盖 action 的颜色、宽度等主题配置。',
+        },
+        {
+          Component: SwipeCellCoordinationExample,
+          id: 'coordination',
+          title: '页面单开',
+          description: '页面 Hook 管理多个行之间的单开协调，不依赖全局 Provider。',
+        },
+        {
+          Component: SwipeCellGroupExample,
+          id: 'group',
+          title: 'Group 协调',
+          description: '显式的局部分组，同一 Group 内单开。',
         },
       ]}
-      fullBleedExamples
     />
   )
 }

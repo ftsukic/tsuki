@@ -1,53 +1,21 @@
-import { SwipeCell } from '../../..'
+import { Cell, SwipeCell, Text } from '../../..'
 import { useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { View } from 'react-native'
 
 /**
- * @title Basic SwipeCell
- * @description Swipe left to reveal a right-side action and press the action to update the result.
+ * @title 基础操作
+ * @description 单个右侧 action，点击后更新结果并自动收起。
  */
 export default function SwipeCellBasicFixture() {
   const [result, setResult] = useState('向左滑动显示操作')
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>基础用法</Text>
-      <SwipeCell rightActions={[{ label: '删除', onPress: () => setResult('已删除') }]}>
-        <View style={styles.content}>
-          <Text style={styles.title}>订单 #1024</Text>
-          <Text style={styles.subtitle}>{result}</Text>
-        </View>
+    <View style={{ gap: 12 }}>
+      <SwipeCell
+        actions={[{ text: '删除', color: 'danger', onPress: () => setResult('已点击删除') }]}
+      >
+        <Cell title="订单 #1024" description={result} />
       </SwipeCell>
-      <Text style={styles.caption}>操作区域按内容测量，滑动超过宽度的一半后展开。</Text>
+      <Text>滑动距离与松手速度共同决定展开或收起。</Text>
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    gap: 12,
-  },
-  heading: {
-    color: '#333333',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  content: {
-    gap: 4,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  title: {
-    color: '#323233',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  subtitle: {
-    color: '#969799',
-    fontSize: 13,
-  },
-  caption: {
-    color: '#969799',
-    fontSize: 13,
-  },
-})

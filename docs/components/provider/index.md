@@ -10,7 +10,7 @@
 
 - [启用安全区根节点：通过 safeArea 选项为安全区内容提供 SafeAreaProvider。](../../../src/provider/__fixtures__/examples/safe-area.tsx)
 
-TsukiProvider 组合可选 `SafeAreaProvider`、默认启用的 `GestureHandlerRootView`、`ConfigProvider`、SwipeCell 状态管理和函数式弹层的 React 承载器。应用需在其外层提供 `react-native-teleport` 的 `PortalProvider`，由应用负责 Portal 宿主生命周期。
+TsukiProvider 组合可选 `SafeAreaProvider`、默认启用的 `GestureHandlerRootView`、`ConfigProvider` 和函数式弹层的 React 承载器。应用需在其外层提供 `react-native-teleport` 的 `PortalProvider`，由应用负责 Portal 宿主生命周期。SwipeCell 的单开与外部触摸关闭由页面接入 `useSwipeCellDismiss()`，TsukiProvider 不再安装 SwipeCell manager 或重置其局部按压作用域。
 
 ## API
 
