@@ -1,6 +1,6 @@
 import * as Worklets from 'react-native-worklets'
 import type { SwipeCellRef } from '../swipe-cell'
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
+import { act, cleanup, fireEvent, render, screen, userEvent } from '@testing-library/react-native'
 import { createRef, memo, type ReactNode } from 'react'
 import {
   Button,
@@ -93,45 +93,36 @@ describe('Popover', () => {
     jest.clearAllMocks()
   })
 
-  it('keeps its trigger in a cell action but clears ownership for floating content', async () => {
+  it('keeps floating content outside an expanded SwipeCell body press scope', async () => {
     const ref = createRef<SwipeCellRef>()
-    const onOpen = jest.fn()
     const onClose = jest.fn()
+    const onPress = jest.fn()
     await renderWithSafeArea(
       <TsukiProvider motion={{ enabled: false }}>
-        <SwipeCell
-          ref={ref}
-          testID="popover-owner"
-          onOpen={onOpen}
-          onClose={onClose}
-          closeOnActionPress={false}
-          rightAction={
-            <Popover
-              visible
-              trigger="manual"
-              content={<Button testID="floating-button">浮层</Button>}
-            >
-              <Button testID="owned-trigger">触发器</Button>
-            </Popover>
-          }
-        />
+        <SwipeCell ref={ref} testID="popover-owner" onClose={onClose} rightAction="删除">
+          <Popover
+            visible
+            trigger="manual"
+            content={
+              <Button testID="floating-button" onPress={onPress}>
+                浮层
+              </Button>
+            }
+          >
+            <Button testID="owned-trigger">触发器</Button>
+          </Popover>
+        </SwipeCell>
       </TsukiProvider>,
     )
     await act(async () => {
       screen
         .getByTestId('popover-owner-right-action', { includeHiddenElements: true })
-        .props.onLayout({
-          nativeEvent: { layout: { width: 100, height: 48, x: 0, y: 0 } },
-        })
+        .props.onLayout({ nativeEvent: { layout: { width: 100, height: 48, x: 0, y: 0 } } })
       ref.current?.open()
     })
-    expect(onOpen).toHaveBeenCalledTimes(1)
-    const triggerPress = fireEvent(screen.getByTestId('owned-trigger'), 'pressIn')
-    await triggerPress
+    await userEvent.setup().press(screen.getByTestId('floating-button'))
+    expect(onPress).toHaveBeenCalledTimes(1)
     expect(onClose).not.toHaveBeenCalled()
-    const contentPress = fireEvent(screen.getByTestId('floating-button'), 'pressIn')
-    await contentPress
-    expect(onClose).toHaveBeenCalledTimes(1)
   })
 
   it('is closed by default and opens from a Button child', async () => {

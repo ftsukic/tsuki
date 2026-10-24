@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react'
-import type { LayoutChangeEvent } from 'react-native'
+import { isValidElement, useLayoutEffect, useMemo, useState, type ReactNode } from 'react'
+import { View, type LayoutChangeEvent } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 import type { SharedValue } from 'react-native-reanimated'
-import { resolveActionOffset } from './action-offset'
+import { SwipeCellActionWidthContext } from './context'
+import { resolveActionOffset, resolveActionWidth } from './action-offset'
 import type { SwipeCellSide } from './types'
 
 interface SwipeCellActionMotionProps {
@@ -20,31 +21,54 @@ export function SwipeCellActionMotion({
   totalWidth,
   layer,
 }: SwipeCellActionMotionProps) {
+  const [measuredWidth, setMeasuredWidth] = useState<number>()
+  const actionProps = isValidElement<{ width?: number; children?: ReactNode }>(children)
+    ? children.props
+    : undefined
+  const declaredWidth = typeof actionProps?.width === 'number' ? actionProps.width : undefined
+  const label =
+    typeof actionProps?.children === 'string' || typeof actionProps?.children === 'number'
+      ? actionProps.children
+      : null
   const x = useSharedValue(0)
   const width = useSharedValue(0)
-  const style = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateX: resolveActionOffset(
-          translation.value,
-          totalWidth.value,
-          x.value,
-          width.value,
-          side,
-        ),
-      },
-    ],
-  }))
+  useLayoutEffect(() => {
+    width.value = 0
+    setMeasuredWidth(undefined)
+  }, [declaredWidth, label, width])
+  const contentLayout = useMemo(
+    () => (measuredWidth === undefined ? null : { width: measuredWidth, side }),
+    [measuredWidth, side],
+  )
+  const style = useAnimatedStyle(() =>
+    width.value > 0
+      ? {
+          opacity: 1,
+          width: resolveActionWidth(translation.value, totalWidth.value, width.value, side),
+          transform: [
+            {
+              translateX: resolveActionOffset(translation.value, totalWidth.value, x.value, side),
+            },
+          ],
+        }
+      : { opacity: 0 },
+  )
   const handleLayout = (event: LayoutChangeEvent) => {
-    x.value = event.nativeEvent.layout.x
-    width.value = event.nativeEvent.layout.width
+    const layout = event.nativeEvent.layout
+    x.value = layout.x
+    width.value = layout.width
+    if (layout.width > 0) setMeasuredWidth(layout.width)
   }
   return (
-    <Animated.View
+    <View
       onLayout={handleLayout}
-      style={[{ alignSelf: 'stretch', flexDirection: 'row', zIndex: layer }, style]}
+      style={{ width: measuredWidth, alignSelf: 'stretch', zIndex: layer }}
     >
-      {children}
-    </Animated.View>
+      <Animated.View collapsable={false} style={[{ flex: 1, overflow: 'hidden' }, style]}>
+        <SwipeCellActionWidthContext.Provider value={contentLayout}>
+          {children}
+        </SwipeCellActionWidthContext.Provider>
+      </Animated.View>
+    </View>
   )
 }

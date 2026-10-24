@@ -1,8 +1,11 @@
 import type { AliasToken, SwipeCellToken } from '../theme'
+import { alphaColor } from '../theme/util/colors'
 
 export function getSwipeCellToken(token: AliasToken): SwipeCellToken {
   return {
     backgroundColor: token.colorBgContainer,
+    pressedBackgroundColor: token.pressedBackgroundColor,
+    contentOverlayColor: alphaColor(token.colorBgContainer, 0.55),
     actionBackgroundColor: token.colorError,
     actionDefaultBackgroundColor: token.colorBgElevated,
     actionPrimaryBackgroundColor: token.colorPrimary,

@@ -1,18 +1,8 @@
 import { useCallback, useContext } from 'react'
-import { SwipeCellPressContext, useSwipeCellManager } from './context'
+import { SwipeCellPressContext } from './context'
 
-export function useSwipeCellPress(phase: 'pressIn' | 'press' = 'pressIn') {
-  const manager = useSwipeCellManager()
+/** Dispatch only to the enclosing cell; page coordination belongs to useSwipeCellDismiss. */
+export function useSwipeCellPress() {
   const owner = useContext(SwipeCellPressContext)
-  return useCallback(() => {
-    if (phase === 'press') {
-      owner?.onPress?.()
-      return
-    }
-    if (owner === null) manager?.closeActive()
-    else {
-      manager?.closeOthers(owner.id)
-      owner.onPressIn?.()
-    }
-  }, [owner, manager, phase])
+  return useCallback(() => owner?.onPress?.() === true, [owner])
 }

@@ -1,9 +1,10 @@
-import type { Key, ReactNode } from 'react'
+import type { Key, ReactNode, RefCallback } from 'react'
 import type {
   ColorValue,
   PressableProps as NativePressableProps,
   StyleProp,
   ViewProps,
+  View,
   ViewStyle,
 } from 'react-native'
 
@@ -17,6 +18,7 @@ export interface SwipeCellStyleState {
 export interface SwipeCellSemanticStyles {
   root?: StyleProp<ViewStyle>
   content?: StyleProp<ViewStyle>
+  contentOverlay?: StyleProp<ViewStyle>
   actions?: StyleProp<ViewStyle>
 }
 
@@ -47,6 +49,8 @@ export interface SwipeCellActionItem {
 export interface SwipeCellRef {
   open: (side?: SwipeCellSide) => void
   close: () => void
+  /** Native page-coordinate measurement; forwarded by the built-in SwipeCell. */
+  measure?: View['measure']
 }
 
 export interface SwipeCellActionProps extends Omit<NativePressableProps, 'children' | 'style'> {
@@ -72,12 +76,30 @@ export interface SwipeCellProps extends Omit<ViewProps, 'children' | 'style'> {
   closeOnActionPress?: boolean
   /** Apply resistance beyond the measured action width. Defaults to false. */
   overshoot?: boolean
+  /** Content travel at full reveal in points; content and overlaid actions move proportionally. */
+  contentDragLimit?: number
   style?: StyleProp<ViewStyle>
   styles?: SwipeCellStyles
+  /** Horizontal gesture activation or an imperative open request, before settlement. */
+  onOpenStart?: () => void
   onOpen?: () => void
   onClose?: () => void
 }
 
 export interface SwipeCellGroupProps extends Omit<ViewProps, 'children'> {
   children?: ReactNode
+}
+
+export interface SwipeCellDismissBinding {
+  ref: RefCallback<SwipeCellRef>
+  onOpenStart: () => void
+  onClose: () => void
+  onTouchStart: NonNullable<ViewProps['onTouchStart']>
+}
+
+export interface SwipeCellDismissController {
+  containerProps: Pick<ViewProps, 'onStartShouldSetResponderCapture'>
+  getSwipeCellProps: (id: string) => SwipeCellDismissBinding
+  /** Also attach to scroll start and page blur. */
+  close: () => void
 }

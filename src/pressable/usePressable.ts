@@ -26,12 +26,11 @@ export function usePressable({
   const feedbackOwner = useContext(SwipeCellPressContext)?.feedback
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [hovered, setHovered] = useState(false)
-  const notifyPress = useSwipeCellPress()
-  const notifyClick = useSwipeCellPress('press')
+  const notifyClick = useSwipeCellPress()
   const handlePress = usePressHandler({
     disabled: isDisabled,
     onPress: (event) => {
-      notifyClick()
+      if (notifyClick()) return
       onPress?.(event)
     },
     onPressDebounceWait,
@@ -104,9 +103,12 @@ export function usePressable({
         notifyFeedback(true)
         setActive(true)
       }
-      notifyPress()
     }
     props.onPressIn?.(event)
+  }
+  const handleLongPress: NonNullable<typeof props.onLongPress> = (event) => {
+    if (isDisabled || notifyClick()) return
+    props.onLongPress?.(event)
   }
   const handlePressOut: NonNullable<typeof props.onPressOut> = (event) => {
     if (Platform.OS === 'web') feedbackOwner?.end()
@@ -131,6 +133,7 @@ export function usePressable({
       accessibilityRole: accessibilityRole ?? (onPress ? 'button' : undefined),
       disabled: isDisabled,
       onPress: handlePress,
+      onLongPress: feedbackOwner || props.onLongPress ? handleLongPress : undefined,
       onPressIn: handlePressIn,
       onPressOut: handlePressOut,
       onHoverIn: handleHoverIn,

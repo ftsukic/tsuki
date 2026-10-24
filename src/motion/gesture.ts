@@ -1,6 +1,6 @@
 import { ReduceMotion, withDecay } from 'react-native-reanimated'
 import { animateValue } from './animation'
-import { GESTURE_PRESET, MAGNETIC_PRESET } from './presets'
+import { GESTURE_PRESET, MAGNETIC_PRESET, SWIPE_SNAP_PRESET } from './presets'
 import { MOTION_EASING } from './easing'
 import { MOTION_DURATION } from './token'
 
@@ -57,6 +57,7 @@ export const SWIPE_PRESET = {
   velocityThreshold: 500,
   threshold: 0.5,
   resistance: 0.25,
+  projectionTime: 0.12,
 }
 
 export function resolveSwipeOffset(
@@ -77,16 +78,18 @@ export function resolveSwipeTarget(offset: number, velocity: number, left: numbe
   'worklet'
   if (offset < 0 && velocity >= SWIPE_PRESET.velocityThreshold) return 0
   if (offset > 0 && velocity <= -SWIPE_PRESET.velocityThreshold) return 0
+  const projected =
+    offset + (Number.isFinite(velocity) ? velocity : 0) * SWIPE_PRESET.projectionTime
   if (
     offset > 0 &&
     left > 0 &&
-    (offset > left * SWIPE_PRESET.threshold || velocity >= SWIPE_PRESET.velocityThreshold)
+    (projected > left * SWIPE_PRESET.threshold || velocity >= SWIPE_PRESET.velocityThreshold)
   )
     return left
   if (
     offset < 0 &&
     right > 0 &&
-    (-offset > right * SWIPE_PRESET.threshold || velocity <= -SWIPE_PRESET.velocityThreshold)
+    (-projected > right * SWIPE_PRESET.threshold || velocity <= -SWIPE_PRESET.velocityThreshold)
   )
     return -right
   return 0
@@ -113,18 +116,36 @@ export function snapGesture(
   )
 }
 
-/** SwipeCell uses the same non-bouncing transition in both directions. */
+/** Gestures retain release momentum; imperative transitions preserve their timing contract. */
 export function snapSwipeCellOffset(
   target: number,
   enabled: boolean,
   onFinished?: (finished?: boolean) => void,
   durationScale = 1,
   duration = MOTION_DURATION.fast,
+  velocity?: number,
+  from = target,
+  relaxed = false,
 ) {
   'worklet'
-  if (!enabled) {
+  if (!enabled || duration <= 0 || durationScale <= 0) {
     onFinished?.(true)
     return target
+  }
+  if (velocity !== undefined) {
+    const scale = (duration / MOTION_DURATION.normal) * durationScale * (relaxed ? 1.6 : 1)
+    const delta = target - from
+    const frequency = Math.sqrt(SWIPE_SNAP_PRESET.stiffness / SWIPE_SNAP_PRESET.mass) / scale
+    // Bound toward-target momentum so even a fast fling cannot cross the anchor.
+    const speed = Number.isFinite(velocity) ? Math.max(0, Math.sign(delta) * velocity) : 0
+    const boundedVelocity = Math.sign(delta) * Math.min(speed, Math.abs(delta) * frequency)
+    return animateValue(
+      target,
+      { ...SWIPE_SNAP_PRESET, reduceMotion: ReduceMotion.Never },
+      onFinished,
+      scale,
+      boundedVelocity,
+    )
   }
   return animateValue(
     target,
@@ -136,6 +157,15 @@ export function snapSwipeCellOffset(
     },
     onFinished,
   )
+}
+
+/** A small opening-only return near the end of the shared reveal progress. */
+export function resolveSwipeCellRebound(progress: number, distance: number) {
+  'worklet'
+  const start = 0.75
+  if (progress <= start || progress >= 1) return 0
+  const tail = (progress - start) / (1 - start)
+  return distance * 0.8 * tail * tail * (1 - tail)
 }
 
 /** Resist overscroll progressively while keeping movement continuous at the edge. */

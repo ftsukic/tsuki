@@ -50,6 +50,12 @@ export const OVERLAY_PRESETS = {
 
 export const GESTURE_PRESET = { mode: 'spring' as const, ...MOTION_SPRING.responsive }
 export const MAGNETIC_PRESET = { mode: 'spring' as const, ...MOTION_SPRING.magnetic }
+// Critical damping keeps row settlement decisive without oscillation.
+export const SWIPE_SNAP_PRESET = {
+  mode: 'spring' as const,
+  ...MOTION_SPRING.magnetic,
+  damping: 2 * Math.sqrt(MOTION_SPRING.magnetic.stiffness * MOTION_SPRING.magnetic.mass),
+}
 export const FEEDBACK_PRESETS = {
   spin: {
     mode: 'timing' as const,

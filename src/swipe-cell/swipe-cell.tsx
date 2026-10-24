@@ -11,7 +11,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import type { GestureResponderEvent, LayoutChangeEvent, PressableProps } from 'react-native'
 import { GestureDetector, Gesture } from '../gesture'
 import Animated, {
@@ -27,17 +27,21 @@ import {
 } from '../motion/gesture'
 import { useMotionConfig } from '../motion/useMotionConfig'
 import { scheduleOnRN, scheduleOnUI } from 'react-native-worklets'
-import { getCellToken } from '../cell/token'
 import { Pressable } from '../pressable'
 import { useComponentToken } from '../theme'
 import { resolveStyles } from '../style'
 import { SwipeCellAction } from './swipe-cell-action'
 import { SwipeCellPressFeedback } from './press-feedback'
 import { SwipeCellActionMotion } from './swipe-cell-action-motion'
+import {
+  resolveActionProgress,
+  resolveContentOffset,
+  resolveContentMotionOffset,
+  type SwipeCellContentMotion,
+} from './action-offset'
 import { getSwipeCellStyles } from './style'
 import { getSwipeCellToken } from './token'
-import { SwipeCellGroupContext, SwipeCellPressContext, useSwipeCellManager } from './context'
-import type { SwipeCellHandle } from './manager'
+import { SwipeCellGroupContext, SwipeCellPressContext } from './context'
 import type {
   SwipeCellActionItem,
   SwipeCellActionProps,
@@ -132,8 +136,10 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     onRightActionPress,
     closeOnActionPress = true,
     overshoot = false,
+    contentDragLimit,
     style,
     styles,
+    onOpenStart,
     onOpen,
     onClose,
     testID,
@@ -142,19 +148,30 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   ref,
 ) {
   const token = useComponentToken('SwipeCell', getSwipeCellToken)
-  const cellToken = useComponentToken('Cell', getCellToken)
   const resolvedStyles = useMemo(() => getSwipeCellStyles(token), [token])
+  const limitContent = contentDragLimit !== undefined && Number.isFinite(contentDragLimit)
+  const contentLimit = limitContent ? Math.max(0, contentDragLimit) : 0
   const group = useContext(SwipeCellGroupContext)
-  const manager = useSwipeCellManager()
   const generatedId = useId()
   const cellId = explicitId ?? generatedId
+  const rootRef = useRef<View>(null)
   const translation = useSharedValue(0)
+  const contentMotion = useSharedValue<SwipeCellContentMotion>({
+    phase: 'idle',
+    start: 0,
+    target: 0,
+    carry: 0,
+  })
   const gestureStartX = useSharedValue(0)
   const gestureActive = useSharedValue(false)
+  const gestureGeneration = useSharedValue(0)
   const gestureWidths = useSharedValue({ left: 0, right: 0 })
   const feedbackTouchStart = useSharedValue({ x: 0, y: 0 })
   const feedbackCancelled = useSharedValue(false)
-  const contentFeedback = useRef(new SwipeCellPressFeedback()).current
+  const feedbackOrigin = useRef<{ x: number; y: number } | null>(null)
+  const contentFeedback = useRef(
+    new SwipeCellPressFeedback(() => phaseRef.current === 'closed'),
+  ).current
   const leftActionWidth = useSharedValue(0)
   const rightActionWidth = useSharedValue(0)
   const animationToken = useSharedValue(0)
@@ -196,10 +213,9 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
       const wasOpen = phaseRef.current !== 'closed'
       phaseRef.current = 'closed'
       setActionSide(null)
-      manager?.release(cellId)
       if (wasOpen) onClose?.()
     },
-    [animationToken, cellId, manager, onClose],
+    [animationToken, onClose],
   )
 
   const prepareGestureSettlement = useCallback(
@@ -214,34 +230,65 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   )
 
   const settleOnUI = useCallback(
-    (offset: number, side: SwipeCellSide | null) => {
+    (offset: number, side: SwipeCellSide | null, velocity?: number, fromGesture = false) => {
       'worklet'
       if (!mounted.value) return
+      if (!fromGesture) gestureGeneration.value += 1
       gestureActive.value = false
       const nextToken = animationToken.value + 1
       animationToken.value = nextToken
       cancelAnimation(translation)
+      const content = resolveContentMotionOffset(
+        translation.value,
+        leftActionWidth.value,
+        rightActionWidth.value,
+        limitContent ? contentLimit : undefined,
+        contentMotion.value,
+      )
+      contentMotion.value = {
+        phase: side ? 'opening' : 'closing',
+        start: translation.value,
+        target: offset,
+        carry:
+          content -
+          resolveContentOffset(
+            translation.value,
+            leftActionWidth.value,
+            rightActionWidth.value,
+            limitContent ? contentLimit : undefined,
+          ),
+      }
+      const completeSettlement = (finished?: boolean) => {
+        'worklet'
+        if (!finished || animationToken.value !== nextToken) return
+        if (side) scheduleOnRN(completeOpen, side, offset, nextToken)
+        else scheduleOnRN(completeClose, nextToken)
+      }
       scheduleOnRN(prepareGestureSettlement, side, nextToken)
       translation.value = snapSwipeCellOffset(
         offset,
         animationEnabled,
-        (finished) => {
-          'worklet'
-          if (!finished || animationToken.value !== nextToken) return
-          if (side) scheduleOnRN(completeOpen, side, offset, nextToken)
-          else scheduleOnRN(completeClose, nextToken)
-        },
+        completeSettlement,
         durationScale,
         token.animationDuration,
+        velocity,
+        translation.value,
+        limitContent,
       )
     },
     [
       animationEnabled,
+      contentLimit,
+      contentMotion,
+      leftActionWidth,
+      rightActionWidth,
+      limitContent,
       animationToken,
       completeClose,
       completeOpen,
       durationScale,
       gestureActive,
+      gestureGeneration,
       mounted,
       prepareGestureSettlement,
       token.animationDuration,
@@ -252,11 +299,12 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   const settleTo = useCallback(
     (offset: number, side: SwipeCellSide | null) => {
       setActionSide(null)
+      if (side) contentFeedback.cancel()
       if (side) phaseRef.current = 'opening'
       else if (phaseRef.current !== 'closed') phaseRef.current = 'closing'
-      scheduleOnUI(settleOnUI, offset, side)
+      scheduleOnUI(settleOnUI, offset, side, limitContent ? 0 : undefined)
     },
-    [settleOnUI],
+    [contentFeedback, limitContent, settleOnUI],
   )
 
   const syncOpenOffset = useCallback(
@@ -267,22 +315,19 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
       animationToken.value = nextToken
       const nextOffset = getOffset(side, width)
       translation.value = nextOffset
+      contentMotion.value = { phase: 'idle', start: nextOffset, target: nextOffset, carry: 0 }
       currentOffsetRef.current = nextOffset
     },
-    [animationToken, translation],
+    [animationToken, contentMotion, translation],
   )
 
-  const releaseOwnership = useCallback(() => {
-    manager?.release(cellId)
-  }, [cellId, manager])
-
   const close = useCallback(() => {
-    if (phaseRef.current === 'closing') return
+    if (phaseRef.current === 'closing' && !gestureActive.value) return
     pendingOpenRef.current = null
     openSideRef.current = null
     setActionSide(null)
     settleTo(0, null)
-  }, [settleTo])
+  }, [gestureActive, settleTo])
 
   const resolveOpenSide = useCallback((side: SwipeCellSide) => {
     if (getActionWidth(side, actionWidthsRef.current) > 0) return side
@@ -290,12 +335,10 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     return getActionWidth(fallback, actionWidthsRef.current) > 0 ? fallback : null
   }, [])
 
-  const handle = useMemo<SwipeCellHandle>(() => ({ id: cellId, close }), [cellId, close])
-
-  const claim = useCallback(() => {
-    manager?.claim(handle)
+  const notifyOpenStart = useCallback(() => {
+    onOpenStart?.()
     group?.requestOpen(cellId)
-  }, [cellId, group, handle, manager])
+  }, [cellId, group, onOpenStart])
 
   const open = useCallback(
     (side: SwipeCellSide = 'right') => {
@@ -304,7 +347,7 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         return
       }
 
-      claim()
+      notifyOpenStart()
       const resolvedSide = resolveOpenSide(side)
       if (!resolvedSide) {
         pendingOpenRef.current = side
@@ -318,7 +361,7 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         resolvedSide,
       )
     },
-    [claim, close, hasLeftAction, hasRightAction, resolveOpenSide, settleTo],
+    [notifyOpenStart, close, hasLeftAction, hasRightAction, resolveOpenSide, settleTo],
   )
 
   const handleActionLayout = useCallback(
@@ -346,15 +389,19 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     [gestureActive, leftActionWidth, rightActionWidth, settleTo, syncOpenOffset],
   )
 
-  const cancelContentFeedback = useCallback(() => contentFeedback.cancel(), [contentFeedback])
+  const cancelContentFeedback = useCallback(() => contentFeedback.move(), [contentFeedback])
   const endContentFeedback = useCallback(() => contentFeedback.end(), [contentFeedback])
 
-  const startGesture = useCallback(() => {
-    contentFeedback.cancel()
-    if (phaseRef.current === 'closing') phaseRef.current = 'open'
-    setActionSide(null)
-    claim()
-  }, [claim, contentFeedback])
+  const startGesture = useCallback(
+    (generation: number) => {
+      if (!mounted.value || gestureGeneration.value !== generation) return
+      contentFeedback.move()
+      if (phaseRef.current === 'closing') phaseRef.current = 'open'
+      setActionSide(null)
+      notifyOpenStart()
+    },
+    [mounted, gestureGeneration, notifyOpenStart, contentFeedback],
+  )
 
   const pan = useMemo(() => {
     const gesture = Gesture.Pan()
@@ -366,12 +413,34 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         gestureActive.value = true
         gestureWidths.value = { left: leftActionWidth.value, right: rightActionWidth.value }
         animationToken.value += 1
+        gestureGeneration.value += 1
         cancelAnimation(translation)
+        const content = resolveContentMotionOffset(
+          translation.value,
+          leftActionWidth.value,
+          rightActionWidth.value,
+          limitContent ? contentLimit : undefined,
+          contentMotion.value,
+        )
+        contentMotion.value = {
+          phase: 'dragging',
+          start: translation.value,
+          target: 0,
+          carry:
+            content -
+            resolveContentOffset(
+              translation.value,
+              leftActionWidth.value,
+              rightActionWidth.value,
+              limitContent ? contentLimit : undefined,
+            ),
+        }
         gestureStartX.value = translation.value
-        scheduleOnRN(startGesture)
+        scheduleOnRN(startGesture, gestureGeneration.value)
       })
       .onUpdate((event) => {
         'worklet'
+        if (!gestureActive.value) return
         translation.value = resolveSwipeOffset(
           gestureStartX.value + event.translationX,
           Math.max(gestureWidths.value.left, leftActionWidth.value),
@@ -381,7 +450,13 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
       })
       .onEnd((event, success) => {
         'worklet'
-        const offset = gestureStartX.value + event.translationX
+        if (!gestureActive.value) return
+        const offset = resolveSwipeOffset(
+          gestureStartX.value + event.translationX,
+          leftActionWidth.value,
+          rightActionWidth.value,
+          overshoot,
+        )
         const targetOffset = resolveSwipeTarget(
           offset,
           event.velocityX,
@@ -390,7 +465,18 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         )
         const target = success ? targetOffset : 0
         const side: SwipeCellSide | null = target > 0 ? 'left' : target < 0 ? 'right' : null
-        settleOnUI(target, side)
+        settleOnUI(target, side, success ? event.velocityX : 0, true)
+      })
+      .onFinalize(() => {
+        'worklet'
+        if (!gestureActive.value) return
+        const target = resolveSwipeTarget(
+          translation.value,
+          0,
+          leftActionWidth.value,
+          rightActionWidth.value,
+        )
+        settleOnUI(target, target > 0 ? 'left' : target < 0 ? 'right' : null, 0, true)
       })
 
     if (testID) gesture.withTestId(`${testID}-gesture`)
@@ -398,10 +484,14 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     return gesture
   }, [
     animationToken,
+    contentLimit,
+    contentMotion,
+    limitContent,
     startGesture,
     settleOnUI,
     gestureActive,
     gestureWidths,
+    gestureGeneration,
     gestureStartX,
     hasLeftAction,
     hasRightAction,
@@ -413,16 +503,31 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   ])
 
   const animatedContentStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translation.value }],
+    transform: [
+      {
+        translateX: resolveContentMotionOffset(
+          translation.value,
+          leftActionWidth.value,
+          rightActionWidth.value,
+          limitContent ? contentLimit : undefined,
+          contentMotion.value,
+        ),
+      },
+    ],
   }))
 
-  const handleContentPressIn = useCallback(() => {
-    manager?.closeOthers(cellId)
-  }, [cellId, manager])
+  const animatedOverlayStyle = useAnimatedStyle(() => {
+    const side = translation.value < 0 ? 'right' : 'left'
+    const width = side === 'right' ? rightActionWidth.value : leftActionWidth.value
+    return { opacity: Math.min(1, resolveActionProgress(translation.value, width, side)) }
+  })
 
   const handleContentPress = useCallback(() => {
+    if (contentFeedback.moved) return true
+    const dismiss = contentFeedback.dismissesPress || phaseRef.current !== 'closed'
     if (phaseRef.current === 'open' || phaseRef.current === 'opening') close()
-  }, [close])
+    return dismiss
+  }, [close, contentFeedback])
 
   const contentGesture = useMemo(() => {
     const cancelMovedFeedback = (x: number, y: number) => {
@@ -504,12 +609,16 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     return () => {
       mounted.value = false
       animationToken.value += 1
+      gestureGeneration.value += 1
       cancelAnimation(translation)
-      releaseOwnership()
     }
-  }, [animationToken, mounted, releaseOwnership, translation])
+  }, [animationToken, gestureGeneration, mounted, translation])
 
-  useImperativeHandle(ref, () => ({ open, close }), [close, open])
+  useImperativeHandle(
+    ref,
+    () => ({ open, close, measure: (callback) => rootRef.current?.measure(callback) }),
+    [close, open],
+  )
 
   const renderedLeftActions =
     leftActions !== undefined
@@ -534,8 +643,10 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
       onRightActionPress,
       closeOnActionPress,
       overshoot,
+      contentDragLimit,
       style,
       styles,
+      onOpenStart,
       onOpen,
       onClose,
       testID,
@@ -543,15 +654,13 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     state: { left: hasLeftAction, right: hasRightAction },
   })
 
-  const actionOwner = useMemo(() => ({ id: cellId }), [cellId])
+  const actionOwner = useMemo(() => ({}), [])
   const contentOwner = useMemo(
     () => ({
-      id: cellId,
-      onPressIn: handleContentPressIn,
       onPress: handleContentPress,
       feedback: contentFeedback,
     }),
-    [cellId, contentFeedback, handleContentPressIn, handleContentPress],
+    [contentFeedback, handleContentPress],
   )
 
   const renderedContent = (
@@ -564,16 +673,30 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         >
           <Pressable
             accessible={false}
-            onTouchStart={() => {
+            onStartShouldSetResponderCapture={() => phaseRef.current !== 'closed'}
+            onTouchStart={(event) => {
+              const x = event.nativeEvent?.pageX
+              const y = event.nativeEvent?.pageY
+              feedbackOrigin.current = Number.isFinite(x) && Number.isFinite(y) ? { x, y } : null
               contentFeedback.begin()
-              handleContentPressIn()
+            }}
+            onTouchMove={(event) => {
+              const origin = feedbackOrigin.current
+              if (!origin) return
+              if (
+                Math.abs(event.nativeEvent.pageX - origin.x) > SWIPE_PRESET.activationDistance ||
+                Math.abs(event.nativeEvent.pageY - origin.y) > SWIPE_PRESET.activationDistance
+              ) {
+                contentFeedback.move()
+              }
             }}
             onTouchEnd={endContentFeedback}
             onTouchCancel={endContentFeedback}
             onPress={handleContentPress}
+            onLongPress={handleContentPress}
             style={[resolvedStyles.content, semantic?.content]}
             pressStyle="background"
-            pressedBackgroundColor={cellToken.pressedBackgroundColor}
+            pressedBackgroundColor={token.pressedBackgroundColor}
             testID={testID ? `${testID}-content` : undefined}
           >
             {children}
@@ -584,9 +707,18 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   )
 
   return (
-    <View {...viewProps} testID={testID} style={[resolvedStyles.root, semantic?.root, style]}>
+    <View
+      {...viewProps}
+      ref={rootRef}
+      collapsable={false}
+      testID={testID}
+      style={[resolvedStyles.root, semantic?.root, style]}
+    >
       <SwipeCellPressContext.Provider value={actionOwner}>
-        <View pointerEvents="box-none" style={[resolvedStyles.actions, semantic?.actions]}>
+        <View
+          pointerEvents="box-none"
+          style={[resolvedStyles.actions, limitContent && { zIndex: 1 }, semantic?.actions]}
+        >
           {hasLeftAction ? (
             <View
               testID={testID ? `${testID}-left-action` : undefined}
@@ -599,20 +731,22 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
               {(Array.isArray(renderedLeftActions)
                 ? renderedLeftActions
                 : [renderedLeftActions]
-              ).map((action, index, items) => (
+              ).map((action, index) => (
                 <SwipeCellActionMotion
                   key={isValidElement(action) ? (action.key ?? index) : index}
                   side="left"
+                  layer={
+                    (Array.isArray(renderedLeftActions) ? renderedLeftActions.length : 1) - index
+                  }
                   translation={translation}
                   totalWidth={leftActionWidth}
-                  layer={items.length - index}
                 >
                   {action}
                 </SwipeCellActionMotion>
               ))}
             </View>
           ) : null}
-          <View style={{ flex: 1 }} />
+          <View pointerEvents="none" style={{ flex: 1 }} />
           {hasRightAction ? (
             <View
               testID={testID ? `${testID}-right-action` : undefined}
@@ -629,9 +763,9 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
                 <SwipeCellActionMotion
                   key={isValidElement(action) ? (action.key ?? index) : index}
                   side="right"
+                  layer={index + 1}
                   translation={translation}
                   totalWidth={rightActionWidth}
-                  layer={index + 1}
                 >
                   {action}
                 </SwipeCellActionMotion>
@@ -641,22 +775,23 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         </View>
       </SwipeCellPressContext.Provider>
       {renderedContent}
+      {limitContent ? (
+        <Animated.View
+          testID={testID ? `${testID}-content-overlay` : undefined}
+          pointerEvents="none"
+          accessible={false}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={[
+            StyleSheet.absoluteFill,
+            { backgroundColor: token.contentOverlayColor },
+            semantic?.contentOverlay,
+            animatedOverlayStyle,
+          ]}
+        />
+      ) : null}
     </View>
   )
 })
 
 SwipeCell.displayName = 'SwipeCell'
-
-export function useSwipeCellController() {
-  const manager = useSwipeCellManager()
-  const closeCurrent = useCallback(() => {
-    manager?.closeActive()
-  }, [manager])
-  return useMemo(
-    () => ({
-      closeCurrent,
-      closeCurrentSwipeCell: closeCurrent,
-    }),
-    [closeCurrent],
-  )
-}

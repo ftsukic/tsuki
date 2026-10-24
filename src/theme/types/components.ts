@@ -110,6 +110,8 @@ export interface NavbarToken {
 
 export interface SwipeCellToken {
   backgroundColor: string
+  pressedBackgroundColor?: string
+  contentOverlayColor?: string
   actionBackgroundColor: string
   actionDefaultBackgroundColor: string
   actionPrimaryBackgroundColor: string
