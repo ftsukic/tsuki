@@ -30,6 +30,10 @@ export default defineConfig({
   alias: {
     '@ftsukic/tsuki$': path.join(sourceRoot, 'index.ts'),
     'react-native$': path.join(__dirname, '.umi-patch/react-native.js'),
+    'react-native-gesture-handler/ReanimatedSwipeable$': path.join(
+      __dirname,
+      '.umi-patch/reanimated-swipeable.js',
+    ),
     'react-native-gesture-handler$': path.join(
       __dirname,
       '.umi-patch/react-native-gesture-handler.js',

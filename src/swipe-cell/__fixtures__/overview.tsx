@@ -63,7 +63,7 @@ export default function SwipeCellOverview() {
         },
         {
           Component: SwipeCellFlashListExample,
-          description: '展示 FlashList 回收 1000 条 SwipeCell 时的稳定 id 和滚动关闭。',
+          description: '展示 RNGH + FlashList 在无专用 Provider 下的单开、滚动关闭和回收重置。',
           id: 'flash-list',
           title: 'FlashList 1000 items',
         },

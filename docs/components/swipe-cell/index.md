@@ -45,7 +45,11 @@ import { SwipeCell, SwipeCellAction, SwipeCellGroup, useSwipeCellController } fr
 
 <code src="../../../src/swipe-cell/__fixtures__/examples/list.tsx" title="列表用法" description="展示列表滚动时通过控制 hook 关闭当前项。"></code>
 
-<code src="../../../src/swipe-cell/__fixtures__/examples/flash-list.tsx" title="FlashList 1000 条" description="展示 FlashList 回收大量 SwipeCell 时的稳定 id 和滚动关闭。"></code>
+<code src="../../../src/swipe-cell/__fixtures__/examples/flash-list.tsx" title="RNGH + FlashList 1000 条" description="独立的 RNGH 接入方案：无需 SwipeCellProvider，列表管理单开、滚动关闭和回收重置。"></code>
+
+此示例直接使用 RNGH `ReanimatedSwipeable` 和 Tsuki `SwipeCellAction`，不依赖 TsukiProvider 的 SwipeCell manager，也不代表当前公共 SwipeCell 已迁移。列表只保存一个当前展开项；触摸其他行、开始侧滑另一行或开始滚动时关闭旧项，保留目标点击。FlashList 复用行时通过稳定数据 id 创建新的归属记录，并在 layout effect 中 `reset()`，旧回调不再影响新数据；删除操作等待关闭完成后再移除数据。`keyExtractor` 保持稳定，不给 renderItem 内部强加数据 key。
+
+示例需要应用已有的 `GestureHandlerRootView`；不额外要求 SwipeCellProvider。点击列表以外的空白区域不会自动关闭。原生手势和回收效果需在 Expo Example 上验证，Dumi 的静态适配不作为手势验收依据。
 
 <code src="../../../src/swipe-cell/__fixtures__/examples/ref.tsx" title="Ref 控制" description="展示通过 ref 调用 open 和 close。"></code>
 
