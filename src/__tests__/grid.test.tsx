@@ -1,4 +1,4 @@
-import { Grid } from '..'
+import { ConfigProvider, Grid } from '..'
 import { fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet, View } from 'react-native'
 import { getDesignToken } from '../theme'
@@ -131,5 +131,81 @@ describe('Grid', () => {
     )
 
     expect(screen.getByTestId('custom-content')).toBeTruthy()
+  })
+})
+
+describe('Grid styles', () => {
+  it('uses theme typography and centers multiline labels', async () => {
+    const theme = { seed: { fontSize: 18, lineWidth: 2 } }
+    const token = getDesignToken(theme)
+    await render(
+      <ConfigProvider theme={theme}>
+        <Grid>
+          <Grid.Item testID="item" text={'第一行\n第二行'} />
+        </Grid>
+      </ConfigProvider>,
+    )
+    expect(StyleSheet.flatten(screen.getByText('第一行\n第二行').props.style)).toMatchObject({
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight,
+      textAlign: 'center',
+    })
+    expect(StyleSheet.flatten(screen.getByTestId('item').props.style).borderWidth).toBe(2)
+  })
+
+  it('uses natural text alignment when center is disabled', async () => {
+    await render(
+      <Grid center={false}>
+        <Grid.Item text={'第一行\n第二行'} />
+      </Grid>,
+    )
+    expect(StyleSheet.flatten(screen.getByText('第一行\n第二行').props.style).textAlign).toBe(
+      'auto',
+    )
+  })
+
+  it('draws shared borders once, including an incomplete final row', async () => {
+    await render(
+      <Grid columnNum={2}>
+        {[0, 1, 2].map((index) => (
+          <Grid.Item key={index} testID={`item-${index}`} text={index} />
+        ))}
+      </Grid>,
+    )
+    const styles = [0, 1, 2].map((index) =>
+      StyleSheet.flatten(screen.getByTestId(`item-${index}`).props.style),
+    )
+    expect(styles[0]).toMatchObject({ borderWidth: 1, borderTopWidth: 1, borderStartWidth: 1 })
+    expect(styles[1]).toMatchObject({ borderWidth: 1, borderTopWidth: 1, borderStartWidth: 0 })
+    expect(styles[2]).toMatchObject({ borderWidth: 1, borderTopWidth: 0, borderStartWidth: 1 })
+  })
+
+  it('preserves explicit border width overrides without gutters', async () => {
+    await render(
+      <Grid columnNum={1}>
+        <Grid.Item text="一" />
+        <Grid.Item testID="custom" text="二" style={{ borderWidth: 3 }} />
+      </Grid>,
+    )
+    const style = StyleSheet.flatten(screen.getByTestId('custom').props.style)
+    expect(style.borderWidth).toBe(3)
+    expect(style.borderTopWidth).toBeUndefined()
+    expect(style.borderStartWidth).toBeUndefined()
+  })
+
+  it('keeps complete borders with gutters and allows item style overrides', async () => {
+    await render(
+      <Grid columnNum={1} gutter={12}>
+        <Grid.Item testID="first" text="一" />
+        <Grid.Item testID="second" text="二" style={{ borderWidth: 3 }} />
+      </Grid>,
+    )
+    const first = StyleSheet.flatten(screen.getByTestId('first').props.style)
+    const second = StyleSheet.flatten(screen.getByTestId('second').props.style)
+    expect(first.borderWidth).toBe(1)
+    expect(first.borderTopWidth).toBeUndefined()
+    expect(first.borderStartWidth).toBeUndefined()
+    expect(second.borderWidth).toBe(3)
+    expect(second.borderTopWidth).toBeUndefined()
   })
 })

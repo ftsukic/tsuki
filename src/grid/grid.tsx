@@ -1,6 +1,6 @@
 import { Children, useMemo } from 'react'
 import { View } from 'react-native'
-import { GridContext } from './context'
+import { GridContext, GridItemIndexContext } from './context'
 import { GridItem } from './grid-item'
 import type { GridProps } from './types'
 
@@ -66,7 +66,7 @@ export function GridComponent({
                 paddingVertical: halfGutter,
               }}
             >
-              {item}
+              <GridItemIndexContext.Provider value={index}>{item}</GridItemIndexContext.Provider>
             </View>
           ))}
         </View>

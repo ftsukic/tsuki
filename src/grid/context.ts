@@ -9,6 +9,8 @@ export const defaultGridContext: GridContextValue = {
   square: false,
 }
 
+export const GridItemIndexContext = createContext<number | null>(null)
+
 const GridContext = createContext<GridContextValue>(defaultGridContext)
 
 export const useGridContext = () => useContext(GridContext)
