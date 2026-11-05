@@ -371,3 +371,30 @@ describe('Swipe', () => {
     timing.mockRestore()
   })
 })
+
+it.each([false, true])(
+  'applies both explicit Swipe dimensions in vertical=%s mode',
+  async (vertical) => {
+    await render(
+      <Swipe testID="sized" width={200} height={120} vertical={vertical}>
+        {slides(2)}
+      </Swipe>,
+    )
+    expect(StyleSheet.flatten(screen.getByTestId('sized').props.style)).toMatchObject({
+      width: 200,
+      height: 120,
+    })
+  },
+)
+
+it('lets Swipe root styles override explicit viewport dimensions', async () => {
+  await render(
+    <Swipe testID="sized" width={200} height={120} style={{ width: 240, height: 160 }}>
+      {slides()}
+    </Swipe>,
+  )
+  expect(StyleSheet.flatten(screen.getByTestId('sized').props.style)).toMatchObject({
+    width: 240,
+    height: 160,
+  })
+})

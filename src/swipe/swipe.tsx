@@ -510,7 +510,7 @@ const SwipeComponent = forwardRef<SwipeRef, SwipeProps>(function Swipe(
       testID={testID}
       {...viewProps}
       onLayout={handleLayout}
-      style={[resolvedStyles.root, semanticStyles?.root, style]}
+      style={[resolvedStyles.root, { width, height }, semanticStyles?.root, style]}
     >
       {content}
       {showIndicators &&
