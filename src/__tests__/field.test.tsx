@@ -17,7 +17,7 @@ import {
   Radio,
   Text,
 } from '..'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react-native'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { createRef, useState } from 'react'
 import { StyleSheet } from 'react-native'
 import * as Reanimated from 'react-native-reanimated'
@@ -1083,4 +1083,63 @@ describe('Field semantic structure', () => {
       ).toHaveLength(0)
     },
   )
+})
+
+describe('read-only Field selection controls', () => {
+  it.each(['switch', 'radio', 'checkbox'] as const)(
+    'blocks accessibility activation for %s without changing its appearance',
+    async (role) => {
+      const onChange = jest.fn()
+      const tree = (readOnly: boolean) =>
+        role === 'switch' ? (
+          <FieldSwitch readOnly={readOnly} onChange={onChange} />
+        ) : role === 'radio' ? (
+          <FieldRadio
+            readOnly={readOnly}
+            onChange={onChange}
+            options={[{ label: 'A', value: 'A' }]}
+          />
+        ) : (
+          <FieldCheckbox readOnly={readOnly} onChange={onChange}>
+            <Checkbox name="A">A</Checkbox>
+          </FieldCheckbox>
+        )
+      const view = await render(tree(false))
+      const normalStyle = StyleSheet.flatten(screen.getByRole(role).props.style)
+      await view.rerender(tree(true))
+      const control = screen.getByRole(role)
+      expect(control.props.accessibilityState.disabled).toBe(false)
+      expect(StyleSheet.flatten(control.props.style)).toEqual(normalStyle)
+      await act(() => control.props.onClick({ nativeEvent: {}, currentTarget: 1, target: 1 }))
+      expect(onChange).not.toHaveBeenCalled()
+      await view.rerender(tree(false))
+      await act(() =>
+        screen.getByRole(role).props.onClick({ nativeEvent: {}, currentTarget: 1, target: 1 }),
+      )
+      expect(onChange).toHaveBeenCalledTimes(1)
+    },
+  )
+
+  it('invalidates pending Switch confirmation when the Field becomes read-only', async () => {
+    let confirm: (allowed: boolean) => void = () => undefined
+    const beforeChange = jest.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          confirm = resolve
+        }),
+    )
+    const onChange = jest.fn()
+    const tree = (readOnly: boolean) => (
+      <FieldSwitch readOnly={readOnly} beforeChange={beforeChange} onChange={onChange} />
+    )
+    const view = await render(tree(false))
+    await act(() =>
+      screen.getByRole('switch').props.onClick({ nativeEvent: {}, currentTarget: 1, target: 1 }),
+    )
+    expect(beforeChange).toHaveBeenCalledTimes(1)
+    await view.rerender(tree(true))
+    await act(() => confirm(true))
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByRole('switch').props.accessibilityState.checked).toBe(false)
+  })
 })

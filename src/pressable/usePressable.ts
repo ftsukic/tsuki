@@ -2,6 +2,7 @@ import { useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { Platform } from 'react-native'
 import { SwipeCellPressContext } from '../swipe-cell/context'
 import { useSwipeCellPress } from '../swipe-cell/useSwipeCellPress'
+import { PressableReadOnlyContext } from './read-only-context'
 import { usePressHandler } from './usePressHandler'
 import type { PressableProps, PressableState } from './types'
 
@@ -21,7 +22,8 @@ export function usePressable({
   style,
   ...props
 }: PressableOptions) {
-  const isDisabled = disabled === true
+  const readOnly = useContext(PressableReadOnlyContext)
+  const isDisabled = disabled === true || readOnly
   const [active, setActive] = useState(false)
   const feedbackOwner = useContext(SwipeCellPressContext)?.feedback
   const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -106,12 +108,12 @@ export function usePressable({
       }
       notifyPress()
     }
-    props.onPressIn?.(event)
+    if (!readOnly) props.onPressIn?.(event)
   }
   const handlePressOut: NonNullable<typeof props.onPressOut> = (event) => {
     if (Platform.OS === 'web') feedbackOwner?.end()
     cancelFeedback()
-    props.onPressOut?.(event)
+    if (!readOnly) props.onPressOut?.(event)
   }
   const handleHoverIn: NonNullable<typeof props.onHoverIn> = (event) => {
     if (!isDisabled) setHovered(true)
@@ -129,7 +131,9 @@ export function usePressable({
     hostProps: {
       ...props,
       accessibilityRole: accessibilityRole ?? (onPress ? 'button' : undefined),
-      disabled: isDisabled,
+      // Read-only suppresses activation without changing the public disabled semantics.
+      disabled: disabled === true,
+      onLongPress: readOnly ? undefined : props.onLongPress,
       onPress: handlePress,
       onPressIn: handlePressIn,
       onPressOut: handlePressOut,

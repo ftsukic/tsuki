@@ -1,3 +1,4 @@
+import { PressableReadOnlyContext } from '../pressable/read-only-context'
 import { getFieldAccessibility } from './accessibility'
 import type { ReactNode } from 'react'
 import type { DimensionValue } from 'react-native'
@@ -104,22 +105,24 @@ export function FieldSwitch<const ActiveValueT = boolean, const InactiveValueT =
       titleExtra={titleExtra}
       description={description}
       value={
-        <Switch
-          {...switchProps}
-          {...getFieldAccessibility(props)}
-          value={value}
-          defaultValue={defaultValue}
-          activeValue={activeValue}
-          inactiveValue={inactiveValue}
-          loading={loading}
-          disabled={disabled}
-          onPress={switchOnPress}
-          onChange={onChange}
-          beforeChange={beforeChange}
-          pointerEvents={readOnly ? 'none' : pointerEvents}
-          style={[semantic?.control, switchStyle]}
-          styles={switchStyles}
-        />
+        <PressableReadOnlyContext.Provider value={readOnly === true}>
+          <Switch
+            {...switchProps}
+            {...getFieldAccessibility(props)}
+            value={value}
+            defaultValue={defaultValue}
+            activeValue={activeValue}
+            inactiveValue={inactiveValue}
+            loading={loading}
+            disabled={disabled}
+            onPress={switchOnPress}
+            onChange={onChange}
+            beforeChange={beforeChange}
+            pointerEvents={readOnly ? 'none' : pointerEvents}
+            style={[semantic?.control, switchStyle]}
+            styles={switchStyles}
+          />
+        </PressableReadOnlyContext.Provider>
       }
       valueExtra={valueExtra}
       trailing={trailing}

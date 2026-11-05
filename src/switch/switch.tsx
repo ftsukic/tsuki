@@ -1,6 +1,7 @@
-import { forwardRef, useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useContext, useLayoutEffect, useRef, useState } from 'react'
 import { useMotionValue } from '../motion/useMotionValue'
 import { STATE_PRESET, LAYOUT_PRESET } from '../motion/presets'
+import { PressableReadOnlyContext } from '../pressable/read-only-context'
 import { Pressable } from '../pressable'
 import { resolveStyles } from '../style'
 import { useComponentToken } from '../theme'
@@ -31,6 +32,7 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
   }: SwitchProps<ActiveValueT, InactiveValueT>,
   ref: React.ForwardedRef<SwitchRef>,
 ) {
+  const readOnly = useContext(PressableReadOnlyContext)
   const token = useComponentToken('Switch', getSwitchToken)
   const resolvedSize = resolveSwitchSize(size)
   const isControlled = value !== undefined
@@ -40,8 +42,16 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
   const currentValue = isControlled ? (value as ActiveValueT | InactiveValueT) : uncontrolledValue
   const active = Object.is(currentValue, activeValue)
   const beforeChangeRequestRef = useRef(0)
-  const latest = useRef({ active, currentValue, disabled, loading, isControlled, onChange })
-  latest.current = { active, currentValue, disabled, loading, isControlled, onChange }
+  const latest = useRef({
+    active,
+    currentValue,
+    disabled,
+    readOnly,
+    loading,
+    isControlled,
+    onChange,
+  })
+  latest.current = { active, currentValue, disabled, readOnly, loading, isControlled, onChange }
 
   useLayoutEffect(() => {
     // A value that changes away and back must still invalidate the old confirmation.
@@ -49,7 +59,7 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
     return () => {
       beforeChangeRequestRef.current += 1
     }
-  }, [currentValue, activeValue, inactiveValue, disabled, loading, isControlled])
+  }, [currentValue, activeValue, inactiveValue, disabled, readOnly, loading, isControlled])
   const translateProgress = useMotionValue(active ? 1 : 0, STATE_PRESET, active ? 1 : 0)
   const trackProgress = useMotionValue(
     active ? 1 : 0,
@@ -57,7 +67,7 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
     active ? 1 : 0,
   )
   const handlePress = useCallback(() => {
-    if (disabled || loading) return
+    if (disabled || readOnly || loading) return
 
     const requestId = ++beforeChangeRequestRef.current
     onPress?.()
@@ -70,6 +80,7 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
         allowed === false ||
         requestId !== beforeChangeRequestRef.current ||
         current.disabled ||
+        current.readOnly ||
         current.loading ||
         !Object.is(current.currentValue, sourceValue)
       )
@@ -90,7 +101,7 @@ function SwitchComponent<ActiveValueT = boolean, InactiveValueT = boolean>(
     }
 
     void result.then(commit, () => undefined)
-  }, [activeValue, beforeChange, disabled, inactiveValue, loading, onPress])
+  }, [activeValue, beforeChange, disabled, inactiveValue, loading, onPress, readOnly])
 
   const switchProps = {
     ...pressableProps,

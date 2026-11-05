@@ -1,3 +1,4 @@
+import { PressableReadOnlyContext } from '../pressable/read-only-context'
 import { getFieldAccessibility } from './accessibility'
 import type { ReactNode } from 'react'
 import type { DimensionValue } from 'react-native'
@@ -93,24 +94,26 @@ export function FieldRadio(props: FieldRadioProps) {
       titleExtra={titleExtra}
       description={description}
       value={
-        <Radio.Group
-          {...groupProps}
-          {...getFieldAccessibility(props)}
-          style={[{ minWidth: 0, flexShrink: 1 }, semantic?.control]}
-          options={options}
-          value={currentValue}
-          onChange={setValue}
-          disabled={disabled}
-          variant={variant}
-          buttonVariant={buttonVariant}
-          direction={direction}
-          gap={gap}
-          buttonLayout={buttonLayout ?? 'equal'}
-          buttonColumns={buttonColumns}
-          pointerEvents={readOnly ? 'none' : groupProps.pointerEvents}
-        >
-          {children}
-        </Radio.Group>
+        <PressableReadOnlyContext.Provider value={readOnly === true}>
+          <Radio.Group
+            {...groupProps}
+            {...getFieldAccessibility(props)}
+            style={[{ minWidth: 0, flexShrink: 1 }, semantic?.control]}
+            options={options}
+            value={currentValue}
+            onChange={setValue}
+            disabled={disabled}
+            variant={variant}
+            buttonVariant={buttonVariant}
+            direction={direction}
+            gap={gap}
+            buttonLayout={buttonLayout ?? 'equal'}
+            buttonColumns={buttonColumns}
+            pointerEvents={readOnly ? 'none' : groupProps.pointerEvents}
+          >
+            {children}
+          </Radio.Group>
+        </PressableReadOnlyContext.Provider>
       }
       valueExtra={valueExtra}
       trailing={trailing}
