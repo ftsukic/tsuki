@@ -137,7 +137,7 @@ Interaction 当前仅保留协调和 responder；`interactionId` 与 SwipeCell �
 
 公共 usePanGesture 统一为 RNGH：使用 direction 而非 axis，返回 gesture、translateX、translateY、progress 而非 panHandlers。删除 useGesturePan、GesturePanOptions、GesturePanResult 与 responder 专属类型；公共参数和返回类型统一为 UsePanGestureOptions / UsePanGestureResult。
 
-```tsx | pure
+```tsx
 import { usePanGesture } from '@ftsukic/tsuki'
 import type { UsePanGestureOptions, UsePanGestureResult } from '@ftsukic/tsuki'
 

@@ -8,7 +8,7 @@
 
 ## 当前状态
 
-当前版本已完成仓库、组件包、dumi 文档 H5 预览，并实现首轮 TsukiProvider、Theme、Button、Cell、Grid、Input、Icon、Loading、Skeleton、Radio、Avatar、Badge、Portal、Overlay、Popup、Dialog、Toast 和 Notify。文档使用 `dumi-theme-mobile`、`react-native-web` 和源码同目录 `__fixtures__`，不接入 Expo Snack。
+当前仓库包含 Markdown 组件文档和独立 Expo 预览应用，并实现 TsukiProvider、Theme、Button、Cell、Grid、Input、Icon、Loading、Skeleton、Radio、Avatar、Badge、Portal、Overlay、Popup、Dialog、Toast 和 Notify。组件文档链接到源码同目录的 canonical `__fixtures__`，不接入 Expo Snack。
 
 计划中的基础组件包括：
 
@@ -23,7 +23,7 @@
 
 ```text
 src/                         # 组件源码与 canonical fixtures
-docs/                        # Dumi 文档
+docs/                        # Markdown 文档
 example/                     # 独立 Expo 原生预览应用
 scripts/                     # 仓库脚本
 ```
@@ -37,10 +37,11 @@ yarn typecheck
 yarn lint
 yarn test
 yarn format:check
-yarn docs:dev
 ```
 
-`example` 是使用 Expo Router 的独立预览应用，直接引用根目录 `src`。首页支持组件搜索和系统 / 浅色 / 深色主题切换，组件详情位于 `/components/[id]`，键盘实验位于 `/labs/keyboard-chat`。根布局统一接入 Tsuki `TsukiProvider`（主题、手势、Safe Area、Portal）和 `KeyboardProvider`，所有组件页面继续复用 canonical Fixture。运行 `yarn example:dev` 后可在 Expo Go 或 development build 中检查原生行为；Dumi H5 文档使用 `react-native-web` 渲染源码旁的同一批 fixtures。
+组件文档位于 [文档首页](docs/index.md)、[快速开始](docs/guide/index.md) 和 [组件索引](docs/components/index.md)。
+
+`example` 是使用 Expo Router 的独立预览应用，直接引用根目录 `src`。首页支持组件搜索和系统 / 浅色 / 深色主题切换，组件详情位于 `/components/[id]`，键盘实验位于 `/labs/keyboard-chat`。根布局统一接入 Tsuki `TsukiProvider`（主题、手势、Safe Area、Portal）和 `KeyboardProvider`，所有组件页面继续复用 canonical Fixture。运行 `yarn example:dev` 后可在 Expo Go 或 development build 中检查原生行为。
 
 使用手势组件或 UI thread 动画时，请参考 [快速开始](docs/guide/index.md) 安装 `react-native-gesture-handler`、`react-native-reanimated` 和 `react-native-worklets`。业务 App 可以自行提供对应 root，也可以在应用入口使用 `TsukiProvider` 的 `gesture` / `safeArea` capability；已有外部 root 时保持对应选项默认值即可。
 

@@ -1,25 +1,10 @@
----
-title: Theme
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 主题
-  order: 3
----
-
 # Theme
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Theme 使用 `SeedToken → MappingAlgorithm → MapToken → AliasToken` 四层模型，输出适合 React Native 的绝对行高、毫秒动画和 Vant 移动端间距。组件自己的尺寸和视觉语义仍由 Component Token 派生。
 
-</section>
-
-<code src="../../../src/theme/__fixtures__/overview.tsx" title="组件预览"></code>
+- **基础示例** [示例源码](../../../src/theme/__fixtures__/overview.tsx)
 
 示例同步展示当前传入的 `mode`、`seed`、`token` 和 `components` 配置，以及解析后的关键全局 token 与 Button 参数；切换明暗主题后数值随之更新。
 

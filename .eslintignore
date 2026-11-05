@@ -1,5 +1,3 @@
 **/lib/**
 **/dist/**
-**/.dumi/**
-**/.umi/**
 node_modules/**

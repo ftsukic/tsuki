@@ -1,51 +1,36 @@
----
-title: FloatingBubble 悬浮气泡
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # FloatingBubble 悬浮气泡
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 FloatingBubble 是一个通过 Portal 挂载到宿主浮层区域的悬浮操作气泡，默认位于右下区域，支持拖动、方向限制、边界磁吸、安全区和受控位置。
 
-</section>
-
-<code src="../../../src/floating-bubble/__fixtures__/overview.tsx" title="组件预览" description="FloatingBubble 的定位、拖动、磁吸、受控、自定义内容、安全区和主题预览。"></code>
+- **基础示例**：FloatingBubble 的定位、拖动、磁吸、受控、自定义内容、安全区和主题预览。 [示例源码](../../../src/floating-bubble/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { FloatingBubble, Icon } from '@ftsukic/tsuki'
 ```
 
-## 代码演示
+## 示例源码
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/basic.tsx" title="基础用法" description="默认右下定位和点击反馈。"></code>
+- **基础用法**：默认右下定位和点击反馈。 [示例源码](../../../src/floating-bubble/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/axis.tsx" title="拖动方向" description="展示横向、纵向、自由拖动和锁定。"></code>
+- **拖动方向**：展示横向、纵向、自由拖动和锁定。 [示例源码](../../../src/floating-bubble/__fixtures__/examples/axis.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/magnetic.tsx" title="横向磁吸" description="松手吸附到最近的左右边界。"></code>
+- **横向磁吸**：松手吸附到最近的左右边界。 [示例源码](../../../src/floating-bubble/__fixtures__/examples/magnetic.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/controlled.tsx" title="受控位置" description="使用 offset 和 onOffsetChange 持有最终坐标。"></code>
+- **受控位置**：使用 offset 和 onOffsetChange 持有最终坐标。 [示例源码](../../../src/floating-bubble/__fixtures__/examples/controlled.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/custom.tsx" title="自定义内容" description="使用 children 和自定义尺寸。"></code>
+- **自定义内容**：使用 children 和自定义尺寸。 [示例源码](../../../src/floating-bubble/__fixtures__/examples/custom.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/safe-area.tsx" title="安全区" description="避开顶部和底部系统安全区。"></code>
+- **安全区**：避开顶部和底部系统安全区。 [示例源码](../../../src/floating-bubble/__fixtures__/examples/safe-area.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/theme.tsx" title="主题定制" description="覆盖 FloatingBubble token 和 semantic styles。"></code>
+- **主题定制**：覆盖 FloatingBubble token 和 semantic styles。 [示例源码](../../../src/floating-bubble/__fixtures__/examples/theme.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/semantic.tsx" title="语义样式" description="分别定制气泡、内容和图标区域，以及拖动状态。"></code>
+- **语义样式**：分别定制气泡、内容和图标区域，以及拖动状态。 [示例源码](../../../src/floating-bubble/__fixtures__/examples/semantic.tsx)
 
-<code src="../../../src/floating-bubble/__fixtures__/examples/motion.tsx" title="动画策略" description="统一控制按压反馈和磁吸动画。"></code>
+- **动画策略**：统一控制按压反馈和磁吸动画。 [示例源码](../../../src/floating-bubble/__fixtures__/examples/motion.tsx)
 
 ## API
 
@@ -69,7 +54,7 @@ import { FloatingBubble, Icon } from '@ftsukic/tsuki'
 
 组件继承 React Native `PressableProps`，但自行管理 `children` 和 `style`；`disabled` 会同时禁用点击和拖动，`accessibilityRole` 默认是 `button`。图标型气泡应提供 `accessibilityLabel`：
 
-```tsx | pure
+```tsx
 <FloatingBubble accessibilityLabel="打开客服" onPress={openSupport}>
   <Icon name="CustomerServiceOutlined" size={24} />
 </FloatingBubble>

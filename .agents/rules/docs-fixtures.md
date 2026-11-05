@@ -2,7 +2,7 @@
 
 ## Canonical examples
 
-- `src/<component>/__fixtures__/` 是 canonical example source。Dumi 和 Expo Example 应复用同一份 Fixture，不要维护分离的 demo implementation。
+- `src/<component>/__fixtures__/` 是 canonical example source。Markdown 文档链接到同一份 Fixture，Expo Example 也复用它，不要维护分离的 demo implementation。
 - 通常使用以下结构：
 
   ```text
@@ -20,8 +20,8 @@
 ## Component documentation
 
 - 使用 `docs/components/button/index.md` 作为结构参考，不要将不存在的章节机械套用到其他 component。
-- Public component 文档通常使用 `componentDoc: true` 和 `toc: false`，通过 `component-doc-intro` 介绍 component，并在该 component 属于 Dumi component-doc system 时提供 `overview.tsx` preview。
-- Markdown demo 使用每项一个 `<code src="..." title="..." description="..."></code>` 引用 runnable Fixture。不要用未运行的 code block 替代 interactive example，也不要在 MDX 中维护第二份 demo implementation。
+- Public component 文档使用普通 Markdown 标题、说明和 API 表格。
+- 示例用 Markdown 链接指向 canonical Fixture source，并在链接附近说明示例用途；不要复制维护第二份 demo implementation。
 - 文档必须描述实际的 public type、prop、default、behavior boundary、继承的 React Native prop、accessibility semantic、`style`/`styles` scope、theme token、不支持的 API，以及适用时的 compound API。
 - 覆盖适用的 public use case：basic usage、visual variant、size/layout、interaction state、disabled/loading/error boundary、compound component，以及 theme 或 semantic styles。不要虚构 component 没有实现的类别。
 - Example 必须反映当前 export 的 API，并展示有意义的 state 或 result change。保持 source、Fixture 和 docs contract 一致。

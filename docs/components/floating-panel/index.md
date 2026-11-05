@@ -1,58 +1,43 @@
----
-title: FloatingPanel 浮动面板
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # FloatingPanel 浮动面板
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 FloatingPanel 用于在视口顶部或底部展示可拖动面板，支持多个高度锚点、磁吸停靠、内容滚动、方向匹配的圆角和阴影。
 
-</section>
-
-<code src="../../../src/floating-panel/__fixtures__/overview.tsx" title="组件预览"></code>
+- **基础示例** [示例源码](../../../src/floating-panel/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { FloatingPanel, TsukiProvider } from '@ftsukic/tsuki'
 ```
 
 FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `TsukiProvider` 内：
 
-```tsx | pure
+```tsx
 <TsukiProvider>
   <App />
 </TsukiProvider>
 ```
 
-## 代码演示
+## 示例源码
 
-<code src="../../../src/floating-panel/__fixtures__/examples/basic.tsx" title="基础用法" description="默认从 100px 高度开始，拖动 header 浏览内容。"></code>
+- **基础用法**：默认从 100px 高度开始，拖动 header 浏览内容。 [示例源码](../../../src/floating-panel/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/floating-panel/__fixtures__/examples/anchors.tsx" title="自定义锚点" description="使用 height、anchors 和两个高度事件控制面板。"></code>
+- **自定义锚点**：使用 height、anchors 和两个高度事件控制面板。 [示例源码](../../../src/floating-panel/__fixtures__/examples/anchors.tsx)
 
-<code src="../../../src/floating-panel/__fixtures__/examples/content-draggable.tsx" title="仅拖动头部" description="关闭 contentDraggable 后，内容区域继续由 ScrollView 负责滚动。"></code>
+- **仅拖动头部**：关闭 contentDraggable 后，内容区域继续由 ScrollView 负责滚动。 [示例源码](../../../src/floating-panel/__fixtures__/examples/content-draggable.tsx)
 
-<code src="../../../src/floating-panel/__fixtures__/examples/magnetic.tsx" title="关闭磁吸" description="magnetic=false 时停留在边界内的任意高度。"></code>
+- **关闭磁吸**：magnetic=false 时停留在边界内的任意高度。 [示例源码](../../../src/floating-panel/__fixtures__/examples/magnetic.tsx)
 
-<code src="../../../src/floating-panel/__fixtures__/examples/disabled.tsx" title="禁用拖动" description="draggable=false 隐藏拖拽条并固定面板。"></code>
+- **禁用拖动**：draggable=false 隐藏拖拽条并固定面板。 [示例源码](../../../src/floating-panel/__fixtures__/examples/disabled.tsx)
 
-<code src="../../../src/floating-panel/__fixtures__/examples/safe-area.tsx" title="底部安全区" description="默认适配底部 safe-area inset，并且不改变锚点高度。"></code>
+- **底部安全区**：默认适配底部 safe-area inset，并且不改变锚点高度。 [示例源码](../../../src/floating-panel/__fixtures__/examples/safe-area.tsx)
 
-<code src="../../../src/floating-panel/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 FloatingPanel token 和 semantic styles 定制外观。"></code>
+- **主题定制**：通过 FloatingPanel token 和 semantic styles 定制外观。 [示例源码](../../../src/floating-panel/__fixtures__/examples/theme.tsx)
 
 <!-- prettier-ignore -->
-<code src="../../../src/floating-panel/__fixtures__/examples/top.tsx" title="顶部下拉" description="收起保留月份、星期标题和一周日期，下拉展开完整月历，高度跟随内容与安全区。"></code>
+- **顶部下拉**：收起保留月份、星期标题和一周日期，下拉展开完整月历，高度跟随内容与安全区。 [示例源码](../../../src/floating-panel/__fixtures__/examples/top.tsx)
 
 ## API
 

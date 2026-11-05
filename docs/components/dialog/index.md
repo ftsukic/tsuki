@@ -1,29 +1,14 @@
----
-title: Dialog 弹出框
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Dialog 弹出框
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Dialog 用于消息提示、操作确认和当前页面内的短交互。支持受控组件、命令式调用、异步关闭、自定义内容、遮罩和两种按钮风格。
 
-</section>
-
-<code src="../../../src/dialog/__fixtures__/overview.tsx" title="组件预览"></code>
+- **基础示例** [示例源码](../../../src/dialog/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import {
   ConfigProvider,
   Dialog,
@@ -36,7 +21,7 @@ import {
 
 命令式 API 和受控 Dialog 需要 `PortalHost`。可以直接组合 `ConfigProvider` 和 `PortalHost`：
 
-```tsx | pure
+```tsx
 <ConfigProvider>
   <PortalHost>
     <App />
@@ -46,27 +31,27 @@ import {
 
 应用也可以使用同时提供主题和 Portal 宿主的 `TsukiProvider`；它是上述组合的便捷入口。
 
-## 代码演示
+## 示例源码
 
-<code src="../../../src/dialog/__fixtures__/examples/basic.tsx" title="基础提示" description="showDialog 默认只展示确认按钮。"></code>
+- **基础提示**：showDialog 默认只展示确认按钮。 [示例源码](../../../src/dialog/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/confirm.tsx" title="确认框" description="showConfirmDialog 增加取消按钮并通过 Promise 区分结果。"></code>
+- **确认框**：showConfirmDialog 增加取消按钮并通过 Promise 区分结果。 [示例源码](../../../src/dialog/__fixtures__/examples/confirm.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/controlled.tsx" title="受控组件" description="使用 show 和 onShowChange 管理 Dialog 的显示状态。"></code>
+- **受控组件**：使用 show 和 onShowChange 管理 Dialog 的显示状态。 [示例源码](../../../src/dialog/__fixtures__/examples/controlled.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/custom.tsx" title="自定义内容" description="使用 ReactNode 标题、children 正文和 footer 自定义底部。"></code>
+- **自定义内容**：使用 ReactNode 标题、children 正文和 footer 自定义底部。 [示例源码](../../../src/dialog/__fixtures__/examples/custom.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/before-close.tsx" title="异步关闭" description="beforeClose 可以阻止关闭并在检查期间显示按钮 loading。"></code>
+- **异步关闭**：beforeClose 可以阻止关闭并在检查期间显示按钮 loading。 [示例源码](../../../src/dialog/__fixtures__/examples/before-close.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/round.tsx" title="圆角按钮" description="theme 为 round-button 时使用圆角操作按钮。"></code>
+- **圆角按钮**：theme 为 round-button 时使用圆角操作按钮。 [示例源码](../../../src/dialog/__fixtures__/examples/round.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/interactions.tsx" title="遮罩与禁用" description="展示遮罩关闭和按钮禁用行为。"></code>
+- **遮罩与禁用**：展示遮罩关闭和按钮禁用行为。 [示例源码](../../../src/dialog/__fixtures__/examples/interactions.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/layout.tsx" title="内容布局" description="分别展示仅标题、仅正文和标题加正文三种默认布局。"></code>
+- **内容布局**：分别展示仅标题、仅正文和标题加正文三种默认布局。 [示例源码](../../../src/dialog/__fixtures__/examples/layout.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 Dialog token 和 semantic styles 定制视觉。"></code>
+- **主题定制**：通过 Dialog token 和 semantic styles 定制视觉。 [示例源码](../../../src/dialog/__fixtures__/examples/theme.tsx)
 
-<code src="../../../src/dialog/__fixtures__/examples/keyboard.tsx" title="输入框与键盘避让"></code>
+- **输入框与键盘避让** [示例源码](../../../src/dialog/__fixtures__/examples/keyboard.tsx)
 
 开启 `keyboardAvoiding` 后，面板在键盘上方的可用区域布局，遮罩仍覆盖整个宿主。居中面板仅在底部被键盘遮挡时上移，底部面板贴近键盘上沿，顶部面板保持顶部位置。避让使用独立的 Reanimated 位移，并采用键盘事件的时长。该能力位于 Portal 内；仅在页面外包裹 KeyboardAvoidingView 无法保证作用于弹层。
 
@@ -167,7 +152,7 @@ resetDialogDefaultOptions(): void
 
 通过 `ConfigProvider` 的 `theme.components.Dialog` 配置面板、标题、正文、按钮、间距、动画和层级 token：
 
-```tsx | pure
+```tsx
 <ConfigProvider
   theme={{
     components: {

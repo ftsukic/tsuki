@@ -1,36 +1,31 @@
----
-title: 组件
-order: 1
----
-
 # 组件
 
 当前已实现：
 
-- [Avatar](/components/avatar)、[Badge](/components/badge)、[Tag](/components/tag)
-- [ActionSheet](/components/action-sheet)
-- [BottomBar](/components/bottom-bar)
-- [Button](/components/button)、[Cell](/components/cell)、[Dialog](/components/dialog)、[Divider](/components/divider)
-- [Checkbox](/components/checkbox)
-- [Collapse](/components/collapse)
-- [DatePicker](/components/date-picker)、[TimePicker](/components/time-picker)、[DateTimePicker](/components/date-time-picker)
-- [Dropdown](/components/dropdown)
-- [Empty](/components/empty)
-- [Field](/components/field)、[Input](/components/input)
-- [Flex](/components/flex)、[FloatingBubble](/components/floating-bubble)、[FloatingPanel](/components/floating-panel)、[Grid](/components/grid)、[Layout](/components/layout)、[Space](/components/space)
-- [Icon](/components/icon)、[Loading](/components/loading)
-- [ImagePreview](/components/image-preview)
-- [Slider](/components/slider)
-- [Skeleton](/components/skeleton)
-- [Navbar](/components/navbar)
-- [NoticeBar](/components/notice-bar)、[Notify](/components/notify)
-- [Overlay](/components/overlay)、[Popup](/components/popup)、[Portal](/components/portal)
-- [Popover](/components/popover)
-- [Picker](/components/picker)、[PickerGroup](/components/picker-group)、[Progress](/components/progress)、[TsukiProvider](/components/provider)、[Radio](/components/radio)
-- [Segmented](/components/segmented)、[Surface](/components/surface)
-- [Search](/components/search)、[Tabs](/components/tabs)、[Text](/components/text)、[Theme](/components/theme)、[Toast](/components/toast)
-- [SwipeCell](/components/swipe-cell)
-- [Swipe](/components/swipe)
-- [Switch](/components/switch)、[Watermark](/components/watermark)
+- [Avatar](./avatar/index.md)、[Badge](./badge/index.md)、[Tag](./tag/index.md)
+- [ActionSheet](./action-sheet/index.md)
+- [BottomBar](./bottom-bar/index.md)
+- [Button](./button/index.md)、[Cell](./cell/index.md)、[Dialog](./dialog/index.md)、[Divider](./divider/index.md)
+- [Checkbox](./checkbox/index.md)
+- [Collapse](./collapse/index.md)
+- [DatePicker](./date-picker/index.md)、[TimePicker](./time-picker/index.md)、[DateTimePicker](./date-time-picker/index.md)
+- [Dropdown](./dropdown/index.md)
+- [Empty](./empty/index.md)
+- [Field](./field/index.md)、[Input](./input/index.md)
+- [Flex](./flex/index.md)、[FloatingBubble](./floating-bubble/index.md)、[FloatingPanel](./floating-panel/index.md)、[Grid](./grid/index.md)、[Layout](./layout/index.md)、[Space](./space/index.md)
+- [Icon](./icon/index.md)、[Loading](./loading/index.md)
+- [ImagePreview](./image-preview/index.md)
+- [Slider](./slider/index.md)
+- [Skeleton](./skeleton/index.md)
+- [Navbar](./navbar/index.md)
+- [NoticeBar](./notice-bar/index.md)、[Notify](./notify/index.md)
+- [Overlay](./overlay/index.md)、[Popup](./popup/index.md)、[Portal](./portal/index.md)
+- [Popover](./popover/index.md)
+- [Picker](./picker/index.md)、[PickerGroup](./picker-group/index.md)、[Progress](./progress/index.md)、[TsukiProvider](./provider/index.md)、[Radio](./radio/index.md)
+- [Segmented](./segmented/index.md)、[Surface](./surface/index.md)
+- [Search](./search/index.md)、[Tabs](./tabs/index.md)、[Text](./text/index.md)、[Theme](./theme/index.md)、[Toast](./toast/index.md)
+- [SwipeCell](./swipe-cell/index.md)
+- [Swipe](./swipe/index.md)
+- [Switch](./switch/index.md)、[Watermark](./watermark/index.md)
 
 每个组件页面都从 `src/<component>/__fixtures__` 加载可运行示例，并说明公开 Props、默认行为、边界、无障碍语义和主题定制方式。

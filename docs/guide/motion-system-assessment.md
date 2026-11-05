@@ -1,7 +1,3 @@
----
-title: Motion System 仓库评估
----
-
 # Motion System 仓库评估
 
 当前 Motion 使用现有 TsukiProvider / ThemeContext，按 Component → Preset → Primitive → Reanimated / RNGH 组织。直接统一当前设计，不维护旧版本别名或兼容参数分支。
@@ -24,7 +20,7 @@ title: Motion System 仓库评估
 | `src/motion/useCollapseMotion.ts` / `useCollapseMotion.native.ts` | Web 布局事件与原生 UI thread 测量 |
 | `src/motion/useFeedbackMotion.ts` / `gesture.ts` | 反馈动画与手势吸附 |
 
-组件及支持文件使用 kebab-case；Hook 使用 camelCase，同名文件承载同名 Hook；平台差异使用 `.native.ts`。Fixture 使用 `overview.tsx`、`style.ts` 与 `examples/<scenario>.tsx`，Dumi 与 Expo 复用相同场景文件。
+组件及支持文件使用 kebab-case；Hook 使用 camelCase，同名文件承载同名 Hook；平台差异使用 `.native.ts`。Fixture 使用 `overview.tsx`、`style.ts` 与 `examples/<scenario>.tsx`；Markdown 文档链接到同一份场景源码，Expo Example 也复用它。
 
 ## 当前接入
 
@@ -42,4 +38,4 @@ Popup 保持 Portal identity，面板和遮罩共享进度；组件时长继续�
 
 静态检查、Mock 测试、Web 构建和浏览器交互只能证明相应范围。iOS / Android 仍需原生构建与设备验证；仓库没有 Harmony 工程，需要宿主适配版本、HAP 与真实设备证据。
 
-Transition 的 slide 在尺寸测量完成后启动首次进入，退出卸载后重新测量。文档静态适配器单独使用 JavaScript 帧调度；正常 Web 与原生使用 Reanimated 驱动。
+Transition 的 slide 在尺寸测量完成后启动首次进入，退出卸载后重新测量；Web 与原生动画由 Reanimated 驱动，Markdown 文档链接到 canonical fixture 源码。

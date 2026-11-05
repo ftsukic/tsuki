@@ -1,17 +1,4 @@
----
-title: ImagePreview 图片预览
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # ImagePreview 图片预览
-
-<section className="component-doc-intro">
 
 ## 介绍
 
@@ -19,19 +6,17 @@ ImagePreview 使用稳定图片 ID 管理完整图片序列，支持虚拟分页
 
 图片数据独立于消息的挂载状态。消息列表回收单元不会删除预览图片；加载历史消息插入图片时，当前图片继续由 `activeId` 标识。缩略图位置通过可选的 `ImagePreview.Source` 登记。
 
-</section>
-
-<code src="../../../src/image-preview/__fixtures__/overview.tsx" title="组件预览" description="统一查看器的基础、自定义 adapter、手势和来源过渡示例。"></code>
+- **基础示例**：统一查看器的基础、自定义 adapter、手势和来源过渡示例。 [示例源码](../../../src/image-preview/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { ImagePreview } from '@ftsukic/tsuki'
 ```
 
 ## 组件族与来源
 
-```tsx | pure
+```tsx
 <TsukiProvider safeArea>
   <ImagePreview.Provider>
     <ImagePreview.Source imageId={item.id} disabled={!viewable} style={{ width: 96, height: 64 }}>
@@ -74,17 +59,17 @@ Provider 放在应用根 Portal 内、导航容器外，统一捕获来源注册
 - 纵向先移动图片内容，到顶部边界后继续向下才进入退出拖动；未达到关闭条件或父级拒绝关闭时恢复。
 - 工具栏透明度读取分页/退出进度，点击权限独立管理，不成为图片交互的前提。
 
-## 代码演示
+## 示例源码
 
-<code src="../../../src/image-preview/__fixtures__/examples/basic.tsx" title="基础用法" description="通过稳定图片 ID 选择图片，复用统一工具栏。"></code>
+- **基础用法**：通过稳定图片 ID 选择图片，复用统一工具栏。 [示例源码](../../../src/image-preview/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/image-preview/__fixtures__/examples/custom-renderer.tsx" title="自定义图片 adapter" description="同一个 adapter 负责图片渲染和邻页预加载。"></code>
+- **自定义图片 adapter**：同一个 adapter 负责图片渲染和邻页预加载。 [示例源码](../../../src/image-preview/__fixtures__/examples/custom-renderer.tsx)
 
-<code src="../../../src/image-preview/__fixtures__/examples/gesture.tsx" title="手势交互" description="横竖图切换、缩放、拖动、短拖恢复和下拉关闭。"></code>
+- **手势交互**：横竖图切换、缩放、拖动、短拖恢复和下拉关闭。 [示例源码](../../../src/image-preview/__fixtures__/examples/gesture.tsx)
 
-<code src="../../../src/image-preview/__fixtures__/examples/transition.tsx" title="缩略图过渡" description="正方形 cover 缩略图打开后仍按原图比例完整展示。"></code>
+- **缩略图过渡**：正方形 cover 缩略图打开后仍按原图比例完整展示。 [示例源码](../../../src/image-preview/__fixtures__/examples/transition.tsx)
 
-<code src="../../../src/image-preview/__fixtures__/examples/chat-messages.tsx" title="聊天网络图片 · 300 张" description="虚拟化消息列表、独立缩略图、完整预览序列与长按自定义 Popup。"></code>
+- **聊天网络图片 · 300 张**：虚拟化消息列表、独立缩略图、完整预览序列与长按自定义 Popup。 [示例源码](../../../src/image-preview/__fixtures__/examples/chat-messages.tsx)
 
 ## API
 

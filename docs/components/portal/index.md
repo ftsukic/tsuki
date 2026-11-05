@@ -1,29 +1,14 @@
----
-title: Portal 浮层宿主
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Portal 浮层宿主
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Portal 将内容渲染到当前 `PortalHost` 的宿主层，适合 Popup、Overlay、Dialog、Toast 等需要脱离页面布局的浮层。除了组件式 `Portal`，还提供用于命令式浮层的 `mountPortal`、`updatePortal` 和 `unmountPortal`。
 
-</section>
-
-<code src="../../../src/portal/__fixtures__/overview.tsx" title="组件预览"></code>
+- **基础示例** [示例源码](../../../src/portal/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import {
   ConfigProvider,
   Portal,
@@ -36,7 +21,7 @@ import {
 
 `TsukiProvider` 会自动挂载 `PortalHost`。需要自行组合主题和宿主时，使用 `ConfigProvider` 与 `PortalHost`：
 
-```tsx | pure
+```tsx
 <ConfigProvider>
   <PortalHost>
     <App />
@@ -44,11 +29,11 @@ import {
 </ConfigProvider>
 ```
 
-## 代码演示
+## 示例源码
 
-<code src="../../../src/portal/__fixtures__/examples/basic.tsx" title="组件式 Portal" description="使用 Portal 将内容渲染到宿主层。"></code>
+- **组件式 Portal**：使用 Portal 将内容渲染到宿主层。 [示例源码](../../../src/portal/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/portal/__fixtures__/examples/imperative.tsx" title="命令式挂载" description="使用 mountPortal、updatePortal 和 unmountPortal 管理动态内容。"></code>
+- **命令式挂载**：使用 mountPortal、updatePortal 和 unmountPortal 管理动态内容。 [示例源码](../../../src/portal/__fixtures__/examples/imperative.tsx)
 
 ## API
 
@@ -86,7 +71,7 @@ unmountPortal(key: PortalKey): void
 
 首次命令式调用需要等待宿主完成挂载：使用 `useEffect` 或后续点击事件，不要在 render、首次 `useLayoutEffect` 或首次 ref 回调中调用。需要在布局阶段显示内容时，使用组件式 `Portal`。命令式 entry 不会随调用方组件自动卸载，调用方应在 effect 清理中释放 key。
 
-```tsx | pure
+```tsx
 import { useEffect } from 'react'
 import { Text } from 'react-native'
 import { mountPortal, unmountPortal } from '@ftsukic/tsuki'
@@ -110,6 +95,6 @@ function StartupPortal() {
 
 ## 父级受控输入验证
 
-<code src="../../../src/portal/__fixtures__/examples/controlled-input.tsx" title="父级受控输入"></code>
+- **父级受控输入** [示例源码](../../../src/portal/__fixtures__/examples/controlled-input.tsx)
 
 Example 在 `EXPO_PUBLIC_TSUKI_PORTAL=teleport` 的原生构建中展示 Teleport 后端；默认运行时显示 JavaScript 后端。该示例将 value 保存在页面父级，用于验证中文拼音组合输入、父级赋值、清空与提交。

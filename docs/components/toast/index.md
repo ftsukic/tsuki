@@ -1,29 +1,14 @@
----
-title: Toast 轻提示
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Toast 轻提示
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Toast 用于反馈操作结果或展示短暂状态。支持受控组件、命令式调用、加载/成功/失败类型、位置、遮罩、点击行为和主题 token。
 
-</section>
-
-<code src="../../../src/toast/__fixtures__/overview.tsx" title="组件预览"></code>
+- **基础示例** [示例源码](../../../src/toast/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import {
   ConfigProvider,
   PortalHost,
@@ -48,19 +33,19 @@ import {
 
 应用也可以使用同时提供主题和 Portal 宿主的 `TsukiProvider`；它是上述组合的便捷入口。
 
-## 代码演示
+## 示例源码
 
-<code src="../../../src/toast/__fixtures__/examples/basic.tsx" title="基础类型" description="通过 text、loading、success 和 fail 展示不同语义的提示。"></code>
+- **基础类型**：通过 text、loading、success 和 fail 展示不同语义的提示。 [示例源码](../../../src/toast/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/toast/__fixtures__/examples/positions.tsx" title="位置" description="使用 position 将提示放在顶部、中间或底部。"></code>
+- **位置**：使用 position 将提示放在顶部、中间或底部。 [示例源码](../../../src/toast/__fixtures__/examples/positions.tsx)
 
-<code src="../../../src/toast/__fixtures__/examples/interactions.tsx" title="持续显示与交互" description="duration 为 0 时保持显示，可通过实例 close、closeToast、overlay 和 forbidClick 控制生命周期与触摸行为。"></code>
+- **持续显示与交互**：duration 为 0 时保持显示，可通过实例 close、closeToast、overlay 和 forbidClick 控制生命周期与触摸行为。 [示例源码](../../../src/toast/__fixtures__/examples/interactions.tsx)
 
-<code src="../../../src/toast/__fixtures__/examples/multiple.tsx" title="单例与多实例" description="默认复用当前提示，开启 allowMultipleToast 后可以同时展示多个提示。"></code>
+- **单例与多实例**：默认复用当前提示，开启 allowMultipleToast 后可以同时展示多个提示。 [示例源码](../../../src/toast/__fixtures__/examples/multiple.tsx)
 
-<code src="../../../src/toast/__fixtures__/examples/controlled.tsx" title="受控组件" description="直接使用 Toast，通过 show 和 onShowChange 管理显示状态。"></code>
+- **受控组件**：直接使用 Toast，通过 show 和 onShowChange 管理显示状态。 [示例源码](../../../src/toast/__fixtures__/examples/controlled.tsx)
 
-<code src="../../../src/toast/__fixtures__/examples/theme.tsx" title="主题定制" description="通过 ConfigProvider 的 Toast token 和 semantic styles 定制外观。"></code>
+- **主题定制**：通过 ConfigProvider 的 Toast token 和 semantic styles 定制外观。 [示例源码](../../../src/toast/__fixtures__/examples/theme.tsx)
 
 ## API
 

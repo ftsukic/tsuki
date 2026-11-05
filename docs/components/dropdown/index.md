@@ -1,49 +1,34 @@
----
-title: Dropdown 下拉菜单
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础组件
-  order: 1
----
-
 # Dropdown 下拉菜单
-
-<section className="component-doc-intro">
 
 ## 介绍
 
 Dropdown 用于在菜单栏下方或上方展开一个选项面板。它复用 Portal、OverlaySurface 和共享 motion 能力，支持 Vant 风格的 options、自定义内容、禁用状态、受控值、向上展开和 ref 控制。
 
-</section>
-
-<code src="../../../src/dropdown/__fixtures__/overview.tsx" title="组件预览" description="Dropdown 汇总基础、内容、禁用、方向和受控值示例。"></code>
+- **基础示例**：Dropdown 汇总基础、内容、禁用、方向和受控值示例。 [示例源码](../../../src/dropdown/__fixtures__/overview.tsx)
 
 ## 引入
 
-```tsx | pure
+```tsx
 import { DropdownItem, DropdownMenu, useBackgroundScrollLocked } from '@ftsukic/tsuki'
 ```
 
 组件需要放在 `PortalHost` 或 `TsukiProvider` 内；应用已经提供 Portal 宿主时不需要为每个 Dropdown 额外添加宿主。
 
-## 代码演示
+## 示例源码
 
-<code src="../../../src/dropdown/__fixtures__/examples/basic.tsx" title="基础用法" description="使用 options 生成排序面板，并组合自定义筛选面板。"></code>
+- **基础用法**：使用 options 生成排序面板，并组合自定义筛选面板。 [示例源码](../../../src/dropdown/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/dropdown/__fixtures__/examples/custom-content.tsx" title="自定义内容" description="children 存在时优先作为面板内容，并可以通过 DropdownItem ref 关闭。"></code>
+- **自定义内容**：children 存在时优先作为面板内容，并可以通过 DropdownItem ref 关闭。 [示例源码](../../../src/dropdown/__fixtures__/examples/custom-content.tsx)
 
-<code src="../../../src/dropdown/__fixtures__/examples/disabled.tsx" title="禁用状态" description="展示禁用菜单和禁用选项。"></code>
+- **禁用状态**：展示禁用菜单和禁用选项。 [示例源码](../../../src/dropdown/__fixtures__/examples/disabled.tsx)
 
-<code src="../../../src/dropdown/__fixtures__/examples/direction-up.tsx" title="向上展开" description="使用 direction up 将面板锚定在菜单上方。"></code>
+- **向上展开**：使用 direction up 将面板锚定在菜单上方。 [示例源码](../../../src/dropdown/__fixtures__/examples/direction-up.tsx)
 
-<code src="../../../src/dropdown/__fixtures__/examples/controlled.tsx" title="受控值" description="由外部状态控制 DropdownItem.value。"></code>
+- **受控值**：由外部状态控制 DropdownItem.value。 [示例源码](../../../src/dropdown/__fixtures__/examples/controlled.tsx)
 
-<code src="../../../src/dropdown/__fixtures__/examples/semantic.tsx" title="语义样式" description="单项标题、箭头、面板、选项图标和选中标记，以及打开期间的动态更新。"></code>
+- **语义样式**：单项标题、箭头、面板、选项图标和选中标记，以及打开期间的动态更新。 [示例源码](../../../src/dropdown/__fixtures__/examples/semantic.tsx)
 
-<code src="../../../src/dropdown/__fixtures__/examples/scroll-lock.tsx" title="背景滚动锁定" description="锁定背景列表，同时保留长选项列表与横向菜单的滚动。"></code>
+- **背景滚动锁定**：锁定背景列表，同时保留长选项列表与横向菜单的滚动。 [示例源码](../../../src/dropdown/__fixtures__/examples/scroll-lock.tsx)
 
 ## API
 
@@ -87,7 +72,7 @@ import { DropdownItem, DropdownMenu, useBackgroundScrollLocked } from '@ftsukic/
 
 ### DropdownOption
 
-```tsx | pure
+```tsx
 interface DropdownOption {
   text: ReactNode
   value: string | number
@@ -125,7 +110,7 @@ Web 自动锁定菜单所在页面与可滚动祖先，保留原有 overflow 样
 
 React Native 通过透明交互层阻断菜单之外的背景手势。宿主列表应在最近的 `PortalHost` / `TsukiProvider` **内部**使用 `useBackgroundScrollLocked()`，连接 `scrollEnabled`，停止背景列表自身的滚动能力；Portal 无法直接设置任意父列表的属性。
 
-```tsx | pure
+```tsx
 function Page() {
   const locked = useBackgroundScrollLocked()
   return (
@@ -143,7 +128,7 @@ function Page() {
 
 ## Ref API
 
-```tsx | pure
+```tsx
 const menuRef = useRef<DropdownMenuRef>(null)
 const itemRef = useRef<DropdownItemRef>(null)
 
@@ -162,7 +147,7 @@ ref 方法复用同一套 `DropdownMenu` 状态，不会创建第二套 visible 
 
 通过 `ConfigProvider` 的 `theme.components.Dropdown` 覆盖组件 token：
 
-```tsx | pure
+```tsx
 <ConfigProvider
   theme={{
     components: {

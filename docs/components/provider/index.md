@@ -1,25 +1,14 @@
----
-title: TsukiProvider 全局上下文
-componentDoc: true
-toc: false
-nav:
-  title: 组件
-group:
-  title: 基础设施
-  order: 2
----
-
 # TsukiProvider 全局上下文
 
-<code src="../../../src/provider/__fixtures__/overview.tsx" title="组件预览"></code>
+- **基础示例** [示例源码](../../../src/provider/__fixtures__/overview.tsx)
 
-## 代码演示
+## 示例源码
 
-<code src="../../../src/provider/__fixtures__/examples/basic.tsx" title="应用入口" description="TsukiProvider 组合主题和 Portal 宿主，为浮层组件提供运行上下文。"></code>
+- **应用入口**：TsukiProvider 组合主题和 Portal 宿主，为浮层组件提供运行上下文。 [示例源码](../../../src/provider/__fixtures__/examples/basic.tsx)
 
-<code src="../../../src/provider/__fixtures__/examples/gesture.tsx" title="默认手势根节点" description="TsukiProvider 默认通过 GestureHandlerRootView 为手势内容提供根节点。"></code>
+- **默认手势根节点**：TsukiProvider 默认通过 GestureHandlerRootView 为手势内容提供根节点。 [示例源码](../../../src/provider/__fixtures__/examples/gesture.tsx)
 
-<code src="../../../src/provider/__fixtures__/examples/safe-area.tsx" title="启用安全区根节点" description="通过 safeArea 选项为安全区内容提供 SafeAreaProvider。"></code>
+- **启用安全区根节点**：通过 safeArea 选项为安全区内容提供 SafeAreaProvider。 [示例源码](../../../src/provider/__fixtures__/examples/safe-area.tsx)
 
 TsukiProvider 组合 `SafeAreaProvider`、`GestureHandlerRootView`、`ConfigProvider`、`SwipeCellManager` 和 `PortalHost`。`GestureHandlerRootView` 默认启用，以便 SwipeCell 等手势组件开箱即用；通过 `gesture={false}` 可以显式关闭。通过 `theme` 传入全局主题配置，并使用 `children` 渲染应用内容。设置 `safeArea` 后，会增加对应的安全区根节点。
 
@@ -43,7 +32,7 @@ TsukiProvider 是推荐的应用级入口，会按可选 `SafeAreaProvider` → 
 
 默认使用 JS Portal，无需安装 Teleport。启用时安装 `react-native-teleport@^1.2.2`，从独立入口导入适配器：
 
-```tsx | pure
+```tsx
 import { TsukiProvider } from '@ftsukic/tsuki'
 import { teleportPortalBackend } from '@ftsukic/tsuki/teleport'
 
