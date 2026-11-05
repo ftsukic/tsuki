@@ -1,4 +1,4 @@
-import { ConfigProvider, Search } from '..'
+import { ConfigProvider, getDesignToken, Search } from '..'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { createRef } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
@@ -379,5 +379,26 @@ describe('Search', () => {
     } finally {
       jest.useRealTimers()
     }
+  })
+})
+
+it('uses theme typography for Search labels and preserves label overrides', async () => {
+  const theme = { seed: { fontSize: 24, fontFamily: 'monospace' } }
+  const token = getDesignToken(theme)
+  await render(
+    <ConfigProvider theme={theme}>
+      <Search label="主题标签" />
+      <Search label="自定义标签" styles={{ label: { fontSize: 18, lineHeight: 22 } }} />
+    </ConfigProvider>,
+  )
+  expect(StyleSheet.flatten(screen.getByText('主题标签').props.style)).toMatchObject({
+    fontSize: token.fontSize,
+    lineHeight: token.lineHeight,
+    fontFamily: token.fontFamily,
+  })
+  expect(StyleSheet.flatten(screen.getByText('自定义标签').props.style)).toMatchObject({
+    fontSize: 18,
+    lineHeight: 22,
+    fontFamily: token.fontFamily,
   })
 })

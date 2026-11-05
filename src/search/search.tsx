@@ -8,7 +8,8 @@ import { getSearchStyles } from './style'
 import { getSearchToken } from './token'
 import type { SearchInstance, SearchProps, SearchShape, SearchStyleState } from './types'
 import { forwardRef, useCallback, useEffect, useRef } from 'react'
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
+import { Text } from '../text'
 
 const SEARCH_DEFAULT_SHAPE: SearchShape = 'square'
 const SEARCH_DEFAULT_CLEARABLE = true
