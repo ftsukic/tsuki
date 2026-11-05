@@ -1,6 +1,7 @@
-import { View } from 'react-native-web'
+import { Pressable, View } from 'react-native-web'
 
 export const GestureHandlerRootView = View
+export { Pressable }
 
 function createGesture() {
   const gesture = {
