@@ -61,7 +61,7 @@ function getContrastTextColor(backgroundColor: ColorValue, token: AliasToken): C
   if (typeof backgroundColor !== 'string') return token.colorTextLightSolid
 
   try {
-    return new FastColor(backgroundColor).isDark() ? token.colorTextLightSolid : token.colorText
+    return new FastColor(backgroundColor).isDark() ? token.colorTextLightSolid : token.colorBlack
   } catch {
     return token.colorTextLightSolid
   }

@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react-native'
-import { ConfigProvider, getDesignToken, Tag } from '..'
+import { ConfigProvider, darkAlgorithm, getDesignToken, Tag } from '..'
 import { StyleSheet, Text } from 'react-native'
 
 function styleOf(testID: string) {
@@ -141,7 +141,7 @@ describe('Tag', () => {
       color: token.colorTextLightSolid,
     })
     expect(StyleSheet.flatten(screen.getByText('浅色').props.style)).toMatchObject({
-      color: token.colorText,
+      color: token.colorBlack,
     })
     expect(StyleSheet.flatten(screen.getByText('覆盖').props.style)).toMatchObject({
       color: '#ad0000',
@@ -237,4 +237,23 @@ describe('Tag', () => {
     expect(label.props.ellipsizeMode).toBe('tail')
     expect(screen.getByRole('button', { name: '关闭「很长的标签内容」' })).toBeTruthy()
   })
+})
+
+it('keeps custom Tag background contrast independent of the dark theme text color', async () => {
+  const theme = { algorithm: darkAlgorithm }
+  const token = getDesignToken(theme)
+  await render(
+    <ConfigProvider theme={theme}>
+      <Tag color="#ffffff">浅色背景</Tag>
+      <Tag color="#000000">深色背景</Tag>
+      <Tag color="#ffffff" textColor="#123456">
+        自定义文字
+      </Tag>
+    </ConfigProvider>,
+  )
+  expect(StyleSheet.flatten(screen.getByText('浅色背景').props.style).color).toBe(token.colorBlack)
+  expect(StyleSheet.flatten(screen.getByText('深色背景').props.style).color).toBe(
+    token.colorTextLightSolid,
+  )
+  expect(StyleSheet.flatten(screen.getByText('自定义文字').props.style).color).toBe('#123456')
 })
