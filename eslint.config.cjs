@@ -9,7 +9,7 @@ const testingLibrary = require('eslint-plugin-testing-library')
 
 module.exports = [
   {
-    ignores: ['**/lib/**', '**/dist/**', '**/.dumi/**', '**/.umi/**', '**/node_modules/**'],
+    ignores: ['**/lib/**', '**/dist/**', '**/node_modules/**'],
   },
   {
     files: ['**/*.{js,jsx,ts,tsx,cjs,mjs}'],
