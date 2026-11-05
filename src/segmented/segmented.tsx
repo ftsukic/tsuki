@@ -101,6 +101,24 @@ export const Segmented = forwardRef<ViewComponent, SegmentedProps>(function Segm
   )
   const isControlled = value !== undefined
   const activeValue = isControlled ? value : uncontrolledValue
+  const initialDefaultValue = useRef(defaultValue)
+  const initialSelectionResolved = useRef(uncontrolledValue !== undefined)
+  useEffect(() => {
+    if (isControlled) return
+    const selected = normalizedOptions.find((option) => Object.is(option.value, uncontrolledValue))
+    if (selected && !selected.disabled) {
+      initialSelectionResolved.current = true
+      return
+    }
+    const initialOption = !initialSelectionResolved.current
+      ? normalizedOptions.find(
+          (option) => Object.is(option.value, initialDefaultValue.current) && !option.disabled,
+        )
+      : undefined
+    const next = initialOption?.value ?? firstValue
+    if (next !== undefined) initialSelectionResolved.current = true
+    if (!Object.is(next, uncontrolledValue)) setUncontrolledValue(next)
+  }, [firstValue, isControlled, normalizedOptions, uncontrolledValue])
   const activeIndex = normalizedOptions.findIndex((option) => Object.is(option.value, activeValue))
   const [itemLayouts, setItemLayouts] = useState<readonly OptionLayout[]>([])
   const hasMeasuredActiveThumb = useRef(false)

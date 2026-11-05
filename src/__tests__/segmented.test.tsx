@@ -444,3 +444,46 @@ describe('Segmented', () => {
     expect(timing).not.toHaveBeenCalled()
   })
 })
+
+describe('Segmented option updates', () => {
+  it('resolves the initial default selection after options load without emitting a change', async () => {
+    const onChange = jest.fn()
+    const view = await render(<Segmented options={[]} defaultValue="B" onChange={onChange} />)
+    await view.rerender(<Segmented options={['A', 'B']} defaultValue="B" onChange={onChange} />)
+    expect(screen.getByRole('radio', { name: 'B' }).props.accessibilityState.selected).toBe(true)
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('falls back to the first enabled option when selection is removed or disabled', async () => {
+    const onChange = jest.fn()
+    const view = await render(
+      <Segmented options={['A', 'B']} defaultValue="B" onChange={onChange} />,
+    )
+    await view.rerender(<Segmented options={['A', 'C']} onChange={onChange} />)
+    expect(screen.getByRole('radio', { name: 'A' }).props.accessibilityState.selected).toBe(true)
+    await view.rerender(
+      <Segmented options={[{ label: 'A', value: 'A', disabled: true }, 'C']} onChange={onChange} />,
+    )
+    expect(screen.getByRole('radio', { name: 'C' }).props.accessibilityState.selected).toBe(true)
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('selects a newly loaded first option and keeps valid user selections across updates', async () => {
+    const view = await render(<Segmented options={[]} />)
+    await view.rerender(<Segmented options={['A', 'B']} />)
+    expect(screen.getByRole('radio', { name: 'A' }).props.accessibilityState.selected).toBe(true)
+    await press(screen.getByRole('radio', { name: 'B' }))
+    await view.rerender(<Segmented options={['C', 'B']} />)
+    expect(screen.getByRole('radio', { name: 'B' }).props.accessibilityState.selected).toBe(true)
+  })
+
+  it('leaves controlled selections to the caller when options change', async () => {
+    const onChange = jest.fn()
+    const view = await render(<Segmented value="B" options={['A', 'B']} onChange={onChange} />)
+    await view.rerender(<Segmented value="B" options={['A', 'C']} onChange={onChange} />)
+    expect(
+      screen.getAllByRole('radio').every((item) => !item.props.accessibilityState.selected),
+    ).toBe(true)
+    expect(onChange).not.toHaveBeenCalled()
+  })
+})
