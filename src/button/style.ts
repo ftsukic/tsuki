@@ -166,11 +166,13 @@ export function getButtonStyles(
         ? themeToken.colorBgContainer
         : 'transparent'
   const borderColor = customColor ?? colors.borderColor
-  const borderWidth = isBorderless
-    ? 0
-    : props.hairline
-      ? StyleSheet.hairlineWidth
-      : token.borderWidth
+  const borderWidth =
+    isBorderless || (state.disabled && isSolid)
+      ? 0
+      : props.hairline
+        ? StyleSheet.hairlineWidth
+        : token.borderWidth
+  const resolvedBackgroundColor = state.disabled && borderWidth > 0 ? borderColor : backgroundColor
   const radius =
     shape === 'circle'
       ? size.height / 2
@@ -191,7 +193,7 @@ export function getButtonStyles(
       borderWidth,
       borderStyle: variant === 'dashed' ? 'dashed' : 'solid',
       borderColor,
-      backgroundColor,
+      backgroundColor: resolvedBackgroundColor,
       flexDirection: 'row',
       columnGap: isCircle ? 0 : token.iconGap,
       alignItems: 'center',

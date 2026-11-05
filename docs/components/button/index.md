@@ -49,8 +49,8 @@ import { Button, Icon } from '@ftsukic/tsuki'
 | shape | `'default' \| 'round' \| 'square' \| 'circle'` | `'default'` | 按钮形状 |
 | block | `boolean` | `false` | 非 `circle` 按钮占满父级可用宽度，包括 `text` 变体 |
 | hairline | `boolean` | `false` | 使用 React Native 的 hairline border |
-| disabled | `boolean` | `false` | 禁用按钮并应用禁用透明度 |
-| loading | `boolean` | `false` | 用 `Loading` 替换普通 icon，保留 `children` 并禁用 press；`circle` loading 仍保持固定圆形尺寸 |
+| disabled | `boolean` | `false` | 禁用按钮并应用禁用透明度；有边框变体的填充色与边框色一致，实心变体隐藏同色边框 |
+| loading | `boolean` | `false` | 用 `Loading` 替换普通 icon，保留 `children` 并禁用 press；禁用配色同 `disabled`，`circle` loading 仍保持固定圆形尺寸 |
 | loadingType | `'circular' \| 'spinner'` | `'circular'` | loading 指示器类型 |
 | loadingSize | `number` | 当前 Button 字号 | loading 指示器尺寸；未传入时根据当前 Button size/font token 推导 |
 | icon | `ReactNode` | — | 图标节点；`circle` 不为图标增加左右间距 |

@@ -96,9 +96,9 @@ describe('Button', () => {
         </Button>
       )
       const view = await render(tree(true))
-      expect(StyleSheet.flatten(screen.getByTestId('recovering-button').props.style).opacity).toBe(
-        0.4,
-      )
+      const inactiveStyle = getButtonStyle('recovering-button')
+      expect(inactiveStyle.opacity).toBe(0.4)
+      expect(inactiveStyle.backgroundColor).toBe(inactiveStyle.borderColor)
       // RNTL 14 fireEvent returns a Promise; the lint plugin still assumes sync events.
       // eslint-disable-next-line testing-library/no-await-sync-events
       await fireEvent.press(screen.getByTestId('recovering-button'))
@@ -432,6 +432,47 @@ describe('Button', () => {
     expect(StyleSheet.flatten(screen.getByText('默认文字').props.style).color).not.toBe(
       getStyle('default-text').borderColor,
     )
+  })
+
+  it('preserves disabled fills for borderless variants', async () => {
+    await render(
+      <ConfigProvider>
+        <Button testID="disabled-filled" variant="filled" disabled>
+          填充按钮
+        </Button>
+        <Button testID="disabled-text" variant="text" disabled>
+          文字按钮
+        </Button>
+      </ConfigProvider>,
+    )
+
+    expect(getButtonStyle('disabled-filled')).toMatchObject({
+      backgroundColor: getDesignToken().colorFillTertiary,
+      borderWidth: 0,
+      opacity: 0.4,
+    })
+    expect(getButtonStyle('disabled-text')).toMatchObject({
+      backgroundColor: 'transparent',
+      borderWidth: 0,
+      opacity: 0.4,
+    })
+  })
+
+  it('removes the redundant border from disabled solid buttons', async () => {
+    await render(
+      <ConfigProvider>
+        <Button testID="disabled-primary" type="primary" disabled>
+          主要按钮
+        </Button>
+      </ConfigProvider>,
+    )
+
+    const style = getButtonStyle('disabled-primary')
+    expect(style).toMatchObject({
+      borderWidth: 0,
+      opacity: 0.4,
+    })
+    expect(style.backgroundColor).toBe(style.borderColor)
   })
 
   it('sizes text buttons to their visible content instead of the control height', async () => {
@@ -786,13 +827,14 @@ describe('Button', () => {
 
     const overlay = findOverlay(toJSON())
     if (!overlay) throw new Error('Pressed Button overlay was not rendered')
+    const borderWidth = getButtonToken(getDesignToken()).borderWidth
 
     expect(StyleSheet.flatten(overlay.props.style)).toMatchObject({
       backgroundColor: 'rgba(0, 0, 0, 0.1)',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      top: 0,
+      bottom: -borderWidth,
+      left: -borderWidth,
+      right: -borderWidth,
+      top: -borderWidth,
     })
     expect(overlay.props.pointerEvents).toBe('none')
   })
