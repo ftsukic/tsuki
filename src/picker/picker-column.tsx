@@ -11,8 +11,8 @@ import {
 } from 'react'
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native'
 import { View } from 'react-native'
+import { Pressable as GestureHandlerPressable } from 'react-native-gesture-handler'
 import { Gesture, GestureDetector } from '../gesture'
-import { PlainPressable } from '../pressable/plain-pressable'
 import { Text } from '../text'
 import { useComponentToken } from '../theme'
 import { useMotionConfig } from '../motion/useMotionConfig'
@@ -98,7 +98,7 @@ const PickerColumnItem = memo(function PickerColumnItem({
   const disabled = columnDisabled || item.disabled === true
 
   return (
-    <PlainPressable
+    <GestureHandlerPressable
       accessibilityLabel={accessibilityLabel ? `${accessibilityLabel}, ${item.text}` : item.text}
       accessibilityRole="radio"
       accessibilityState={{ disabled, selected }}
@@ -115,7 +115,7 @@ const PickerColumnItem = memo(function PickerColumnItem({
       <Text numberOfLines={1} style={[styles.itemLabel, itemLabelStyle]}>
         {item.text}
       </Text>
-    </PlainPressable>
+    </GestureHandlerPressable>
   )
 })
 

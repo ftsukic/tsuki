@@ -226,6 +226,29 @@ describe('Picker state and semantic regressions', () => {
     )
   })
 
+  it('keeps option taps working after recognizing a wheel pan', async () => {
+    const readPosition = observeWheel()
+    const onChange = jest.fn()
+    await render(
+      <ConfigProvider theme={{ motion: { enabled: false } }}>
+        <Picker columns={options} onChange={onChange} showToolbar={false} />
+      </ConfigProvider>,
+    )
+
+    await act(async () => {
+      fireGestureHandler(getByGestureTestId('picker-column-0-gesture'), [
+        { state: State.BEGAN },
+        { state: State.ACTIVE, translationY: -44 },
+        { translationY: -44 },
+        { state: State.END, translationY: -44 },
+      ])
+    })
+    expect(readPosition()).toBe(66)
+
+    await fireEvent.press(screen.getByTestId('picker-item-0-1'))
+    await waitFor(() => expect(onChange).toHaveBeenLastCalledWith(['second'], [options[1]]))
+  })
+
   it('invalidates a pending request when loading starts', async () => {
     const callbacks: Array<(finished?: boolean) => void> = []
     const onChange = jest.fn()
