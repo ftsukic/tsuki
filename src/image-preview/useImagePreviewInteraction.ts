@@ -188,19 +188,23 @@ export function useImagePreviewInteraction(options: Options) {
   }, [activeId, ids, host.width, host.height, pageWidth, reset, selected, index, position])
 
   const updatePan = useCallback(
-    (event: PanGestureHandlerEventPayload) => {
+    (event: PanGestureHandlerEventPayload, finalPosition = false) => {
       'worklet'
       if (multiple.value || state.value === 'pinch') return
       let image = images[index.value]
       if (!image) return
       const dx =
-        Number.isFinite(event.absoluteX) && Number.isFinite(originX.value)
+        finalPosition && Number.isFinite(event.absoluteX) && Number.isFinite(originX.value)
           ? event.absoluteX - originX.value
-          : event.translationX
+          : Number.isFinite(event.translationX)
+            ? event.translationX
+            : event.absoluteX - originX.value
       const dy =
-        Number.isFinite(event.absoluteY) && Number.isFinite(originY.value)
+        finalPosition && Number.isFinite(event.absoluteY) && Number.isFinite(originY.value)
           ? event.absoluteY - originY.value
-          : event.translationY
+          : Number.isFinite(event.translationY)
+            ? event.translationY
+            : event.absoluteY - originY.value
       if (!axis.value) {
         if (Math.max(Math.abs(dx), Math.abs(dy)) < SWIPE_PRESET.activationDistance) return
         axis.value = Math.abs(dx) > Math.abs(dy) ? 1 : 2
@@ -220,12 +224,9 @@ export function useImagePreviewInteraction(options: Options) {
           Math.min((ids.length - 1) * pageWidth, base + pageWidth, base - excess),
         )
         position.value = target
-        if (target === base && excess !== 0)
-          x.value = resistGestureOffset(
-            raw,
-            Math.max(0, (image.width * scale.value - host.width) / 2),
-            host.width,
-          )
+        const horizontalLimit = Math.max(0, (image.width * scale.value - host.width) / 2)
+        if (target === base && excess !== 0 && horizontalLimit > 0)
+          x.value = resistGestureOffset(raw, horizontalLimit, host.width)
         setState(target === base ? 'pan' : 'paging')
       } else {
         const raw = startY.value + dy
@@ -304,7 +305,7 @@ export function useImagePreviewInteraction(options: Options) {
           )
             return
           if (success && (Number.isFinite(event.absoluteX) || Number.isFinite(event.translationX)))
-            updatePan(event)
+            updatePan(event, true)
           if (state.value === 'paging') {
             const distance = position.value - index.value * pageWidth
             const fling =

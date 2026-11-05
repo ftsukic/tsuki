@@ -282,6 +282,7 @@ it('keeps the album at its edge without selecting an invalid image', async () =>
   p.select.mockClear()
   await start(c)
   await move(c, 350)
+  expect(c.x.value).toBe(0)
   await end(c)
   expect(c.position.value).toBe(0)
   expect(c.selected.value).toBe('a')

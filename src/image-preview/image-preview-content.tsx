@@ -226,8 +226,8 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewProps
     )
     useEffect(() => {
       if (!layoutReady) return
-      pager.current?.scrollToOffset({ offset: position.value, animated: false })
-    }, [layoutReady, pageWidth, pager, position])
+      pager.current?.scrollToOffset({ offset: activeIndex * pageWidth, animated: false })
+    }, [activeIndex, layoutReady, pageWidth, pager])
     useImperativeHandle(
       ref,
       () => ({
@@ -388,6 +388,7 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewProps
                 renderItem={renderPage}
                 keyExtractor={(entry) => entry.id}
                 horizontal
+                pointerEvents="box-none"
                 scrollEnabled={false}
                 showsHorizontalScrollIndicator={false}
                 initialScrollIndex={activeIndex}
@@ -426,7 +427,11 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewProps
                 ) : (
                   <Text
                     style={[
-                      { color: token.indexColor, fontSize: token.indexFontSize },
+                      {
+                        color: token.indexColor,
+                        fontSize: token.indexFontSize,
+                        lineHeight: token.indexLineHeight,
+                      },
                       semantic.index,
                     ]}
                   >

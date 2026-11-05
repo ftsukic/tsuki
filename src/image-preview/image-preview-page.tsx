@@ -67,18 +67,18 @@ export function ImagePreviewPage({
         { scaleY: current.height / base.height },
       ],
     }
-  }, [selected, item.id, base, height, hidden, opacity, rect, width, clip])
+  }, [selected, item.id, base, height, hidden, opacity, rect, width, clip, active])
   const clippingStyle = useAnimatedStyle(() => {
     const bounds = selected.value === item.id ? clip.value : { x: 0, y: 0, width, height }
     return { left: bounds.x, top: bounds.y, width: bounds.width, height: bounds.height }
-  }, [selected, item.id, clip, width, height])
+  }, [selected, item.id, clip, width, height, active])
   const imageStyle = useAnimatedStyle(() => {
     const current = selected.value === item.id ? rect.value : base
     const sx = current.width / base.width
     const sy = current.height / base.height
     const scale = Math.max(sx, sy)
     return { transform: [{ scaleX: scale / sx }, { scaleY: scale / sy }] }
-  }, [selected, item.id, base, rect])
+  }, [selected, item.id, base, rect, active])
   return (
     <View style={{ width: pageWidth, height }}>
       <Animated.View

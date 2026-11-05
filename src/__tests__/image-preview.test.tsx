@@ -1,6 +1,6 @@
 /* eslint-disable testing-library/no-await-sync-events -- Installed fireEvent is asynchronous. */
 import React, { useEffect } from 'react'
-import { Text } from 'react-native'
+import { StyleSheet, Text } from 'react-native'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { ImagePreview, PortalHost, ConfigProvider } from '..'
 import { ImagePreviewContent } from '../image-preview/image-preview-content'
@@ -127,6 +127,7 @@ it('keeps controls outside image gestures and disables them when a business over
   )
   const view = await render(tree(false))
   await layout()
+  expect(screen.getByTestId('image-preview-pager').props.pointerEvents).toBe('box-none')
   expect(screen.getByText('a:idle')).toBeTruthy()
   expect(screen.getByText('Business overlay', { includeHiddenElements: true })).toBeTruthy()
   await view.rerender(tree(true))
@@ -231,4 +232,29 @@ it('shares one album between images and videos and pauses video rendering on exi
       ([props]) => props.item.id === 'c' && props.active && !props.playing,
     ),
   ).toBe(true)
+})
+
+it('applies ImagePreview index typography tokens with semantic style precedence', async () => {
+  const tree = (lineHeight?: number) => (
+    <ConfigProvider
+      theme={{ components: { ImagePreview: { indexFontSize: 22, indexLineHeight: 42 } } }}
+    >
+      <ImagePreviewContent
+        visible
+        showIndex
+        items={items}
+        transitionDuration={0}
+        styles={lineHeight ? { index: { lineHeight } } : undefined}
+      />
+    </ConfigProvider>
+  )
+  const view = await render(tree())
+  expect(
+    StyleSheet.flatten(screen.getByText('1/3', { includeHiddenElements: true }).props.style),
+  ).toMatchObject({ fontSize: 22, lineHeight: 42 })
+  await view.rerender(tree(48))
+  expect(
+    StyleSheet.flatten(screen.getByText('1/3', { includeHiddenElements: true }).props.style)
+      .lineHeight,
+  ).toBe(48)
 })
