@@ -48,7 +48,7 @@ export function Slider(props: SliderProps) {
     if (value === undefined) setInternalValue(next)
     onChange?.(next)
   }
-  const { gesture, position, dragging, staticAdapter, responderHandlers } = useSliderGesture({
+  const { gesture, position, dragging } = useSliderGesture({
     value: current,
     min,
     max,
@@ -81,8 +81,6 @@ export function Slider(props: SliderProps) {
     <GestureDetector gesture={gesture}>
       <View
         {...viewProps}
-        {...responderHandlers}
-        pointerEvents={staticAdapter ? 'box-only' : viewProps.pointerEvents}
         accessible
         accessibilityRole="adjustable"
         aria-valuemin={min}
