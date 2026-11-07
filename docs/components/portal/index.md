@@ -35,6 +35,8 @@ import {
 
 - **命令式挂载**：使用 mountPortal、updatePortal 和 unmountPortal 管理动态内容。 [示例源码](../../../src/portal/__fixtures__/examples/imperative.tsx)
 
+- **文本样式透传**：Portal 中的自定义 Tsuki Text 继承 Button 内容样式。 [示例源码](../../../src/portal/__fixtures__/examples/text-inheritance.tsx)
+
 ## API
 
 ### Portal
@@ -43,19 +45,35 @@ import {
 | ---------- | ----------- | ------ | -------------------- |
 | `children` | `ReactNode` | —      | 要渲染到宿主层的内容 |
 
-`Portal` 必须渲染在 `PortalHost` 内部，否则会抛出缺少 TsukiProvider / PortalHost 的错误。Portal 会保留当前主题上下文，浮层内容可以继续使用 `useToken` 和组件 token。
+`Portal` 必须渲染在 `PortalHost` 内部，否则会抛出缺少 TsukiProvider / PortalHost 的错误。Portal 会保留当前主题上下文和 Tsuki Text 继承上下文，浮层内容可以继续使用 `useToken`、组件 token 和来源位置的 Text 样式。
 
 ### PortalHost
 
-| 属性       | 类型        | 默认值 | 说明                         |
-| ---------- | ----------- | ------ | ---------------------------- |
-| `children` | `ReactNode` | —      | 宿主下方的页面内容，可以为空 |
+| 属性            | 类型            | 默认值   | 说明                         |
+| --------------- | --------------- | -------- | ---------------------------- |
+| `children`      | `ReactNode`     | —        | 宿主下方的页面内容，可以为空 |
+| `portalBackend` | `PortalBackend` | 平台默认 | 显式指定 Portal 后端         |
+| `teleport`      | `boolean`       | —        | 已弃用；显式 `false` 选择 JS |
 
 同一运行时可以存在多个 `PortalHost`，最近完成挂载的宿主负责新的命令式 entry；该宿主卸载后，恢复使用前一个仍在挂载的宿主。宿主会按挂载顺序渲染 entry，entry 层使用 `pointerEvents="box-none"`，宿主卸载时会清理全部内容。
 
 组件式 Portal 使用组件树中最近的 Host。根 TsukiProvider 的 Host 位于导航页面外，挂载到它的内容不会跟随单个页面的转场或隐藏。需要随页面关闭的常驻浮层，应在页面内提供 Host；页面失焦但仍被导航保留时，由宿主应用卸载相应浮层和局部 Host。Portal 本身不识别导航焦点，命令式宿主选择也不按焦点切换。
 
-独立 `PortalHost` 与 `TsukiProvider` 共用 `portalBackend?: PortalBackend` 配置，只在首次挂载时读取。未配置时继承上层后端；没有上层后端时使用 JS。从 `@ftsukic/tsuki/teleport` 导入 `teleportPortalBackend` 后，使用 `<ConfigProvider><PortalHost portalBackend={teleportPortalBackend}><App /></PortalHost></ConfigProvider>` 可独立启用 Teleport。局部 Host 无需重复配置。`teleport` 已弃用；显式 `teleport={false}` 仍可选择 JS，单独 `true` 需要显式或继承的后端。
+`PortalHost` 与 `TsukiProvider` 使用相同的后端选择规则：iOS、Android 和 Web 默认使用 Teleport；Harmony 与其他未知平台默认使用 JS Portal。平台默认值由 Metro 平台入口选择，后端在首次挂载时固定。
+
+局部 Host 未设置后端时继承父级选择；设置 `portalBackend` 会显式覆盖父级。显式 `portalBackend` 优先于旧 `teleport` 属性，`teleport={false}` 可在任意平台强制使用 JS。单独 `teleport={true}` 仍要求有显式或继承的 Teleport 后端。
+
+iOS、Android 和 Web 项目需要安装 `react-native-teleport@^1.2.2`。iOS/Android 需启用 Fabric 并重新构建宿主 App（iOS 更新 Pods）；Expo Go 不含该原生模块。Harmony 和其他未知平台使用 JS Portal，不需要导入 Teleport 入口。
+
+需要显式指定时，从 `@ftsukic/tsuki/teleport` 导入适配器：
+
+```tsx
+import { teleportPortalBackend } from '@ftsukic/tsuki/teleport'
+
+;<PortalHost portalBackend={teleportPortalBackend}>
+  <App />
+</PortalHost>
+```
 
 ### Imperative API
 
@@ -87,7 +105,7 @@ function StartupPortal() {
 
 将 `StartupPortal` 放在 `PortalHost` 内。
 
-组件式 `Portal` 仅桥接调用位置的主题上下文；命令式内容使用目标宿主位置的上下文。其他业务 Context、安全区 Context 或导航 Context 若需要在浮层中使用，应放在 `PortalHost` 外层；局部 TsukiProvider 不会自动随内容迁移。浮层内容也不会继承所在 SwipeCell 的按压归属。
+组件式 `Portal` 会桥接调用位置的主题上下文和 TextInheritanceContext，JS Portal 与 Teleport Portal 均支持 context 更新；命令式内容使用目标宿主位置的上下文。其他业务 Context、安全区 Context 或导航 Context 若需要在浮层中使用，应放在 `PortalHost` 外层；局部 TsukiProvider 不会自动随内容迁移。浮层内容也不会继承所在 SwipeCell 的按压归属。
 
 ## 背景滚动锁状态
 
@@ -97,4 +115,4 @@ function StartupPortal() {
 
 - **父级受控输入** [示例源码](../../../src/portal/__fixtures__/examples/controlled-input.tsx)
 
-Example 在 `EXPO_PUBLIC_TSUKI_PORTAL=teleport` 的原生构建中展示 Teleport 后端；默认运行时显示 JavaScript 后端。该示例将 value 保存在页面父级，用于验证中文拼音组合输入、父级赋值、清空与提交。
+Example 使用平台默认后端：iOS、Android 和 Web 使用 Teleport，Harmony 或未知平台使用 JavaScript 后端。该示例将 value 保存在页面父级，用于验证中文拼音组合输入、父级赋值、清空与提交。

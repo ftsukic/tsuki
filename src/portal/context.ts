@@ -3,8 +3,9 @@ import type { PortalBackend, PortalMethods } from './types'
 
 export const PortalContext = createContext<PortalMethods | null>(null)
 
-export const PortalBackendContext = createContext<PortalBackend | undefined>(undefined)
+/** undefined means no Provider has selected a backend; null explicitly selects JS. */
+export const PortalBackendContext = createContext<PortalBackend | null | undefined>(undefined)
 export const PortalDestinationContext = createContext<{
-  backend: PortalBackend | undefined
+  backend: PortalBackend | null | undefined
   hostName: string
 } | null>(null)

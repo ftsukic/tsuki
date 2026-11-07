@@ -8,9 +8,9 @@ export interface PortalProps {
 }
 
 export interface PortalHostProps {
-  /** @deprecated Pass portalBackend; true requires an explicit or inherited backend. */
+  /** @deprecated Use portalBackend for an explicit backend; false selects JavaScript Portal. */
   teleport?: boolean
-  /** Custom backend, taking precedence over teleport; fixed at mount. */
+  /** Explicit backend, taking precedence over teleport; fixed at mount. */
   portalBackend?: PortalBackend
   children?: ReactNode
 }

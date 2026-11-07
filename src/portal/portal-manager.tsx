@@ -14,7 +14,7 @@ interface PortalManagerState {
 
 /** Renders the portal entries managed by the nearest PortalHost. */
 export class PortalManager extends PureComponent<
-  { backend?: PortalBackend; hostName?: string },
+  { backend?: PortalBackend | null; hostName?: string },
   PortalManagerState
 > {
   static displayName = 'PortalManager'

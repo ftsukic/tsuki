@@ -20,6 +20,8 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
   moduleNameMapper: {
     '^@ftsukic/tsuki/teleport$': '<rootDir>/src/teleport.ts',
+    // Keep behavior tests on JS; portal-entry.test exercises platform resolution with Metro.
+    '^\\./default-backend$': '<rootDir>/src/portal/default-backend.ts',
     '^@ftsukic/tsuki$': '<rootDir>/src',
     '^@/(.*)$': '<rootDir>/example/$1',
     '^react$': '<rootDir>/node_modules/react',

@@ -11,7 +11,7 @@ import type { TsukiProviderProps } from './types'
 
 export const TsukiProvider = memo(function TsukiProvider({
   children,
-  teleport = false,
+  teleport,
   portalBackend,
   gesture = true,
   safeArea = false,

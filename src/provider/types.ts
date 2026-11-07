@@ -5,9 +5,9 @@ import type { MotionConfig } from '../motion/types'
 
 export interface TsukiProviderProps {
   children?: ReactNode
-  /** @deprecated Import the optional Teleport entry and pass portalBackend instead. */
+  /** @deprecated Use portalBackend for an explicit backend; false selects JavaScript Portal. */
   teleport?: boolean
-  /** Optional Portal backend; fixed for this TsukiProvider mount. */
+  /** Explicit Portal backend; otherwise the platform default is fixed at mount. */
   portalBackend?: PortalBackend
   /** 初始化时选择手势根节点，挂载后固定。 */
   gesture?: boolean
