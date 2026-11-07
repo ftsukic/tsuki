@@ -20,7 +20,11 @@ export interface ImagePreviewItemProps {
   playing?: boolean
   originalRequested?: boolean
   originalAttempt?: number
-  onDisplayStateChange?: (id: string, state: ImagePreviewLoadState) => void
+  onDisplayStateChange?: (
+    id: string,
+    source: 'thumbnail' | 'image',
+    state: ImagePreviewLoadState,
+  ) => void
   onOriginalStateChange?: (id: string, state: ImagePreviewLoadState) => void
 }
 
@@ -30,6 +34,8 @@ interface SourceLayerProps {
   testID: string
   original?: boolean
   showStatus?: boolean
+  showLoading?: boolean
+  revealOnLoad?: boolean
   onStateChange?: (state: ImagePreviewLoadState) => void
 }
 
@@ -40,14 +46,16 @@ function SourceLayer({
   testID,
   original = false,
   showStatus = true,
+  showLoading = true,
+  revealOnLoad = false,
   onStateChange,
 }: SourceLayerProps) {
   const [state, setState] = useState<ImagePreviewLoadState>('loading')
   const [attempt, setAttempt] = useState(0)
-  const originalStyle = useAnimatedTransition({
-    visible: !original || state === 'loaded',
+  const revealStyle = useAnimatedTransition({
+    visible: (!original && !revealOnLoad) || state === 'loaded',
     preset: motionPresets.fade,
-    motion: original,
+    motion: original || revealOnLoad,
     appear: false,
   })
   const mountedRef = useRef(true)
@@ -73,6 +81,9 @@ function SourceLayer({
     },
     [attempt],
   )
+  const handleLoadStart = useCallback(() => updateState('loading'), [updateState])
+  const handleLoad = useCallback(() => updateState('loaded'), [updateState])
+  const handleError = useCallback(() => updateState('error'), [updateState])
   const handleRetry = useCallback(() => {
     setState('loading')
     attemptRef.current += 1
@@ -87,20 +98,20 @@ function SourceLayer({
         pointerEvents="none"
         style={[
           StyleSheet.absoluteFill,
-          original && originalStyle,
-          original && state !== 'loaded' && styles.hidden,
+          (original || revealOnLoad) && revealStyle,
+          (original || revealOnLoad) && state !== 'loaded' && styles.hidden,
         ]}
       >
         {adapter.render({
           source,
           style: styles.image,
-          onLoadStart: () => updateState('loading'),
-          onLoad: () => updateState('loaded'),
-          onError: () => updateState('error'),
+          onLoadStart: handleLoadStart,
+          onLoad: handleLoad,
+          onError: handleError,
           testID,
         })}
       </Animated.View>
-      {showStatus && !original && state === 'loading' ? (
+      {showStatus && showLoading && !original && state === 'loading' ? (
         <View pointerEvents="none" style={styles.status}>
           <ActivityIndicator color="#ffffff" testID={`${testID}-loading`} />
         </View>
@@ -157,8 +168,12 @@ export const ImagePreviewItem = memo(function ImagePreviewItem({
     (state: ImagePreviewLoadState) => onOriginalStateChange?.(item.id, state),
     [item.id, onOriginalStateChange],
   )
-  const displayCallback = useCallback(
-    (state: ImagePreviewLoadState) => onDisplayStateChange?.(item.id, state),
+  const thumbnailCallback = useCallback(
+    (state: ImagePreviewLoadState) => onDisplayStateChange?.(item.id, 'thumbnail', state),
+    [item.id, onDisplayStateChange],
+  )
+  const imageCallback = useCallback(
+    (state: ImagePreviewLoadState) => onDisplayStateChange?.(item.id, 'image', state),
     [item.id, onDisplayStateChange],
   )
   const originalVisible = Boolean(originalRequested && item.original)
@@ -178,7 +193,7 @@ export const ImagePreviewItem = memo(function ImagePreviewItem({
         <VersionedSourceLayer
           adapter={imageAdapter}
           showStatus={false}
-          onStateChange={displayCallback}
+          onStateChange={thumbnailCallback}
           source={item.thumbnail}
           testID={`image-preview-thumbnail-${item.id}`}
         />
@@ -190,14 +205,16 @@ export const ImagePreviewItem = memo(function ImagePreviewItem({
             active,
             playing,
             style: styles.image,
-            onLoad: () => displayCallback('loaded'),
-            onError: () => displayCallback('error'),
+            onLoad: () => imageCallback('loaded'),
+            onError: () => imageCallback('error'),
           })}
         </View>
       ) : (
         <VersionedSourceLayer
           adapter={imageAdapter}
-          onStateChange={displayCallback}
+          showLoading={!item.thumbnail}
+          revealOnLoad={Boolean(item.thumbnail)}
+          onStateChange={imageCallback}
           source={item.source}
           testID={`image-preview-image-${item.id}`}
         />

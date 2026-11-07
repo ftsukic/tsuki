@@ -47,7 +47,7 @@ export default function ImagePreviewOverview() {
         },
         {
           Component: GestureExample,
-          description: '验证缩放、拖动和 dismiss。',
+          description: '使用本地图片验证触点锚定的下拉跟手、恢复与关闭。',
           id: 'gesture',
           title: '手势交互',
         },

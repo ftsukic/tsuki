@@ -33,8 +33,16 @@ export default function ImagePreviewBasic() {
                 source={item.source}
                 resizeMode="contain"
                 style={styles.image}
-                onLoad={() => setErrors((current) => ({ ...current, [item.id]: false }))}
-                onError={() => setErrors((current) => ({ ...current, [item.id]: true }))}
+                onLoad={() =>
+                  setErrors((current) =>
+                    current[item.id] === true ? { ...current, [item.id]: false } : current,
+                  )
+                }
+                onError={() =>
+                  setErrors((current) =>
+                    current[item.id] === true ? current : { ...current, [item.id]: true },
+                  )
+                }
               />
             </Pressable>
           </ImagePreview.Source>

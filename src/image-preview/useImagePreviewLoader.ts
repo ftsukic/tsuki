@@ -28,12 +28,17 @@ export function useImagePreviewLoader(
       sessionRef.current = { adapter, requests: new Map() }
     }
     const { requests } = sessionRef.current
-    for (const index of [activeIndex, activeIndex - 1, activeIndex + 1]) {
+    const activeItem = items[activeIndex]
+    const activeSource = activeItem?.type === 'video' ? activeItem.thumbnail : activeItem?.source
+    const activeKey = activeSource ? getImagePreviewSourceKey(activeSource) : undefined
+    for (const index of [activeIndex - 1, activeIndex + 1]) {
       const item = items[index]
       if (!item) continue
       const source = item.type === 'video' ? item.thumbnail : item.source
       if (!source) continue
       const key = getImagePreviewSourceKey(source)
+      // The current page already has a mounted Image node; don't compete with it.
+      if (key === activeKey) continue
       if (requests.has(key)) continue
       const request = {}
       requests.set(key, request)

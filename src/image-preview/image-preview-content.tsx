@@ -7,17 +7,17 @@ import {
   useMemo,
   useRef,
   useState,
+  useLayoutEffect,
 } from 'react'
 import type { ReactNode } from 'react'
 import { BackHandler, Dimensions, Platform, View } from 'react-native'
 import type { FlatList, LayoutChangeEvent, ListRenderItemInfo } from 'react-native'
 import Animated, {
   runOnUI,
-  scrollTo,
-  useAnimatedReaction,
   useAnimatedRef,
   useAnimatedStyle,
   useDerivedValue,
+  useSharedValue,
 } from 'react-native-reanimated'
 import { SafeAreaInsetsContext, initialWindowMetrics } from 'react-native-safe-area-context'
 import { GestureDetector } from '../gesture'
@@ -88,10 +88,13 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewProps
     })
     const [layoutReady, setLayoutReady] = useState(false)
     const [interactionState, setInteractionState] = useState<ImagePreviewInteractionState>('idle')
+    const [pendingClose, setPendingClose] = useState<ImagePreviewCloseReason | null>(null)
     const [originals, setOriginals] = useState<
       Record<string, { attempt: number; status: ImagePreviewLoadState }>
     >({})
-    const [displayed, setDisplayed] = useState<Record<string, boolean>>({})
+    const [displayed, setDisplayed] = useState<
+      Record<string, { thumbnail?: ImagePreviewLoadState; image?: ImagePreviewLoadState }>
+    >({})
     const galleryRef = useRef(items)
     if (!selectedId || items.some((entry) => entry.id === selectedId)) galleryRef.current = items
     const gallery = galleryRef.current
@@ -108,32 +111,33 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewProps
     )
     const pageWidth = viewport.width + themeToken.paddingSM
     const pager = useAnimatedRef<FlatList<ImagePreviewImage>>()
+    const pagerBase = useSharedValue(activeIndex * pageWidth)
     const root = useRef<View>(null)
     const enabled = visible && !interactionDisabled
     const callbacks = useRef({ onChange, onLongPress, onRequestClose })
     callbacks.current = { onChange, onLongPress, onRequestClose }
-    const select = useCallback((id: string) => {
-      const index = galleryRef.current.findIndex((entry) => entry.id === id),
-        entry = galleryRef.current[index]
-      if (!entry) return
-      setSelectedId(id)
-      callbacks.current.onChange?.({ id, item: entry, index, count: galleryRef.current.length })
-    }, [])
-    const requestRef = useRef<(reason: ImagePreviewCloseReason) => void>(() => {})
-    const close = useCallback((reason: 'image' | 'gesture') => requestRef.current(reason), [])
+    const select = useCallback(
+      (id: string) => {
+        const index = gallery.findIndex((entry) => entry.id === id),
+          entry = gallery[index]
+        if (!entry) return
+        setSelectedId(id)
+        onChange?.({ id, item: entry, index, count: gallery.length })
+      },
+      [gallery, onChange],
+    )
+    const close = useCallback((reason: 'image' | 'gesture') => setPendingClose(reason), [])
     const longPress = useCallback(() => {
-      const current = interactionRef.current
-      const id = current?.selected.value
-      const index = galleryRef.current.findIndex((entry) => entry.id === id),
-        entry = galleryRef.current[index]
+      const index = gallery.findIndex((entry) => entry.id === selectedId),
+        entry = gallery[index]
       if (entry)
-        callbacks.current.onLongPress?.({
+        onLongPress?.({
           id: entry.id,
           item: entry,
           index,
-          count: galleryRef.current.length,
+          count: gallery.length,
         })
-    }, [])
+    }, [gallery, selectedId, onLongPress])
     const interaction = useImagePreviewInteraction({
       enabled,
       ids,
@@ -147,8 +151,16 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewProps
       onLongPress: longPress,
       onStateChange: setInteractionState,
     })
-    const interactionRef = useRef(interaction)
-    interactionRef.current = interaction
+    const restoreRequest = useRef(0)
+    const previousVisible = useRef(visible)
+    const visibleRef = useRef(visible)
+    visibleRef.current = visible
+    useLayoutEffect(() => {
+      if (previousVisible.current === visible) return
+      previousVisible.current = visible
+      restoreRequest.current += 1
+      if (!visible) runOnUI(interaction.stop)()
+    }, [visible, interaction.stop])
     const onBegin = useCallback(
       (reopening: boolean) => {
         galleryRef.current = items
@@ -170,7 +182,11 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewProps
       id: selectedId,
       viewport,
       layoutReady,
-      displayReady: Boolean(displayed[selectedId ?? '']),
+      displayReady: item?.thumbnail
+        ? displayed[selectedId ?? '']?.thumbnail === 'loaded' ||
+          (displayed[selectedId ?? '']?.thumbnail === 'error' &&
+            ['loaded', 'error'].includes(displayed[selectedId ?? '']?.image ?? ''))
+        : ['loaded', 'error'].includes(displayed[selectedId ?? '']?.image ?? ''),
       duration: transitionDuration ?? token.animationDuration,
       pageWidth,
       interaction,
@@ -185,17 +201,20 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewProps
           (interactionDisabled && reason !== 'removed' && reason !== 'imperative')
         )
           return
+        const request = ++restoreRequest.current
         callbacks.current.onRequestClose?.(reason)
         requestAnimationFrame(() => {
-          if (interactionRef.current && visibleRef.current)
-            runOnUI(interactionRef.current.restore)()
+          if (request !== restoreRequest.current || !visibleRef.current) return
+          runOnUI(interaction.restore)()
         })
       },
-      [visible, phase, interactionDisabled],
+      [visible, phase, interactionDisabled, interaction.restore],
     )
-    const visibleRef = useRef(visible)
-    visibleRef.current = visible
-    requestRef.current = requestClose
+    useEffect(() => {
+      if (!pendingClose) return
+      setPendingClose(null)
+      requestClose(pendingClose)
+    }, [pendingClose, requestClose])
     const previousProp = useRef(activeId)
     useEffect(() => {
       if (previousProp.current === activeId) return
@@ -217,17 +236,15 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewProps
     useImagePreviewLoader(gallery, activeIndex, visible, imageAdapter)
     const { position, dragY, state: gestureState } = interaction
     const { mask, paging, progress, presentation } = session
-    useAnimatedReaction(
-      () => position.value,
-      (offset) => {
-        scrollTo(pager, offset, 0, false)
-      },
-      [pager, position],
+    const pagerContentStyle = useAnimatedStyle(
+      () => ({ transform: [{ translateX: pagerBase.value - position.value }] }),
+      [pagerBase, position],
     )
-    useEffect(() => {
+    useLayoutEffect(() => {
       if (!layoutReady) return
+      pagerBase.value = activeIndex * pageWidth
       pager.current?.scrollToOffset({ offset: activeIndex * pageWidth, animated: false })
-    }, [activeIndex, layoutReady, pageWidth, pager])
+    }, [activeIndex, layoutReady, pageWidth, pager, pagerBase])
     useImperativeHandle(
       ref,
       () => ({
@@ -271,10 +288,16 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewProps
         ),
       [],
     )
-    const displayState = useCallback((id: string, status: ImagePreviewLoadState) => {
-      if (status === 'loaded' || status === 'error')
-        setDisplayed((current) => (current[id] ? current : { ...current, [id]: true }))
-    }, [])
+    const displayState = useCallback(
+      (id: string, source: 'thumbnail' | 'image', status: ImagePreviewLoadState) => {
+        setDisplayed((current) =>
+          current[id]?.[source] === status
+            ? current
+            : { ...current, [id]: { ...current[id], [source]: status } },
+        )
+      },
+      [],
+    )
     const renderPage = useCallback(
       ({ item: page, index }: ListRenderItemInfo<ImagePreviewImage>) => (
         <ImagePreviewPage
@@ -401,6 +424,7 @@ export const ImagePreviewContent = forwardRef<ImagePreviewRef, ImagePreviewProps
                 maxToRenderPerBatch={2}
                 windowSize={5}
                 removeClippedSubviews={false}
+                contentContainerStyle={pagerContentStyle}
                 extraData={{ selectedId, originals }}
               />
             </Animated.View>

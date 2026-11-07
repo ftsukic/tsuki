@@ -5,7 +5,7 @@ import { ImagePreview } from '../image-preview'
 import { ImagePreviewSourcesContext } from '../image-preview/context'
 import type { ImagePreviewSourcesContextValue } from '../image-preview/context'
 import { PortalContext, PortalDestinationContext } from '../portal/context'
-import type { PortalMethods } from '../portal/types'
+import type { PortalBackend, PortalMethods } from '../portal/types'
 
 let sources: ImagePreviewSourcesContextValue
 function Probe() {
@@ -155,7 +155,8 @@ it('notifies only subscriptions for an id whose visibility changes', async () =>
 })
 
 it('captures the root portal destination before descendants introduce another host', async () => {
-  const rootDestination = { backend: undefined, hostName: 'root' }
+  const rootBackend = {} as PortalBackend
+  const rootDestination = { backend: rootBackend, hostName: 'root' }
   const rootManager: PortalMethods = { mount: jest.fn(), update: jest.fn(), unmount: jest.fn() }
   const nestedManager: PortalMethods = { mount: jest.fn(), update: jest.fn(), unmount: jest.fn() }
   await render(
@@ -163,7 +164,7 @@ it('captures the root portal destination before descendants introduce another ho
       <PortalDestinationContext.Provider value={rootDestination}>
         <ImagePreview.Provider>
           <PortalContext.Provider value={nestedManager}>
-            <PortalDestinationContext.Provider value={{ backend: undefined, hostName: 'nested' }}>
+            <PortalDestinationContext.Provider value={{ backend: null, hostName: 'nested' }}>
               <Probe />
               <Source />
             </PortalDestinationContext.Provider>
@@ -173,6 +174,7 @@ it('captures the root portal destination before descendants introduce another ho
     </PortalContext.Provider>,
   )
   expect(sources.rootDestination).toEqual(rootDestination)
+  expect(sources.rootDestination?.backend).toBe(rootBackend)
   expect(sources.rootManager).toBe(rootManager)
   expect(rootManager.mount).not.toHaveBeenCalled()
   expect(nestedManager.mount).not.toHaveBeenCalled()

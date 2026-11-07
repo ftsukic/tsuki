@@ -44,8 +44,7 @@ describe('ImagePreview source destinations', () => {
       imageAdapter: adapter,
       onOpened: opened,
     }
-    // Jest cannot dispatch Reanimated's native scroll command.
-    const freeze = jest.spyOn(Reanimated, 'scrollTo').mockImplementation(() => {})
+    const scroll = jest.spyOn(Reanimated, 'scrollTo').mockImplementation(() => {})
     const actual = interactionModule.useImagePreviewInteraction
     let interaction!: ReturnType<typeof actual>
     const hook = jest
@@ -69,9 +68,9 @@ describe('ImagePreview source destinations', () => {
       )
       expect(getSourceRect).toHaveBeenCalledTimes(1)
       expect(mounted.mock.calls.filter(([id]) => id === 'image-preview-image-a')).toHaveLength(1)
-      expect(freeze).toHaveBeenCalled()
+      expect(scroll).not.toHaveBeenCalled()
     } finally {
-      freeze.mockRestore()
+      scroll.mockRestore()
       hook.mockRestore()
     }
   })

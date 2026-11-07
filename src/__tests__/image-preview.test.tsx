@@ -1,12 +1,16 @@
 /* eslint-disable testing-library/no-await-sync-events -- Installed fireEvent is asynchronous. */
-import React, { useEffect } from 'react'
-import { StyleSheet, Text } from 'react-native'
+import React, { useEffect, useState } from 'react'
+import { Image, StyleSheet, Text } from 'react-native'
+import * as Reanimated from 'react-native-reanimated'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native'
 import { ImagePreview, PortalHost, ConfigProvider } from '..'
 import { ImagePreviewContent } from '../image-preview/image-preview-content'
 import * as interactionModule from '../image-preview/useImagePreviewInteraction'
+import * as sessionModule from '../image-preview/useImagePreviewSession'
+import { interpolateRect } from '../image-preview/utils'
 import type {
   ImagePreviewImage,
+  ImagePreviewImageRenderProps,
   ImagePreviewRef,
   ImagePreviewMediaRenderProps,
 } from '../image-preview/types'
@@ -23,6 +27,52 @@ async function layout() {
     await new Promise((resolve) => setTimeout(resolve, 180))
   })
 }
+function queueAnimationFrames() {
+  const original = globalThis.requestAnimationFrame
+  const callbacks: FrameRequestCallback[] = []
+  Object.defineProperty(globalThis, 'requestAnimationFrame', {
+    configurable: true,
+    writable: true,
+    value: (callback: FrameRequestCallback) => {
+      callbacks.push(callback)
+      return callbacks.length
+    },
+  })
+  return {
+    flush: () => callbacks.splice(0).forEach((callback) => callback(16)),
+    restore: () =>
+      Object.defineProperty(globalThis, 'requestAnimationFrame', {
+        configurable: true,
+        writable: true,
+        value: original,
+      }),
+  }
+}
+async function dismiss(control: ReturnType<typeof interactionModule.useImagePreviewInteraction>) {
+  await act(() => {
+    control.pan.handlers.onBegin!({ absoluteX: 200, absoluteY: 400 } as never)
+    control.pan.handlers.onStart!({} as never)
+    control.pan.handlers.onUpdate!({
+      absoluteX: 200,
+      absoluteY: 600,
+      translationX: 0,
+      translationY: 200,
+    } as never)
+  })
+  await act(() =>
+    control.pan.handlers.onFinalize!(
+      {
+        absoluteX: 200,
+        absoluteY: 600,
+        translationX: 0,
+        translationY: 200,
+        velocityX: 0,
+        velocityY: 0,
+      } as never,
+      true,
+    ),
+  )
+}
 const counter = ({ id, index, count }: { id: string; index: number; count: number }) => (
   <Text>{`${id}:${index}:${count}`}</Text>
 )
@@ -31,6 +81,114 @@ it('does not mount a hidden or empty viewer', async () => {
   expect(screen.queryByTestId('image-preview')).toBeNull()
   await view.rerender(<ImagePreviewContent visible items={[]} />)
   expect(screen.queryByTestId('image-preview')).toBeNull()
+})
+it('drives page clipping and image frames with transforms instead of animated layout bounds', async () => {
+  await render(<ImagePreviewContent visible items={[items[0]]} transitionDuration={0} />)
+  await layout()
+  for (const id of [
+    `image-preview-clip-offset-a`,
+    `image-preview-clip-scale-a`,
+    `image-preview-content-scale-a`,
+    `image-preview-content-offset-a`,
+    `image-preview-frame-a`,
+  ]) {
+    const style = screen.getByTestId(id).props.style
+    const animated = Array.isArray(style) ? style[1] : style
+    expect(animated).toHaveProperty('transform')
+    expect(animated).not.toHaveProperty('left')
+    expect(animated).not.toHaveProperty('top')
+    expect(animated).not.toHaveProperty('width')
+    expect(animated).not.toHaveProperty('height')
+  }
+})
+it('does not restart a Web image request when its load state changes', async () => {
+  let loadEffectCount = 0
+  let image: ImagePreviewImageRenderProps | undefined
+  function WebImage({ onLoadStart, onLoad, onError, ...props }: ImagePreviewImageRenderProps) {
+    image = { ...props, onLoadStart, onLoad, onError }
+    useEffect(() => {
+      loadEffectCount += 1
+      onLoadStart()
+    }, [onLoadStart, onLoad, onError])
+    return null
+  }
+  const imageAdapter = { render: (props: ImagePreviewImageRenderProps) => <WebImage {...props} /> }
+  await render(
+    <ImagePreviewContent
+      visible
+      items={[items[0]]}
+      imageAdapter={imageAdapter}
+      transitionDuration={0}
+    />,
+  )
+  await layout()
+
+  loadEffectCount = 0
+  await act(() => image?.onLoad())
+  expect(loadEffectCount).toBe(0)
+})
+it('waits for the actual thumbnail before hiding its registered source', async () => {
+  const item = { ...items[0], thumbnail: { uri: 'https://example.com/a-thumb.jpg' } }
+  const view = await render(
+    <PortalHost>
+      <ImagePreview.Provider>
+        <ImagePreview.Source imageId="a" testID="message-thumbnail">
+          <Text>Thumbnail</Text>
+        </ImagePreview.Source>
+        <ImagePreviewContent
+          visible
+          items={[item]}
+          transitionDuration={240}
+          getSourceRect={() => ({ x: 24, y: 48, width: 96, height: 64 })}
+        />
+      </ImagePreview.Provider>
+    </PortalHost>,
+  )
+  await layout()
+  const source = screen.getByTestId('message-thumbnail', { includeHiddenElements: true })
+  expect(source).not.toHaveStyle({ opacity: 0 })
+  await fireEvent(screen.getByTestId('image-preview-image-a'), 'load')
+  expect(source).not.toHaveStyle({ opacity: 0 })
+  expect(screen.getByTestId('image-preview-pager-layer')).toHaveStyle({ opacity: 0 })
+
+  await fireEvent(screen.getByTestId('image-preview-thumbnail-a'), 'load')
+  await waitFor(() =>
+    expect(screen.getByTestId('message-thumbnail', { includeHiddenElements: true })).toHaveStyle({
+      opacity: 0,
+    }),
+  )
+  await view.unmount()
+})
+
+it('uses the selected image source through repeated open and close sessions', async () => {
+  const sources = new Map<string | undefined, ImagePreviewImageRenderProps['source']>()
+  const imageAdapter = {
+    render: (props: ImagePreviewImageRenderProps) => {
+      sources.set(props.testID, props.source)
+      return <Image {...props} />
+    },
+  }
+  const tree = (visible: boolean, activeId: string) => (
+    <ImagePreviewContent
+      visible={visible}
+      items={items}
+      activeId={activeId}
+      transitionDuration={0}
+      imageAdapter={imageAdapter}
+    />
+  )
+  const view = await render(tree(true, 'a'))
+  await layout()
+  for (let index = 0; index < 10; index += 1) {
+    const activeId = index % 2 === 0 ? 'b' : 'a'
+    await view.rerender(tree(false, activeId === 'a' ? 'b' : 'a'))
+    await waitFor(() => expect(screen.queryByTestId('image-preview')).toBeNull())
+    await view.rerender(tree(true, activeId))
+    await layout()
+    expect(sources.get(`image-preview-image-${activeId}`)).toEqual(
+      items.find((item) => item.id === activeId)?.source,
+    )
+  }
 })
 it('exports only one component family and uses its source provider with ordinary Portal', async () => {
   expect(ImagePreview.Provider).toBeDefined()
@@ -257,4 +415,188 @@ it('applies ImagePreview index typography tokens with semantic style precedence'
     StyleSheet.flatten(screen.getByText('1/3', { includeHiddenElements: true }).props.style)
       .lineHeight,
   ).toBe(48)
+})
+
+it('freezes a confirmed dismiss at release and returns continuously to its source rect', async () => {
+  const timings: { target: number; finish?: (finished?: boolean) => void }[] = []
+  const timing = jest
+    .spyOn(Reanimated, 'withTiming')
+    .mockImplementation((target, _config, finish) => {
+      timings.push({ target: target as number, finish })
+      return 1 as never
+    })
+  const actualInteraction = interactionModule.useImagePreviewInteraction
+  const actualSession = sessionModule.useImagePreviewSession
+  let control!: ReturnType<typeof actualInteraction>
+  let session!: ReturnType<typeof actualSession>
+  const interactionHook = jest
+    .spyOn(interactionModule, 'useImagePreviewInteraction')
+    .mockImplementation((options) => {
+      control = actualInteraction(options)
+      return control
+    })
+  const sessionHook = jest
+    .spyOn(sessionModule, 'useImagePreviewSession')
+    .mockImplementation((options) => {
+      session = actualSession(options)
+      return session
+    })
+  const sourceRect = { x: 24, y: 48, width: 96, height: 64 }
+  const getSourceRect = jest.fn(() => sourceRect)
+  const events: string[] = []
+  function Controlled() {
+    const [visible, setVisible] = useState(true)
+    return (
+      <ImagePreviewContent
+        visible={visible}
+        items={items}
+        transitionDuration={240}
+        getSourceRect={getSourceRect}
+        onRequestClose={(reason) => {
+          events.push(reason)
+          setVisible(false)
+        }}
+        onClose={() => events.push('close')}
+        onClosed={() => events.push('closed')}
+      />
+    )
+  }
+  let frames: ReturnType<typeof queueAnimationFrames> | undefined
+  try {
+    await render(<Controlled />)
+    await layout()
+    for (const image of screen.queryAllByTestId(/^image-preview-image-/))
+      await fireEvent(image, 'load')
+    frames = queueAnimationFrames()
+
+    await act(() => {
+      control.pan.handlers.onBegin!({ absoluteX: 200, absoluteY: 400 } as never)
+      control.pan.handlers.onStart!({} as never)
+      control.pan.handlers.onUpdate!({
+        absoluteX: 200,
+        absoluteY: 600,
+        translationX: 0,
+        translationY: 200,
+      } as never)
+    })
+    const releaseRect = control.rect.value
+    const releaseMask = session.mask.value
+    await act(() =>
+      control.pan.handlers.onFinalize!(
+        {
+          absoluteX: 200,
+          absoluteY: 600,
+          translationX: 0,
+          translationY: 200,
+          velocityX: 0,
+          velocityY: 0,
+        } as never,
+        true,
+      ),
+    )
+    await waitFor(() => expect(session.phase).toBe('closing'))
+    await waitFor(() => expect(getSourceRect).toHaveBeenCalledTimes(2))
+    expect(events.slice(0, 2)).toEqual(['gesture', 'close'])
+    await act(async () => {
+      frames?.flush()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+    expect(control.dragY.value).toBe(200)
+    expect(session.rect.value.x).toBeCloseTo(releaseRect.x)
+    expect(session.rect.value.y).toBeCloseTo(releaseRect.y)
+    expect(session.rect.value.width).toBeCloseTo(releaseRect.width)
+    expect(session.rect.value.height).toBeCloseTo(releaseRect.height)
+    expect(session.mask.value).toBeCloseTo(releaseMask)
+
+    await act(() => {
+      session.progress.value = 0.5
+    })
+    const midpoint = interpolateRect(sourceRect, releaseRect, 0.5)
+    expect(session.rect.value.x).toBeCloseTo(midpoint.x)
+    expect(session.rect.value.y).toBeCloseTo(midpoint.y)
+    expect(session.mask.value).toBeCloseTo(releaseMask * 0.5)
+    expect(timings.some(({ target }) => target === 0)).toBe(true)
+  } finally {
+    frames?.restore()
+    sessionHook.mockRestore()
+    interactionHook.mockRestore()
+    timing.mockRestore()
+  }
+})
+
+it('restores a requested dismiss on the next frame when controlled visible stays true', async () => {
+  const actual = interactionModule.useImagePreviewInteraction
+  let control!: ReturnType<typeof actual>
+  const request = jest.fn()
+  const hook = jest
+    .spyOn(interactionModule, 'useImagePreviewInteraction')
+    .mockImplementation((options) => {
+      control = actual(options)
+      return control
+    })
+  let frames: ReturnType<typeof queueAnimationFrames> | undefined
+  try {
+    await render(
+      <ConfigProvider theme={{ motion: { enabled: false } }}>
+        <ImagePreviewContent
+          visible
+          items={items}
+          transitionDuration={0}
+          onRequestClose={request}
+        />
+      </ConfigProvider>,
+    )
+    await layout()
+    frames = queueAnimationFrames()
+    await dismiss(control)
+    expect(request).toHaveBeenCalledWith('gesture')
+    expect(control.dragY.value).toBe(200)
+
+    await act(async () => {
+      frames?.flush()
+      await new Promise((resolve) => setTimeout(resolve, 0))
+    })
+    expect(screen.getByTestId('image-preview')).toBeTruthy()
+    expect(control.dragY.value).toBe(0)
+    expect(control.state.value).toBe('idle')
+  } finally {
+    frames?.restore()
+    hook.mockRestore()
+  }
+})
+
+it('ignores a close animation completion after visible reopens', async () => {
+  const completions: { target: number; finish?: (finished?: boolean) => void }[] = []
+  const timing = jest
+    .spyOn(Reanimated, 'withTiming')
+    .mockImplementation((target, _config, finish) => {
+      completions.push({ target: target as number, finish })
+      return 1 as never
+    })
+  const closed = jest.fn()
+  const tree = (visible: boolean) => (
+    <ImagePreviewContent
+      visible={visible}
+      items={items}
+      transitionDuration={240}
+      onClosed={closed}
+    />
+  )
+  try {
+    const view = await render(tree(true))
+    await layout()
+    for (const image of screen.queryAllByTestId(/^image-preview-image-/))
+      await fireEvent(image, 'load')
+    await waitFor(() => expect(completions.some(({ target }) => target === 1)).toBe(true))
+
+    await view.rerender(tree(false))
+    await waitFor(() => expect(completions.some(({ target }) => target === 0)).toBe(true))
+    const oldClose = completions.filter(({ target }) => target === 0).at(-1)!
+    await view.rerender(tree(true))
+    await act(() => oldClose.finish?.(true))
+    expect(screen.getByTestId('image-preview')).toBeTruthy()
+    expect(closed).not.toHaveBeenCalled()
+  } finally {
+    timing.mockRestore()
+  }
 })

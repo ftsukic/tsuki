@@ -60,8 +60,8 @@ export function useImagePreviewSession({
   )
   const fromClip = useSharedValue(fullClip)
   const targetClip = useSharedValue(fullClip)
-  const from = useSharedValue(interaction.rect.value)
-  const target = useSharedValue(interaction.rect.value)
+  const from = useSharedValue(fullClip)
+  const target = useSharedValue(fullClip)
   const anchored = useSharedValue(false)
   const frozen = useSharedValue(false)
   const paging = useSharedValue(false)
@@ -89,7 +89,7 @@ export function useImagePreviewSession({
     finish,
     ready && (phase === 'opening' || phase === 'closing'),
   )
-  const { rect: interactionRect, dragY } = interaction
+  const { rect: interactionRect, dismissProgress } = interaction
   const rect = useDerivedValue(
     () =>
       frozen.value
@@ -125,8 +125,8 @@ export function useImagePreviewSession({
         ? 0
         : frozen.value
           ? progress.value * shade.value
-          : progress.value * Math.max(0.25, 1 - dragY.value / viewport.height),
-    [phase, ready, viewport.height, dragY],
+          : progress.value * (1 - dismissProgress.value),
+    [phase, ready, dismissProgress],
   )
   // Gate the entire pager, including pre-rendered neighbours, before source/layout preparation.
   const presentation = useDerivedValue(

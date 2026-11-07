@@ -44,16 +44,17 @@ export function ImagePreviewPage({
   playing: boolean
   originalRequested: boolean
   originalAttempt: number
-  onDisplayStateChange: (id: string, status: ImagePreviewLoadState) => void
+  onDisplayStateChange: (
+    id: string,
+    source: 'thumbnail' | 'image',
+    status: ImagePreviewLoadState,
+  ) => void
   onOriginalStateChange: (id: string, status: ImagePreviewLoadState) => void
 }) {
   const base = containRect(item, width, height)
   const frame = useAnimatedStyle(() => {
     const current = selected.value === item.id ? rect.value : base
-    const bounds = selected.value === item.id ? clip.value : { x: 0, y: 0 }
     return {
-      left: base.x - bounds.x,
-      top: base.y - bounds.y,
       opacity:
         hidden.value && selected.value !== item.id
           ? 0
@@ -67,10 +68,36 @@ export function ImagePreviewPage({
         { scaleY: current.height / base.height },
       ],
     }
-  }, [selected, item.id, base, height, hidden, opacity, rect, width, clip, active])
-  const clippingStyle = useAnimatedStyle(() => {
-    const bounds = selected.value === item.id ? clip.value : { x: 0, y: 0, width, height }
-    return { left: bounds.x, top: bounds.y, width: bounds.width, height: bounds.height }
+  }, [selected, item.id, base, height, hidden, opacity, rect, width, active])
+  const clipOffsetStyle = useAnimatedStyle(() => {
+    const current = selected.value === item.id ? clip.value : { x: 0, y: 0, width, height }
+    return {
+      transform: [
+        { translateX: current.x + current.width / 2 - width / 2 },
+        { translateY: current.y + current.height / 2 - height / 2 },
+      ],
+    }
+  }, [selected, item.id, clip, width, height, active])
+  const clippingScale = useAnimatedStyle(() => {
+    const current = selected.value === item.id ? clip.value : { width, height }
+    return {
+      transform: [{ scaleX: current.width / width }, { scaleY: current.height / height }],
+    }
+  }, [selected, item.id, clip, width, height, active])
+  const contentScale = useAnimatedStyle(() => {
+    const current = selected.value === item.id ? clip.value : { width, height }
+    return {
+      transform: [{ scaleX: width / current.width }, { scaleY: height / current.height }],
+    }
+  }, [selected, item.id, clip, width, height, active])
+  const contentOffset = useAnimatedStyle(() => {
+    const current = selected.value === item.id ? clip.value : { x: 0, y: 0, width, height }
+    return {
+      transform: [
+        { translateX: -(current.x + current.width / 2 - width / 2) },
+        { translateY: -(current.y + current.height / 2 - height / 2) },
+      ],
+    }
   }, [selected, item.id, clip, width, height, active])
   const imageStyle = useAnimatedStyle(() => {
     const current = selected.value === item.id ? rect.value : base
@@ -82,35 +109,58 @@ export function ImagePreviewPage({
   return (
     <View style={{ width: pageWidth, height }}>
       <Animated.View
-        style={[{ position: 'absolute', overflow: 'hidden' }, clippingStyle]}
+        style={{ width, height, overflow: 'hidden' }}
         testID={`image-preview-page-${item.id}`}
       >
         <Animated.View
-          testID={`image-preview-frame-${item.id}`}
-          style={[
-            {
-              position: 'absolute',
-              left: base.x,
-              top: base.y,
-              width: base.width,
-              height: base.height,
-              overflow: 'hidden',
-            },
-            frame,
-          ]}
+          testID={`image-preview-clip-offset-${item.id}`}
+          style={[{ position: 'absolute', left: 0, top: 0, width, height }, clipOffsetStyle]}
         >
-          <Animated.View style={[{ width: '100%', height: '100%' }, imageStyle]}>
-            <ImagePreviewItem
-              item={item}
-              imageAdapter={imageAdapter}
-              renderMedia={renderMedia}
-              active={active}
-              playing={playing}
-              originalRequested={originalRequested}
-              originalAttempt={originalAttempt}
-              onOriginalStateChange={onOriginalStateChange}
-              onDisplayStateChange={onDisplayStateChange}
-            />
+          <Animated.View
+            testID={`image-preview-clip-scale-${item.id}`}
+            style={[
+              { position: 'absolute', left: 0, top: 0, width, height, overflow: 'hidden' },
+              clippingScale,
+            ]}
+          >
+            <Animated.View
+              testID={`image-preview-content-scale-${item.id}`}
+              style={[{ position: 'absolute', left: 0, top: 0, width, height }, contentScale]}
+            >
+              <Animated.View
+                testID={`image-preview-content-offset-${item.id}`}
+                style={[{ position: 'absolute', left: 0, top: 0, width, height }, contentOffset]}
+              >
+                <Animated.View
+                  testID={`image-preview-frame-${item.id}`}
+                  style={[
+                    {
+                      position: 'absolute',
+                      left: base.x,
+                      top: base.y,
+                      width: base.width,
+                      height: base.height,
+                      overflow: 'hidden',
+                    },
+                    frame,
+                  ]}
+                >
+                  <Animated.View style={[{ width: '100%', height: '100%' }, imageStyle]}>
+                    <ImagePreviewItem
+                      item={item}
+                      imageAdapter={imageAdapter}
+                      renderMedia={renderMedia}
+                      active={active}
+                      playing={playing}
+                      originalRequested={originalRequested}
+                      originalAttempt={originalAttempt}
+                      onOriginalStateChange={onOriginalStateChange}
+                      onDisplayStateChange={onDisplayStateChange}
+                    />
+                  </Animated.View>
+                </Animated.View>
+              </Animated.View>
+            </Animated.View>
           </Animated.View>
         </Animated.View>
       </Animated.View>

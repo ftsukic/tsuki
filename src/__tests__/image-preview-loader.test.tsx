@@ -50,21 +50,36 @@ describe('image preview preloading', () => {
         adapter={{ ...defaultImagePreviewAdapter, preload }}
       />,
     )
-    expect(preload.mock.calls.map(([source]) => source)).toEqual([poster, image('neighbor').source])
+    expect(preload.mock.calls.map(([source]) => source)).toEqual([image('neighbor').source])
   })
 
-  it('only preloads the current and two neighboring sources and deduplicates the window', async () => {
+  it('preloads adjacent sources without prefetching the mounted current image', async () => {
     const preload = jest.fn()
     const adapter = { ...defaultImagePreviewAdapter, preload }
     const view = await render(<LoaderProbe adapter={adapter} />)
     expect(preload.mock.calls.map(([source]) => source)).toEqual([
-      images[1].source,
       images[0].source,
       images[2].source,
     ])
     await view.rerender(<LoaderProbe activeIndex={2} adapter={adapter} />)
     expect(preload).toHaveBeenCalledTimes(4)
     expect(preload).toHaveBeenLastCalledWith(images[3].source)
+  })
+
+  it('skips an adjacent duplicate of the current source', async () => {
+    const preload = jest.fn()
+    const current = image('current')
+    const duplicate = { ...image('duplicate'), source: current.source }
+    await render(
+      <LoaderProbe
+        items={[image('before'), current, duplicate]}
+        activeIndex={1}
+        adapter={{ ...defaultImagePreviewAdapter, preload }}
+      />,
+    )
+    expect(preload).toHaveBeenCalledTimes(1)
+    expect(preload).toHaveBeenCalledWith(image('before').source)
+    expect(preload).not.toHaveBeenCalledWith(current.source)
   })
 
   it('preserves complete private sources for adapters and distinguishes credentials', async () => {
@@ -78,11 +93,21 @@ describe('image preview preloading', () => {
       ...first,
       source: { ...first.source, headers: { Authorization: 'second' } },
     }
-    const view = await render(<LoaderProbe items={[first]} activeIndex={0} adapter={adapter} />)
+    const third = {
+      ...first,
+      source: { ...first.source, headers: { Authorization: 'third' } },
+    }
+    const middle = image('middle')
+    const view = await render(
+      <LoaderProbe items={[first, middle, second]} activeIndex={1} adapter={adapter} />,
+    )
     expect(preload).toHaveBeenCalledWith(first.source)
-    await view.rerender(<LoaderProbe items={[second]} activeIndex={0} adapter={adapter} />)
-    expect(preload).toHaveBeenLastCalledWith(second.source)
-    expect(preload).toHaveBeenCalledTimes(2)
+    expect(preload).toHaveBeenCalledWith(second.source)
+    await view.rerender(
+      <LoaderProbe items={[first, middle, third]} activeIndex={1} adapter={adapter} />,
+    )
+    expect(preload).toHaveBeenLastCalledWith(third.source)
+    expect(preload).toHaveBeenCalledTimes(3)
   })
 
   it('never strips headers or request bodies into an unauthenticated native prefetch', async () => {
@@ -113,9 +138,9 @@ describe('image preview preloading', () => {
     const view = await render(<LoaderProbe adapter={first} />)
     await view.rerender(<LoaderProbe adapter={first} visible={false} />)
     await view.rerender(<LoaderProbe adapter={first} />)
-    expect(preload).toHaveBeenCalledTimes(6)
+    expect(preload).toHaveBeenCalledTimes(4)
     await view.rerender(<LoaderProbe adapter={second} />)
-    expect(second.preload).toHaveBeenCalledTimes(3)
+    expect(second.preload).toHaveBeenCalledTimes(2)
   })
 
   it('bounds history so older images can be warmed again after a long browsing session', async () => {
@@ -127,20 +152,77 @@ describe('image preview preloading', () => {
     }
     expect(preload).toHaveBeenCalledTimes(images.length)
     await view.rerender(<LoaderProbe activeIndex={0} adapter={adapter} />)
-    expect(preload).toHaveBeenCalledTimes(images.length + 2)
+    expect(preload).toHaveBeenCalledTimes(images.length + 1)
   })
 
   it('catches failed preloads and permits retry when the window is prepared again', async () => {
     const preload = jest.fn().mockRejectedValueOnce(new Error('offline')).mockResolvedValue(true)
     const adapter = { ...defaultImagePreviewAdapter, preload }
-    const view = await render(<LoaderProbe items={[images[0]]} activeIndex={0} adapter={adapter} />)
+    const view = await render(
+      <LoaderProbe items={[images[0], images[1]]} activeIndex={0} adapter={adapter} />,
+    )
     await act(async () => Promise.resolve())
-    await view.rerender(<LoaderProbe items={[images[0]]} activeIndex={0} adapter={adapter} />)
+    await view.rerender(
+      <LoaderProbe items={[images[0], images[1]]} activeIndex={0} adapter={adapter} />,
+    )
     expect(preload).toHaveBeenCalledTimes(2)
   })
 })
 
 describe('image preview media lifecycle', () => {
+  it('keeps a loaded thumbnail visible while the high-resolution fade starts', async () => {
+    const timing = jest.spyOn(Reanimated, 'withTiming')
+    const item = {
+      ...image('photo'),
+      thumbnail: { uri: 'https://example.com/photo-thumb.jpg' },
+    }
+    const onDisplayStateChange = jest.fn()
+    try {
+      await render(<ImagePreviewItem item={item} onDisplayStateChange={onDisplayStateChange} />)
+      const thumbnail = screen.getByTestId('image-preview-thumbnail-photo')
+      const original = screen.getByTestId('image-preview-image-photo')
+      expect(thumbnail).toBeVisible()
+      expect(original).not.toBeVisible()
+      expect(screen.queryByTestId('image-preview-image-photo-loading')).toBeNull()
+
+      await fireEvent(thumbnail, 'load')
+      expect(onDisplayStateChange).toHaveBeenCalledWith('photo', 'thumbnail', 'loaded')
+      expect(thumbnail).toBeVisible()
+      expect(original).not.toBeVisible()
+
+      timing.mockClear()
+      await fireEvent(original, 'load')
+      expect(timing).toHaveBeenCalledWith(
+        1,
+        expect.objectContaining({ duration: expect.any(Number) }),
+        expect.any(Function),
+      )
+      expect(thumbnail).toBeVisible()
+      expect(screen.getByTestId('image-preview-image-photo')).toBeTruthy()
+      expect(screen.queryByTestId('image-preview-image-photo-loading')).toBeNull()
+    } finally {
+      timing.mockRestore()
+    }
+  })
+
+  it('keeps the thumbnail behind a failed high-resolution image and exposes retry', async () => {
+    const item = {
+      ...image('photo'),
+      thumbnail: { uri: 'https://example.com/photo-thumb.jpg' },
+    }
+    await render(<ImagePreviewItem item={item} />)
+    const thumbnail = screen.getByTestId('image-preview-thumbnail-photo')
+    await fireEvent(thumbnail, 'load')
+    await fireEvent(screen.getByTestId('image-preview-image-photo'), 'error')
+    expect(thumbnail).toBeVisible()
+    expect(screen.getByRole('button', { name: '图片加载失败，重试' })).toBeTruthy()
+    expect(screen.getByTestId('image-preview-image-photo')).not.toBeVisible()
+    expect(screen.queryByTestId('image-preview-image-photo-loading')).toBeNull()
+    await fireEvent.press(screen.getByRole('button', { name: '图片加载失败，重试' }))
+    expect(thumbnail).toBeVisible()
+    expect(screen.getByTestId('image-preview-image-photo')).not.toBeVisible()
+  })
+
   it('fades in the loaded original while preserving the preview underneath', async () => {
     const timing = jest.spyOn(Reanimated, 'withTiming')
     try {
