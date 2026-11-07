@@ -5,15 +5,19 @@ import { PortalConsumer } from './portal-consumer'
 import { PortalHost } from './portal-host'
 import { SwipeCellPressContext } from '../swipe-cell/context'
 import { ThemeContext } from '../theme/context'
+import { TextInheritanceContext } from '../text/context'
 import type { PortalProps } from './types'
 
 function PortalComponent({ children }: PortalProps) {
   const destination = useContext(PortalDestinationContext)
   const manager = useContext(PortalContext)
   const theme = useContext(ThemeContext)
+  const textInheritance = useContext(TextInheritanceContext)
   const NativePortal = destination?.backend?.Portal
   const content = (
-    <SwipeCellPressContext.Provider value={null}>{children}</SwipeCellPressContext.Provider>
+    <TextInheritanceContext.Provider value={textInheritance}>
+      <SwipeCellPressContext.Provider value={null}>{children}</SwipeCellPressContext.Provider>
+    </TextInheritanceContext.Provider>
   )
 
   if (NativePortal) {

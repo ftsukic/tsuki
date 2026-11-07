@@ -28,6 +28,8 @@ import { Button, Icon } from '@ftsukic/tsuki'
 
 - **禁用与加载恢复**：切换禁用与加载状态，检查按钮颜色恢复和点击计数。 [示例源码](../../../src/button/__fixtures__/examples/state-recovery.tsx)
 
+- **嵌套文本**：多层业务组件中的 Tsuki Text 继承 Button 内容样式，局部 Text props 仍可覆盖对应值。 [示例源码](../../../src/button/__fixtures__/examples/nested-text.tsx)
+
 升级已有用法请参阅 [Button API 迁移](../../guide/button-migration.md)。
 
 ## API
@@ -141,4 +143,4 @@ Group 不添加 `gap`。有边框的相邻 Button 使用实际 `borderWidth` 消
 
 Button 通过现有 Pressable 接入统一 Motion 策略，保持原有背景/遮罩按压反馈。全局关闭或 Reduced Motion 时反馈立即到达按下状态；需要缩放或透明度反馈时可使用 `MotionPressable`。
 
-图标与内容间距由根容器的 columnGap 管理，默认使用 Button.iconGap（8）；circle 为 0。children 在私有内容容器内组合，数组和 Fragment 的片段之间不会额外插入图标间距。styles.icon 不再自带左右 margin；styles.content 继续只定制自动生成的 Text。仅图标、仅文字或空 children 不产生额外区域间距。
+图标与内容间距由根容器的 columnGap 管理，默认使用 Button.iconGap（8）；circle 为 0。children 在私有内容容器内组合，数组和 Fragment 的片段之间不会额外插入图标间距。字符串和数字继续转换为 Tsuki Text；自定义子组件中的 Tsuki Text 也会继承 Button 的 `content` 样式，`styles.content` 同时作用于自动生成和嵌套的 Tsuki Text。图标内容不继承 `content` 样式，原生 React Native `Text` 也不会自动继承。styles.icon 不再自带左右 margin。仅图标、仅文字或空 children 不产生额外区域间距。

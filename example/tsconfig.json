@@ -10,5 +10,5 @@
       "@ftsukic/tsuki/teleport": ["../src/teleport.ts"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": ["**/*.ts", "**/*.tsx", "nativewind-env.d.ts"]
 }

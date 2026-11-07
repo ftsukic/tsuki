@@ -5,6 +5,7 @@ import { Icon } from '../icon'
 import type { IconName } from '../icon'
 import { Text } from '../text'
 import type { CellToken } from '../theme'
+import { TextInheritanceProvider } from '../text/text-inheritance-provider'
 import type { CellLayoutState } from './normalize'
 import type { CellResolvedStyles } from './style'
 import type { CellProps, CellSemanticStyles } from './types'
@@ -39,6 +40,14 @@ function renderText(value: ReactNode, style: StyleProp<TextStyle>, numberOfLines
   return value
 }
 
+function renderTextSlot(value: ReactNode, style: StyleProp<TextStyle>, numberOfLines?: number) {
+  return (
+    <TextInheritanceProvider style={style}>
+      {renderText(value, style, numberOfLines)}
+    </TextInheritanceProvider>
+  )
+}
+
 interface CellLayoutProps {
   props: CellProps
   layout: CellLayoutState
@@ -53,7 +62,7 @@ export function CellLayout({ props, layout, resolved, semantic, token }: CellLay
     <View style={[resolved.container, semantic?.container]}>
       {layout.hasLeading ? (
         <View style={[resolved.leading, semantic?.leading]}>
-          {renderText(props.leading, resolved.title)}
+          {renderTextSlot(props.leading, resolved.title)}
         </View>
       ) : null}
       <View style={resolved.main}>
@@ -65,28 +74,28 @@ export function CellLayout({ props, layout, resolved, semantic, token }: CellLay
                   <Text style={[resolved.required, semantic?.required]}>*</Text>
                 ) : null}
                 {layout.hasTitle
-                  ? renderText(props.title, [resolved.title, semantic?.title], props.titleLines)
+                  ? renderTextSlot(props.title, [resolved.title, semantic?.title], props.titleLines)
                   : null}
                 {layout.hasTitleExtra ? (
                   <View style={[resolved.titleExtraContainer, semantic?.titleExtraContainer]}>
-                    {renderText(props.titleExtra, [resolved.titleExtra, semantic?.titleExtra])}
+                    {renderTextSlot(props.titleExtra, [resolved.titleExtra, semantic?.titleExtra])}
                   </View>
                 ) : null}
               </View>
             ) : null}
             {layout.hasDescription
-              ? renderText(props.description, [resolved.description, semantic?.description])
+              ? renderTextSlot(props.description, [resolved.description, semantic?.description])
               : null}
           </View>
         ) : null}
         {layout.hasValueArea ? (
           <View style={[resolved.valueContainer, semantic?.valueContainer]}>
             {layout.hasValue
-              ? renderText(props.value, [resolved.value, semantic?.value], props.valueLines)
+              ? renderTextSlot(props.value, [resolved.value, semantic?.value], props.valueLines)
               : null}
             {layout.hasValueExtra ? (
               <View style={[resolved.valueExtraContainer, semantic?.valueExtraContainer]}>
-                {renderText(props.valueExtra, [resolved.valueExtra, semantic?.valueExtra])}
+                {renderTextSlot(props.valueExtra, [resolved.valueExtra, semantic?.valueExtra])}
               </View>
             ) : null}
           </View>
@@ -94,7 +103,7 @@ export function CellLayout({ props, layout, resolved, semantic, token }: CellLay
       </View>
       {layout.hasTrailing ? (
         <View style={[resolved.trailingContainer, semantic?.trailingContainer]}>
-          {renderText(props.trailing, [resolved.trailing, semantic?.trailing])}
+          {renderTextSlot(props.trailing, [resolved.trailing, semantic?.trailing])}
         </View>
       ) : null}
       {props.showArrow ? (

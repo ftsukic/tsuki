@@ -1,17 +1,29 @@
 /* RNTL v14 fireEvent returns a Promise; this lint rule still assumes synchronous events. */
 /* eslint-disable testing-library/no-await-sync-events */
 import { cleanup, fireEvent, render, screen } from '@testing-library/react-native'
+import { useEffect } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+import { PortalHost } from '..'
 import FixtureExplorer from '../../example/components/fixture-explorer'
-import { FixtureOverview } from '../fixture-overview'
+import { FixtureOverview, FixtureOverviewModeProvider } from '../fixture-overview'
 import type { StyleProp, ViewStyle } from 'react-native'
 
 const mockPush = jest.fn()
 
 jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }), { virtual: true })
-jest.mock('../../example/components/demo-provider', () => ({
-  useDemoTheme: () => ({ mode: 'system', setMode: jest.fn() }),
-}))
+jest.mock('@/theme', () => {
+  const actual = jest.requireActual('@/theme')
+  return {
+    ...actual,
+    useAppTheme: () => actual.resolveAppTheme(actual.defaultAppTheme, { mode: 'light' }),
+    useAppThemeSettings: () => ({
+      mode: 'system',
+      setMode: jest.fn(),
+      baseFontSize: 16,
+      setBaseFontSize: jest.fn(),
+    }),
+  }
+})
 jest.mock('../../example/fixtures/categories', () => ({
   componentCategories: [{ title: '基础组件', components: ['button', 'cell'] }],
 }))
@@ -34,6 +46,35 @@ function findNodes(value: unknown, predicate: (node: JsonNode) => boolean): Json
 
 function nodeStyle(node: JsonNode) {
   return StyleSheet.flatten(node.props.style as StyleProp<ViewStyle>) ?? {}
+}
+
+function createFixtureExamples(onFirstUnmount = jest.fn()) {
+  function FirstExample() {
+    useEffect(() => () => onFirstUnmount(), [])
+    return <Text testID="first-example">第一个示例内容</Text>
+  }
+
+  function SecondExample() {
+    return <Text testID="second-example">第二个示例内容</Text>
+  }
+
+  return {
+    examples: [
+      {
+        Component: FirstExample,
+        description: '第一个示例说明',
+        id: 'first',
+        title: '示例一',
+      },
+      {
+        Component: SecondExample,
+        description: '第二个示例说明',
+        id: 'second',
+        title: '示例二',
+      },
+    ],
+    onFirstUnmount,
+  }
 }
 
 jest.mock('../../example/fixtures/catalog', () => {
@@ -140,5 +181,77 @@ describe('FixtureExplorer component navigation', () => {
         findNodes(view.toJSON(), (node) => nodeStyle(node).marginHorizontal === -20),
       ).toHaveLength(0)
     }
+  })
+})
+
+describe('FixtureOverview mode', () => {
+  it('renders every example by default without a provider', async () => {
+    const { examples } = createFixtureExamples()
+
+    await render(<FixtureOverview examples={examples} />)
+
+    expect(screen.getByTestId('first-example')).toBeTruthy()
+    expect(screen.getByTestId('second-example')).toBeTruthy()
+    expect(screen.queryByText('选择示例')).toBeNull()
+  })
+
+  it('mounts only the selected example when the provider mode is single', async () => {
+    const { examples } = createFixtureExamples()
+
+    await render(
+      <FixtureOverviewModeProvider mode="single">
+        <PortalHost>
+          <FixtureOverview examples={examples} />
+        </PortalHost>
+      </FixtureOverviewModeProvider>,
+    )
+
+    expect(screen.getByTestId('first-example')).toBeTruthy()
+    expect(screen.queryByTestId('second-example')).toBeNull()
+    expect(screen.getByText('选择示例')).toBeTruthy()
+  })
+
+  it('unmounts the previous example after switching selection', async () => {
+    const onFirstUnmount = jest.fn()
+    const { examples } = createFixtureExamples(onFirstUnmount)
+
+    await render(
+      <FixtureOverviewModeProvider mode="single">
+        <FixtureOverview examples={examples} />
+      </FixtureOverviewModeProvider>,
+    )
+    await fireEvent.press(screen.getByText('示例二'))
+
+    expect(screen.queryByTestId('first-example')).toBeNull()
+    expect(screen.getByTestId('second-example')).toBeTruthy()
+    expect(onFirstUnmount).toHaveBeenCalledTimes(1)
+  })
+
+  it('lets explicit all mode override a single-mode provider', async () => {
+    const { examples } = createFixtureExamples()
+
+    await render(
+      <FixtureOverviewModeProvider mode="single">
+        <FixtureOverview examples={examples} mode="all" />
+      </FixtureOverviewModeProvider>,
+    )
+
+    expect(screen.getByTestId('first-example')).toBeTruthy()
+    expect(screen.getByTestId('second-example')).toBeTruthy()
+    expect(screen.queryByText('选择示例')).toBeNull()
+  })
+
+  it('keeps explicit single mode when the provider mode is all', async () => {
+    const { examples } = createFixtureExamples()
+
+    await render(
+      <FixtureOverviewModeProvider mode="all">
+        <FixtureOverview examples={examples} mode="single" />
+      </FixtureOverviewModeProvider>,
+    )
+
+    expect(screen.getByTestId('first-example')).toBeTruthy()
+    expect(screen.queryByTestId('second-example')).toBeNull()
+    expect(screen.getByText('选择示例')).toBeTruthy()
   })
 })

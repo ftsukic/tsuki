@@ -1,6 +1,7 @@
 import { act, cleanup, render, screen } from '@testing-library/react-native'
 import { Text, View } from 'react-native'
 import ComponentScreen from '../../example/app/components/[id]'
+import { AppThemeProvider } from '../../example/theme'
 import { mountPortal, TsukiProvider } from '..'
 import type { TestInstance } from 'test-renderer'
 
@@ -70,11 +71,13 @@ function isInsidePage(node: TestInstance) {
 
 function App({ showPage = true }: { showPage?: boolean }) {
   return (
-    <TsukiProvider theme={{ seed: { motion: false } }}>
-      <View testID="route-boundary" style={{ flex: 1 }}>
-        {showPage ? <ComponentScreen /> : null}
-      </View>
-    </TsukiProvider>
+    <AppThemeProvider>
+      <TsukiProvider theme={{ seed: { motion: false } }}>
+        <View testID="route-boundary" style={{ flex: 1 }}>
+          {showPage ? <ComponentScreen /> : null}
+        </View>
+      </TsukiProvider>
+    </AppThemeProvider>
   )
 }
 

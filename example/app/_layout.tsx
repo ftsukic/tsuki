@@ -1,8 +1,9 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router'
+import '../global.css'
+import { ThemeProvider } from 'expo-router'
 import { Stack } from 'expo-router/stack'
 import { StatusBar, View } from 'react-native'
-import { useToken } from '@ftsukic/tsuki'
-import { DemoProvider, useDemoTheme } from '@/components/demo-provider'
+import { DemoProvider } from '@/components/demo-provider'
+import { toNavigationTheme, useAppTheme } from '@/theme'
 
 export const unstable_settings = { initialRouteName: 'index' }
 
@@ -15,31 +16,19 @@ export default function RootLayout() {
 }
 
 function DemoStack() {
-  const { token } = useToken()
-  const { dark } = useDemoTheme()
-  const baseTheme = dark ? DarkTheme : DefaultTheme
-  const navigationTheme = {
-    ...baseTheme,
-    colors: {
-      ...baseTheme.colors,
-      primary: token.colorPrimary,
-      background: token.colorBgLayout,
-      card: token.colorBgContainer,
-      text: token.colorText,
-      border: token.colorBorder,
-      notification: token.colorError,
-    },
-  }
+  const theme = useAppTheme()
+  const navigationTheme = toNavigationTheme(theme)
   return (
     <ThemeProvider value={navigationTheme}>
-      <View style={{ flex: 1, backgroundColor: token.colorBgLayout }}>
-        <StatusBar barStyle={dark ? 'light-content' : 'dark-content'} />
+      <View style={{ flex: 1, backgroundColor: theme.colors.surface.page }}>
+        <StatusBar barStyle={theme.mode === 'dark' ? 'light-content' : 'dark-content'} />
         <Stack
           screenOptions={{
-            headerStyle: { backgroundColor: token.colorBgContainer },
-            headerTintColor: token.colorText,
+            animation: 'ios_from_right',
+            headerStyle: { backgroundColor: theme.colors.surface.container },
+            headerTintColor: theme.colors.text.primary,
             headerShadowVisible: false,
-            contentStyle: { backgroundColor: token.colorBgLayout },
+            contentStyle: { backgroundColor: theme.colors.surface.page },
           }}
         >
           <Stack.Screen name="labs/shared-transition" options={{ headerShown: false }} />

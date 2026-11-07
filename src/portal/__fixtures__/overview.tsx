@@ -2,6 +2,7 @@ import PortalControlledInputExample from './examples/controlled-input'
 import { FixtureOverview } from '../../fixture-overview'
 import PortalBasicExample from './examples/basic'
 import PortalImperativeExample from './examples/imperative'
+import PortalTextInheritanceExample from './examples/text-inheritance'
 
 /**
  * @title Portal overview
@@ -17,6 +18,12 @@ export default function PortalOverview() {
           description: '页面父级持有 value，验证中文输入和外部赋值、清空。',
           id: 'controlled-input',
           title: '父级受控输入',
+        },
+        {
+          Component: PortalTextInheritanceExample,
+          description: 'Portal 中的自定义 Tsuki Text 保留调用位置 Button 的内容样式。',
+          id: 'text-inheritance',
+          title: '文本样式透传',
         },
         {
           Component: PortalBasicExample,

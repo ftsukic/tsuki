@@ -13,6 +13,7 @@ import CellLabelExample from './examples/label'
 import CellLargeExample from './examples/large'
 import CellLinkExample from './examples/link'
 import CellLongContentExample from './examples/long-content'
+import CellNestedTextExample from './examples/nested-text'
 import CellRequiredExample from './examples/required'
 import CellTitleExtraExample from './examples/title-extra'
 import CellValueExample from './examples/value'
@@ -86,6 +87,13 @@ export default function CellOverview() {
           description: 'valueExtra 紧邻 value。',
           id: 'value-extra',
           title: 'Value extra',
+        },
+        {
+          Component: CellNestedTextExample,
+          description:
+            '自定义 Tsuki Text 分别继承 leading、title、description、value 等文本槽样式。',
+          id: 'nested-text',
+          title: '嵌套文本',
         },
         {
           Component: CellLongContentExample,

@@ -1,5 +1,6 @@
 import { FixtureOverview } from '../../fixture-overview'
 import ButtonGroupFixture from './examples/group'
+import ButtonNestedTextFixture from './examples/nested-text'
 import ButtonPressFeedbackFixture from './examples/press-feedback'
 import ButtonShapesFixture from './examples/shapes'
 import ButtonVariantsFixture from './examples/variants'
@@ -20,6 +21,12 @@ export default function ButtonOverview() {
           description: '展示类型、视觉变体、自定义颜色和语义样式。',
           id: 'variants',
           title: '类型与变体',
+        },
+        {
+          Component: ButtonNestedTextFixture,
+          description: '多层自定义组件中的 Tsuki Text 自动继承 Button 内容样式。',
+          id: 'nested-text',
+          title: '嵌套文本',
         },
         {
           Component: ButtonSizesFixture,

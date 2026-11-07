@@ -54,6 +54,8 @@ import { Cell } from '@ftsukic/tsuki'
 
 - **语义样式**：CellStyles 插槽。 [示例源码](../../../src/cell/__fixtures__/examples/semantic.tsx)
 
+- **嵌套文本**：联系人列表中的自定义 Tsuki Text 分别继承对应文本槽样式。 [示例源码](../../../src/cell/__fixtures__/examples/nested-text.tsx)
+
 - **主题定制**：Cell component token。 [示例源码](../../../src/cell/__fixtures__/examples/theme.tsx)
 
 ## API
@@ -90,7 +92,7 @@ Cell 继承 React Native `PressableProps`，但由 Cell 管理 children、style 
 
 内容行按 `leading + 主体 + trailing + arrow` 排列。主体使用剩余宽度，并保留 minWidth: 0；horizontal 时标题区按内容宽度占位、值区使用剩余宽度，vertical 时标题区位于值区上方。默认一级区域顶部对齐，center 时整体居中。小 leading 节点和箭头在自己的首行行高盒内居中，大 Avatar 不会被固定宽高限制。
 
-自定义 ReactNode 原样渲染，不会被 cloneElement 或注入 props；其内部排版、省略和交互由调用方负责。字符串和数字自动创建 Text，数组与 Fragment 中的字符串和数字也递归包装；空数组和空 Fragment 不产生区域或间距。titleLines / valueLines 控制对应区域中每个自动创建的 Text，自定义节点保持原样。titleExtra / valueExtra 保持各自容器内的默认居中；trailing 按自然尺寸占位，窄屏长内容可通过 trailingContainer 设置 maxWidth / flexShrink。
+自定义 ReactNode 原样渲染，不会被 cloneElement 或注入 props；其中的 Tsuki Text 会继承各自 leading、title、titleExtra、description、value、valueExtra 或 trailing 文本槽样式，多层自定义组件、Fragment 和数组都可继承，槽位之间互不污染。原生 React Native `Text` 不消费该上下文。字符串和数字自动创建 Text，数组与 Fragment 中的字符串和数字也递归包装；空数组和空 Fragment 不产生区域或间距。titleLines / valueLines 控制对应区域中每个自动创建的 Text，自定义节点保持原样。titleExtra / valueExtra 保持各自容器内的默认居中；trailing 按自然尺寸占位，窄屏长内容可通过 trailingContainer 设置 maxWidth / flexShrink。
 
 ### CellStyles
 
@@ -106,8 +108,8 @@ Cell 继承 React Native `PressableProps`，但由 Cell 管理 children、style 
 | trailingContainer | `StyleProp<ViewStyle>` | 独立右侧内容容器。 |
 | arrow | `StyleProp<ViewStyle>` | 箭头容器。 |
 | divider | `StyleProp<ViewStyle>` | 底部分割线。 |
-| title / description / value | `StyleProp<TextStyle>` | 自动创建的对应文字。 |
-| titleExtra / valueExtra / trailing | `StyleProp<TextStyle>` | 自动创建的对应扩展文字；不作用于自定义 ReactNode 内部。 |
+| title / description / value | `StyleProp<TextStyle>` | 对应文本槽样式；也由槽内的 Tsuki Text 继承。 |
+| titleExtra / valueExtra / trailing | `StyleProp<TextStyle>` | 对应文本槽样式；也由槽内的 Tsuki Text 继承。 |
 | required | `StyleProp<TextStyle>` | 必填标记。 |
 
 默认样式先由 token 派生，再应用 styles，最后应用根 style。按下反馈使用 Pressable 的 pressed 状态：默认按下背景覆盖静态根背景；函数式 styles.root 显式返回 backgroundColor 时可覆盖按下背景。函数式 styles 应保持纯函数，不依赖调用次数。

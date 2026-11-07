@@ -2,15 +2,15 @@ import { useState } from 'react'
 import { useRouter } from 'expo-router'
 import { FlatList, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Cell, Search, Segmented, Text, useToken } from '@ftsukic/tsuki'
+import { Cell, Search, Segmented, Text } from '@ftsukic/tsuki'
 import { componentCatalog } from '@/fixtures/catalog'
 import { componentCategories } from '@/fixtures/categories'
-import { useDemoTheme } from './demo-provider'
+import { useAppTheme, useAppThemeSettings } from '@/theme'
 
 export default function FixtureExplorer() {
   const router = useRouter()
-  const { token } = useToken()
-  const { mode, setMode } = useDemoTheme()
+  const theme = useAppTheme()
+  const { mode, setMode } = useAppThemeSettings()
   const [query, setQuery] = useState('')
   const keyword = query.trim().toLowerCase()
   const sections = componentCategories
@@ -28,26 +28,66 @@ export default function FixtureExplorer() {
     }))
     .filter((section) => section.data.length > 0)
   const resultCount = sections.reduce((count, section) => count + section.data.length, 0)
+  const groupBody = {
+    ...styles.groupBody,
+    borderRadius: theme.shape.radius.scale[theme.shape.radius.semantic.card],
+  }
+
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: token.colorBgLayout }]}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: theme.colors.surface.page }]}>
       <FlatList
         data={sections}
         keyExtractor={(section) => section.title}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          {
+            gap: theme.spacing.layout.item,
+            paddingHorizontal: theme.spacing.layout.page.horizontal,
+            paddingVertical: theme.spacing.layout.page.vertical,
+          },
+        ]}
         ListHeaderComponent={
-          <View style={styles.header}>
-            <View style={styles.brandRow}>
-              <View style={[styles.logo, { backgroundColor: token.colorPrimary }]}>
-                <Text style={[styles.logoText, { color: token.colorTextLightSolid }]}>月</Text>
+          <View style={[styles.header, { gap: theme.spacing.layout.section }]}>
+            <View style={[styles.brandRow, { gap: theme.spacing.layout.item }]}>
+              <View
+                style={[
+                  styles.logo,
+                  {
+                    backgroundColor: theme.colors.brand.primary,
+                    borderRadius: theme.shape.radius.scale[theme.shape.radius.semantic.card],
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    {
+                      color: theme.colors.brand.onPrimary,
+                      fontSize: theme.typography.size['2xl'],
+                      lineHeight: Math.round(
+                        theme.typography.size['2xl'] * theme.typography.lineHeight.normal,
+                      ),
+                    },
+                  ]}
+                >
+                  月
+                </Text>
               </View>
               <View>
-                <Text style={styles.brand}>TSUKI</Text>
-                <Text style={{ color: token.colorTextSecondary }}>React Native UI</Text>
+                <Text style={[theme.typography.styles.label, styles.brand]}>TSUKI</Text>
+                <Text
+                  style={[theme.typography.styles.caption, { color: theme.colors.text.secondary }]}
+                >
+                  React Native UI
+                </Text>
               </View>
             </View>
-            <Text style={styles.title}>组件游乐场</Text>
-            <Text style={[styles.description, { color: token.colorTextSecondary }]}>
+            <Text className="!type-page-title !text-app-text-primary" style={styles.title}>
+              组件游乐场
+            </Text>
+            <Text
+              style={[theme.typography.styles.bodySmall, { color: theme.colors.text.secondary }]}
+            >
               探索组件的样式、交互和组合方式。
             </Text>
             <Segmented
@@ -62,7 +102,7 @@ export default function FixtureExplorer() {
                 if (value === 'system' || value === 'light' || value === 'dark') setMode(value)
               }}
             />
-            <Cell.Group title="交互实验室" border={false} styles={{ body: styles.groupBody }}>
+            <Cell.Group title="交互实验室" border={false} styles={{ body: groupBody }}>
               <Cell
                 title="字号设置"
                 description="聊天预览 · 七档字号 · 全局生效"
@@ -77,8 +117,12 @@ export default function FixtureExplorer() {
               />
             </Cell.Group>
             <View style={styles.sectionRow}>
-              <Text style={styles.sectionTitle}>全部组件</Text>
-              <Text style={{ color: token.colorTextSecondary }}>
+              <Text style={[theme.typography.styles.sectionTitle, styles.sectionTitle]}>
+                全部组件
+              </Text>
+              <Text
+                style={[theme.typography.styles.bodySmall, { color: theme.colors.text.secondary }]}
+              >
                 {resultCount} / {componentCatalog.length}
               </Text>
             </View>
@@ -88,7 +132,7 @@ export default function FixtureExplorer() {
               placeholder="搜索组件名称或功能"
               accessibilityLabel="搜索组件"
               shape="round"
-              background={token.colorBgLayout}
+              background={theme.colors.surface.page}
               style={{ paddingHorizontal: 0, paddingVertical: 0 }}
             />
           </View>
@@ -98,7 +142,7 @@ export default function FixtureExplorer() {
             title={section.title}
             extra={`${section.data.length} 个组件`}
             border={false}
-            styles={{ body: styles.groupBody }}
+            styles={{ body: groupBody }}
           >
             {section.data.map((item) => (
               <Cell
@@ -115,12 +159,22 @@ export default function FixtureExplorer() {
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
-            <Text style={styles.cardTitle}>没有找到组件</Text>
-            <Text style={{ color: token.colorTextSecondary }}>试试其他名称或功能关键词。</Text>
+            <Text style={[theme.typography.styles.label, styles.cardTitle]}>没有找到组件</Text>
+            <Text
+              style={[theme.typography.styles.bodySmall, { color: theme.colors.text.secondary }]}
+            >
+              试试其他名称或功能关键词。
+            </Text>
           </View>
         }
         ListFooterComponent={
-          <Text style={[styles.footer, { color: token.colorTextTertiary }]}>
+          <Text
+            style={[
+              theme.typography.styles.caption,
+              styles.footer,
+              { color: theme.colors.text.tertiary },
+            ]}
+          >
             @ftsukic/tsuki · 为原生体验而造
           </Text>
         }
@@ -131,23 +185,22 @@ export default function FixtureExplorer() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { width: '100%', maxWidth: 760, alignSelf: 'center', padding: 20, gap: 10 },
-  header: { gap: 18, paddingBottom: 8 },
-  brandRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 },
-  logo: { width: 46, height: 46, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
-  logoText: { fontSize: 24, lineHeight: 32, fontWeight: '600' },
-  brand: { fontSize: 17, lineHeight: 24, fontWeight: '800', letterSpacing: 3 },
-  title: { fontSize: 34, lineHeight: 44, fontWeight: '700', marginTop: 8 },
-  description: { fontSize: 15, lineHeight: 23 },
-  groupBody: { borderRadius: 16, overflow: 'hidden' },
+  content: { width: '100%', maxWidth: 760, alignSelf: 'center' },
+  header: { paddingBottom: 8 },
+  brandRow: { flexDirection: 'row', alignItems: 'center', marginTop: 12 },
+  logo: { width: 46, height: 46, alignItems: 'center', justifyContent: 'center' },
+  logoText: { fontWeight: '600' },
+  brand: { fontWeight: '800', letterSpacing: 3 },
+  title: { marginTop: 8 },
+  groupBody: { overflow: 'hidden' },
   sectionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 8,
   },
-  sectionTitle: { fontSize: 20, lineHeight: 28, fontWeight: '700' },
-  cardTitle: { fontSize: 17, lineHeight: 24, fontWeight: '600' },
+  sectionTitle: { fontWeight: '700' },
+  cardTitle: { fontWeight: '600' },
   empty: { alignItems: 'center', padding: 32, gap: 10 },
-  footer: { textAlign: 'center', fontSize: 12, lineHeight: 18, paddingVertical: 24 },
+  footer: { textAlign: 'center', paddingVertical: 24 },
 })

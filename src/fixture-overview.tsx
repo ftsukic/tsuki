@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import type { ComponentType } from 'react'
+import type { ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { Text } from './text'
 import { useToken } from './theme'
@@ -14,6 +15,22 @@ export interface FixtureExampleEntry {
 
 const ALL_CONTENT_PADDING = 20
 
+export const FixtureOverviewModeContext = createContext<'all' | 'single' | undefined>(undefined)
+
+export function FixtureOverviewModeProvider({
+  children,
+  mode,
+}: {
+  children: ReactNode
+  mode: 'all' | 'single'
+}) {
+  return (
+    <FixtureOverviewModeContext.Provider value={mode}>
+      {children}
+    </FixtureOverviewModeContext.Provider>
+  )
+}
+
 export interface FixtureOverviewProps {
   examples: readonly FixtureExampleEntry[]
   fullBleedExamples?: boolean
@@ -23,15 +40,17 @@ export interface FixtureOverviewProps {
 export function FixtureOverview({
   examples,
   fullBleedExamples = false,
-  mode = 'all',
+  mode,
 }: FixtureOverviewProps) {
   const { token } = useToken()
   const backgroundScrollLocked = useBackgroundScrollLocked()
+  const contextMode = useContext(FixtureOverviewModeContext)
+  const resolvedMode = mode ?? contextMode ?? 'all'
   const [selectedId, setSelectedId] = useState(examples[0]?.id ?? '')
 
   if (examples.length === 0) return null
 
-  if (mode === 'single') {
+  if (resolvedMode === 'single') {
     const selected = examples.find((example) => example.id === selectedId) ?? examples[0]
     const SelectedExample = selected.Component
 

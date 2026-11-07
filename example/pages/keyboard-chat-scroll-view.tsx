@@ -17,6 +17,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useAppTheme } from '@/theme'
 
 type KeyboardLiftBehavior = 'always' | 'never' | 'persistent' | 'whenAtEnd'
 type PanelType = 'emoji' | 'attachment'
@@ -55,6 +56,9 @@ const LIFT_BEHAVIORS: Array<{ label: string; value: KeyboardLiftBehavior }> = [
 ]
 
 export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => void }) {
+  const theme = useAppTheme()
+  const colors = theme.colors
+  const typography = theme.typography.styles
   const inputRef = useRef<InputInstance>(null)
   const scrollRef = useRef<KeyboardChatScrollViewRef>(null)
   const [draft, setDraft] = useState('')
@@ -194,11 +198,13 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
   ])
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: colors.surface.page }]}>
       <View style={styles.pageHeader}>
         <View style={styles.pageTitleBlock}>
-          <Text style={styles.pageTitle}>KeyboardChatScrollView</Text>
-          <Text style={styles.pageDescription} selectable>
+          <Text style={[typography.sectionTitle, { color: colors.text.primary }]}>
+            KeyboardChatScrollView
+          </Text>
+          <Text style={[typography.caption, { color: colors.text.secondary }]} selectable>
             聊天滚动与键盘交互专项测试
           </Text>
         </View>
@@ -209,15 +215,29 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
           onPress={onBack}
           style={styles.closeButton}
         >
-          <Text style={styles.closeButtonLabel}>关闭</Text>
+          <Text style={[typography.bodySmall, { color: colors.text.link }]}>关闭</Text>
         </Pressable>
       </View>
 
-      <View style={styles.controlPanel}>
+      <View
+        style={[
+          styles.controlPanel,
+          {
+            backgroundColor: colors.surface.container,
+            borderBottomColor: colors.border.subtle,
+            borderTopColor: colors.border.subtle,
+          },
+        ]}
+      >
         <View style={styles.controlHeader}>
           <View>
-            <Text style={styles.controlTitle}>keyboardLiftBehavior</Text>
-            <Text style={styles.controlHint} selectable>
+            <Text style={[typography.bodySmall, { color: colors.text.primary }]}>
+              keyboardLiftBehavior
+            </Text>
+            <Text
+              style={[styles.controlHint, typography.caption, { color: colors.text.tertiary }]}
+              selectable
+            >
               当前：{keyboardLiftBehavior} · end visible：{isAtEnd ? 'true' : 'false'} · panel：
               {panelVisible ? panelType : 'closed'} · frozen：{frozenDebug ? 'true' : 'false'}
             </Text>
@@ -225,9 +245,13 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
           <Pressable
             accessibilityRole="button"
             onPress={scrollToEnd}
-            style={({ pressed }) => [styles.latestButton, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.latestButton,
+              { borderColor: colors.border.default },
+              pressed && styles.pressed,
+            ]}
           >
-            <Text style={styles.latestButtonLabel}>回到底部</Text>
+            <Text style={[typography.caption, { color: colors.text.primary }]}>回到底部</Text>
           </Pressable>
         </View>
         <View style={styles.behaviorRow}>
@@ -241,11 +265,22 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
                 onPress={() => setKeyboardLiftBehavior(item.value)}
                 style={({ pressed }) => [
                   styles.behaviorButton,
-                  selected && styles.behaviorButtonSelected,
+                  { backgroundColor: colors.surface.sunken },
+                  selected && {
+                    backgroundColor: colors.state.selected.background,
+                    borderColor: colors.state.selected.border,
+                    borderWidth: 1,
+                  },
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={[styles.behaviorLabel, selected && styles.behaviorLabelSelected]}>
+                <Text
+                  style={[
+                    typography.caption,
+                    { color: selected ? colors.state.selected.foreground : colors.text.secondary },
+                    selected && styles.behaviorLabelSelected,
+                  ]}
+                >
                   {item.label}
                 </Text>
               </Pressable>
@@ -275,8 +310,25 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
               key={message.id}
               style={[styles.messageRow, message.mine && styles.messageRowMine]}
             >
-              <View style={[styles.messageBubble, message.mine && styles.messageBubbleMine]}>
-                <Text style={[styles.messageText, message.mine && styles.messageTextMine]}>
+              <View
+                style={[
+                  styles.messageBubble,
+                  {
+                    backgroundColor: colors.surface.container,
+                    borderColor: colors.border.subtle,
+                  },
+                  message.mine && {
+                    backgroundColor: colors.brand.primary,
+                    borderColor: colors.brand.primary,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    typography.bodySmall,
+                    { color: message.mine ? colors.brand.onPrimary : colors.text.primary },
+                  ]}
+                >
                   {message.text}
                 </Text>
               </View>
@@ -294,7 +346,15 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
         ) : null}
 
         <Animated.View style={[styles.composerLayer, composerPanelStyle]}>
-          <KeyboardStickyView style={styles.composerShell}>
+          <KeyboardStickyView
+            style={[
+              styles.composerShell,
+              {
+                backgroundColor: colors.surface.container,
+                borderTopColor: colors.border.subtle,
+              },
+            ]}
+          >
             <View style={styles.composer}>
               <View style={styles.inputContainer}>
                 <Input
@@ -305,11 +365,14 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
                   onChangeText={setDraft}
                   onSubmitEditing={sendMessage}
                   placeholder="输入消息，测试键盘抬升"
-                  placeholderTextColor="#98a2b3"
+                  placeholderTextColor={colors.text.tertiary}
                   ref={inputRef}
                   returnKeyType="send"
                   style={styles.input}
-                  styles={{ root: styles.inputShell, input: styles.inputText }}
+                  styles={{
+                    root: [styles.inputShell, { backgroundColor: colors.surface.sunken }],
+                    input: [styles.inputText, typography.bodySmall, { color: colors.text.primary }],
+                  }}
                   value={draft}
                 />
               </View>
@@ -318,9 +381,15 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
                 accessibilityRole="button"
                 accessibilityState={{ expanded: panelVisible }}
                 onPress={toggleEmojiPanel}
-                style={({ pressed }) => [styles.emojiButton, pressed && styles.pressed]}
+                style={({ pressed }) => [
+                  styles.emojiButton,
+                  { borderColor: colors.border.default },
+                  pressed && styles.pressed,
+                ]}
               >
-                <Text style={styles.emojiButtonLabel}>{panelVisible ? '⌄' : '☺'}</Text>
+                <Text style={[typography.sectionTitle, { color: colors.icon.primary }]}>
+                  {panelVisible ? '⌄' : '☺'}
+                </Text>
               </Pressable>
               <Pressable
                 accessibilityLabel="发送消息"
@@ -330,19 +399,25 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
                 onPress={sendMessage}
                 style={({ pressed }) => [
                   styles.sendButton,
-                  !draft.trim() && styles.sendButtonDisabled,
+                  {
+                    backgroundColor: draft.trim() ? colors.brand.primary : colors.text.disabled,
+                  },
                   pressed && styles.pressed,
                 ]}
               >
-                <Text style={styles.sendButtonLabel}>发送</Text>
+                <Text style={[typography.caption, { color: colors.brand.onPrimary }]}>发送</Text>
               </Pressable>
               <Pressable
                 accessibilityLabel="收起键盘"
                 accessibilityRole="button"
                 onPress={() => void KeyboardController.dismiss()}
-                style={({ pressed }) => [styles.dismissButton, pressed && styles.pressed]}
+                style={({ pressed }) => [
+                  styles.dismissButton,
+                  { borderColor: colors.border.default },
+                  pressed && styles.pressed,
+                ]}
               >
-                <Text style={styles.dismissButtonLabel}>收起</Text>
+                <Text style={[typography.caption, { color: colors.text.secondary }]}>收起</Text>
               </Pressable>
             </View>
           </KeyboardStickyView>
@@ -354,15 +429,29 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
         accessibilityViewIsModal={panelVisible}
         importantForAccessibility={panelVisible ? 'yes' : 'no-hide-descendants'}
         pointerEvents={panelVisible ? 'auto' : 'none'}
-        style={[styles.emojiPanel, panelAnimatedStyle]}
+        style={[
+          styles.emojiPanel,
+          {
+            backgroundColor: colors.surface.container,
+            borderTopColor: colors.border.default,
+          },
+          panelAnimatedStyle,
+        ]}
       >
         <View style={[styles.emojiPanelContent, { paddingBottom: bottom }]}>
           <View style={styles.emojiPanelHeader}>
             <View>
-              <Text style={styles.emojiPanelTitle}>
+              <Text style={[typography.body, { color: colors.text.primary }]}>
                 {panelType === 'emoji' ? 'Emoji 面板' : 'Attachment 面板'}
               </Text>
-              <Text style={styles.emojiPanelHint} selectable>
+              <Text
+                style={[
+                  styles.emojiPanelHint,
+                  typography.caption,
+                  { color: colors.text.secondary },
+                ]}
+                selectable
+              >
                 面板独立于 KeyboardStickyView，切换时保持消息列表位置。
               </Text>
             </View>
@@ -370,9 +459,13 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
               accessibilityLabel="收起表情面板"
               accessibilityRole="button"
               onPress={closeEmojiPanel}
-              style={({ pressed }) => [styles.panelCloseButton, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.panelCloseButton,
+                { borderColor: colors.border.default },
+                pressed && styles.pressed,
+              ]}
             >
-              <Text style={styles.panelCloseButtonLabel}>收起</Text>
+              <Text style={[typography.caption, { color: colors.text.primary }]}>收起</Text>
             </Pressable>
           </View>
           <View style={styles.emojiGrid}>
@@ -382,9 +475,25 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
                 accessibilityRole="button"
                 key={emoji}
                 onPress={() => setDraft((current) => `${current}${emoji}`)}
-                style={({ pressed }) => [styles.emojiOption, pressed && styles.pressed]}
+                style={({ pressed }) => [
+                  styles.emojiOption,
+                  { backgroundColor: colors.surface.sunken },
+                  pressed && styles.pressed,
+                ]}
               >
-                <Text style={styles.emojiOptionLabel}>{emoji}</Text>
+                <Text
+                  style={[
+                    {
+                      fontFamily: theme.typography.family.base,
+                      fontSize: theme.typography.size['2xl'],
+                      lineHeight: Math.round(
+                        theme.typography.size['2xl'] * theme.typography.lineHeight.normal,
+                      ),
+                    },
+                  ]}
+                >
+                  {emoji}
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -396,7 +505,6 @@ export default function KeyboardChatScrollViewPage({ onBack }: { onBack: () => v
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: '#f5f7fa',
     flex: 1,
   },
   pageHeader: {
@@ -410,31 +518,14 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
-  pageTitle: {
-    color: '#101828',
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  pageDescription: {
-    color: '#667085',
-    fontSize: 12,
-  },
   closeButton: {
     alignItems: 'center',
     minHeight: 36,
     justifyContent: 'center',
     paddingHorizontal: 8,
   },
-  closeButtonLabel: {
-    color: '#1677ff',
-    fontSize: 13,
-    fontWeight: '600',
-  },
   controlPanel: {
-    backgroundColor: '#ffffff',
-    borderBottomColor: '#eaecf0',
     borderBottomWidth: 1,
-    borderTopColor: '#eaecf0',
     borderTopWidth: 1,
     paddingHorizontal: 16,
     paddingVertical: 10,
@@ -444,27 +535,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  controlTitle: {
-    color: '#344054',
-    fontSize: 13,
-    fontWeight: '600',
-  },
   controlHint: {
-    color: '#98a2b3',
-    fontSize: 11,
     marginTop: 2,
   },
   latestButton: {
-    borderColor: '#d0d5dd',
     borderRadius: 8,
     borderWidth: 1,
     paddingHorizontal: 10,
     paddingVertical: 7,
-  },
-  latestButtonLabel: {
-    color: '#344054',
-    fontSize: 12,
-    fontWeight: '600',
   },
   behaviorRow: {
     flexDirection: 'row',
@@ -472,24 +550,13 @@ const styles = StyleSheet.create({
     marginTop: 9,
   },
   behaviorButton: {
-    backgroundColor: '#f2f4f7',
     borderRadius: 8,
     flex: 1,
     paddingHorizontal: 8,
     paddingVertical: 8,
   },
-  behaviorButtonSelected: {
-    backgroundColor: '#eaf2ff',
-    borderColor: '#1677ff',
-    borderWidth: 1,
-  },
-  behaviorLabel: {
-    color: '#667085',
-    fontSize: 12,
-    textAlign: 'center',
-  },
+  behaviorLabel: { textAlign: 'center' },
   behaviorLabelSelected: {
-    color: '#1677ff',
     fontWeight: '600',
   },
   gestureArea: {
@@ -510,29 +577,13 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   messageBubble: {
-    backgroundColor: '#ffffff',
-    borderColor: '#eaecf0',
     borderRadius: 16,
     borderWidth: 1,
     maxWidth: '84%',
     paddingHorizontal: 13,
     paddingVertical: 10,
   },
-  messageBubbleMine: {
-    backgroundColor: '#1677ff',
-    borderColor: '#1677ff',
-  },
-  messageText: {
-    color: '#344054',
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  messageTextMine: {
-    color: '#ffffff',
-  },
   composerShell: {
-    backgroundColor: '#ffffff',
-    borderTopColor: '#eaecf0',
     borderTopWidth: 1,
     paddingBottom: 8,
     paddingHorizontal: 10,
@@ -543,17 +594,11 @@ const styles = StyleSheet.create({
   },
   emojiButton: {
     alignItems: 'center',
-    borderColor: '#d0d5dd',
     borderRadius: 18,
     borderWidth: 1,
     height: 36,
     justifyContent: 'center',
     width: 36,
-  },
-  emojiButtonLabel: {
-    color: '#344054',
-    fontSize: 20,
-    lineHeight: 22,
   },
   composer: {
     alignItems: 'flex-end',
@@ -568,48 +613,29 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   inputShell: {
-    backgroundColor: '#f2f4f7',
     borderRadius: 18,
     paddingHorizontal: 0,
   },
   inputText: {
-    color: '#101828',
-    fontSize: 14,
     paddingHorizontal: 13,
     paddingVertical: 9,
   },
   sendButton: {
     alignItems: 'center',
-    backgroundColor: '#1677ff',
     borderRadius: 18,
     height: 36,
     justifyContent: 'center',
     width: 52,
   },
-  sendButtonDisabled: {
-    backgroundColor: '#d0d5dd',
-  },
-  sendButtonLabel: {
-    color: '#ffffff',
-    fontSize: 13,
-    fontWeight: '600',
-  },
   dismissButton: {
     alignItems: 'center',
-    borderColor: '#d0d5dd',
     borderRadius: 18,
     borderWidth: 1,
     height: 36,
     justifyContent: 'center',
     width: 52,
   },
-  dismissButtonLabel: {
-    color: '#667085',
-    fontSize: 12,
-  },
   emojiPanel: {
-    backgroundColor: '#ffffff',
-    borderTopColor: '#d0d5dd',
     borderTopWidth: 1,
     bottom: 0,
     left: 0,
@@ -637,29 +663,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 14,
   },
-  emojiPanelTitle: {
-    color: '#101828',
-    fontSize: 15,
-    fontWeight: '700',
-  },
   emojiPanelHint: {
-    color: '#667085',
-    fontSize: 11,
     marginTop: 3,
   },
   panelCloseButton: {
     alignItems: 'center',
-    borderColor: '#d0d5dd',
     borderRadius: 16,
     borderWidth: 1,
     height: 32,
     justifyContent: 'center',
     paddingHorizontal: 11,
-  },
-  panelCloseButtonLabel: {
-    color: '#344054',
-    fontSize: 12,
-    fontWeight: '600',
   },
   emojiGrid: {
     flexDirection: 'row',
@@ -669,15 +682,10 @@ const styles = StyleSheet.create({
   },
   emojiOption: {
     alignItems: 'center',
-    backgroundColor: '#f2f4f7',
     borderRadius: 12,
     height: 46,
     justifyContent: 'center',
     width: 46,
-  },
-  emojiOptionLabel: {
-    fontSize: 25,
-    lineHeight: 30,
   },
   pressed: {
     opacity: 0.7,

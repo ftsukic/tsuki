@@ -3,23 +3,34 @@ import { StyleSheet } from 'react-native'
 import { State } from 'react-native-gesture-handler'
 import { fireGestureHandler, getByGestureTestId } from 'react-native-gesture-handler/jest-utils'
 import FontSizePage from '@/pages/font-size'
-import { useDemoTheme } from '@/components/demo-provider'
+import { useAppTheme, useAppThemeSettings } from '@/theme'
+import { useAppThemeDefinition } from '@/theme/use-app-theme'
+import { defaultAppTheme } from '../../example/theme/tokens'
+import { resolveAppTheme } from '../../example/theme/resolve-app-theme'
 
-jest.mock('@/components/demo-provider', () => ({ useDemoTheme: jest.fn() }))
+jest.mock('@/theme', () => {
+  const actual = jest.requireActual('@/theme')
+  return { ...actual, useAppTheme: jest.fn(), useAppThemeSettings: jest.fn() }
+})
+jest.mock('@/theme/use-app-theme', () => ({ useAppThemeDefinition: jest.fn() }))
 
 it('previews the font-size mapping locally, cancels without saving and applies on completion', async () => {
   const save = jest.fn(),
     back = jest.fn()
-  jest.mocked(useDemoTheme).mockReturnValue({
+  jest.mocked(useAppTheme).mockReturnValue(resolveAppTheme(defaultAppTheme, { mode: 'light' }))
+  jest.mocked(useAppThemeDefinition).mockReturnValue(defaultAppTheme)
+  jest.mocked(useAppThemeSettings).mockReturnValue({
     mode: 'light',
-    dark: false,
     setMode: jest.fn(),
-    fontSize: 18,
-    setFontSize: save,
+    baseFontSize: 18,
+    setBaseFontSize: save,
   })
   await render(<FontSizePage onBack={back} />)
   await waitFor(() =>
-    expect(StyleSheet.flatten(screen.getByText('预览字体大小').props.style).fontSize).toBe(18),
+    expect(StyleSheet.flatten(screen.getByText('预览字体大小').props.style)).toMatchObject({
+      fontSize: 18,
+      lineHeight: 27,
+    }),
   )
   await act(async () => {
     screen
@@ -34,7 +45,10 @@ it('previews the font-size mapping locally, cancels without saving and applies o
     ])
   })
   await waitFor(() =>
-    expect(StyleSheet.flatten(screen.getByText('预览字体大小').props.style).fontSize).toBe(30),
+    expect(StyleSheet.flatten(screen.getByText('预览字体大小').props.style)).toMatchObject({
+      fontSize: 30,
+      lineHeight: 45,
+    }),
   )
   expect(save).not.toHaveBeenCalled()
   fireEvent.press(screen.getByRole('button', { name: '取消' }))

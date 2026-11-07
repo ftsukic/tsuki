@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { Stack } from 'expo-router/stack'
 import FastImage from 'react-native-fast-image'
-import { ImagePreview, Text, useToken } from '@ftsukic/tsuki'
+import { ImagePreview, Text } from '@ftsukic/tsuki'
 import { fastImageAdapter } from '../../components/fast-image-adapter'
+import { useAppTheme } from '@/theme'
 
 const ITEMS = [
   { id: 'landscape', width: 1200, height: 800, photo: 10 },
@@ -17,14 +18,14 @@ const ITEMS = [
 
 /** Example-only integration: the library depends only on the imageAdapter contract. */
 export default function FastImagePreviewScreen() {
-  const { token } = useToken()
+  const theme = useAppTheme()
   const [visible, setVisible] = useState(false)
   const [activeId, setActiveId] = useState(ITEMS[0].id)
   return (
     <ImagePreview.Provider>
       <Stack.Screen options={{ title: 'FastImage 图片预览' }} />
       <ScrollView
-        style={{ backgroundColor: token.colorBgLayout }}
+        style={{ backgroundColor: theme.colors.surface.page }}
         contentContainerStyle={styles.content}
       >
         <Text>FastImage 缩略图与图片预览</Text>

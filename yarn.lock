@@ -2162,11 +2162,12 @@ __metadata:
     react-native-gesture-handler: "npm:2.30.0"
     react-native-popover-view: "npm:^6.1.0"
     react-native-reanimated: "npm:4.2.1"
-    react-native-safe-area-context: "npm:^5.9.1"
+    react-native-safe-area-context: "npm:^5.6.1"
     react-native-svg: "npm:^15.15.0"
     react-native-teleport: "npm:1.2.2"
     react-native-web: "npm:^0.21.2"
     react-native-worklets: "npm:0.7.1"
+    tailwind-merge: "npm:^2.6.0"
     test-renderer: "npm:1.1.0"
     typescript: "npm:^5.9.2"
   peerDependencies:
@@ -8305,7 +8306,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-safe-area-context@npm:^5.9.1":
+"react-native-safe-area-context@npm:^5.6.1":
   version: 5.9.1
   resolution: "react-native-safe-area-context@npm:5.9.1"
   peerDependencies:
@@ -9266,6 +9267,13 @@ __metadata:
   dependencies:
     "@pkgr/core": "npm:^0.3.6"
   checksum: 10c0/5a6c19f4f79045aaa7994106401bff6dbe7cca23a6d0a0723ff14eb8b1bebeb4a71729118f6914905598e304ea2fa13509885e11ba07d92e7cb68a06740cb328
+  languageName: node
+  linkType: hard
+
+"tailwind-merge@npm:^2.6.0":
+  version: 2.6.1
+  resolution: "tailwind-merge@npm:2.6.1"
+  checksum: 10c0/f9b5d7ba37f6c6dc7bb7a090f08252e8d827b5abfc1031bf468c5274ce104409e7952a0075a3e009aab53adda8c6d133bc1dd9d3427e2ae5bc00306f9ce1fbff
   languageName: node
   linkType: hard
 

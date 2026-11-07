@@ -8,8 +8,17 @@ import {
   useEffect,
   useState,
 } from 'react'
-import { TextInput } from 'react-native'
-import { Portal, PortalHost, TsukiProvider, mountPortal, updatePortal, unmountPortal } from '..'
+import { StyleSheet, Text as NativeText, TextInput, View } from 'react-native'
+import {
+  Button,
+  Portal,
+  PortalHost,
+  Text,
+  TsukiProvider,
+  mountPortal,
+  updatePortal,
+  unmountPortal,
+} from '..'
 
 // Model RN TextInput's native-text bookkeeping and value reconciliation.
 function NativeValueProbe({
@@ -42,7 +51,7 @@ it.each([false, true])('records controlled reconciliation with portal=%s', async
   function App() {
     const [value, setValue] = useState('')
     const input = <NativeValueProbe value={value} onChangeText={setValue} writes={writes} />
-    return <PortalHost>{portal ? <Portal>{input}</Portal> : input}</PortalHost>
+    return <PortalHost teleport={false}>{portal ? <Portal>{input}</Portal> : input}</PortalHost>
   }
   await render(<App />)
   // eslint-disable-next-line testing-library/no-await-sync-events
@@ -209,6 +218,18 @@ it('configures a standalone Host and inherits its backend in nested hosts', asyn
   await view.unmount()
 })
 
+it('uses the generic JS fallback when a Provider has no explicit backend', async () => {
+  await render(
+    <TsukiProvider gesture={false}>
+      <Portal>
+        <TextInput testID="default-js-input" />
+      </Portal>
+    </TsukiProvider>,
+  )
+  expect(screen.getByTestId('default-js-input')).toBeTruthy()
+  expect(screen.queryByTestId('native-portal')).toBeNull()
+})
+
 it('allows a local Host to explicitly select the JS backend', async () => {
   await render(
     <TsukiProvider gesture={false} portalBackend={teleportPortalBackend}>
@@ -262,4 +283,70 @@ it('reports the explicit backend migration for an unsupported legacy opt-in', as
   await expect(render(<PortalHost teleport />)).rejects.toThrow(
     'Import teleportPortalBackend from @ftsukic/tsuki/teleport',
   )
+})
+
+function PortalTextLeaf({ testID }: { testID: string }) {
+  return <Text testID={testID}>订单已保存</Text>
+}
+
+function PortalTextBranch({ testID }: { testID: string }) {
+  return (
+    <View>
+      <PortalTextLeaf testID={testID} />
+    </View>
+  )
+}
+
+it.each([false, true])(
+  'bridges and updates Text inheritance through Portal=%s',
+  async (teleport) => {
+    const tree = (primary: boolean) => (
+      <TsukiProvider gesture={false} portalBackend={teleport ? teleportPortalBackend : undefined}>
+        {teleport ? (
+          <PortalHost portalBackend={teleportPortalBackend}>
+            <Button type={primary ? 'primary' : 'default'}>
+              <Portal>
+                <PortalTextBranch testID="portal-inherited-text" />
+              </Portal>
+            </Button>
+          </PortalHost>
+        ) : (
+          <PortalHost teleport={false}>
+            <Button type={primary ? 'primary' : 'default'}>
+              <Portal>
+                <PortalTextBranch testID="portal-inherited-text" />
+              </Portal>
+            </Button>
+          </PortalHost>
+        )}
+      </TsukiProvider>
+    )
+
+    const view = await render(tree(false))
+    const text = screen.getByTestId('portal-inherited-text')
+    const initialColor = StyleSheet.flatten(text.props.style).color
+    expect(screen.queryByTestId('native-portal') !== null).toBe(teleport)
+
+    await view.rerender(tree(true))
+
+    expect(
+      StyleSheet.flatten(screen.getByTestId('portal-inherited-text').props.style).color,
+    ).not.toBe(initialColor)
+  },
+)
+
+it('does not apply Tsuki text inheritance to native Text inside Portal content', async () => {
+  await render(
+    <TsukiProvider gesture={false}>
+      <PortalHost teleport={false}>
+        <Button type="primary">
+          <Portal>
+            <NativeText testID="native-portal-text">原生文本</NativeText>
+          </Portal>
+        </Button>
+      </PortalHost>
+    </TsukiProvider>,
+  )
+
+  expect(screen.getByTestId('native-portal-text').props.style).toBeUndefined()
 })

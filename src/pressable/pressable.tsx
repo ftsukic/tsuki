@@ -1,5 +1,6 @@
 import { forwardRef, useCallback, useRef } from 'react'
 import { StyleSheet, View } from 'react-native'
+import type { ViewStyle } from 'react-native'
 import { AnimatedPressableHost } from './pressable-host'
 import { usePressable } from './usePressable'
 import { useToken } from '../theme'
@@ -46,6 +47,13 @@ export const Pressable = forwardRef<
   })
   feedback.current = setPressed
   const pressed = interaction.state.pressed
+  const borderWidth = rootStyle?.borderWidth ?? 0
+  const overlayBorderInsets: ViewStyle = {
+    top: -(rootStyle?.borderTopWidth ?? borderWidth),
+    right: -(rootStyle?.borderRightWidth ?? borderWidth),
+    bottom: -(rootStyle?.borderBottomWidth ?? borderWidth),
+    left: -(rootStyle?.borderLeftWidth ?? borderWidth),
+  }
   const background =
     pressStyle === 'background' && pressed
       ? [{ backgroundColor: pressedBackgroundColor ?? token.pressedBackgroundColor }, pressedStyle]
@@ -56,6 +64,7 @@ export const Pressable = forwardRef<
         pointerEvents="none"
         style={[
           StyleSheet.absoluteFill,
+          overlayBorderInsets,
           { backgroundColor: pressedOverlayColor ?? token.pressedOverlayColor },
           pressedStyle,
         ]}

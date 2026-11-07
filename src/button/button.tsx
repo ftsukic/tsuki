@@ -7,6 +7,7 @@ import { ButtonGroup, getButtonGroupConnectedStyle } from './button-group'
 import { getButtonStyles, shouldUseButtonOverlay } from './style'
 import { getButtonToken } from './token'
 import type { ButtonProps, ButtonStyleState } from './types'
+import { TextInheritanceProvider } from '../text/text-inheritance-provider'
 import { Fragment, forwardRef, isValidElement, useContext, useEffect } from 'react'
 import { View } from 'react-native'
 import type { ReactNode } from 'react'
@@ -142,13 +143,15 @@ const InternalButton = forwardRef<React.ComponentRef<typeof Pressable>, ButtonPr
           const semantic = resolveStyles(styles, { props: buttonProps, state })
           const content = children
           const renderedContent = hasViewContent(content) ? (
-            <View
-              style={{ flexDirection: 'row', alignItems: 'center', minWidth: 0, flexShrink: 1 }}
-            >
-              {renderViewContent(content, (text) => (
-                <Text style={[resolved.content, semantic?.content]}>{text}</Text>
-              ))}
-            </View>
+            <TextInheritanceProvider style={[resolved.content, semantic?.content]}>
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', minWidth: 0, flexShrink: 1 }}
+              >
+                {renderViewContent(content, (text) => (
+                  <Text style={[resolved.content, semantic?.content]}>{text}</Text>
+                ))}
+              </View>
+            </TextInheritanceProvider>
           ) : null
 
           const iconNode = loading ? (

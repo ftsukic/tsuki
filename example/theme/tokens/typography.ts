@@ -1,0 +1,90 @@
+import type { AppTypographyDefinition } from '../types'
+
+export const typographyTokens: AppTypographyDefinition = {
+  family: {
+    base: 'System',
+    heading: 'System',
+    mono: 'monospace',
+  },
+  size: {
+    xs: 12,
+    sm: 14,
+    md: 16,
+    lg: 18,
+    xl: 20,
+    '2xl': 24,
+    '3xl': 34,
+    '4xl': 40,
+  },
+  weight: {
+    regular: '400',
+    medium: '500',
+    semibold: '600',
+    bold: '700',
+  },
+  lineHeight: {
+    tight: 1.2,
+    title: 1.3,
+    comfortable: 1.4,
+    normal: 1.5,
+    relaxed: 1.65,
+  },
+  letterSpacing: {
+    tight: -0.5,
+    compact: -0.3,
+    subtle: -0.2,
+    normal: 0,
+    wide: 0.1,
+  },
+  styles: {
+    display: {
+      family: 'heading',
+      size: '4xl',
+      weight: 'bold',
+      lineHeight: 'tight',
+      letterSpacing: 'tight',
+    },
+    pageTitle: {
+      family: 'heading',
+      size: '3xl',
+      weight: 'bold',
+      lineHeight: 'title',
+      letterSpacing: 'compact',
+    },
+    sectionTitle: {
+      family: 'heading',
+      size: 'xl',
+      weight: 'bold',
+      lineHeight: 'comfortable',
+      letterSpacing: 'subtle',
+    },
+    body: {
+      family: 'base',
+      size: 'md',
+      weight: 'regular',
+      lineHeight: 'normal',
+      letterSpacing: 'normal',
+    },
+    bodySmall: {
+      family: 'base',
+      size: 'sm',
+      weight: 'regular',
+      lineHeight: 'normal',
+      letterSpacing: 'normal',
+    },
+    label: {
+      family: 'base',
+      size: 'md',
+      weight: 'semibold',
+      lineHeight: 'normal',
+      letterSpacing: 'wide',
+    },
+    caption: {
+      family: 'base',
+      size: 'xs',
+      weight: 'regular',
+      lineHeight: 'normal',
+      letterSpacing: 'wide',
+    },
+  },
+}

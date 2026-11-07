@@ -6,7 +6,7 @@ import { Stack } from 'expo-router/stack'
 import Video, { ViewType } from 'react-native-video'
 import type { VideoRef } from 'react-native-video'
 import FastImage from 'react-native-fast-image'
-import { ImagePreview, useToken } from '@ftsukic/tsuki'
+import { ImagePreview } from '@ftsukic/tsuki'
 import type {
   ImagePreviewImage,
   ImagePreviewMediaRenderProps,
@@ -16,6 +16,7 @@ import type {
 import ChatMessages from '../../../src/image-preview/__fixtures__/examples/chat-messages'
 import PreviewToolbar from '../../../src/image-preview/__fixtures__/examples/preview-toolbar'
 import { fastImageAdapter } from '../../components/fast-image-adapter'
+import { useAppTheme } from '@/theme'
 
 const VIDEO = {
   // eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro bundles native assets through static require.
@@ -90,7 +91,7 @@ function VideoFrame({
 }
 
 export default function MediaChatScreen() {
-  const { token } = useToken()
+  const theme = useAppTheme()
   const focused = useIsFocused()
   const playerRef = useRef<VideoRef>(null)
   const [paused, setPaused] = useState<Record<string, boolean>>({})
@@ -160,7 +161,7 @@ export default function MediaChatScreen() {
   return (
     <ImagePreview.Provider>
       <Stack.Screen options={{ title: '图片与视频混合聊天' }} />
-      <View style={{ flex: 1, padding: 16, backgroundColor: token.colorBgLayout }}>
+      <View style={{ flex: 1, padding: 16, backgroundColor: theme.colors.surface.page }}>
         <ChatMessages
           imageAdapter={fastImageAdapter}
           mediaItems={MEDIA}

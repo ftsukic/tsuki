@@ -1,7 +1,10 @@
 module.exports = function (api) {
   api.cache(true)
   return {
-    presets: [['babel-preset-expo', { reanimated: false, worklets: false }]],
+    presets: [
+      ['babel-preset-expo', { jsxImportSource: 'nativewind', reanimated: false, worklets: false }],
+      'nativewind/babel',
+    ],
     plugins: ['react-native-worklets/plugin'],
   }
 }

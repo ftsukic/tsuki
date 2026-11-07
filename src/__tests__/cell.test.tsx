@@ -1,8 +1,8 @@
 import CellCompositionFixture from '../cell/__fixtures__/examples/composition'
 import { Fragment, useState } from 'react'
-import { Cell, ConfigProvider, getDesignToken, getCellToken } from '..'
+import { Cell, ConfigProvider, Text as TsukiText, getDesignToken, getCellToken } from '..'
 import { fireEvent, render, screen } from '@testing-library/react-native'
-import { StyleSheet, Text } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import type { StyleProp, ViewStyle } from 'react-native'
 import { getCellStyles } from '../cell/style'
 
@@ -59,7 +59,60 @@ function groupHairlineCount(group: JsonNode) {
 
 const press = (instance: Parameters<typeof fireEvent.press>[0]) => fireEvent.press(instance)
 
+function CellNestedText({ testID }: { testID: string }) {
+  return (
+    <View>
+      <View>
+        <TsukiText testID={testID}>Custom slot text</TsukiText>
+      </View>
+    </View>
+  )
+}
+
 describe('Cell', () => {
+  it('inherits styles independently for every custom text slot', async () => {
+    await render(
+      <ConfigProvider>
+        <Cell
+          leading={<CellNestedText testID="leading-text" />}
+          title={<CellNestedText testID="title-text" />}
+          titleExtra={<CellNestedText testID="title-extra-text" />}
+          description={<CellNestedText testID="description-text" />}
+          value={<CellNestedText testID="value-text" />}
+          valueExtra={<CellNestedText testID="value-extra-text" />}
+          trailing={<CellNestedText testID="trailing-text" />}
+          styles={{
+            title: { color: '#c02040' },
+            titleExtra: { color: '#c08020' },
+            description: { color: '#2060c0' },
+            value: { color: '#208040' },
+            valueExtra: { color: '#8040c0' },
+            trailing: { color: '#806020' },
+          }}
+        />
+      </ConfigProvider>,
+    )
+
+    const token = getCellToken(getDesignToken())
+    expect(StyleSheet.flatten(screen.getByTestId('leading-text').props.style).color).toBe(
+      token.titleColor,
+    )
+    expect(StyleSheet.flatten(screen.getByTestId('title-text').props.style).color).toBe('#c02040')
+    expect(StyleSheet.flatten(screen.getByTestId('title-extra-text').props.style).color).toBe(
+      '#c08020',
+    )
+    expect(StyleSheet.flatten(screen.getByTestId('description-text').props.style).color).toBe(
+      '#2060c0',
+    )
+    expect(StyleSheet.flatten(screen.getByTestId('value-text').props.style).color).toBe('#208040')
+    expect(StyleSheet.flatten(screen.getByTestId('value-extra-text').props.style).color).toBe(
+      '#8040c0',
+    )
+    expect(StyleSheet.flatten(screen.getByTestId('trailing-text').props.style).color).toBe(
+      '#806020',
+    )
+  })
+
   it('does not render a divider for a standalone Cell', async () => {
     const view = await render(<Cell testID="single" />)
 

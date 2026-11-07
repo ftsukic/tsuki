@@ -1,8 +1,15 @@
 import * as React from 'react'
-import { Button, ButtonGroup, ConfigProvider, getButtonToken, getDesignToken } from '..'
+import {
+  Button,
+  ButtonGroup,
+  ConfigProvider,
+  Text as TsukiText,
+  getButtonToken,
+  getDesignToken,
+} from '..'
 import type { ButtonProps } from '../button'
 import { fireEvent, render, screen } from '@testing-library/react-native'
-import { StyleSheet, Text } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import type { JsonElement, JsonNode } from 'test-renderer'
 
 function findOverlay(node: JsonNode | null): JsonElement | undefined {
@@ -81,6 +88,10 @@ function expectNoTextChildrenInsideViews(node: JsonNode | null): void {
   })
 }
 
+function ButtonTextWrapper({ children }: { children: React.ReactNode }) {
+  return <View>{children}</View>
+}
+
 function getButtonStyle(testID: string) {
   return StyleSheet.flatten(screen.getByTestId(testID).props.style)
 }
@@ -142,6 +153,55 @@ describe('Button', () => {
     expect(screen.getByText('图标后')).toBeTruthy()
     expectNoTextChildrenInsideViews(toJSON())
   })
+
+  it('inherits content styles through nested Tsuki Text components only', async () => {
+    await render(
+      <ConfigProvider>
+        <Button type="primary" size="small" icon={<TsukiText testID="icon-text">+</TsukiText>}>
+          <ButtonTextWrapper>
+            <ButtonTextWrapper>
+              <TsukiText testID="nested-button-text">保存订单</TsukiText>
+              <Text testID="native-button-text">原生标签</Text>
+            </ButtonTextWrapper>
+          </ButtonTextWrapper>
+        </Button>
+      </ConfigProvider>,
+    )
+
+    const token = getDesignToken()
+    const buttonToken = getButtonToken(token)
+    expect(StyleSheet.flatten(screen.getByTestId('nested-button-text').props.style)).toMatchObject({
+      color: token.colorTextLightSolid,
+      fontSize: buttonToken.contentFontSizeSM,
+    })
+    expect(StyleSheet.flatten(screen.getByTestId('icon-text').props.style).color).toBe(
+      token.colorText,
+    )
+    expect(screen.getByTestId('native-button-text').props.style).toBeUndefined()
+  })
+
+  it.each([
+    ['solid', false, false],
+    ['filled', true, false],
+    ['text', false, true],
+  ] as const)(
+    'keeps nested text inheritance for variant=%s, disabled=%s, loading=%s',
+    async (variant, disabled, loading) => {
+      await render(
+        <ConfigProvider>
+          <Button variant={variant} size="large" disabled={disabled} loading={loading}>
+            <ButtonTextWrapper>
+              <TsukiText testID="stateful-button-text">继续</TsukiText>
+            </ButtonTextWrapper>
+          </Button>
+        </ConfigProvider>,
+      )
+
+      expect(
+        StyleSheet.flatten(screen.getByTestId('stateful-button-text').props.style).fontSize,
+      ).toBe(getButtonToken(getDesignToken()).contentFontSizeLG)
+    },
+  )
 
   it('renders Vant variants and invokes onPress', async () => {
     const onPress = jest.fn()

@@ -6,6 +6,7 @@ export type TextSize = 'small' | 'normal' | 'large'
 
 export interface TextProps extends Omit<NativeTextProps, 'children' | 'style'> {
   children?: ReactNode
+  className?: string
   type?: TextType
   size?: TextSize
   weight?: TextStyle['fontWeight']
