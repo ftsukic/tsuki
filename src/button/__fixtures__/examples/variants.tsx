@@ -6,7 +6,7 @@ import { StyleSheet, Text, View } from 'react-native'
 
 /**
  * @title 按钮变体
- * @description 展示常用类型、快捷配色、五种视觉变体和自定义颜色。
+ * @description 展示常用类型、快捷配色、不同配色的禁用实心按钮、五种视觉变体和自定义颜色。
  */
 export default function ButtonVariantsFixture() {
   const [pressCount, setPressCount] = useState(0)
@@ -57,6 +57,21 @@ export default function ButtonVariantsFixture() {
         </Button>
         <Button color="success" variant="filled">
           成功填充
+        </Button>
+      </View>
+      <Text style={styles.heading}>禁用配色</Text>
+      <View style={styles.row}>
+        <Button type="primary" disabled>
+          主要
+        </Button>
+        <Button type="primary" success disabled>
+          成功
+        </Button>
+        <Button type="primary" warning disabled>
+          警告
+        </Button>
+        <Button type="primary" danger disabled>
+          危险
         </Button>
       </View>
       <Text style={styles.heading}>视觉变体</Text>
