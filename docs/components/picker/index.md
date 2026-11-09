@@ -22,6 +22,8 @@ import { Cell, Picker, PickerToolbar, Popup, showPicker } from '@ftsukic/tsuki'
 
 - **长列表 Picker**：验证长列表的首尾居中、滚轮吸附和受控值更新。 [示例源码](../../../src/picker/__fixtures__/examples/long-list.tsx)
 
+- **大列表性能对照**：比较 500、10000 和 100000 项数据准备、Picker 布局及 Popup 打开耗时。 [示例源码](../../../src/picker/__fixtures__/examples/performance.tsx)
+
 - **多列 Picker**：同时渲染多个独立滚轮列。 [示例源码](../../../src/picker/__fixtures__/examples/multi-column.tsx)
 
 - **底部安全区**：由 Popup 面板统一处理 bottom safe-area，并保持背景连续。 [示例源码](../../../src/picker/__fixtures__/examples/safe-area.tsx)
@@ -52,6 +54,8 @@ interface PickerOption {
 ```
 
 `text` 是显示文本，`value` 是规范化和提交值，`disabled` 的 option 不可选，`children` 用于级联数据。`formatter` 或 `filter` 不属于基础 Picker API，而应由日期时间组件处理。
+
+`columns` 是只读输入。更新 `text`、`value`、`disabled` 或 `children` 时，请创建新的 option 对象和列数组；Picker 会按列数组身份缓存选项索引。
 
 ### PickerProps
 
@@ -180,6 +184,6 @@ Picker 不维护 Popup 的 draft/commit 生命周期；上例中的 `draft`、`c
 
 每列暴露 `radiogroup` 角色，滚轮 option 暴露 `radio` 角色和 selected/disabled 状态；可用 `columnLabels` 区分多列。Toolbar 操作暴露 `button` 角色。Loading 隐藏 option 的无障碍树并保留 progressbar，同时取消尚未结算的选项交互。读屏器开启时自动全量渲染，长列表的屏幕阅读器遍历体验需在目标设备确认。
 
-`virtual` 默认开启。长列只挂载可视范围及上下缓冲选项，完整数据仍用于选值、联动和确认；`virtual={false}` 保留全量渲染。首次挂载长列时，选项等待原生读屏状态查询完成后再显示，查询失败回退全量渲染。DatePicker、DateTimePicker、TimePicker、Field 选择适配器及 `Picker.open()` 同样支持此配置。窗口随拖动和吸附的真实偏移更新；JS 线程长时间阻塞时仍可能出现补充节点延迟，原生高速滚动体验需在目标设备验证。
+`virtual` 默认开启。长列首帧立即渲染当前窗口，完整数据仍用于选值、联动和确认；`virtual={false}` 保留全量渲染。异步读屏状态查询确认开启读屏后，Picker 会切换为全量渲染，确保所有选项都能被遍历；查询失败也回退全量渲染。DatePicker、DateTimePicker、TimePicker、Field 选择适配器及 `Picker.open()` 同样支持此配置。窗口随拖动和吸附的真实偏移更新；JS 线程长时间阻塞时仍可能出现补充节点延迟，原生高速滚动体验需在目标设备验证。
 
 PickerColumn 使用 `Gesture.Pan`、SharedValue 和共享 Motion 吸附能力，遵循 `ConfigProvider` / `TsukiProvider` 的 enabled、reducedMotion 和 durationScale。点击默认 200ms，滑动采用 swipeDuration；关闭动画或减少动态效果时直接结算。iOS、Android 的实际 tap/pan 冲突、速度和视觉效果仍需在目标设备确认。

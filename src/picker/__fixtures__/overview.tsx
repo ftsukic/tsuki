@@ -11,6 +11,7 @@ import ToolbarExample from './examples/toolbar'
 import LoadingExample from './examples/loading'
 import EmptyExample from './examples/empty'
 import SemanticExample from './examples/semantic'
+import PerformanceExample from './examples/performance'
 
 /**
  * @title Picker overview
@@ -50,6 +51,12 @@ export default function PickerOverview() {
           description: 'FieldPicker 直接组合 Cell 与 Picker，确认后回写字段展示值。',
           id: 'field',
           title: 'FieldPicker 联动',
+        },
+        {
+          Component: PerformanceExample,
+          description: '对比 500、10000、100000 项数据的准备、Picker 布局和 Popup 打开耗时。',
+          id: 'performance',
+          title: '大列表性能对照',
         },
         {
           Component: LongListExample,

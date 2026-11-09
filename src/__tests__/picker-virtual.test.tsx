@@ -10,6 +10,7 @@ import { ConfigProvider } from '../theme'
 import { getPickerWindow } from '../picker/window'
 import { DatePicker } from '../date-picker'
 import { TimePicker } from '../time-picker'
+import { getPickerEnabledFlags, resolvePickerState } from '../picker/utils'
 
 const options = Array.from({ length: 500 }, (_, index) => ({ text: `Item ${index}`, value: index }))
 
@@ -55,6 +56,55 @@ describe('Picker virtual rendering', () => {
     await view.rerender(<Picker columns={options.slice(0, 10)} value={[499]} />)
     expect(itemCount()).toBe(10)
     expect(screen.getByTestId('picker-item-0-9').props.accessibilityState.selected).toBe(true)
+  })
+
+  it('reuses a 100000-item lookup index across controlled value updates', () => {
+    let indexedReads = 0
+    const options = Array.from({ length: 100_000 }, (_, index) => ({
+      text: `Item ${index + 1}`,
+      value: index + 1,
+    }))
+    const trackedOptions = new Proxy(options, {
+      get(target, property, receiver) {
+        if (typeof property === 'string' && /^\d+$/.test(property)) indexedReads += 1
+        return Reflect.get(target, property, receiver) as unknown
+      },
+    })
+    const columns = [trackedOptions] as const
+
+    const firstState = resolvePickerState(columns, [100_000])
+    const readsAfterIndex = indexedReads
+    const updatedState = resolvePickerState(columns, [99_999], firstState)
+
+    expect(firstState.values).toEqual([100_000])
+    expect(updatedState.values).toEqual([99_999])
+    expect(indexedReads - readsAfterIndex).toBeLessThan(8)
+  })
+
+  it('does not retain an enabled-flags array for all-enabled columns', () => {
+    const enabledOptions = [
+      { text: 'first', value: 'first' },
+      { text: 'second', value: 'second' },
+    ]
+
+    expect(getPickerEnabledFlags(enabledOptions)).toBeNull()
+  })
+
+  it('uses a fresh lookup after options are immutably replaced', () => {
+    const initialOptions = [
+      { text: 'first', value: 1 },
+      { text: 'second', value: 2 },
+    ]
+    const previousState = resolvePickerState(initialOptions, [1])
+    const updatedOptions = [
+      { ...initialOptions[0], disabled: true },
+      { text: 'second updated', value: 2 },
+    ]
+
+    const updatedState = resolvePickerState(updatedOptions, [1], previousState)
+
+    expect(updatedState.values).toEqual([2])
+    expect(updatedState.options[0]).toBe(updatedOptions[1])
   })
 
   it('emits the original value when clicking a windowed option', async () => {
@@ -167,6 +217,32 @@ describe('Picker virtual rendering', () => {
       changeReader(true)
     })
     expect(itemCount()).toBe(500)
+  })
+
+  it('shows the virtual window before the screen reader query settles, then expands for accessibility', async () => {
+    let resolveReader: (enabled: boolean) => void = () => {}
+    jest.spyOn(AccessibilityInfo, 'isScreenReaderEnabled').mockReturnValue(
+      new Promise<boolean>((resolve) => {
+        resolveReader = resolve
+      }),
+    )
+    jest.spyOn(AccessibilityInfo, 'addEventListener').mockReturnValue({
+      remove: jest.fn(),
+    } as never)
+
+    await render(<Picker columns={options} defaultValue={[0]} />)
+
+    expect(itemCount()).toBe(31)
+    expect(screen.getByTestId('picker-item-0-0').props.accessibilityState.selected).toBe(true)
+    expect(screen.queryByTestId('picker-item-0-499')).toBeNull()
+
+    await act(async () => {
+      resolveReader(true)
+      await Promise.resolve()
+    })
+
+    expect(itemCount()).toBe(500)
+    expect(screen.getByTestId('picker-item-0-499')).toBeTruthy()
   })
 
   it('falls back to full rendering if the reader query fails', async () => {

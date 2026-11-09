@@ -27,6 +27,20 @@ async function renderPicker(props: TimePickerProps & { ref?: Ref<TimePickerRef> 
 }
 
 describe('TimePicker', () => {
+  it('resolves each dynamic column once during initial uncontrolled setup', async () => {
+    const filterCalls: string[] = []
+    const filter: TimePickerFilter = (type, options) => {
+      filterCalls.push(type)
+      return options
+    }
+    const filterSpy = jest.fn(filter)
+
+    await renderPicker({ defaultValue: ['12', '30'], filter: filterSpy })
+
+    expect(filterSpy).toHaveBeenCalledTimes(2)
+    expect(filterCalls).toEqual(['hour', 'minute'])
+  })
+
   it('uses hour and minute by default and supports seconds', async () => {
     await renderPicker({ defaultValue: ['21', '30'] })
     expect(screen.getAllByTestId(/^picker-column-\d+$/)).toHaveLength(2)
@@ -149,6 +163,17 @@ describe('TimePicker', () => {
 
     await press('picker-item-0-4')
     expect(onChange).toHaveBeenLastCalledWith(['40', '12'], expect.any(Array))
+  })
+
+  it('preserves exact canonical value matching when resolving filtered options', async () => {
+    await renderPicker({
+      columnsType: ['hour'],
+      defaultValue: ['00'],
+      filter: (type) => (type === 'hour' ? [{ text: 'negative zero', value: -0 }] : []),
+    })
+
+    expect(screen.queryByText('negative zero')).toBeNull()
+    expect(screen.queryByTestId('picker-item-0-0')).toBeNull()
   })
 
   it('aligns step options with ranges and repairs invalid values', async () => {

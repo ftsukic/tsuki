@@ -2,6 +2,7 @@ import {
   forwardRef,
   memo,
   useCallback,
+  useContext,
   useEffect,
   useImperativeHandle,
   useLayoutEffect,
@@ -30,6 +31,7 @@ import {
   DEFAULT_DURATION,
   findEnabledIndex,
   findEnabledIndexWorklet,
+  getPickerEnabledFlags,
   getIndexByOffset,
   getMomentumTarget,
   getOffsetByIndex,
@@ -38,6 +40,7 @@ import {
 import type { PickerOption } from './types'
 import { getPickerWindow } from './window'
 import { useScreenReader } from './useScreenReader'
+import { PerformanceProbeContext } from '../performance-probe-context'
 
 const LOCK_DISTANCE = 10
 
@@ -73,6 +76,7 @@ interface ItemProps {
   styles: ReturnType<typeof getPickerStyles>
   token: ReturnType<typeof getPickerToken>
   onPress: (index: number) => void
+  onLayout?: () => void
   itemStyle?: StyleProp<ViewStyle>
   itemLabelStyle?: StyleProp<TextStyle>
 }
@@ -92,6 +96,7 @@ const PickerColumnItem = memo(function PickerColumnItem({
   styles,
   token,
   onPress,
+  onLayout,
   itemStyle,
   itemLabelStyle,
 }: ItemProps) {
@@ -103,6 +108,7 @@ const PickerColumnItem = memo(function PickerColumnItem({
       accessibilityRole="radio"
       accessibilityState={{ disabled, selected }}
       disabled={disabled}
+      onLayout={onLayout}
       onPress={() => onPress(index)}
       style={[
         styles.item,
@@ -144,8 +150,8 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
   const count = items.length
   const visible = Math.max(1, Math.floor(visibleItemCount) || 1)
   const screenReader = useScreenReader()
+  const performanceProbe = useContext(PerformanceProbeContext)
   const windowed = virtual && screenReader !== true && count > visible * 5 + 1
-  const waitingForAccessibility = windowed && screenReader === undefined
   const [windowState, setWindowState] = useState(() => ({
     items,
     selectedIndex,
@@ -177,20 +183,13 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
     () => getPickerStyles(token, itemHeight, visible),
     [itemHeight, token, visible],
   )
-  const enabledFlags = useMemo(() => items.map((item) => !item.disabled), [items])
-  const itemsKey = useMemo(
-    () =>
-      items
-        .map((item) => `${typeof item.value}:${String(item.value)}:${item.disabled ? 'd' : 'e'}`)
-        .join('|'),
-    [items],
-  )
+  const enabledFlags = useMemo(() => getPickerEnabledFlags(items), [items])
   const selectedIndexRef = useRef(selectedIndex)
   selectedIndexRef.current = selectedIndex
   const onIndexChangeRef = useRef(onIndexChange)
   onIndexChangeRef.current = onIndexChange
 
-  const initialIndex = findEnabledIndex(items, selectedIndex)
+  const initialIndex = useMemo(() => findEnabledIndex(items, selectedIndex), [items, selectedIndex])
   const initialOffset = getOffsetByIndex(Math.max(0, initialIndex), itemHeight)
   const offset = useSharedValue(initialOffset)
   const requestedBucket = useSharedValue(-1)
@@ -236,7 +235,7 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
   const pendingIndex = useSharedValue(-1)
   const generationRef = useRef(0)
   const pendingSnapRef = useRef<PendingSnap | null>(null)
-  const previousItemsKeyRef = useRef<string | null>(null)
+  const previousItemsRef = useRef<typeof items | null>(null)
   const previousSelectedIndexRef = useRef(selectedIndex)
   const previousItemHeightRef = useRef(itemHeight)
   const previousSelectionRevisionRef = useRef(selectionRevision)
@@ -298,13 +297,12 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
   )
 
   useLayoutEffect(() => {
-    const structuralChange =
-      previousItemsKeyRef.current !== null && previousItemsKeyRef.current !== itemsKey
+    const structuralChange = previousItemsRef.current !== null && previousItemsRef.current !== items
     const selectedChange = previousSelectedIndexRef.current !== selectedIndex
     const itemHeightChange = previousItemHeightRef.current !== itemHeight
 
     if (
-      previousItemsKeyRef.current === null ||
+      previousItemsRef.current === null ||
       structuralChange ||
       selectedChange ||
       itemHeightChange ||
@@ -318,7 +316,7 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
       offset.value = getOffsetByIndex(Math.max(0, nextIndex), itemHeight)
     }
 
-    previousItemsKeyRef.current = itemsKey
+    previousItemsRef.current = items
     previousSelectedIndexRef.current = selectedIndex
     previousItemHeightRef.current = itemHeight
     previousSelectionRevisionRef.current = selectionRevision
@@ -328,7 +326,6 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
     invalidateSnap,
     itemHeight,
     items,
-    itemsKey,
     offset,
     panActive,
     selectedIndex,
@@ -425,7 +422,7 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
           duration,
         })
         const rawIndex = getIndexByOffset(momentumTarget ?? offset.value, itemHeight, count)
-        const targetIndex = findEnabledIndexWorklet(enabledFlags, rawIndex)
+        const targetIndex = findEnabledIndexWorklet(enabledFlags, rawIndex, count)
         if (targetIndex < 0) {
           panEndHandled.value = true
           return
@@ -462,7 +459,7 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
 
         if (!panEndHandled.value && count > 0) {
           const rawIndex = getIndexByOffset(offset.value, itemHeight, count)
-          const targetIndex = findEnabledIndexWorklet(enabledFlags, rawIndex)
+          const targetIndex = findEnabledIndexWorklet(enabledFlags, rawIndex, count)
           if (targetIndex >= 0) {
             const generation = snapGeneration.value + 1
             snapGeneration.value = generation
@@ -572,12 +569,7 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
           {windowed && range.start > 0 ? (
             <View style={{ height: range.start * itemHeight }} />
           ) : null}
-          {(waitingForAccessibility
-            ? []
-            : windowed
-              ? items.slice(range.start, range.end)
-              : items
-          ).map((item, localIndex) => {
+          {(windowed ? items.slice(range.start, range.end) : items).map((item, localIndex) => {
             const index = localIndex + (windowed ? range.start : 0)
             return (
               <PickerColumnItem
@@ -590,6 +582,12 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
                 itemLabelStyle={itemLabelStyle}
                 itemStyle={itemStyle}
                 onPress={handlePress}
+                onLayout={
+                  index === selectedIndex && performanceProbe?.onPickerOptionLayout
+                    ? () =>
+                        performanceProbe.onPickerOptionLayout?.(performanceProbe.runId, columnIndex)
+                    : undefined
+                }
                 selected={index === selectedIndex}
                 styles={styles}
                 token={token}
@@ -598,9 +596,6 @@ export const PickerColumn = forwardRef<PickerColumnRef, PickerColumnProps>(funct
           })}
           {windowed && range.end < count ? (
             <View style={{ height: (count - range.end) * itemHeight }} />
-          ) : null}
-          {waitingForAccessibility ? (
-            <View style={{ height: (range.end - range.start) * itemHeight }} />
           ) : null}
         </Animated.View>
       </View>

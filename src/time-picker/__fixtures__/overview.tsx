@@ -7,6 +7,7 @@ import Popup from './examples/popup'
 import Range from './examples/range'
 import Seconds from './examples/seconds'
 import Step from './examples/step'
+import OpenPerformance from './examples/open-performance'
 
 /** @title TimePicker overview @description TimePicker 的 Vant 时间范围、过滤和 Tsuki 步进示例。 */
 export default function Overview() {
@@ -26,6 +27,12 @@ export default function Overview() {
         { Component: Formatter, id: 'formatter', title: 'formatter', description: '自定义显示。' },
         { Component: Filter, id: 'filter', title: 'filter', description: '动态过滤选项。' },
         { Component: Step, id: 'step', title: '步进', description: 'minuteStep={5}。' },
+        {
+          Component: OpenPerformance,
+          id: 'open-performance',
+          title: '首次和重复打开性能',
+          description: '分开记录 Picker 布局耗时与 Popup 打开动画、交互就绪耗时。',
+        },
         {
           Component: Popup,
           id: 'popup',

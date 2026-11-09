@@ -28,6 +28,113 @@ export interface ResolvedPickerState {
   options: readonly PickerOption[]
 }
 
+interface NumericOptionIndex {
+  value: number
+  index: number
+}
+
+interface PickerColumnIndex {
+  /** `null` means every item is enabled, avoiding a large worklet capture. */
+  enabledFlags: boolean[] | null
+  indexByValue: Map<PickerValue | symbol, number>
+  nextEnabledIndex?: number[]
+  numericOptions?: NumericOptionIndex[]
+  previousEnabledIndex?: number[]
+}
+
+const negativeZero = Symbol('picker-negative-zero')
+// Picker columns are readonly inputs. Replace the array and changed option objects
+// when updating data so this identity cache cannot retain stale indexes.
+const pickerColumnIndexes = new WeakMap<PickerColumnData, PickerColumnIndex>()
+
+function getValueKey(value: PickerValue | undefined): PickerValue | symbol {
+  return typeof value === 'number' && Object.is(value, -0) ? negativeZero : (value as PickerValue)
+}
+
+function getPickerColumnIndex(items: PickerColumnData): PickerColumnIndex {
+  const cached = pickerColumnIndexes.get(items)
+  if (cached) return cached
+
+  let enabledFlags: boolean[] | null = null
+  const indexByValue = new Map<PickerValue | symbol, number>()
+
+  items.forEach((item, index) => {
+    if (item.disabled) {
+      if (enabledFlags === null) {
+        enabledFlags = new Array<boolean>(items.length).fill(true)
+      }
+      enabledFlags[index] = false
+    } else if (enabledFlags !== null) {
+      enabledFlags[index] = true
+    }
+    const key = getValueKey(item.value)
+    if (!indexByValue.has(key)) indexByValue.set(key, index)
+  })
+
+  let nextEnabledIndex: number[] | undefined
+  let previousEnabledIndex: number[] | undefined
+  if (enabledFlags !== null) {
+    nextEnabledIndex = new Array<number>(items.length)
+    previousEnabledIndex = new Array<number>(items.length)
+    let nearestEnabled = -1
+    for (let index = items.length - 1; index >= 0; index -= 1) {
+      if (enabledFlags[index]) nearestEnabled = index
+      nextEnabledIndex[index] = nearestEnabled
+    }
+    nearestEnabled = -1
+    for (let index = 0; index < items.length; index += 1) {
+      if (enabledFlags[index]) nearestEnabled = index
+      previousEnabledIndex[index] = nearestEnabled
+    }
+  }
+
+  const result = {
+    enabledFlags,
+    indexByValue,
+    nextEnabledIndex,
+    previousEnabledIndex,
+  }
+  pickerColumnIndexes.set(items, result)
+  return result
+}
+
+export function getPickerEnabledFlags(items: PickerColumnData): readonly boolean[] | null {
+  return getPickerColumnIndex(items).enabledFlags
+}
+
+function getNumericOptions(items: PickerColumnData, indexed: PickerColumnIndex) {
+  if (indexed.numericOptions) return indexed.numericOptions
+
+  const numericOptions: NumericOptionIndex[] = []
+  let numericOptionsSorted = true
+  let previousNumericValue = -Infinity
+  items.forEach((item, index) => {
+    if (item.disabled) return
+    const value = Number(item.value)
+    if (!Number.isFinite(value)) return
+    if (value < previousNumericValue) numericOptionsSorted = false
+    previousNumericValue = value
+    numericOptions.push({ index, value })
+  })
+
+  if (!numericOptionsSorted) {
+    numericOptions.sort((left, right) => left.value - right.value || left.index - right.index)
+  }
+
+  // Keep the first enabled item for each numeric value, matching Array.reduce's
+  // stable tie behavior while allowing nearest-value lookup with binary search.
+  let uniqueLength = 0
+  numericOptions.forEach((option) => {
+    if (uniqueLength === 0 || option.value !== numericOptions[uniqueLength - 1].value) {
+      numericOptions[uniqueLength] = option
+      uniqueLength += 1
+    }
+  })
+  numericOptions.length = uniqueLength
+  indexed.numericOptions = numericOptions
+  return numericOptions
+}
+
 function isColumnSource(value: unknown): value is PickerColumnSource {
   return Array.isArray(value) || typeof value === 'function'
 }
@@ -40,19 +147,22 @@ function getColumnSources(columns: PickerColumns): readonly PickerColumnSource[]
 export function findEnabledIndex(items: PickerColumnData, index: number): number {
   if (items.length === 0) return -1
   const target = Math.min(items.length - 1, Math.max(0, Math.trunc(index) || 0))
-  for (let i = target; i < items.length; i += 1) {
-    if (!items[i].disabled) return i
-  }
-  for (let i = target - 1; i >= 0; i -= 1) {
-    if (!items[i].disabled) return i
-  }
-  return -1
+  const indexed = getPickerColumnIndex(items)
+  if (indexed.enabledFlags === null) return target
+  const nextEnabledIndex = indexed.nextEnabledIndex!
+  const previousEnabledIndex = indexed.previousEnabledIndex!
+  return nextEnabledIndex[target] >= 0 ? nextEnabledIndex[target] : previousEnabledIndex[target]
 }
 
-export function findEnabledIndexWorklet(enabledFlags: readonly boolean[], index: number): number {
+export function findEnabledIndexWorklet(
+  enabledFlags: readonly boolean[] | null,
+  index: number,
+  count: number,
+): number {
   'worklet'
-  if (enabledFlags.length === 0) return -1
-  const target = Math.min(enabledFlags.length - 1, Math.max(0, Math.trunc(index) || 0))
+  if (count === 0) return -1
+  const target = Math.min(count - 1, Math.max(0, Math.trunc(index) || 0))
+  if (enabledFlags === null) return target
   for (let i = target; i < enabledFlags.length; i += 1) if (enabledFlags[i]) return i
   for (let i = target - 1; i >= 0; i -= 1) if (enabledFlags[i]) return i
   return -1
@@ -113,22 +223,43 @@ function resolveIndex(
   previousIndex?: number,
   previousValue?: PickerValue,
 ) {
-  const requestedIndex = items.findIndex((item) => Object.is(item.value, requestedValue))
+  if (items.length === 0) {
+    return { index: -1, requestedIndex: -1, reconciled: true }
+  }
+
+  const indexed = getPickerColumnIndex(items)
+  const requestedIndex = indexed.indexByValue.get(getValueKey(requestedValue)) ?? -1
   const previousInvalid =
-    previousValue !== undefined && !items.some((item) => Object.is(item.value, previousValue))
+    previousValue !== undefined && !indexed.indexByValue.has(getValueKey(previousValue))
   const requested = requestedIndex >= 0 && !items[requestedIndex].disabled
   const requestedNumber = Number(requestedValue)
-  const nearestIndex =
-    !requested && Number.isFinite(requestedNumber)
-      ? items.reduce<number | undefined>((nearest, item, index) => {
-          if (item.disabled || !Number.isFinite(Number(item.value))) return nearest
-          if (nearest === undefined) return index
-          return Math.abs(Number(item.value) - requestedNumber) <
-            Math.abs(Number(items[nearest].value) - requestedNumber)
-            ? index
-            : nearest
-        }, undefined)
-      : undefined
+  let nearestIndex: number | undefined
+  const numericOptions =
+    !requested && Number.isFinite(requestedNumber) ? getNumericOptions(items, indexed) : []
+  if (numericOptions.length > 0) {
+    let low = 0
+    let high = numericOptions.length
+    while (low < high) {
+      const middle = (low + high) >>> 1
+      if (numericOptions[middle].value < requestedNumber) low = middle + 1
+      else high = middle
+    }
+
+    const lower = numericOptions[low - 1]
+    const upper = numericOptions[low]
+    if (!lower) nearestIndex = upper.index
+    else if (!upper) nearestIndex = lower.index
+    else {
+      const lowerDistance = Math.abs(lower.value - requestedNumber)
+      const upperDistance = Math.abs(upper.value - requestedNumber)
+      nearestIndex =
+        lowerDistance < upperDistance
+          ? lower.index
+          : upperDistance < lowerDistance
+            ? upper.index
+            : Math.min(lower.index, upper.index)
+    }
+  }
   const index = requested
     ? requestedIndex
     : (nearestIndex ??
@@ -161,6 +292,7 @@ export function resolvePickerColumns(
     const indexes: number[] = []
     const values: PickerValue[] = []
     const options: PickerOption[] = []
+    let previousValueIndex = 0
     sources.forEach((source, columnIndex) => {
       const items =
         typeof source === 'function'
@@ -170,9 +302,7 @@ export function resolvePickerColumns(
         items,
         requestedValues[positional ? columnIndex : values.length],
         previousState?.indexes[columnIndex],
-        previousState?.values[
-          previousState.indexes.slice(0, columnIndex).filter((index) => index >= 0).length
-        ],
+        previousState?.values[previousValueIndex],
       )
       result.push({ items, ...resolved })
       indexes.push(resolved.index)
@@ -180,6 +310,7 @@ export function resolvePickerColumns(
         values.push(items[resolved.index].value)
         options.push(items[resolved.index])
       }
+      if (previousState && previousState.indexes[columnIndex] >= 0) previousValueIndex += 1
     })
     return result
   }

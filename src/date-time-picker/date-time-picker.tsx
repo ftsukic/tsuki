@@ -16,7 +16,6 @@ import { normalizeDateTimeBounds, validateDateTimeColumnOrder } from '../picker/
 import {
   dateToFields,
   fieldsToPickerValues,
-  pickerValuesToFields,
   selectedValuesToPickerValues,
 } from '../picker/date-time/value'
 import type {
@@ -64,15 +63,7 @@ export const DateTimePicker = forwardRef<DateTimePickerRef, DateTimePickerProps>
       )
       return new Date(timestamp)
     }, [bounds.maxDate, bounds.minDate])
-    const baseFields = useMemo(
-      () =>
-        pickerValuesToFields(
-          selectedValuesToPickerValues(value ?? defaultValue ?? [], resolvedColumns),
-          resolvedColumns,
-          dateToFields(initialDate),
-        ),
-      [defaultValue, initialDate, resolvedColumns, value],
-    )
+    const baseFields = useMemo(() => dateToFields(initialDate), [initialDate])
     const columnConfig = useMemo<DateTimeColumnsConfig>(
       () => ({
         baseFields,

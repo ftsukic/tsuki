@@ -42,7 +42,7 @@ function subscribe(listener: () => void) {
 
 let disconnectCurrent: (() => void) | undefined
 
-// Long columns wait for this query before choosing an accessible render mode.
+// Long columns show a virtual window immediately and expand once reader status is known.
 export function useScreenReader() {
   return useSyncExternalStore(
     subscribe,

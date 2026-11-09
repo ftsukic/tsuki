@@ -42,6 +42,12 @@ interface NumericRange {
   max: number
 }
 
+interface DateTimeNormalizationContext {
+  hasTimeConstraint: boolean
+  maxTime?: DateTimeFields
+  minTime?: DateTimeFields
+}
+
 const NATURAL_RANGES: Record<DateTimeColumnType, NumericRange> = {
   day: { max: 31, min: 1 },
   hour: { max: 23, min: 0 },
@@ -51,6 +57,11 @@ const NATURAL_RANGES: Record<DateTimeColumnType, NumericRange> = {
   year: { max: 9999, min: 1 },
 }
 const TIME_FIELD_ORDER = ['hour', 'minute', 'second'] as const
+const negativeZeroValue = Symbol('negative-zero-picker-value')
+
+function getPickerValueKey(value: PickerValue): PickerValue | symbol {
+  return typeof value === 'number' && Object.is(value, -0) ? negativeZeroValue : value
+}
 
 export const dateTimeColumns = new WeakSet<object>()
 const optionTypes = new WeakMap<PickerOption, DateTimeColumnType>()
@@ -137,10 +148,11 @@ function resolveTimeRange(
   type: Extract<DateTimeColumnType, 'hour' | 'minute' | 'second'>,
   fields: DateTimeFields,
   config: DateTimeColumnsConfig,
+  normalization: DateTimeNormalizationContext,
 ): NumericRange {
   const natural = NATURAL_RANGES[type]
-  const minTime = parseTime(config.minTime)
-  const maxTime = parseTime(config.maxTime)
+  const minTime = normalization.minTime
+  const maxTime = normalization.maxTime
   let min = natural.min
   let max = natural.max
 
@@ -188,6 +200,7 @@ function resolveRange(
   type: DateTimeColumnType,
   fields: DateTimeFields,
   config: DateTimeColumnsConfig,
+  normalization: DateTimeNormalizationContext,
 ): NumericRange {
   if (config.minDate || config.maxDate) {
     return resolveDateRange(type, fields, config)
@@ -196,8 +209,8 @@ function resolveRange(
     return resolveDateRange(type, fields, config)
   }
   if (
-    config.minTime ||
-    config.maxTime ||
+    normalization.minTime ||
+    normalization.maxTime ||
     config.minHour !== undefined ||
     config.maxHour !== undefined ||
     config.minMinute !== undefined ||
@@ -205,7 +218,7 @@ function resolveRange(
     config.minSecond !== undefined ||
     config.maxSecond !== undefined
   ) {
-    return resolveTimeRange(type, fields, config)
+    return resolveTimeRange(type, fields, config, normalization)
   }
   return NATURAL_RANGES[type]
 }
@@ -256,6 +269,14 @@ function hasTimeConstraint(config: DateTimeColumnsConfig): boolean {
   )
 }
 
+function createNormalizationContext(config: DateTimeColumnsConfig): DateTimeNormalizationContext {
+  return {
+    hasTimeConstraint: hasTimeConstraint(config),
+    maxTime: parseTime(config.maxTime),
+    minTime: parseTime(config.minTime),
+  }
+}
+
 function getTimeInSeconds(fields: DateTimeFields): number {
   return fields.hour * 60 * 60 + fields.minute * 60 + fields.second
 }
@@ -272,24 +293,31 @@ function getNearestOptionValue(
   type: Extract<DateTimeColumnType, 'hour' | 'minute' | 'second'>,
   fields: DateTimeFields,
   config: DateTimeColumnsConfig,
+  normalization: DateTimeNormalizationContext,
 ): number | undefined {
-  const options = createOptions(type, resolveRange(type, fields, config), getStep(type, config))
-  if (options.length === 0) return undefined
+  const range = resolveRange(type, fields, config, normalization)
+  const natural = NATURAL_RANGES[type]
+  const step = getStep(type, config)
+  const start = Math.min(natural.max, Math.max(natural.min, range.min))
+  const end = Math.min(natural.max, Math.max(natural.min, range.max))
+  const first = Math.ceil(start / step) * step
+  if (first > end) return undefined
+
+  const lastStepIndex = Math.floor((end - first) / step)
   const requested = fields[type]
-  return options.reduce(
-    (nearest, option) => {
-      if (nearest === undefined) return Number(option.value)
-      return Math.abs(Number(option.value) - requested) < Math.abs(nearest - requested)
-        ? Number(option.value)
-        : nearest
-    },
-    undefined as number | undefined,
+  const lowerStepIndex = Math.max(
+    0,
+    Math.min(lastStepIndex, Math.floor((requested - first) / step)),
   )
+  const lower = first + lowerStepIndex * step
+  const upper = first + Math.min(lastStepIndex, lowerStepIndex + 1) * step
+  return Math.abs(upper - requested) < Math.abs(lower - requested) ? upper : lower
 }
 
 function normalizeRequestedFields(
   fields: DateTimeFields,
   config: DateTimeColumnsConfig,
+  normalization: DateTimeNormalizationContext,
 ): DateTimeFields {
   let normalized = normalizeDateTimeFields(fields)
 
@@ -297,10 +325,10 @@ function normalizeRequestedFields(
     normalized = clampDateTimeFields(normalized, config.minDate, config.maxDate)
   }
 
-  if (!hasTimeConstraint(config)) return normalized
+  if (!normalization.hasTimeConstraint) return normalized
 
-  const minTime = parseTime(config.minTime)
-  const maxTime = parseTime(config.maxTime)
+  const minTime = normalization.minTime
+  const maxTime = normalization.maxTime
   if (minTime || maxTime) {
     const currentSeconds = getTimeInSeconds(normalized)
     const minSeconds = minTime ? getTimeInSeconds(minTime) : 0
@@ -325,7 +353,7 @@ function normalizeRequestedFields(
     }
 
     TIME_FIELD_ORDER.forEach((type) => {
-      const value = getNearestOptionValue(type, normalized, config)
+      const value = getNearestOptionValue(type, normalized, config, normalization)
       if (value !== undefined) normalized = { ...normalized, [type]: value }
     })
 
@@ -365,23 +393,36 @@ function resolveOptions(
   type: DateTimeColumnType,
   fields: DateTimeFields,
   config: DateTimeColumnsConfig,
+  normalization: DateTimeNormalizationContext,
 ): PickerOption[] {
-  const options = createOptions(type, resolveRange(type, fields, config), getStep(type, config))
+  const options = createOptions(
+    type,
+    resolveRange(type, fields, config, normalization),
+    getStep(type, config),
+  )
   const formatted = formatOptions(type, options, config)
   const values = fieldsToSelectedValues(fields, config.columnsType)
   const filtered = config.filter?.(type, formatted, values) ?? formatted
 
-  return filtered.flatMap((option) => {
-    const canonical = options.find((item) => Object.is(item.value, option.value))
-    if (!canonical) return []
+  const canonicalByValue = new Map<PickerValue | symbol, PickerOption>()
+  options.forEach((option) => {
+    const key = getPickerValueKey(option.value)
+    if (!canonicalByValue.has(key)) canonicalByValue.set(key, option)
+  })
+  const resolved: PickerOption[] = []
+  filtered.forEach((option) => {
+    const canonical = canonicalByValue.get(getPickerValueKey(option.value))
+    if (!canonical) return
     const selectedOption = { ...option, value: canonical.value }
     optionTypes.set(selectedOption, type)
-    return [selectedOption]
+    resolved.push(selectedOption)
   })
+  return resolved
 }
 
 export function createDateTimeColumns(config: DateTimeColumnsConfig): PickerColumns {
   const baseFields = config.baseFields ?? DEFAULT_DATE_TIME_FIELDS
+  const normalization = createNormalizationContext(config)
   const canonicalFieldsCache = new WeakMap<object, DateTimeFields>()
 
   const columns = config.columnsType.map((type) => (context: PickerColumnContext) => {
@@ -396,6 +437,7 @@ export function createDateTimeColumns(config: DateTimeColumnsConfig): PickerColu
       : normalizeRequestedFields(
           pickerValuesToFields(values, config.columnsType, baseFields),
           config,
+          normalization,
         )
 
     if (!cachedFields && requestedReference && typeof requestedReference === 'object') {
@@ -414,8 +456,8 @@ export function createDateTimeColumns(config: DateTimeColumnsConfig): PickerColu
       }
     })
 
-    const fields = normalizeRequestedFields(requestedFields, config)
-    return resolveOptions(type, fields, config)
+    const fields = normalizeRequestedFields(requestedFields, config, normalization)
+    return resolveOptions(type, fields, config, normalization)
   })
   dateTimeColumns.add(columns)
   return columns
@@ -426,6 +468,10 @@ export function normalizeDateTimePickerValues(
   config: DateTimeColumnsConfig,
 ): number[] {
   const baseFields = config.baseFields ?? DEFAULT_DATE_TIME_FIELDS
+  const normalization = createNormalizationContext(config)
   const fields = pickerValuesToFields(values, config.columnsType, baseFields)
-  return fieldsToPickerValues(normalizeRequestedFields(fields, config), config.columnsType)
+  return fieldsToPickerValues(
+    normalizeRequestedFields(fields, config, normalization),
+    config.columnsType,
+  )
 }

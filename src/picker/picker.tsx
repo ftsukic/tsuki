@@ -106,12 +106,22 @@ export const Picker = forwardRef<PickerRef, PickerProps>(function Picker(
   const columnsRef = useRef(columns)
   columnsRef.current = columns
   const previousResolvedStateRef = useRef<ResolvedPickerState | undefined>(undefined)
+  const initialColumnsRef = useRef(columns)
+  const initialValuesRef = useRef(initialValues)
   const requestedValues = controlled ? value : internalValues
   const selectedValuesRef = useRef<readonly PickerValue[]>(initialValues)
   const columnRefs = useRef<Array<PickerColumnRef | null>>([])
 
   useEffect(() => {
     if (controlled) return
+    if (
+      columns === initialColumnsRef.current &&
+      arePickerValuesEqual(internalValues, initialValuesRef.current)
+    ) {
+      // Initial state has already resolved these columns; don't generate each
+      // dynamic column a second time during the mount effect.
+      return
+    }
     const nextValues = resolvePickerState(
       columns,
       requestedValuesRef.current,

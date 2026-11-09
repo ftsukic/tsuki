@@ -6,18 +6,10 @@ import {
   usePickerGroupRegistrationContext,
 } from '../picker-group/context'
 import type { PickerOption, PickerRef, PickerSelection, PickerValue } from '../picker/types'
-import {
-  createDateTimeColumns,
-  normalizeDateTimePickerValues,
-  pickerOptionsToSelectedValues,
-} from '../picker/date-time/columns'
+import { createDateTimeColumns, pickerOptionsToSelectedValues } from '../picker/date-time/columns'
 import type { DateTimeColumnsConfig } from '../picker/date-time/columns'
 import { normalizeColumnTypes } from '../picker/date-time/normalize'
-import {
-  DEFAULT_DATE_TIME_FIELDS,
-  pickerValuesToFields,
-  selectedValuesToPickerValues,
-} from '../picker/date-time/value'
+import { DEFAULT_DATE_TIME_FIELDS, selectedValuesToPickerValues } from '../picker/date-time/value'
 import type {
   TimePickerColumnType,
   TimePickerProps,
@@ -60,18 +52,9 @@ export const TimePicker = forwardRef<TimePickerRef, TimePickerProps>(function Ti
     () => normalizeColumnTypes(columnsType, ALLOWED_COLUMNS, 'TimePicker'),
     [columnsType],
   )
-  const baseFields = useMemo(
-    () =>
-      pickerValuesToFields(
-        selectedValuesToPickerValues(value ?? defaultValue ?? [], resolvedColumns),
-        resolvedColumns,
-        DEFAULT_DATE_TIME_FIELDS,
-      ),
-    [defaultValue, resolvedColumns, value],
-  )
   const columnConfig = useMemo<DateTimeColumnsConfig>(
     () => ({
-      baseFields,
+      baseFields: DEFAULT_DATE_TIME_FIELDS,
       columnsType: resolvedColumns,
       filter: filter
         ? (type, options, values) => filter(type as TimePickerColumnType, options, values)
@@ -92,7 +75,6 @@ export const TimePicker = forwardRef<TimePickerRef, TimePickerProps>(function Ti
       secondStep,
     }),
     [
-      baseFields,
       filter,
       formatter,
       hourStep,
@@ -112,24 +94,15 @@ export const TimePicker = forwardRef<TimePickerRef, TimePickerProps>(function Ti
   const columns = useMemo(() => createDateTimeColumns(columnConfig), [columnConfig])
   const pickerRef = useRef<PickerRef>(null)
   const pickerValue = useMemo(
-    () =>
-      value === undefined
-        ? undefined
-        : normalizeDateTimePickerValues(
-            selectedValuesToPickerValues(value, resolvedColumns),
-            columnConfig,
-          ),
-    [columnConfig, resolvedColumns, value],
+    () => (value === undefined ? undefined : selectedValuesToPickerValues(value, resolvedColumns)),
+    [resolvedColumns, value],
   )
   const pickerDefaultValue = useMemo(
     () =>
       defaultValue === undefined
         ? undefined
-        : normalizeDateTimePickerValues(
-            selectedValuesToPickerValues(defaultValue, resolvedColumns),
-            columnConfig,
-          ),
-    [columnConfig, defaultValue, resolvedColumns],
+        : selectedValuesToPickerValues(defaultValue, resolvedColumns),
+    [defaultValue, resolvedColumns],
   )
   const handleChange = useCallback(
     (_nextValues: readonly PickerValue[], options: readonly PickerOption[]) => {

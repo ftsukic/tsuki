@@ -4,7 +4,7 @@
 
 `TimePicker` 是纯时间滚轮选择器，负责生成 hour、minute、second 列和时间范围联动。它不内置 Popup，公开 `value`、`defaultValue` 和事件值都是按 `columnsType` 顺序排列的 `string[]`。
 
-- **基础示例**：TimePicker 的列组合、范围、过滤、步进和 Popup 示例。 [示例源码](../../../src/time-picker/__fixtures__/overview.tsx)
+- **基础示例**：TimePicker 的列组合、范围、过滤、步进、Popup 和首次打开性能示例。 [示例源码](../../../src/time-picker/__fixtures__/overview.tsx)
 
 ## 示例源码
 
@@ -23,6 +23,8 @@
 - **步进**：展示 minuteStep 如何生成真实 options。 [示例源码](../../../src/time-picker/__fixtures__/examples/step.tsx)
 
 - **Popup 集成**：通过 Cell + Popup 组合 TimePicker，并在外层维护 draft。 [示例源码](../../../src/time-picker/__fixtures__/examples/popup.tsx)
+
+- **首次和重复打开性能**：分别记录 Picker 布局、Popup 打开动画和交互就绪耗时；首次值变更还包括手动点按与吸附时间。 [示例源码](../../../src/time-picker/__fixtures__/examples/open-performance.tsx)
 
 ## API
 

@@ -2,7 +2,13 @@ import { OVERLAY_PRESETS, overlayAnimation } from '../motion/presets'
 import { forwardRef, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { BackHandler, Platform, StyleSheet, View, useWindowDimensions } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
-import Animated, { useAnimatedStyle } from 'react-native-reanimated'
+import Animated, {
+  useAnimatedReaction,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated'
+import type { SharedValue } from 'react-native-reanimated'
+import { scheduleOnRN } from 'react-native-worklets'
 import { useTransitionProgressState } from '../motion/useTransitionProgress'
 import { useMotionConfig } from '../motion/useMotionConfig'
 import { OverlaySurface } from '../overlay/overlay-surface'
@@ -13,8 +19,40 @@ import type { PopupProps } from './types'
 import { getPopupBottomPadding, getPopupStyles } from './style'
 import { getPopupToken } from './token'
 import { usePopupKeyboard } from './usePopupKeyboard'
+import { PerformanceProbeContext } from '../performance-probe-context'
+import type { PerformanceProbeContextValue } from '../performance-probe-context'
 
-export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(props, ref) {
+interface PopupContentProps extends PopupProps {
+  performanceProbe?: PerformanceProbeContextValue | null
+}
+
+function PopupFirstVisibleProbe({
+  onFirstVisible,
+  progress,
+  runId,
+  visible,
+}: {
+  onFirstVisible: (runId: number) => void
+  progress: SharedValue<number>
+  runId: number
+  visible: boolean
+}) {
+  const reportedRunId = useSharedValue(-1)
+
+  useAnimatedReaction(
+    () => progress.value,
+    (value) => {
+      if (!visible || value < 0.5 || reportedRunId.value === runId) return
+      reportedRunId.value = runId
+      scheduleOnRN(onFirstVisible, runId)
+    },
+    [onFirstVisible, progress, reportedRunId, runId, visible],
+  )
+
+  return null
+}
+
+export const PopupContent = forwardRef<View, PopupContentProps>(function PopupContent(props, ref) {
   const { token: themeToken } = useToken()
   const token = useComponentToken('Popup', getPopupToken)
   const safeAreaInsets = useContext(SafeAreaInsetsContext)
@@ -38,6 +76,7 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
     onOpened,
     onClose,
     onClosed,
+    performanceProbe,
     children,
     onLayout,
     ...viewProps
@@ -326,7 +365,21 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
           animatedPanelStyle,
         ]}
       >
-        {children}
+        {performanceProbe ? (
+          <PerformanceProbeContext.Provider value={performanceProbe}>
+            {children}
+          </PerformanceProbeContext.Provider>
+        ) : (
+          children
+        )}
+        {performanceProbe?.onPopupFirstVisible ? (
+          <PopupFirstVisibleProbe
+            onFirstVisible={performanceProbe.onPopupFirstVisible}
+            progress={progress}
+            runId={performanceProbe.runId}
+            visible={visible}
+          />
+        ) : null}
       </Animated.View>
     </View>
   )
@@ -371,9 +424,10 @@ export const PopupContent = forwardRef<View, PopupProps>(function PopupContent(p
 PopupContent.displayName = 'Popup.Content'
 
 export const Popup = forwardRef<View, PopupProps>(function Popup(props, ref) {
+  const performanceProbe = useContext(PerformanceProbeContext)
   return (
     <Portal>
-      <PopupContent {...props} ref={ref} />
+      <PopupContent {...props} performanceProbe={performanceProbe} ref={ref} />
     </Portal>
   )
 })
