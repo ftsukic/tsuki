@@ -1,13 +1,38 @@
+jest.mock('react-native-teleport', () => {
+  const React = jest.requireActual('react')
+  const { View } = jest.requireActual('react-native')
+
+  return {
+    PortalProvider: ({ children }: { children?: ReactNode }) =>
+      React.createElement(React.Fragment, null, children),
+    PortalHost: ({ name, children }: { name: string; children?: ReactNode }) =>
+      React.createElement(View, { name, testID: 'teleport-host' }, children),
+    Portal: ({ hostName, children }: { hostName?: string; children?: ReactNode }) =>
+      React.createElement(View, { hostName, testID: 'teleport-native-portal' }, children),
+  }
+})
+
 import { resolveStyles } from '../style/resolve-styles'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { useEffect, useState } from 'react'
-import { Button, ConfigProvider, Popup, PortalHost } from '..'
-import { BackHandler, Keyboard, Platform, StyleSheet, Text, View } from 'react-native'
+import { ActionSheet, Button, ConfigProvider, Dialog, Popup, PortalHost } from '..'
+import {
+  BackHandler,
+  Keyboard,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native'
 import { Easing } from 'react-native-reanimated'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import * as Reanimated from 'react-native-reanimated'
+import { teleportPortalBackend } from '../teleport'
 import type { ReactNode } from 'react'
 import type { ViewStyle } from 'react-native'
+import type { TestInstance } from 'test-renderer'
 
 function AppProvider({ children, motion = false }: { children?: ReactNode; motion?: boolean }) {
   return (
@@ -21,8 +46,36 @@ function AppProvider({ children, motion = false }: { children?: ReactNode; motio
   )
 }
 
+function TeleportAppProvider({
+  children,
+  motion = false,
+}: {
+  children?: ReactNode
+  motion?: boolean
+}) {
+  return (
+    <ConfigProvider theme={{ seed: { motion } }}>
+      <PortalHost portalBackend={teleportPortalBackend}>{children}</PortalHost>
+    </ConfigProvider>
+  )
+}
+
 function flattenStyle(element: { props: { style?: unknown } } | null | undefined) {
   return StyleSheet.flatten(element?.props.style) as Record<string, unknown>
+}
+
+function findNativePortals(view: {
+  container: { queryAll: (predicate: (node: TestInstance) => boolean) => TestInstance[] }
+}) {
+  return view.container.queryAll((node) => node.props.testID === 'teleport-native-portal')
+}
+
+function findNativePortal(instance: TestInstance) {
+  let current: TestInstance | null = instance
+  while (current && current.props.testID !== 'teleport-native-portal') {
+    current = current.parent
+  }
+  return current
 }
 
 describe('Popup', () => {
@@ -1186,5 +1239,252 @@ describe('Popup', () => {
     expect(onRequestClose).toHaveBeenCalledTimes(1)
     await view.unmount()
     ;(Platform as unknown as { OS: string }).OS = previousPlatformOS
+  })
+
+  it('runs Popup visibility and lifecycle through its Teleport host', async () => {
+    const events: string[] = []
+    const tree = (visible: boolean) => (
+      <TeleportAppProvider>
+        <Popup
+          visible={visible}
+          duration={0}
+          destroyOnClosed
+          testID="teleport-destroyed-panel"
+          onOpen={() => events.push('open')}
+          onOpened={() => events.push('opened')}
+          onClose={() => events.push('close')}
+          onClosed={() => events.push('closed')}
+        >
+          <Text testID="teleport-destroyed-content">destroy me after closing</Text>
+        </Popup>
+        <Popup visible={visible} duration={0} lazyRender={false} testID="teleport-retained-panel">
+          <Text testID="teleport-retained-content">retain me after closing</Text>
+        </Popup>
+      </TeleportAppProvider>
+    )
+    const view = await render(tree(false))
+    const hostName = screen.getByTestId('teleport-host').props.name
+
+    expect(findNativePortals(view)).toHaveLength(2)
+    expect(findNativePortals(view).map((portal) => portal.props.hostName)).toEqual([
+      hostName,
+      hostName,
+    ])
+    expect(
+      screen.queryByTestId('teleport-destroyed-content', { includeHiddenElements: true }),
+    ).toBeNull()
+    expect(
+      screen.getByTestId('teleport-retained-content', { includeHiddenElements: true }),
+    ).toBeTruthy()
+    expect(events).toEqual([])
+
+    await view.rerender(tree(true))
+    expect(events).toEqual(['open', 'opened'])
+    const destroyedPanel = screen.getByTestId('teleport-destroyed-panel')
+    expect(findNativePortal(destroyedPanel)?.props.hostName).toBe(hostName)
+    expect(screen.getByTestId('teleport-destroyed-content')).toBeTruthy()
+
+    await view.rerender(tree(false))
+    expect(events).toEqual(['open', 'opened', 'close', 'closed'])
+    expect(
+      screen.queryByTestId('teleport-destroyed-content', { includeHiddenElements: true }),
+    ).toBeNull()
+    expect(
+      screen.getByTestId('teleport-retained-content', { includeHiddenElements: true }),
+    ).toBeTruthy()
+    await view.unmount()
+  })
+
+  it('keeps Popup Pressable and TextInput interactions inside Teleport and closes from the overlay', async () => {
+    const onPress = jest.fn()
+    const onPressOverlay = jest.fn()
+    const onRequestClose = jest.fn()
+
+    function InteractivePopup() {
+      const [visible, setVisible] = useState(true)
+      const [value, setValue] = useState('')
+
+      return (
+        <Popup
+          visible={visible}
+          duration={0}
+          closeOnPressOverlay
+          destroyOnClosed
+          onPressOverlay={onPressOverlay}
+          onRequestClose={() => {
+            onRequestClose()
+            setVisible(false)
+          }}
+        >
+          <Pressable testID="teleport-popup-pressable" onPress={onPress}>
+            <Text>press inside Popup</Text>
+          </Pressable>
+          <TextInput testID="teleport-popup-input" value={value} onChangeText={setValue} />
+        </Popup>
+      )
+    }
+
+    const view = await render(
+      <TeleportAppProvider>
+        <InteractivePopup />
+      </TeleportAppProvider>,
+    )
+    const input = screen.getByTestId('teleport-popup-input')
+    const hostName = screen.getByTestId('teleport-host').props.name
+
+    expect(findNativePortal(input)?.props.hostName).toBe(hostName)
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.press(screen.getByTestId('teleport-popup-pressable'))
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.changeText(input, 'edited through Teleport')
+    expect(onPress).toHaveBeenCalledTimes(1)
+    expect(screen.getByTestId('teleport-popup-input').props.value).toBe('edited through Teleport')
+
+    // eslint-disable-next-line testing-library/no-container
+    const overlay = view.container.queryAll(
+      (node) => typeof node.props.onStartShouldSetResponder === 'function',
+    )[0]
+    expect(overlay).toBeTruthy()
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.press(overlay!)
+    expect(onPressOverlay).toHaveBeenCalledTimes(1)
+    expect(onRequestClose).toHaveBeenCalledTimes(1)
+    expect(screen.queryByTestId('teleport-popup-input', { includeHiddenElements: true })).toBeNull()
+    await view.unmount()
+  })
+
+  it('updates keyboardAvoiding layout inside a Teleport NativePortal', async () => {
+    const timing = jest.spyOn(Reanimated, 'withTiming').mockImplementation((value) => value)
+    const listeners = new Map<string, Parameters<typeof Keyboard.addListener>[1]>()
+    const addListener = Keyboard.addListener.bind(Keyboard)
+    jest.spyOn(Keyboard, 'addListener').mockImplementation((name, listener) => {
+      listeners.set(name, listener)
+      return addListener(name, listener)
+    })
+    const tree = () => (
+      <TeleportAppProvider motion>
+        <Popup visible keyboardAvoiding testID="teleport-keyboard-panel">
+          <Text>keyboard form</Text>
+        </Popup>
+      </TeleportAppProvider>
+    )
+    const view = await render(tree())
+    const panel = screen.getByTestId('teleport-keyboard-panel')
+    const hostName = screen.getByTestId('teleport-host').props.name
+    const findViewport = () =>
+      // Native layout is needed to simulate keyboard overlap without a device.
+      // eslint-disable-next-line testing-library/no-container
+      view.container.queryAll((node) => node.props.onLayout && node.props.collapsable === false)[0]
+    const findOffset = () =>
+      // eslint-disable-next-line testing-library/no-container
+      view.container.queryAll(
+        (node) => node.props.pointerEvents === 'box-none' && Boolean(flattenStyle(node).transform),
+      )[0]
+
+    expect(findNativePortal(panel)?.props.hostName).toBe(hostName)
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(panel, 'layout', {
+      nativeEvent: { layout: { x: 0, y: 0, width: 300, height: 300 } },
+    })
+    await act(async () => {
+      await findViewport().props.onLayout({
+        persist: () => {},
+        nativeEvent: { layout: { x: 0, y: 0, width: 390, height: 800 } },
+      })
+      listeners.get(Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow')?.({
+        duration: 250,
+        easing: 'keyboard',
+        startCoordinates: { screenY: 800, screenX: 0, width: 390, height: 0 },
+        endCoordinates: { screenY: 500, screenX: 0, width: 390, height: 300 },
+      })
+    })
+    await view.rerender(tree())
+
+    expect(flattenStyle(findOffset()).transform).toEqual([{ translateY: -50 }])
+    expect(timing).toHaveBeenCalledWith(-50, expect.objectContaining({ duration: 250 }), undefined)
+    expect(flattenStyle(screen.getByTestId('teleport-keyboard-panel')).maxHeight).toBe(500)
+    await view.unmount()
+  })
+
+  it('uses one matching Teleport NativePortal per Popup and preserves z-index layers', async () => {
+    const view = await render(
+      <TeleportAppProvider>
+        <Popup visible duration={0} zIndex={7} testID="teleport-lower-panel">
+          <Text>lower popup</Text>
+        </Popup>
+        <Popup visible duration={0} zIndex={40} testID="teleport-upper-panel">
+          <Text>upper popup</Text>
+        </Popup>
+      </TeleportAppProvider>,
+    )
+    const portals = findNativePortals(view)
+    const hostName = screen.getByTestId('teleport-host').props.name
+    const lower = screen.getByTestId('teleport-lower-panel')
+    const upper = screen.getByTestId('teleport-upper-panel')
+
+    expect(portals).toHaveLength(2)
+    expect(findNativePortal(lower)).not.toBe(findNativePortal(upper))
+    expect(portals.map((portal) => portal.props.hostName)).toEqual([hostName, hostName])
+    expect(flattenStyle(lower.parent).zIndex).toBe(8)
+    expect(flattenStyle(lower.parent?.parent).zIndex).toBe(7)
+    expect(flattenStyle(upper.parent).zIndex).toBe(41)
+    expect(flattenStyle(upper.parent?.parent).zIndex).toBe(40)
+    await view.unmount()
+  })
+
+  it('keeps Dialog and ActionSheet PopupContent in one Teleport each and cleans up on close', async () => {
+    const onDialogClosed = jest.fn()
+    const onSheetClosed = jest.fn()
+
+    function CombinedPopups() {
+      const [dialogVisible, setDialogVisible] = useState(true)
+      const [sheetVisible, setSheetVisible] = useState(true)
+
+      return (
+        <>
+          <Dialog
+            show={dialogVisible}
+            message="Teleport dialog content"
+            onShowChange={setDialogVisible}
+            onClose={onDialogClosed}
+          />
+          <ActionSheet
+            visible={sheetVisible}
+            actions={[{ name: 'Teleport sheet action' }]}
+            cancelText="Cancel sheet"
+            onClose={() => setSheetVisible(false)}
+            onClosed={onSheetClosed}
+          />
+        </>
+      )
+    }
+
+    const view = await render(
+      <TeleportAppProvider>
+        <CombinedPopups />
+      </TeleportAppProvider>,
+    )
+    const hostName = screen.getByTestId('teleport-host').props.name
+    const dialog = screen.getByRole('alert')
+    const sheetCancel = screen.getByTestId('action-sheet-cancel-button')
+    const dialogPortal = findNativePortal(dialog)
+    const sheetPortal = findNativePortal(sheetCancel)
+
+    expect(findNativePortals(view)).toHaveLength(2)
+    expect(dialogPortal?.props.hostName).toBe(hostName)
+    expect(sheetPortal?.props.hostName).toBe(hostName)
+    expect(dialogPortal).not.toBe(sheetPortal)
+
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.press(screen.getByTestId('dialog-confirm-button'))
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent.press(screen.getByTestId('action-sheet-cancel-button'))
+    expect(onDialogClosed).toHaveBeenCalledTimes(1)
+    expect(onSheetClosed).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('alert', { includeHiddenElements: true })).toBeNull()
+    expect(
+      screen.queryByTestId('action-sheet-cancel-button', { includeHiddenElements: true }),
+    ).toBeNull()
+    await view.unmount()
   })
 })
