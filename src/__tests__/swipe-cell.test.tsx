@@ -1440,11 +1440,13 @@ describe('SwipeCell', () => {
 
   it('does not emit animated close events for closed Group siblings or repeated closes', async () => {
     const springs: Array<(finished?: boolean) => void> = []
+    const withTiming = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((_value, _config, callback) => {
+        if (callback) springs.push(callback)
+        return 0
+      })
     jest.spyOn(Reanimated, 'withSpring').mockImplementation((_value, _config, callback) => {
-      if (callback) springs.push(callback)
-      return 0
-    })
-    jest.spyOn(Reanimated, 'withTiming').mockImplementation((_value, _config, callback) => {
       if (callback) springs.push(callback)
       return 0
     })
@@ -1454,6 +1456,7 @@ describe('SwipeCell', () => {
     await render(
       <ConfigProvider theme={{ seed: { motion: true } }}>
         <SwipeCellGroup>
+          <CloseCurrentButton />
           <SwipeCell ref={ref} testID="close-events" rightAction="删除" onClose={onClose} />
           <SwipeCell rightAction="更多" onClose={siblingClose} />
         </SwipeCellGroup>
@@ -1467,9 +1470,10 @@ describe('SwipeCell', () => {
     }
     await layoutAction('close-events', 'right', 100)
     await act(async () => ref.current?.close())
-    await finishLatest()
+    expect(springs).toHaveLength(0)
     expect(onClose).not.toHaveBeenCalled()
     await act(async () => ref.current?.open())
+    expect(springs).toHaveLength(1)
     expect(screen.queryByRole('button', { name: '删除' })).toBeNull()
     await act(async () => {
       for (const finish of springs) finish(true)
@@ -1477,12 +1481,14 @@ describe('SwipeCell', () => {
     })
     expect(siblingClose).not.toHaveBeenCalled()
     expect(screen.getByRole('button', { name: '删除' })).toBeTruthy()
-    await act(async () => ref.current?.close())
+    await fireEvent.press(screen.getByTestId('close-current'))
+    expect(springs).toHaveLength(2)
     expect(screen.queryByRole('button', { name: '删除' })).toBeNull()
     await finishLatest()
     expect(onClose).toHaveBeenCalledTimes(1)
     await act(async () => ref.current?.close())
-    await finishLatest()
+    expect(springs).toHaveLength(2)
+    expect(withTiming).toHaveBeenCalledTimes(2)
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 })

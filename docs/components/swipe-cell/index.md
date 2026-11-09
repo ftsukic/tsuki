@@ -28,11 +28,13 @@ import { SwipeCell, SwipeCellAction, SwipeCellGroup, useSwipeCellController } fr
 
 - **点击主体关闭**：展示关闭展开项时保留主体原有 Pressable 事件。 [示例源码](../../../src/swipe-cell/__fixtures__/examples/content-close.tsx)
 
-- **列表用法**：展示列表滚动时通过控制 hook 关闭当前项。 [示例源码](../../../src/swipe-cell/__fixtures__/examples/list.tsx)
+- **SwipeCell + FlatList**：列表内触摸关闭当前项，保留原生 Pressable 和 Tsuki Cell 的点击处理。 [示例源码](../../../src/swipe-cell/__fixtures__/examples/list.tsx)
 
-- **RNGH + FlashList 1000 条**：独立的 RNGH 接入方案：无需 SwipeCellProvider，列表管理单开、滚动关闭和回收重置。 [示例源码](../../../src/swipe-cell/__fixtures__/examples/flash-list.tsx)
+- **SwipeCell + FlashList 1000 条**：使用公共 SwipeCell 和稳定 `item.id`，展示列表触摸协调与回收重置。 [示例源码](../../../src/swipe-cell/__fixtures__/examples/flash-list.tsx)
 
-此示例直接使用 RNGH `ReanimatedSwipeable` 和 Tsuki `SwipeCellAction`，不依赖 TsukiProvider 的 SwipeCell manager，也不代表当前公共 SwipeCell 已迁移。列表只保存一个当前展开项；触摸其他行、开始侧滑另一行或开始滚动时关闭旧项，保留目标点击。FlashList 复用行时通过稳定数据 id 创建新的归属记录，并在 layout effect 中 `reset()`，旧回调不再影响新数据；删除操作等待关闭完成后再移除数据。`keyExtractor` 保持稳定，不给 renderItem 内部强加数据 key。
+两个列表示例都用 `SwipeCellGroup` 提供无 TsukiProvider 时的局部互斥；在 Group 内层，列表触摸边界调用 `useSwipeCellController().closeCurrent()`。普通 View、原生 Pressable、Tsuki Cell、当前行内容及列表空白都会沿触摸冒泡触发关闭，列表滚动开始也会关闭；关闭只更新 SwipeCell，不阻止目标行原有 `onPress`。`SwipeCellAction` 保留自己的 `onTouchStart` 回调后停止向列表边界冒泡，避免关闭 Action 自己；Action 的正常 `onPress` 与 `closeOnActionPress` 仍控制结果。
+
+FlashList 示例使用公共 `SwipeCell`，`keyExtractor` 返回业务 `item.id`，并把同一个 id 传给 `SwipeCell`。实例绑定新 id 时会清零位移、取消旧动画并使旧绑定回调失效；删除操作等待关闭完成后再移除数据。列表边界只覆盖列表区域，不使用透明遮罩或拦截滚动。点击列表区域以外的空白不会自动关闭；实际平台的触摸冒泡、滚动和复用行为仍需在 Expo Example 上验收，测试 Mock 不等同真机证据。
 
 示例需要应用已有的 `GestureHandlerRootView`；不额外要求 SwipeCellProvider。点击列表以外的空白区域不会自动关闭。原生手势和回收效果需在 Expo Example 上验证，文档中的源码链接不作为手势验收依据。
 
@@ -88,6 +90,23 @@ const swipeCell = useSwipeCellController()
 
 React Native 没有 Web DOM 的全局 click-outside 事件。页面中的自定义原生 `Pressable` 或滚动事件仍应显式调用 `swipeCell.closeCurrent()`；组件库的 `Pressable` 会自动接入 coordinator。
 
+如果列表没有 `TsukiProvider`，可将 `SwipeCellGroup` 和列表局部触摸边界组合使用。`useSwipeCellController` 在 Group 内会关闭该 Group 的 cell；在没有 Provider 或 Group 的位置保持空操作：
+
+```tsx
+function CoordinatedList() {
+  const swipeCell = useSwipeCellController()
+  return (
+    <View onTouchStart={swipeCell.closeCurrent}>
+      <FlatList onScrollBeginDrag={swipeCell.closeCurrent} />
+    </View>
+  )
+}
+
+;<SwipeCellGroup>
+  <CoordinatedList />
+</SwipeCellGroup>
+```
+
 ### SwipeCellActionItem
 
 ```tsx
@@ -136,7 +155,7 @@ ref.current?.close()
 
 ### SwipeCellGroup
 
-`SwipeCellGroup` 继承 React Native `ViewProps`。它保留旧版局部 grouping 行为：任意一个 cell 通过拖动或 ref 打开时，其他已注册 cell 会自动关闭。TsukiProvider coordinator 已经保证同一 TsukiProvider 下的全局单开，因此新列表不需要使用 Group；Group 不提供 overlay 或 outside press 行为。
+`SwipeCellGroup` 继承 React Native `ViewProps`。它保留旧版局部 grouping 行为：任意一个 cell 通过拖动或 ref 打开时，其他已注册 cell 会自动关闭。TsukiProvider coordinator 已经保证同一 TsukiProvider 下的全局单开。Group 本身不添加 overlay 或 outside press 行为；需要列表触摸关闭时，在列表范围添加局部触摸边界。
 
 | 属性 | 类型 | 默认值 | 说明 |
 | --- | --- | --- | --- |
@@ -171,4 +190,4 @@ ref.current?.close()
 
 ### 按压协调边界
 
-最近的 TsukiProvider 提供 SwipeCellManager，嵌套 TsukiProvider 各自协调。内容点击关闭自身，内容按下仅关闭其它项，操作区按下保留自身，操作完成是否关闭由 `closeOnActionPress` 决定；外部库内 Pressable 按下关闭当前展开项，disabled 不通知。内容及自定义操作中的库内 Pressable 自动读取所属 cell，无需 `interactionId`。Portal 与 Popover 浮层内容清除所属 cell。自定义 React Native Modal 会继承调用处 Context，不属于库内浮层边界；需要外部按压语义时，应通过库内 Portal 承载。没有 TsukiProvider 时不提供全局单开或外部按压关闭，Group 仍提供组内打开互斥。
+最近的 TsukiProvider 提供 SwipeCellManager，嵌套 TsukiProvider 各自协调。内容点击关闭自身，内容按下仅关闭其它项，操作完成是否关闭由 `closeOnActionPress` 决定；外部库内 Pressable 按下关闭当前展开项，disabled 不通知。内容及自定义操作中的库内 Pressable 自动读取所属 cell，无需 `interactionId`。Portal 与 Popover 浮层内容清除所属 cell。自定义 React Native Modal 会继承调用处 Context，不属于库内浮层边界；需要外部按压语义时，应通过库内 Portal 承载。没有 TsukiProvider 时不提供全局单开或外部按压关闭；SwipeCellGroup 仍提供组内打开互斥，控制 hook 在 Group 内可关闭该组。

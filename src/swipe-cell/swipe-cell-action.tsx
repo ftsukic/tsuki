@@ -10,7 +10,7 @@ export const SwipeCellAction = forwardRef<
   React.ComponentRef<typeof Pressable>,
   SwipeCellActionProps
 >(function SwipeCellAction(
-  { children, color, backgroundColor, textColor, width, style, ...pressableProps },
+  { children, color, backgroundColor, textColor, width, style, onTouchStart, ...pressableProps },
   ref,
 ) {
   const token = useComponentToken('SwipeCell', getSwipeCellToken)
@@ -27,6 +27,10 @@ export const SwipeCellAction = forwardRef<
       ref={ref}
       {...pressableProps}
       disabled={pressableProps.disabled ?? false}
+      onTouchStart={(event) => {
+        onTouchStart?.(event)
+        event.stopPropagation?.()
+      }}
       pressStyle="overlay"
       pressedOverlayColor={token.actionPressedOverlayColor}
       style={(state) => [

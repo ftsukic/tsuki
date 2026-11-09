@@ -6,12 +6,13 @@ import {
   useEffect,
   useId,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type ReactNode,
 } from 'react'
-import { View } from 'react-native'
+import { Platform, View } from 'react-native'
 import type { GestureResponderEvent, LayoutChangeEvent, PressableProps } from 'react-native'
 import { GestureDetector, Gesture } from '../gesture'
 import Animated, {
@@ -62,8 +63,10 @@ function wrapActionPress(
   onPress: PressableProps['onPress'],
   close: () => void,
   closeOnActionPress: boolean,
+  isCurrentBinding: () => boolean,
 ) {
   return (event: GestureResponderEvent) => {
+    if (!isCurrentBinding()) return
     onPress?.(event)
     if (closeOnActionPress) close()
   }
@@ -74,10 +77,13 @@ function mergeActionPress(
   onPress: PressableProps['onPress'],
   close: () => void,
   closeOnActionPress: boolean,
+  isCurrentBinding: () => boolean,
 ): ReactNode {
   if (!isValidElement<SwipeCellActionProps>(action) || action.type !== SwipeCellAction) {
     return (
-      <SwipeCellAction onPress={wrapActionPress(onPress, close, closeOnActionPress)}>
+      <SwipeCellAction
+        onPress={wrapActionPress(onPress, close, closeOnActionPress, isCurrentBinding)}
+      >
         {action}
       </SwipeCellAction>
     )
@@ -89,11 +95,13 @@ function mergeActionPress(
       {...action.props}
       onPress={wrapActionPress(
         (event) => {
+          if (!isCurrentBinding()) return
           actionOnPress?.(event)
           onPress?.(event)
         },
         close,
         closeOnActionPress,
+        isCurrentBinding,
       )}
     />
   )
@@ -103,6 +111,7 @@ function renderActionItems(
   actions: SwipeCellActionItem[],
   close: () => void,
   closeOnActionPress: boolean,
+  isCurrentBinding: () => boolean,
 ) {
   return actions.map((action, index) => (
     <SwipeCellAction
@@ -112,7 +121,7 @@ function renderActionItems(
       textColor={action.textColor}
       width={action.width}
       disabled={action.disabled}
-      onPress={wrapActionPress(action.onPress, close, closeOnActionPress)}
+      onPress={wrapActionPress(action.onPress, close, closeOnActionPress, isCurrentBinding)}
     >
       {action.text ?? action.label}
     </SwipeCellAction>
@@ -148,6 +157,8 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   const manager = useSwipeCellManager()
   const generatedId = useId()
   const cellId = explicitId ?? generatedId
+  const currentCellIdRef = useRef(cellId)
+  const bindingGenerationRef = useRef(0)
   const translation = useSharedValue(0)
   const gestureStartX = useSharedValue(0)
   const gestureActive = useSharedValue(false)
@@ -158,9 +169,18 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   const leftActionWidth = useSharedValue(0)
   const rightActionWidth = useSharedValue(0)
   const animationToken = useSharedValue(0)
+  const bindingGeneration = useSharedValue(0)
+  const gestureBinding = useSharedValue(0)
   const mounted = useSharedValue(true)
   const currentOffsetRef = useRef(0)
   const actionWidthsRef = useRef({ left: 0, right: 0 })
+  const currentCloseRef = useRef<() => void>(() => {})
+  const handleRef = useRef<SwipeCellHandle>({
+    id: cellId,
+    close: () => {
+      if (currentCellIdRef.current === cellId) currentCloseRef.current()
+    },
+  })
   const pendingOpenRef = useRef<SwipeCellSide | null>(null)
   const openSideRef = useRef<SwipeCellSide | null>(null)
   const phaseRef = useRef<'closed' | 'opening' | 'open' | 'closing'>('closed')
@@ -175,6 +195,52 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   const motion = useMotionConfig()
   const animationEnabled = motion.duration(token.animationDuration) > 0
   const durationScale = motion.durationScale
+
+  useLayoutEffect(() => {
+    const previousCellId = currentCellIdRef.current
+    if (previousCellId === cellId) return
+
+    currentCellIdRef.current = cellId
+    const nextBindingGeneration = bindingGenerationRef.current + 1
+    bindingGenerationRef.current = nextBindingGeneration
+    bindingGeneration.value = nextBindingGeneration
+    animationToken.value += 1
+    cancelAnimation(translation)
+    translation.value = 0
+    gestureActive.value = false
+    gestureWidths.value = { left: 0, right: 0 }
+    actionWidthsRef.current = { left: 0, right: 0 }
+    leftActionWidth.value = 0
+    rightActionWidth.value = 0
+    contentFeedback.cancel()
+    pendingOpenRef.current = null
+    openSideRef.current = null
+    phaseRef.current = 'closed'
+    currentOffsetRef.current = 0
+    setActionSide(null)
+    manager?.release(previousCellId)
+    group?.release(handleRef.current)
+    handleRef.current = {
+      id: cellId,
+      close: () => {
+        if (currentCellIdRef.current === cellId) currentCloseRef.current()
+      },
+    }
+  }, [
+    animationToken,
+    bindingGeneration,
+    cellId,
+    contentFeedback,
+    gestureActive,
+    gestureWidths,
+    group,
+    leftActionWidth,
+    manager,
+    rightActionWidth,
+    translation,
+  ])
+
+  const isCurrentBinding = useCallback(() => currentCellIdRef.current === cellId, [cellId])
 
   const completeOpen = useCallback(
     (side: SwipeCellSide, offset: number, completionToken: number) => {
@@ -197,9 +263,10 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
       phaseRef.current = 'closed'
       setActionSide(null)
       manager?.release(cellId)
+      group?.release(handleRef.current)
       if (wasOpen) onClose?.()
     },
-    [animationToken, cellId, manager, onClose],
+    [animationToken, cellId, group, manager, onClose],
   )
 
   const prepareGestureSettlement = useCallback(
@@ -214,9 +281,9 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   )
 
   const settleOnUI = useCallback(
-    (offset: number, side: SwipeCellSide | null) => {
+    (offset: number, side: SwipeCellSide | null, expectedBindingGeneration: number) => {
       'worklet'
-      if (!mounted.value) return
+      if (!mounted.value || bindingGeneration.value !== expectedBindingGeneration) return
       gestureActive.value = false
       const nextToken = animationToken.value + 1
       animationToken.value = nextToken
@@ -238,6 +305,7 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     [
       animationEnabled,
       animationToken,
+      bindingGeneration,
       completeClose,
       completeOpen,
       durationScale,
@@ -251,12 +319,13 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
 
   const settleTo = useCallback(
     (offset: number, side: SwipeCellSide | null) => {
+      if (currentCellIdRef.current !== cellId) return
       setActionSide(null)
       if (side) phaseRef.current = 'opening'
       else if (phaseRef.current !== 'closed') phaseRef.current = 'closing'
-      scheduleOnUI(settleOnUI, offset, side)
+      scheduleOnUI(settleOnUI, offset, side, bindingGenerationRef.current)
     },
-    [settleOnUI],
+    [cellId, settleOnUI],
   )
 
   const syncOpenOffset = useCallback(
@@ -277,12 +346,23 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   }, [cellId, manager])
 
   const close = useCallback(() => {
+    if (currentCellIdRef.current !== cellId) return
     if (phaseRef.current === 'closing') return
+    if (
+      phaseRef.current === 'closed' &&
+      pendingOpenRef.current === null &&
+      !gestureActive.value &&
+      currentOffsetRef.current === 0
+    ) {
+      manager?.release(cellId)
+      group?.release(handleRef.current)
+      return
+    }
     pendingOpenRef.current = null
     openSideRef.current = null
     setActionSide(null)
     settleTo(0, null)
-  }, [settleTo])
+  }, [cellId, gestureActive, group, manager, settleTo])
 
   const resolveOpenSide = useCallback((side: SwipeCellSide) => {
     if (getActionWidth(side, actionWidthsRef.current) > 0) return side
@@ -290,15 +370,15 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     return getActionWidth(fallback, actionWidthsRef.current) > 0 ? fallback : null
   }, [])
 
-  const handle = useMemo<SwipeCellHandle>(() => ({ id: cellId, close }), [cellId, close])
-
   const claim = useCallback(() => {
+    const handle = handleRef.current
     manager?.claim(handle)
-    group?.requestOpen(cellId)
-  }, [cellId, group, handle, manager])
+    group?.requestOpen(handle)
+  }, [group, manager])
 
   const open = useCallback(
     (side: SwipeCellSide = 'right') => {
+      if (currentCellIdRef.current !== cellId) return
       if (!hasLeftAction && !hasRightAction) {
         close()
         return
@@ -318,11 +398,12 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         resolvedSide,
       )
     },
-    [claim, close, hasLeftAction, hasRightAction, resolveOpenSide, settleTo],
+    [cellId, claim, close, hasLeftAction, hasRightAction, resolveOpenSide, settleTo],
   )
 
   const handleActionLayout = useCallback(
     (side: SwipeCellSide, event: LayoutChangeEvent) => {
+      if (currentCellIdRef.current !== cellId) return
       const width = Number.isFinite(event.nativeEvent.layout.width)
         ? Math.max(0, event.nativeEvent.layout.width)
         : 0
@@ -343,18 +424,22 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         syncOpenOffset(side, width)
       }
     },
-    [gestureActive, leftActionWidth, rightActionWidth, settleTo, syncOpenOffset],
+    [cellId, gestureActive, leftActionWidth, rightActionWidth, settleTo, syncOpenOffset],
   )
 
   const cancelContentFeedback = useCallback(() => contentFeedback.cancel(), [contentFeedback])
   const endContentFeedback = useCallback(() => contentFeedback.end(), [contentFeedback])
 
-  const startGesture = useCallback(() => {
-    contentFeedback.cancel()
-    if (phaseRef.current === 'closing') phaseRef.current = 'open'
-    setActionSide(null)
-    claim()
-  }, [claim, contentFeedback])
+  const startGesture = useCallback(
+    (expectedBindingGeneration: number) => {
+      if (expectedBindingGeneration !== bindingGenerationRef.current) return
+      contentFeedback.cancel()
+      if (phaseRef.current === 'closing') phaseRef.current = 'open'
+      setActionSide(null)
+      claim()
+    },
+    [claim, contentFeedback],
+  )
 
   const pan = useMemo(() => {
     const gesture = Gesture.Pan()
@@ -363,15 +448,18 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
       .failOffsetY([-SWIPE_PRESET.activationDistance, SWIPE_PRESET.activationDistance])
       .onStart(() => {
         'worklet'
+        const currentBinding = bindingGeneration.value
+        gestureBinding.value = currentBinding
         gestureActive.value = true
         gestureWidths.value = { left: leftActionWidth.value, right: rightActionWidth.value }
         animationToken.value += 1
         cancelAnimation(translation)
         gestureStartX.value = translation.value
-        scheduleOnRN(startGesture)
+        scheduleOnRN(startGesture, currentBinding)
       })
       .onUpdate((event) => {
         'worklet'
+        if (gestureBinding.value !== bindingGeneration.value) return
         translation.value = resolveSwipeOffset(
           gestureStartX.value + event.translationX,
           Math.max(gestureWidths.value.left, leftActionWidth.value),
@@ -381,6 +469,10 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
       })
       .onEnd((event, success) => {
         'worklet'
+        if (gestureBinding.value !== bindingGeneration.value) {
+          gestureActive.value = false
+          return
+        }
         const offset = gestureStartX.value + event.translationX
         const targetOffset = resolveSwipeTarget(
           offset,
@@ -390,7 +482,7 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         )
         const target = success ? targetOffset : 0
         const side: SwipeCellSide | null = target > 0 ? 'left' : target < 0 ? 'right' : null
-        settleOnUI(target, side)
+        settleOnUI(target, side, gestureBinding.value)
       })
 
     if (testID) gesture.withTestId(`${testID}-gesture`)
@@ -398,9 +490,11 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     return gesture
   }, [
     animationToken,
+    bindingGeneration,
     startGesture,
     settleOnUI,
     gestureActive,
+    gestureBinding,
     gestureWidths,
     gestureStartX,
     hasLeftAction,
@@ -417,12 +511,14 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
   }))
 
   const handleContentPressIn = useCallback(() => {
+    if (currentCellIdRef.current !== cellId) return
     manager?.closeOthers(cellId)
   }, [cellId, manager])
 
   const handleContentPress = useCallback(() => {
+    if (currentCellIdRef.current !== cellId) return
     if (phaseRef.current === 'open' || phaseRef.current === 'opening') close()
-  }, [close])
+  }, [cellId, close])
 
   const contentGesture = useMemo(() => {
     const cancelMovedFeedback = (x: number, y: number) => {
@@ -494,10 +590,14 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
     }
   }, [close, hasLeftAction, hasRightAction, leftActionWidth, rightActionWidth])
 
-  useEffect(() => {
-    if (!group) return undefined
-    return group.register(cellId, close)
-  }, [cellId, close, group])
+  useLayoutEffect(() => {
+    currentCloseRef.current = close
+  }, [close])
+
+  useLayoutEffect(() => {
+    const handle = handleRef.current
+    return () => group?.release(handle)
+  }, [cellId, group])
 
   useEffect(() => {
     mounted.value = true
@@ -513,12 +613,18 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
 
   const renderedLeftActions =
     leftActions !== undefined
-      ? renderActionItems(leftActions, close, closeOnActionPress)
-      : mergeActionPress(leftAction, onLeftActionPress, close, closeOnActionPress)
+      ? renderActionItems(leftActions, close, closeOnActionPress, isCurrentBinding)
+      : mergeActionPress(leftAction, onLeftActionPress, close, closeOnActionPress, isCurrentBinding)
   const renderedRightActions =
     resolvedRightActions !== undefined
-      ? renderActionItems(resolvedRightActions, close, closeOnActionPress)
-      : mergeActionPress(rightAction, onRightActionPress, close, closeOnActionPress)
+      ? renderActionItems(resolvedRightActions, close, closeOnActionPress, isCurrentBinding)
+      : mergeActionPress(
+          rightAction,
+          onRightActionPress,
+          close,
+          closeOnActionPress,
+          isCurrentBinding,
+        )
 
   const semantic = resolveStyles(styles, {
     props: {
@@ -589,6 +695,11 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
         <View pointerEvents="box-none" style={[resolvedStyles.actions, semantic?.actions]}>
           {hasLeftAction ? (
             <View
+              id={
+                Platform.OS === 'web'
+                  ? `tsuki-swipe-cell-action-${encodeURIComponent(cellId)}-left`
+                  : undefined
+              }
               testID={testID ? `${testID}-left-action` : undefined}
               pointerEvents={actionSide === 'left' ? 'auto' : 'none'}
               accessibilityElementsHidden={actionSide !== 'left'}
@@ -615,6 +726,11 @@ export const SwipeCell = forwardRef<SwipeCellRef, SwipeCellProps>(function Swipe
           <View style={{ flex: 1 }} />
           {hasRightAction ? (
             <View
+              id={
+                Platform.OS === 'web'
+                  ? `tsuki-swipe-cell-action-${encodeURIComponent(cellId)}-right`
+                  : undefined
+              }
               testID={testID ? `${testID}-right-action` : undefined}
               pointerEvents={actionSide === 'right' ? 'auto' : 'none'}
               accessibilityElementsHidden={actionSide !== 'right'}
@@ -649,9 +765,11 @@ SwipeCell.displayName = 'SwipeCell'
 
 export function useSwipeCellController() {
   const manager = useSwipeCellManager()
+  const group = useContext(SwipeCellGroupContext)
   const closeCurrent = useCallback(() => {
-    manager?.closeActive()
-  }, [manager])
+    if (group) group.closeCurrent()
+    else manager?.closeActive()
+  }, [group, manager])
   return useMemo(
     () => ({
       closeCurrent,

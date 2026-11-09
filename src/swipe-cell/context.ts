@@ -1,10 +1,11 @@
 import { createContext, useContext } from 'react'
 import type { SwipeCellPressFeedback } from './press-feedback'
-import type { SwipeCellManager } from './manager'
+import type { SwipeCellHandle, SwipeCellManager } from './manager'
 
 interface SwipeCellGroupContextValue {
-  register: (id: string, close: () => void) => () => void
-  requestOpen: (id: string) => void
+  closeCurrent: () => void
+  release: (handle: SwipeCellHandle) => void
+  requestOpen: (handle: SwipeCellHandle) => void
 }
 
 export const SwipeCellGroupContext = createContext<SwipeCellGroupContextValue | null>(null)

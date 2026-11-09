@@ -57,15 +57,15 @@ export default function SwipeCellOverview() {
         },
         {
           Component: SwipeCellListExample,
-          description: '展示列表开始滚动时通过 useSwipeCellController 关闭当前 cell。',
+          description: '展示公共 SwipeCell 在 FlatList 中的点按关闭、事件透传和滚动关闭。',
           id: 'list',
           title: 'List usage',
         },
         {
           Component: SwipeCellFlashListExample,
-          description: '展示 RNGH + FlashList 在无专用 Provider 下的单开、滚动关闭和回收重置。',
+          description: '展示公共 SwipeCell 在 FlashList 1000 行中的触摸协调、稳定 id 和回收重置。',
           id: 'flash-list',
-          title: 'FlashList 1000 items',
+          title: 'SwipeCell + FlashList 1000 items',
         },
         {
           Component: SwipeCellRefExample,
