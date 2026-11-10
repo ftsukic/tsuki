@@ -1,17 +1,3 @@
-jest.mock('react-native-teleport', () => {
-  const React = jest.requireActual('react')
-  const { View } = jest.requireActual('react-native')
-
-  return {
-    PortalProvider: ({ children }: { children?: ReactNode }) =>
-      React.createElement(React.Fragment, null, children),
-    PortalHost: ({ name, children }: { name: string; children?: ReactNode }) =>
-      React.createElement(View, { name, testID: 'teleport-host' }, children),
-    Portal: ({ hostName, children }: { hostName?: string; children?: ReactNode }) =>
-      React.createElement(View, { hostName, testID: 'teleport-native-portal' }, children),
-  }
-})
-
 import { resolveStyles } from '../style/resolve-styles'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native'
 import { useEffect, useState } from 'react'
@@ -29,10 +15,20 @@ import {
 import { Easing } from 'react-native-reanimated'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import * as Reanimated from 'react-native-reanimated'
-import { teleportPortalBackend } from '../teleport'
 import type { ReactNode } from 'react'
 import type { ViewStyle } from 'react-native'
+import type { PortalBackend } from '../portal/types'
 import type { TestInstance } from 'test-renderer'
+
+const customPortalBackend: PortalBackend = {
+  Provider: ({ children }) => <>{children}</>,
+  Host: ({ name, style }) => <View testID="custom-backend-host" nativeID={name} style={style} />,
+  Portal: ({ hostName, children, style }) => (
+    <View testID="custom-backend-portal" nativeID={hostName} style={style}>
+      {children}
+    </View>
+  ),
+}
 
 function AppProvider({ children, motion = false }: { children?: ReactNode; motion?: boolean }) {
   return (
@@ -46,7 +42,7 @@ function AppProvider({ children, motion = false }: { children?: ReactNode; motio
   )
 }
 
-function TeleportAppProvider({
+function CustomBackendAppProvider({
   children,
   motion = false,
 }: {
@@ -55,7 +51,7 @@ function TeleportAppProvider({
 }) {
   return (
     <ConfigProvider theme={{ seed: { motion } }}>
-      <PortalHost portalBackend={teleportPortalBackend}>{children}</PortalHost>
+      <PortalHost portalBackend={customPortalBackend}>{children}</PortalHost>
     </ConfigProvider>
   )
 }
@@ -64,15 +60,15 @@ function flattenStyle(element: { props: { style?: unknown } } | null | undefined
   return StyleSheet.flatten(element?.props.style) as Record<string, unknown>
 }
 
-function findNativePortals(view: {
+function findCustomPortals(view: {
   container: { queryAll: (predicate: (node: TestInstance) => boolean) => TestInstance[] }
 }) {
-  return view.container.queryAll((node) => node.props.testID === 'teleport-native-portal')
+  return view.container.queryAll((node) => node.props.testID === 'custom-backend-portal')
 }
 
-function findNativePortal(instance: TestInstance) {
+function findCustomPortal(instance: TestInstance) {
   let current: TestInstance | null = instance
-  while (current && current.props.testID !== 'teleport-native-portal') {
+  while (current && current.props.testID !== 'custom-backend-portal') {
     current = current.parent
   }
   return current
@@ -1241,61 +1237,66 @@ describe('Popup', () => {
     ;(Platform as unknown as { OS: string }).OS = previousPlatformOS
   })
 
-  it('runs Popup visibility and lifecycle through its Teleport host', async () => {
+  it('runs Popup visibility and lifecycle through its custom backend host', async () => {
     const events: string[] = []
     const tree = (visible: boolean) => (
-      <TeleportAppProvider>
+      <CustomBackendAppProvider>
         <Popup
           visible={visible}
           duration={0}
           destroyOnClosed
-          testID="teleport-destroyed-panel"
+          testID="custom-backend-destroyed-panel"
           onOpen={() => events.push('open')}
           onOpened={() => events.push('opened')}
           onClose={() => events.push('close')}
           onClosed={() => events.push('closed')}
         >
-          <Text testID="teleport-destroyed-content">destroy me after closing</Text>
+          <Text testID="custom-backend-destroyed-content">destroy me after closing</Text>
         </Popup>
-        <Popup visible={visible} duration={0} lazyRender={false} testID="teleport-retained-panel">
-          <Text testID="teleport-retained-content">retain me after closing</Text>
+        <Popup
+          visible={visible}
+          duration={0}
+          lazyRender={false}
+          testID="custom-backend-retained-panel"
+        >
+          <Text testID="custom-backend-retained-content">retain me after closing</Text>
         </Popup>
-      </TeleportAppProvider>
+      </CustomBackendAppProvider>
     )
     const view = await render(tree(false))
-    const hostName = screen.getByTestId('teleport-host').props.name
+    const hostName = screen.getByTestId('custom-backend-host').props.nativeID
 
-    expect(findNativePortals(view)).toHaveLength(2)
-    expect(findNativePortals(view).map((portal) => portal.props.hostName)).toEqual([
+    expect(findCustomPortals(view)).toHaveLength(2)
+    expect(findCustomPortals(view).map((portal) => portal.props.nativeID)).toEqual([
       hostName,
       hostName,
     ])
     expect(
-      screen.queryByTestId('teleport-destroyed-content', { includeHiddenElements: true }),
+      screen.queryByTestId('custom-backend-destroyed-content', { includeHiddenElements: true }),
     ).toBeNull()
     expect(
-      screen.getByTestId('teleport-retained-content', { includeHiddenElements: true }),
+      screen.getByTestId('custom-backend-retained-content', { includeHiddenElements: true }),
     ).toBeTruthy()
     expect(events).toEqual([])
 
     await view.rerender(tree(true))
     expect(events).toEqual(['open', 'opened'])
-    const destroyedPanel = screen.getByTestId('teleport-destroyed-panel')
-    expect(findNativePortal(destroyedPanel)?.props.hostName).toBe(hostName)
-    expect(screen.getByTestId('teleport-destroyed-content')).toBeTruthy()
+    const destroyedPanel = screen.getByTestId('custom-backend-destroyed-panel')
+    expect(findCustomPortal(destroyedPanel)?.props.nativeID).toBe(hostName)
+    expect(screen.getByTestId('custom-backend-destroyed-content')).toBeTruthy()
 
     await view.rerender(tree(false))
     expect(events).toEqual(['open', 'opened', 'close', 'closed'])
     expect(
-      screen.queryByTestId('teleport-destroyed-content', { includeHiddenElements: true }),
+      screen.queryByTestId('custom-backend-destroyed-content', { includeHiddenElements: true }),
     ).toBeNull()
     expect(
-      screen.getByTestId('teleport-retained-content', { includeHiddenElements: true }),
+      screen.getByTestId('custom-backend-retained-content', { includeHiddenElements: true }),
     ).toBeTruthy()
     await view.unmount()
   })
 
-  it('keeps Popup Pressable and TextInput interactions inside Teleport and closes from the overlay', async () => {
+  it('keeps Popup Pressable and TextInput interactions inside custom backend and closes from the overlay', async () => {
     const onPress = jest.fn()
     const onPressOverlay = jest.fn()
     const onRequestClose = jest.fn()
@@ -1316,29 +1317,31 @@ describe('Popup', () => {
             setVisible(false)
           }}
         >
-          <Pressable testID="teleport-popup-pressable" onPress={onPress}>
+          <Pressable testID="custom-backend-popup-pressable" onPress={onPress}>
             <Text>press inside Popup</Text>
           </Pressable>
-          <TextInput testID="teleport-popup-input" value={value} onChangeText={setValue} />
+          <TextInput testID="custom-backend-popup-input" value={value} onChangeText={setValue} />
         </Popup>
       )
     }
 
     const view = await render(
-      <TeleportAppProvider>
+      <CustomBackendAppProvider>
         <InteractivePopup />
-      </TeleportAppProvider>,
+      </CustomBackendAppProvider>,
     )
-    const input = screen.getByTestId('teleport-popup-input')
-    const hostName = screen.getByTestId('teleport-host').props.name
+    const input = screen.getByTestId('custom-backend-popup-input')
+    const hostName = screen.getByTestId('custom-backend-host').props.nativeID
 
-    expect(findNativePortal(input)?.props.hostName).toBe(hostName)
+    expect(findCustomPortal(input)?.props.nativeID).toBe(hostName)
     // eslint-disable-next-line testing-library/no-await-sync-events
-    await fireEvent.press(screen.getByTestId('teleport-popup-pressable'))
+    await fireEvent.press(screen.getByTestId('custom-backend-popup-pressable'))
     // eslint-disable-next-line testing-library/no-await-sync-events
-    await fireEvent.changeText(input, 'edited through Teleport')
+    await fireEvent.changeText(input, 'edited through custom backend')
     expect(onPress).toHaveBeenCalledTimes(1)
-    expect(screen.getByTestId('teleport-popup-input').props.value).toBe('edited through Teleport')
+    expect(screen.getByTestId('custom-backend-popup-input').props.value).toBe(
+      'edited through custom backend',
+    )
 
     // eslint-disable-next-line testing-library/no-container
     const overlay = view.container.queryAll(
@@ -1349,11 +1352,13 @@ describe('Popup', () => {
     await fireEvent.press(overlay!)
     expect(onPressOverlay).toHaveBeenCalledTimes(1)
     expect(onRequestClose).toHaveBeenCalledTimes(1)
-    expect(screen.queryByTestId('teleport-popup-input', { includeHiddenElements: true })).toBeNull()
+    expect(
+      screen.queryByTestId('custom-backend-popup-input', { includeHiddenElements: true }),
+    ).toBeNull()
     await view.unmount()
   })
 
-  it('updates keyboardAvoiding layout inside a Teleport NativePortal', async () => {
+  it('updates keyboardAvoiding layout through a custom backend Portal', async () => {
     const timing = jest.spyOn(Reanimated, 'withTiming').mockImplementation((value) => value)
     const listeners = new Map<string, Parameters<typeof Keyboard.addListener>[1]>()
     const addListener = Keyboard.addListener.bind(Keyboard)
@@ -1362,15 +1367,15 @@ describe('Popup', () => {
       return addListener(name, listener)
     })
     const tree = () => (
-      <TeleportAppProvider motion>
-        <Popup visible keyboardAvoiding testID="teleport-keyboard-panel">
+      <CustomBackendAppProvider motion>
+        <Popup visible keyboardAvoiding testID="custom-backend-keyboard-panel">
           <Text>keyboard form</Text>
         </Popup>
-      </TeleportAppProvider>
+      </CustomBackendAppProvider>
     )
     const view = await render(tree())
-    const panel = screen.getByTestId('teleport-keyboard-panel')
-    const hostName = screen.getByTestId('teleport-host').props.name
+    const panel = screen.getByTestId('custom-backend-keyboard-panel')
+    const hostName = screen.getByTestId('custom-backend-host').props.nativeID
     const findViewport = () =>
       // Native layout is needed to simulate keyboard overlap without a device.
       // eslint-disable-next-line testing-library/no-container
@@ -1381,7 +1386,7 @@ describe('Popup', () => {
         (node) => node.props.pointerEvents === 'box-none' && Boolean(flattenStyle(node).transform),
       )[0]
 
-    expect(findNativePortal(panel)?.props.hostName).toBe(hostName)
+    expect(findCustomPortal(panel)?.props.nativeID).toBe(hostName)
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent(panel, 'layout', {
       nativeEvent: { layout: { x: 0, y: 0, width: 300, height: 300 } },
@@ -1402,29 +1407,29 @@ describe('Popup', () => {
 
     expect(flattenStyle(findOffset()).transform).toEqual([{ translateY: -50 }])
     expect(timing).toHaveBeenCalledWith(-50, expect.objectContaining({ duration: 250 }), undefined)
-    expect(flattenStyle(screen.getByTestId('teleport-keyboard-panel')).maxHeight).toBe(500)
+    expect(flattenStyle(screen.getByTestId('custom-backend-keyboard-panel')).maxHeight).toBe(500)
     await view.unmount()
   })
 
-  it('uses one matching Teleport NativePortal per Popup and preserves z-index layers', async () => {
+  it('uses one matching custom backend Portal per Popup and preserves z-index layers', async () => {
     const view = await render(
-      <TeleportAppProvider>
-        <Popup visible duration={0} zIndex={7} testID="teleport-lower-panel">
+      <CustomBackendAppProvider>
+        <Popup visible duration={0} zIndex={7} testID="custom-backend-lower-panel">
           <Text>lower popup</Text>
         </Popup>
-        <Popup visible duration={0} zIndex={40} testID="teleport-upper-panel">
+        <Popup visible duration={0} zIndex={40} testID="custom-backend-upper-panel">
           <Text>upper popup</Text>
         </Popup>
-      </TeleportAppProvider>,
+      </CustomBackendAppProvider>,
     )
-    const portals = findNativePortals(view)
-    const hostName = screen.getByTestId('teleport-host').props.name
-    const lower = screen.getByTestId('teleport-lower-panel')
-    const upper = screen.getByTestId('teleport-upper-panel')
+    const portals = findCustomPortals(view)
+    const hostName = screen.getByTestId('custom-backend-host').props.nativeID
+    const lower = screen.getByTestId('custom-backend-lower-panel')
+    const upper = screen.getByTestId('custom-backend-upper-panel')
 
     expect(portals).toHaveLength(2)
-    expect(findNativePortal(lower)).not.toBe(findNativePortal(upper))
-    expect(portals.map((portal) => portal.props.hostName)).toEqual([hostName, hostName])
+    expect(findCustomPortal(lower)).not.toBe(findCustomPortal(upper))
+    expect(portals.map((portal) => portal.props.nativeID)).toEqual([hostName, hostName])
     expect(flattenStyle(lower.parent).zIndex).toBe(8)
     expect(flattenStyle(lower.parent?.parent).zIndex).toBe(7)
     expect(flattenStyle(upper.parent).zIndex).toBe(41)
@@ -1432,7 +1437,7 @@ describe('Popup', () => {
     await view.unmount()
   })
 
-  it('keeps Dialog and ActionSheet PopupContent in one Teleport each and cleans up on close', async () => {
+  it('keeps Dialog and ActionSheet PopupContent in one custom backend each and cleans up on close', async () => {
     const onDialogClosed = jest.fn()
     const onSheetClosed = jest.fn()
 
@@ -1444,13 +1449,13 @@ describe('Popup', () => {
         <>
           <Dialog
             show={dialogVisible}
-            message="Teleport dialog content"
+            message="custom backend dialog content"
             onShowChange={setDialogVisible}
             onClose={onDialogClosed}
           />
           <ActionSheet
             visible={sheetVisible}
-            actions={[{ name: 'Teleport sheet action' }]}
+            actions={[{ name: 'custom backend sheet action' }]}
             cancelText="Cancel sheet"
             onClose={() => setSheetVisible(false)}
             onClosed={onSheetClosed}
@@ -1460,19 +1465,19 @@ describe('Popup', () => {
     }
 
     const view = await render(
-      <TeleportAppProvider>
+      <CustomBackendAppProvider>
         <CombinedPopups />
-      </TeleportAppProvider>,
+      </CustomBackendAppProvider>,
     )
-    const hostName = screen.getByTestId('teleport-host').props.name
+    const hostName = screen.getByTestId('custom-backend-host').props.nativeID
     const dialog = screen.getByRole('alert')
     const sheetCancel = screen.getByTestId('action-sheet-cancel-button')
-    const dialogPortal = findNativePortal(dialog)
-    const sheetPortal = findNativePortal(sheetCancel)
+    const dialogPortal = findCustomPortal(dialog)
+    const sheetPortal = findCustomPortal(sheetCancel)
 
-    expect(findNativePortals(view)).toHaveLength(2)
-    expect(dialogPortal?.props.hostName).toBe(hostName)
-    expect(sheetPortal?.props.hostName).toBe(hostName)
+    expect(findCustomPortals(view)).toHaveLength(2)
+    expect(dialogPortal?.props.nativeID).toBe(hostName)
+    expect(sheetPortal?.props.nativeID).toBe(hostName)
     expect(dialogPortal).not.toBe(sheetPortal)
 
     // eslint-disable-next-line testing-library/no-await-sync-events

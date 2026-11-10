@@ -7,19 +7,11 @@ import type { PropsWithChildren } from 'react'
 /** Owns backend initialization; page hosts inherit the selected backend. */
 export function PortalBackendProvider({
   backend,
-  teleport,
   children,
-}: PropsWithChildren<{ backend?: PortalBackend; teleport?: boolean }>) {
+}: PropsWithChildren<{ backend?: PortalBackend }>) {
   const inheritedBackend = useContext(PortalBackendContext)
   const [selectedBackend] = useState<PortalBackend | null>(() => {
     if (backend !== undefined) return backend
-    if (teleport === false) return null
-    if (teleport === true) {
-      if (inheritedBackend) return inheritedBackend
-      throw new Error(
-        'Import teleportPortalBackend from @ftsukic/tsuki/teleport and pass portalBackend to enable Teleport.',
-      )
-    }
     if (inheritedBackend !== undefined) return inheritedBackend
     return defaultPortalBackend
   })

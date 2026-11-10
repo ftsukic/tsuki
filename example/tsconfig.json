@@ -6,8 +6,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
-      "@ftsukic/tsuki": ["../src"],
-      "@ftsukic/tsuki/teleport": ["../src/teleport.ts"]
+      "@ftsukic/tsuki": ["../src"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "nativewind-env.d.ts"]

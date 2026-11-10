@@ -42,17 +42,7 @@ const requiredFiles = [
   'lib/typescript/commonjs/index.d.ts',
   'lib/typescript/module/index.d.ts',
   'src/index.ts',
-  'src/teleport.ts',
-  'lib/commonjs/teleport.js',
-  'lib/module/teleport.js',
-  'lib/typescript/commonjs/teleport.d.ts',
-  'lib/typescript/module/teleport.d.ts',
-  ...['commonjs', 'module'].flatMap((target) =>
-    ['default', 'ios', 'android', 'web'].map(
-      (platform) =>
-        `lib/${target}/portal/default-backend${platform === 'default' ? '' : `.${platform}`}.js`,
-    ),
-  ),
+  ...['commonjs', 'module'].map((target) => `lib/${target}/portal/default-backend.js`),
 ]
 const forbiddenPatterns = [
   /(^|\/)__tests__(\/|$)/,
@@ -119,6 +109,7 @@ function createResolverContext(
       harmony: ['react-native'],
       ios: ['react-native'],
       web: ['browser'],
+      windows: ['react-native'],
     },
     unstable_enablePackageExports: packageExports,
     unstable_incrementalResolution: false,
@@ -173,7 +164,7 @@ function dependencies(entry, platform, visited = new Set()) {
 
 function validatePublishedPortalResolution() {
   const consumerEntry = path.join(packageRoot, 'example/app/_layout.tsx')
-  for (const platform of ['ios', 'android', 'harmony']) {
+  for (const platform of ['ios', 'android', 'harmony', 'windows']) {
     assert.equal(
       resolveModule(consumerEntry, '@ftsukic/tsuki', platform, {
         packageExports: true,
@@ -201,7 +192,7 @@ function validatePublishedPortalResolution() {
 
   for (const target of ['commonjs', 'module']) {
     const entry = path.join(packageRoot, `lib/${target}/index.js`)
-    for (const platform of ['ios', 'android', 'web', 'harmony']) {
+    for (const platform of ['ios', 'android', 'web', 'harmony', 'windows']) {
       const graph = dependencies(entry, platform)
       assert.equal(
         graph.has('tailwind-merge'),
@@ -210,8 +201,8 @@ function validatePublishedPortalResolution() {
       )
       assert.equal(
         graph.has('react-native-teleport'),
-        platform !== 'harmony',
-        `${target} dependency graph has an unexpected Teleport dependency for ${platform}`,
+        false,
+        `${target} dependency graph must not include react-native-teleport for ${platform}`,
       )
       assert.equal(
         resolveModule(
@@ -219,17 +210,30 @@ function validatePublishedPortalResolution() {
           './default-backend',
           platform,
         ),
-        path.join(
-          packageRoot,
-          `lib/${target}/portal/default-backend${
-            ['ios', 'android', 'web'].includes(platform) ? `.${platform}` : ''
-          }.js`,
-        ),
+        path.join(packageRoot, `lib/${target}/portal/default-backend.js`),
         `${target} backend relative import resolved incorrectly for ${platform}`,
       )
     }
   }
 }
+
+assert.equal(
+  packageJson.exports['./teleport'],
+  undefined,
+  'Teleport package export must be removed',
+)
+for (const dependencyGroup of ['dependencies', 'devDependencies', 'peerDependencies']) {
+  assert.equal(
+    packageJson[dependencyGroup]?.['react-native-teleport'],
+    undefined,
+    `${dependencyGroup} must not include react-native-teleport`,
+  )
+}
+assert.equal(
+  packageJson.peerDependenciesMeta?.['react-native-teleport'],
+  undefined,
+  'peerDependenciesMeta must not include react-native-teleport',
+)
 
 if (packResult.name !== packageJson.name) {
   throw new Error(`Packed package name does not match package.json: ${packResult.name}`)
@@ -241,6 +245,11 @@ if (packResult.version !== packageJson.version) {
 
 if (missingFiles.length > 0) {
   throw new Error(`Missing package files: ${missingFiles.join(', ')}`)
+}
+
+const teleportFiles = files.filter((file) => file.toLowerCase().includes('teleport'))
+if (teleportFiles.length > 0) {
+  throw new Error(`Teleport files must not be included in the package: ${teleportFiles.join(', ')}`)
 }
 
 validatePublishedPortalResolution()

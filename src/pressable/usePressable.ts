@@ -66,6 +66,13 @@ export function usePressable({
     setActive(false)
     notifyFeedback(!isDisabled && testOnlyPressed)
   }, [clearFeedbackTimer, isDisabled, notifyFeedback, testOnlyPressed])
+  const handlePressWithFeedback = useCallback<typeof handlePress>(
+    (event) => {
+      cancelFeedback()
+      handlePress(event)
+    },
+    [cancelFeedback, handlePress],
+  )
 
   useEffect(() => {
     const unsubscribe = feedbackOwner?.subscribe(cancelFeedback)
@@ -134,7 +141,7 @@ export function usePressable({
       // Read-only suppresses activation without changing the public disabled semantics.
       disabled: disabled === true,
       onLongPress: readOnly ? undefined : props.onLongPress,
-      onPress: handlePress,
+      onPress: handlePressWithFeedback,
       onPressIn: handlePressIn,
       onPressOut: handlePressOut,
       onHoverIn: handleHoverIn,

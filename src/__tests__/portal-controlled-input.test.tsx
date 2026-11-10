@@ -1,4 +1,3 @@
-import { teleportPortalBackend } from '../teleport'
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import {
   forwardRef,
@@ -9,6 +8,7 @@ import {
   useState,
 } from 'react'
 import { StyleSheet, Text as NativeText, TextInput, View } from 'react-native'
+import type { PortalBackend } from '../portal/types'
 import {
   Button,
   Portal,
@@ -19,6 +19,16 @@ import {
   updatePortal,
   unmountPortal,
 } from '..'
+
+const customPortalBackend: PortalBackend = {
+  Provider: ({ children }) => <>{children}</>,
+  Host: ({ name, style }) => <View testID={`custom-host-${name}`} nativeID={name} style={style} />,
+  Portal: ({ children, hostName, style }) => (
+    <View testID="custom-portal" nativeID={hostName} style={style}>
+      {children}
+    </View>
+  ),
+}
 
 // Model RN TextInput's native-text bookkeeping and value reconciliation.
 function NativeValueProbe({
@@ -51,7 +61,7 @@ it.each([false, true])('records controlled reconciliation with portal=%s', async
   function App() {
     const [value, setValue] = useState('')
     const input = <NativeValueProbe value={value} onChangeText={setValue} writes={writes} />
-    return <PortalHost teleport={false}>{portal ? <Portal>{input}</Portal> : input}</PortalHost>
+    return <PortalHost>{portal ? <Portal>{input}</Portal> : input}</PortalHost>
   }
   await render(<App />)
   // eslint-disable-next-line testing-library/no-await-sync-events
@@ -110,19 +120,7 @@ it('keeps controlled edits atomic inside Portal and supports external assignment
   expect(screen.getByTestId('probe').props.value).toBe('')
 })
 
-jest.mock('react-native-teleport', () => {
-  const React = jest.requireActual('react')
-  const { View } = jest.requireActual('react-native')
-  return {
-    PortalProvider: ({ children }: { children?: React.ReactNode }) => children,
-    PortalHost: ({ name }: { name: string }) =>
-      React.createElement(View, { testID: `native-host-${name}` }),
-    Portal: ({ children, hostName }: { children?: React.ReactNode; hostName: string }) =>
-      React.createElement(View, { testID: 'native-portal', hostName }, children),
-  }
-})
-
-it('keeps parent-controlled values in the same React commit with the native backend', async () => {
+it('keeps parent-controlled values in the same React commit with a custom backend', async () => {
   const writes: string[] = []
   let mounts = 0
   let assign: ((value: string) => void) | undefined
@@ -136,7 +134,7 @@ it('keeps parent-controlled values in the same React commit with the native back
     const [value, setValue] = useState('')
     assign = setValue
     return (
-      <TsukiProvider gesture={false} portalBackend={teleportPortalBackend}>
+      <TsukiProvider gesture={false} portalBackend={customPortalBackend}>
         <Portal>
           <Probe
             value={value}
@@ -150,7 +148,7 @@ it('keeps parent-controlled values in the same React commit with the native back
     )
   }
   await render(<App />)
-  expect(screen.getByTestId('native-portal')).toBeTruthy()
+  expect(screen.getByTestId('custom-portal')).toBeTruthy()
   for (const text of ['z', 'zh', 'zhong', '中国']) {
     // eslint-disable-next-line testing-library/no-await-sync-events
     await fireEvent.changeText(screen.getByTestId('probe'), text)
@@ -167,9 +165,9 @@ it('keeps parent-controlled values in the same React commit with the native back
   expect(mounts).toBe(1)
 })
 
-it('fixes the backend at TsukiProvider mount and selects the closest native host', async () => {
+it('fixes the backend at TsukiProvider mount and selects the closest custom host', async () => {
   const tree = (enabled: boolean) => (
-    <TsukiProvider gesture={false} portalBackend={enabled ? teleportPortalBackend : undefined}>
+    <TsukiProvider gesture={false} portalBackend={enabled ? customPortalBackend : undefined}>
       <PortalHost>
         <Portal>
           <TextInput testID="nested-input" />
@@ -178,30 +176,30 @@ it('fixes the backend at TsukiProvider mount and selects the closest native host
     </TsukiProvider>
   )
   const view = await render(tree(true))
-  const hostName = screen.getByTestId('native-portal').props.hostName
-  expect(screen.getByTestId(`native-host-${hostName}`)).toBeTruthy()
+  const hostName = screen.getByTestId('custom-portal').props.nativeID
+  expect(screen.getByTestId(`custom-host-${hostName}`)).toBeTruthy()
   await view.rerender(tree(false))
-  expect(screen.getByTestId('native-portal').props.hostName).toBe(hostName)
+  expect(screen.getByTestId('custom-portal').props.nativeID).toBe(hostName)
 })
 
-it('routes imperative entries through the selected native host and retains their ownership', async () => {
-  await render(<TsukiProvider gesture={false} portalBackend={teleportPortalBackend} />)
+it('routes imperative entries through the selected custom host and retains their ownership', async () => {
+  await render(<TsukiProvider gesture={false} portalBackend={customPortalBackend} />)
   let key = 0
   await act(() => {
     key = mountPortal(<TextInput testID="imperative-native" value="first" />)
   })
-  const hostName = screen.getByTestId('native-portal').props.hostName
-  expect(screen.getByTestId(`native-host-${hostName}`)).toBeTruthy()
+  const hostName = screen.getByTestId('custom-portal').props.nativeID
+  expect(screen.getByTestId(`custom-host-${hostName}`)).toBeTruthy()
   await act(() => updatePortal(key, <TextInput testID="imperative-native" value="updated" />))
   expect(screen.getByTestId('imperative-native').props.value).toBe('updated')
-  expect(screen.getByTestId('native-portal').props.hostName).toBe(hostName)
+  expect(screen.getByTestId('custom-portal').props.nativeID).toBe(hostName)
   await act(() => unmountPortal(key))
   expect(screen.queryByTestId('imperative-native')).toBeNull()
 })
 
 it('configures a standalone Host and inherits its backend in nested hosts', async () => {
   const view = await render(
-    <PortalHost portalBackend={teleportPortalBackend}>
+    <PortalHost portalBackend={customPortalBackend}>
       <PortalHost>
         <Portal>
           <TextInput testID="standalone-input" />
@@ -209,8 +207,8 @@ it('configures a standalone Host and inherits its backend in nested hosts', asyn
       </PortalHost>
     </PortalHost>,
   )
-  const destination = screen.getByTestId('native-portal').props.hostName
-  expect(screen.getByTestId(`native-host-${destination}`)).toBeTruthy()
+  const destination = screen.getByTestId('custom-portal').props.nativeID
+  expect(screen.getByTestId(`custom-host-${destination}`)).toBeTruthy()
   await act(() => {
     mountPortal(<TextInput testID="standalone-imperative" />)
   })
@@ -227,41 +225,27 @@ it('uses the generic JS fallback when a Provider has no explicit backend', async
     </TsukiProvider>,
   )
   expect(screen.getByTestId('default-js-input')).toBeTruthy()
-  expect(screen.queryByTestId('native-portal')).toBeNull()
-})
-
-it('allows a local Host to explicitly select the JS backend', async () => {
-  await render(
-    <TsukiProvider gesture={false} portalBackend={teleportPortalBackend}>
-      <PortalHost teleport={false}>
-        <Portal>
-          <TextInput testID="local-js-input" />
-        </Portal>
-      </PortalHost>
-    </TsukiProvider>,
-  )
-  expect(screen.getByTestId('local-js-input')).toBeTruthy()
-  expect(screen.queryByTestId('native-portal')).toBeNull()
+  expect(screen.queryByTestId('custom-portal')).toBeNull()
 })
 
 it('prioritizes a standalone custom backend and fixes its selection at mount', async () => {
   const tree = (enabled: boolean) => (
-    <PortalHost portalBackend={enabled ? teleportPortalBackend : undefined} teleport={false}>
+    <PortalHost portalBackend={enabled ? customPortalBackend : undefined}>
       <Portal>
         <TextInput testID="custom-host-input" />
       </Portal>
     </PortalHost>
   )
   const view = await render(tree(true))
-  const destination = screen.getByTestId('native-portal').props.hostName
+  const destination = screen.getByTestId('custom-portal').props.nativeID
   await view.rerender(tree(false))
-  expect(screen.getByTestId('native-portal').props.hostName).toBe(destination)
+  expect(screen.getByTestId('custom-portal').props.nativeID).toBe(destination)
   expect(screen.getByTestId('custom-host-input')).toBeTruthy()
 })
 
-it('keeps the native entry layer when its root child is replaced', async () => {
+it('keeps the custom entry layer when its root child is replaced', async () => {
   const tree = (version: number) => (
-    <PortalHost portalBackend={teleportPortalBackend}>
+    <PortalHost portalBackend={customPortalBackend}>
       <Portal>
         <TextInput key={version} testID="changing-root" />
       </Portal>
@@ -279,12 +263,6 @@ it('keeps the native entry layer when its root child is replaced', async () => {
   expect(screen.getByTestId('later-entry')).toBeTruthy()
 })
 
-it('reports the explicit backend migration for an unsupported legacy opt-in', async () => {
-  await expect(render(<PortalHost teleport />)).rejects.toThrow(
-    'Import teleportPortalBackend from @ftsukic/tsuki/teleport',
-  )
-})
-
 function PortalTextLeaf({ testID }: { testID: string }) {
   return <Text testID={testID}>订单已保存</Text>
 }
@@ -298,34 +276,27 @@ function PortalTextBranch({ testID }: { testID: string }) {
 }
 
 it.each([false, true])(
-  'bridges and updates Text inheritance through Portal=%s',
-  async (teleport) => {
+  'bridges and updates Text inheritance with custom backend=%s',
+  async (customBackend) => {
     const tree = (primary: boolean) => (
-      <TsukiProvider gesture={false} portalBackend={teleport ? teleportPortalBackend : undefined}>
-        {teleport ? (
-          <PortalHost portalBackend={teleportPortalBackend}>
-            <Button type={primary ? 'primary' : 'default'}>
-              <Portal>
-                <PortalTextBranch testID="portal-inherited-text" />
-              </Portal>
-            </Button>
-          </PortalHost>
-        ) : (
-          <PortalHost teleport={false}>
-            <Button type={primary ? 'primary' : 'default'}>
-              <Portal>
-                <PortalTextBranch testID="portal-inherited-text" />
-              </Portal>
-            </Button>
-          </PortalHost>
-        )}
+      <TsukiProvider
+        gesture={false}
+        portalBackend={customBackend ? customPortalBackend : undefined}
+      >
+        <PortalHost>
+          <Button type={primary ? 'primary' : 'default'}>
+            <Portal>
+              <PortalTextBranch testID="portal-inherited-text" />
+            </Portal>
+          </Button>
+        </PortalHost>
       </TsukiProvider>
     )
 
     const view = await render(tree(false))
     const text = screen.getByTestId('portal-inherited-text')
     const initialColor = StyleSheet.flatten(text.props.style).color
-    expect(screen.queryByTestId('native-portal') !== null).toBe(teleport)
+    expect(screen.queryByTestId('custom-portal') !== null).toBe(customBackend)
 
     await view.rerender(tree(true))
 
@@ -338,7 +309,7 @@ it.each([false, true])(
 it('does not apply Tsuki text inheritance to native Text inside Portal content', async () => {
   await render(
     <TsukiProvider gesture={false}>
-      <PortalHost teleport={false}>
+      <PortalHost>
         <Button type="primary">
           <Portal>
             <NativeText testID="native-portal-text">原生文本</NativeText>

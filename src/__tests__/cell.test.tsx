@@ -779,6 +779,31 @@ describe('Cell', () => {
     expect(cellDividerCount(cellNode(view.toJSON(), 'interactive'))).toBe(1)
   })
 
+  it('restores the Cell background after a click without pressOut', async () => {
+    const onPress = jest.fn()
+    const view = await render(
+      <ConfigProvider>
+        <Cell testID="missing-press-out-cell" title="会话" onPress={onPress} />
+      </ConfigProvider>,
+    )
+    const cell = screen.getByTestId('missing-press-out-cell')
+    const pressedBackgroundColor = getCellToken(getDesignToken()).pressedBackgroundColor
+
+    // RNTL 14 fireEvent returns a Promise; the lint plugin still assumes sync events.
+    // eslint-disable-next-line testing-library/no-await-sync-events
+    await fireEvent(cell, 'pressIn')
+    expect(nodeStyle(cellNode(view.toJSON(), 'missing-press-out-cell')).backgroundColor).toBe(
+      pressedBackgroundColor,
+    )
+
+    await press(cell)
+
+    expect(onPress).toHaveBeenCalledTimes(1)
+    expect(nodeStyle(cellNode(view.toJSON(), 'missing-press-out-cell')).backgroundColor).toBe(
+      getCellToken(getDesignToken()).backgroundColor,
+    )
+  })
+
   it('applies Cell component token overrides to group semantics', async () => {
     const view = await render(
       <ConfigProvider

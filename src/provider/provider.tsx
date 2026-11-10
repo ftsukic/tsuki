@@ -11,7 +11,6 @@ import type { TsukiProviderProps } from './types'
 
 export const TsukiProvider = memo(function TsukiProvider({
   children,
-  teleport,
   portalBackend,
   gesture = true,
   safeArea = false,
@@ -31,9 +30,7 @@ export const TsukiProvider = memo(function TsukiProvider({
         <ConfigProvider theme={resolvedTheme}>
           <SwipeCellContext.Provider value={swipeCellManager}>
             <SwipeCellPressContext.Provider value={null}>
-              <PortalHost portalBackend={portalBackend} teleport={teleport}>
-                {children}
-              </PortalHost>
+              <PortalHost portalBackend={portalBackend}>{children}</PortalHost>
             </SwipeCellPressContext.Provider>
           </SwipeCellContext.Provider>
         </ConfigProvider>

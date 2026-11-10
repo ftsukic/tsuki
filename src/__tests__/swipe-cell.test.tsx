@@ -1012,14 +1012,13 @@ describe('SwipeCell', () => {
       await act(async () => {
         jest.advanceTimersByTime(30)
       })
-      await fireEvent(content, 'touchEnd', {})
       await fireEvent(child, 'press')
-      await fireEvent(child, 'pressOut')
       expect(onPress).toHaveBeenCalledTimes(1)
       await act(async () => {
         jest.advanceTimersByTime(100)
       })
       expect(StyleSheet.flatten(child.props.style).backgroundColor).not.toBe(pressedBackgroundColor)
+      await fireEvent(content, 'touchEnd', {})
       await fireEvent(content, 'touchStart', {})
       await fireEvent(child, 'pressIn')
       await act(async () => {

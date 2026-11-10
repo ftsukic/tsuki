@@ -14,7 +14,7 @@ function SavedNotice() {
 
 /**
  * @title Portal 文本继承
- * @description Portal 内容跨越 JS 或 Teleport 宿主时，仍保留来源 Button 的 Tsuki Text 内容样式。
+ * @description Portal 内容仍保留来源 Button 的 Tsuki Text 内容样式。
  */
 export default function PortalTextInheritanceExample() {
   const [visible, setVisible] = useState(false)

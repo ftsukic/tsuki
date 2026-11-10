@@ -1479,11 +1479,7 @@ __metadata:
     react-native-reanimated: ">=4.1.7 <4.6.0"
     react-native-safe-area-context: ">=5.6.2 <6.0.0"
     react-native-svg: ">=15.13.0"
-    react-native-teleport: ^1.2.2
     react-native-worklets: ">=0.7.1"
-  peerDependenciesMeta:
-    react-native-teleport:
-      optional: true
   languageName: node
   linkType: soft
 
@@ -3384,7 +3380,6 @@ __metadata:
     react-native-safe-area-context: "npm:~5.7.0"
     react-native-screens: "npm:~4.26.0"
     react-native-svg: "npm:15.15.4"
-    react-native-teleport: "npm:1.2.2"
     react-native-video: "npm:^6.19.3"
     react-native-web: "npm:~0.21.0"
     react-native-worklets: "npm:0.10.1"
@@ -6087,17 +6082,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 10c0/1fb8e3ac9d45a4db74731a006cd32f883051844f361974dff49e1a4142aa7c1a0d87e0b04fff06a1932ca53940bcfb94e45e01a845eb451d4659fbf07092629e
-  languageName: node
-  linkType: hard
-
-"react-native-teleport@npm:1.2.2":
-  version: 1.2.2
-  resolution: "react-native-teleport@npm:1.2.2"
-  peerDependencies:
-    react: "*"
-    react-dom: "*"
-    react-native: "*"
-  checksum: 10c0/5f82da01ea56924723399d8d5963f1299eb82ec151ab3c272d14812b8d32783cba3252a9adc622062c52b2bb2e398d9b6da743e0d87557406d16213f8f044e28
   languageName: node
   linkType: hard
 

@@ -1,5 +1,15 @@
 # @ftsukic/tsuki
 
+## 0.2.0
+
+### Minor Changes
+
+- 移除 `react-native-teleport` 集成、已弃用的 `teleport` 属性和 `@ftsukic/tsuki/teleport` 子路径。所有平台现在默认使用 Tsuki JavaScript Portal。迁移时请移除 `react-native-teleport` 依赖及 `teleport` 属性；若之前从独立入口选择 Teleport，请改用默认 Portal 或实现自定义 `portalBackend`。
+
+### Patch Changes
+
+- 修复点击后按压高亮可能残留的问题，并清理待触发的延迟反馈。
+
 ## 0.1.6
 
 ### Patch Changes

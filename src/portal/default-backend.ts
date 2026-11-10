@@ -1,4 +1,4 @@
 import type { PortalBackend } from './types'
 
-/** JavaScript Portal is the default on platforms without a native backend. */
+/** All platforms use the JavaScript Portal by default. */
 export const defaultPortalBackend: PortalBackend | null = null

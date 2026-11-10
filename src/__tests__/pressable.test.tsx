@@ -290,6 +290,26 @@ describe('Pressable', () => {
     expect(screen.getByTestId('stateful-child').props.children).toBe('idle')
   })
 
+  it('clears pressed feedback after a click when pressOut is missing', async () => {
+    const onPress = jest.fn()
+    await render(
+      <Pressable testID="missing-press-out" onPress={onPress}>
+        {({ pressed }) => (
+          <Text testID="missing-press-out-state">{pressed ? 'pressed' : 'idle'}</Text>
+        )}
+      </Pressable>,
+    )
+
+    const pressable = screen.getByTestId('missing-press-out')
+    await fireEvent(pressable, 'pressIn')
+    expect(screen.getByTestId('missing-press-out-state').props.children).toBe('pressed')
+
+    await fireEvent.press(pressable)
+
+    expect(onPress).toHaveBeenCalledTimes(1)
+    expect(screen.getByTestId('missing-press-out-state').props.children).toBe('idle')
+  })
+
   it('preserves press callbacks and debounce behavior', async () => {
     const onPress = jest.fn()
     const onPressIn = jest.fn()

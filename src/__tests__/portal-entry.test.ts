@@ -63,6 +63,7 @@ function resolveSource(
         harmony: ['react-native'],
         ios: ['react-native'],
         web: ['browser'],
+        windows: ['react-native'],
       },
       unstable_enablePackageExports: options.packageExports ?? false,
       unstable_incrementalResolution: false,
@@ -111,21 +112,11 @@ function dependencies(entry: string, platform: string, visited = new Set<string>
   return visited
 }
 
-it('resolves platform defaults and keeps Harmony on the JS dependency graph', () => {
+it('resolves every platform to the JS backend without Teleport dependencies', () => {
   const sourceEntry = path.resolve(__dirname, '../index.ts')
   const backendProvider = path.resolve(__dirname, '../portal/backend-provider.tsx')
 
-  for (const platform of ['ios', 'android', 'web']) {
-    expect(resolveSource(backendProvider, './default-backend', platform)).toBe(
-      path.resolve(__dirname, `../portal/default-backend.${platform}.ts`),
-    )
-    const graph = dependencies(sourceEntry, platform)
-    expect(graph.has('react-native-teleport')).toBe(true)
-    expect(graph.has(path.resolve(__dirname, '../text/text.tsx'))).toBe(true)
-    expect(graph.has('tailwind-merge')).toBe(true)
-  }
-
-  for (const platform of ['harmony', 'windows']) {
+  for (const platform of ['ios', 'android', 'web', 'harmony', 'windows']) {
     expect(resolveSource(backendProvider, './default-backend', platform)).toBe(
       path.resolve(__dirname, '../portal/default-backend.ts'),
     )
@@ -134,17 +125,13 @@ it('resolves platform defaults and keeps Harmony on the JS dependency graph', ()
     expect(graph.has(path.resolve(__dirname, '../text/text.tsx'))).toBe(true)
     expect(graph.has('tailwind-merge')).toBe(true)
   }
-
-  expect(
-    dependencies(path.resolve(__dirname, '../teleport.ts'), 'ios').has('react-native-teleport'),
-  ).toBe(true)
 })
 
 it('resolves the actual package root through exports on React Native platforms', () => {
   const packageRoot = path.resolve(__dirname, '../..')
   const consumerEntry = path.resolve(packageRoot, 'example/app/_layout.tsx')
 
-  for (const platform of ['ios', 'android', 'harmony']) {
+  for (const platform of ['ios', 'android', 'harmony', 'windows']) {
     expect(
       resolveSource(consumerEntry, '@ftsukic/tsuki', platform, {
         packageExports: true,

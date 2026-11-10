@@ -173,9 +173,9 @@ export function unmountPortal(key: PortalKey): void {
 }
 
 /** Select a backend once, or inherit the nearest Provider/Host configuration. */
-export function PortalHost({ children, teleport, portalBackend }: PortalHostProps) {
+export function PortalHost({ children, portalBackend }: PortalHostProps) {
   return (
-    <PortalBackendProvider backend={portalBackend} teleport={teleport}>
+    <PortalBackendProvider backend={portalBackend}>
       <PortalHostContainer>{children}</PortalHostContainer>
     </PortalBackendProvider>
   )
