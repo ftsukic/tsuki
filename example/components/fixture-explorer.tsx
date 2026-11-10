@@ -115,6 +115,18 @@ export default function FixtureExplorer() {
                 showArrow
                 onPress={() => router.push('/labs/keyboard-chat')}
               />
+              <Cell
+                title="Gesture Image Viewer"
+                description="原生图片预览 · 默认手势参数"
+                showArrow
+                onPress={() => router.push('/labs/gesture-image-viewer')}
+              />
+              <Cell
+                title="Galeria 原生图片预览"
+                description="原生预览 · 共享转场 · Galeria 默认行为"
+                showArrow
+                onPress={() => router.push('/labs/galeria')}
+              />
             </Cell.Group>
             <View style={styles.sectionRow}>
               <Text style={[theme.typography.styles.sectionTitle, styles.sectionTitle]}>
