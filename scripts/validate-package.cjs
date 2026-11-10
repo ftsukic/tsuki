@@ -19,10 +19,14 @@ if (invalidInstallScripts.length > 0) {
   )
 }
 
-const output = execFileSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {
-  encoding: 'utf8',
-  stdio: ['ignore', 'pipe', 'inherit'],
-})
+const output = execFileSync(
+  'npm',
+  ['pack', '--dry-run', '--json', '--ignore-scripts', '--silent'],
+  {
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'inherit'],
+  },
+)
 const packResult = JSON.parse(output)[0]
 const files = packResult.files.map(({ path }) => path.replaceAll('\\', '/'))
 const requiredFiles = [
