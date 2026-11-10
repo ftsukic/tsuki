@@ -1,5 +1,25 @@
 # @ftsukic/tsuki
 
+## 0.1.6
+
+### Patch Changes
+
+- 833493a: Select Teleport automatically on iOS, Android, and Web, with the JS Portal fallback on Harmony and unknown platforms. Install and link `react-native-teleport` in apps targeting the Teleport platforms; explicit backend overrides remain available.
+- dacf6c3: Fix disabled Button fills across variants and semantic colors, remove redundant borders from solid buttons, and extend pressed overlays through the border.
+- 9596cf8: Reduce large Picker initialization work and add cold and repeat-open performance fixtures for Picker and TimePicker.
+- 0341c21: Fix Tag text contrast for custom backgrounds in dark themes.
+- dc102ed: Apply the themed index line height in ImagePreview.
+- dc102ed: Fix Android ImagePreview dragging by allowing pan gestures through the pager list.
+- 5374dfb: Add NativeWind className support and RNR-style text style inheritance for Text, Button, Cell, and Portal content.
+- 47e46a9: Fix read-only Field selection controls across pointer and accessibility activation, including pending Switch confirmations.
+- 69eef71: Fix Grid theme typography, multiline text alignment, and doubled shared borders when gutter is zero. Use the theme line width for item borders.
+- 4931398: Keep SwipeCell list interactions reliable across row touches and recycled FlashList cells.
+- 0eb7b52: Apply explicit width and height to the Swipe viewport.
+- c2f3af9: Use theme typography for Search labels while preserving label overrides.
+- 806e1b2: Resolve uncontrolled Segmented selection when options load or change.
+- 78aec24: Keep ImagePreview dismissal anchored to the current touch position while the image shrinks and the background fades.
+- 8cd96d8: Fix Android Picker wheel scrolling while preserving option taps.
+
 ## 0.1.5
 
 ### Patch Changes
