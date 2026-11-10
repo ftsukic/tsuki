@@ -27,7 +27,11 @@ const output = execFileSync(
     stdio: ['ignore', 'pipe', 'inherit'],
   },
 )
-const packResult = JSON.parse(output)[0]
+const jsonStart = output.indexOf('[')
+if (jsonStart === -1) {
+  throw new Error(`npm pack did not return JSON: ${output.slice(0, 200)}`)
+}
+const packResult = JSON.parse(output.slice(jsonStart))[0]
 const files = packResult.files.map(({ path }) => path.replaceAll('\\', '/'))
 const requiredFiles = [
   'package.json',
