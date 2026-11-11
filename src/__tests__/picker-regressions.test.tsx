@@ -226,6 +226,103 @@ describe('Picker state and semantic regressions', () => {
     )
   })
 
+  it('keeps option taps working after recognizing a wheel pan', async () => {
+    const onChange = jest.fn()
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((target, _config, callback) => {
+      callback?.(true)
+      return target as never
+    })
+    await render(
+      <ConfigProvider theme={{ motion: { enabled: false } }}>
+        <Picker columns={options} onChange={onChange} showToolbar={false} />
+      </ConfigProvider>,
+    )
+
+    await act(async () => {
+      fireGestureHandler(getByGestureTestId('picker-column-0-gesture'), [
+        { state: State.BEGAN },
+        { state: State.ACTIVE, translationY: -44 },
+        { translationY: -44 },
+        { state: State.END, translationY: -44 },
+      ])
+    })
+    expect(screen.getByTestId('picker-item-0-1').props.accessibilityState.selected).toBe(true)
+
+    await fireEvent.press(screen.getByTestId('picker-item-0-0'))
+    await waitFor(() => {
+      expect(onChange).toHaveBeenNthCalledWith(2, ['first'], [options[0]])
+    })
+    expect(onChange).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not select an option when a horizontal gesture fails the wheel pan', async () => {
+    const onChange = jest.fn()
+    await render(<Picker columns={options} onChange={onChange} showToolbar={false} />)
+
+    await act(async () => {
+      fireGestureHandler(getByGestureTestId('picker-column-0-gesture'), [
+        { state: State.BEGAN },
+        { state: State.FAILED, translationX: 80, translationY: 0 },
+      ])
+    })
+
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.getByTestId('picker-item-0-0').props.accessibilityState.selected).toBe(true)
+  })
+
+  it('restores option taps after a cancelled wheel pan', async () => {
+    const onChange = jest.fn()
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((target, _config, callback) => {
+      callback?.(true)
+      return target as never
+    })
+    await render(<Picker columns={options} onChange={onChange} showToolbar={false} />)
+
+    await act(async () => {
+      fireGestureHandler(getByGestureTestId('picker-column-0-gesture'), [
+        { state: State.BEGAN },
+        { state: State.ACTIVE, translationY: -44 },
+        { translationY: -44 },
+        { state: State.CANCELLED, translationY: -44 },
+      ])
+    })
+    await fireEvent.press(screen.getByTestId('picker-item-0-0'))
+
+    await waitFor(() => expect(onChange).toHaveBeenLastCalledWith(['first'], [options[0]]))
+  })
+
+  it('emits only the settled values during rapid consecutive wheel pans', async () => {
+    const threeOptions = [options[0], options[1], { text: 'Third', value: 'third' }]
+    const onChange = jest.fn()
+    jest.spyOn(Reanimated, 'withTiming').mockImplementation((target, _config, callback) => {
+      callback?.(true)
+      return target as never
+    })
+    await render(
+      <Picker columns={threeOptions} itemHeight={24} onChange={onChange} showToolbar={false} />,
+    )
+
+    for (const translationY of [-12, -12, 13]) {
+      await act(async () => {
+        fireGestureHandler(getByGestureTestId('picker-column-0-gesture'), [
+          { state: State.BEGAN },
+          { state: State.ACTIVE, translationY },
+          { translationY },
+          { state: State.END, translationY },
+        ])
+      })
+    }
+
+    await waitFor(() => {
+      expect(onChange.mock.calls.map(([values]) => values)).toEqual([
+        ['second'],
+        ['third'],
+        ['second'],
+      ])
+    })
+    expect(onChange).toHaveBeenCalledTimes(3)
+  })
+
   it('invalidates a pending request when loading starts', async () => {
     const callbacks: Array<(finished?: boolean) => void> = []
     const onChange = jest.fn()
