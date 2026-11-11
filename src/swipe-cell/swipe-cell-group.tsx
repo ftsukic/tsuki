@@ -8,7 +8,7 @@ export function SwipeCellGroup({ children, style, ...viewProps }: SwipeCellGroup
   const register = useCallback((id: string, close: () => void) => {
     cellsRef.current.set(id, close)
     return () => {
-      cellsRef.current.delete(id)
+      if (cellsRef.current.get(id) === close) cellsRef.current.delete(id)
     }
   }, [])
   const requestOpen = useCallback((id: string) => {

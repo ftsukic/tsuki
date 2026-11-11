@@ -741,6 +741,278 @@ describe('SwipeCell', () => {
     expect(getTranslation('motion-removed-action')).toBe(0)
   })
 
+  it('resets an open item binding and ignores its old gesture, action, and close handle after recycling', async () => {
+    const ref = React.createRef<SwipeCellRef>()
+    const firstOpen = jest.fn()
+    const firstClose = jest.fn()
+    const firstAction = jest.fn()
+    const secondOpenStart = jest.fn()
+    const secondAction = jest.fn()
+    const secondClose = jest.fn()
+    const user = userEvent.setup()
+    const view = await render(
+      <TestProvider>
+        <SwipeCellGroup>
+          <SwipeCell
+            ref={ref}
+            id="recycled-a"
+            testID="recycled-row"
+            actions={[{ key: 'recycled-a-action', text: '删除', width: 64, onPress: firstAction }]}
+            closeOnActionPress={false}
+            onOpen={firstOpen}
+            onClose={firstClose}
+          />
+        </SwipeCellGroup>
+      </TestProvider>,
+    )
+
+    await layoutAction('recycled-row', 'right', 64)
+    await drag('recycled-row', -80)
+    expect(getTranslation('recycled-row')).toBe(-64)
+    expect(screen.getByRole('button', { name: '删除' })).toBeTruthy()
+    expect(firstOpen).toHaveBeenCalledTimes(1)
+
+    const oldClose = ref.current!.close
+    const oldPan = getByGestureTestId('recycled-row-gesture')
+    const oldActionBoundary = screen.getByRole('button', { name: '删除' })
+    const staleActionClick = oldActionBoundary.props.onClick as (event: never) => void
+    const oldActionEvent = {
+      currentTarget: oldActionBoundary,
+      target: oldActionBoundary,
+      nativeEvent: {},
+    }
+    await act(async () => staleActionClick(oldActionEvent as never))
+    expect(firstAction).toHaveBeenCalledTimes(1)
+    firstAction.mockClear()
+
+    await view.rerender(
+      <TestProvider>
+        <SwipeCellGroup>
+          <SwipeCell
+            ref={ref}
+            id="recycled-b"
+            testID="recycled-row"
+            actions={[{ key: 'recycled-b-action', text: '删除', width: 64, onPress: secondAction }]}
+            onOpenStart={secondOpenStart}
+            onClose={secondClose}
+          />
+        </SwipeCellGroup>
+      </TestProvider>,
+    )
+
+    expect(getTranslation('recycled-row')).toBe(0)
+    expect(screen.queryByRole('button', { name: '删除' })).toBeNull()
+    expect(firstOpen).toHaveBeenCalledTimes(1)
+    expect(firstClose).not.toHaveBeenCalled()
+    await act(async () => {
+      oldPan.handlers.onUpdate?.({ translationX: -80 } as never)
+      oldPan.handlers.onEnd?.({ translationX: -80, velocityX: 0 } as never, true)
+      oldPan.handlers.onFinalize?.({} as never, false)
+      staleActionClick(oldActionEvent as never)
+    })
+    expect(getTranslation('recycled-row')).toBe(0)
+    expect(firstAction).not.toHaveBeenCalled()
+    expect(secondAction).not.toHaveBeenCalled()
+    expect(secondClose).not.toHaveBeenCalled()
+
+    await act(async () => ref.current?.open())
+    expect(secondOpenStart).toHaveBeenCalledTimes(1)
+    expect(getTranslation('recycled-row')).toBe(-64)
+    expect(screen.getByRole('button', { name: '删除' })).toBeTruthy()
+    await act(async () => oldClose())
+    await act(async () => staleActionClick(oldActionEvent as never))
+    expect(getTranslation('recycled-row')).toBe(-64)
+    expect(secondClose).not.toHaveBeenCalled()
+    await user.press(screen.getByRole('button', { name: '删除' }))
+    expect(secondAction).toHaveBeenCalledTimes(1)
+    expect(secondClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('rebinds recycled ids inside SwipeCellGroup and coordinates in both directions', async () => {
+    const recycledRef = React.createRef<SwipeCellRef>()
+    const fixedRef = React.createRef<SwipeCellRef>()
+    const firstOpen = jest.fn()
+    const firstClose = jest.fn()
+    const recycledOpen = jest.fn()
+    const recycledClose = jest.fn()
+    const fixedOpen = jest.fn()
+    const fixedClose = jest.fn()
+    const view = await render(
+      <TestProvider>
+        <SwipeCellGroup>
+          <SwipeCell
+            ref={recycledRef}
+            id="group-recycled-a"
+            testID="group-recycled-row"
+            rightAction="删除"
+            onOpen={firstOpen}
+            onClose={firstClose}
+          />
+          <SwipeCell
+            ref={fixedRef}
+            id="group-fixed-c"
+            testID="group-fixed-row"
+            rightAction="更多"
+            onOpen={fixedOpen}
+            onClose={fixedClose}
+          />
+        </SwipeCellGroup>
+      </TestProvider>,
+    )
+
+    await layoutAction('group-recycled-row', 'right', 64)
+    await layoutAction('group-fixed-row', 'right', 64)
+    await act(async () => recycledRef.current?.open())
+    expect(firstOpen).toHaveBeenCalledTimes(1)
+    expect(getTranslation('group-recycled-row')).toBe(-64)
+    const oldClose = recycledRef.current!.close
+
+    await view.rerender(
+      <TestProvider>
+        <SwipeCellGroup>
+          <SwipeCell
+            ref={recycledRef}
+            id="group-recycled-b"
+            testID="group-recycled-row"
+            rightAction="删除"
+            onOpen={recycledOpen}
+            onClose={recycledClose}
+          />
+          <SwipeCell
+            ref={fixedRef}
+            id="group-fixed-c"
+            testID="group-fixed-row"
+            rightAction="更多"
+            onOpen={fixedOpen}
+            onClose={fixedClose}
+          />
+        </SwipeCellGroup>
+      </TestProvider>,
+    )
+    await layoutAction('group-recycled-row', 'right', 64)
+    expect(getTranslation('group-recycled-row')).toBe(0)
+
+    await act(async () => recycledRef.current?.open())
+    expect(recycledOpen).toHaveBeenCalledTimes(1)
+    expect(getTranslation('group-recycled-row')).toBe(-64)
+    await act(async () => oldClose())
+    expect(getTranslation('group-recycled-row')).toBe(-64)
+    expect(recycledClose).not.toHaveBeenCalled()
+
+    await act(async () => fixedRef.current?.open())
+    expect(recycledClose).toHaveBeenCalledTimes(1)
+    expect(getTranslation('group-recycled-row')).toBe(0)
+    expect(fixedOpen).toHaveBeenCalledTimes(1)
+    expect(getTranslation('group-fixed-row')).toBe(-64)
+    expect(firstClose).not.toHaveBeenCalled()
+
+    await act(async () => recycledRef.current?.open())
+    expect(fixedClose).toHaveBeenCalledTimes(1)
+    expect(getTranslation('group-fixed-row')).toBe(0)
+    expect(recycledOpen).toHaveBeenCalledTimes(2)
+    expect(getTranslation('group-recycled-row')).toBe(-64)
+  })
+
+  it('ignores delayed animation callbacks from the previous recycled item', async () => {
+    const ref = React.createRef<SwipeCellRef>()
+    const finishes: Array<(finished?: boolean) => void> = []
+    const pendingRN: Array<() => void> = []
+    const firstOpen = jest.fn()
+    const secondOpen = jest.fn()
+    jest.mocked(Reanimated.useAnimatedStyle).mockClear()
+    const cancel = jest.spyOn(Reanimated, 'cancelAnimation')
+    const spring = jest
+      .spyOn(Reanimated, 'withSpring')
+      .mockImplementation((target, _config, callback) => {
+        if (callback) finishes.push(callback)
+        return target
+      })
+    const timing = jest
+      .spyOn(Reanimated, 'withTiming')
+      .mockImplementation((target, _config, callback) => {
+        if (callback) finishes.push(callback)
+        return target
+      })
+    const schedule = jest.spyOn(Worklets, 'scheduleOnRN').mockImplementation((worklet, ...args) => {
+      pendingRN.push(() => worklet(...args))
+    })
+
+    try {
+      const view = await render(
+        <ConfigProvider
+          theme={{
+            seed: { motion: true },
+            components: { SwipeCell: { animationDuration: 120 } },
+          }}
+        >
+          <SwipeCell
+            ref={ref}
+            id="animated-a"
+            testID="animated-recycled-row"
+            rightAction="删除"
+            onOpen={firstOpen}
+          />
+        </ConfigProvider>,
+      )
+      const contentStyle = jest.mocked(Reanimated.useAnimatedStyle).mock.calls[0]![0]
+      await layoutAction('animated-recycled-row', 'right', 64)
+      await act(async () => ref.current?.open())
+      expect(finishes).toHaveLength(1)
+      expect(contentStyle().transform).toEqual([{ translateX: -64 }])
+      const pendingBeforeLateFinish = pendingRN.length
+      const previousCancelCount = cancel.mock.calls.length
+
+      await view.rerender(
+        <ConfigProvider
+          theme={{
+            seed: { motion: true },
+            components: { SwipeCell: { animationDuration: 120 } },
+          }}
+        >
+          <SwipeCell
+            ref={ref}
+            id="animated-b"
+            testID="animated-recycled-row"
+            rightAction="删除"
+            onOpen={secondOpen}
+          />
+        </ConfigProvider>,
+      )
+      expect(cancel).toHaveBeenCalledTimes(previousCancelCount + 1)
+      await act(async () => finishes[0]!(true))
+      expect(pendingRN).toHaveLength(pendingBeforeLateFinish)
+      await act(async () => {
+        pendingRN.splice(0).forEach((callback) => callback())
+        await Promise.resolve()
+      })
+
+      expect(firstOpen).not.toHaveBeenCalled()
+      expect(secondOpen).not.toHaveBeenCalled()
+      expect(contentStyle().transform).toEqual([{ translateX: 0 }])
+    } finally {
+      schedule.mockRestore()
+      cancel.mockRestore()
+      timing.mockRestore()
+      spring.mockRestore()
+    }
+  })
+
+  it('invalidates a captured close handle when its cell unmounts', async () => {
+    const ref = React.createRef<SwipeCellRef>()
+    const view = await render(
+      <TestProvider>
+        <SwipeCellGroup>
+          <SwipeCell ref={ref} id="unmounted-row" rightAction="删除" />
+        </SwipeCellGroup>
+      </TestProvider>,
+    )
+    const staleClose = ref.current!.close
+    scheduleOnUI.mockClear()
+    await act(async () => view.unmount())
+    await act(async () => staleClose())
+    expect(scheduleOnUI).not.toHaveBeenCalled()
+  })
+
   it('keeps only one cell open inside SwipeCellGroup', async () => {
     const firstRef = React.createRef<SwipeCellRef>()
     const secondRef = React.createRef<SwipeCellRef>()

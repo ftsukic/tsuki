@@ -22,8 +22,8 @@ jest.mock('@shopify/flash-list', () => {
       onScrollBeginDrag?: () => void
     }) => (
       <View {...{ testID: 'fixture-list', onScrollBeginDrag }}>
-        {data.slice(0, 2).map((item) => (
-          <React.Fragment key={item.id}>{renderItem({ item })}</React.Fragment>
+        {data.slice(0, 2).map((item, index) => (
+          <React.Fragment key={index}>{renderItem({ item })}</React.Fragment>
         ))}
       </View>
     ),

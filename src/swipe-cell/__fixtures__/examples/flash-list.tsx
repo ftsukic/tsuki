@@ -31,7 +31,7 @@ function DismissMessageRow({
   }, [item.id])
   return (
     <SwipeCell
-      key={item.id}
+      id={item.id}
       testID={`flash-swipe-${item.id}`}
       {...binding}
       actions={[
