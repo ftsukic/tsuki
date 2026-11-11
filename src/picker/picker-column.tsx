@@ -11,8 +11,9 @@ import {
 } from 'react'
 import type { StyleProp, TextStyle, ViewStyle } from 'react-native'
 import { View } from 'react-native'
+import { Pressable as GestureHandlerPressable } from 'react-native-gesture-handler'
 import { Gesture, GestureDetector } from '../gesture'
-import { PlainPressable } from '../pressable/plain-pressable'
+import { useSwipeCellPress } from '../swipe-cell/useSwipeCellPress'
 import { Text } from '../text'
 import { useComponentToken } from '../theme'
 import { useMotionConfig } from '../motion/useMotionConfig'
@@ -96,14 +97,17 @@ const PickerColumnItem = memo(function PickerColumnItem({
   itemLabelStyle,
 }: ItemProps) {
   const disabled = columnDisabled || item.disabled === true
+  const notifySwipeCellPress = useSwipeCellPress()
 
   return (
-    <PlainPressable
+    <GestureHandlerPressable
       accessibilityLabel={accessibilityLabel ? `${accessibilityLabel}, ${item.text}` : item.text}
       accessibilityRole="radio"
       accessibilityState={{ disabled, selected }}
       disabled={disabled}
-      onPress={() => onPress(index)}
+      onPress={() => {
+        if (!notifySwipeCellPress()) onPress(index)
+      }}
       style={[
         styles.item,
         itemStyle,
@@ -115,7 +119,7 @@ const PickerColumnItem = memo(function PickerColumnItem({
       <Text numberOfLines={1} style={[styles.itemLabel, itemLabelStyle]}>
         {item.text}
       </Text>
-    </PlainPressable>
+    </GestureHandlerPressable>
   )
 })
 
