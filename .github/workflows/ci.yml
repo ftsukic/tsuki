@@ -63,5 +63,26 @@ jobs:
       - name: Validate example
         run: yarn example:typecheck && yarn example:config && yarn example:export
 
+      - name: Prepare Changesets base branch
+        shell: bash
+        run: |
+          base_branch="$(node -e "const config = require('./.changeset/config.json'); if (typeof config.baseBranch === 'string') process.stdout.write(config.baseBranch)")"
+          if [ -z "$base_branch" ] || ! git check-ref-format --branch "$base_branch" >/dev/null; then
+            echo "::error::.changeset/config.json must define a valid baseBranch"
+            exit 1
+          fi
+
+          if git show-ref --verify --quiet "refs/heads/$base_branch"; then
+            echo "Local Changesets base branch '$base_branch' already exists; leaving it unchanged."
+          else
+            remote_ref="refs/remotes/origin/$base_branch"
+            if ! git show-ref --verify --quiet "$remote_ref"; then
+              echo "::error::Changesets base branch origin/$base_branch does not exist"
+              exit 1
+            fi
+
+            git branch --no-track "$base_branch" "origin/$base_branch"
+          fi
+
       - name: Validate changesets
         run: yarn changeset:status
