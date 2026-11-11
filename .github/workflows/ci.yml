@@ -63,5 +63,9 @@ jobs:
       - name: Validate example
         run: yarn example:typecheck && yarn example:config && yarn example:export
 
+      - name: Prepare Changesets base branch
+        if: github.event_name == 'pull_request'
+        run: git branch --force main origin/main
+
       - name: Validate changesets
         run: yarn changeset:status
