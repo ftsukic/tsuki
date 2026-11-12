@@ -4,7 +4,7 @@
 
 Switch 用于在打开和关闭状态之间进行切换，支持受控、非受控、自定义值、异步切换确认、禁用和加载状态。
 
-- [组件预览：Switch 的状态、尺寸、自定义颜色和异步确认示例。](../../../src/switch/__fixtures__/overview.tsx)
+- [组件预览：Switch 的状态、尺寸、自定义颜色和异步确认示例。](../../../packages/tsuki/src/switch/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,13 +14,13 @@ import { Switch } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [状态和尺寸：展示默认、checked、disabled、loading 以及 small、medium、large 尺寸。](../../../src/switch/__fixtures__/examples/states.tsx)
+- [状态和尺寸：展示默认、checked、disabled、loading 以及 small、medium、large 尺寸。](../../../packages/tsuki/src/switch/__fixtures__/examples/states.tsx)
 
-- [自定义颜色：通过 activeColor 和 inactiveColor 定制轨道颜色。](../../../src/switch/__fixtures__/examples/colors.tsx)
+- [自定义颜色：通过 activeColor 和 inactiveColor 定制轨道颜色。](../../../packages/tsuki/src/switch/__fixtures__/examples/colors.tsx)
 
-- [异步确认：beforeChange 返回 Promise，在确认完成前不提交新的开关值。](../../../src/switch/__fixtures__/examples/before-change.tsx)
+- [异步确认：beforeChange 返回 Promise，在确认完成前不提交新的开关值。](../../../packages/tsuki/src/switch/__fixtures__/examples/before-change.tsx)
 
-- [语义样式：自定义轨道与滑块尺寸、状态背景及加载区域。](../../../src/switch/__fixtures__/examples/semantic.tsx)
+- [语义样式：自定义轨道与滑块尺寸、状态背景及加载区域。](../../../packages/tsuki/src/switch/__fixtures__/examples/semantic.tsx)
 
 ## API
 

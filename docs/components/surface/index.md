@@ -4,7 +4,7 @@
 
 Surface 是只负责视觉承载的主题背景、圆角和裁剪容器，不包含 Card 的 header、body、footer 语义。
 
-- [组件预览：展示 Surface 与 CellGroup、Grid 的组合。](../../../src/surface/__fixtures__/overview.tsx)
+- [组件预览：展示 Surface 与 CellGroup、Grid 的组合。](../../../packages/tsuki/src/surface/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,7 +14,7 @@ import { Surface } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [Surface Mixed：在同一 Surface 中并列组合 CellGroup 和 Mobile Grid。](../../../src/surface/__fixtures__/examples/mixed.tsx)
+- [Surface Mixed：在同一 Surface 中并列组合 CellGroup 和 Mobile Grid。](../../../packages/tsuki/src/surface/__fixtures__/examples/mixed.tsx)
 
 ## API
 

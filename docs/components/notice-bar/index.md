@@ -4,7 +4,7 @@
 
 NoticeBar 用于展示需要持续关注的消息通知，支持 Vant 风格的单行滚动、文本省略和多行换行。
 
-- [组件预览：展示 NoticeBar 的基础、组合内容、滚动、换行、交互、禁用和主题示例。](../../../src/notice-bar/__fixtures__/overview.tsx)
+- [组件预览：展示 NoticeBar 的基础、组合内容、滚动、换行、交互、禁用和主题示例。](../../../packages/tsuki/src/notice-bar/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,19 +14,19 @@ import { NoticeBar } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础通知：展示基础通知和左侧自定义图标。](../../../src/notice-bar/__fixtures__/examples/NoticeBar.tsx)
+- [基础通知：展示基础通知和左侧自定义图标。](../../../packages/tsuki/src/notice-bar/__fixtures__/examples/NoticeBar.tsx)
 
-- [组合内容：展示 children 自定义内容和静态右侧图标。](../../../src/notice-bar/__fixtures__/examples/custom-content.tsx)
+- [组合内容：展示 children 自定义内容和静态右侧图标。](../../../packages/tsuki/src/notice-bar/__fixtures__/examples/custom-content.tsx)
 
-- [滚动配置：展示短内容循环滚动以及 speed、delay 配置。](../../../src/notice-bar/__fixtures__/examples/scrollable.tsx)
+- [滚动配置：展示短内容循环滚动以及 speed、delay 配置。](../../../packages/tsuki/src/notice-bar/__fixtures__/examples/scrollable.tsx)
 
-- [换行：展示关闭滚动后的多行换行。](../../../src/notice-bar/__fixtures__/examples/wrapable.tsx)
+- [换行：展示关闭滚动后的多行换行。](../../../packages/tsuki/src/notice-bar/__fixtures__/examples/wrapable.tsx)
 
-- [交互：展示 onClick 计数和 onClose 隐藏当前通知。](../../../src/notice-bar/__fixtures__/examples/interaction.tsx)
+- [交互：展示 onClick 计数和 onClose 隐藏当前通知。](../../../packages/tsuki/src/notice-bar/__fixtures__/examples/interaction.tsx)
 
-- [禁用：展示通知栏和关闭操作的禁用状态。](../../../src/notice-bar/__fixtures__/examples/disabled.tsx)
+- [禁用：展示通知栏和关闭操作的禁用状态。](../../../packages/tsuki/src/notice-bar/__fixtures__/examples/disabled.tsx)
 
-- [主题和语义样式：展示主题覆盖、语义样式和独立的主体与关闭操作。](../../../src/notice-bar/__fixtures__/examples/theme.tsx)
+- [主题和语义样式：展示主题覆盖、语义样式和独立的主体与关闭操作。](../../../packages/tsuki/src/notice-bar/__fixtures__/examples/theme.tsx)
 
 ## API
 

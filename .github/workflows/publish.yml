@@ -75,11 +75,12 @@ jobs:
         run: pnpm run release:check-package
 
       - name: Check registry version
-        run: node scripts/check-registry-version.cjs "$(node -p "require('./package.json').version")"
+        run: node scripts/check-registry-version.cjs "$(node -p "require('./packages/tsuki/package.json').version")"
 
       - name: Publish to npm
         env:
           NPM_TAG: ${{ steps.release.outputs.npm_tag }}
+        working-directory: packages/tsuki
         run: npm publish --access public --provenance --tag "$NPM_TAG"
 
       - name: Verify published package
@@ -87,7 +88,7 @@ jobs:
           NPM_TAG: ${{ steps.release.outputs.npm_tag }}
         shell: bash
         run: |
-          VERSION="$(node -p "require('./package.json').version")"
+          VERSION="$(node -p "require('./packages/tsuki/package.json').version")"
           for attempt in $(seq 1 30); do
             PUBLISHED_VERSION="$(
               npm view "@ftsukic/tsuki@${VERSION}" version \

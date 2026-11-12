@@ -13,14 +13,14 @@ import type {
   ImagePreviewProps,
   ImagePreviewSourceProps,
 } from '@ftsukic/tsuki'
-import ChatMessages from '../../../src/image-preview/__fixtures__/examples/chat-messages'
-import PreviewToolbar from '../../../src/image-preview/__fixtures__/examples/preview-toolbar'
+import ChatMessages from '../../../../packages/tsuki/src/image-preview/__fixtures__/examples/chat-messages'
+import PreviewToolbar from '../../../../packages/tsuki/src/image-preview/__fixtures__/examples/preview-toolbar'
 import { fastImageAdapter } from '../../components/fast-image-adapter'
 
 const VIDEO = {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro bundles native assets through static require.
+  // eslint-disable-next-line ts/no-require-imports -- Metro bundles native assets through static require.
   source: require('../../assets/videos/chat-demo.mp4'),
-  // eslint-disable-next-line @typescript-eslint/no-require-imports -- Metro bundles native assets through static require.
+  // eslint-disable-next-line ts/no-require-imports -- Metro bundles native assets through static require.
   poster: require('../../assets/videos/chat-demo-poster.png'),
 }
 const MEDIA = Array.from({ length: 75 }, (_, index) => ({

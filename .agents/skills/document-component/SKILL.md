@@ -1,6 +1,6 @@
 ---
 name: document-component
-description: 添加或更新规范组件 Fixture、公共组件文档或共享 Expo Example 时使用。
+description: 添加或更新规范组件 Fixture、公共组件文档或共享 Expo Playground 时使用。
 ---
 
 # 文档组件 Skill
@@ -13,6 +13,6 @@ description: 添加或更新规范组件 Fixture、公共组件文档或共享 E
 4. 保持 `overview.tsx` 为组合层，让组件文档链接到 canonical Fixture。不要维护第二份 demo implementation。
 5. 记录真实 API：type、prop、default、behavior boundary、继承的 React Native prop、accessibility、style/semantic slot、token、不支持的 API，以及适用时的 compound API。
 6. 新增 Fixture 时检查 Fixture catalog 是否需要重新生成。
-7. 使用 `verify-change` 选择 docs/example validation，并准确记录实际运行的内容。
+7. 使用 `verify-change` 选择 docs/Playground validation，并准确记录实际运行的内容。
 
 相关 Rule：`docs-fixtures`、`api-design`、`theme-style`、`architecture`；如果改变 behavior assertion，还要读取 `testing`。

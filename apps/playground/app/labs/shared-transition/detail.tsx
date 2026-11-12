@@ -1,1 +1,1 @@
-export { SharedNavigationDetail as default } from '../../../../src/image-preview/__fixtures__/examples/navigation'
+export { SharedNavigationDetail as default } from '../../../../../packages/tsuki/src/image-preview/__fixtures__/examples/navigation'

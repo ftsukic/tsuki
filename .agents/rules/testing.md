@@ -3,7 +3,8 @@
 ## 应测试的内容
 
 - 测试 public behavior 和重要的 domain behavior，而不是 private implementation shape。
-- Component test 通常位于 `src/__tests__/`；已有 colocated test directory 仍然有效，不要仅为一致性而移动它们。
+- Component test 通常位于 `packages/tsuki/src/__tests__/`；已有 colocated test directory 仍然有效，不要仅为一致性而移动它们。
+- Playground 页面和应用集成测试位于 `apps/playground/__tests__/`。
 - Pure logic test 使用面向行为的名称，例如 `picker-date-time.test.ts` 或 `image-preview-utils.test.ts`。
 - 对 stateful component，覆盖 controlled 和 uncontrolled operation、default、state transition、callback 以及重要 edge case。
 - 当 component 暴露 accessibility 时，覆盖其 semantic 和 action。

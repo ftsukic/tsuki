@@ -2,7 +2,7 @@
 
 ## Canonical examples
 
-- `src/<component>/__fixtures__/` 是 canonical example source。组件文档和 Expo Example 应复用同一份 Fixture，不要维护分离的 demo implementation。
+- `packages/tsuki/src/<component>/__fixtures__/` 是 canonical example source。组件文档和 Expo Playground 应复用同一份 Fixture，不要维护分离的 demo implementation。
 - 通常使用以下结构：
 
   ```text
@@ -29,5 +29,5 @@
 ## 仓库特定边界
 
 - 除非任务明确要求改变 documentation coverage，否则不要为了强制 Fixture 与 documentation 一一对应而新增或删除现有 coverage。
-- Fixture catalog generator 定义 Expo Example 的发现方式。单独新增 Fixture 不要求修改 TypeScript configuration。
+- Fixture catalog generator 定义 Expo Playground 的发现方式。单独新增 Fixture 不要求修改 TypeScript configuration。
 - Validation step 属于 `verify-change`，不属于本 Rule。没有实际运行对应命令时，不要声称 docs 或 Fixture 已验证。

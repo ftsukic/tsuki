@@ -1,76 +1,26 @@
 {
-  "name": "@ftsukic/tsuki",
-  "version": "1.0.0-beta.1",
-  "description": "基础 React Native UI 组件库。",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ftsukic/tsuki.git",
-    "directory": "."
-  },
-  "bugs": {
-    "url": "https://github.com/ftsukic/tsuki/issues"
-  },
-  "homepage": "https://github.com/ftsukic/tsuki#readme",
-  "source": "src/index.ts",
-  "main": "lib/commonjs/index.js",
-  "module": "lib/module/index.js",
-  "react-native": "src/index.ts",
-  "types": "lib/typescript/commonjs/index.d.ts",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./lib/typescript/module/index.d.ts",
-        "default": "./lib/module/index.js"
-      },
-      "require": {
-        "types": "./lib/typescript/commonjs/index.d.ts",
-        "default": "./lib/commonjs/index.js"
-      }
-    }
-  },
-  "files": [
-    "assets",
-    "src",
-    "lib",
-    "README.md",
-    "LICENSE",
-    "!**/__fixtures__",
-    "!**/__tests__",
-    "!**/__mocks__",
-    "!**/*.md"
-  ],
-  "sideEffects": false,
+  "name": "tsuki-workspace",
+  "private": true,
   "packageManager": "pnpm@12.19.0",
-  "dependencies": {
-    "@ant-design/colors": "^8.0.1",
-    "@ant-design/fast-color": "^3.0.1",
-    "@ant-design/icons-svg": "^4.6.0",
-    "react-native-popover-view": "^6.1.0"
-  },
-  "peerDependencies": {
-    "react": ">=19.2.3",
-    "react-native": ">=0.86.0",
-    "react-native-gesture-handler": ">=2.32.0 <3.0.0",
-    "react-native-reanimated": ">=4.7.1 <5.0.0",
-    "react-native-safe-area-context": ">=5.7.0 <6.0.0",
-    "react-native-svg": ">=15.16.0",
-    "react-native-teleport": "^1.2.2",
-    "react-native-worklets": ">=0.13.0"
-  },
-  "publishConfig": {
-    "access": "public"
+  "engines": {
+    "node": "^22.13.0 || >=24"
   },
   "scripts": {
-    "build": "bob build",
-    "fixtures:generate": "node scripts/generate-fixture-catalog.cjs",
-    "typecheck": "tsc -p tsconfig.test.json --noEmit",
-    "lint": "eslint src example --ext .ts,.tsx && eslint eslint.config.cjs babel.config.cjs jest.config.cjs commitlint.config.mjs lint-staged.config.mjs scripts/changeset-status.cjs",
-    "test": "jest --config jest.config.cjs --runInBand",
-    "example:dev": "pnpm --filter example run start",
-    "example:typecheck": "pnpm --filter example run typecheck",
-    "example:config": "pnpm --filter example run config",
-    "example:export": "pnpm --filter example run export:web",
+    "build": "pnpm --filter @ftsukic/tsuki run build",
+    "fixtures:generate": "pnpm --filter playground run generate:fixtures",
+    "typecheck": "pnpm run package:typecheck && pnpm run playground:typecheck",
+    "package:typecheck": "pnpm --filter @ftsukic/tsuki run typecheck",
+    "package:test": "pnpm --filter @ftsukic/tsuki run test",
+    "playground:typecheck": "pnpm --filter playground run typecheck",
+    "playground:test": "pnpm --filter playground run test",
+    "playground:config": "pnpm --filter playground run config",
+    "playground:build:development": "pnpm --filter playground run build:development",
+    "playground:build": "pnpm --filter playground run build:native",
+    "playground:dev": "pnpm --filter playground run start",
+    "playground:ios": "pnpm --filter playground run ios",
+    "playground:android": "pnpm --filter playground run android",
+    "lint": "eslint packages/tsuki/src apps/playground --ext .ts,.tsx,.js,.cjs,.mjs && eslint eslint.config.mjs commitlint.config.mjs lint-staged.config.mjs packages/tsuki/*.cjs scripts/*.cjs",
+    "test": "pnpm run package:test && pnpm run playground:test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "commitlint": "commitlint",
@@ -78,80 +28,21 @@
     "changeset:status": "node scripts/changeset-status.cjs",
     "release:version": "changeset version",
     "release:publish": "changeset publish",
-    "release:check-package": "node scripts/validate-package.cjs",
+    "release:check-package": "pnpm --filter @ftsukic/tsuki run release:check-package",
     "prepare": "husky"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.4",
-    "@babel/preset-env": "^7.28.3",
-    "@babel/preset-react": "^7.27.1",
-    "@babel/preset-typescript": "^7.27.1",
-    "@babel/runtime": "^7.29.10",
     "@changesets/cli": "^3.0.3",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
-    "@eslint/js": "^9.39.5",
-    "@react-native/babel-preset": "0.86.3",
-    "@react-native/jest-preset": "0.86.3",
-    "@react-native/metro-config": "0.86.3",
-    "@shopify/flash-list": "2.3.3",
-    "@testing-library/react-native": "^14.1.0",
-    "@types/jest": "^30.0.0",
-    "@types/node": "^22.0.0",
-    "@types/react": "^19.1.10",
-    "@types/react-dom": "^19.1.7",
-    "@typescript-eslint/eslint-plugin": "^8.72.0",
-    "@typescript-eslint/parser": "^8.72.0",
-    "babel-jest": "^30.5.2",
-    "eslint": "^9.39.5",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.7",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^7.1.1",
+    "@antfu/eslint-config": "10.0.0",
+    "@eslint-react/eslint-plugin": "^5.28.8",
+    "eslint": "10.14.0",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.0",
     "eslint-plugin-testing-library": "^7.16.2",
-    "globals": "^16.5.0",
     "husky": "^9.1.7",
-    "jest": "^30.5.2",
-    "jest-environment-jsdom": "^30.5.2",
     "lint-staged": "^17.6.0",
-    "prettier": "^3.9.10",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "react-native": "0.86.3",
-    "react-native-builder-bob": "0.44.1",
-    "react-native-gesture-handler": "2.33.1",
-    "react-native-reanimated": "4.7.1",
-    "react-native-safe-area-context": "5.10.1",
-    "react-native-svg": "15.16.0",
-    "react-native-teleport": "1.2.2",
-    "react-native-web": "^0.21.4",
-    "react-native-worklets": "0.13.0",
-    "test-renderer": "1.2.0",
-    "typescript": "^5.9.2"
-  },
-  "react-native-builder-bob": {
-    "source": "src",
-    "output": "lib",
-    "targets": [
-      [
-        "module",
-        {
-          "esm": true
-        }
-      ],
-      "commonjs",
-      [
-        "typescript",
-        {
-          "project": "tsconfig.build.json"
-        }
-      ]
-    ],
-    "exclude": "**/{__tests__/**,__fixtures__/**,__mocks__/**,*.md}"
-  },
-  "peerDependenciesMeta": {
-    "react-native-teleport": {
-      "optional": true
-    }
+    "prettier": "^3.9.10"
   }
 }

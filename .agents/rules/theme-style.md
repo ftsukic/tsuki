@@ -9,7 +9,7 @@ SeedToken -> MapToken -> AliasToken -> ComponentToken
 ```
 
 - `SeedToken` 包含基础 theme input；`MapToken` 派生 palette、typography、size、motion 等映射值；`AliasToken` 提供可复用的 semantic design value；`ComponentToken` 包含 component-specific override。
-- 使用现有的 `MappingAlgorithm`、`ConfigProvider`、`useToken` 和 `useComponentToken` contract。修改 token 或 theme behavior 前，读取 `src/theme/`。
+- 使用现有的 `MappingAlgorithm`、`ConfigProvider`、`useToken` 和 `useComponentToken` contract。修改 token 或 theme behavior 前，读取 `packages/tsuki/src/theme/`。
 - 设计系统共享的值优先使用 `AliasToken`。只有真正属于单个 component 且应允许 consumer 配置的值，才放入 `ComponentToken`。
 - 保留 theme inheritance、override、dark/default algorithm、motion duration 和 hairline behavior。不要把 theme change 伪装成 context 或 naming cleanup。
 

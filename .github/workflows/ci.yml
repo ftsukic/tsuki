@@ -58,10 +58,13 @@ jobs:
         run: pnpm run test
 
       - name: Build package
-        run: pnpm run build
+        run: pnpm --filter @ftsukic/tsuki run build
 
-      - name: Validate example
-        run: pnpm run example:typecheck && pnpm run example:config && pnpm run example:export
+      - name: Validate package contents
+        run: pnpm run release:check-package
+
+      - name: Validate Playground
+        run: pnpm run playground:typecheck && pnpm run playground:config && pnpm run playground:build:development && pnpm run playground:build
 
       - name: Prepare Changesets base branch
         shell: bash

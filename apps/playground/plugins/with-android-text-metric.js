@@ -1,5 +1,5 @@
 // Expo loads local config plugins through Node's CommonJS loader.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+
 const { withAndroidStyles, createRunOncePlugin } = require('expo/config-plugins')
 
 const TEXT_VIEW_STYLE = 'Widget.Tsuki.TextView'

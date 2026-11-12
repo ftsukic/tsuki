@@ -4,7 +4,7 @@
 
 按钮用于触发操作，支持 Vant 风格的类型、尺寸、视觉变体、加载状态和 `default`、`round`、`square`、`circle` 形状。
 
-- [组件预览：Button 的类型、状态和形状预览。](../../../src/button/__fixtures__/overview.tsx)
+- [组件预览：Button 的类型、状态和形状预览。](../../../packages/tsuki/src/button/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,19 +14,19 @@ import { Button, Icon } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [类型与变体：展示 Button 的类型、五种视觉变体、自定义颜色和语义样式。](../../../src/button/__fixtures__/examples/variants.tsx)
+- [类型与变体：展示 Button 的类型、五种视觉变体、自定义颜色和语义样式。](../../../packages/tsuki/src/button/__fixtures__/examples/variants.tsx)
 
-- [尺寸与布局：比较四种尺寸、块级按钮和文字按钮。](../../../src/button/__fixtures__/examples/sizes.tsx)
+- [尺寸与布局：比较四种尺寸、块级按钮和文字按钮。](../../../packages/tsuki/src/button/__fixtures__/examples/sizes.tsx)
 
-- [图标与加载：切换加载状态，观察图标替换、左右位置、内容保留和动态文案。](../../../src/button/__fixtures__/examples/loading.tsx)
+- [图标与加载：切换加载状态，观察图标替换、左右位置、内容保留和动态文案。](../../../packages/tsuki/src/button/__fixtures__/examples/loading.tsx)
 
-- [形状：并排比较默认、方角、胶囊和不同尺寸的圆形图标按钮。](../../../src/button/__fixtures__/examples/shapes.tsx)
+- [形状：并排比较默认、方角、胶囊和不同尺寸的圆形图标按钮。](../../../packages/tsuki/src/button/__fixtures__/examples/shapes.tsx)
 
-- [Button.Group：展示连接按钮组、统一尺寸、视觉变体、显式尺寸覆盖和单按钮组。](../../../src/button/__fixtures__/examples/group.tsx)
+- [Button.Group：展示连接按钮组、统一尺寸、视觉变体、显式尺寸覆盖和单按钮组。](../../../packages/tsuki/src/button/__fixtures__/examples/group.tsx)
 
-- [按下反馈：比较 text Button 默认透明度反馈和显式 overlay 配置。](../../../src/button/__fixtures__/examples/press-feedback.tsx)
+- [按下反馈：比较 text Button 默认透明度反馈和显式 overlay 配置。](../../../packages/tsuki/src/button/__fixtures__/examples/press-feedback.tsx)
 
-- [禁用与加载恢复：切换状态，检查按钮颜色恢复和点击计数。](../../../src/button/__fixtures__/examples/state-recovery.tsx)
+- [禁用与加载恢复：切换状态，检查按钮颜色恢复和点击计数。](../../../packages/tsuki/src/button/__fixtures__/examples/state-recovery.tsx)
 
 升级已有用法请参阅 [Button API 迁移](../../guide/button-migration.md)。
 

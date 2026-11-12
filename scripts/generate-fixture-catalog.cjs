@@ -2,8 +2,8 @@ const fs = require('node:fs')
 const path = require('node:path')
 
 const repositoryRoot = path.resolve(__dirname, '..')
-const sourceRoot = path.join(repositoryRoot, 'src')
-const outputPath = path.join(repositoryRoot, 'example', 'fixtures', 'catalog.ts')
+const sourceRoot = path.join(repositoryRoot, 'packages', 'tsuki', 'src')
+const outputPath = path.join(repositoryRoot, 'apps', 'playground', 'fixtures', 'catalog.ts')
 
 function walk(directory) {
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -94,7 +94,7 @@ const fixtures = componentDirectories.map((component, index) => {
   }
 
   const overviewSource = fs.readFileSync(overviewPath, 'utf8')
-  const relativeOverviewPath = toPosix(path.relative(repositoryRoot, overviewPath))
+  const relativeOverviewPath = toPosix(path.relative(path.dirname(outputPath), overviewPath))
   const title = componentTitle(component)
 
   return {
@@ -102,7 +102,7 @@ const fixtures = componentDirectories.map((component, index) => {
     description: readTag(overviewSource, 'description') || `${title} component overview.`,
     id: component,
     importName: `ComponentOverview${index}`,
-    importPath: `../../${relativeOverviewPath.replace(/\.tsx$/, '')}`,
+    importPath: relativeOverviewPath.replace(/\.tsx$/, ''),
     title,
   }
 })

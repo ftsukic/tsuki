@@ -4,7 +4,7 @@
 
 Divider 用于区分不同内容区域，提供横向 hairline、颜色、厚度和统一左右 inset。
 
-- [组件预览：Divider 的基础横线和可配置样式预览。](../../../src/divider/__fixtures__/overview.tsx)
+- [组件预览：Divider 的基础横线和可配置样式预览。](../../../packages/tsuki/src/divider/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,9 +14,9 @@ import { Divider } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础用法：使用主题默认颜色和 hairline 厚度。](../../../src/divider/__fixtures__/examples/basic.tsx)
+- [基础用法：使用主题默认颜色和 hairline 厚度。](../../../packages/tsuki/src/divider/__fixtures__/examples/basic.tsx)
 
-- [颜色、厚度和 inset：覆盖颜色、厚度、左右 inset 和根节点样式。](../../../src/divider/__fixtures__/examples/options.tsx)
+- [颜色、厚度和 inset：覆盖颜色、厚度、左右 inset 和根节点样式。](../../../packages/tsuki/src/divider/__fixtures__/examples/options.tsx)
 
 ## API
 

@@ -1,7 +1,7 @@
 import { View } from 'react-native'
 import { Stack } from 'expo-router/stack'
 import { ImagePreview, useToken } from '@ftsukic/tsuki'
-import ChatMessages from '../../../src/image-preview/__fixtures__/examples/chat-messages'
+import ChatMessages from '../../../../packages/tsuki/src/image-preview/__fixtures__/examples/chat-messages'
 import { fastImageAdapter } from '../../components/fast-image-adapter'
 
 export default function FastImageChatScreen() {

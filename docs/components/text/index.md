@@ -4,7 +4,7 @@
 
 Text 是跟随 Theme 的基础文本组件。它将 React Native 文本能力和 `colorText`、`fontFamily`、字号、行高及语义颜色结合起来，不引入 Web Heading 体系。
 
-- [组件预览](../../../src/text/__fixtures__/overview.tsx)
+- [组件预览](../../../packages/tsuki/src/text/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,9 +14,9 @@ import { ConfigProvider, darkAlgorithm, Text } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础文本：默认文本跟随主题，显式 style 可以覆盖默认颜色。](../../../src/text/__fixtures__/examples/basic.tsx)
+- [基础文本：默认文本跟随主题，显式 style 可以覆盖默认颜色。](../../../packages/tsuki/src/text/__fixtures__/examples/basic.tsx)
 
-- [语义、尺寸和字重：使用 default、secondary、tertiary、disabled 及三种字号表达文本层级。](../../../src/text/__fixtures__/examples/semantic.tsx)
+- [语义、尺寸和字重：使用 default、secondary、tertiary、disabled 及三种字号表达文本层级。](../../../packages/tsuki/src/text/__fixtures__/examples/semantic.tsx)
 
 ## API
 

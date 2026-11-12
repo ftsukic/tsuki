@@ -4,7 +4,7 @@
 
 在指定范围内选择一个数值。支持拖动、点击定位、步长吸附、刻度和自定义滑块，可用于音量、亮度和字号档位选择。使用 RNGH 与 Reanimated，在 UI 线程更新拖动位置；没有额外的过渡动画。
 
-- [组件预览：数值选择、步长刻度、状态和外观定制。](../../../src/slider/__fixtures__/overview.tsx)
+- [组件预览：数值选择、步长刻度、状态和外观定制。](../../../packages/tsuki/src/slider/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -16,7 +16,7 @@ import { Slider } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基本用法：受控与非受控，实时变化与完成事件。](../../../src/slider/__fixtures__/examples/basic.tsx) - [步长与刻度：离散档位、刻度标签和反向布局。](../../../src/slider/__fixtures__/examples/steps.tsx) - [禁用与只读：不可编辑的两种状态。](../../../src/slider/__fixtures__/examples/states.tsx) - [样式定制：组件 token、语义样式与滑块内容。](../../../src/slider/__fixtures__/examples/theme.tsx)
+- [基本用法：受控与非受控，实时变化与完成事件。](../../../packages/tsuki/src/slider/__fixtures__/examples/basic.tsx) - [步长与刻度：离散档位、刻度标签和反向布局。](../../../packages/tsuki/src/slider/__fixtures__/examples/steps.tsx) - [禁用与只读：不可编辑的两种状态。](../../../packages/tsuki/src/slider/__fixtures__/examples/states.tsx) - [样式定制：组件 token、语义样式与滑块内容。](../../../packages/tsuki/src/slider/__fixtures__/examples/theme.tsx)
 
 ## API
 

@@ -42,7 +42,7 @@
 ## 代表性目录结构
 
 ```text
-src/search/
+packages/tsuki/src/search/
   __fixtures__/
   search.tsx
   index.ts
@@ -50,7 +50,7 @@ src/search/
   style.ts
   token.ts
 
-src/picker/
+packages/tsuki/src/picker/
   __fixtures__/
   picker.tsx
   picker-view.tsx
@@ -63,7 +63,7 @@ src/picker/
   token.ts
   usePicker.ts
 
-src/picker/date-time/
+packages/tsuki/src/picker/date-time/
   columns.ts
   types.ts
   value.ts

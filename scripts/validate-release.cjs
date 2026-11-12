@@ -1,6 +1,9 @@
 const fs = require('node:fs')
+const path = require('node:path')
 
-const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+const packageDirectory =
+  process.env.TSUKI_PACKAGE_DIR || path.resolve(__dirname, '..', 'packages', 'tsuki')
+const packageJson = JSON.parse(fs.readFileSync(path.join(packageDirectory, 'package.json'), 'utf8'))
 const tag = process.env.GITHUB_REF_NAME
 const stableMaintenance = /^0\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/
 const beta = /^[1-9]\d*\.(0|[1-9]\d*)\.(0|[1-9]\d*)-beta\.(0|[1-9]\d*)$/

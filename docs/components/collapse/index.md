@@ -4,7 +4,7 @@
 
 Collapse 用于将内容组织成可展开和收起的面板，支持多个面板同时展开，也支持 Vant 风格的 accordion 手风琴模式。
 
-- [组件预览：Collapse 的基础、手风琴、默认展开、禁用、受控和主题示例。](../../../src/collapse/__fixtures__/overview.tsx)
+- [组件预览：Collapse 的基础、手风琴、默认展开、禁用、受控和主题示例。](../../../packages/tsuki/src/collapse/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,19 +14,19 @@ import { Collapse, CollapseItem } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础用法：默认允许多个面板同时展开。](../../../src/collapse/__fixtures__/examples/basic.tsx)
+- [基础用法：默认允许多个面板同时展开。](../../../packages/tsuki/src/collapse/__fixtures__/examples/basic.tsx)
 
-- [手风琴：accordion 模式下同一时间只展开一个面板。](../../../src/collapse/__fixtures__/examples/accordion.tsx)
+- [手风琴：accordion 模式下同一时间只展开一个面板。](../../../packages/tsuki/src/collapse/__fixtures__/examples/accordion.tsx)
 
-- [默认展开：使用 defaultValue 设置非受控初始展开项。](../../../src/collapse/__fixtures__/examples/default.tsx)
+- [默认展开：使用 defaultValue 设置非受控初始展开项。](../../../packages/tsuki/src/collapse/__fixtures__/examples/default.tsx)
 
-- [禁用项：禁用项不响应点击，也不会触发 onChange。](../../../src/collapse/__fixtures__/examples/disabled.tsx)
+- [禁用项：禁用项不响应点击，也不会触发 onChange。](../../../packages/tsuki/src/collapse/__fixtures__/examples/disabled.tsx)
 
-- [受控模式：使用 value 和 onChange 管理展开状态。](../../../src/collapse/__fixtures__/examples/controlled.tsx)
+- [受控模式：使用 value 和 onChange 管理展开状态。](../../../packages/tsuki/src/collapse/__fixtures__/examples/controlled.tsx)
 
-- [语义样式：通过 CollapseItem styles 定制稳定的公开区域。](../../../src/collapse/__fixtures__/examples/semantic.tsx)
+- [语义样式：通过 CollapseItem styles 定制稳定的公开区域。](../../../packages/tsuki/src/collapse/__fixtures__/examples/semantic.tsx)
 
-- [主题定制：通过 ConfigProvider 覆盖 Collapse component token。](../../../src/collapse/__fixtures__/examples/theme.tsx)
+- [主题定制：通过 ConfigProvider 覆盖 Collapse component token。](../../../packages/tsuki/src/collapse/__fixtures__/examples/theme.tsx)
 
 ## API
 

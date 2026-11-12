@@ -4,7 +4,7 @@ import { useCallback, useRef } from 'react'
 import { View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button, useSwipeCellDismiss, type SwipeCellRef } from '@ftsukic/tsuki'
-import WeChatSwipeCell from '../../../src/swipe-cell/__fixtures__/examples/wechat'
+import WeChatSwipeCell from '../../../../packages/tsuki/src/swipe-cell/__fixtures__/examples/wechat'
 
 export default function WeChatSwipeScreen() {
   const ref = useRef<SwipeCellRef>(null)

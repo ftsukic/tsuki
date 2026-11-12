@@ -1,1 +1,7 @@
+**/node_modules/
+**/lib/
+**/dist/
+**/.expo/
+apps/playground/android/
+apps/playground/ios/
 pnpm-lock.yaml

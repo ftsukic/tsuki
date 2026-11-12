@@ -4,7 +4,7 @@
 
 Layout 提供 Vant 风格的 24 栅格 `Row` / `Col`，用于页面分栏、偏移和跨行布局。
 
-- [组件预览：Layout 的栅格、间距、偏移、换行和对齐示例。](../../../src/layout/__fixtures__/overview.tsx)
+- [组件预览：Layout 的栅格、间距、偏移、换行和对齐示例。](../../../packages/tsuki/src/layout/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,21 +14,21 @@ import { Col, Row } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础栅格：三个 span 为 8 的 Col 组成一行。](../../../src/layout/__fixtures__/examples/basic.tsx)
+- [基础栅格：三个 span 为 8 的 Col 组成一行。](../../../packages/tsuki/src/layout/__fixtures__/examples/basic.tsx)
 
-- [横向 gutter：相邻 Col 之间使用 16 点横向间距，首尾不增加额外外边距。](../../../src/layout/__fixtures__/examples/gutter.tsx)
+- [横向 gutter：相邻 Col 之间使用 16 点横向间距，首尾不增加额外外边距。](../../../packages/tsuki/src/layout/__fixtures__/examples/gutter.tsx)
 
-- [纵向 gutter：使用 [16, 8] 设置横向间距和实际行之间的纵向间距。](../../../src/layout/__fixtures__/examples/vertical-gutter.tsx)
+- [纵向 gutter：使用 [16, 8] 设置横向间距和实际行之间的纵向间距。](../../../packages/tsuki/src/layout/__fixtures__/examples/vertical-gutter.tsx)
 
-- [偏移：使用 offset 在 Col 左侧预留栅格。](../../../src/layout/__fixtures__/examples/offset.tsx)
+- [偏移：使用 offset 在 Col 左侧预留栅格。](../../../packages/tsuki/src/layout/__fixtures__/examples/offset.tsx)
 
-- [主轴对齐：将 justify 映射到 React Native Flexbox。](../../../src/layout/__fixtures__/examples/justify.tsx)
+- [主轴对齐：将 justify 映射到 React Native Flexbox。](../../../packages/tsuki/src/layout/__fixtures__/examples/justify.tsx)
 
-- [交叉轴对齐：将 align 映射到 React Native Flexbox。](../../../src/layout/__fixtures__/examples/align.tsx)
+- [交叉轴对齐：将 align 映射到 React Native Flexbox。](../../../packages/tsuki/src/layout/__fixtures__/examples/align.tsx)
 
-- [换行：按栅格换行，并在实际行间加入纵向 gutter。](../../../src/layout/__fixtures__/examples/wrap.tsx)
+- [换行：按栅格换行，并在实际行间加入纵向 gutter。](../../../packages/tsuki/src/layout/__fixtures__/examples/wrap.tsx)
 
-- [自定义样式：Row 和 Col 的 style 作用于根 View，Col.styles.content 控制可见内容。](../../../src/layout/__fixtures__/examples/custom-style.tsx)
+- [自定义样式：Row 和 Col 的 style 作用于根 View，Col.styles.content 控制可见内容。](../../../packages/tsuki/src/layout/__fixtures__/examples/custom-style.tsx)
 
 ## API
 

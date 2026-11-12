@@ -4,23 +4,23 @@
 
 `DatePicker` 是纯日期滚轮选择器，负责生成 year、month、day 列和日期边界联动。它不内置 Popup，公开 `value`、`defaultValue` 和事件值都是按 `columnsType` 顺序排列的 `string[]`。
 
-- [组件预览：DatePicker 的日期列、边界、格式化和 Popup 组合示例。](../../../src/date-picker/__fixtures__/overview.tsx)
+- [组件预览：DatePicker 的日期列、边界、格式化和 Popup 组合示例。](../../../packages/tsuki/src/date-picker/__fixtures__/overview.tsx)
 
 ## 代码演示
 
-- [基础日期：受控选择 year、month、day。](../../../src/date-picker/__fixtures__/examples/basic.tsx)
+- [基础日期：受控选择 year、month、day。](../../../packages/tsuki/src/date-picker/__fixtures__/examples/basic.tsx)
 
-- [列组合：展示日期列子集和任意合法重排。](../../../src/date-picker/__fixtures__/examples/columns.tsx)
+- [列组合：展示日期列子集和任意合法重排。](../../../packages/tsuki/src/date-picker/__fixtures__/examples/columns.tsx)
 
-- [formatter：只修改日期选项的显示文本。](../../../src/date-picker/__fixtures__/examples/formatter.tsx)
+- [formatter：只修改日期选项的显示文本。](../../../packages/tsuki/src/date-picker/__fixtures__/examples/formatter.tsx)
 
-- [filter：根据当前完整 values 过滤日期选项。](../../../src/date-picker/__fixtures__/examples/filter.tsx)
+- [filter：根据当前完整 values 过滤日期选项。](../../../packages/tsuki/src/date-picker/__fixtures__/examples/filter.tsx)
 
-- [日期范围：展示 minDate 和 maxDate 的 year、month、day 联动。](../../../src/date-picker/__fixtures__/examples/range.tsx)
+- [日期范围：展示 minDate 和 maxDate 的 year、month、day 联动。](../../../packages/tsuki/src/date-picker/__fixtures__/examples/range.tsx)
 
-- [闰年：展示不同年份的二月天数。](../../../src/date-picker/__fixtures__/examples/leap-year.tsx)
+- [闰年：展示不同年份的二月天数。](../../../packages/tsuki/src/date-picker/__fixtures__/examples/leap-year.tsx)
 
-- [Popup 集成：通过 Cell + Popup 组合 DatePicker，并在外层维护 draft。](../../../src/date-picker/__fixtures__/examples/popup.tsx)
+- [Popup 集成：通过 Cell + Popup 组合 DatePicker，并在外层维护 draft。](../../../packages/tsuki/src/date-picker/__fixtures__/examples/popup.tsx)
 
 ## API
 

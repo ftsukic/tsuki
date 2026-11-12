@@ -9,6 +9,8 @@
 
 The tag must match `package.json` and belong to the corresponding remote branch. The workflow selects and verifies the npm channel explicitly. Beta releases never update `latest`. Stable 1.x publication requires a separate channel-policy change when 1.x is ready.
 
+On `main`, the published package lives at `packages/tsuki/` and the root workspace package is private. The `0.x` maintenance branch keeps its existing root-package layout and release workflow; keep its release line independent and do not apply the monorepo path move there.
+
 Use separate worktrees and install dependencies in each. Forward-port fixes with their tests and canonical fixtures, adapting branch-specific documentation. Do not merge maintenance release commits or version numbers into main.
 
 ## Versioning
@@ -21,11 +23,11 @@ Changesets use the current release branch as `baseBranch`: `0.x` on maintenance 
 ## Publishing
 
 1. Merge the scoped Changesets and fixes into the corresponding release branch.
-2. Generate the version and review `package.json`, `CHANGELOG.md`, and prerelease state where applicable.
+2. Generate the version and review `packages/tsuki/package.json`, `packages/tsuki/CHANGELOG.md`, and prerelease state on `main`. On `0.x`, review its root `package.json` and `CHANGELOG.md`.
 3. Commit and push the release branch.
 4. Wait until CI for that exact release commit is successful.
 5. Create and push the matching annotated version tag (for example, `v0.1.4` or `v1.0.0-beta.0`).
-6. GitHub Actions validates the version, channel and branch ancestry, builds the package, and publishes with npm Trusted Publishing.
+6. GitHub Actions validates the version, channel and branch ancestry, builds and packs `packages/tsuki/` on `main`, and publishes that workspace with npm Trusted Publishing.
 7. Verify the published version and its channel (`latest` or `next`).
 
 Do not create or push a release tag while the release commit CI is pending or failing. Create beta GitHub Releases with `--prerelease --latest=false`.

@@ -12,7 +12,7 @@ description: 仓库变更后，用于根据变更范围选择验证命令、检�
 3. 对 private implementation/helper change，运行 package typecheck 和相关的聚焦测试。
 4. 对 component behavior change，运行 package typecheck、相关的聚焦测试，以及项目会检查该代码时的 lint。
 5. 对 Public API change，运行 typecheck、相关 test suite、lint 和 build；通过仓库已配置的 script 确认 export 和 package behavior。
-6. 对 Fixture 或 public documentation change，运行适用的 docs build 和 example/Fixture validation。只有变更行为确实需要时，才增加 typecheck 或聚焦测试。
+6. 对 Fixture 或 public documentation change，运行适用的 docs build 和 Playground/Fixture validation。只有变更行为确实需要时，才增加 typecheck 或聚焦测试。
 7. 对完整仓库变更，按照 `.github/workflows/ci.yml` 对齐验证，不要将 CI workflow 复制到本 Skill。
 8. 记录命令名、exit status 和有意义的 failure。区分 pre-existing failure 与 regression，并区分 static/build proof 与 runtime 或 device proof。
 

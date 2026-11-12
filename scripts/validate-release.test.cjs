@@ -9,6 +9,8 @@ const script = path.join(__dirname, 'validate-release.cjs')
 
 test('release versions select their channel and reject unsupported or mismatched tags', () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'tsuki-release-'))
+  const packageDirectory = path.join(directory, 'package')
+  fs.mkdirSync(packageDirectory)
   try {
     for (const [version, tag, expected] of [
       ['0.1.4', 'v0.1.4', 'release_branch=0.x\nnpm_tag=latest\n'],
@@ -22,14 +24,19 @@ test('release versions select their channel and reject unsupported or mismatched
       ['1.0.0-rc.0', 'v1.0.0-rc.0', null],
     ]) {
       fs.writeFileSync(
-        path.join(directory, 'package.json'),
+        path.join(packageDirectory, 'package.json'),
         JSON.stringify({ name: '@ftsukic/tsuki', version }),
       )
       const output = path.join(directory, 'output')
       fs.writeFileSync(output, '')
       const result = spawnSync(process.execPath, [script], {
         cwd: directory,
-        env: { ...process.env, GITHUB_REF_NAME: tag, GITHUB_OUTPUT: output },
+        env: {
+          ...process.env,
+          GITHUB_REF_NAME: tag,
+          GITHUB_OUTPUT: output,
+          TSUKI_PACKAGE_DIR: packageDirectory,
+        },
         encoding: 'utf8',
       })
       assert.equal(result.status, expected === null ? 1 : 0, result.stderr)

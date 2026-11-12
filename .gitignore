@@ -13,9 +13,6 @@ coverage/
 .env.*
 !.env.example
 .expo/
-web-build/
-example/.expo/
-example/web-build/
 
 .idea/
 .vscode/

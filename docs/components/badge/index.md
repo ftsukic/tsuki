@@ -4,7 +4,7 @@
 
 徽标用于在头像或其他内容附近展示数字、红点和状态信息。
 
-- [组件预览](../../../src/badge/__fixtures__/overview.tsx)
+- [组件预览](../../../packages/tsuki/src/badge/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,13 +14,13 @@ import { Avatar, Badge } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [数字、红点和独立展示：支持 content、显式 max、红点、零值和 standalone。](../../../src/badge/__fixtures__/examples/types.tsx)
+- [数字、红点和独立展示：支持 content、显式 max、红点、零值和 standalone。](../../../packages/tsuki/src/badge/__fixtures__/examples/types.tsx)
 
-- [四角定位和偏移：包裹 children 时支持四个角的 position 和 offset。](../../../src/badge/__fixtures__/examples/position.tsx)
+- [四角定位和偏移：包裹 children 时支持四个角的 position 和 offset。](../../../packages/tsuki/src/badge/__fixtures__/examples/position.tsx)
 
-- [状态点：使用 status 和 text 展示状态。](../../../src/badge/__fixtures__/examples/status.tsx)
+- [状态点：使用 status 和 text 展示状态。](../../../packages/tsuki/src/badge/__fixtures__/examples/status.tsx)
 
-- [主题和语义样式：通过组件 token 和 styles 定制 Badge，包括 standalone 固定圆形。](../../../src/badge/__fixtures__/examples/theme.tsx)
+- [主题和语义样式：通过组件 token 和 styles 定制 Badge，包括 standalone 固定圆形。](../../../packages/tsuki/src/badge/__fixtures__/examples/theme.tsx)
 
 ## API
 

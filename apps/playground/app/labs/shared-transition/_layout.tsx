@@ -1,6 +1,6 @@
 import { router } from 'expo-router'
 import { Stack } from 'expo-router/stack'
-import { SharedNavigationProvider } from '../../../../src/image-preview/__fixtures__/examples/navigation'
+import { SharedNavigationProvider } from '../../../../../packages/tsuki/src/image-preview/__fixtures__/examples/navigation'
 
 export default function SharedTransitionLayout() {
   return (

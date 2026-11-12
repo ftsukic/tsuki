@@ -4,7 +4,7 @@
 
 Dialog 用于消息提示、操作确认和当前页面内的短交互。支持受控组件、命令式调用、异步关闭、自定义内容、遮罩和两种按钮风格。
 
-- [组件预览](../../../src/dialog/__fixtures__/overview.tsx)
+- [组件预览](../../../packages/tsuki/src/dialog/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -16,25 +16,25 @@ import { ConfigProvider, Dialog, closeDialog, showConfirmDialog, showDialog } fr
 
 ## 代码演示
 
-- [基础提示：showDialog 默认只展示确认按钮。](../../../src/dialog/__fixtures__/examples/basic.tsx)
+- [基础提示：showDialog 默认只展示确认按钮。](../../../packages/tsuki/src/dialog/__fixtures__/examples/basic.tsx)
 
-- [确认框：showConfirmDialog 增加取消按钮并通过 Promise 区分结果。](../../../src/dialog/__fixtures__/examples/confirm.tsx)
+- [确认框：showConfirmDialog 增加取消按钮并通过 Promise 区分结果。](../../../packages/tsuki/src/dialog/__fixtures__/examples/confirm.tsx)
 
-- [受控组件：使用 show 和 onShowChange 管理 Dialog 的显示状态。](../../../src/dialog/__fixtures__/examples/controlled.tsx)
+- [受控组件：使用 show 和 onShowChange 管理 Dialog 的显示状态。](../../../packages/tsuki/src/dialog/__fixtures__/examples/controlled.tsx)
 
-- [自定义内容：使用 ReactNode 标题、children 正文和 footer 自定义底部。](../../../src/dialog/__fixtures__/examples/custom.tsx)
+- [自定义内容：使用 ReactNode 标题、children 正文和 footer 自定义底部。](../../../packages/tsuki/src/dialog/__fixtures__/examples/custom.tsx)
 
-- [异步关闭：beforeClose 可以阻止关闭并在检查期间显示按钮 loading。](../../../src/dialog/__fixtures__/examples/before-close.tsx)
+- [异步关闭：beforeClose 可以阻止关闭并在检查期间显示按钮 loading。](../../../packages/tsuki/src/dialog/__fixtures__/examples/before-close.tsx)
 
-- [圆角按钮：theme 为 round-button 时使用圆角操作按钮。](../../../src/dialog/__fixtures__/examples/round.tsx)
+- [圆角按钮：theme 为 round-button 时使用圆角操作按钮。](../../../packages/tsuki/src/dialog/__fixtures__/examples/round.tsx)
 
-- [遮罩与禁用：展示遮罩关闭和按钮禁用行为。](../../../src/dialog/__fixtures__/examples/interactions.tsx)
+- [遮罩与禁用：展示遮罩关闭和按钮禁用行为。](../../../packages/tsuki/src/dialog/__fixtures__/examples/interactions.tsx)
 
-- [内容布局：分别展示仅标题、仅正文和标题加正文三种默认布局。](../../../src/dialog/__fixtures__/examples/layout.tsx)
+- [内容布局：分别展示仅标题、仅正文和标题加正文三种默认布局。](../../../packages/tsuki/src/dialog/__fixtures__/examples/layout.tsx)
 
-- [主题定制：通过 Dialog token 和 semantic styles 定制视觉。](../../../src/dialog/__fixtures__/examples/theme.tsx)
+- [主题定制：通过 Dialog token 和 semantic styles 定制视觉。](../../../packages/tsuki/src/dialog/__fixtures__/examples/theme.tsx)
 
-- [输入框与键盘避让](../../../src/dialog/__fixtures__/examples/keyboard.tsx)
+- [输入框与键盘避让](../../../packages/tsuki/src/dialog/__fixtures__/examples/keyboard.tsx)
 
 开启 `keyboardAvoiding` 后，面板在键盘上方的可用区域布局，遮罩仍覆盖整个宿主。居中面板仅在底部被键盘遮挡时上移，底部面板贴近键盘上沿，顶部面板保持顶部位置。避让使用独立的 Reanimated 位移，并采用键盘事件的时长。该能力位于 Portal 内；仅在页面外包裹 KeyboardAvoidingView 无法保证作用于弹层。
 

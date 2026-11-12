@@ -1,7 +1,7 @@
 import { ScrollView } from 'react-native'
 import { Stack } from 'expo-router/stack'
 import { ImagePreview, useToken } from '@ftsukic/tsuki'
-import OnlineImage from '../../../src/image-preview/__fixtures__/examples/online-image'
+import OnlineImage from '../../../../packages/tsuki/src/image-preview/__fixtures__/examples/online-image'
 import { fastImageAdapter } from '../../components/fast-image-adapter'
 
 export default function FastImageOriginalScreen() {

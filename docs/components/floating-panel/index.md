@@ -4,7 +4,7 @@
 
 FloatingPanel 用于在视口顶部或底部展示可拖动面板，支持多个高度锚点、磁吸停靠、内容滚动、方向匹配的圆角和阴影。
 
-- [组件预览](../../../src/floating-panel/__fixtures__/overview.tsx)
+- [组件预览](../../../packages/tsuki/src/floating-panel/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -22,24 +22,24 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `TsukiProvider` 
 
 ## 代码演示
 
-- [基础用法：默认从 100px 高度开始，拖动 header 浏览内容。](../../../src/floating-panel/__fixtures__/examples/basic.tsx)
+- [基础用法：默认从 100px 高度开始，拖动 header 浏览内容。](../../../packages/tsuki/src/floating-panel/__fixtures__/examples/basic.tsx)
 
-- [自定义锚点：使用 height、anchors 和两个高度事件控制面板。](../../../src/floating-panel/__fixtures__/examples/anchors.tsx)
+- [自定义锚点：使用 height、anchors 和两个高度事件控制面板。](../../../packages/tsuki/src/floating-panel/__fixtures__/examples/anchors.tsx)
 
-- [仅拖动头部：关闭 contentDraggable 后，内容区域继续由 ScrollView 负责滚动。](../../../src/floating-panel/__fixtures__/examples/content-draggable.tsx)
+- [仅拖动头部：关闭 contentDraggable 后，内容区域继续由 ScrollView 负责滚动。](../../../packages/tsuki/src/floating-panel/__fixtures__/examples/content-draggable.tsx)
 
-- [关闭磁吸：magnetic=false 时停留在边界内的任意高度。](../../../src/floating-panel/__fixtures__/examples/magnetic.tsx)
+- [关闭磁吸：magnetic=false 时停留在边界内的任意高度。](../../../packages/tsuki/src/floating-panel/__fixtures__/examples/magnetic.tsx)
 
-- [禁用拖动：draggable=false 隐藏拖拽条并固定面板。](../../../src/floating-panel/__fixtures__/examples/disabled.tsx)
+- [禁用拖动：draggable=false 隐藏拖拽条并固定面板。](../../../packages/tsuki/src/floating-panel/__fixtures__/examples/disabled.tsx)
 
-- [底部安全区：默认适配底部 safe-area inset，并且不改变锚点高度。](../../../src/floating-panel/__fixtures__/examples/safe-area.tsx)
+- [底部安全区：默认适配底部 safe-area inset，并且不改变锚点高度。](../../../packages/tsuki/src/floating-panel/__fixtures__/examples/safe-area.tsx)
 
-- [主题定制：通过 FloatingPanel token 和 semantic styles 定制外观。](../../../src/floating-panel/__fixtures__/examples/theme.tsx)
+- [主题定制：通过 FloatingPanel token 和 semantic styles 定制外观。](../../../packages/tsuki/src/floating-panel/__fixtures__/examples/theme.tsx)
 
-- [Tab bar 上方与下拉关闭：点击“更多”tab 开启或关闭面板，也可以向下拖过最小锚点关闭。](../../../src/floating-panel/__fixtures__/examples/tab-bar-dismiss.tsx)
+- [Tab bar 上方与下拉关闭：点击“更多”tab 开启或关闭面板，也可以向下拖过最小锚点关闭。](../../../packages/tsuki/src/floating-panel/__fixtures__/examples/tab-bar-dismiss.tsx)
 
 <!-- prettier-ignore -->
-- [顶部下拉：收起保留月份、星期标题和一周日期，下拉展开完整月历，高度跟随内容与安全区。](../../../src/floating-panel/__fixtures__/examples/top.tsx)
+- [顶部下拉：收起保留月份、星期标题和一周日期，下拉展开完整月历，高度跟随内容与安全区。](../../../packages/tsuki/src/floating-panel/__fixtures__/examples/top.tsx)
 
 ## API
 
@@ -95,7 +95,7 @@ FloatingPanel 使用 Portal，推荐挂载在应用根节点的 `TsukiProvider` 
 
 FloatingPanel 不替换 children 的无障碍语义；交互内容应自行提供 `accessible`、`accessibilityRole` 和 `accessibilityLabel`。允许拖动时，默认手柄提供 `adjustable` role、当前高度和范围，并通过 `increment` / `decrement` action 展开或收起一档；受控模式仍需父组件回写高度。自定义 header 保留其内部无障碍语义，组件不将它合并成一个调节控件。组件直接读取 `react-native-safe-area-context` 的 inset；宿主应用需要安装该 peer dependency，并在应用根节点按需挂载 `SafeAreaProvider`。推荐的 `TsukiProvider` 不会重复创建 Safe Area context。
 
-H5 文档使用 `react-native-web` 预览；Jest 只验证状态、样式和 responder 逻辑，不代表 iOS、Android 或 HarmonyOS 的真实设备触摸表现。
+Jest 只验证状态、样式和 responder 逻辑，不代表真实设备触摸表现；当前项目只验收 iOS 和 Android。
 
 ## 主题定制
 

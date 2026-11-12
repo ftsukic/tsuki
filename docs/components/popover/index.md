@@ -4,7 +4,7 @@
 
 Popover 用于在触发控件附近展示 Vant 风格的操作菜单，也支持完全自定义浮层内容。组件使用 `react-native-popover-view` 处理 React Native 的定位、箭头、屏幕边界、旋转和键盘适配。
 
-- [组件预览：Popover 的 action 菜单、定位、主题、触发器和自定义内容预览。](../../../src/popover/__fixtures__/overview.tsx)
+- [组件预览：Popover 的 action 菜单、定位、主题、触发器和自定义内容预览。](../../../packages/tsuki/src/popover/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,25 +14,25 @@ import { Popover } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础用法：点击触发器打开包含三个 action 的菜单，并显示最后选择的 action。](../../../src/popover/__fixtures__/examples/basic.tsx)
+- [基础用法：点击触发器打开包含三个 action 的菜单，并显示最后选择的 action。](../../../packages/tsuki/src/popover/__fixtures__/examples/basic.tsx)
 
-- [深色风格：比较 light 和 dark 两种 Popover 自身视觉主题。](../../../src/popover/__fixtures__/examples/theme.tsx)
+- [深色风格：比较 light 和 dark 两种 Popover 自身视觉主题。](../../../packages/tsuki/src/popover/__fixtures__/examples/theme.tsx)
 
-- [弹出位置：验证 auto、top、bottom、left 和 right 五种位置。](../../../src/popover/__fixtures__/examples/placement.tsx)
+- [弹出位置：验证 auto、top、bottom、left 和 right 五种位置。](../../../packages/tsuki/src/popover/__fixtures__/examples/placement.tsx)
 
-- [图标：在 action 中组合图标，并为单项设置颜色。](../../../src/popover/__fixtures__/examples/icon.tsx)
+- [图标：在 action 中组合图标，并为单项设置颜色。](../../../packages/tsuki/src/popover/__fixtures__/examples/icon.tsx)
 
-- [禁用选项：展示禁用 action 和禁用 Popover 触发器。](../../../src/popover/__fixtures__/examples/disabled.tsx)
+- [禁用选项：展示禁用 action 和禁用 Popover 触发器。](../../../packages/tsuki/src/popover/__fixtures__/examples/disabled.tsx)
 
-- [横向排列：使用 actionsDirection 横向排列 action。](../../../src/popover/__fixtures__/examples/horizontal.tsx)
+- [横向排列：使用 actionsDirection 横向排列 action。](../../../packages/tsuki/src/popover/__fixtures__/examples/horizontal.tsx)
 
-- [受控模式：使用 visible、onVisibleChange 和 manual trigger 管理可见状态。](../../../src/popover/__fixtures__/examples/controlled.tsx)
+- [受控模式：使用 visible、onVisibleChange 和 manual trigger 管理可见状态。](../../../packages/tsuki/src/popover/__fixtures__/examples/controlled.tsx)
 
-- [自定义内容：使用 content 替换 action 菜单，并从自定义内容内部关闭浮层。](../../../src/popover/__fixtures__/examples/custom-content.tsx)
+- [自定义内容：使用 content 替换 action 菜单，并从自定义内容内部关闭浮层。](../../../packages/tsuki/src/popover/__fixtures__/examples/custom-content.tsx)
 
-- [语义样式：通过 semantic styles 定制 reference、container 和 item 插槽。](../../../src/popover/__fixtures__/examples/semantic.tsx)
+- [语义样式：通过 semantic styles 定制 reference、container 和 item 插槽。](../../../packages/tsuki/src/popover/__fixtures__/examples/semantic.tsx)
 
-- [主题 token：通过 ConfigProvider 覆盖 Popover component token。](../../../src/popover/__fixtures__/examples/theme-token.tsx)
+- [主题 token：通过 ConfigProvider 覆盖 Popover component token。](../../../packages/tsuki/src/popover/__fixtures__/examples/theme-token.tsx)
 
 ## API
 
@@ -117,7 +117,7 @@ Popover token 包括：`borderRadius`、`actionWidth`、`actionHeight`、`action
 
 Popover 的定位、箭头、屏幕边界、设备旋转和键盘适配基于 `react-native-popover-view`。当前只支持 `auto`、`top`、`bottom`、`left`、`right` 和 `floating`，不包含 Vant Web 的 `top-start`、`top-end` 等 12 方位扩展。
 
-`react-native-popover-view` 对 Web 没有官方保证，但本组件的 docs demo 通过 `react-native-web` 构建和运行路径验证；Web 使用时仍应在目标浏览器确认 reference 定位和 outside press。使用 Popover 的宿主需要提供 `react-native-safe-area-context` 的 `SafeAreaProvider`，组件会把 safe-area insets 与自身最小边缘 margin 一起传给定位层。
+`react-native-popover-view` 的 reference 定位和 outside press 由底层平台实现决定。使用 Popover 的宿主需要提供 `react-native-safe-area-context` 的 `SafeAreaProvider`，组件会把 safe-area insets 与自身最小边缘 margin 一起传给定位层。
 
 Popover 不提供 `showPopover()` imperative API，也不是 Tooltip、Dropdown 或 Popup 的替代实现。
 

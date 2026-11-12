@@ -4,7 +4,7 @@
 
 ActionSheet 用于从底部展示一组操作。它复用 Popup 的 bottom 定位、底部安全区、滑入动画和 Overlay 遮罩，并使用统一的 `Pressable` 提供点击反馈。
 
-- [组件预览：ActionSheet 的基础菜单、标题、自定义颜色、禁用、加载和自定义内容预览。](../../../src/action-sheet/__fixtures__/overview.tsx)
+- [组件预览：ActionSheet 的基础菜单、标题、自定义颜色、禁用、加载和自定义内容预览。](../../../packages/tsuki/src/action-sheet/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -22,19 +22,19 @@ import { ActionSheet, ConfigProvider, TsukiProvider, showActionSheet } from '@ft
 
 ## 代码演示
 
-- [基础用法：展示普通 action 和取消按钮。](../../../src/action-sheet/__fixtures__/examples/basic.tsx)
+- [基础用法：展示普通 action 和取消按钮。](../../../packages/tsuki/src/action-sheet/__fixtures__/examples/basic.tsx)
 
-- [带标题：标题仅用于说明，不参与点击。](../../../src/action-sheet/__fixtures__/examples/title.tsx)
+- [带标题：标题仅用于说明，不参与点击。](../../../packages/tsuki/src/action-sheet/__fixtures__/examples/title.tsx)
 
-- [自定义颜色 action：使用 color 设置删除等破坏性操作的颜色。](../../../src/action-sheet/__fixtures__/examples/custom-color.tsx)
+- [自定义颜色 action：使用 color 设置删除等破坏性操作的颜色。](../../../packages/tsuki/src/action-sheet/__fixtures__/examples/custom-color.tsx)
 
-- [禁用 action：禁用项仍然展示，但不会响应点击。](../../../src/action-sheet/__fixtures__/examples/disabled.tsx)
+- [禁用 action：禁用项仍然展示，但不会响应点击。](../../../packages/tsuki/src/action-sheet/__fixtures__/examples/disabled.tsx)
 
-- [加载 action：加载项显示 Loading 并禁止重复触发。](../../../src/action-sheet/__fixtures__/examples/loading.tsx)
+- [加载 action：加载项显示 Loading 并禁止重复触发。](../../../packages/tsuki/src/action-sheet/__fixtures__/examples/loading.tsx)
 
-- [自定义 subname：name 和 subname 都可以传入 ReactNode。](../../../src/action-sheet/__fixtures__/examples/custom-subname.tsx)
+- [自定义 subname：name 和 subname 都可以传入 ReactNode。](../../../packages/tsuki/src/action-sheet/__fixtures__/examples/custom-subname.tsx)
 
-- [长操作列表：列表滚动，标题和取消区保持可见；打开后增加操作，检查退出动画和取消背景。](../../../src/action-sheet/__fixtures__/examples/long-list.tsx)
+- [长操作列表：列表滚动，标题和取消区保持可见；打开后增加操作，检查退出动画和取消背景。](../../../packages/tsuki/src/action-sheet/__fixtures__/examples/long-list.tsx)
 
 ## API
 

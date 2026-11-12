@@ -4,9 +4,7 @@
     "types": ["jest", "node"],
     "noEmit": true,
     "paths": {
-      "@ftsukic/tsuki": ["src"],
-      "@/*": ["example/*"],
-      "@ftsukic/tsuki/teleport": ["src/teleport.ts"]
+      "@ftsukic/tsuki": ["./src"]
     }
   },
   "include": ["src"]

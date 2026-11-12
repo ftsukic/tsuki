@@ -1,7 +1,7 @@
 # Motion Animation Rule
 
 - 新增或迁移动画采用 Component → Motion Preset → Motion Primitive → Reanimated / RNGH。组件不直接定义 withTiming、withSpring、Easing、独立 duration 或 spring 参数。
-- 使用 src/motion/token.ts 和 semantic-presets.ts；组件时长仍允许通过现有 ComponentToken 覆盖。手势吸附使用 motion/gesture.ts，手势逐帧更新留在 UI thread。
+- 使用 packages/tsuki/src/motion/token.ts 和 semantic-presets.ts；组件时长仍允许通过现有 ComponentToken 覆盖。手势吸附使用 motion/gesture.ts，手势逐帧更新留在 UI thread。
 - Motion 配置使用现有 Provider / ConfigProvider 的 ThemeContext。局部关闭、全局关闭、Reduced Motion 和时长倍率由 useMotionConfig 统一解析；不得另建 Theme Provider 或逐组件读取系统 accessibility。
 - 退出必须先完成动画，再触发完成事件和卸载；反转取消旧目标及已排队的旧回调。退出期间禁用 pointer events 和隐藏 accessibility。
 - 普通动效优先 opacity / transform；Collapse 的高度与 Segmented 的绝对定位背景宽度属于已有布局例外。

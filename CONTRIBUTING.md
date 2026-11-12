@@ -3,7 +3,7 @@
 ## Requirements
 
 - Node.js 22+
-- pnpm 12.19.0 (the version is pinned in `package.json`)
+- pnpm 12.19.0 (the version is pinned in the root `package.json`)
 
 ## Checks
 
@@ -14,6 +14,7 @@ pnpm install --frozen-lockfile
 pnpm run typecheck
 pnpm run lint
 pnpm run test
+pnpm run build
 ```
 
 提交信息遵循 Conventional Commits，例如：
@@ -31,4 +32,4 @@ pnpm run release:version
 pnpm run release:publish
 ```
 
-组件源码、文档和 Expo 示例应保持单一来源；组件文档位于 `docs/components/`，交互示例复用源码旁的 canonical fixtures。
+组件源码、文档和 Expo Playground 应保持单一来源。组件源码及 canonical fixtures 位于 `packages/tsuki/src/`，组件文档位于 `docs/components/`，Playground 通过 workspace 依赖 `@ftsukic/tsuki` 并复用这些 fixtures。

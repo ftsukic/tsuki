@@ -4,25 +4,25 @@
 
 `DateTimePicker` 是在一个纯滚轮选择器中组合日期和时间字段的公共组件。仅日期使用 `DatePicker`，仅时间使用 `TimePicker`；三者的 Popup、draft 和提交状态都由外层组合负责。
 
-- [组件预览：DateTimePicker 的列子集、完整范围、格式化和 Popup 组合示例。](../../../src/date-time-picker/__fixtures__/overview.tsx)
+- [组件预览：DateTimePicker 的列子集、完整范围、格式化和 Popup 组合示例。](../../../packages/tsuki/src/date-time-picker/__fixtures__/overview.tsx)
 
 ## 代码演示
 
-- [基础选择：默认选择 year、month、day、hour、minute 五列。](../../../src/date-time-picker/__fixtures__/examples/basic.tsx)
+- [基础选择：默认选择 year、month、day、hour、minute 五列。](../../../packages/tsuki/src/date-time-picker/__fixtures__/examples/basic.tsx)
 
-- [列子集：展示按语义顺序省略字段，不允许颠倒。](../../../src/date-time-picker/__fixtures__/examples/columns.tsx)
+- [列子集：展示按语义顺序省略字段，不允许颠倒。](../../../packages/tsuki/src/date-time-picker/__fixtures__/examples/columns.tsx)
 
-- [带秒：显式加入 second 列。](../../../src/date-time-picker/__fixtures__/examples/seconds.tsx)
+- [带秒：显式加入 second 列。](../../../packages/tsuki/src/date-time-picker/__fixtures__/examples/seconds.tsx)
 
-- [完整范围：展示 minDate 和 maxDate 的日期时间边界联动。](../../../src/date-time-picker/__fixtures__/examples/range.tsx)
+- [完整范围：展示 minDate 和 maxDate 的日期时间边界联动。](../../../packages/tsuki/src/date-time-picker/__fixtures__/examples/range.tsx)
 
-- [时间步进：展示 hourStep、minuteStep 和 secondStep。](../../../src/date-time-picker/__fixtures__/examples/step.tsx)
+- [时间步进：展示 hourStep、minuteStep 和 secondStep。](../../../packages/tsuki/src/date-time-picker/__fixtures__/examples/step.tsx)
 
-- [formatter：覆盖日期和时间列的显示文案。](../../../src/date-time-picker/__fixtures__/examples/formatter.tsx)
+- [formatter：覆盖日期和时间列的显示文案。](../../../packages/tsuki/src/date-time-picker/__fixtures__/examples/formatter.tsx)
 
-- [filter：根据完整 string values 过滤选项。](../../../src/date-time-picker/__fixtures__/examples/filter.tsx)
+- [filter：根据完整 string values 过滤选项。](../../../packages/tsuki/src/date-time-picker/__fixtures__/examples/filter.tsx)
 
-- [Popup 集成：通过 Cell + Popup 组合 DateTimePicker，并在外层维护 draft。](../../../src/date-time-picker/__fixtures__/examples/popup.tsx)
+- [Popup 集成：通过 Cell + Popup 组合 DateTimePicker，并在外层维护 draft。](../../../packages/tsuki/src/date-time-picker/__fixtures__/examples/popup.tsx)
 
 ## API
 

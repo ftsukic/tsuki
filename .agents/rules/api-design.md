@@ -34,7 +34,7 @@
 
 ## Compatibility
 
-- 组件 barrel 和 `src/index.ts` 中现有的 export 都是兼容面。它们的存在不代表未来 API design 应继续采用同样模式。
+- 组件 barrel 和 `packages/tsuki/src/index.ts` 中现有的 export 都是兼容面。它们的存在不代表未来 API design 应继续采用同样模式。
 - 如果不可避免地调整 public API，应使用 `deprecated -> compatibility adapter -> major-version removal` 的顺序，并提供明确文档和聚焦回归覆盖。不要让 internal refactor 意外破坏 consumer。
 - Internal prop、implementation-only callback 和 layout bridge 不得因为 exported React component 的 generic intersection 意外成为新的 Public API。
 - 如果 internal-looking prop 已经进入 public component type，必须先保留带清晰注释的 deprecated compatibility adapter，再将 internal implementation 解耦，留待 future major removal；普通 refactor 不得直接删除它。

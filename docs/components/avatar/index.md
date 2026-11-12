@@ -4,7 +4,7 @@
 
 头像用于代表用户或事物，支持图片、图标和字符，并提供图片失败回退、头像分组和分组溢出展示。
 
-- [组件预览](../../../src/avatar/__fixtures__/overview.tsx)
+- [组件预览](../../../packages/tsuki/src/avatar/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,11 +14,11 @@ import { Avatar, Badge, Icon } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [尺寸和形状：支持预设尺寸、自定义尺寸、圆形和方形。](../../../src/avatar/__fixtures__/examples/basic.tsx)
+- [尺寸和形状：支持预设尺寸、自定义尺寸、圆形和方形。](../../../packages/tsuki/src/avatar/__fixtures__/examples/basic.tsx)
 
-- [图片、图标和字符：图片失败后按 icon、children 顺序回退。](../../../src/avatar/__fixtures__/examples/sources.tsx)
+- [图片、图标和字符：图片失败后按 icon、children 顺序回退。](../../../packages/tsuki/src/avatar/__fixtures__/examples/sources.tsx)
 
-- [头像分组：Avatar.Group 支持统一属性、头像叠放和 maxCount 溢出头像。](../../../src/avatar/__fixtures__/examples/group.tsx)
+- [头像分组：Avatar.Group 支持统一属性、头像叠放和 maxCount 溢出头像。](../../../packages/tsuki/src/avatar/__fixtures__/examples/group.tsx)
 
 ## API
 

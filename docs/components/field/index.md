@@ -4,7 +4,7 @@
 
 Field 系列不是独立的基础 UI 容器，而是表单场景适配器：`FieldInput`、`FieldRadio`、`FieldCheckbox`、`FieldSwitch`、`FieldPicker`、`FieldDatePicker`、`FieldTimePicker` 和 `FieldDateTimePicker` 分别直接组合 `Cell` 与对应控件。需要自定义表单项时，直接组合 `Cell` 和自定义 control。
 
-- [组件预览：自定义 Cell 表单项、六种具体适配器、布局状态和主题用法。](../../../src/field/__fixtures__/overview.tsx)
+- [组件预览：自定义 Cell 表单项、六种具体适配器、布局状态和主题用法。](../../../packages/tsuki/src/field/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -30,27 +30,27 @@ import {
 
 ## 代码演示
 
-- [自定义表单项：直接组合 Cell 和自定义 control。](../../../src/field/__fixtures__/examples/basic.tsx)
+- [自定义表单项：直接组合 Cell 和自定义 control。](../../../packages/tsuki/src/field/__fixtures__/examples/basic.tsx)
 
-- [FieldInput：Cell 与 Input 的表单组合。](../../../src/field/__fixtures__/examples/field-input.tsx)
+- [FieldInput：Cell 与 Input 的表单组合。](../../../packages/tsuki/src/field/__fixtures__/examples/field-input.tsx)
 
-- [FieldRadio：Cell 与 Radio.Group 的表单组合。](../../../src/field/__fixtures__/examples/field-radio.tsx)
+- [FieldRadio：Cell 与 Radio.Group 的表单组合。](../../../packages/tsuki/src/field/__fixtures__/examples/field-radio.tsx)
 
-- [FieldCheckbox：Cell 与 Checkbox.Group 的表单组合。](../../../src/field/__fixtures__/examples/field-checkbox.tsx)
+- [FieldCheckbox：Cell 与 Checkbox.Group 的表单组合。](../../../packages/tsuki/src/field/__fixtures__/examples/field-checkbox.tsx)
 
-- [FieldSwitch：Cell 与 Switch 的表单组合，包含自定义值、状态和 beforeChange。](../../../src/field/__fixtures__/examples/field-switch.tsx)
+- [FieldSwitch：Cell 与 Switch 的表单组合，包含自定义值、状态和 beforeChange。](../../../packages/tsuki/src/field/__fixtures__/examples/field-switch.tsx)
 
-- [FieldPicker：Cell 选择入口与 Picker 弹层的组合。](../../../src/field/__fixtures__/examples/field-picker.tsx)
+- [FieldPicker：Cell 选择入口与 Picker 弹层的组合。](../../../packages/tsuki/src/field/__fixtures__/examples/field-picker.tsx)
 
-- [FieldDatePicker：Cell 日期入口与 DatePicker 弹层的组合。](../../../src/field/__fixtures__/examples/field-date-picker.tsx)
+- [FieldDatePicker：Cell 日期入口与 DatePicker 弹层的组合。](../../../packages/tsuki/src/field/__fixtures__/examples/field-date-picker.tsx)
 
-- [FieldTimePicker：Cell 时间入口与 TimePicker 弹层的组合。](../../../src/field/__fixtures__/examples/field-time-picker.tsx)
+- [FieldTimePicker：Cell 时间入口与 TimePicker 弹层的组合。](../../../packages/tsuki/src/field/__fixtures__/examples/field-time-picker.tsx)
 
-- [FieldDateTimePicker：Cell 日期时间入口与 DateTimePicker 弹层的组合。](../../../src/field/__fixtures__/examples/field-date-time-picker.tsx)
+- [FieldDateTimePicker：Cell 日期时间入口与 DateTimePicker 弹层的组合。](../../../packages/tsuki/src/field/__fixtures__/examples/field-date-time-picker.tsx)
 
-- [布局和状态：vertical、readOnly 和 disabled。](../../../src/field/__fixtures__/examples/states.tsx)
+- [布局和状态：vertical、readOnly 和 disabled。](../../../packages/tsuki/src/field/__fixtures__/examples/states.tsx)
 
-- [主题和语义样式：Field token 与 FieldPicker feedback 语义样式。](../../../src/field/__fixtures__/examples/theme.tsx)
+- [主题和语义样式：Field token 与 FieldPicker feedback 语义样式。](../../../packages/tsuki/src/field/__fixtures__/examples/theme.tsx)
 
 ## 共同表单属性
 

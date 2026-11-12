@@ -4,7 +4,7 @@
 
 Flex 是对 React Native `View` Flexbox 的薄封装，直接使用原生 `gap`，适合一般的行列布局。
 
-- [组件预览：Flex 的方向、换行、间距和对齐示例。](../../../src/flex/__fixtures__/overview.tsx)
+- [组件预览：Flex 的方向、换行、间距和对齐示例。](../../../packages/tsuki/src/flex/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,13 +14,13 @@ import { Flex } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础用法：使用 gap 排列横向兄弟元素。](../../../src/flex/__fixtures__/examples/basic.tsx)
+- [基础用法：使用 gap 排列横向兄弟元素。](../../../packages/tsuki/src/flex/__fixtures__/examples/basic.tsx)
 
-- [方向：比较 row 和 column 两种方向。](../../../src/flex/__fixtures__/examples/directions.tsx)
+- [方向：比较 row 和 column 两种方向。](../../../packages/tsuki/src/flex/__fixtures__/examples/directions.tsx)
 
-- [换行：使用 wrap 允许横向子项换行。](../../../src/flex/__fixtures__/examples/wrap.tsx)
+- [换行：使用 wrap 允许横向子项换行。](../../../packages/tsuki/src/flex/__fixtures__/examples/wrap.tsx)
 
-- [对齐：组合 align 和 justify 完成工具栏布局。](../../../src/flex/__fixtures__/examples/alignment.tsx)
+- [对齐：组合 align 和 justify 完成工具栏布局。](../../../packages/tsuki/src/flex/__fixtures__/examples/alignment.tsx)
 
 ## API
 

@@ -4,7 +4,7 @@
 
 Navbar 提供 Vant 4 风格的顶部导航栏。它使用左侧、标题、右侧三个可选布局区域：左右内容固定在两侧，标题通过自身的左右 auto margin 保持居中。
 
-- [组件预览：Navbar 的基础操作、固定定位、安全区和 custom slot 用法。](../../../src/navbar/__fixtures__/overview.tsx)
+- [组件预览：Navbar 的基础操作、固定定位、安全区和 custom slot 用法。](../../../packages/tsuki/src/navbar/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,39 +14,39 @@ import { Navbar, Pressable } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础用法：默认显示居中标题，不显示返回箭头。](../../../src/navbar/__fixtures__/examples/basic.tsx)
+- [基础用法：默认显示居中标题，不显示返回箭头。](../../../packages/tsuki/src/navbar/__fixtures__/examples/basic.tsx)
 
-- [仅标题：展示没有左右操作内容的导航栏。](../../../src/navbar/__fixtures__/examples/title-only.tsx)
+- [仅标题：展示没有左右操作内容的导航栏。](../../../packages/tsuki/src/navbar/__fixtures__/examples/title-only.tsx)
 
-- [返回按钮：通过 leftArrow 显示内置返回箭头。](../../../src/navbar/__fixtures__/examples/left-arrow.tsx)
+- [返回按钮：通过 leftArrow 显示内置返回箭头。](../../../packages/tsuki/src/navbar/__fixtures__/examples/left-arrow.tsx)
 
-- [左侧文字：组合返回箭头和左侧文字。](../../../src/navbar/__fixtures__/examples/left-text.tsx)
+- [左侧文字：组合返回箭头和左侧文字。](../../../packages/tsuki/src/navbar/__fixtures__/examples/left-text.tsx)
 
-- [右侧按钮：使用 rightText 和 onPressRight 创建右侧操作。](../../../src/navbar/__fixtures__/examples/right-action.tsx)
+- [右侧按钮：使用 rightText 和 onPressRight 创建右侧操作。](../../../packages/tsuki/src/navbar/__fixtures__/examples/right-action.tsx)
 
-- [禁用操作：左右操作独立禁用，但仍保留各自的布局区域。](../../../src/navbar/__fixtures__/examples/disabled-actions.tsx)
+- [禁用操作：左右操作独立禁用，但仍保留各自的布局区域。](../../../packages/tsuki/src/navbar/__fixtures__/examples/disabled-actions.tsx)
 
-- [自定义左侧内容：使用 left 自定义渲染，并覆盖默认左侧内容。](../../../src/navbar/__fixtures__/examples/custom-left.tsx)
+- [自定义左侧内容：使用 left 自定义渲染，并覆盖默认左侧内容。](../../../packages/tsuki/src/navbar/__fixtures__/examples/custom-left.tsx)
 
-- [自定义右侧内容：使用 right 自定义渲染，并覆盖默认右侧文字。](../../../src/navbar/__fixtures__/examples/custom-right.tsx)
+- [自定义右侧内容：使用 right 自定义渲染，并覆盖默认右侧文字。](../../../packages/tsuki/src/navbar/__fixtures__/examples/custom-right.tsx)
 
-- [三个槽位：使用单一 custom slot 和 Navbar 级回调。](../../../src/navbar/__fixtures__/examples/three-sections.tsx)
+- [三个槽位：使用单一 custom slot 和 Navbar 级回调。](../../../packages/tsuki/src/navbar/__fixtures__/examples/three-sections.tsx)
 
-- [多个 Action：在一个 custom slot 内组合多个独立 Pressable。](../../../src/navbar/__fixtures__/examples/two-sections.tsx)
+- [多个 Action：在一个 custom slot 内组合多个独立 Pressable。](../../../packages/tsuki/src/navbar/__fixtures__/examples/two-sections.tsx)
 
-- [长标题：长标题单行显示并尾部省略，仍保持物理居中。](../../../src/navbar/__fixtures__/examples/long-title.tsx)
+- [长标题：长标题单行显示并尾部省略，仍保持物理居中。](../../../packages/tsuki/src/navbar/__fixtures__/examples/long-title.tsx)
 
-- [长操作：左右操作变长时，标题中心和三槽定位保持稳定。](../../../src/navbar/__fixtures__/examples/long-actions.tsx)
+- [长操作：左右操作变长时，标题中心和三槽定位保持稳定。](../../../packages/tsuki/src/navbar/__fixtures__/examples/long-actions.tsx)
 
-- [长左侧文字：展示左侧文字的单行行为。](../../../src/navbar/__fixtures__/examples/long-left-text.tsx)
+- [长左侧文字：展示左侧文字的单行行为。](../../../packages/tsuki/src/navbar/__fixtures__/examples/long-left-text.tsx)
 
-- [长右侧操作：展示右侧文字的单行行为。](../../../src/navbar/__fixtures__/examples/long-right-action.tsx)
+- [长右侧操作：展示右侧文字的单行行为。](../../../packages/tsuki/src/navbar/__fixtures__/examples/long-right-action.tsx)
 
-- [固定顶部：fixed 在 React Native 中使用 absolute top/left/right 定位。](../../../src/navbar/__fixtures__/examples/fixed.tsx)
+- [固定顶部：fixed 在 React Native 中使用 absolute top/left/right 定位。](../../../packages/tsuki/src/navbar/__fixtures__/examples/fixed.tsx)
 
-- [固定并占位：fixed 和 placeholder 组合时为页面内容保留 Navbar 高度。](../../../src/navbar/__fixtures__/examples/fixed-placeholder.tsx)
+- [固定并占位：fixed 和 placeholder 组合时为页面内容保留 Navbar 高度。](../../../packages/tsuki/src/navbar/__fixtures__/examples/fixed-placeholder.tsx)
 
-- [顶部安全区：safeAreaInsetTop 在 46 点内容区上方加入顶部 inset。](../../../src/navbar/__fixtures__/examples/safe-area.tsx)
+- [顶部安全区：safeAreaInsetTop 在 46 点内容区上方加入顶部 inset。](../../../packages/tsuki/src/navbar/__fixtures__/examples/safe-area.tsx)
 
 ## 布局行为
 

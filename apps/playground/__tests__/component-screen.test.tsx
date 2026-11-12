@@ -1,8 +1,8 @@
 import { cleanup, render, screen } from '@testing-library/react-native'
 import { PortalProvider } from 'react-native-teleport'
 import { View } from 'react-native'
-import ComponentScreen from '../../example/app/components/[id]'
-import { TsukiProvider } from '..'
+import ComponentScreen from '../app/components/[id]'
+import { TsukiProvider } from '@ftsukic/tsuki'
 import type { TestInstance } from 'test-renderer'
 
 let mockFocused = true
@@ -28,10 +28,10 @@ jest.mock('react-native-safe-area-context', () => {
   const { View } = jest.requireActual('react-native')
   return { ...actual, SafeAreaProvider: View, SafeAreaView: View }
 })
-jest.mock('../../example/fixtures/catalog', () => {
+jest.mock('../fixtures/catalog', () => {
   const React = jest.requireActual('react')
   const { Text } = jest.requireActual('react-native')
-  const { FloatingBubble, FloatingPanel } = jest.requireActual('../index')
+  const { FloatingBubble, FloatingPanel } = jest.requireActual('@ftsukic/tsuki')
   return {
     componentCatalog: [
       {

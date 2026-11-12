@@ -1,7 +1,9 @@
 const { execSync } = require('node:child_process')
 const fs = require('node:fs')
+const path = require('node:path')
 
-const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'))
+const packageDirectory = path.resolve(__dirname, '..', 'packages', 'tsuki')
+const packageJson = JSON.parse(fs.readFileSync(path.join(packageDirectory, 'package.json'), 'utf8'))
 const forbiddenInstallScripts = ['preinstall', 'install', 'postinstall']
 const invalidInstallScripts = forbiddenInstallScripts.filter((name) => packageJson.scripts?.[name])
 
@@ -14,6 +16,7 @@ if (invalidInstallScripts.length > 0) {
 }
 
 const output = execSync('npm pack --dry-run --json --ignore-scripts', {
+  cwd: packageDirectory,
   encoding: 'utf8',
   stdio: ['ignore', 'pipe', 'inherit'],
 })
@@ -36,12 +39,25 @@ const forbiddenPatterns = [
   /(^|\/)\.vscode(\/|$)/,
   /(^|\/)docs(\/|$)/,
   /(^|\/)docs-dist(\/|$)/,
-  /(^|\/)example(\/|$)/,
+  /(^|\/)(apps|playground|example)(\/|$)/,
 ]
-const missingFiles = requiredFiles.filter((file) => !files.includes(file))
+function collectExportFiles(value) {
+  if (typeof value === 'string') return [value.replace(/^\.\//, '')]
+  if (!value || typeof value !== 'object') return []
+  return Object.values(value).flatMap(collectExportFiles)
+}
+
+const requiredPackageFiles = [
+  ...new Set([...requiredFiles, ...collectExportFiles(packageJson.exports)]),
+]
+const missingFiles = requiredPackageFiles.filter((file) => !files.includes(file))
 const forbiddenFiles = files.filter((file) =>
   forbiddenPatterns.some((pattern) => pattern.test(file)),
 )
+
+if (packResult.name !== '@ftsukic/tsuki') {
+  throw new Error('Refusing to validate unexpected package: ' + packResult.name)
+}
 
 if (packResult.name !== packageJson.name) {
   throw new Error(`Packed package name does not match package.json: ${packResult.name}`)

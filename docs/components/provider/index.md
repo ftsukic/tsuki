@@ -1,14 +1,14 @@
 # TsukiProvider 全局上下文
 
-- [组件预览](../../../src/provider/__fixtures__/overview.tsx)
+- [组件预览](../../../packages/tsuki/src/provider/__fixtures__/overview.tsx)
 
 ## 代码演示
 
-- [应用入口：TsukiProvider 组合主题与手势等 Tsuki 上下文。](../../../src/provider/__fixtures__/examples/basic.tsx)
+- [应用入口：TsukiProvider 组合主题与手势等 Tsuki 上下文。](../../../packages/tsuki/src/provider/__fixtures__/examples/basic.tsx)
 
-- [默认手势根节点：TsukiProvider 默认通过 GestureHandlerRootView 为手势内容提供根节点。](../../../src/provider/__fixtures__/examples/gesture.tsx)
+- [默认手势根节点：TsukiProvider 默认通过 GestureHandlerRootView 为手势内容提供根节点。](../../../packages/tsuki/src/provider/__fixtures__/examples/gesture.tsx)
 
-- [启用安全区根节点：通过 safeArea 选项为安全区内容提供 SafeAreaProvider。](../../../src/provider/__fixtures__/examples/safe-area.tsx)
+- [启用安全区根节点：通过 safeArea 选项为安全区内容提供 SafeAreaProvider。](../../../packages/tsuki/src/provider/__fixtures__/examples/safe-area.tsx)
 
 TsukiProvider 组合可选 `SafeAreaProvider`、默认启用的 `GestureHandlerRootView`、`ConfigProvider` 和函数式弹层的 React 承载器。应用需在其外层提供 `react-native-teleport` 的 `PortalProvider`，由应用负责 Portal 宿主生命周期。SwipeCell 的单开与外部触摸关闭由页面接入 `useSwipeCellDismiss()`，TsukiProvider 不再安装 SwipeCell manager 或重置其局部按压作用域。
 

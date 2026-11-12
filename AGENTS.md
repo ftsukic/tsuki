@@ -2,8 +2,8 @@
 
 ## 项目定位
 
-- `@ftsukic/tsuki` 是一个 React Native UI 组件库。源码入口是 `src/index.ts`。
-- Markdown 指南和组件文档位于 `docs/`；Expo Example 位于 `example/`。
+- `@ftsukic/tsuki` 是一个 React Native UI 组件库。源码入口是 `packages/tsuki/src/index.ts`。
+- Markdown 指南和组件文档位于 `docs/`；Expo Playground 位于 `apps/playground/`。
 - `.agents/` 包含显式的项目 Context。不要假设每个 Agent 都会自动加载它。
 
 ## 执行原则
@@ -16,8 +16,8 @@
 ## 事实来源
 
 - 冲突按以下顺序处理：实际源码/配置/CI、当前项目文档、项目 Context（`AGENTS.md` 和 `.agents/`），最后才是推断。
-- 涉及 public export 时，读取 `src/index.ts` 和相关组件的 `index.ts`。
-- 涉及 theme 和 styling 时，读取 `src/theme/`、`src/style/` 以及受影响的组件实现。
+- 涉及 public export 时，读取 `packages/tsuki/src/index.ts` 和相关组件的 `index.ts`。
+- 涉及 theme 和 styling 时，读取 `packages/tsuki/src/theme/`、`packages/tsuki/src/style/` 以及受影响的组件实现。
 - 涉及 Fixture 和文档时，读取 Fixture generator、受影响的 Fixture，以及存在时对应的组件文档。
 - 涉及测试时，读取聚焦测试；需要质量门禁时读取 `.github/workflows/ci.yml`。
 - 涉及 release 时，使用 `docs/releasing.md`、`.github/workflows/publish.yml`、`.changeset/` 和 release validation scripts 作为事实来源。不要用 Rule 摘要替代这些事实。
@@ -31,7 +31,7 @@
 | Props、types、callback、ref、compatibility、accessibility | `.agents/rules/api-design.md` |
 | Theme token、provider、style、semantic slot | `.agents/rules/theme-style.md` |
 | Motion、动画策略、过渡生命周期、手势吸附 | `.agents/rules/motion-animation.md` |
-| Fixture、组件文档、Expo Example 复用 | `.agents/rules/docs-fixtures.md` |
+| Fixture、组件文档、Expo Playground 复用 | `.agents/rules/docs-fixtures.md` |
 | 测试范围和行为覆盖 | `.agents/rules/testing.md` |
 | Changeset、versioning、publishing | `.agents/rules/release.md` |
 
