@@ -15,8 +15,8 @@ Use separate worktrees and install dependencies in each. Forward-port fixes with
 
 Changesets use the current release branch as `baseBranch`: `0.x` on maintenance and `main` on development.
 
-- On `0.x`, run `yarn release:version` for the next maintenance version. Breaking changes must still include migration notes.
-- On `main`, enter prerelease mode once with `yarn changeset pre enter beta`, then run `yarn release:version`. Keep `.changeset/pre.json` committed. Later beta releases use new Changesets and `yarn release:version`; do not exit prerelease mode until preparing the stable release.
+- On `0.x`, run `pnpm run release:version` for the next maintenance version. Breaking changes must still include migration notes.
+- On `main`, enter prerelease mode once with `pnpm exec changeset pre enter beta`, then run `pnpm run release:version`. Keep `.changeset/pre.json` committed. Later beta releases use new Changesets and `pnpm run release:version`; do not exit prerelease mode until preparing the stable release.
 
 ## Publishing
 

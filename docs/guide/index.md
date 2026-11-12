@@ -7,19 +7,19 @@ Tsuki 是一个面向 React Native 和 Expo 的 UI 组件库。
 ## 安装
 
 ```bash
-yarn add @ftsukic/tsuki react-native-safe-area-context react-native-svg
+pnpm add @ftsukic/tsuki react-native-safe-area-context react-native-svg
 ```
 
 使用手势或 UI thread 动画能力时，再安装可选 peer dependencies：
 
 ```bash
-yarn add react-native-gesture-handler react-native-reanimated react-native-worklets
+pnpm add react-native-gesture-handler react-native-reanimated react-native-worklets
 ```
 
-如果使用 Expo，请使用 `npx expo install`，让 Expo 根据 SDK 选择匹配版本：
+如果使用 Expo，请使用 `pnpm exec expo install`，让 Expo 根据 SDK 选择匹配版本：
 
 ```bash
-npx expo install react-native-gesture-handler react-native-reanimated react-native-worklets
+pnpm exec expo install react-native-gesture-handler react-native-reanimated react-native-worklets
 ```
 
 ### 手势根节点

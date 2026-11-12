@@ -1,6 +1,6 @@
 const fs = require('node:fs')
 const path = require('node:path')
-const { execFileSync } = require('node:child_process')
+const { execSync } = require('node:child_process')
 
 const changesetDirectory = path.resolve(__dirname, '../.changeset')
 const hasPendingChangesets = fs
@@ -12,5 +12,4 @@ if (!hasPendingChangesets) {
   process.exit(0)
 }
 
-const yarnCommand = process.platform === 'win32' ? 'yarn.cmd' : 'yarn'
-execFileSync(yarnCommand, ['changeset', 'status'], { stdio: 'inherit' })
+execSync('pnpm exec changeset status', { stdio: 'inherit' })

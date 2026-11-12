@@ -1,0 +1,6 @@
+packages:
+  - .
+  - example
+allowBuilds:
+  '@parcel/watcher': false
+  unrs-resolver: true

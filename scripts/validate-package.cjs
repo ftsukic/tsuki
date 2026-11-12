@@ -1,4 +1,4 @@
-const { execFileSync } = require('node:child_process')
+const { execSync } = require('node:child_process')
 const fs = require('node:fs')
 
 const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'))
@@ -13,7 +13,7 @@ if (invalidInstallScripts.length > 0) {
   )
 }
 
-const output = execFileSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], {
+const output = execSync('npm pack --dry-run --json --ignore-scripts', {
   encoding: 'utf8',
   stdio: ['ignore', 'pipe', 'inherit'],
 })

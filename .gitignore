@@ -1,10 +1,5 @@
 node_modules/
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+.yarn/
 
 lib/
 dist/
@@ -21,7 +16,6 @@ coverage/
 web-build/
 example/.expo/
 example/web-build/
-example/.yarn/
 
 .idea/
 .vscode/

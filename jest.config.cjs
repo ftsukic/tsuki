@@ -21,7 +21,8 @@ const nativeConfig = {
     ],
   },
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native|react-native-gesture-handler|react-native-popover-view|react-native-reanimated|react-native-worklets)/)',
+    'node_modules/(?!(?:((jest-)?react-native|@react-native|react-native-gesture-handler|react-native-popover-view|react-native-reanimated|react-native-worklets)/|\\.pnpm/))',
+    'node_modules/\\.pnpm/(?!(?:((jest-)?react-native|@react-native\\+[^@]+|react-native-gesture-handler|react-native-popover-view|react-native-reanimated|react-native-worklets)@))',
   ],
   setupFiles: ['<rootDir>/node_modules/react-native-gesture-handler/jestSetup.js'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],

@@ -24,24 +24,23 @@
 ```text
 src/                         # 组件源码与 canonical fixtures
 docs/                        # Markdown 指南与组件文档
-example/                     # 独立 Expo 原生预览应用
+example/                     # Expo 原生预览 workspace
 scripts/                     # 仓库脚本
 ```
 
 ## 开发
 
 ```bash
-corepack enable
-yarn install
-yarn typecheck
-yarn lint
-yarn test
-yarn format:check
+pnpm install
+pnpm run typecheck
+pnpm run lint
+pnpm run test
+pnpm run format:check
 ```
 
-`example` 是使用 Expo Router 的独立预览应用，直接引用根目录 `src`。首页支持组件搜索和系统 / 浅色 / 深色主题切换，组件详情位于 `/components/[id]`，键盘实验位于 `/labs/keyboard-chat`。根布局统一接入 Teleport `PortalProvider`、Tsuki `TsukiProvider`（主题、手势、Safe Area）和 `KeyboardProvider`，所有组件页面继续复用 canonical Fixture。运行 `yarn example:dev` 后可在 development build 中检查原生行为；组件文档位于 `docs/components/`，并链接到源码旁的同一批 fixtures。
+`example` 是使用 Expo Router 的预览应用，直接引用根目录 `src`，并通过 workspace 依赖使用组件包。首页支持组件搜索和系统 / 浅色 / 深色主题切换，组件详情位于 `/components/[id]`，键盘实验位于 `/labs/keyboard-chat`。根布局统一接入 Teleport `PortalProvider`、Tsuki `TsukiProvider`（主题、手势、Safe Area）和 `KeyboardProvider`，所有组件页面继续复用 canonical Fixture。运行 `pnpm run example:dev` 后可在 development build 中检查原生行为；组件文档位于 `docs/components/`，并链接到源码旁的同一批 fixtures。
 
-Example 固定使用 Expo SDK 57、React Native 0.86.3 和 React 19.2.3。为验证组件库当前依赖，Reanimated 4.7.1、Worklets 0.13.0、SVG 15.16.0、Gesture Handler 2.33.1、Safe Area Context 5.10.1、Keyboard Controller 1.22.8 和 FlashList 2.3.3 单独维护版本，并通过 `expo.install.exclude` 避免被 SDK 默认版本覆盖。原生依赖更新后需运行 `yarn --cwd example ios` 或 `yarn --cwd example android` 重新构建开发客户端，不能使用 Expo Go 内置的原生版本验证。
+Example 固定使用 Expo SDK 57、React Native 0.86.3 和 React 19.2.3。为验证组件库当前依赖，Reanimated 4.7.1、Worklets 0.13.0、SVG 15.16.0、Gesture Handler 2.33.1、Safe Area Context 5.10.1、Keyboard Controller 1.22.8 和 FlashList 2.3.3 单独维护版本，并通过 `expo.install.exclude` 避免被 SDK 默认版本覆盖。原生依赖更新后需运行 `pnpm --filter example run ios` 或 `pnpm --filter example run android` 重新构建开发客户端，不能使用 Expo Go 内置的原生版本验证。
 
 使用手势组件或 UI thread 动画时，请参考 [快速开始](docs/guide/index.md) 安装 `react-native-gesture-handler`、`react-native-reanimated` 和 `react-native-worklets`。业务 App 可以自行提供对应 root，也可以在应用入口使用 `TsukiProvider` 的 `gesture` / `safeArea` capability；已有外部 root 时保持对应选项默认值即可。
 

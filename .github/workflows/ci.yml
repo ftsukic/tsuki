@@ -22,46 +22,46 @@ jobs:
         with:
           node-version: 22
 
-      - name: Enable Corepack
-        run: corepack enable
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+          cache: true
 
       - name: Install dependencies
-        run: yarn install --immutable
-
-      - name: Install example dependencies
-        run: yarn --cwd example install --immutable
+        run: pnpm install --frozen-lockfile
 
       - name: Commitlint
         shell: bash
         run: |
           if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
-            yarn commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}" --verbose
+            pnpm run commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}" --verbose
           elif [ "${{ github.event.before }}" = "0000000000000000000000000000000000000000" ]; then
-            yarn commitlint --last --verbose
+            pnpm run commitlint --last --verbose
           else
-            yarn commitlint --from "${{ github.event.before }}" --to "${{ github.sha }}" --verbose
+            pnpm run commitlint --from "${{ github.event.before }}" --to "${{ github.sha }}" --verbose
           fi
 
       - name: Format check
-        run: yarn format:check
+        run: pnpm run format:check
 
       - name: Validate release policy
         run: node --test scripts/validate-release.test.cjs
 
       - name: Typecheck
-        run: yarn typecheck
+        run: pnpm run typecheck
 
       - name: Lint
-        run: yarn lint
+        run: pnpm run lint
 
       - name: Test
-        run: yarn test
+        run: pnpm run test
 
       - name: Build package
-        run: yarn build
+        run: pnpm run build
 
       - name: Validate example
-        run: yarn example:typecheck && yarn example:config && yarn example:export
+        run: pnpm run example:typecheck && pnpm run example:config && pnpm run example:export
 
       - name: Prepare Changesets base branch
         shell: bash
@@ -85,4 +85,4 @@ jobs:
           fi
 
       - name: Validate changesets
-        run: yarn changeset:status
+        run: pnpm run changeset:status
