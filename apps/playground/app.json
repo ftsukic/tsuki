@@ -41,8 +41,6 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "react-native-fast-image",
-      "react-native-video",
       "./plugins/with-android-text-metric.js"
     ]
   }

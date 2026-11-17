@@ -10,7 +10,7 @@ Tsuki 是一个 React Native UI 组件库，使用 pnpm monorepo 维护。
 | `apps/playground/` | 用于浏览组件和 canonical fixtures 的 Expo 应用 |
 | `docs/`            | 开发指南和组件文档                             |
 
-组件源码和 canonical fixtures 位于 `packages/tsuki/src/`。Playground 的组件目录由这些 fixtures 生成，文档与应用复用同一份示例。
+组件源码和 canonical fixtures 位于 `packages/tsuki/src/`。Expo Playground 从这些 fixtures 生成组件目录，支持按类别浏览、搜索、预览组件并切换系统、浅色或深色主题；组件文档也复用同一份示例。
 
 ## 开发
 

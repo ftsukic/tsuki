@@ -54,25 +54,6 @@ export default function ComponentScreen() {
         ) : (
           <Preview key={fixture.id} />
         )}
-        {fixture.id === 'image-preview' ? (
-          <>
-            <Link href="/labs/media-chat" style={{ padding: 16 }}>
-              图片与视频混合聊天 →
-            </Link>
-            <Link href="/labs/fast-image-chat" style={{ padding: 16 }}>
-              FastImage 聊天图片 · 300 张 →
-            </Link>
-            <Link href="/labs/fast-image-original" style={{ padding: 16 }}>
-              FastImage 查看原图 →
-            </Link>
-            <Link href="/labs/fast-image-preview" style={{ padding: 16 }}>
-              FastImage 组合示例 →
-            </Link>
-            <Link href="/labs/shared-transition" style={{ padding: 16 }}>
-              测试跨页面图片预览与来源定位 →
-            </Link>
-          </>
-        ) : null}
       </FixtureKeyboardToolbarContext.Provider>
       {hasToolbar && keyboardVisible ? (
         <Portal hostName="root">

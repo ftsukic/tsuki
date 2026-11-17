@@ -51,7 +51,7 @@ describe('FixtureExplorer component navigation', () => {
     mockPush.mockClear()
   })
 
-  it('opens component and lab routes from the catalog', async () => {
+  it('opens component routes from the catalog', async () => {
     await render(<FixtureExplorer />)
     expect(screen.getByText('组件游乐场')).toBeTruthy()
     expect(screen.getByText('Button')).toBeTruthy()
@@ -61,8 +61,6 @@ describe('FixtureExplorer component navigation', () => {
       pathname: '/components/[id]',
       params: { id: 'button' },
     })
-    await fireEvent.press(screen.getByText('键盘与聊天'))
-    expect(mockPush).toHaveBeenCalledWith('/labs/keyboard-chat')
   })
 
   it('filters the component catalog by search text', async () => {
