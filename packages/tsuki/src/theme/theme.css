@@ -14,6 +14,7 @@
   --tsuki-color-border: #e5e7eb;
   --tsuki-button-border-radius: 8px;
   --tsuki-button-height: 44px;
+  --tsuki-divider-thickness: 1px;
   --tsuki-input-border-radius: 8px;
   --tsuki-input-height: 44px;
 }
@@ -31,6 +32,7 @@
   --tsuki-color-border: #374151;
   --tsuki-button-border-radius: 8px;
   --tsuki-button-height: 44px;
+  --tsuki-divider-thickness: 1px;
   --tsuki-input-border-radius: 8px;
   --tsuki-input-height: 44px;
 }

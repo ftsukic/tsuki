@@ -6,6 +6,7 @@ export type { TsukiProviderProps } from './tsuki-provider'
 export { useTsukiTheme } from './theme'
 export type {
   ButtonThemeTokens,
+  DividerThemeTokens,
   InputThemeTokens,
   ResolvedTheme,
   SemanticTokens,

@@ -2,6 +2,7 @@ import { createElement } from 'react'
 import { StyleSheet, View } from 'react-native'
 import type { ViewStyle } from 'react-native'
 import { cn } from '../style/cn'
+import { nativeWindVariables } from '../style/nativewind-variables'
 import type { SpaceProps } from './types'
 
 const alignClasses = {
@@ -11,25 +12,6 @@ const alignClasses = {
   stretch: 'items-stretch',
   baseline: 'items-baseline',
 } satisfies Record<NonNullable<SpaceProps['align']>, string>
-
-function getGapVariable(gap: number): ViewStyle | undefined {
-  let nativewind: { vars: (values: Record<string, number>) => ViewStyle }
-  try {
-    // Metro treats requires in a try block as optional dependencies.
-    // eslint-disable-next-line ts/no-require-imports
-    nativewind = require('nativewind')
-  } catch (error) {
-    if (error instanceof ReferenceError && typeof require === 'undefined') return undefined
-    if (
-      error instanceof Error &&
-      /Cannot find module .*nativewind|Requiring unknown module/.test(error.message)
-    ) {
-      return undefined
-    }
-    throw error
-  }
-  return nativewind.vars({ '--tsuki-space-gap': gap })
-}
 
 export function Space({
   direction = 'horizontal',
@@ -41,7 +23,7 @@ export function Space({
   ...viewProps
 }: SpaceProps) {
   const horizontal = direction === 'horizontal'
-  const variables = className ? getGapVariable(gap ?? 0) : undefined
+  const variables = className ? nativeWindVariables({ '--tsuki-space-gap': gap ?? 0 }) : undefined
 
   if (!variables) {
     const layout: ViewStyle = {

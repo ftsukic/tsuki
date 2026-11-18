@@ -22,7 +22,12 @@ function loadTypeScriptModule(filePath) {
   vm.runInNewContext(outputText, {
     exports: loadedModule.exports,
     module: loadedModule,
-    require,
+    require: (name) => {
+      // Static CSS uses a one-CSS-pixel fallback. React Native resolves the
+      // actual device hairline before serializing runtime theme variables.
+      if (name === 'react-native') return { StyleSheet: { hairlineWidth: 1 } }
+      return require(name)
+    },
   })
   return loadedModule.exports
 }

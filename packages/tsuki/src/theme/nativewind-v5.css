@@ -13,4 +13,5 @@
   --radius-tsuki-input: var(--tsuki-input-border-radius);
   --spacing-tsuki-button: var(--tsuki-button-height);
   --spacing-tsuki-input: var(--tsuki-input-height);
+  --spacing-tsuki-divider: var(--tsuki-divider-thickness);
 }

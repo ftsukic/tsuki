@@ -23,6 +23,9 @@ module.exports = {
         'tsuki-button': 'var(--tsuki-button-height)',
         'tsuki-input': 'var(--tsuki-input-height)',
       },
+      spacing: {
+        'tsuki-divider': 'var(--tsuki-divider-thickness)',
+      },
     },
   },
 }

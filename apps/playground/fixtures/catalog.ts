@@ -12,7 +12,7 @@ import ComponentOverview7 from '../../../packages/tsuki/bak/src/collapse/__fixtu
 import ComponentOverview8 from '../../../packages/tsuki/bak/src/date-picker/__fixtures__/overview'
 import ComponentOverview9 from '../../../packages/tsuki/bak/src/date-time-picker/__fixtures__/overview'
 import ComponentOverview10 from '../../../packages/tsuki/bak/src/dialog/__fixtures__/overview'
-import ComponentOverview11 from '../../../packages/tsuki/bak/src/divider/__fixtures__/overview'
+import ComponentOverview11 from '../../../packages/tsuki/src/divider/__fixtures__/overview'
 import ComponentOverview12 from '../../../packages/tsuki/bak/src/dropdown/__fixtures__/overview'
 import ComponentOverview13 from '../../../packages/tsuki/bak/src/empty/__fixtures__/overview'
 import ComponentOverview14 from '../../../packages/tsuki/bak/src/field/__fixtures__/overview'
@@ -148,7 +148,8 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview11,
     component: 'divider',
-    description: 'Divider 的横向 hairline、颜色、厚度和左右 inset 示例。',
+    description:
+      'V2 horizontal and vertical separators, insets, theme thickness and class overrides.',
     id: 'divider',
     title: 'Divider',
   },

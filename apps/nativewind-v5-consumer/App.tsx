@@ -3,6 +3,7 @@ import type { PropsWithChildren } from 'react'
 import {
   Button,
   ConfigProvider,
+  Divider,
   Icon,
   Input,
   serializeTheme,
@@ -75,6 +76,7 @@ function NestedScope() {
 
 export default function App() {
   const systemScheme = useColorScheme()
+  const [dividerThickness, setDividerThickness] = useState(3)
   const [gap, setGap] = useState(7)
   const [iconPresses, setIconPresses] = useState(0)
   const [appearance, setAppearance] = useState<AppearanceChoice>('system')
@@ -110,6 +112,41 @@ export default function App() {
           >
             <Text className="text-tsuki-foreground">Change scheme ({appearance})</Text>
           </Pressable>
+          <Divider className="opacity-100" testID="divider-default" />
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setDividerThickness((value) => (value === 3 ? 7 : 3))}
+          >
+            <Text>Change divider thickness ({dividerThickness})</Text>
+          </Pressable>
+          <ConfigProvider
+            theme={{
+              semantic: { colorBorder: '#7c3aed' },
+              components: { Divider: { thickness: dividerThickness } },
+            }}
+          >
+            <Divider className="opacity-100" inset={12} testID="divider-theme" />
+            <Space style={{ height: 40 }}>
+              <Divider
+                orientation="vertical"
+                className="opacity-100"
+                inset={6}
+                testID="divider-vertical"
+              />
+            </Space>
+          </ConfigProvider>
+          <Divider
+            className="bg-red-500 h-4"
+            color="#7c3aed"
+            thickness={3}
+            testID="divider-class"
+          />
+          <Divider
+            className="bg-red-500 h-4"
+            style={{ backgroundColor: '#15803d', height: 9 }}
+            testID="divider-style"
+          />
+
           <Button
             className="bg-tsuki-primary rounded-tsuki-button"
             classNames={{ root: 'px-4', content: 'font-semibold' }}

@@ -5,6 +5,7 @@
   },
   "include": [
     "src/button/__fixtures__/**/*.tsx",
+    "src/divider/__fixtures__/**/*.tsx",
     "src/icon/__fixtures__/**/*.tsx",
     "src/input/__fixtures__/**/*.tsx",
     "src/space/__fixtures__/**/*.tsx"

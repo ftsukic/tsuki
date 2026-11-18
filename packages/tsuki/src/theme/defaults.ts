@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native'
 import type { ResolvedTheme, ThemeScheme } from './types'
 
 const THEMES: Record<ThemeScheme, ResolvedTheme> = {
@@ -17,6 +18,7 @@ const THEMES: Record<ThemeScheme, ResolvedTheme> = {
     },
     components: {
       Button: { borderRadius: 8, height: 44 },
+      Divider: { thickness: StyleSheet.hairlineWidth },
       Input: { borderRadius: 8, height: 44 },
     },
   },
@@ -36,6 +38,7 @@ const THEMES: Record<ThemeScheme, ResolvedTheme> = {
     },
     components: {
       Button: { borderRadius: 8, height: 44 },
+      Divider: { thickness: StyleSheet.hairlineWidth },
       Input: { borderRadius: 8, height: 44 },
     },
   },
@@ -48,6 +51,7 @@ export function getDefaultTheme(scheme: ThemeScheme): ResolvedTheme {
     semantic: { ...theme.semantic },
     components: {
       Button: { ...theme.components.Button },
+      Divider: { ...theme.components.Divider },
       Input: { ...theme.components.Input },
     },
   }

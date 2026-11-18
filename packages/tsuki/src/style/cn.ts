@@ -6,7 +6,7 @@ const mergeTailwindClasses = extendTailwindMerge({
   extend: {
     theme: {
       radius: ['tsuki-button', 'tsuki-input'],
-      spacing: ['tsuki-button', 'tsuki-input'],
+      spacing: ['tsuki-button', 'tsuki-input', 'tsuki-divider'],
     },
   },
 })

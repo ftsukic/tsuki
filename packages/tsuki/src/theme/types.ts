@@ -23,10 +23,15 @@ export interface InputThemeTokens {
   height: number
 }
 
+export interface DividerThemeTokens {
+  thickness: number
+}
+
 export interface ThemeConfig {
   semantic?: Partial<SemanticTokens>
   components?: {
     Button?: Partial<ButtonThemeTokens>
+    Divider?: Partial<DividerThemeTokens>
     Input?: Partial<InputThemeTokens>
   }
   inherit?: boolean
@@ -37,6 +42,7 @@ export interface ResolvedTheme {
   semantic: SemanticTokens
   components: {
     Button: ButtonThemeTokens
+    Divider: DividerThemeTokens
     Input: InputThemeTokens
   }
 }
