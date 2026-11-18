@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "dependencies": {
     "@ftsukic/tsuki": "workspace:*",
+    "@ftsukic/tsuki-native": "workspace:*",
     "@shopify/flash-list": "2.3.3",
     "expo": "~57.0.32",
     "expo-build-properties": "^57.0.23",
