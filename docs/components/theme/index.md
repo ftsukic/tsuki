@@ -4,7 +4,7 @@
 
 Theme 使用 `SeedToken → MappingAlgorithm → MapToken → AliasToken` 四层模型，输出适合 React Native 的绝对行高、毫秒动画和 Vant 移动端间距。组件自己的尺寸和视觉语义仍由 Component Token 派生。
 
-- [组件预览](../../../packages/tsuki/src/theme/__fixtures__/overview.tsx)
+- [组件预览](../../../packages/tsuki/bak/src/theme/__fixtures__/overview.tsx)
 
 示例同步展示当前传入的 `mode`、`seed`、`token` 和 `components` 配置，以及解析后的关键全局 token 与 Button 参数；切换明暗主题后数值随之更新。
 

@@ -4,7 +4,7 @@
 
 Segmented 是互斥选择型分段控制器，适合通知已读状态、筛选条件和页面模式。它使用统一的 `Pressable` 点击反馈，并通过滑动 thumb 表示选中状态。
 
-- [组件预览：Segmented 的通知、筛选、尺寸、布局、形状和禁用用法。](../../../packages/tsuki/src/segmented/__fixtures__/overview.tsx)
+- [组件预览：Segmented 的通知、筛选、尺寸、布局、形状和禁用用法。](../../../packages/tsuki/bak/src/segmented/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,17 +14,17 @@ import { Segmented } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [未读 / 已读通知：用 Segmented 实现通知状态切换。](../../../packages/tsuki/src/segmented/__fixtures__/examples/notice.tsx)
+- [未读 / 已读通知：用 Segmented 实现通知状态切换。](../../../packages/tsuki/bak/src/segmented/__fixtures__/examples/notice.tsx)
 
-- [筛选示例：展示字符串 option、对象 option、size 和 block。](../../../packages/tsuki/src/segmented/__fixtures__/examples/filter.tsx)
+- [筛选示例：展示字符串 option、对象 option、size 和 block。](../../../packages/tsuki/bak/src/segmented/__fixtures__/examples/filter.tsx)
 
-- [禁用状态：整体禁用和单项禁用都不会触发 onChange。](../../../packages/tsuki/src/segmented/__fixtures__/examples/disabled.tsx)
+- [禁用状态：整体禁用和单项禁用都不会触发 onChange。](../../../packages/tsuki/bak/src/segmented/__fixtures__/examples/disabled.tsx)
 
-- [自定义标签：option 的 label 支持自定义 ReactNode。](../../../packages/tsuki/src/segmented/__fixtures__/examples/custom-label.tsx)
+- [自定义标签：option 的 label 支持自定义 ReactNode。](../../../packages/tsuki/bak/src/segmented/__fixtures__/examples/custom-label.tsx)
 
-- [形状与自定义圆角：对比 default、round 和单实例自定义圆角。](../../../packages/tsuki/src/segmented/__fixtures__/examples/shapes.tsx)
+- [形状与自定义圆角：对比 default、round 和单实例自定义圆角。](../../../packages/tsuki/bak/src/segmented/__fixtures__/examples/shapes.tsx)
 
-- [主题与语义样式：通过组件 token、单实例选中颜色和 styles 定制胶囊控件。](../../../packages/tsuki/src/segmented/__fixtures__/examples/theme.tsx)
+- [主题与语义样式：通过组件 token、单实例选中颜色和 styles 定制胶囊控件。](../../../packages/tsuki/bak/src/segmented/__fixtures__/examples/theme.tsx)
 
 ## API
 

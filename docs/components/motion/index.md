@@ -4,7 +4,7 @@
 
 Motion 统一动画策略、Token、Preset 和 Primitive。组件用法使用 `Transition`、`MotionView` 和 `MotionPressable`；需要自行管理容器时使用 `useTransitionProgress` 与 `useAnimatedTransition`。
 
-- [组件预览](../../../packages/tsuki/src/motion/__fixtures__/overview.tsx)
+- [组件预览](../../../packages/tsuki/bak/src/motion/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,25 +14,25 @@ import { TsukiProvider, Transition, MotionView, MotionPressable } from '@ftsukic
 
 ## 代码演示
 
-- [退出与卸载：只观察卡片的生命周期与卸载空态。](../../../packages/tsuki/src/motion/__fixtures__/examples/transition-lifecycle.tsx)
+- [退出与卸载：只观察卡片的生命周期与卸载空态。](../../../packages/tsuki/bak/src/motion/__fixtures__/examples/transition-lifecycle.tsx)
 
-- [属性动画：在固定展示区域内改变属性，始终保持挂载。](../../../packages/tsuki/src/motion/__fixtures__/examples/property-animation.tsx)
+- [属性动画：在固定展示区域内改变属性，始终保持挂载。](../../../packages/tsuki/bak/src/motion/__fixtures__/examples/property-animation.tsx)
 
-- [基础过渡效果：十一种效果独立展示隐藏状态。](../../../packages/tsuki/src/motion/__fixtures__/examples/transition-effects.tsx)
+- [基础过渡效果：十一种效果独立展示隐藏状态。](../../../packages/tsuki/bak/src/motion/__fixtures__/examples/transition-effects.tsx)
 
-- [动效策略：全局、局部开关与减少动态效果。](../../../packages/tsuki/src/motion/__fixtures__/examples/motion-config.tsx)
+- [动效策略：全局、局部开关与减少动态效果。](../../../packages/tsuki/bak/src/motion/__fixtures__/examples/motion-config.tsx)
 
-- [语义预设：比较浮层与强调场景的 preset。](../../../packages/tsuki/src/motion/__fixtures__/examples/semantic-presets.tsx)
+- [语义预设：比较浮层与强调场景的 preset。](../../../packages/tsuki/bak/src/motion/__fixtures__/examples/semantic-presets.tsx)
 
-- [快速反转：动画途中反向切换与最终完成事件。](../../../packages/tsuki/src/motion/__fixtures__/examples/interruption.tsx)
+- [快速反转：动画途中反向切换与最终完成事件。](../../../packages/tsuki/bak/src/motion/__fixtures__/examples/interruption.tsx)
 
-- [反馈动效：旋转、呼吸和错误反馈。](../../../packages/tsuki/src/motion/__fixtures__/examples/feedback.tsx)
+- [反馈动效：旋转、呼吸和错误反馈。](../../../packages/tsuki/bak/src/motion/__fixtures__/examples/feedback.tsx)
 
-- [组件动效：Popup 退出与 Collapse 动态内容。](../../../packages/tsuki/src/motion/__fixtures__/examples/component-motion.tsx)
+- [组件动效：Popup 退出与 Collapse 动态内容。](../../../packages/tsuki/bak/src/motion/__fixtures__/examples/component-motion.tsx)
 
-- [过渡 Hook：自行承载 animated style 的用法。](../../../packages/tsuki/src/motion/__fixtures__/examples/transition-hooks.tsx)
+- [过渡 Hook：自行承载 animated style 的用法。](../../../packages/tsuki/bak/src/motion/__fixtures__/examples/transition-hooks.tsx)
 
-- [共享进度：同一个 progress 驱动多个样式。](../../../packages/tsuki/src/motion/__fixtures__/examples/shared-progress.tsx)
+- [共享进度：同一个 progress 驱动多个样式。](../../../packages/tsuki/bak/src/motion/__fixtures__/examples/shared-progress.tsx)
 
 ## API
 

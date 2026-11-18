@@ -4,7 +4,7 @@
 
 Watermark 用于在组件自身的布局区域上重复覆盖文字或图片水印。它不使用 Portal，水印层不拦截触摸，也不会把重复文字加入无障碍树。
 
-- [组件预览：Watermark 汇总文字、图片、布局、语义样式和主题 token 示例。](../../../packages/tsuki/src/watermark/__fixtures__/overview.tsx)
+- [组件预览：Watermark 汇总文字、图片、布局、语义样式和主题 token 示例。](../../../packages/tsuki/bak/src/watermark/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,17 +14,17 @@ import { Watermark } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础文字：展示默认文字平铺和触摸穿透。](../../../packages/tsuki/src/watermark/__fixtures__/examples/basic.tsx)
+- [基础文字：展示默认文字平铺和触摸穿透。](../../../packages/tsuki/bak/src/watermark/__fixtures__/examples/basic.tsx)
 
-- [多行文字：数组内容在同一个水印块中按多行渲染。](../../../packages/tsuki/src/watermark/__fixtures__/examples/multiline.tsx)
+- [多行文字：数组内容在同一个水印块中按多行渲染。](../../../packages/tsuki/bak/src/watermark/__fixtures__/examples/multiline.tsx)
 
-- [图片水印：使用 RN ImageSource 和 contain 模式渲染图片水印。](../../../packages/tsuki/src/watermark/__fixtures__/examples/image.tsx)
+- [图片水印：使用 RN ImageSource 和 contain 模式渲染图片水印。](../../../packages/tsuki/bak/src/watermark/__fixtures__/examples/image.tsx)
 
-- [间距、旋转和偏移：调整水印块尺寸、两轴间距、起始偏移、旋转和透明度。](../../../packages/tsuki/src/watermark/__fixtures__/examples/layout.tsx)
+- [间距、旋转和偏移：调整水印块尺寸、两轴间距、起始偏移、旋转和透明度。](../../../packages/tsuki/bak/src/watermark/__fixtures__/examples/layout.tsx)
 
-- [语义样式：通过 styles.root、styles.mark 和 styles.text 定制外观。](../../../packages/tsuki/src/watermark/__fixtures__/examples/custom.tsx)
+- [语义样式：通过 styles.root、styles.mark 和 styles.text 定制外观。](../../../packages/tsuki/bak/src/watermark/__fixtures__/examples/custom.tsx)
 
-- [主题 token：通过 ConfigProvider 覆盖 Watermark component token。](../../../packages/tsuki/src/watermark/__fixtures__/examples/theme.tsx)
+- [主题 token：通过 ConfigProvider 覆盖 Watermark component token。](../../../packages/tsuki/bak/src/watermark/__fixtures__/examples/theme.tsx)
 
 ## API
 

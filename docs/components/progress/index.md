@@ -4,7 +4,7 @@
 
 Progress 用于展示任务完成进度，支持 Vant 风格的条形进度条和环形进度条。进度值会自动限制在 `0` 到 `100` 之间，并使用 Animated 平滑过渡更新。
 
-- [组件预览：Progress 汇总条形、环形、文字、尺寸和主题 token 示例。](../../../packages/tsuki/src/progress/__fixtures__/overview.tsx)
+- [组件预览：Progress 汇总条形、环形、文字、尺寸和主题 token 示例。](../../../packages/tsuki/bak/src/progress/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,21 +14,21 @@ import { Progress } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [默认条形：使用默认 token 渲染 60% 条形进度。](../../../packages/tsuki/src/progress/__fixtures__/examples/basic.tsx)
+- [默认条形：使用默认 token 渲染 60% 条形进度。](../../../packages/tsuki/bak/src/progress/__fixtures__/examples/basic.tsx)
 
-- [无文字条形：隐藏条形进度的 pivot 文字，仅显示轨道和进度部分。](../../../packages/tsuki/src/progress/__fixtures__/examples/line-without-pivot.tsx)
+- [无文字条形：隐藏条形进度的 pivot 文字，仅显示轨道和进度部分。](../../../packages/tsuki/bak/src/progress/__fixtures__/examples/line-without-pivot.tsx)
 
-- [条形变体：展示 50%、100%、自定义颜色以及 round/square 端点。](../../../packages/tsuki/src/progress/__fixtures__/examples/line-variants.tsx)
+- [条形变体：展示 50%、100%、自定义颜色以及 round/square 端点。](../../../packages/tsuki/bak/src/progress/__fixtures__/examples/line-variants.tsx)
 
-- [环形进度：展示默认尺寸、自定义尺寸和不同 strokeWidth 的环形进度。](../../../packages/tsuki/src/progress/__fixtures__/examples/circle.tsx)
+- [环形进度：展示默认尺寸、自定义尺寸和不同 strokeWidth 的环形进度。](../../../packages/tsuki/bak/src/progress/__fixtures__/examples/circle.tsx)
 
-- [环形动画：通过按钮更新环形进度，并观察描边和百分比文字平滑过渡。](../../../packages/tsuki/src/progress/__fixtures__/examples/circle-animation.tsx)
+- [环形动画：通过按钮更新环形进度，并观察描边和百分比文字平滑过渡。](../../../packages/tsuki/bak/src/progress/__fixtures__/examples/circle-animation.tsx)
 
-- [自定义文字：使用 pivotText 替换默认百分比文字。](../../../packages/tsuki/src/progress/__fixtures__/examples/custom-text.tsx)
+- [自定义文字：使用 pivotText 替换默认百分比文字。](../../../packages/tsuki/bak/src/progress/__fixtures__/examples/custom-text.tsx)
 
-- [动态增减：使用 Button 组动态增加或减少当前进度。](../../../packages/tsuki/src/progress/__fixtures__/examples/dynamic.tsx)
+- [动态增减：使用 Button 组动态增加或减少当前进度。](../../../packages/tsuki/bak/src/progress/__fixtures__/examples/dynamic.tsx)
 
-- [主题 token：通过 ConfigProvider 覆盖 Progress 的样式 token。](../../../packages/tsuki/src/progress/__fixtures__/examples/theme.tsx)
+- [主题 token：通过 ConfigProvider 覆盖 Progress 的样式 token。](../../../packages/tsuki/bak/src/progress/__fixtures__/examples/theme.tsx)
 
 ## API
 

@@ -27,5 +27,6 @@
 - [SwipeCell](./swipe-cell/index.md)
 - [Swipe](./swipe/index.md)
 - [Switch](./switch/index.md)、[Watermark](./watermark/index.md)
+- **Tsuki v2 canary:** [Button](./v2/button/index.md)、[Input](./v2/input/index.md)
 
-每个组件页面都从 `src/<component>/__fixtures__` 加载可运行示例，并说明公开 Props、默认行为、边界、无障碍语义和主题定制方式。
+上方未标版本的组件页面记录 1.x 历史 API，对应示例位于 `packages/tsuki/bak/src/<component>/__fixtures__/`。Tsuki v2 Button 和 Input 的新 API 与示例单独记录在 `v2/`。

@@ -4,7 +4,7 @@
 
 Dropdown 用于在菜单栏下方或上方展开一个选项面板。它复用 Portal、OverlaySurface 和共享 motion 能力，支持 Vant 风格的 options、自定义内容、禁用状态、受控值、向上展开和 ref 控制。
 
-- [组件预览：Dropdown 汇总基础、内容、禁用、方向和受控值示例。](../../../packages/tsuki/src/dropdown/__fixtures__/overview.tsx)
+- [组件预览：Dropdown 汇总基础、内容、禁用、方向和受控值示例。](../../../packages/tsuki/bak/src/dropdown/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -16,19 +16,19 @@ import { DropdownItem, DropdownMenu, useBackgroundScrollLocked } from '@ftsukic/
 
 ## 代码演示
 
-- [基础用法：使用 options 生成排序面板，并组合自定义筛选面板。](../../../packages/tsuki/src/dropdown/__fixtures__/examples/basic.tsx)
+- [基础用法：使用 options 生成排序面板，并组合自定义筛选面板。](../../../packages/tsuki/bak/src/dropdown/__fixtures__/examples/basic.tsx)
 
-- [自定义内容：children 存在时优先作为面板内容，并可以通过 DropdownItem ref 关闭。](../../../packages/tsuki/src/dropdown/__fixtures__/examples/custom-content.tsx)
+- [自定义内容：children 存在时优先作为面板内容，并可以通过 DropdownItem ref 关闭。](../../../packages/tsuki/bak/src/dropdown/__fixtures__/examples/custom-content.tsx)
 
-- [禁用状态：展示禁用菜单和禁用选项。](../../../packages/tsuki/src/dropdown/__fixtures__/examples/disabled.tsx)
+- [禁用状态：展示禁用菜单和禁用选项。](../../../packages/tsuki/bak/src/dropdown/__fixtures__/examples/disabled.tsx)
 
-- [向上展开：使用 direction up 将面板锚定在菜单上方。](../../../packages/tsuki/src/dropdown/__fixtures__/examples/direction-up.tsx)
+- [向上展开：使用 direction up 将面板锚定在菜单上方。](../../../packages/tsuki/bak/src/dropdown/__fixtures__/examples/direction-up.tsx)
 
-- [受控值：由外部状态控制 DropdownItem.value。](../../../packages/tsuki/src/dropdown/__fixtures__/examples/controlled.tsx)
+- [受控值：由外部状态控制 DropdownItem.value。](../../../packages/tsuki/bak/src/dropdown/__fixtures__/examples/controlled.tsx)
 
-- [语义样式：单项标题、箭头、面板、选项图标和选中标记，以及打开期间的动态更新。](../../../packages/tsuki/src/dropdown/__fixtures__/examples/semantic.tsx)
+- [语义样式：单项标题、箭头、面板、选项图标和选中标记，以及打开期间的动态更新。](../../../packages/tsuki/bak/src/dropdown/__fixtures__/examples/semantic.tsx)
 
-- [背景滚动锁定：锁定背景列表，同时保留长选项列表与横向菜单的滚动。](../../../packages/tsuki/src/dropdown/__fixtures__/examples/scroll-lock.tsx)
+- [背景滚动锁定：锁定背景列表，同时保留长选项列表与横向菜单的滚动。](../../../packages/tsuki/bak/src/dropdown/__fixtures__/examples/scroll-lock.tsx)
 
 ## API
 

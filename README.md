@@ -1,20 +1,21 @@
 # Tsuki
 
-Tsuki 是一个 React Native UI 组件库，使用 pnpm monorepo 维护。
+Tsuki 是一个 React Native UI 组件库。当前工作集中在 v2 框架和 Button / Input canary；完整 1.x 源码继续保留为历史参考。
 
 ## Workspace
 
-| 路径               | 用途                                           |
-| ------------------ | ---------------------------------------------- |
-| `packages/tsuki/`  | 发布到 npm 的 `@ftsukic/tsuki` 组件包          |
-| `apps/playground/` | 用于浏览组件和 canonical fixtures 的 Expo 应用 |
-| `docs/`            | 开发指南和组件文档                             |
-
-组件源码和 canonical fixtures 位于 `packages/tsuki/src/`。Expo Playground 从这些 fixtures 生成组件目录，支持按类别浏览、搜索、预览组件并切换系统、浅色或深色主题；组件文档也复用同一份示例。
+| 路径                           | 用途                                         |
+| ------------------------------ | -------------------------------------------- |
+| `packages/tsuki/src/`          | Tsuki v2 源码和当前公共入口                  |
+| `packages/tsuki/bak/src/`      | 完整 1.x 源码归档，只读参考                  |
+| `apps/playground/`             | 使用归档源码的 1.x 历史 Playground           |
+| `apps/nativewind-v4-consumer/` | 独立 NativeWind 4 / Tailwind 3 集成消费者    |
+| `apps/nativewind-v5-consumer/` | 独立 NativeWind 5 RC / Tailwind 4 集成消费者 |
+| `docs/`                        | v2 架构说明、v2 canary API 和保留的 1.x 指南 |
 
 ## 开发
 
-需要 Node.js `^22.13.0` 或 `>=24`，以及 pnpm 12.19.0。
+需要 Node.js `^22.13.0 || >=24` 和 pnpm 12.19.0。
 
 ```bash
 pnpm install --frozen-lockfile
@@ -23,22 +24,17 @@ pnpm run lint
 pnpm run test
 pnpm run build
 pnpm run format:check
+pnpm run release:check-package
 ```
 
-启动 Playground 或在原生目标上运行：
+`typecheck` 包括 v2 package、两个 Consumer 和历史 Playground。`test` 包括归档 1.x Jest、v2 canary 测试和 Playground 测试。旧 Fixture Generator 只扫描 `packages/tsuki/bak/src`：
 
 ```bash
-pnpm run playground:dev
-pnpm run playground:ios
-pnpm run playground:android
+pnpm run fixtures:generate
+pnpm run consumer:v4:config
+pnpm run consumer:v5:config
+pnpm run consumer:v4:build:development
+pnpm run consumer:v5:build:development
 ```
 
-使用 Changesets 管理发布说明；发布包的 manifest、构建产物和 changelog 位于 `packages/tsuki/`。
-
-```bash
-pnpm run changeset
-pnpm run release:version
-pnpm run release:publish
-```
-
-更多信息见 [贡献指南](CONTRIBUTING.md)、[快速开始](docs/guide/index.md) 和 [组件包 README](packages/tsuki/README.md)。
+完整的 v2 Theme / Style、Consumer 和发布边界见 [项目框架文档](docs/architecture/tsuki-v2-project-framework.md)。发布仍由 Changesets 管理；本次 major 变更意图保存在 `.changeset/`，不手工修改 package version。

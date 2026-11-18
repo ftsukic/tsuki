@@ -4,7 +4,7 @@
 
 Toast 用于反馈操作结果或展示短暂状态。支持受控组件、命令式调用、加载/成功/失败类型、位置、遮罩、点击行为和主题 token。
 
-- [组件预览](../../../packages/tsuki/src/toast/__fixtures__/overview.tsx)
+- [组件预览](../../../packages/tsuki/bak/src/toast/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -24,17 +24,17 @@ import {
 
 ## 代码演示
 
-- [基础类型：通过 text、loading、success 和 fail 展示不同语义的提示。](../../../packages/tsuki/src/toast/__fixtures__/examples/basic.tsx)
+- [基础类型：通过 text、loading、success 和 fail 展示不同语义的提示。](../../../packages/tsuki/bak/src/toast/__fixtures__/examples/basic.tsx)
 
-- [位置：使用 position 将提示放在顶部、中间或底部。](../../../packages/tsuki/src/toast/__fixtures__/examples/positions.tsx)
+- [位置：使用 position 将提示放在顶部、中间或底部。](../../../packages/tsuki/bak/src/toast/__fixtures__/examples/positions.tsx)
 
-- [持续显示与交互：duration 为 0 时保持显示，可通过实例 close、closeToast、overlay 和 forbidClick 控制生命周期与触摸行为。](../../../packages/tsuki/src/toast/__fixtures__/examples/interactions.tsx)
+- [持续显示与交互：duration 为 0 时保持显示，可通过实例 close、closeToast、overlay 和 forbidClick 控制生命周期与触摸行为。](../../../packages/tsuki/bak/src/toast/__fixtures__/examples/interactions.tsx)
 
-- [单例与多实例：默认复用当前提示，开启 allowMultipleToast 后可以同时展示多个提示。](../../../packages/tsuki/src/toast/__fixtures__/examples/multiple.tsx)
+- [单例与多实例：默认复用当前提示，开启 allowMultipleToast 后可以同时展示多个提示。](../../../packages/tsuki/bak/src/toast/__fixtures__/examples/multiple.tsx)
 
-- [受控组件：直接使用 Toast，通过 show 和 onShowChange 管理显示状态。](../../../packages/tsuki/src/toast/__fixtures__/examples/controlled.tsx)
+- [受控组件：直接使用 Toast，通过 show 和 onShowChange 管理显示状态。](../../../packages/tsuki/bak/src/toast/__fixtures__/examples/controlled.tsx)
 
-- [主题定制：通过 ConfigProvider 的 Toast token 和 semantic styles 定制外观。](../../../packages/tsuki/src/toast/__fixtures__/examples/theme.tsx)
+- [主题定制：通过 ConfigProvider 的 Toast token 和 semantic styles 定制外观。](../../../packages/tsuki/bak/src/toast/__fixtures__/examples/theme.tsx)
 
 ## API
 

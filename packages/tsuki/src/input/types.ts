@@ -1,75 +1,23 @@
 import type { ReactNode } from 'react'
-import type { StyleProp, TextStyle, ViewStyle } from 'react-native'
-import type { StyleInfo, StyleResolver } from '../style'
-import type { TextInput as NativeTextInput, TextInputProps } from 'react-native'
+import type { TextInputProps, StyleProp, TextStyle, ViewStyle } from 'react-native'
+import type { ClassNames } from '../types'
 
-export type InputType = 'text' | 'password' | 'number' | 'tel'
-export type InputInstance = NativeTextInput
-export type InputSize = 'large' | 'normal' | 'small'
-export type InputClearTrigger = 'always' | 'focus'
-export type InputFormatTrigger = 'onEndEditing' | 'onChangeText'
+export type InputClassNames = ClassNames<'root' | 'input' | 'prefix' | 'suffix'>
 
-export interface InputAutoSizeConfig {
-  minRows?: number
-  maxRows?: number
-}
-
-export interface InputStyleState {
-  focused: boolean
-  disabled: boolean
-}
-
-export interface InputSemanticStyles {
+export interface InputStyles {
   root?: StyleProp<ViewStyle>
-  container?: StyleProp<ViewStyle>
   input?: StyleProp<TextStyle>
   prefix?: StyleProp<ViewStyle>
   suffix?: StyleProp<ViewStyle>
-  clear?: StyleProp<ViewStyle>
-  count?: StyleProp<TextStyle>
-  addonBefore?: StyleProp<ViewStyle>
-  addonAfter?: StyleProp<ViewStyle>
 }
 
-export type InputStyles = StyleResolver<InputProps, InputStyleState, InputSemanticStyles>
-export type InputStyleInfo = StyleInfo<InputProps, InputStyleState>
-
-export interface InputProps extends Omit<TextInputProps, 'style'> {
-  /** Input mode. `number` and `tel` only select the native keyboard; the value stays a string. */
-  type?: InputType
-  size?: InputSize
-  bordered?: boolean
-  /** Enables the highlighted border color while focused. Defaults to false. */
-  focusedBordered?: boolean
-  clearable?: boolean
-  clearTrigger?: InputClearTrigger
-  formatter?: (value: string) => string
-  formatTrigger?: InputFormatTrigger
-  showWordLimit?: boolean
-  rows?: number
-  autoSize?: boolean | InputAutoSizeConfig
+export interface InputProps extends Omit<TextInputProps, 'style' | 'className'> {
+  disabled?: boolean
+  error?: string
   prefix?: ReactNode
   suffix?: ReactNode
-  addonBefore?: ReactNode
-  addonAfter?: ReactNode
-
-  /** Prevents editing and applies the disabled input appearance. */
-  disabled?: boolean
-
-  /** Prevents editing while retaining the normal input appearance. */
-  readOnly?: boolean
-
-  /** Controlled password visibility state. */
-  passwordVisible?: boolean
-
-  /** Initial password visibility state for an uncontrolled password input. */
-  defaultPasswordVisible?: boolean
-
-  /** Called after the password visibility state changes. */
-  onPasswordVisibleChange?: (visible: boolean) => void
-
-  /** Called after the input value is cleared. */
-  onClear?: () => void
+  className?: string
+  classNames?: InputClassNames
   style?: StyleProp<ViewStyle>
   styles?: InputStyles
 }

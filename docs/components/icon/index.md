@@ -1,6 +1,6 @@
 # Icon
 
-- [示例源码](../../../packages/tsuki/src/icon/__fixtures__/overview.tsx)
+- [示例源码](../../../packages/tsuki/bak/src/icon/__fixtures__/overview.tsx)
 
 `Icon` 使用 `@ant-design/icons-svg` 图标定义，并通过 `react-native-svg` 渲染到 React Native。H5 文档预览使用 `react-native-svg` 的 Web 实现。
 

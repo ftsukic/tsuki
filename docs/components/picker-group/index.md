@@ -6,17 +6,17 @@
 
 `activeTab` 对应 Vant 的 `v-model:active-tab`。在受控模式下，点击 tab 只触发 `onChange`，必须由父组件回写新的 `activeTab` 后页面才会切换；不传 `activeTab` 时，使用 `defaultActiveTab` 初始化并由组件内部维护。
 
-- [组件预览：PickerGroup 的共享 toolbar、tabs 和多 Picker 示例。](../../../packages/tsuki/src/picker-group/__fixtures__/overview.tsx)
+- [组件预览：PickerGroup 的共享 toolbar、tabs 和多 Picker 示例。](../../../packages/tsuki/bak/src/picker-group/__fixtures__/overview.tsx)
 
 ## 代码演示
 
-- [基础用法：Cell 打开底部 Popup，日期和时间由两个独立 Picker 组合。](../../../packages/tsuki/src/picker-group/__fixtures__/examples/basic.tsx)
+- [基础用法：Cell 打开底部 Popup，日期和时间由两个独立 Picker 组合。](../../../packages/tsuki/bak/src/picker-group/__fixtures__/examples/basic.tsx)
 
-- [下一步：设置 nextStepText 后，前面的 tab 先切换到下一步，最后一页才汇总确认。](../../../packages/tsuki/src/picker-group/__fixtures__/examples/next-step.tsx)
+- [下一步：设置 nextStepText 后，前面的 tab 先切换到下一步，最后一页才汇总确认。](../../../packages/tsuki/bak/src/picker-group/__fixtures__/examples/next-step.tsx)
 
-- [日期范围组合：使用 PickerGroup 和两个 DatePicker 组合实现日期范围选择。](../../../packages/tsuki/src/picker-group/__fixtures__/examples/date-range.tsx)
+- [日期范围组合：使用 PickerGroup 和两个 DatePicker 组合实现日期范围选择。](../../../packages/tsuki/bak/src/picker-group/__fixtures__/examples/date-range.tsx)
 
-- [受控 activeTab：通过 activeTab 和 onChange 控制当前 tab。](../../../packages/tsuki/src/picker-group/__fixtures__/examples/controlled.tsx)
+- [受控 activeTab：通过 activeTab 和 onChange 控制当前 tab。](../../../packages/tsuki/bak/src/picker-group/__fixtures__/examples/controlled.tsx)
 
 ## API
 

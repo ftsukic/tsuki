@@ -2,7 +2,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 
 const repositoryRoot = path.resolve(__dirname, '..')
-const sourceRoot = path.join(repositoryRoot, 'packages', 'tsuki', 'src')
+const sourceRoot = path.join(repositoryRoot, 'packages', 'tsuki', 'bak', 'src')
 const outputPath = path.join(repositoryRoot, 'apps', 'playground', 'fixtures', 'catalog.ts')
 
 function walk(directory) {

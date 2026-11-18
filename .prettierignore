@@ -1,7 +1,8 @@
 **/node_modules/
+packages/tsuki/bak/**
 **/lib/
 **/dist/
 **/.expo/
-apps/playground/android/
+**/android/
 apps/playground/ios/
 pnpm-lock.yaml

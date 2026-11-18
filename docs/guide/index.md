@@ -1,5 +1,7 @@
 # 快速开始
 
+> 此页记录 Tsuki 1.x 的历史 API。Tsuki v2 的当前入口和消费者配置见 [v2 项目框架](../architecture/tsuki-v2-project-framework.md)。
+
 Tsuki 是一个面向 React Native 和 Expo 的 UI 组件库。
 
 组件节点定制与破坏性迁移请参阅 [语义结构与样式](./semantic-styles.md)。

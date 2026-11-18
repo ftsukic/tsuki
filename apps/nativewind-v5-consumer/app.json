@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Tsuki NativeWind v5",
+    "slug": "nativewind-v5-consumer",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "tsuki-nativewind-v5",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ftsukic.tsukinativewindv5"
+    },
+    "android": {
+      "package": "com.ftsukic.tsukinativewindv5",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

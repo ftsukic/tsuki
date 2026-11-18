@@ -25,6 +25,7 @@ export default antfu(
       '**/lib/**',
       '**/dist/**',
       '**/node_modules/**',
+      'packages/tsuki/bak/**',
       '**/android/**',
       '**/ios/**',
       '**/.expo/**',

@@ -51,14 +51,17 @@ jobs:
       - name: Typecheck
         run: pnpm run typecheck
 
+      - name: Validate NativeWind consumer config
+        run: pnpm run consumers:config
+
       - name: Lint
         run: pnpm run lint
 
       - name: Test
         run: pnpm run test
 
-      - name: Build package
-        run: pnpm --filter @ftsukic/tsuki run build
+      - name: Build package and validate npm consumers
+        run: pnpm run consumers:tarball
 
       - name: Validate package contents
         run: pnpm run release:check-package

@@ -1,40 +1,25 @@
-import { Input } from '../../..'
-import { useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
-
 /**
- * @title Input basic
- * @description 展示受控输入、清除操作和 disabled/readOnly 状态。
+ * @title Native input behavior
+ * @description Use the inherited TextInput props for value, keyboard, and accessibility behavior.
  */
-export default function InputBasicFixture() {
-  const [value, setValue] = useState('')
+import { useState } from 'react'
+import { Input } from '@ftsukic/tsuki'
+import { View } from 'react-native'
+
+export default function InputBasicExample() {
+  const [email, setEmail] = useState('')
 
   return (
-    <View style={styles.container}>
+    <View style={{ gap: 12 }}>
       <Input
-        value={value}
-        bordered
-        clearable
-        clearTrigger="always"
-        placeholder="请输入内容"
-        onChangeText={setValue}
+        accessibilityLabel="Email address"
+        autoCapitalize="none"
+        keyboardType="email-address"
+        placeholder="name@example.com"
+        value={email}
+        onChangeText={setEmail}
       />
-      <Text>当前值：{value || '—'}</Text>
-      <Input disabled defaultValue="禁用输入" bordered />
-      <Input readOnly defaultValue="只读输入" bordered />
-      <Text>自定义边框</Text>
-      <Input styles={{ container: { borderRadius: 50 } }} bordered placeholder="没有边框" />
-      <Input
-        styles={{ container: { borderRadius: 16, backgroundColor: '#f055D' } }}
-        bordered
-        placeholder="没有边框"
-      />
+      <Input accessibilityLabel="Disabled field" disabled value="Read only value" />
     </View>
   )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    gap: 12,
-  },
-})

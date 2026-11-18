@@ -4,25 +4,25 @@
 
 `TimePicker` 是纯时间滚轮选择器，负责生成 hour、minute、second 列和时间范围联动。它不内置 Popup，公开 `value`、`defaultValue` 和事件值都是按 `columnsType` 顺序排列的 `string[]`。
 
-- [组件预览：TimePicker 的列组合、范围、过滤、步进和 Popup 示例。](../../../packages/tsuki/src/time-picker/__fixtures__/overview.tsx)
+- [组件预览：TimePicker 的列组合、范围、过滤、步进和 Popup 示例。](../../../packages/tsuki/bak/src/time-picker/__fixtures__/overview.tsx)
 
 ## 代码演示
 
-- [基础时间：受控选择小时和分钟。](../../../packages/tsuki/src/time-picker/__fixtures__/examples/basic.tsx)
+- [基础时间：受控选择小时和分钟。](../../../packages/tsuki/bak/src/time-picker/__fixtures__/examples/basic.tsx)
 
-- [列组合：展示时间列子集和任意合法重排。](../../../packages/tsuki/src/time-picker/__fixtures__/examples/columns.tsx)
+- [列组合：展示时间列子集和任意合法重排。](../../../packages/tsuki/bak/src/time-picker/__fixtures__/examples/columns.tsx)
 
-- [带秒：展示 hour、minute、second 三列。](../../../packages/tsuki/src/time-picker/__fixtures__/examples/seconds.tsx)
+- [带秒：展示 hour、minute、second 三列。](../../../packages/tsuki/bak/src/time-picker/__fixtures__/examples/seconds.tsx)
 
-- [时间范围：展示 minTime 和 maxTime 的级联边界。](../../../packages/tsuki/src/time-picker/__fixtures__/examples/range.tsx)
+- [时间范围：展示 minTime 和 maxTime 的级联边界。](../../../packages/tsuki/bak/src/time-picker/__fixtures__/examples/range.tsx)
 
-- [formatter：只修改时间选项的显示文本。](../../../packages/tsuki/src/time-picker/__fixtures__/examples/formatter.tsx)
+- [formatter：只修改时间选项的显示文本。](../../../packages/tsuki/bak/src/time-picker/__fixtures__/examples/formatter.tsx)
 
-- [filter：按当前完整 values 过滤时间选项。](../../../packages/tsuki/src/time-picker/__fixtures__/examples/filter.tsx)
+- [filter：按当前完整 values 过滤时间选项。](../../../packages/tsuki/bak/src/time-picker/__fixtures__/examples/filter.tsx)
 
-- [步进：展示 minuteStep 如何生成真实 options。](../../../packages/tsuki/src/time-picker/__fixtures__/examples/step.tsx)
+- [步进：展示 minuteStep 如何生成真实 options。](../../../packages/tsuki/bak/src/time-picker/__fixtures__/examples/step.tsx)
 
-- [Popup 集成：通过 Cell + Popup 组合 TimePicker，并在外层维护 draft。](../../../packages/tsuki/src/time-picker/__fixtures__/examples/popup.tsx)
+- [Popup 集成：通过 Cell + Popup 组合 TimePicker，并在外层维护 draft。](../../../packages/tsuki/bak/src/time-picker/__fixtures__/examples/popup.tsx)
 
 ## API
 

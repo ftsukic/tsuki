@@ -5,7 +5,7 @@ const nativeConfig = {
   rootDir: __dirname,
   preset: '@react-native/jest-preset',
   resolver: 'react-native-reanimated/jest/resolver',
-  roots: ['<rootDir>/src'],
+  roots: ['<rootDir>/bak/src'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
   testPathIgnorePatterns: ['/node_modules/'],
   transform: {
@@ -24,7 +24,8 @@ const nativeConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
   moduleNameMapper: {
     '^react-native-teleport$': '<rootDir>/node_modules/react-native-teleport/jest/index.js',
-    '^@ftsukic/tsuki$': '<rootDir>/src',
+    '^@ftsukic/tsuki/(.*)$': '<rootDir>/bak/src/$1',
+    '^@ftsukic/tsuki$': '<rootDir>/bak/src',
     '^react$': '<rootDir>/node_modules/react',
     '^react/jsx-runtime$': '<rootDir>/node_modules/react/jsx-runtime',
     '^react-native$': '<rootDir>/node_modules/react-native',

@@ -4,7 +4,7 @@
 
 Overlay 用于创建全屏遮罩，强调当前操作并阻止用户操作底层内容。支持受控显示、淡入淡出、嵌入内容、遮罩点击和主题定制。
 
-- [组件预览](../../../packages/tsuki/src/overlay/__fixtures__/overview.tsx)
+- [组件预览](../../../packages/tsuki/bak/src/overlay/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -22,13 +22,13 @@ Overlay 内部使用 `Portal`，推荐放在应用根节点的 `TsukiProvider` �
 
 ## 代码演示
 
-- [基础用法：使用 show 受控显示遮罩，点击遮罩后由调用方关闭。](../../../packages/tsuki/src/overlay/__fixtures__/examples/basic.tsx)
+- [基础用法：使用 show 受控显示遮罩，点击遮罩后由调用方关闭。](../../../packages/tsuki/bak/src/overlay/__fixtures__/examples/basic.tsx)
 
-- [嵌入内容：通过 children 放置自定义内容和交互控件。](../../../packages/tsuki/src/overlay/__fixtures__/examples/embedded.tsx)
+- [嵌入内容：通过 children 放置自定义内容和交互控件。](../../../packages/tsuki/bak/src/overlay/__fixtures__/examples/embedded.tsx)
 
-- [透明遮罩与动画：自定义背景色并使用 duration 控制淡入淡出速度。](../../../packages/tsuki/src/overlay/__fixtures__/examples/interactions.tsx)
+- [透明遮罩与动画：自定义背景色并使用 duration 控制淡入淡出速度。](../../../packages/tsuki/bak/src/overlay/__fixtures__/examples/interactions.tsx)
 
-- [主题定制：通过 Overlay token 和 semantic styles 定制外观。](../../../packages/tsuki/src/overlay/__fixtures__/examples/theme.tsx)
+- [主题定制：通过 Overlay token 和 semantic styles 定制外观。](../../../packages/tsuki/bak/src/overlay/__fixtures__/examples/theme.tsx)
 
 ## API
 

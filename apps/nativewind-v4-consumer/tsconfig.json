@@ -1,0 +1,10 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@ftsukic/tsuki": ["../../packages/tsuki/src/index.ts"],
+      "@ftsukic/tsuki/*": ["../../packages/tsuki/src/*"]
+    }
+  }
+}

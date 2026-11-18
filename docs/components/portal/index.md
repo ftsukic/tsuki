@@ -4,7 +4,7 @@
 
 Tsuki 的弹层直接使用 `react-native-teleport`。应用负责挂载 `PortalProvider`；它会自动提供名为 `root` 的默认宿主。Dialog、Popup、Toast、ActionSheet、Notify、Dropdown、FloatingPanel、FloatingBubble 和 ImagePreview 会将浮层渲染到该宿主。
 
-- [组件预览](../../../packages/tsuki/src/portal/__fixtures__/overview.tsx)
+- [组件预览](../../../packages/tsuki/bak/src/portal/__fixtures__/overview.tsx)
 
 ## 应用入口
 
@@ -29,9 +29,9 @@ export function AppRoot() {
 
 ## 代码演示
 
-- [组件式 Portal：使用 Teleport Portal 将内容渲染到 root 宿主。](../../../packages/tsuki/src/portal/__fixtures__/examples/basic.tsx)
+- [组件式 Portal：使用 Teleport Portal 将内容渲染到 root 宿主。](../../../packages/tsuki/bak/src/portal/__fixtures__/examples/basic.tsx)
 
-- [父级受控输入：验证 Teleport Portal 中的中文输入、父级赋值、清空和关闭。](../../../packages/tsuki/src/portal/__fixtures__/examples/controlled-input.tsx)
+- [父级受控输入：验证 Teleport Portal 中的中文输入、父级赋值、清空和关闭。](../../../packages/tsuki/bak/src/portal/__fixtures__/examples/controlled-input.tsx)
 
 ## 使用 Teleport Portal
 

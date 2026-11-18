@@ -4,7 +4,7 @@
 
 BottomBar 是页面底部固定布局容器，用于承载 Button、输入框、操作区域和其他任意 children。它只提供布局能力，不实现 ActionBar、商品操作、icon action、tab navigation 或业务状态。
 
-- [组件预览：BottomBar 的基础、底部按钮组、输入操作区、安全区和自定义样式示例。](../../../packages/tsuki/src/bottom-bar/__fixtures__/overview.tsx)
+- [组件预览：BottomBar 的基础、底部按钮组、输入操作区、安全区和自定义样式示例。](../../../packages/tsuki/bak/src/bottom-bar/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,15 +14,15 @@ import { BottomBar } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础用法：BottomBar 作为页面根容器的底部操作区域，children 由调用方组合。](../../../packages/tsuki/src/bottom-bar/__fixtures__/examples/basic.tsx)
+- [基础用法：BottomBar 作为页面根容器的底部操作区域，children 由调用方组合。](../../../packages/tsuki/bak/src/bottom-bar/__fixtures__/examples/basic.tsx)
 
-- [底部按钮组：使用 Button.Group block 在 BottomBar 中展示等宽按钮。](../../../packages/tsuki/src/bottom-bar/__fixtures__/examples/button-group.tsx)
+- [底部按钮组：使用 Button.Group block 在 BottomBar 中展示等宽按钮。](../../../packages/tsuki/bak/src/bottom-bar/__fixtures__/examples/button-group.tsx)
 
-- [输入操作区：将 Input 和 Button 组合到页面底部。](../../../packages/tsuki/src/bottom-bar/__fixtures__/examples/input.tsx)
+- [输入操作区：将 Input 和 Button 组合到页面底部。](../../../packages/tsuki/bak/src/bottom-bar/__fixtures__/examples/input.tsx)
 
-- [底部安全区：默认处理底部 safe-area inset。](../../../packages/tsuki/src/bottom-bar/__fixtures__/examples/safe-area.tsx)
+- [底部安全区：默认处理底部 safe-area inset。](../../../packages/tsuki/bak/src/bottom-bar/__fixtures__/examples/safe-area.tsx)
 
-- [自定义样式：通过根 style 覆盖背景、圆角和间距。](../../../packages/tsuki/src/bottom-bar/__fixtures__/examples/custom-style.tsx)
+- [自定义样式：通过根 style 覆盖背景、圆角和间距。](../../../packages/tsuki/bak/src/bottom-bar/__fixtures__/examples/custom-style.tsx)
 
 ## API
 

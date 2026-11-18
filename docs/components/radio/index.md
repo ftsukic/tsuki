@@ -4,7 +4,7 @@
 
 单选框用于从一组选项中选择一个值，也可以单独作为可控的布尔选择项使用。支持 Vant 语义的圆形 check、方形 check 和中心圆点指示器、Ant Design 风格的 `button` 变体、子节点分组、`options` 分组、禁用状态和主题定制。
 
-- [组件预览](../../../packages/tsuki/src/radio/__fixtures__/overview.tsx)
+- [组件预览](../../../packages/tsuki/bak/src/radio/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,21 +14,21 @@ import { Radio } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [独立 Radio：支持受控 checked 和非受控 defaultChecked 两种写法。](../../../packages/tsuki/src/radio/__fixtures__/examples/standalone.tsx)
+- [独立 Radio：支持受控 checked 和非受控 defaultChecked 两种写法。](../../../packages/tsuki/bak/src/radio/__fixtures__/examples/standalone.tsx)
 
-- [Radio.Group 子节点：使用子 Radio 自定义选项，支持受控值、默认值、横向布局和间距。](../../../packages/tsuki/src/radio/__fixtures__/examples/group.tsx)
+- [Radio.Group 子节点：使用子 Radio 自定义选项，支持受控值、默认值、横向布局和间距。](../../../packages/tsuki/bak/src/radio/__fixtures__/examples/group.tsx)
 
-- [Button Radio：button 变体隐藏指示器，默认使用内容自适应宽度，并保留 Group 单选行为。](../../../packages/tsuki/src/radio/__fixtures__/examples/button.tsx)
+- [Button Radio：button 变体隐藏指示器，默认使用内容自适应宽度，并保留 Group 单选行为。](../../../packages/tsuki/bak/src/radio/__fixtures__/examples/button.tsx)
 
-- [options 分组：使用 options 配置数组快速生成结构一致的选项。](../../../packages/tsuki/src/radio/__fixtures__/examples/options.tsx)
+- [options 分组：使用 options 配置数组快速生成结构一致的选项。](../../../packages/tsuki/bak/src/radio/__fixtures__/examples/options.tsx)
 
-- [指示器形状：shape 支持 round 和 square，labelPosition 支持左右标签。](../../../packages/tsuki/src/radio/__fixtures__/examples/shapes.tsx)
+- [指示器形状：shape 支持 round 和 square，labelPosition 支持左右标签。](../../../packages/tsuki/bak/src/radio/__fixtures__/examples/shapes.tsx)
 
-- [禁用状态：Radio、options 选项和整个 Radio.Group 都支持禁用。](../../../packages/tsuki/src/radio/__fixtures__/examples/disabled.tsx)
+- [禁用状态：Radio、options 选项和整个 Radio.Group 都支持禁用。](../../../packages/tsuki/bak/src/radio/__fixtures__/examples/disabled.tsx)
 
-- [自定义内容与语义样式：children 支持自定义节点，styles 覆盖 root、icon 和 label。](../../../packages/tsuki/src/radio/__fixtures__/examples/styled.tsx)
+- [自定义内容与语义样式：children 支持自定义节点，styles 覆盖 root、icon 和 label。](../../../packages/tsuki/bak/src/radio/__fixtures__/examples/styled.tsx)
 
-- [主题定制：通过 theme.components.Radio 统一覆盖组件 token。](../../../packages/tsuki/src/radio/__fixtures__/examples/theme.tsx)
+- [主题定制：通过 theme.components.Radio 统一覆盖组件 token。](../../../packages/tsuki/bak/src/radio/__fixtures__/examples/theme.tsx)
 
 ## API
 

@@ -4,7 +4,7 @@
 
 Checkbox 用于多选，使用边框、主题色背景、`CheckOutlined` 和 `MinusOutlined` 图标表达已选与半选状态。组件支持独立受控/非受控状态、`Checkbox.Group` 子节点和 `options` 多选，以及不包装 `Button` 的 `variant="button"` 样式。`checked` 与 `indeterminate` 是独立状态；button variant 隐藏 indicator，默认使用内容自适应宽度；在 Field 或显式等宽 Group 中可使用 Grid 等宽换行，并保留 Checkbox 的多选切换行为。
 
-- [组件预览：Checkbox 的基础、多选分组、全选半选、FlashList 大列表、button variant 和主题示例。](../../../packages/tsuki/src/checkbox/__fixtures__/overview.tsx)
+- [组件预览：Checkbox 的基础、多选分组、全选半选、FlashList 大列表、button variant 和主题示例。](../../../packages/tsuki/bak/src/checkbox/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,19 +14,19 @@ import { Checkbox } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础状态：受控、非受控、禁用、左右标签和 shape。](../../../packages/tsuki/src/checkbox/__fixtures__/examples/basic.tsx)
+- [基础状态：受控、非受控、禁用、左右标签和 shape。](../../../packages/tsuki/bak/src/checkbox/__fixtures__/examples/basic.tsx)
 
-- [Checkbox.Group：使用 name 管理多个选项并通过 onChange 得到数组值。](../../../packages/tsuki/src/checkbox/__fixtures__/examples/group.tsx)
+- [Checkbox.Group：使用 name 管理多个选项并通过 onChange 得到数组值。](../../../packages/tsuki/bak/src/checkbox/__fixtures__/examples/group.tsx)
 
-- [全选与半选：通过 Checkbox.indeterminate 与 Checkbox.Group.toggleAll 组合实现全选状态。](../../../packages/tsuki/src/checkbox/__fixtures__/examples/check-all.tsx)
+- [全选与半选：通过 Checkbox.indeterminate 与 Checkbox.Group.toggleAll 组合实现全选状态。](../../../packages/tsuki/bak/src/checkbox/__fixtures__/examples/check-all.tsx)
 
-- [FlashList 全选：在 FlashList 大列表中使用外部 selection 管理选中状态，并通过 Cell 整行点击和 indeterminate 实现全选。](../../../packages/tsuki/src/checkbox/__fixtures__/examples/flash-list.tsx)
+- [FlashList 全选：在 FlashList 大列表中使用外部 selection 管理选中状态，并通过 Cell 整行点击和 indeterminate 实现全选。](../../../packages/tsuki/bak/src/checkbox/__fixtures__/examples/flash-list.tsx)
 
-- [options 分组：使用 options 配置数组快速生成结构一致的多选项。](../../../packages/tsuki/src/checkbox/__fixtures__/examples/options.tsx)
+- [options 分组：使用 options 配置数组快速生成结构一致的多选项。](../../../packages/tsuki/bak/src/checkbox/__fixtures__/examples/options.tsx)
 
-- [Button checkbox：展示 button variant 的独立和分组用法。](../../../packages/tsuki/src/checkbox/__fixtures__/examples/button.tsx)
+- [Button checkbox：展示 button variant 的独立和分组用法。](../../../packages/tsuki/bak/src/checkbox/__fixtures__/examples/button.tsx)
 
-- [主题定制：通过 token 定制主题，并通过 styles.label 调整自定义标签区域。](../../../packages/tsuki/src/checkbox/__fixtures__/examples/theme.tsx)
+- [主题定制：通过 token 定制主题，并通过 styles.label 调整自定义标签区域。](../../../packages/tsuki/bak/src/checkbox/__fixtures__/examples/theme.tsx)
 
 ## API
 

@@ -1,0 +1,36 @@
+/* Generated from theme/defaults.ts by scripts/copy-theme-assets.cjs. */
+
+:root,
+[data-tsuki-scheme='light'] {
+  --tsuki-color-primary: #055ffd;
+  --tsuki-color-primary-foreground: #ffffff;
+  --tsuki-color-success: #15803d;
+  --tsuki-color-warning: #b45309;
+  --tsuki-color-danger: #dc2626;
+  --tsuki-color-foreground: #111827;
+  --tsuki-color-muted: #6b7280;
+  --tsuki-color-background: #ffffff;
+  --tsuki-color-surface: #f9fafb;
+  --tsuki-color-border: #e5e7eb;
+  --tsuki-button-border-radius: 8px;
+  --tsuki-button-height: 44px;
+  --tsuki-input-border-radius: 8px;
+  --tsuki-input-height: 44px;
+}
+
+[data-tsuki-scheme='dark'] {
+  --tsuki-color-primary: #4d8dff;
+  --tsuki-color-primary-foreground: #111827;
+  --tsuki-color-success: #4ade80;
+  --tsuki-color-warning: #fbbf24;
+  --tsuki-color-danger: #f87171;
+  --tsuki-color-foreground: #f9fafb;
+  --tsuki-color-muted: #9ca3af;
+  --tsuki-color-background: #111827;
+  --tsuki-color-surface: #1f2937;
+  --tsuki-color-border: #374151;
+  --tsuki-button-border-radius: 8px;
+  --tsuki-button-height: 44px;
+  --tsuki-input-border-radius: 8px;
+  --tsuki-input-height: 44px;
+}

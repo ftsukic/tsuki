@@ -4,7 +4,7 @@
 
 Swipe 用于横向或纵向切换内容，支持 Vant Swipe 的循环、自动播放、指示器和命令式导航能力。
 
-- [组件预览：Swipe 的基础、自动播放、循环、纵向、自定义指示器和命令式示例。](../../../packages/tsuki/src/swipe/__fixtures__/overview.tsx)
+- [组件预览：Swipe 的基础、自动播放、循环、纵向、自定义指示器和命令式示例。](../../../packages/tsuki/bak/src/swipe/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,7 +14,7 @@ import { Swipe } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础用法：横向滑动三个页面。](../../../packages/tsuki/src/swipe/__fixtures__/examples/basic.tsx) - [自动播放：每三秒切换一次。](../../../packages/tsuki/src/swipe/__fixtures__/examples/autoplay.tsx) - [循环播放：首尾连续切换。](../../../packages/tsuki/src/swipe/__fixtures__/examples/loop.tsx) - [纵向滚动：固定高度的纵向轮播。](../../../packages/tsuki/src/swipe/__fixtures__/examples/vertical.tsx) - [自定义 indicator：使用 renderIndicator 显示页码。](../../../packages/tsuki/src/swipe/__fixtures__/examples/custom-indicator.tsx) - [imperative ref：使用 prev、next 和 swipeTo 导航。](../../../packages/tsuki/src/swipe/__fixtures__/examples/imperative.tsx)
+- [基础用法：横向滑动三个页面。](../../../packages/tsuki/bak/src/swipe/__fixtures__/examples/basic.tsx) - [自动播放：每三秒切换一次。](../../../packages/tsuki/bak/src/swipe/__fixtures__/examples/autoplay.tsx) - [循环播放：首尾连续切换。](../../../packages/tsuki/bak/src/swipe/__fixtures__/examples/loop.tsx) - [纵向滚动：固定高度的纵向轮播。](../../../packages/tsuki/bak/src/swipe/__fixtures__/examples/vertical.tsx) - [自定义 indicator：使用 renderIndicator 显示页码。](../../../packages/tsuki/bak/src/swipe/__fixtures__/examples/custom-indicator.tsx) - [imperative ref：使用 prev、next 和 swipeTo 导航。](../../../packages/tsuki/bak/src/swipe/__fixtures__/examples/imperative.tsx)
 
 ## API
 

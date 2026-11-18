@@ -1,0 +1,16 @@
+@theme inline {
+  --color-tsuki-primary: var(--tsuki-color-primary);
+  --color-tsuki-primary-foreground: var(--tsuki-color-primary-foreground);
+  --color-tsuki-success: var(--tsuki-color-success);
+  --color-tsuki-warning: var(--tsuki-color-warning);
+  --color-tsuki-danger: var(--tsuki-color-danger);
+  --color-tsuki-foreground: var(--tsuki-color-foreground);
+  --color-tsuki-muted: var(--tsuki-color-muted);
+  --color-tsuki-background: var(--tsuki-color-background);
+  --color-tsuki-surface: var(--tsuki-color-surface);
+  --color-tsuki-border: var(--tsuki-color-border);
+  --radius-tsuki-button: var(--tsuki-button-border-radius);
+  --radius-tsuki-input: var(--tsuki-input-border-radius);
+  --spacing-tsuki-button: var(--tsuki-button-height);
+  --spacing-tsuki-input: var(--tsuki-input-height);
+}

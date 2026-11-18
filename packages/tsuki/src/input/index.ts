@@ -1,14 +1,2 @@
 export { Input } from './input'
-export type {
-  InputAutoSizeConfig,
-  InputClearTrigger,
-  InputFormatTrigger,
-  InputInstance,
-  InputSize,
-  InputProps,
-  InputSemanticStyles,
-  InputStyleInfo,
-  InputStyleState,
-  InputStyles,
-  InputType,
-} from './types'
+export type { InputClassNames, InputProps, InputStyles } from './types'

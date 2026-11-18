@@ -1,50 +1,16 @@
-import { defaultAlgorithm } from './themes/default'
 import { useContext, useMemo } from 'react'
 import type { PropsWithChildren } from 'react'
 import { ThemeContext } from './context'
-import type { ThemeConfig } from './types/config'
-import { definedValues, EMPTY_THEME, resolveTheme } from './resolve-theme'
+import { mergeTheme } from './merge-theme'
+import type { ThemeConfig } from './types'
 
-export function ConfigProvider({
-  children,
-  theme = EMPTY_THEME,
-}: PropsWithChildren<{ theme?: ThemeConfig }>) {
+export interface ConfigProviderProps extends PropsWithChildren {
+  theme?: ThemeConfig
+}
+
+export function ConfigProvider({ children, theme }: ConfigProviderProps) {
   const parent = useContext(ThemeContext)
-  const inherited = theme.inherit === false ? null : parent
-  const { seed, token, algorithm, mode, components, motion } = theme
-  const parentSeed = inherited?.seedOverrides
-  const parentToken = inherited?.tokenOverrides
-  const parentAlgorithm = inherited?.algorithm
-  const parentComponents = inherited?.componentOverrides
-  const visual = useMemo(
-    () =>
-      resolveTheme(
-        { seed, token, algorithm, mode, components },
-        {
-          seedOverrides: parentSeed ?? {},
-          tokenOverrides: parentToken ?? {},
-          algorithm: parentAlgorithm ?? defaultAlgorithm,
-          componentOverrides: parentComponents ?? {},
-          motion: {},
-        },
-      ),
-    [
-      seed,
-      token,
-      algorithm,
-      mode,
-      components,
-      parentSeed,
-      parentToken,
-      parentAlgorithm,
-      parentComponents,
-    ],
-  )
-  const parentMotion = inherited?.motion
-  const policy = useMemo(
-    () => ({ ...parentMotion, ...definedValues(motion) }),
-    [parentMotion, motion],
-  )
-  const value = useMemo(() => ({ ...visual, motion: policy }), [visual, policy])
+  const value = useMemo(() => mergeTheme(parent, theme), [parent, theme])
+
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
 }

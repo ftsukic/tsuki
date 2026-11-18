@@ -4,7 +4,7 @@
 
 Notify 用于在页面顶部展示需要即时反馈的通知，支持四种语义类型、受控组件、命令式调用、自动关闭、顶部安全区和主题定制。
 
-- [组件预览：Notify 汇总类型、受控显示、命令式交互、主题和顶部安全区示例。](../../../packages/tsuki/src/notify/__fixtures__/overview.tsx)
+- [组件预览：Notify 汇总类型、受控显示、命令式交互、主题和顶部安全区示例。](../../../packages/tsuki/bak/src/notify/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -24,15 +24,15 @@ Notify 使用 Teleport Portal 渲染。应用需在 TsukiProvider 外层挂载 `
 
 ## 代码演示
 
-- [通知类型：通过 type 展示 primary、success、warning 和 error 四种通知颜色。](../../../packages/tsuki/src/notify/__fixtures__/examples/types.tsx)
+- [通知类型：通过 type 展示 primary、success、warning 和 error 四种通知颜色。](../../../packages/tsuki/bak/src/notify/__fixtures__/examples/types.tsx)
 
-- [受控组件：使用 visible 管理显示状态，并通过 ref.close 请求关闭。](../../../packages/tsuki/src/notify/__fixtures__/examples/controlled.tsx)
+- [受控组件：使用 visible 管理显示状态，并通过 ref.close 请求关闭。](../../../packages/tsuki/bak/src/notify/__fixtures__/examples/controlled.tsx)
 
-- [命令式交互：showNotify 返回的实例可以更新 message 或关闭当前单例通知。](../../../packages/tsuki/src/notify/__fixtures__/examples/interactions.tsx)
+- [命令式交互：showNotify 返回的实例可以更新 message 或关闭当前单例通知。](../../../packages/tsuki/bak/src/notify/__fixtures__/examples/interactions.tsx)
 
-- [主题和样式：通过 Notify token 和单次样式定制通知外观。](../../../packages/tsuki/src/notify/__fixtures__/examples/theme.tsx)
+- [主题和样式：通过 Notify token 和单次样式定制通知外观。](../../../packages/tsuki/bak/src/notify/__fixtures__/examples/theme.tsx)
 
-- [顶部安全区：默认适配顶部安全区，也可以通过 safeAreaInsetTop 显式关闭。](../../../packages/tsuki/src/notify/__fixtures__/examples/safe-area.tsx)
+- [顶部安全区：默认适配顶部安全区，也可以通过 safeAreaInsetTop 显式关闭。](../../../packages/tsuki/bak/src/notify/__fixtures__/examples/safe-area.tsx)
 
 ## API
 

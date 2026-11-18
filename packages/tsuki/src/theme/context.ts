@@ -1,19 +1,5 @@
 import { createContext } from 'react'
-import type { MappingAlgorithm } from './types'
-import type { AliasToken } from './types/alias'
-import type { ComponentTokenOverrides } from './types/components'
-import type { SeedToken } from './types/seed'
-import type { ThemeTokenOverrides } from './types/config'
-import type { MotionConfig } from '../motion/types'
+import { getDefaultTheme } from './defaults'
+import type { ResolvedTheme } from './types'
 
-export interface ThemeValue {
-  seed: SeedToken
-  token: AliasToken
-  seedOverrides: Partial<SeedToken>
-  tokenOverrides: ThemeTokenOverrides
-  algorithm: MappingAlgorithm | readonly MappingAlgorithm[]
-  componentOverrides: ComponentTokenOverrides
-  motion: MotionConfig
-}
-
-export const ThemeContext = createContext<ThemeValue | null>(null)
+export const ThemeContext = createContext<ResolvedTheme>(getDefaultTheme('light'))

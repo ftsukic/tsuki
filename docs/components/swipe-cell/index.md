@@ -6,7 +6,7 @@
 
 SwipeCell 用于在列表行上通过水平滑动展示操作，提供 Vant 风格的左右多 action、吸附阈值、命令式控制和页面级单开协调。
 
-- [组件预览：SwipeCell 的微信消息列表、多 action、协调、列表、分组和主题示例。](../../../packages/tsuki/src/swipe-cell/__fixtures__/overview.tsx)
+- [组件预览：SwipeCell 的微信消息列表、多 action、协调、列表、分组和主题示例。](../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -20,17 +20,17 @@ import { SwipeCell, SwipeCellAction, SwipeCellGroup, useSwipeCellDismiss } from 
 
 | 场景 | 内容 |
 | --- | --- |
-| [微信效果](../../../packages/tsuki/src/swipe-cell/__fixtures__/examples/wechat.tsx) | 正文限位、action 撑开、文字遮挡，置顶、未读和删除 |
-| [基础操作](../../../packages/tsuki/src/swipe-cell/__fixtures__/examples/basic.tsx) | 单个右侧 action 与操作结果 |
-| [左右操作](../../../packages/tsuki/src/swipe-cell/__fixtures__/examples/both-sides.tsx) | 左右两侧独立配置 |
-| [多个操作](../../../packages/tsuki/src/swipe-cell/__fixtures__/examples/multiple-actions.tsx) | 同侧多个 action |
-| [点击与按住](../../../packages/tsuki/src/swipe-cell/__fixtures__/examples/content-close.tsx) | 收起时业务点击、长按计数；展开后仅关闭；拖动取消反馈 |
-| [FlashList · 1000 条](../../../packages/tsuki/src/swipe-cell/__fixtures__/examples/flash-list.tsx) | 公共 SwipeCell + 页面 Hook，覆盖外部触摸、单开、滚动关闭与数据回收 |
-| [FlatList 接入](../../../packages/tsuki/src/swipe-cell/__fixtures__/examples/list.tsx) | 同一套页面 Hook 接入 FlatList |
-| [Ref 控制](../../../packages/tsuki/src/swipe-cell/__fixtures__/examples/ref.tsx) | 手动调用 open / close |
-| [主题样式](../../../packages/tsuki/src/swipe-cell/__fixtures__/examples/theme.tsx) | action 颜色与宽度 |
-| [页面单开](../../../packages/tsuki/src/swipe-cell/__fixtures__/examples/coordination.tsx) | 通过页面 Hook 管理多行 |
-| [Group 协调](../../../packages/tsuki/src/swipe-cell/__fixtures__/examples/group.tsx) | SwipeCellGroup 内的兼容协调方式 |
+| [微信效果](../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/examples/wechat.tsx) | 正文限位、action 撑开、文字遮挡，置顶、未读和删除 |
+| [基础操作](../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/examples/basic.tsx) | 单个右侧 action 与操作结果 |
+| [左右操作](../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/examples/both-sides.tsx) | 左右两侧独立配置 |
+| [多个操作](../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/examples/multiple-actions.tsx) | 同侧多个 action |
+| [点击与按住](../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/examples/content-close.tsx) | 收起时业务点击、长按计数；展开后仅关闭；拖动取消反馈 |
+| [FlashList · 1000 条](../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/examples/flash-list.tsx) | 公共 SwipeCell + 页面 Hook，覆盖外部触摸、单开、滚动关闭与数据回收 |
+| [FlatList 接入](../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/examples/list.tsx) | 同一套页面 Hook 接入 FlatList |
+| [Ref 控制](../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/examples/ref.tsx) | 手动调用 open / close |
+| [主题样式](../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/examples/theme.tsx) | action 颜色与宽度 |
+| [页面单开](../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/examples/coordination.tsx) | 通过页面 Hook 管理多行 |
+| [Group 协调](../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/examples/group.tsx) | SwipeCellGroup 内的兼容协调方式 |
 
 ## API
 
@@ -221,4 +221,4 @@ id 必须唯一且稳定。行 ref 解绑时释放登记，旧行关闭回调与
 
 根节点已有 responder capture 时，需合并观察回调并保留原本的返回值。页面失焦时由导航生命周期调用 `dismiss.close()`；Modal 等独立原生根节点应单独接入。该 Hook 处理接入根节点内的触摸，不提供跨原生窗口的全局监听。
 
-- [完整示例：页面外部触摸与 FlashList。](../../../packages/tsuki/src/swipe-cell/__fixtures__/examples/flash-list.tsx)
+- [完整示例：页面外部触摸与 FlashList。](../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/examples/flash-list.tsx)

@@ -4,7 +4,7 @@
 
 Popup 用于在当前页面上方展示内容，支持居中、四边定位、遮罩、圆角、懒渲染、销毁和按 Native Stack 语义实现的滑入动画。
 
-- [组件预览](../../../packages/tsuki/src/popup/__fixtures__/overview.tsx)
+- [组件预览](../../../packages/tsuki/bak/src/popup/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -22,19 +22,19 @@ Popup 推荐挂载在应用根节点的 `TsukiProvider` 内：
 
 ## 代码演示
 
-- [基础用法：使用 visible 受控显示居中弹层。](../../../packages/tsuki/src/popup/__fixtures__/examples/basic.tsx)
+- [基础用法：使用 visible 受控显示居中弹层。](../../../packages/tsuki/bak/src/popup/__fixtures__/examples/basic.tsx)
 
-- [五种位置：支持 center、top、bottom、left 和 right，并按位置处理 round 圆角。](../../../packages/tsuki/src/popup/__fixtures__/examples/positions.tsx)
+- [五种位置：支持 center、top、bottom、left 和 right，并按位置处理 round 圆角。](../../../packages/tsuki/bak/src/popup/__fixtures__/examples/positions.tsx)
 
-- [底部安全区：bottom Popup 可将宿主提供的底部 safe-area inset 叠加到面板已有的底部内边距。](../../../packages/tsuki/src/popup/__fixtures__/examples/safe-area.tsx)
+- [底部安全区：bottom Popup 可将宿主提供的底部 safe-area inset 叠加到面板已有的底部内边距。](../../../packages/tsuki/bak/src/popup/__fixtures__/examples/safe-area.tsx)
 
-- [遮罩交互：通过 overlay、onPressOverlay 和 closeOnPressOverlay 管理遮罩点击。](../../../packages/tsuki/src/popup/__fixtures__/examples/interactions.tsx)
+- [遮罩交互：通过 overlay、onPressOverlay 和 closeOnPressOverlay 管理遮罩点击。](../../../packages/tsuki/bak/src/popup/__fixtures__/examples/interactions.tsx)
 
-- [生命周期与销毁：观察打开、关闭回调，并使用 destroyOnClosed 销毁内容。](../../../packages/tsuki/src/popup/__fixtures__/examples/lifecycle.tsx)
+- [生命周期与销毁：观察打开、关闭回调，并使用 destroyOnClosed 销毁内容。](../../../packages/tsuki/bak/src/popup/__fixtures__/examples/lifecycle.tsx)
 
-- [主题定制：通过 Popup token 和 semantic styles 定制浮层。](../../../packages/tsuki/src/popup/__fixtures__/examples/theme.tsx)
+- [主题定制：通过 Popup token 和 semantic styles 定制浮层。](../../../packages/tsuki/bak/src/popup/__fixtures__/examples/theme.tsx)
 
-- [输入框与键盘避让](../../../packages/tsuki/src/popup/__fixtures__/examples/keyboard.tsx)
+- [输入框与键盘避让](../../../packages/tsuki/bak/src/popup/__fixtures__/examples/keyboard.tsx)
 
 开启 `keyboardAvoiding` 后，面板在键盘上方的可用区域布局，遮罩仍覆盖整个宿主。居中面板仅在底部被键盘遮挡时上移，底部面板贴近键盘上沿，顶部面板保持顶部位置。避让使用独立的 Reanimated 位移，并采用键盘事件的时长。该能力位于 Portal 内；仅在页面外包裹 KeyboardAvoidingView 无法保证作用于弹层。
 

@@ -4,7 +4,7 @@
 
 Search 是面向列表过滤和搜索入口的单行输入组件。它组合 `Input` 提供输入、清除、禁用、只读和原生 TextInput 能力，自己负责搜索场景的外层布局、搜索图标、形状和搜索行为。
 
-- [组件预览：Search 汇总 Vant 风格输入、左右扩展和搜索行为场景。](../../../packages/tsuki/src/search/__fixtures__/overview.tsx)
+- [组件预览：Search 汇总 Vant 风格输入、左右扩展和搜索行为场景。](../../../packages/tsuki/bak/src/search/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,31 +14,31 @@ import { Search } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础 Search：默认方角 Search 只显示输入区域。](../../../packages/tsuki/src/search/__fixtures__/examples/basic.tsx)
+- [基础 Search：默认方角 Search 只显示输入区域。](../../../packages/tsuki/bak/src/search/__fixtures__/examples/basic.tsx)
 
-- [外部操作：通过 action 放置取消等外部操作。](../../../packages/tsuki/src/search/__fixtures__/examples/action.tsx)
+- [外部操作：通过 action 放置取消等外部操作。](../../../packages/tsuki/bak/src/search/__fixtures__/examples/action.tsx)
 
-- [输入对齐：将输入文字和占位文字居中对齐。](../../../packages/tsuki/src/search/__fixtures__/examples/align.tsx)
+- [输入对齐：将输入文字和占位文字居中对齐。](../../../packages/tsuki/bak/src/search/__fixtures__/examples/align.tsx)
 
-- [禁用状态：禁用状态由 Input 负责输入状态和视觉。](../../../packages/tsuki/src/search/__fixtures__/examples/disabled.tsx)
+- [禁用状态：禁用状态由 Input 负责输入状态和视觉。](../../../packages/tsuki/bak/src/search/__fixtures__/examples/disabled.tsx)
 
-- [底部分割线：显示 Search 整体底部分割线。](../../../packages/tsuki/src/search/__fixtures__/examples/divider.tsx)
+- [底部分割线：显示 Search 整体底部分割线。](../../../packages/tsuki/bak/src/search/__fixtures__/examples/divider.tsx)
 
-- [自定义背景：自定义 Search 外层背景，输入区域保持独立底色。](../../../packages/tsuki/src/search/__fixtures__/examples/background.tsx)
+- [自定义背景：自定义 Search 外层背景，输入区域保持独立底色。](../../../packages/tsuki/bak/src/search/__fixtures__/examples/background.tsx)
 
-- [内部 Label：在默认搜索图标后放置地址等内部内容。](../../../packages/tsuki/src/search/__fixtures__/examples/label.tsx)
+- [内部 Label：在默认搜索图标后放置地址等内部内容。](../../../packages/tsuki/bak/src/search/__fixtures__/examples/label.tsx)
 
-- [Button 操作：使用 Button 作为 Search 外部操作区。](../../../packages/tsuki/src/search/__fixtures__/examples/button-action.tsx)
+- [Button 操作：使用 Button 作为 Search 外部操作区。](../../../packages/tsuki/bak/src/search/__fixtures__/examples/button-action.tsx)
 
-- [Left 和 Action：自定义外部 left 并组合返回箭头和按钮。](../../../packages/tsuki/src/search/__fixtures__/examples/left.tsx)
+- [Left 和 Action：自定义外部 left 并组合返回箭头和按钮。](../../../packages/tsuki/bak/src/search/__fixtures__/examples/left.tsx)
 
-- [组合操作：action 可以组合多个按钮或图标节点。](../../../packages/tsuki/src/search/__fixtures__/examples/action-extra.tsx)
+- [组合操作：action 可以组合多个按钮或图标节点。](../../../packages/tsuki/bak/src/search/__fixtures__/examples/action-extra.tsx)
 
-- [受控 Search：通过 value 和 onChange 管理受控搜索关键词。](../../../packages/tsuki/src/search/__fixtures__/examples/controlled.tsx)
+- [受控 Search：通过 value 和 onChange 管理受控搜索关键词。](../../../packages/tsuki/bak/src/search/__fixtures__/examples/controlled.tsx)
 
-- [自动搜索：输入停止后通过 debounce 触发最新搜索。](../../../packages/tsuki/src/search/__fixtures__/examples/auto-search.tsx)
+- [自动搜索：输入停止后通过 debounce 触发最新搜索。](../../../packages/tsuki/bak/src/search/__fixtures__/examples/auto-search.tsx)
 
-- [Square Search：使用 square 形状渲染小圆角搜索框。](../../../packages/tsuki/src/search/__fixtures__/examples/square.tsx)
+- [Square Search：使用 square 形状渲染小圆角搜索框。](../../../packages/tsuki/bak/src/search/__fixtures__/examples/square.tsx)
 
 ## API
 

@@ -23,7 +23,8 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.cjs'],
   moduleNameMapper: {
     '^react-native-teleport$': '<rootDir>/node_modules/react-native-teleport/jest/index.js',
-    '^@ftsukic/tsuki$': '<rootDir>/../../packages/tsuki/src',
+    '^@ftsukic/tsuki/(.*)$': '<rootDir>/../../packages/tsuki/bak/src/$1',
+    '^@ftsukic/tsuki$': '<rootDir>/../../packages/tsuki/bak/src',
     '^@/(.*)$': '<rootDir>/$1',
     '^react$': '<rootDir>/node_modules/react',
     '^react/jsx-runtime$': '<rootDir>/node_modules/react/jsx-runtime',

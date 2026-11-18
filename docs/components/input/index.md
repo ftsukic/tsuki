@@ -4,7 +4,7 @@
 
 Input 是面向表单输入的高层组件，统一处理字符串值、清除、格式化、密码可见性和常用键盘模式。底层仍使用 React Native TextInput。
 
-- [组件预览：Input 汇总基础、密码、数字和多行输入模式。](../../../packages/tsuki/src/input/__fixtures__/overview.tsx)
+- [组件预览：Input 汇总基础、密码、数字和多行输入模式。](../../../packages/tsuki/bak/src/input/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,19 +14,19 @@ import { Input } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础 Input：展示受控输入、清除操作和 disabled/readOnly 状态。](../../../packages/tsuki/src/input/__fixtures__/examples/basic.tsx)
+- [基础 Input：展示受控输入、清除操作和 disabled/readOnly 状态。](../../../packages/tsuki/bak/src/input/__fixtures__/examples/basic.tsx)
 
-- [Password：使用眼睛按钮切换密码可见状态。](../../../packages/tsuki/src/input/__fixtures__/examples/password.tsx)
+- [Password：使用眼睛按钮切换密码可见状态。](../../../packages/tsuki/bak/src/input/__fixtures__/examples/password.tsx)
 
-- [Number：数字键盘输入仍然保留字符串值，包括前导零。](../../../packages/tsuki/src/input/__fixtures__/examples/number.tsx)
+- [Number：数字键盘输入仍然保留字符串值，包括前导零。](../../../packages/tsuki/bak/src/input/__fixtures__/examples/number.tsx)
 
-- [Textarea：多行输入支持 rows、清除和字数限制。](../../../packages/tsuki/src/input/__fixtures__/examples/textarea.tsx)
+- [Textarea：多行输入支持 rows、清除和字数限制。](../../../packages/tsuki/bak/src/input/__fixtures__/examples/textarea.tsx)
 
-- [AutoSize：多行输入随内容增长，达到最大行数后内部滚动，删除内容时自动缩回。](../../../packages/tsuki/src/input/__fixtures__/examples/auto-size.tsx)
+- [AutoSize：多行输入随内容增长，达到最大行数后内部滚动，删除内容时自动缩回。](../../../packages/tsuki/bak/src/input/__fixtures__/examples/auto-size.tsx)
 
-- [尺寸和布局：展示尺寸、前后缀和 addon 的组合布局。](../../../packages/tsuki/src/input/__fixtures__/examples/layout.tsx)
+- [尺寸和布局：展示尺寸、前后缀和 addon 的组合布局。](../../../packages/tsuki/bak/src/input/__fixtures__/examples/layout.tsx)
 
-- [ScrollView 场景：展示 ScrollView 内的单行输入和 keyboardShouldPersistTaps 配置。](../../../packages/tsuki/src/input/__fixtures__/examples/scroll-view.tsx)
+- [ScrollView 场景：展示 ScrollView 内的单行输入和 keyboardShouldPersistTaps 配置。](../../../packages/tsuki/bak/src/input/__fixtures__/examples/scroll-view.tsx)
 
 ## API
 
@@ -92,7 +92,7 @@ iOS 在内容或实际宽度变化时重新创建隐藏测量节点，避免原�
 
 未传 `value` 且未配置 `formatter` 时，原生输入框保管编辑文本，`defaultValue` 仅用于初始化。`onChangeText`、字数统计和自动测量继续更新，避免每次输入都通过 JS 的 `value` 回写。传入 `value` 时保持受控行为；formatter 需要回写文本，中文输入建议使用 `formatTrigger="onEndEditing"`。该路径不保证修复 iOS Fabric 的所有组合输入问题，需要用目标设备对照验证。
 
-- [中文组合输入对照](../../../packages/tsuki/src/input/__fixtures__/examples/ime.tsx)
+- [中文组合输入对照](../../../packages/tsuki/bak/src/input/__fixtures__/examples/ime.tsx)
 
 ### Portal 内的受控输入
 

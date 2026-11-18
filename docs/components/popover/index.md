@@ -4,7 +4,7 @@
 
 Popover 用于在触发控件附近展示 Vant 风格的操作菜单，也支持完全自定义浮层内容。组件使用 `react-native-popover-view` 处理 React Native 的定位、箭头、屏幕边界、旋转和键盘适配。
 
-- [组件预览：Popover 的 action 菜单、定位、主题、触发器和自定义内容预览。](../../../packages/tsuki/src/popover/__fixtures__/overview.tsx)
+- [组件预览：Popover 的 action 菜单、定位、主题、触发器和自定义内容预览。](../../../packages/tsuki/bak/src/popover/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,25 +14,25 @@ import { Popover } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础用法：点击触发器打开包含三个 action 的菜单，并显示最后选择的 action。](../../../packages/tsuki/src/popover/__fixtures__/examples/basic.tsx)
+- [基础用法：点击触发器打开包含三个 action 的菜单，并显示最后选择的 action。](../../../packages/tsuki/bak/src/popover/__fixtures__/examples/basic.tsx)
 
-- [深色风格：比较 light 和 dark 两种 Popover 自身视觉主题。](../../../packages/tsuki/src/popover/__fixtures__/examples/theme.tsx)
+- [深色风格：比较 light 和 dark 两种 Popover 自身视觉主题。](../../../packages/tsuki/bak/src/popover/__fixtures__/examples/theme.tsx)
 
-- [弹出位置：验证 auto、top、bottom、left 和 right 五种位置。](../../../packages/tsuki/src/popover/__fixtures__/examples/placement.tsx)
+- [弹出位置：验证 auto、top、bottom、left 和 right 五种位置。](../../../packages/tsuki/bak/src/popover/__fixtures__/examples/placement.tsx)
 
-- [图标：在 action 中组合图标，并为单项设置颜色。](../../../packages/tsuki/src/popover/__fixtures__/examples/icon.tsx)
+- [图标：在 action 中组合图标，并为单项设置颜色。](../../../packages/tsuki/bak/src/popover/__fixtures__/examples/icon.tsx)
 
-- [禁用选项：展示禁用 action 和禁用 Popover 触发器。](../../../packages/tsuki/src/popover/__fixtures__/examples/disabled.tsx)
+- [禁用选项：展示禁用 action 和禁用 Popover 触发器。](../../../packages/tsuki/bak/src/popover/__fixtures__/examples/disabled.tsx)
 
-- [横向排列：使用 actionsDirection 横向排列 action。](../../../packages/tsuki/src/popover/__fixtures__/examples/horizontal.tsx)
+- [横向排列：使用 actionsDirection 横向排列 action。](../../../packages/tsuki/bak/src/popover/__fixtures__/examples/horizontal.tsx)
 
-- [受控模式：使用 visible、onVisibleChange 和 manual trigger 管理可见状态。](../../../packages/tsuki/src/popover/__fixtures__/examples/controlled.tsx)
+- [受控模式：使用 visible、onVisibleChange 和 manual trigger 管理可见状态。](../../../packages/tsuki/bak/src/popover/__fixtures__/examples/controlled.tsx)
 
-- [自定义内容：使用 content 替换 action 菜单，并从自定义内容内部关闭浮层。](../../../packages/tsuki/src/popover/__fixtures__/examples/custom-content.tsx)
+- [自定义内容：使用 content 替换 action 菜单，并从自定义内容内部关闭浮层。](../../../packages/tsuki/bak/src/popover/__fixtures__/examples/custom-content.tsx)
 
-- [语义样式：通过 semantic styles 定制 reference、container 和 item 插槽。](../../../packages/tsuki/src/popover/__fixtures__/examples/semantic.tsx)
+- [语义样式：通过 semantic styles 定制 reference、container 和 item 插槽。](../../../packages/tsuki/bak/src/popover/__fixtures__/examples/semantic.tsx)
 
-- [主题 token：通过 ConfigProvider 覆盖 Popover component token。](../../../packages/tsuki/src/popover/__fixtures__/examples/theme-token.tsx)
+- [主题 token：通过 ConfigProvider 覆盖 Popover component token。](../../../packages/tsuki/bak/src/popover/__fixtures__/examples/theme-token.tsx)
 
 ## API
 

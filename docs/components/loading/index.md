@@ -4,7 +4,7 @@
 
 Loading 用于表示正在进行的异步操作，提供 Vant 风格的 `circular` 缺口圆环和 `spinner` 径向条段两种指示器。
 
-- [组件预览：Loading 的类型、尺寸、文字、布局和主题样式预览。](../../../packages/tsuki/src/loading/__fixtures__/overview.tsx)
+- [组件预览：Loading 的类型、尺寸、文字、布局和主题样式预览。](../../../packages/tsuki/bak/src/loading/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,17 +14,17 @@ import { Loading } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础用法：使用默认 token 渲染 circular Loading。](../../../packages/tsuki/src/loading/__fixtures__/examples/basic.tsx)
+- [基础用法：使用默认 token 渲染 circular Loading。](../../../packages/tsuki/bak/src/loading/__fixtures__/examples/basic.tsx)
 
-- [指示器类型：比较 circular 缺口圆环和 spinner 径向条段。](../../../packages/tsuki/src/loading/__fixtures__/examples/type.tsx)
+- [指示器类型：比较 circular 缺口圆环和 spinner 径向条段。](../../../packages/tsuki/bak/src/loading/__fixtures__/examples/type.tsx)
 
-- [尺寸和颜色：使用同一组 size 和 color API 定制两种指示器。](../../../packages/tsuki/src/loading/__fixtures__/examples/size-color.tsx)
+- [尺寸和颜色：使用同一组 size 和 color API 定制两种指示器。](../../../packages/tsuki/bak/src/loading/__fixtures__/examples/size-color.tsx)
 
-- [带文字：在指示器右侧显示加载文字。](../../../packages/tsuki/src/loading/__fixtures__/examples/text.tsx)
+- [带文字：在指示器右侧显示加载文字。](../../../packages/tsuki/bak/src/loading/__fixtures__/examples/text.tsx)
 
-- [垂直布局：使用 vertical 将指示器和文字上下排列。](../../../packages/tsuki/src/loading/__fixtures__/examples/vertical.tsx)
+- [垂直布局：使用 vertical 将指示器和文字上下排列。](../../../packages/tsuki/bak/src/loading/__fixtures__/examples/vertical.tsx)
 
-- [主题和语义样式：通过 Loading token 和 semantic styles 定制组件。](../../../packages/tsuki/src/loading/__fixtures__/examples/theme.tsx)
+- [主题和语义样式：通过 Loading token 和 semantic styles 定制组件。](../../../packages/tsuki/bak/src/loading/__fixtures__/examples/theme.tsx)
 
 ## API
 

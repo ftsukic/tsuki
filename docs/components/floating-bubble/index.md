@@ -4,7 +4,7 @@
 
 FloatingBubble 是一个通过 Portal 挂载到宿主浮层区域的悬浮操作气泡，默认位于右下区域，支持拖动、方向限制、边界磁吸、安全区和受控位置。
 
-- [组件预览：FloatingBubble 的定位、拖动、磁吸、受控、自定义内容、安全区和主题预览。](../../../packages/tsuki/src/floating-bubble/__fixtures__/overview.tsx)
+- [组件预览：FloatingBubble 的定位、拖动、磁吸、受控、自定义内容、安全区和主题预览。](../../../packages/tsuki/bak/src/floating-bubble/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,23 +14,23 @@ import { FloatingBubble, Icon } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [基础用法：默认右下定位和点击反馈。](../../../packages/tsuki/src/floating-bubble/__fixtures__/examples/basic.tsx)
+- [基础用法：默认右下定位和点击反馈。](../../../packages/tsuki/bak/src/floating-bubble/__fixtures__/examples/basic.tsx)
 
-- [拖动方向：展示横向、纵向、自由拖动和锁定。](../../../packages/tsuki/src/floating-bubble/__fixtures__/examples/axis.tsx)
+- [拖动方向：展示横向、纵向、自由拖动和锁定。](../../../packages/tsuki/bak/src/floating-bubble/__fixtures__/examples/axis.tsx)
 
-- [横向磁吸：松手吸附到最近的左右边界。](../../../packages/tsuki/src/floating-bubble/__fixtures__/examples/magnetic.tsx)
+- [横向磁吸：松手吸附到最近的左右边界。](../../../packages/tsuki/bak/src/floating-bubble/__fixtures__/examples/magnetic.tsx)
 
-- [受控位置：使用 offset 和 onOffsetChange 持有最终坐标。](../../../packages/tsuki/src/floating-bubble/__fixtures__/examples/controlled.tsx)
+- [受控位置：使用 offset 和 onOffsetChange 持有最终坐标。](../../../packages/tsuki/bak/src/floating-bubble/__fixtures__/examples/controlled.tsx)
 
-- [自定义内容：使用 children 和自定义尺寸。](../../../packages/tsuki/src/floating-bubble/__fixtures__/examples/custom.tsx)
+- [自定义内容：使用 children 和自定义尺寸。](../../../packages/tsuki/bak/src/floating-bubble/__fixtures__/examples/custom.tsx)
 
-- [安全区：避开顶部和底部系统安全区。](../../../packages/tsuki/src/floating-bubble/__fixtures__/examples/safe-area.tsx)
+- [安全区：避开顶部和底部系统安全区。](../../../packages/tsuki/bak/src/floating-bubble/__fixtures__/examples/safe-area.tsx)
 
-- [主题定制：覆盖 FloatingBubble token 和 semantic styles。](../../../packages/tsuki/src/floating-bubble/__fixtures__/examples/theme.tsx)
+- [主题定制：覆盖 FloatingBubble token 和 semantic styles。](../../../packages/tsuki/bak/src/floating-bubble/__fixtures__/examples/theme.tsx)
 
-- [语义样式：分别定制气泡、内容和图标区域，以及拖动状态。](../../../packages/tsuki/src/floating-bubble/__fixtures__/examples/semantic.tsx)
+- [语义样式：分别定制气泡、内容和图标区域，以及拖动状态。](../../../packages/tsuki/bak/src/floating-bubble/__fixtures__/examples/semantic.tsx)
 
-- [动画策略：统一控制按压反馈和磁吸动画。](../../../packages/tsuki/src/floating-bubble/__fixtures__/examples/motion.tsx)
+- [动画策略：统一控制按压反馈和磁吸动画。](../../../packages/tsuki/bak/src/floating-bubble/__fixtures__/examples/motion.tsx)
 
 ## API
 

@@ -6,7 +6,7 @@ ImagePreview 使用稳定图片 ID 管理完整图片序列，支持虚拟分页
 
 图片数据独立于消息的挂载状态。消息列表回收单元不会删除预览图片；加载历史消息插入图片时，当前图片继续由 `activeId` 标识。缩略图位置通过可选的 `ImagePreview.Source` 登记。
 
-- [组件预览：统一查看器的基础、自定义 adapter、手势和来源过渡示例。](../../../packages/tsuki/src/image-preview/__fixtures__/overview.tsx)
+- [组件预览：统一查看器的基础、自定义 adapter、手势和来源过渡示例。](../../../packages/tsuki/bak/src/image-preview/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -61,15 +61,15 @@ Provider 放在应用根 Portal 内、导航容器外，统一捕获来源注册
 
 ## 代码演示
 
-- [基础用法：通过稳定图片 ID 选择图片，复用统一工具栏。](../../../packages/tsuki/src/image-preview/__fixtures__/examples/basic.tsx)
+- [基础用法：通过稳定图片 ID 选择图片，复用统一工具栏。](../../../packages/tsuki/bak/src/image-preview/__fixtures__/examples/basic.tsx)
 
-- [自定义图片 adapter：同一个 adapter 负责图片渲染和邻页预加载。](../../../packages/tsuki/src/image-preview/__fixtures__/examples/custom-renderer.tsx)
+- [自定义图片 adapter：同一个 adapter 负责图片渲染和邻页预加载。](../../../packages/tsuki/bak/src/image-preview/__fixtures__/examples/custom-renderer.tsx)
 
-- [手势交互：横竖图切换、缩放、拖动、短拖恢复和下拉关闭。](../../../packages/tsuki/src/image-preview/__fixtures__/examples/gesture.tsx)
+- [手势交互：横竖图切换、缩放、拖动、短拖恢复和下拉关闭。](../../../packages/tsuki/bak/src/image-preview/__fixtures__/examples/gesture.tsx)
 
-- [缩略图过渡：正方形 cover 缩略图打开后仍按原图比例完整展示。](../../../packages/tsuki/src/image-preview/__fixtures__/examples/transition.tsx)
+- [缩略图过渡：正方形 cover 缩略图打开后仍按原图比例完整展示。](../../../packages/tsuki/bak/src/image-preview/__fixtures__/examples/transition.tsx)
 
-- [聊天网络图片 · 300 张：虚拟化消息列表、独立缩略图、完整预览序列与长按自定义 Popup。](../../../packages/tsuki/src/image-preview/__fixtures__/examples/chat-messages.tsx)
+- [聊天网络图片 · 300 张：虚拟化消息列表、独立缩略图、完整预览序列与长按自定义 Popup。](../../../packages/tsuki/bak/src/image-preview/__fixtures__/examples/chat-messages.tsx)
 
 ## API
 

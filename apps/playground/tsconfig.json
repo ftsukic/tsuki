@@ -7,7 +7,8 @@
     "types": ["jest"],
     "paths": {
       "@/*": ["./*"],
-      "@ftsukic/tsuki": ["../../packages/tsuki/src"]
+      "@ftsukic/tsuki": ["../../packages/tsuki/bak/src"],
+      "@ftsukic/tsuki/*": ["../../packages/tsuki/bak/src/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"]

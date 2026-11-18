@@ -4,7 +4,7 @@
 
 Space 用于排列一组兄弟元素，提供方向、原生 `gap`、换行和交叉轴对齐能力。
 
-- [组件预览：Space 的横向、纵向、换行和对齐示例。](../../../packages/tsuki/src/space/__fixtures__/overview.tsx)
+- [组件预览：Space 的横向、纵向、换行和对齐示例。](../../../packages/tsuki/bak/src/space/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,11 +14,11 @@ import { Space } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [横向间距：横向排列一组操作项。](../../../packages/tsuki/src/space/__fixtures__/examples/basic.tsx)
+- [横向间距：横向排列一组操作项。](../../../packages/tsuki/bak/src/space/__fixtures__/examples/basic.tsx)
 
-- [纵向间距：纵向堆叠内容并保持固定 gap。](../../../packages/tsuki/src/space/__fixtures__/examples/vertical.tsx)
+- [纵向间距：纵向堆叠内容并保持固定 gap。](../../../packages/tsuki/bak/src/space/__fixtures__/examples/vertical.tsx)
 
-- [换行和对齐：启用 wrap 并设置交叉轴对齐。](../../../packages/tsuki/src/space/__fixtures__/examples/wrap.tsx)
+- [换行和对齐：启用 wrap 并设置交叉轴对齐。](../../../packages/tsuki/bak/src/space/__fixtures__/examples/wrap.tsx)
 
 ## API
 

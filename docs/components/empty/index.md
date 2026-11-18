@@ -4,7 +4,7 @@
 
 Empty 用于在列表、页面或内容区域没有可展示数据时提供统一的空状态反馈。默认图片使用项目内置的 Vant 默认空状态插画，不依赖网络或 Icon。
 
-- [组件预览：Empty 汇总默认图片、描述、操作区、自定义图片和主题定制示例。](../../../packages/tsuki/src/empty/__fixtures__/overview.tsx)
+- [组件预览：Empty 汇总默认图片、描述、操作区、自定义图片和主题定制示例。](../../../packages/tsuki/bak/src/empty/__fixtures__/overview.tsx)
 
 ## 引入
 
@@ -14,15 +14,15 @@ import { Button, Empty, Text } from '@ftsukic/tsuki'
 
 ## 代码演示
 
-- [默认 Empty：使用本地 Vant 默认空状态插画，不依赖网络或 Icon。](../../../packages/tsuki/src/empty/__fixtures__/examples/basic.tsx)
+- [默认 Empty：使用本地 Vant 默认空状态插画，不依赖网络或 Icon。](../../../packages/tsuki/bak/src/empty/__fixtures__/examples/basic.tsx)
 
-- [自定义 description：description 支持自定义 ReactNode。](../../../packages/tsuki/src/empty/__fixtures__/examples/custom-description.tsx)
+- [自定义 description：description 支持自定义 ReactNode。](../../../packages/tsuki/bak/src/empty/__fixtures__/examples/custom-description.tsx)
 
-- [自定义 image：image 支持自定义 ReactNode，imageSize 可调整容器尺寸。](../../../packages/tsuki/src/empty/__fixtures__/examples/custom-image.tsx)
+- [自定义 image：image 支持自定义 ReactNode，imageSize 可调整容器尺寸。](../../../packages/tsuki/bak/src/empty/__fixtures__/examples/custom-image.tsx)
 
-- [带 Button 操作：children 会渲染在只负责间距布局的底部操作区域。](../../../packages/tsuki/src/empty/__fixtures__/examples/action.tsx)
+- [带 Button 操作：children 会渲染在只负责间距布局的底部操作区域。](../../../packages/tsuki/bak/src/empty/__fixtures__/examples/action.tsx)
 
-- [主题定制：通过 Empty component token 调整图片尺寸、描述文字和底部间距。](../../../packages/tsuki/src/empty/__fixtures__/examples/theme.tsx)
+- [主题定制：通过 Empty component token 调整图片尺寸、描述文字和底部间距。](../../../packages/tsuki/bak/src/empty/__fixtures__/examples/theme.tsx)
 
 ## API
 
