@@ -8,7 +8,7 @@ import { SelectableText } from '@ftsukic/tsuki-native'
 import { SelectableText } from '@ftsukic/tsuki-native/selectable-text'
 ```
 
-当前阶段提供包入口、`text` 属性的 Codegen 规范和原生构建配置。Fabric 挂载与文本行为将在后续批次实现。
+SelectableText 接受必填字符串 text 和标准 ViewProps。给组件设置可用宽度和高度。onContentSizeChange 在首次布局和内容尺寸变化后回传 nativeEvent 中的 width 与 height，单位为 RN dp。本阶段提供原生文本显示。
 
 peerDependencies 暂时限定于两个构建目标。RN CLI 基线为 RN 0.82.1 和 React 19.1.1，Playground 锁定 RN 0.86.3 和 React 19.2.3。双端原生兼容性待宿主构建验证。Expo 消费者使用 Development Build。
 

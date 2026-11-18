@@ -29,15 +29,28 @@ assert.ok(
   ),
 )
 
+const sizeEvent = component.events.find((event) => event.name === 'onContentSizeChange')
+assert.equal(sizeEvent?.bubblingType, 'direct')
+assert.deepEqual(
+  sizeEvent.typeAnnotation.argument.properties.map((prop) => [prop.name, prop.typeAnnotation.type]),
+  [
+    ['width', 'FloatTypeAnnotation'],
+    ['height', 'FloatTypeAnnotation'],
+  ],
+)
+
 const required = [
   'package.json',
   'README.md',
   'LICENSE',
   'TsukiNative.podspec',
   'ios/selectable-text/TsukiSelectableTextComponentView.h',
+  'ios/selectable-text/TsukiSelectableTextComponentView.mm',
   'android/build.gradle',
   'android/src/main/AndroidManifest.xml',
   'android/src/main/java/com/ftsukic/tsukinative/TsukiNativePackage.kt',
+  'android/src/main/java/com/ftsukic/tsukinative/selectabletext/TsukiSelectableTextManager.kt',
+  'android/src/main/java/com/ftsukic/tsukinative/selectabletext/TsukiSelectableTextView.kt',
   spec,
 ]
 
