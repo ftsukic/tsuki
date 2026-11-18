@@ -3,7 +3,11 @@ const path = require('node:path')
 
 const repositoryRoot = path.resolve(__dirname, '..')
 const sourceRoot = path.join(repositoryRoot, 'packages', 'tsuki', 'bak', 'src')
-const v2IconFixtures = path.join(repositoryRoot, 'packages', 'tsuki', 'src', 'icon', '__fixtures__')
+const v2SourceRoot = path.join(repositoryRoot, 'packages', 'tsuki', 'src')
+const v2Fixtures = {
+  icon: { id: 'icon', fixtureRoot: path.join(v2SourceRoot, 'icon', '__fixtures__') },
+  space: { id: 'space-v2', fixtureRoot: path.join(v2SourceRoot, 'space', '__fixtures__') },
+}
 const outputPath = path.join(repositoryRoot, 'apps', 'playground', 'fixtures', 'catalog.ts')
 
 function walk(directory) {
@@ -62,9 +66,17 @@ const componentDirectories = fs
   .map((entry) => entry.name)
   .sort((left, right) => left.localeCompare(right))
 
-const fixtures = componentDirectories.map((component, index) => {
-  const fixtureRoot =
-    component === 'icon' ? v2IconFixtures : path.join(sourceRoot, component, '__fixtures__')
+const fixtureSources = new Map(
+  componentDirectories.map((component) => [
+    component,
+    path.join(sourceRoot, component, '__fixtures__'),
+  ]),
+)
+for (const { id, fixtureRoot } of Object.values(v2Fixtures)) {
+  fixtureSources.set(id, fixtureRoot)
+}
+
+const fixtures = Array.from(fixtureSources, ([component, fixtureRoot], index) => {
   const examplesRoot = path.join(fixtureRoot, 'examples')
   const overviewPath = path.join(fixtureRoot, 'overview.tsx')
   const directFixtureFiles = fs
@@ -97,15 +109,16 @@ const fixtures = componentDirectories.map((component, index) => {
 
   const overviewSource = fs.readFileSync(overviewPath, 'utf8')
   const relativeOverviewPath = toPosix(path.relative(path.dirname(outputPath), overviewPath))
-  const title = componentTitle(component)
+  const title = readTag(overviewSource, 'title')
+  const displayTitle = component === 'space-v2' && title ? title : componentTitle(component)
 
   return {
     component,
-    description: readTag(overviewSource, 'description') || `${title} component overview.`,
+    description: readTag(overviewSource, 'description') || `${displayTitle} component overview.`,
     id: component,
     importName: `ComponentOverview${index}`,
     importPath: relativeOverviewPath.replace(/\.tsx$/, ''),
-    title,
+    title: displayTitle,
   }
 })
 

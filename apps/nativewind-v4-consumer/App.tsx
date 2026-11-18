@@ -6,6 +6,7 @@ import {
   Icon,
   Input,
   serializeTheme,
+  Space,
   Text,
   TextClassContext,
   TsukiProvider,
@@ -74,6 +75,7 @@ function NestedScope() {
 
 export default function App() {
   const systemScheme = useColorScheme()
+  const [gap, setGap] = useState(7)
   const [iconPresses, setIconPresses] = useState(0)
   const [appearance, setAppearance] = useState<AppearanceChoice>('system')
   const scheme: ThemeScheme =
@@ -154,6 +156,33 @@ export default function App() {
             <Icon name="CheckCircleTwoTone" size={32} />
             <Text>Icon presses: {iconPresses}</Text>
           </View>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setGap((value) => (value === 7 ? 19 : 7))}
+          >
+            <Text>Change Space gap ({gap})</Text>
+          </Pressable>
+          <Space gap={gap} className="bg-tsuki-surface">
+            <Text>Gap A</Text>
+            <Text>Gap B</Text>
+          </Space>
+          <Space gap={7} className="flex-col gap-4">
+            <Text>Class A</Text>
+            <Text>Class B</Text>
+          </Space>
+          <Space
+            direction="vertical"
+            gap={7}
+            className="flex-col gap-4"
+            style={{ flexDirection: 'row', gap: 24 }}
+          >
+            <Text>Style A</Text>
+            <Text>Style B</Text>
+          </Space>
+          <Space gap={8} wrap style={{ width: 120 }}>
+            <Text style={{ width: 80 }}>Wrap A</Text>
+            <Text style={{ width: 80 }}>Wrap B</Text>
+          </Space>
           <NestedScope />
         </ScrollView>
       </ThemeVariables>

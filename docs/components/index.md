@@ -1,6 +1,16 @@
 # 组件
 
-当前已实现：
+## Tsuki v2
+
+- [Button](./v2/button/index.md)
+- [Icon](./icon/index.md)
+- [Input](./v2/input/index.md)
+- [Space](./v2/space/index.md)
+- [Text](./text/index.md)
+
+## Tsuki 1.x 历史组件
+
+历史 API 的示例保存在 `packages/tsuki/bak/src/<component>/__fixtures__/`。
 
 - [Avatar](./avatar/index.md)、[Badge](./badge/index.md)、[Tag](./tag/index.md)
 - [ActionSheet](./action-sheet/index.md)
@@ -13,7 +23,7 @@
 - [Empty](./empty/index.md)
 - [Field](./field/index.md)、[Input](./input/index.md)
 - [Flex](./flex/index.md)、[FloatingBubble](./floating-bubble/index.md)、[FloatingPanel](./floating-panel/index.md)、[Grid](./grid/index.md)、[Layout](./layout/index.md)、[Space](./space/index.md)
-- [Icon](./icon/index.md)、[Loading](./loading/index.md)
+- [Loading](./loading/index.md)
 - [ImagePreview](./image-preview/index.md)
 - [Slider](./slider/index.md)
 - [Skeleton](./skeleton/index.md)
@@ -23,10 +33,7 @@
 - [Popover](./popover/index.md)
 - [Picker](./picker/index.md)、[PickerGroup](./picker-group/index.md)、[Progress](./progress/index.md)、[TsukiProvider](./provider/index.md)、[Radio](./radio/index.md)
 - [Segmented](./segmented/index.md)、[Surface](./surface/index.md)
-- [Search](./search/index.md)、[Tabs](./tabs/index.md)、[Text](./text/index.md)、[Theme](./theme/index.md)、[Toast](./toast/index.md)
+- [Search](./search/index.md)、[Tabs](./tabs/index.md)、[Theme](./theme/index.md)、[Toast](./toast/index.md)
 - [SwipeCell](./swipe-cell/index.md)
 - [Swipe](./swipe/index.md)
 - [Switch](./switch/index.md)、[Watermark](./watermark/index.md)
-- **Tsuki v2 canary:** [Button](./v2/button/index.md)、[Input](./v2/input/index.md)
-
-上方未标版本的组件页面记录 1.x 历史 API，对应示例位于 `packages/tsuki/bak/src/<component>/__fixtures__/`。Tsuki v2 Button 和 Input 的新 API 与示例单独记录在 `v2/`。

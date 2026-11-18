@@ -9,6 +9,7 @@ export const componentCategories = [
       'layout',
       'flex',
       'space',
+      'space-v2',
       'text',
       'surface',
       'popup',
