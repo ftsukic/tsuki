@@ -8,6 +8,7 @@ import {
   Input,
   serializeTheme,
   Space,
+  Surface,
   Text,
   TextClassContext,
   TsukiProvider,
@@ -76,6 +77,7 @@ function NestedScope() {
 
 export default function App() {
   const systemScheme = useColorScheme()
+  const [surfacePadding, setSurfacePadding] = useState(10)
   const [dividerThickness, setDividerThickness] = useState(3)
   const [gap, setGap] = useState(7)
   const [iconPresses, setIconPresses] = useState(0)
@@ -112,6 +114,49 @@ export default function App() {
           >
             <Text className="text-tsuki-foreground">Change scheme ({appearance})</Text>
           </Pressable>
+          <Surface testID="surface-default" className="opacity-100">
+            <Text>Surface default</Text>
+          </Surface>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setSurfacePadding((value) => (value === 10 ? 20 : 10))}
+          >
+            <Text>Change surface padding ({surfacePadding})</Text>
+          </Pressable>
+          <ConfigProvider
+            theme={{
+              semantic: { colorSurface: '#7c3aed', colorBorder: '#f59e0b' },
+              components: { Surface: { borderRadius: 6, padding: surfacePadding, borderWidth: 2 } },
+            }}
+          >
+            <Surface bordered inset className="opacity-100" testID="surface-theme">
+              <Text>Surface theme</Text>
+            </Surface>
+          </ConfigProvider>
+          <Surface
+            bordered
+            radius={3}
+            padding={2}
+            borderWidth={1}
+            className="bg-red-500 rounded-xl p-4 border-4 border-green-500"
+            testID="surface-class"
+          >
+            <Text>Surface class</Text>
+          </Surface>
+          <Surface
+            className="bg-red-500 rounded-xl p-4 border-4 border-green-500"
+            style={{
+              backgroundColor: '#15803d',
+              borderRadius: 0,
+              borderWidth: 2,
+              borderColor: '#123456',
+              padding: 7,
+            }}
+            testID="surface-style"
+          >
+            <Text>Surface style</Text>
+          </Surface>
+
           <Divider className="opacity-100" testID="divider-default" />
           <Pressable
             accessibilityRole="button"

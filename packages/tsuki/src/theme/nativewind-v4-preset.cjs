@@ -18,6 +18,7 @@ module.exports = {
       borderRadius: {
         'tsuki-button': 'var(--tsuki-button-border-radius)',
         'tsuki-input': 'var(--tsuki-input-border-radius)',
+        'tsuki-surface': 'var(--tsuki-surface-border-radius)',
       },
       height: {
         'tsuki-button': 'var(--tsuki-button-height)',
@@ -25,6 +26,10 @@ module.exports = {
       },
       spacing: {
         'tsuki-divider': 'var(--tsuki-divider-thickness)',
+        'tsuki-surface': 'var(--tsuki-surface-padding)',
+      },
+      borderWidth: {
+        'tsuki-surface-width': 'var(--tsuki-surface-border-width)',
       },
     },
   },

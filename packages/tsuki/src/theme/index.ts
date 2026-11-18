@@ -10,6 +10,7 @@ export type {
   InputThemeTokens,
   ResolvedTheme,
   SemanticTokens,
+  SurfaceThemeTokens,
   ThemeConfig,
   ThemeScheme,
   ThemeVariables,

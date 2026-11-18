@@ -5,9 +5,10 @@ import { extendTailwindMerge } from 'tailwind-merge'
 const mergeTailwindClasses = extendTailwindMerge({
   extend: {
     theme: {
-      radius: ['tsuki-button', 'tsuki-input'],
-      spacing: ['tsuki-button', 'tsuki-input', 'tsuki-divider'],
+      radius: ['tsuki-button', 'tsuki-input', 'tsuki-surface'],
+      spacing: ['tsuki-button', 'tsuki-input', 'tsuki-divider', 'tsuki-surface'],
     },
+    classGroups: { 'border-w': [{ border: ['tsuki-surface-width'] }] },
   },
 })
 

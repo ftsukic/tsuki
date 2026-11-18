@@ -11,6 +11,7 @@ export function mergeTheme(parent: ResolvedTheme, override?: ThemeConfig): Resol
       Button: { ...base.components.Button, ...override?.components?.Button },
       Divider: { ...base.components.Divider, ...override?.components?.Divider },
       Input: { ...base.components.Input, ...override?.components?.Input },
+      Surface: { ...base.components.Surface, ...override?.components?.Surface },
     },
   }
 }

@@ -15,6 +15,8 @@ export type { InputClassNames, InputProps, InputStyles } from './input'
 export { Space } from './space'
 export type { SpaceProps } from './space'
 export { cn } from './style'
+export { Surface } from './surface'
+export type { SurfaceProps } from './surface'
 export { Text, TextClassContext } from './text'
 export type { TextProps, TextVariant } from './text'
 export { ConfigProvider, serializeTheme, TsukiProvider, useTsukiTheme } from './theme'
@@ -25,6 +27,7 @@ export type {
   InputThemeTokens,
   ResolvedTheme,
   SemanticTokens,
+  SurfaceThemeTokens,
   ThemeConfig,
   ThemeScheme,
   ThemeVariables,

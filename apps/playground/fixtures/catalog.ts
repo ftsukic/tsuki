@@ -45,7 +45,7 @@ import ComponentOverview40 from '../../../packages/tsuki/bak/src/segmented/__fix
 import ComponentOverview41 from '../../../packages/tsuki/bak/src/skeleton/__fixtures__/overview'
 import ComponentOverview42 from '../../../packages/tsuki/bak/src/slider/__fixtures__/overview'
 import ComponentOverview43 from '../../../packages/tsuki/bak/src/space/__fixtures__/overview'
-import ComponentOverview44 from '../../../packages/tsuki/bak/src/surface/__fixtures__/overview'
+import ComponentOverview44 from '../../../packages/tsuki/src/surface/__fixtures__/overview'
 import ComponentOverview45 from '../../../packages/tsuki/bak/src/swipe/__fixtures__/overview'
 import ComponentOverview46 from '../../../packages/tsuki/bak/src/swipe-cell/__fixtures__/overview'
 import ComponentOverview47 from '../../../packages/tsuki/bak/src/switch/__fixtures__/overview'
@@ -385,7 +385,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview44,
     component: 'surface',
-    description: 'Surface provides a rounded visual container for related mobile content.',
+    description: 'V2 visual containers with padding, borders, insets, theme and class overrides.',
     id: 'surface',
     title: 'Surface',
   },

@@ -8,7 +8,8 @@
     "src/divider/__fixtures__/**/*.tsx",
     "src/icon/__fixtures__/**/*.tsx",
     "src/input/__fixtures__/**/*.tsx",
-    "src/space/__fixtures__/**/*.tsx"
+    "src/space/__fixtures__/**/*.tsx",
+    "src/surface/__fixtures__/**/*.tsx"
   ],
   "exclude": ["src/**/__tests__/**", "src/**/__mocks__/**"]
 }

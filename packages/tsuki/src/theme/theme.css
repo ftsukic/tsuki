@@ -17,6 +17,9 @@
   --tsuki-divider-thickness: 1px;
   --tsuki-input-border-radius: 8px;
   --tsuki-input-height: 44px;
+  --tsuki-surface-border-radius: 12px;
+  --tsuki-surface-padding: 16px;
+  --tsuki-surface-border-width: 1px;
 }
 
 [data-tsuki-scheme='dark'] {
@@ -35,4 +38,7 @@
   --tsuki-divider-thickness: 1px;
   --tsuki-input-border-radius: 8px;
   --tsuki-input-height: 44px;
+  --tsuki-surface-border-radius: 12px;
+  --tsuki-surface-padding: 16px;
+  --tsuki-surface-border-width: 1px;
 }

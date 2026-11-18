@@ -26,6 +26,9 @@ module.exports = withNativewind(config, {
       '--tsuki-input-border-radius',
       '--tsuki-input-height',
       '--tsuki-divider-thickness',
+      '--tsuki-surface-border-radius',
+      '--tsuki-surface-padding',
+      '--tsuki-surface-border-width',
     ],
   },
 })

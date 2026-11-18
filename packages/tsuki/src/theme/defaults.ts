@@ -1,6 +1,8 @@
 import { StyleSheet } from 'react-native'
 import type { ResolvedTheme, ThemeScheme } from './types'
 
+const surface = { borderRadius: 12, padding: 16, borderWidth: StyleSheet.hairlineWidth }
+
 const THEMES: Record<ThemeScheme, ResolvedTheme> = {
   light: {
     scheme: 'light',
@@ -20,6 +22,7 @@ const THEMES: Record<ThemeScheme, ResolvedTheme> = {
       Button: { borderRadius: 8, height: 44 },
       Divider: { thickness: StyleSheet.hairlineWidth },
       Input: { borderRadius: 8, height: 44 },
+      Surface: surface,
     },
   },
   dark: {
@@ -40,6 +43,7 @@ const THEMES: Record<ThemeScheme, ResolvedTheme> = {
       Button: { borderRadius: 8, height: 44 },
       Divider: { thickness: StyleSheet.hairlineWidth },
       Input: { borderRadius: 8, height: 44 },
+      Surface: surface,
     },
   },
 }
@@ -53,6 +57,7 @@ export function getDefaultTheme(scheme: ThemeScheme): ResolvedTheme {
       Button: { ...theme.components.Button },
       Divider: { ...theme.components.Divider },
       Input: { ...theme.components.Input },
+      Surface: { ...theme.components.Surface },
     },
   }
 }

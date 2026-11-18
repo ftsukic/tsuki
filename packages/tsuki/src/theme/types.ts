@@ -27,12 +27,19 @@ export interface DividerThemeTokens {
   thickness: number
 }
 
+export interface SurfaceThemeTokens {
+  borderRadius: number
+  padding: number
+  borderWidth: number
+}
+
 export interface ThemeConfig {
   semantic?: Partial<SemanticTokens>
   components?: {
     Button?: Partial<ButtonThemeTokens>
     Divider?: Partial<DividerThemeTokens>
     Input?: Partial<InputThemeTokens>
+    Surface?: Partial<SurfaceThemeTokens>
   }
   inherit?: boolean
 }
@@ -44,6 +51,7 @@ export interface ResolvedTheme {
     Button: ButtonThemeTokens
     Divider: DividerThemeTokens
     Input: InputThemeTokens
+    Surface: SurfaceThemeTokens
   }
 }
 

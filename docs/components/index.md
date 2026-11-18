@@ -7,6 +7,7 @@
 - [Icon](./icon/index.md)
 - [Input](./v2/input/index.md)
 - [Space](./v2/space/index.md)
+- [Surface](./v2/surface/index.md)
 - [Text](./text/index.md)
 
 ## Tsuki 1.x 历史组件
