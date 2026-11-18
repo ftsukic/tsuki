@@ -6,6 +6,8 @@ export type {
   ButtonStyles,
   ButtonVariant,
 } from './button'
+export { Icon } from './icon'
+export type { IconDefinition, IconName, IconProps } from './icon'
 export { Input } from './input'
 export type { InputClassNames, InputProps, InputStyles } from './input'
 export { cn } from './style'

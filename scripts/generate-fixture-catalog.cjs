@@ -3,6 +3,7 @@ const path = require('node:path')
 
 const repositoryRoot = path.resolve(__dirname, '..')
 const sourceRoot = path.join(repositoryRoot, 'packages', 'tsuki', 'bak', 'src')
+const v2IconFixtures = path.join(repositoryRoot, 'packages', 'tsuki', 'src', 'icon', '__fixtures__')
 const outputPath = path.join(repositoryRoot, 'apps', 'playground', 'fixtures', 'catalog.ts')
 
 function walk(directory) {
@@ -62,7 +63,8 @@ const componentDirectories = fs
   .sort((left, right) => left.localeCompare(right))
 
 const fixtures = componentDirectories.map((component, index) => {
-  const fixtureRoot = path.join(sourceRoot, component, '__fixtures__')
+  const fixtureRoot =
+    component === 'icon' ? v2IconFixtures : path.join(sourceRoot, component, '__fixtures__')
   const examplesRoot = path.join(fixtureRoot, 'examples')
   const overviewPath = path.join(fixtureRoot, 'overview.tsx')
   const directFixtureFiles = fs

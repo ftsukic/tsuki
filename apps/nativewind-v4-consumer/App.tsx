@@ -3,6 +3,7 @@ import type { PropsWithChildren } from 'react'
 import {
   Button,
   ConfigProvider,
+  Icon,
   Input,
   serializeTheme,
   Text,
@@ -73,6 +74,7 @@ function NestedScope() {
 
 export default function App() {
   const systemScheme = useColorScheme()
+  const [iconPresses, setIconPresses] = useState(0)
   const [appearance, setAppearance] = useState<AppearanceChoice>('system')
   const scheme: ThemeScheme =
     appearance === 'system' ? (systemScheme === 'dark' ? 'dark' : 'light') : appearance
@@ -139,6 +141,19 @@ export default function App() {
             styles={{ input: { letterSpacing: 0.1 } }}
             testID="root-input"
           />
+          <View className="flex-row items-center gap-4">
+            <View style={{ padding: 16 }}>
+              <Icon
+                accessibilityLabel="Increment icon count"
+                name="PlusOutlined"
+                size={20}
+                touchableSize={44}
+                onPress={() => setIconPresses((count) => count + 1)}
+              />
+            </View>
+            <Icon name="CheckCircleTwoTone" size={32} />
+            <Text>Icon presses: {iconPresses}</Text>
+          </View>
           <NestedScope />
         </ScrollView>
       </ThemeVariables>

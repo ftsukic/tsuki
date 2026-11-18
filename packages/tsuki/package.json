@@ -49,6 +49,7 @@
     "**/*.css"
   ],
   "dependencies": {
+    "@ant-design/icons-svg": "^4.6.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "tailwind-merge": "^3.7.0"
@@ -103,7 +104,6 @@
     "typescript": "~6.0.3",
     "@ant-design/colors": "^8.0.1",
     "@ant-design/fast-color": "^3.0.1",
-    "@ant-design/icons-svg": "^4.6.0",
     "react-native-popover-view": "^6.1.0"
   },
   "react-native-builder-bob": {

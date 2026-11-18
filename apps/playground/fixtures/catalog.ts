@@ -21,7 +21,7 @@ import ComponentOverview16 from '../../../packages/tsuki/bak/src/floating-bubble
 import ComponentOverview17 from '../../../packages/tsuki/bak/src/floating-panel/__fixtures__/overview'
 import ComponentOverview18 from '../../../packages/tsuki/bak/src/gesture/__fixtures__/overview'
 import ComponentOverview19 from '../../../packages/tsuki/bak/src/grid/__fixtures__/overview'
-import ComponentOverview20 from '../../../packages/tsuki/bak/src/icon/__fixtures__/overview'
+import ComponentOverview20 from '../../../packages/tsuki/src/icon/__fixtures__/overview'
 import ComponentOverview21 from '../../../packages/tsuki/bak/src/image-preview/__fixtures__/overview'
 import ComponentOverview22 from '../../../packages/tsuki/bak/src/input/__fixtures__/overview'
 import ComponentOverview23 from '../../../packages/tsuki/bak/src/layout/__fixtures__/overview'
@@ -212,7 +212,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview20,
     component: 'icon',
-    description: 'Icon 展示图标颜色、尺寸和可触摸图标。',
+    description: 'V2 icons with sizes, colors, custom SVG definitions and touch targets.',
     id: 'icon',
     title: 'Icon',
   },
