@@ -1,0 +1,51 @@
+name: Publish Tsuki Native
+
+on:
+  push:
+    tags:
+      - 'tsuki-native-v*'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm-publish-native
+    env:
+      HUSKY: 0
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          package-manager-cache: false
+          registry-url: https://registry.npmjs.org
+      - uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+      - name: Validate release ref
+        run: |
+          git merge-base --is-ancestor "$GITHUB_SHA" origin/main
+          node <<'NODE'
+          const { version } = require('./packages/tsuki-native/package.json')
+          if (version === '0.0.0' || process.env.GITHUB_REF_NAME !== 'tsuki-native-v' + version) {
+            throw new Error('Invalid Tsuki Native release tag')
+          }
+          NODE
+          if [[ "${GITHUB_REF_NAME#tsuki-native-v}" == *-* ]]; then
+            echo "NPM_TAG=next" >> "$GITHUB_ENV"
+          else
+            echo "NPM_TAG=latest" >> "$GITHUB_ENV"
+          fi
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @ftsukic/tsuki-native typecheck
+      - run: pnpm --filter @ftsukic/tsuki-native lint
+      - run: pnpm --filter @ftsukic/tsuki-native build
+      - run: pnpm --filter @ftsukic/tsuki-native release:check-package
+      - name: Publish Tsuki Native
+        working-directory: packages/tsuki-native
+        run: npm publish --access public --provenance --tag "$NPM_TAG"

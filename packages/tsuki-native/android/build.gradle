@@ -1,0 +1,22 @@
+apply plugin: 'com.android.library'
+apply plugin: 'org.jetbrains.kotlin.android'
+apply plugin: 'com.facebook.react'
+
+android {
+    namespace 'com.ftsukic.tsukinative'
+    compileSdk rootProject.ext.compileSdkVersion
+
+    defaultConfig {
+        minSdk rootProject.ext.minSdkVersion
+    }
+}
+
+react {
+    jsRootDir = file('../src')
+    libraryName = 'TsukiNativeSpec'
+    codegenJavaPackageName = 'com.ftsukic.tsukinative'
+}
+
+dependencies {
+    implementation 'com.facebook.react:react-android'
+}

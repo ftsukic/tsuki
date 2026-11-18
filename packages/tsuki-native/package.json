@@ -1,0 +1,91 @@
+{
+  "name": "@ftsukic/tsuki-native",
+  "version": "0.0.0",
+  "description": "Fabric native components for React Native.",
+  "license": "MIT",
+  "homepage": "https://github.com/ftsukic/tsuki#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ftsukic/tsuki.git",
+    "directory": "packages/tsuki-native"
+  },
+  "source": "src/index.ts",
+  "main": "dist/index.js",
+  "react-native": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "react-native": {
+        "types": "./dist/index.d.ts",
+        "default": "./src/index.ts"
+      },
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./selectable-text": {
+      "react-native": {
+        "types": "./dist/selectable-text/index.d.ts",
+        "default": "./src/selectable-text/index.ts"
+      },
+      "import": {
+        "types": "./dist/selectable-text/index.d.ts",
+        "default": "./dist/selectable-text/index.js"
+      },
+      "require": {
+        "types": "./dist/selectable-text/index.d.ts",
+        "default": "./dist/selectable-text/index.js"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "ios",
+    "android/build.gradle",
+    "android/src",
+    "TsukiNative.podspec",
+    "README.md",
+    "LICENSE"
+  ],
+  "peerDependencies": {
+    "react": "19.1.1 || 19.2.3",
+    "react-native": "0.82.1 || 0.86.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src ../../scripts/validate-native-package.cjs",
+    "release:check-package": "node ../../scripts/validate-native-package.cjs"
+  },
+  "devDependencies": {
+    "@react-native/codegen": "0.82.1",
+    "@types/react": "19.2.18",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "typescript": "~6.0.3"
+  },
+  "codegenConfig": {
+    "name": "TsukiNativeSpec",
+    "type": "components",
+    "jsSrcsDir": "src",
+    "android": {
+      "javaPackageName": "com.ftsukic.tsukinative"
+    },
+    "ios": {
+      "components": {
+        "TsukiSelectableText": {
+          "className": "TsukiSelectableTextComponentView"
+        }
+      }
+    }
+  }
+}
