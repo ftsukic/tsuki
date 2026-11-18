@@ -22,6 +22,7 @@ export function Example() {
 | `background`  | `ColorValue`            | `semantic.colorSurface`                              |
 | `radius`      | `number`                | `components.Surface.borderRadius`，12 dp             |
 | `padding`     | `number`                | `components.Surface.padding`，16 dp                  |
+| `gap`         | `number`                | 原生默认值，控制直接子节点间距                       |
 | `bordered`    | `boolean`               | `false`                                              |
 | `borderColor` | `ColorValue`            | `semantic.colorBorder`                               |
 | `borderWidth` | `number`                | `components.Surface.borderWidth`，设备 hairline      |

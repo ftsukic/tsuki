@@ -16,6 +16,7 @@ export function Surface({
   background,
   radius,
   padding,
+  gap,
   bordered = false,
   borderColor,
   borderWidth,
@@ -35,6 +36,7 @@ export function Surface({
     padding: padding ?? tokens.padding,
     marginHorizontal: inset ? tokens.padding : 0,
     overflow,
+    ...(gap !== undefined && { gap }),
     ...(bordered && {
       borderColor: borderColor ?? semantic.colorBorder,
       borderWidth: borderWidth ?? tokens.borderWidth,
@@ -46,6 +48,7 @@ export function Surface({
         '--tsuki-surface-radius': radius ?? tokens.borderRadius,
         '--tsuki-surface-padding-value': padding ?? tokens.padding,
         '--tsuki-surface-inset-value': inset ? tokens.padding : 0,
+        ...(gap !== undefined && { '--tsuki-surface-gap-value': gap }),
         ...(bordered && {
           '--tsuki-surface-stroke': borderColor ?? semantic.colorBorder,
           '--tsuki-surface-stroke-width': borderWidth ?? tokens.borderWidth,
@@ -69,6 +72,7 @@ export function Surface({
           'bg-[color:var(--tsuki-surface-bg)] rounded-[var(--tsuki-surface-radius)]',
           'p-[var(--tsuki-surface-padding-value)] mx-[var(--tsuki-surface-inset-value)] will-change-variable',
           overflowClasses[overflow],
+          gap !== undefined && 'gap-[var(--tsuki-surface-gap-value)]',
           bordered &&
             'border-[length:var(--tsuki-surface-stroke-width)] border-[color:var(--tsuki-surface-stroke)]',
           className,
@@ -76,7 +80,18 @@ export function Surface({
       : className,
     // NativeWind does not compile overflow: scroll on every consumer.
     style: variables
-      ? [variables, overflow === 'scroll' && { overflow }, style, margins]
+      ? [
+          variables,
+          overflow === 'scroll' && { overflow },
+          style,
+          margins,
+          // Tailwind may expand gap utilities to per-axis properties.
+          gap !== undefined &&
+            inline?.gap != null && {
+              rowGap: inline.rowGap ?? inline.gap,
+              columnGap: inline.columnGap ?? inline.gap,
+            },
+        ]
       : [layout, style],
   }
   return createElement(View, props)

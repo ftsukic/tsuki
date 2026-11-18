@@ -3,6 +3,7 @@
 ## Tsuki v2
 
 - [Button](./v2/button/index.md)
+- [Card](./v2/card/index.md)
 - [Divider](./v2/divider/index.md)
 - [Icon](./icon/index.md)
 - [Input](./v2/input/index.md)

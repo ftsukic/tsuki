@@ -6,6 +6,8 @@ export type {
   ButtonStyles,
   ButtonVariant,
 } from './button'
+export { Card } from './card'
+export type { CardBodyProps, CardFooterProps, CardHeaderProps, CardProps } from './card'
 export { Divider } from './divider'
 export type { DividerProps } from './divider'
 export { Icon } from './icon'
@@ -22,6 +24,7 @@ export type { TextProps, TextVariant } from './text'
 export { ConfigProvider, serializeTheme, TsukiProvider, useTsukiTheme } from './theme'
 export type {
   ButtonThemeTokens,
+  CardThemeTokens,
   ConfigProviderProps,
   DividerThemeTokens,
   InputThemeTokens,

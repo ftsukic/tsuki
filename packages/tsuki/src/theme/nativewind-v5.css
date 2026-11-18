@@ -16,6 +16,12 @@
   --spacing-tsuki-divider: var(--tsuki-divider-thickness);
   --radius-tsuki-surface: var(--tsuki-surface-border-radius);
   --spacing-tsuki-surface: var(--tsuki-surface-padding);
+  --radius-tsuki-card: var(--tsuki-card-border-radius);
+  --spacing-tsuki-card: var(--tsuki-card-padding);
+  --spacing-tsuki-card-header: var(--tsuki-card-header-padding);
+  --spacing-tsuki-card-body: var(--tsuki-card-body-padding);
+  --spacing-tsuki-card-footer: var(--tsuki-card-footer-padding);
+  --spacing-tsuki-card-gap: var(--tsuki-card-gap);
 }
 
 @utility border-tsuki-surface-width {

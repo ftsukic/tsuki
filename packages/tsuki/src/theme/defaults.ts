@@ -2,6 +2,14 @@ import { StyleSheet } from 'react-native'
 import type { ResolvedTheme, ThemeScheme } from './types'
 
 const surface = { borderRadius: 12, padding: 16, borderWidth: StyleSheet.hairlineWidth }
+const card = {
+  borderRadius: 12,
+  padding: 16,
+  headerPadding: 16,
+  bodyPadding: 16,
+  footerPadding: 16,
+  gap: 0,
+}
 
 const THEMES: Record<ThemeScheme, ResolvedTheme> = {
   light: {
@@ -20,6 +28,7 @@ const THEMES: Record<ThemeScheme, ResolvedTheme> = {
     },
     components: {
       Button: { borderRadius: 8, height: 44 },
+      Card: card,
       Divider: { thickness: StyleSheet.hairlineWidth },
       Input: { borderRadius: 8, height: 44 },
       Surface: surface,
@@ -41,6 +50,7 @@ const THEMES: Record<ThemeScheme, ResolvedTheme> = {
     },
     components: {
       Button: { borderRadius: 8, height: 44 },
+      Card: card,
       Divider: { thickness: StyleSheet.hairlineWidth },
       Input: { borderRadius: 8, height: 44 },
       Surface: surface,
@@ -55,6 +65,7 @@ export function getDefaultTheme(scheme: ThemeScheme): ResolvedTheme {
     semantic: { ...theme.semantic },
     components: {
       Button: { ...theme.components.Button },
+      Card: { ...theme.components.Card },
       Divider: { ...theme.components.Divider },
       Input: { ...theme.components.Input },
       Surface: { ...theme.components.Surface },

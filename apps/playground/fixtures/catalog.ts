@@ -56,7 +56,8 @@ import ComponentOverview51 from '../../../packages/tsuki/bak/src/theme/__fixture
 import ComponentOverview52 from '../../../packages/tsuki/bak/src/time-picker/__fixtures__/overview'
 import ComponentOverview53 from '../../../packages/tsuki/bak/src/toast/__fixtures__/overview'
 import ComponentOverview54 from '../../../packages/tsuki/bak/src/watermark/__fixtures__/overview'
-import ComponentOverview55 from '../../../packages/tsuki/src/space/__fixtures__/overview'
+import ComponentOverview55 from '../../../packages/tsuki/src/card/__fixtures__/overview'
+import ComponentOverview56 from '../../../packages/tsuki/src/space/__fixtures__/overview'
 
 export interface ComponentFixtureEntry {
   Component: ComponentType
@@ -461,6 +462,13 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   },
   {
     Component: ComponentOverview55,
+    component: 'card',
+    description: 'V2 cards with optional content sections, actions, class and theme overrides.',
+    id: 'card',
+    title: 'Card',
+  },
+  {
+    Component: ComponentOverview56,
     component: 'space-v2',
     description: 'Native child spacing, direction, wrapping and NativeWind layout overrides.',
     id: 'space-v2',

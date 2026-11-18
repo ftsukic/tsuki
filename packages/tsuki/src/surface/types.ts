@@ -4,6 +4,7 @@ export interface SurfaceProps extends ViewProps {
   background?: ColorValue
   radius?: number
   padding?: number
+  gap?: number
   bordered?: boolean
   borderColor?: ColorValue
   borderWidth?: number

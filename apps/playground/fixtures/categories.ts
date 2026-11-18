@@ -4,6 +4,7 @@ export const componentCategories = [
     title: '基础组件',
     components: [
       'button',
+      'card',
       'cell',
       'icon',
       'layout',

@@ -9,6 +9,7 @@ export function mergeTheme(parent: ResolvedTheme, override?: ThemeConfig): Resol
     semantic: { ...base.semantic, ...override?.semantic },
     components: {
       Button: { ...base.components.Button, ...override?.components?.Button },
+      Card: { ...base.components.Card, ...override?.components?.Card },
       Divider: { ...base.components.Divider, ...override?.components?.Divider },
       Input: { ...base.components.Input, ...override?.components?.Input },
       Surface: { ...base.components.Surface, ...override?.components?.Surface },

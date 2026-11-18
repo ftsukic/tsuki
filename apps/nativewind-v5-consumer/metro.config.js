@@ -29,6 +29,12 @@ module.exports = withNativewind(config, {
       '--tsuki-surface-border-radius',
       '--tsuki-surface-padding',
       '--tsuki-surface-border-width',
+      '--tsuki-card-border-radius',
+      '--tsuki-card-padding',
+      '--tsuki-card-header-padding',
+      '--tsuki-card-body-padding',
+      '--tsuki-card-footer-padding',
+      '--tsuki-card-gap',
     ],
   },
 })

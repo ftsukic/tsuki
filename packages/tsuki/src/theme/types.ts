@@ -33,10 +33,20 @@ export interface SurfaceThemeTokens {
   borderWidth: number
 }
 
+export interface CardThemeTokens {
+  borderRadius: number
+  padding: number
+  headerPadding: number
+  bodyPadding: number
+  footerPadding: number
+  gap: number
+}
+
 export interface ThemeConfig {
   semantic?: Partial<SemanticTokens>
   components?: {
     Button?: Partial<ButtonThemeTokens>
+    Card?: Partial<CardThemeTokens>
     Divider?: Partial<DividerThemeTokens>
     Input?: Partial<InputThemeTokens>
     Surface?: Partial<SurfaceThemeTokens>
@@ -49,6 +59,7 @@ export interface ResolvedTheme {
   semantic: SemanticTokens
   components: {
     Button: ButtonThemeTokens
+    Card: CardThemeTokens
     Divider: DividerThemeTokens
     Input: InputThemeTokens
     Surface: SurfaceThemeTokens

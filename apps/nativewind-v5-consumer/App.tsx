@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { PropsWithChildren } from 'react'
 import {
   Button,
+  Card,
   ConfigProvider,
   Divider,
   Icon,
@@ -77,6 +78,7 @@ function NestedScope() {
 
 export default function App() {
   const systemScheme = useColorScheme()
+  const [cardSaved, setCardSaved] = useState(false)
   const [surfacePadding, setSurfacePadding] = useState(10)
   const [dividerThickness, setDividerThickness] = useState(3)
   const [gap, setGap] = useState(7)
@@ -114,6 +116,38 @@ export default function App() {
           >
             <Text className="text-tsuki-foreground">Change scheme ({appearance})</Text>
           </Pressable>
+          <Card testID="card-simple" className="opacity-100">
+            <Text>Simple card</Text>
+          </Card>
+          <ConfigProvider
+            theme={{
+              components: { Card: { padding: cardSaved ? 10 : 6, headerPadding: 4, gap: 8 } },
+            }}
+          >
+            <Card testID="card-full" bordered className="opacity-100">
+              <Card.Header testID="card-header" className="p-2">
+                <Space align="center" gap={4}>
+                  <Icon name="InfoCircleOutlined" />
+                  <Text>Card details</Text>
+                </Space>
+              </Card.Header>
+              <Card.Body testID="card-body" className="p-4" style={{ padding: 8 }}>
+                <Text>{cardSaved ? 'Card saved' : 'Card body'}</Text>
+              </Card.Body>
+              <Card.Footer testID="card-footer" className="p-1">
+                <Button onPress={() => setCardSaved(true)}>Save card</Button>
+              </Card.Footer>
+            </Card>
+          </ConfigProvider>
+          <Card
+            testID="card-overrides"
+            className="bg-red-500 p-4 gap-4"
+            style={{ backgroundColor: '#15803d', padding: 5, gap: 3 }}
+          >
+            <Text>Override first</Text>
+            <Text>Override second</Text>
+          </Card>
+
           <Surface testID="surface-default" className="opacity-100">
             <Text>Surface default</Text>
           </Surface>

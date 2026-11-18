@@ -5,8 +5,18 @@ import { extendTailwindMerge } from 'tailwind-merge'
 const mergeTailwindClasses = extendTailwindMerge({
   extend: {
     theme: {
-      radius: ['tsuki-button', 'tsuki-input', 'tsuki-surface'],
-      spacing: ['tsuki-button', 'tsuki-input', 'tsuki-divider', 'tsuki-surface'],
+      radius: ['tsuki-button', 'tsuki-card', 'tsuki-input', 'tsuki-surface'],
+      spacing: [
+        'tsuki-button',
+        'tsuki-card',
+        'tsuki-card-header',
+        'tsuki-card-body',
+        'tsuki-card-footer',
+        'tsuki-card-gap',
+        'tsuki-input',
+        'tsuki-divider',
+        'tsuki-surface',
+      ],
     },
     classGroups: { 'border-w': [{ border: ['tsuki-surface-width'] }] },
   },
