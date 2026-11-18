@@ -46,16 +46,6 @@ function rewriteConsumerForTarball(name, tarballPath) {
   if (tsconfig.compilerOptions) delete tsconfig.compilerOptions.paths
   fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n')
 
-  for (const fileName of ['global.css', 'tailwind.config.js']) {
-    const filePath = path.join(consumerRoot, fileName)
-    if (!fs.existsSync(filePath)) continue
-    const contents = fs.readFileSync(filePath, 'utf8')
-    fs.writeFileSync(
-      filePath,
-      contents.replaceAll('../../node_modules/@ftsukic/tsuki', './node_modules/@ftsukic/tsuki'),
-    )
-  }
-
   return consumerRoot
 }
 

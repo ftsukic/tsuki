@@ -5,4 +5,4 @@
 @import '@ftsukic/tsuki/theme.css';
 @import '@ftsukic/tsuki/nativewind-v5.css';
 
-@source '../../node_modules/@ftsukic/tsuki/dist';
+@source './node_modules/@ftsukic/tsuki/dist';

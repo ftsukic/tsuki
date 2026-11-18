@@ -1,9 +1,11 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import { createElement, forwardRef } from 'react'
-import type { ComponentRef, ReactNode, RefAttributes } from 'react'
-import { ActivityIndicator, Pressable, Text, View } from 'react-native'
-import type { PressableProps, TextProps, ViewProps } from 'react-native'
+import type { ComponentRef, RefAttributes } from 'react'
+import { ActivityIndicator, Pressable, View } from 'react-native'
+import type { PressableProps, ViewProps } from 'react-native'
 import { semanticClassName } from '../style/semantic'
+import { Text } from '../text'
+import { TextClassContext } from '../text/context'
 import { useTsukiTheme } from '../theme/theme'
 import type { ButtonProps } from './types'
 
@@ -65,13 +67,9 @@ export const Button = forwardRef<ComponentRef<typeof Pressable>, ButtonProps>(fu
     style: styles?.icon,
     pointerEvents: 'none',
   } as ViewProps
-  const content: ReactNode =
+  const content =
     typeof children === 'string' || typeof children === 'number'
-      ? createElement(
-          Text,
-          { className: contentClassName, style: styles?.content } as TextProps,
-          children,
-        )
+      ? createElement(Text, { style: styles?.content }, children)
       : children
   const leadingContent = loading
     ? createElement(
@@ -107,7 +105,7 @@ export const Button = forwardRef<ComponentRef<typeof Pressable>, ButtonProps>(fu
       style: [styles?.root, style],
     } as PressableProps & RefAttributes<ComponentRef<typeof Pressable>>,
     leadingContent,
-    content,
+    createElement(TextClassContext.Provider, { value: contentClassName }, content),
   )
 })
 

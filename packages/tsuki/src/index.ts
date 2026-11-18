@@ -9,6 +9,8 @@ export type {
 export { Input } from './input'
 export type { InputClassNames, InputProps, InputStyles } from './input'
 export { cn } from './style'
+export { Text, TextClassContext } from './text'
+export type { TextProps, TextVariant } from './text'
 export { ConfigProvider, serializeTheme, TsukiProvider, useTsukiTheme } from './theme'
 export type {
   ButtonThemeTokens,

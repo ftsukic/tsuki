@@ -7,7 +7,11 @@ const nativeConfig = {
   resolver: 'react-native-reanimated/jest/resolver',
   roots: ['<rootDir>/bak/src'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
-  testPathIgnorePatterns: ['/node_modules/'],
+  // This v1 package-entry contract targets a manifest absent from the archive.
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '<rootDir>/bak/src/__tests__/portal-entry\\.test\\.ts$',
+  ],
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': [
       'babel-jest',

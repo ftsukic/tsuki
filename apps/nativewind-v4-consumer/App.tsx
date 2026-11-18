@@ -5,11 +5,13 @@ import {
   ConfigProvider,
   Input,
   serializeTheme,
+  Text,
+  TextClassContext,
   TsukiProvider,
   useTsukiTheme,
 } from '@ftsukic/tsuki'
 import { vars } from 'nativewind'
-import { Pressable, Text, useColorScheme, View } from 'react-native'
+import { Pressable, ScrollView, useColorScheme, View } from 'react-native'
 import type { ThemeScheme } from '@ftsukic/tsuki'
 import './global.css'
 
@@ -84,7 +86,15 @@ export default function App() {
   return (
     <TsukiProvider scheme={scheme}>
       <ThemeVariables className="flex-1">
-        <View className="flex-1 gap-4 bg-tsuki-background px-6 pb-8 pt-14">
+        <ScrollView
+          className="flex-1 bg-tsuki-background"
+          contentContainerStyle={{
+            gap: 16,
+            paddingHorizontal: 24,
+            paddingTop: 56,
+            paddingBottom: 32,
+          }}
+        >
           <Text className="text-tsuki-foreground text-2xl font-bold">Tsuki NativeWind v4</Text>
           <Text className="text-tsuki-muted">Scheme: {scheme}</Text>
           <Pressable
@@ -106,6 +116,20 @@ export default function App() {
           >
             Save
           </Button>
+          <Text>Basic text</Text>
+          <TextClassContext.Provider value="text-tsuki-primary">
+            <Text>
+              First level{' '}
+              <Text className="font-bold">
+                second <Text className="text-red-500">third</Text>
+              </Text>
+            </Text>
+          </TextClassContext.Provider>
+          <Button variant="solid">
+            <Text>
+              Button <Text className="text-red-500">override</Text>
+            </Text>
+          </Button>
           <Input
             accessibilityLabel="Search"
             className="w-full"
@@ -116,7 +140,7 @@ export default function App() {
             testID="root-input"
           />
           <NestedScope />
-        </View>
+        </ScrollView>
       </ThemeVariables>
     </TsukiProvider>
   )
