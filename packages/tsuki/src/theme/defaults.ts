@@ -2,6 +2,29 @@ import { StyleSheet } from 'react-native'
 import type { ResolvedTheme, ThemeScheme } from './types'
 
 const surface = { borderRadius: 12, padding: 16, borderWidth: StyleSheet.hairlineWidth }
+const cell = {
+  paddingHorizontal: 16,
+  paddingVertical: 10,
+  largePaddingVertical: 14,
+  minHeight: 44,
+  largeMinHeight: 56,
+  fontSize: 14,
+  largeFontSize: 16,
+  descriptionFontSize: 12,
+  lineHeight: 22,
+  descriptionLineHeight: 18,
+  iconSize: 16,
+  gap: 8,
+  verticalGap: 6,
+  titleExtraGap: 4,
+  valueExtraGap: 4,
+  dividerWidth: StyleSheet.hairlineWidth,
+  groupTitlePaddingHorizontal: 16,
+  groupTitlePaddingVertical: 10,
+  groupInsetMarginHorizontal: 16,
+  groupRadius: 12,
+  disabledOpacity: 0.4,
+}
 const card = {
   borderRadius: 12,
   padding: 16,
@@ -29,6 +52,7 @@ const THEMES: Record<ThemeScheme, ResolvedTheme> = {
     components: {
       Button: { borderRadius: 8, height: 44 },
       Card: card,
+      Cell: cell,
       Divider: { thickness: StyleSheet.hairlineWidth },
       Input: { borderRadius: 8, height: 44 },
       Surface: surface,
@@ -51,6 +75,7 @@ const THEMES: Record<ThemeScheme, ResolvedTheme> = {
     components: {
       Button: { borderRadius: 8, height: 44 },
       Card: card,
+      Cell: cell,
       Divider: { thickness: StyleSheet.hairlineWidth },
       Input: { borderRadius: 8, height: 44 },
       Surface: surface,
@@ -66,6 +91,7 @@ export function getDefaultTheme(scheme: ThemeScheme): ResolvedTheme {
     components: {
       Button: { ...theme.components.Button },
       Card: { ...theme.components.Card },
+      Cell: { ...theme.components.Cell },
       Divider: { ...theme.components.Divider },
       Input: { ...theme.components.Input },
       Surface: { ...theme.components.Surface },

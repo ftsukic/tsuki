@@ -5,6 +5,7 @@ import { extendTailwindMerge } from 'tailwind-merge'
 const mergeTailwindClasses = extendTailwindMerge({
   extend: {
     theme: {
+      leading: ['tsuki-cell-slot', 'tsuki-cell-line-height', 'tsuki-cell-description-line-height'],
       radius: ['tsuki-button', 'tsuki-card', 'tsuki-input', 'tsuki-surface'],
       spacing: [
         'tsuki-button',

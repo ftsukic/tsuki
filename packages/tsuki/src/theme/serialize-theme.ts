@@ -13,7 +13,8 @@ export function serializeTheme(theme: ResolvedTheme): ThemeVariables {
 
   for (const [component, tokens] of Object.entries(theme.components)) {
     for (const [token, value] of Object.entries(tokens)) {
-      variables[`--tsuki-${component.toLowerCase()}-${toKebabCase(token)}`] = `${value}px`
+      variables[`--tsuki-${component.toLowerCase()}-${toKebabCase(token)}`] =
+        token === 'disabledOpacity' ? String(value) : `${value}px`
     }
   }
 

@@ -16,6 +16,7 @@ module.exports = {
         },
       },
       borderRadius: {
+        'tsuki-cell-group-radius': 'var(--tsuki-cell-group-radius)',
         'tsuki-button': 'var(--tsuki-button-border-radius)',
         'tsuki-card': 'var(--tsuki-card-border-radius)',
         'tsuki-input': 'var(--tsuki-input-border-radius)',
@@ -26,6 +27,22 @@ module.exports = {
         'tsuki-input': 'var(--tsuki-input-height)',
       },
       spacing: {
+        'tsuki-cell-padding-horizontal': 'var(--tsuki-cell-padding-horizontal)',
+        'tsuki-cell-padding-vertical': 'var(--tsuki-cell-padding-vertical)',
+        'tsuki-cell-large-padding-vertical': 'var(--tsuki-cell-large-padding-vertical)',
+        'tsuki-cell-min-height': 'var(--tsuki-cell-min-height)',
+        'tsuki-cell-large-min-height': 'var(--tsuki-cell-large-min-height)',
+        'tsuki-cell-icon-size': 'var(--tsuki-cell-icon-size)',
+        'tsuki-cell-gap': 'var(--tsuki-cell-gap)',
+        'tsuki-cell-vertical-gap': 'var(--tsuki-cell-vertical-gap)',
+        'tsuki-cell-title-extra-gap': 'var(--tsuki-cell-title-extra-gap)',
+        'tsuki-cell-value-extra-gap': 'var(--tsuki-cell-value-extra-gap)',
+        'tsuki-cell-divider-width': 'var(--tsuki-cell-divider-width)',
+        'tsuki-cell-group-title-padding-horizontal':
+          'var(--tsuki-cell-group-title-padding-horizontal)',
+        'tsuki-cell-group-title-padding-vertical': 'var(--tsuki-cell-group-title-padding-vertical)',
+        'tsuki-cell-group-inset-margin-horizontal':
+          'var(--tsuki-cell-group-inset-margin-horizontal)',
         'tsuki-card': 'var(--tsuki-card-padding)',
         'tsuki-card-header': 'var(--tsuki-card-header-padding)',
         'tsuki-card-body': 'var(--tsuki-card-body-padding)',
@@ -36,6 +53,19 @@ module.exports = {
       },
       borderWidth: {
         'tsuki-surface-width': 'var(--tsuki-surface-border-width)',
+      },
+      fontSize: {
+        'tsuki-cell-font-size': 'var(--tsuki-cell-font-size)',
+        'tsuki-cell-large-font-size': 'var(--tsuki-cell-large-font-size)',
+        'tsuki-cell-description-font-size': 'var(--tsuki-cell-description-font-size)',
+      },
+      lineHeight: {
+        'tsuki-cell-slot': 'var(--tsuki-cell-line-height-value)',
+        'tsuki-cell-line-height': 'var(--tsuki-cell-line-height)',
+        'tsuki-cell-description-line-height': 'var(--tsuki-cell-description-line-height)',
+      },
+      opacity: {
+        'tsuki-cell-disabled-opacity': 'var(--tsuki-cell-disabled-opacity)',
       },
     },
   },

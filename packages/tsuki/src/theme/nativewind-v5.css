@@ -22,8 +22,56 @@
   --spacing-tsuki-card-body: var(--tsuki-card-body-padding);
   --spacing-tsuki-card-footer: var(--tsuki-card-footer-padding);
   --spacing-tsuki-card-gap: var(--tsuki-card-gap);
+  --spacing-tsuki-cell-padding-horizontal: var(--tsuki-cell-padding-horizontal);
+  --spacing-tsuki-cell-padding-vertical: var(--tsuki-cell-padding-vertical);
+  --spacing-tsuki-cell-large-padding-vertical: var(--tsuki-cell-large-padding-vertical);
+  --spacing-tsuki-cell-min-height: var(--tsuki-cell-min-height);
+  --spacing-tsuki-cell-large-min-height: var(--tsuki-cell-large-min-height);
+  --spacing-tsuki-cell-icon-size: var(--tsuki-cell-icon-size);
+  --spacing-tsuki-cell-gap: var(--tsuki-cell-gap);
+  --spacing-tsuki-cell-vertical-gap: var(--tsuki-cell-vertical-gap);
+  --spacing-tsuki-cell-title-extra-gap: var(--tsuki-cell-title-extra-gap);
+  --spacing-tsuki-cell-value-extra-gap: var(--tsuki-cell-value-extra-gap);
+  --spacing-tsuki-cell-divider-width: var(--tsuki-cell-divider-width);
+  --spacing-tsuki-cell-group-title-padding-horizontal: var(
+    --tsuki-cell-group-title-padding-horizontal
+  );
+  --spacing-tsuki-cell-group-title-padding-vertical: var(--tsuki-cell-group-title-padding-vertical);
+  --spacing-tsuki-cell-group-inset-margin-horizontal: var(
+    --tsuki-cell-group-inset-margin-horizontal
+  );
+  --text-tsuki-cell-font-size: var(--tsuki-cell-font-size);
+  --text-tsuki-cell-large-font-size: var(--tsuki-cell-large-font-size);
+  --text-tsuki-cell-description-font-size: var(--tsuki-cell-description-font-size);
+  --radius-tsuki-cell-group-radius: var(--tsuki-cell-group-radius);
+  --opacity-tsuki-cell-disabled-opacity: var(--tsuki-cell-disabled-opacity);
 }
 
 @utility border-tsuki-surface-width {
   border-width: var(--tsuki-surface-border-width);
+}
+
+/* NativeWind maps untyped CSS line-height variables as font-size multipliers. */
+@utility leading-tsuki-cell-slot {
+  -rn-tsuki-line-height: var(--tsuki-cell-line-height-value);
+  -rn-native-mapping--rn-tsuki-line-height: &line-height;
+  @variant web {
+    line-height: var(--tsuki-cell-line-height-value);
+  }
+}
+
+@utility leading-tsuki-cell-line-height {
+  -rn-tsuki-line-height: var(--tsuki-cell-line-height);
+  -rn-native-mapping--rn-tsuki-line-height: &line-height;
+  @variant web {
+    line-height: var(--tsuki-cell-line-height);
+  }
+}
+
+@utility leading-tsuki-cell-description-line-height {
+  -rn-tsuki-line-height: var(--tsuki-cell-description-line-height);
+  -rn-native-mapping--rn-tsuki-line-height: &line-height;
+  @variant web {
+    line-height: var(--tsuki-cell-description-line-height);
+  }
 }

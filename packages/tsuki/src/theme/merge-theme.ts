@@ -10,6 +10,7 @@ export function mergeTheme(parent: ResolvedTheme, override?: ThemeConfig): Resol
     components: {
       Button: { ...base.components.Button, ...override?.components?.Button },
       Card: { ...base.components.Card, ...override?.components?.Card },
+      Cell: { ...base.components.Cell, ...override?.components?.Cell },
       Divider: { ...base.components.Divider, ...override?.components?.Divider },
       Input: { ...base.components.Input, ...override?.components?.Input },
       Surface: { ...base.components.Surface, ...override?.components?.Surface },

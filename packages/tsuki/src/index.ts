@@ -8,6 +8,17 @@ export type {
 } from './button'
 export { Card } from './card'
 export type { CardBodyProps, CardFooterProps, CardHeaderProps, CardProps } from './card'
+export { Cell, CellGroup } from './cell'
+export type {
+  CellArrowDirection,
+  CellClassNames,
+  CellGroupClassNames,
+  CellGroupProps,
+  CellGroupStyles,
+  CellProps,
+  CellSize,
+  CellStyles,
+} from './cell'
 export { Divider } from './divider'
 export type { DividerProps } from './divider'
 export { Icon } from './icon'
@@ -25,6 +36,7 @@ export { ConfigProvider, serializeTheme, TsukiProvider, useTsukiTheme } from './
 export type {
   ButtonThemeTokens,
   CardThemeTokens,
+  CellThemeTokens,
   ConfigProviderProps,
   DividerThemeTokens,
   InputThemeTokens,

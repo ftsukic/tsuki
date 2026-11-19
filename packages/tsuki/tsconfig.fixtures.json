@@ -6,6 +6,7 @@
   "include": [
     "src/button/__fixtures__/**/*.tsx",
     "src/card/__fixtures__/**/*.tsx",
+    "src/cell/__fixtures__/**/*.tsx",
     "src/divider/__fixtures__/**/*.tsx",
     "src/icon/__fixtures__/**/*.tsx",
     "src/input/__fixtures__/**/*.tsx",

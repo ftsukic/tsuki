@@ -7,6 +7,7 @@ export { useTsukiTheme } from './theme'
 export type {
   ButtonThemeTokens,
   CardThemeTokens,
+  CellThemeTokens,
   DividerThemeTokens,
   InputThemeTokens,
   ResolvedTheme,

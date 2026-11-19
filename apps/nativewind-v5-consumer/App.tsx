@@ -3,6 +3,8 @@ import type { PropsWithChildren } from 'react'
 import {
   Button,
   Card,
+  Cell,
+  CellGroup,
   ConfigProvider,
   Divider,
   Icon,
@@ -79,6 +81,7 @@ function NestedScope() {
 export default function App() {
   const systemScheme = useColorScheme()
   const [cardSaved, setCardSaved] = useState(false)
+  const [cellCount, setCellCount] = useState(0)
   const [surfacePadding, setSurfacePadding] = useState(10)
   const [dividerThickness, setDividerThickness] = useState(3)
   const [gap, setGap] = useState(7)
@@ -116,6 +119,47 @@ export default function App() {
           >
             <Text className="text-tsuki-foreground">Change scheme ({appearance})</Text>
           </Pressable>
+          <ConfigProvider
+            theme={{
+              semantic: { colorMuted: '#7c3aed' },
+              components: { Cell: { minHeight: 48, groupInsetMarginHorizontal: 12 } },
+            }}
+          >
+            <CellGroup inset title="Cell settings" extra="Local theme" testID="cell-group">
+              <Cell
+                testID="cell-action"
+                accessibilityLabel="Change Cell count"
+                title="Tap Cell"
+                leading={<Icon name="InfoCircleOutlined" />}
+                trailing="Ready"
+                value={`Count: ${cellCount}`}
+                showArrow
+                onPress={() => setCellCount((count) => count + 1)}
+                onLongPress={() => setCellCount((count) => count + 10)}
+              />
+              <Cell
+                testID="cell-overrides"
+                vertical
+                title="A very long row title that should remain inside the inset group without pushing the arrow out of the row"
+                titleLines={1}
+                description="Vertical layout"
+                value="Native style"
+                valueAlign="left"
+                showArrow
+                className="bg-lime-200"
+                style={{ paddingHorizontal: 12 }}
+                classNames={{ container: 'px-8', title: 'text-blue-700', value: 'text-green-800' }}
+                styles={{ container: { paddingHorizontal: 12 }, value: { color: '#b91c1c' } }}
+              />
+              <Cell
+                testID="cell-disabled"
+                title="Disabled Cell"
+                value="Unavailable"
+                disabled
+                onPress={() => setCellCount((count) => count + 100)}
+              />
+            </CellGroup>
+          </ConfigProvider>
           <Card testID="card-simple" className="opacity-100">
             <Text>Simple card</Text>
           </Card>

@@ -6,7 +6,7 @@ import ComponentOverview1 from '../../../packages/tsuki/bak/src/avatar/__fixture
 import ComponentOverview2 from '../../../packages/tsuki/bak/src/badge/__fixtures__/overview'
 import ComponentOverview3 from '../../../packages/tsuki/bak/src/bottom-bar/__fixtures__/overview'
 import ComponentOverview4 from '../../../packages/tsuki/bak/src/button/__fixtures__/overview'
-import ComponentOverview5 from '../../../packages/tsuki/bak/src/cell/__fixtures__/overview'
+import ComponentOverview5 from '../../../packages/tsuki/src/cell/__fixtures__/overview'
 import ComponentOverview6 from '../../../packages/tsuki/bak/src/checkbox/__fixtures__/overview'
 import ComponentOverview7 from '../../../packages/tsuki/bak/src/collapse/__fixtures__/overview'
 import ComponentOverview8 from '../../../packages/tsuki/bak/src/date-picker/__fixtures__/overview'
@@ -106,7 +106,7 @@ export const componentCatalog: readonly ComponentFixtureEntry[] = [
   {
     Component: ComponentOverview5,
     component: 'cell',
-    description: 'Cell 和 CellGroup 的语义布局用法预览。',
+    description: 'Settings rows, interactive rows, and grouped content.',
     id: 'cell',
     title: 'Cell',
   },

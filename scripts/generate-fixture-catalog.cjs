@@ -6,6 +6,7 @@ const sourceRoot = path.join(repositoryRoot, 'packages', 'tsuki', 'bak', 'src')
 const v2SourceRoot = path.join(repositoryRoot, 'packages', 'tsuki', 'src')
 const v2Fixtures = {
   card: { id: 'card', fixtureRoot: path.join(v2SourceRoot, 'card', '__fixtures__') },
+  cell: { id: 'cell', fixtureRoot: path.join(v2SourceRoot, 'cell', '__fixtures__') },
   surface: { id: 'surface', fixtureRoot: path.join(v2SourceRoot, 'surface', '__fixtures__') },
   divider: { id: 'divider', fixtureRoot: path.join(v2SourceRoot, 'divider', '__fixtures__') },
   icon: { id: 'icon', fixtureRoot: path.join(v2SourceRoot, 'icon', '__fixtures__') },
