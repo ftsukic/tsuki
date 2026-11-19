@@ -64,6 +64,12 @@ describe('FixtureExplorer component navigation', () => {
     })
   })
 
+  it('opens the separate Theme Playground route', async () => {
+    await render(<FixtureExplorer />)
+    await fireEvent.press(screen.getByTestId('theme-playground-link'))
+    expect(mockPush).toHaveBeenCalledWith('/theme-playground')
+  })
+
   it('filters by version and preserves the category heading', async () => {
     await render(<FixtureExplorer />)
     await fireEvent.changeText(screen.getByLabelText('搜索组件'), 'Legacy v1')

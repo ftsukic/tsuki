@@ -44,6 +44,7 @@ function DemoStack() {
         >
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="components/[id]" options={{ title: '组件预览' }} />
+          <Stack.Screen name="theme-playground" options={{ title: 'Theme Playground' }} />
         </Stack>
       </View>
     </ThemeProvider>

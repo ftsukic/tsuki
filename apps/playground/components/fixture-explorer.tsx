@@ -67,6 +67,14 @@ export default function FixtureExplorer() {
                 if (value === 'system' || value === 'light' || value === 'dark') setMode(value)
               }}
             />
+            <Cell
+              title="Theme Playground"
+              description="Preview semantic tokens, component overrides, and nested scopes."
+              showArrow
+              accessibilityLabel="Open Theme Playground"
+              onPress={() => router.push('/theme-playground')}
+              testID="theme-playground-link"
+            />
             <View style={styles.sectionRow}>
               <Text style={styles.sectionTitle}>全部组件</Text>
               <Text style={{ color: token.colorTextSecondary }}>
