@@ -1,75 +1,88 @@
-# Tsuki v2 Project Framework
+# Tsuki v2 Package and Consumer Architecture
 
-## Active and historical code
+This guide describes the architecture at the current repository state. The package manifest, source exports, consumer apps, fixture manifest, build scripts, release workflow, and CI are the authority when this document needs an update.
 
-`packages/tsuki/src/` is the v2 source and public entry point. The complete 1.x source tree is retained at `packages/tsuki/bak/src/` as a read-only reference. The v2 package build reads only `src/`, publishes only `dist/`, and does not import from `bak/`.
+## Active source, archive, and package output
 
-`apps/playground/` remains the 1.x history browser. Its TypeScript, Jest, and Metro aliases and the fixture catalog generator point to `bak/src`. The two `apps/nativewind-*-consumer/` projects are separate v2 integration consumers so their Tailwind and NativeWind versions do not share an app runtime.
+| Path | Role | Built or published? |
+| --- | --- | --- |
+| `packages/tsuki/src/` | Active v2 components, Theme, Style, tests, and canonical examples. `src/index.ts` is the package's JavaScript entry surface. | Bob compiles this tree into `dist/`; source itself is not packed. |
+| `packages/tsuki/bak/src/` | Complete archived v1 source used by the Legacy Playground and historical tests. | Not compiled or included in the npm package. |
+| `packages/tsuki/dist/` | Generated CommonJS, ES Module, TypeScript declaration, and Theme CSS outputs. | Included in the npm package. |
+| `packages/consumer-fixtures/` | Private, shared NativeWind integration scenarios and their tests. | Workspace-only; excluded from `@ftsukic/tsuki`. |
 
-## Public v2 surface
+`packages/tsuki/package.json` sets Bob's source to `src` and output to `dist`. `pnpm run build` runs Bob and `scripts/copy-theme-assets.cjs`. That script generates `theme.css` from the v2 defaults and serializer, then copies `theme.css`, `nativewind-v4-preset.cjs`, and `nativewind-v5.css` into `dist/theme/`.
 
-The package root exports the v2 `Button`, `Input`, `TsukiProvider`, `ConfigProvider`, `useTsukiTheme`, `serializeTheme`, and `cn` APIs. It does not re-export the archived 1.x component or JavaScript theme engine. CSS resources are explicit subpath exports; the root entry does not import CSS.
+The package `files` allowlist contains `assets`, `dist`, `README.md`, and `LICENSE`. The package validation script also checks required export targets and rejects archive source, Playground apps, tests, and fixtures from the tarball. NativeWind, Tailwind, and `react-native-css` are not runtime dependencies of Tsuki Core.
 
-The v2 foundation keeps its first public components focused:
+## Public package surface
 
-- `Button` wraps React Native `Pressable`, uses CVA variants, supports a leading icon and loading state, and defaults to the `button` accessibility role.
-- `Input` wraps React Native `TextInput`, preserves its native props, and adds a styled root container, disabled and validation states, and prefix/suffix slots.
-- Both use `className` for root utilities, `classNames` for named semantic slots, `style` for root React Native styles, and `styles` for named React Native style slots.
-- `cn()` combines `clsx` conditionals with `tailwind-merge` conflict resolution.
+Consumers import JavaScript APIs from `@ftsukic/tsuki`. The root export provides nine component families; `CellGroup` is exported alongside `Cell`:
 
-Component documentation and canonical v2 examples live in `docs/components/v2/` and each v2 component's `__fixtures__/` directory. The historical Playground catalog intentionally continues to scan only `bak/src`.
+| Family  | Public symbols                                    |
+| ------- | ------------------------------------------------- |
+| Button  | `Button` and Button props/types                   |
+| Card    | `Card` and section props/types                    |
+| Cell    | `Cell`, `CellGroup`, and row/group props/types    |
+| Divider | `Divider`, `DividerProps`                         |
+| Icon    | `Icon`, `IconName`, `IconDefinition`, `IconProps` |
+| Input   | `Input` and props/types                           |
+| Space   | `Space`, `SpaceProps`                             |
+| Surface | `Surface`, `SurfaceProps`                         |
+| Text    | `Text`, `TextClassContext`, text props/types      |
 
-## Theme contract
+The same root entry exports `TsukiProvider`, `ConfigProvider`, `useTsukiTheme`, `serializeTheme`, `cn`, and their public types. There are no JavaScript subpath exports for individual components. The package export map is limited to the root JavaScript entry and these CSS/preset resources:
 
-`ThemeScheme` is `light | dark`. The consuming project owns system appearance, user preference, and persistence, then passes the resolved `scheme` to `TsukiProvider`.
+- `@ftsukic/tsuki/theme.css`
+- `@ftsukic/tsuki/nativewind-v4-preset`
+- `@ftsukic/tsuki/nativewind-v5.css`
 
-`ThemeConfig` can override the ten semantic color tokens and the Button/Input component tokens:
+`scripts/validate-package.cjs` checks this export map and verifies that every mapped file exists in the packed tarball.
 
-```ts
-interface ThemeConfig {
-  semantic?: Partial<SemanticTokens>
-  components?: {
-    Button?: Partial<{ borderRadius: number; height: number }>
-    Input?: Partial<{ borderRadius: number; height: number }>
-  }
-  inherit?: boolean
-}
-```
+## Theme API
 
-`TsukiProvider` creates the root scope. Nested `ConfigProvider` scopes merge semantic and component values with their parent. `inherit: false` starts from the light or dark defaults for the current scheme, then applies that scope's overrides. Theme resolution is object merging; it does not migrate the 1.x Seed/Map/Alias engine.
+`ThemeScheme` is `light | dark`. The app resolves system appearance, user preference, and persistence, then passes a scheme to `TsukiProvider`. The provider accepts an optional `ThemeConfig`; it does not accept `system` as a scheme.
 
-`useTsukiTheme()` returns the resolved scope. `serializeTheme()` converts it to CSS custom properties such as `--tsuki-color-primary`, `--tsuki-button-height`, and `--tsuki-input-border-radius`. The app adapts this object to its NativeWind runtime:
+`ThemeConfig` can partially override 10 semantic color tokens and six component token groups: Button, Input, Divider, Surface, Card, and Cell. `ConfigProvider` merges local semantic and component values with its parent by default. With `inherit: false`, it starts from the default theme for the active scheme before applying the local override. It does not change the scheme.
 
-```tsx
-function ThemeVariables({ children }: PropsWithChildren) {
-  const theme = useTsukiTheme()
-  return <VariableContextProvider value={serializeTheme(theme)}>{children}</VariableContextProvider>
-}
-```
+`useTsukiTheme()` returns the resolved scope. `serializeTheme()` maps semantic and component values to `--tsuki-*` CSS variables. Numeric values are serialized with `px`, except Cell's `disabledOpacity`, which remains unitless. See the [Theme v2 guide](../components/v2/theme/index.md) for token names, defaults, nested scopes, and both NativeWind bridges.
 
-For NativeWind v4, the consumer uses `vars(serializeTheme(theme))` on a wrapping View. For v5, the consumer uses `VariableContextProvider`. Put the bridge inside each `ConfigProvider` when a nested scope needs its own runtime variables. The consumer apps include workspace paths for local development; the tarball check removes those TypeScript aliases before checking the installed package.
+## CSS resources and NativeWind consumers
 
-## CSS and package resources
+The app chooses its own CSS runtime, utility generation, and variable bridge. The v4 and v5 integration apps share only `@ftsukic/consumer-fixtures`; they keep separate NativeWind versions, PostCSS/Tailwind setup, and Metro configuration.
 
-The build generates `theme.css` from `theme/defaults.ts` and `theme/serialize-theme.ts`, then writes it to `src/theme/theme.css` and `dist/theme/theme.css`. It copies the NativeWind mappings into `dist/theme/` without cleaning `dist/`:
+| Consumer | Workspace runtime | CSS setup | Runtime variable bridge |
+| --- | --- | --- | --- |
+| `apps/nativewind-v4-consumer/` | NativeWind `4.2.7`, Tailwind `3.4.17`, `react-native-css-interop` `0.2.7` | Tailwind preset `@ftsukic/tsuki/nativewind-v4-preset`; global CSS imports the installed `dist/theme/theme.css`. | `vars(serializeTheme(theme))` on a React Native `View`. |
+| `apps/nativewind-v5-consumer/` | NativeWind `5.0.0-rc.1`, `react-native-css` `3.1.0-rc.1`, Tailwind `4.1.12` | Global CSS imports Tailwind utilities, `nativewind/theme`, `@ftsukic/tsuki/theme.css`, and `@ftsukic/tsuki/nativewind-v5.css`. | `VariableContextProvider` receives `serializeTheme(theme)`. |
 
-- `src/theme/nativewind-v4-preset.cjs` → `dist/theme/nativewind-v4-preset.cjs`
-- `src/theme/nativewind-v5.css` → `dist/theme/nativewind-v5.css`
+Both apps currently use Expo SDK `57.0.32`, React Native `0.86.3`, and React `19.2.3`. NativeWind v5 is a release candidate in this pinned workspace. For a nested theme scope, render that app's variable bridge within the matching `ConfigProvider`; this makes the child variables available to its descendants. Full runnable settings are in the [v4 Consumer](../../apps/nativewind-v4-consumer/) and [v5 Consumer](../../apps/nativewind-v5-consumer/).
 
-The consumer-facing paths are `@ftsukic/tsuki/theme.css`, `@ftsukic/tsuki/nativewind-v4-preset`, and `@ftsukic/tsuki/nativewind-v5.css`. Consumer apps import the required CSS and manage utility generation; Tsuki Core has no NativeWind, Tailwind, or `react-native-css` dependency. Tailwind 3's `postcss-import` does not resolve the package CSS export map in this workspace, so the v4 canary imports the installed package file from `node_modules/@ftsukic/tsuki/dist/theme/theme.css` directly.
+## Playground and fixture catalog
 
-The v4 consumer uses NativeWind `4.2.7` with Tailwind `3.4.17`, the NativeWind preset, the Tsuki preset, and Metro `withNativeWind`. It declares `react-native-css-interop` directly so Metro can resolve the JSX runtime emitted by the NativeWind Babel preset, and scans the app source plus `node_modules/@ftsukic/tsuki/dist`.
+`apps/playground/` is the component and theme development workbench. Its home screen links to Components, Theme Playground, and Design Tokens. Components includes both v2 and Legacy v1 entries; the separate theme and token pages do not enter the component catalog.
 
-The v5 consumer uses NativeWind `5.0.0-rc.1`, `react-native-css` `3.1.0-rc.1`, Tailwind `4.1.12`, `@tailwindcss/postcss` `4.1.12`, PostCSS `8.5.6`, and Lightning CSS `1.30.1`. Its CSS entry maps tokens with `@theme inline`; Metro excludes the dynamic `--tsuki-*` variables from inlining. The workspace pins Lightning CSS to `1.30.1` and declares Expo Metro Config directly to keep the RC CSS bundler aligned. NativeWind v5 is a release candidate, and its official docs prefer `VariableContextProvider` for dynamic values. See [v5 Dynamic Themes](https://www.nativewind.dev/v5/guides/themes) and the [RC compatibility notes](https://github.com/nativewind/nativewind/blob/main/docs/rc-compatibility.md).
+`apps/playground/fixtures/manifest.json` is the catalog source. It currently defines 64 component entries: 9 v2 and 55 Legacy v1. The v2 entries reference 73 runnable examples under `packages/tsuki/src/<component>/__fixtures__/examples/`. `scripts/generate-fixture-catalog.cjs` validates those fixture sets and generates `apps/playground/fixtures/catalog.ts`; the catalog must not be maintained separately.
 
-Both consumers target Expo 57 / React Native 0.86.3 / React 19.2.3 and retain the workspace's Reanimated 4.7.1 / Worklets 0.13.1 versions. They verify the same light/dark values, semantic overrides, component overrides, and nested scopes.
+The Playground's TypeScript and Jest aliases map `@ftsukic/tsuki` to `bak/src` for its legacy application shell. Metro resolves imports from v2 source files to the v2 root and other Playground imports to the v1 archive. `V2Preview` supplies a v2 `TsukiProvider` and NativeWind v5 variable context to v2 fixtures. This keeps historical v1 Theme behavior separate from v2 Theme demonstrations while preserving existing v1 fixture IDs and routes.
 
-## Legacy isolation and checks
+## Shared Consumer validation scenarios
 
-- Bob compiles only the new `src/` tree into `dist/`; the asset-copy script writes only `dist/theme/`.
-- Jest's existing suite runs from `bak/src`. `test:v2` runs the v2 foundation tests from `src/`.
-- The legacy Fixture Generator scans `bak/src` and writes the existing Playground catalog.
-- The legacy Playground resolves `@ftsukic/tsuki` to `bak/src` at typecheck, Jest, and Metro time.
-- `release:check-package` verifies the public exports and that `bak/`, `lib/`, source tests, and old fixtures are absent from the packed package.
-- `consumers:tarball` creates a real npm tarball, installs it into two temporary projects, then typechecks and bundles both consumer configurations.
-- Android Dev Build verification is recorded separately from static checks; a successful typecheck or CSS build does not establish device behavior.
+`packages/consumer-fixtures/` is a private workspace package used by both NativeWind apps. It imports components only from `@ftsukic/tsuki` and contains the shared component, Theme override, nested scope, style precedence, and interaction scenarios. The v4 and v5 `App.tsx` files own their respective providers, CSS initialization, and variable bridge.
+
+The tarball script stages the private fixtures beside each temporary consumer and points `@ftsukic/tsuki` at the actual npm tarball. It removes workspace TypeScript aliases before running installation, typecheck, Expo config, and iOS/Android development bundle checks. The private fixture package is not added to the published package contents.
+
+## Build, validation, and release
+
+The root scripts provide the following checks:
+
+- `pnpm run build` builds the v2 package and copies its Theme CSS resources.
+- `pnpm run fixtures:check` verifies the canonical fixture manifest and generated Playground catalog.
+- `pnpm run typecheck` checks the package, package fixtures, private consumer fixtures, both consumers, and Playground.
+- `pnpm run test` runs the archived v1 tests, v2 tests, and Playground tests.
+- `pnpm run consumers:tarball` packs the library and validates both independent consumers against that tarball.
+- `pnpm run release:check-package` validates package exports and contents using `npm pack --dry-run`.
+
+The complete quality gate is `.github/workflows/ci.yml`. It also validates Consumer configs, lint, formatting, Playground bundles, and Changeset status. The publish workflow in `.github/workflows/publish.yml` runs only for a version tag, validates its version and release branch ancestry, then publishes `packages/tsuki` through npm Trusted Publishing. On `main`, `docs/releasing.md` defines the beta line and `next` dist-tag. Changeset prerelease mode stays active through beta releases; version generation and publishing are separate release actions.
+
+A successful static check or bundle export does not prove Android or iOS runtime behavior. Record native launches and interactions separately from build and bundle validation.

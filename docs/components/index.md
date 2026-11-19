@@ -2,6 +2,8 @@
 
 ## Tsuki v2
 
+Tsuki v2 当前有 9 个正式组件入口。`Cell` 与 `CellGroup` 作为一个组件族从公共入口导出。
+
 - [Button](./v2/button/index.md)
 - [Card](./v2/card/index.md)
 - [Cell / CellGroup](./v2/cell/index.md)
@@ -12,9 +14,13 @@
 - [Surface](./v2/surface/index.md)
 - [Text](./v2/text/index.md)
 
+## Theme v2
+
+- [Provider、Theme Token、继承和 NativeWind 变量接入](./v2/theme/index.md)
+
 ## Tsuki 1.x 历史组件
 
-历史 API 的示例保存在 `packages/tsuki/bak/src/<component>/__fixtures__/`。
+历史 API 的源码保存在 `packages/tsuki/bak/src/`，示例由 Playground 的 Fixture Manifest 收录。该目录不属于 npm 包。
 
 - [Avatar](./avatar/index.md)、[Badge](./badge/index.md)、[Tag](./tag/index.md)
 - [ActionSheet](./action-sheet/index.md)
