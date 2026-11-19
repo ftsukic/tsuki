@@ -1,1 +1,1 @@
-export { default } from '@/components/fixture-explorer'
+export { default } from '@/components/home-screen'
