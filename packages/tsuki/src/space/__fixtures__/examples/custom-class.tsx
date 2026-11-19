@@ -1,9 +1,8 @@
 /**
- * @title NativeWind overrides
+ * @title Native Wind overrides
  * @description Demonstrates nativewind overrides with Space.
  */
-import { Text } from 'react-native'
-import { Space } from '../..'
+import { Space, Text } from '@ftsukic/tsuki'
 
 export default function CustomClass() {
   return (

@@ -17,6 +17,9 @@ jest.mock(
   }),
   { virtual: true },
 )
+jest.mock('../components/v2-preview', () => ({
+  V2Preview: jest.requireActual('react-native').View,
+}))
 jest.mock('expo-router/stack', () => ({ Stack: { Screen: () => null } }), { virtual: true })
 jest.mock(
   'react-native-keyboard-controller',
@@ -35,11 +38,13 @@ jest.mock('../fixtures/catalog', () => {
   return {
     componentCatalog: [
       {
+        version: 'v1',
         id: 'floating-bubble',
         title: 'FloatingBubble',
         Component: () => React.createElement(FloatingBubble, { testID: 'page-preview' }),
       },
       {
+        version: 'v1',
         id: 'floating-panel',
         title: 'FloatingPanel',
         Component: () =>
@@ -50,7 +55,8 @@ jest.mock('../fixtures/catalog', () => {
           ),
       },
       {
-        id: 'button',
+        version: 'v2',
+        id: 'button-v2',
         title: 'Button',
         Component: () => React.createElement(Text, { testID: 'ordinary-preview' }, 'button'),
       },
@@ -97,7 +103,7 @@ it.each(['floating-bubble', 'floating-panel'])(
 )
 
 it('keeps ordinary previews mounted when the page loses focus', async () => {
-  mockComponentId = 'button'
+  mockComponentId = 'button-v2'
   const view = await render(<App />)
   mockFocused = false
   await view.rerender(<App />)

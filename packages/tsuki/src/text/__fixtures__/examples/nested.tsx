@@ -2,7 +2,8 @@
  * @title Nested
  * @description Demonstrates Text nested.
  */
-import { Text } from '../../index'
+
+import { Text } from '@ftsukic/tsuki'
 
 export default function Nested() {
   return (

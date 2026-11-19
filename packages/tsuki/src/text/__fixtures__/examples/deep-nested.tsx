@@ -1,8 +1,9 @@
 /**
- * @title DeepNested
+ * @title Deep Nested
  * @description Demonstrates Text deep nested.
  */
-import { Text } from '../../index'
+
+import { Text } from '@ftsukic/tsuki'
 
 export default function DeepNested() {
   return (

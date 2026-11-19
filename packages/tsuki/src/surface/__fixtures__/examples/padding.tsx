@@ -1,9 +1,8 @@
 /**
- * @title padding
+ * @title Padding
  * @description Demonstrates Surface padding.
  */
-import { Text } from 'react-native'
-import { Surface } from '../..'
+import { Surface, Text } from '@ftsukic/tsuki'
 
 export default function Padding() {
   return (

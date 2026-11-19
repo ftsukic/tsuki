@@ -2,8 +2,8 @@
  * @title Basic
  * @description A Card with direct text children.
  */
-import { Card } from '../..'
-import { Text } from '../../../text'
+
+import { Card, Text } from '@ftsukic/tsuki'
 
 export default function Basic() {
   return (

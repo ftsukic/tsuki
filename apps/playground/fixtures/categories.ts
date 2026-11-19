@@ -1,80 +1,15 @@
-// Follow Vant's component categories, with a separate native interaction group.
-export const componentCategories = [
-  {
-    title: '基础组件',
-    components: [
-      'button',
-      'card',
-      'cell',
-      'icon',
-      'layout',
-      'flex',
-      'space',
-      'space-v2',
-      'text',
-      'surface',
-      'popup',
-      'toast',
-      'provider',
-      'theme',
-      'portal',
-    ],
+import { componentCatalog } from './catalog'
+import type { FixtureVersion } from './catalog'
+
+export const fixtureVersionLabel: Record<FixtureVersion, string> = {
+  v1: 'Legacy v1',
+  v2: 'v2',
+}
+
+// Catalog order is set by the manifest. Preserve it even when searching.
+export const componentCategories = [...new Set(componentCatalog.map((item) => item.category))].map(
+  (title) => {
+    const data = componentCatalog.filter((item) => item.category === title)
+    return { title, data, version: data[0].version }
   },
-  {
-    title: '表单组件',
-    components: [
-      'field',
-      'input',
-      'checkbox',
-      'radio',
-      'switch',
-      'slider',
-      'search',
-      'picker',
-      'picker-group',
-      'date-picker',
-      'time-picker',
-      'date-time-picker',
-    ],
-  },
-  {
-    title: '反馈组件',
-    components: [
-      'action-sheet',
-      'dialog',
-      'dropdown',
-      'floating-panel',
-      'floating-bubble',
-      'loading',
-      'notify',
-      'overlay',
-      'swipe-cell',
-    ],
-  },
-  {
-    title: '展示组件',
-    components: [
-      'avatar',
-      'badge',
-      'collapse',
-      'divider',
-      'empty',
-      'image-preview',
-      'notice-bar',
-      'popover',
-      'progress',
-      'skeleton',
-      'swipe',
-      'tag',
-      'watermark',
-    ],
-  },
-  {
-    title: '导航组件',
-    components: ['bottom-bar', 'grid', 'navbar', 'tabs', 'segmented'],
-  },
-  {
-    title: '动效与手势',
-    components: ['motion', 'gesture', 'pressable'],
-  },
-] as const
+)

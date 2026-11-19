@@ -1,7 +1,9 @@
 /**
  * @title Group Title
+ * @description Adds a group title and supplementary label.
  */
-import { Cell } from '../..'
+
+import { Cell } from '@ftsukic/tsuki'
 
 export default function GroupTitle() {
   return (

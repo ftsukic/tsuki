@@ -2,8 +2,8 @@
  * @title Prefix, suffix, and error
  * @description Add accessory content and an accessible validation message to an Input.
  */
-import { Input } from '@ftsukic/tsuki'
-import { Text, View } from 'react-native'
+import { Input, Text } from '@ftsukic/tsuki'
+import { View } from 'react-native'
 
 export default function InputAccessoriesExample() {
   return (

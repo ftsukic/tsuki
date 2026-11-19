@@ -8,6 +8,8 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { Text, useToken } from '@ftsukic/tsuki'
 import { Portal, PortalHost } from 'react-native-teleport'
 import { componentCatalog } from '@/fixtures/catalog'
+import { fixtureVersionLabel } from '@/fixtures/categories'
+import { V2Preview } from '@/components/v2-preview'
 
 const TOOLBAR_COMPONENTS = new Set(['input', 'dialog', 'popup', 'portal'])
 
@@ -38,22 +40,26 @@ export default function ComponentScreen() {
     )
   const Preview = fixture.Component
   const hasPagePortal = PAGE_PORTAL_COMPONENTS.has(fixture.id)
+  const content =
+    fixture.version === 'v2' ? (
+      <V2Preview>
+        <Preview key={fixture.id} />
+      </V2Preview>
+    ) : (
+      <Preview key={fixture.id} />
+    )
   const preview = (
     <SafeAreaView
       edges={['left', 'right', 'bottom']}
       style={{ flex: 1, backgroundColor: token.colorBgLayout }}
     >
-      <Stack.Screen options={{ title: fixture.title }} />
+      <Stack.Screen
+        options={{ title: fixture.title + ' · ' + fixtureVersionLabel[fixture.version] }}
+      />
       <FixtureKeyboardToolbarContext.Provider
         value={hasToolbar && keyboardVisible ? toolbarHeight : 0}
       >
-        {hasPagePortal ? (
-          isFocused ? (
-            <Preview key={fixture.id} />
-          ) : null
-        ) : (
-          <Preview key={fixture.id} />
-        )}
+        {(!hasPagePortal || isFocused) && content}
       </FixtureKeyboardToolbarContext.Provider>
       {hasToolbar && keyboardVisible ? (
         <Portal hostName="root">

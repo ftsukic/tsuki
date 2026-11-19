@@ -8,6 +8,7 @@
   "scripts": {
     "build": "pnpm --filter @ftsukic/tsuki run build",
     "fixtures:generate": "pnpm --filter playground run generate:fixtures",
+    "fixtures:check": "node scripts/generate-fixture-catalog.cjs --check",
     "typecheck": "pnpm run package:typecheck && pnpm run package:fixtures:typecheck && pnpm run consumers:typecheck && pnpm run playground:typecheck",
     "package:typecheck": "pnpm --filter @ftsukic/tsuki run typecheck",
     "package:test": "pnpm --filter @ftsukic/tsuki run test",

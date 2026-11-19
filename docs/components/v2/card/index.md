@@ -28,6 +28,13 @@ export function Details() {
 
 NativeWind v4/v5 的常规样式按 **主题 → props → 类名 → 原生 `style`** 合并。`!important` 工具类遵循 CSS 优先级。Playground 使用原生样式回退，类名效果可在两套 Consumer 中预览。
 
-- [简洁模式](../../../../packages/tsuki/src/card/__fixtures__/examples/basic.tsx)
-- [全部示例](../../../../packages/tsuki/src/card/__fixtures__/overview.tsx)
-- [局部主题](../../../../packages/tsuki/src/card/__fixtures__/examples/theme.tsx)
+## 示例
+
+- [Playground Overview](../../../../packages/tsuki/src/card/__fixtures__/overview.tsx)
+- [Basic](../../../../packages/tsuki/src/card/__fixtures__/examples/basic.tsx)
+- [Composition](../../../../packages/tsuki/src/card/__fixtures__/examples/composition.tsx)
+- [Custom Class](../../../../packages/tsuki/src/card/__fixtures__/examples/custom-class.tsx)
+- [Footer](../../../../packages/tsuki/src/card/__fixtures__/examples/footer.tsx)
+- [Header](../../../../packages/tsuki/src/card/__fixtures__/examples/header.tsx)
+- [Sections](../../../../packages/tsuki/src/card/__fixtures__/examples/sections.tsx)
+- [Theme](../../../../packages/tsuki/src/card/__fixtures__/examples/theme.tsx)

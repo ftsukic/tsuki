@@ -3,8 +3,8 @@
  * @description Renders and rotates an Ant Design-compatible SVG definition.
  */
 
-import { Icon } from '../..'
-import type { IconDefinition } from '../..'
+import { Icon } from '@ftsukic/tsuki'
+import type { IconDefinition } from '@ftsukic/tsuki'
 
 const definition: IconDefinition = {
   name: 'diamond',

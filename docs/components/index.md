@@ -6,11 +6,11 @@
 - [Card](./v2/card/index.md)
 - [Cell / CellGroup](./v2/cell/index.md)
 - [Divider](./v2/divider/index.md)
-- [Icon](./icon/index.md)
+- [Icon](./v2/icon/index.md)
 - [Input](./v2/input/index.md)
 - [Space](./v2/space/index.md)
 - [Surface](./v2/surface/index.md)
-- [Text](./text/index.md)
+- [Text](./v2/text/index.md)
 
 ## Tsuki 1.x 历史组件
 
@@ -28,6 +28,7 @@
 - [Field](./field/index.md)、[Input](./input/index.md)
 - [Flex](./flex/index.md)、[FloatingBubble](./floating-bubble/index.md)、[FloatingPanel](./floating-panel/index.md)、[Grid](./grid/index.md)、[Layout](./layout/index.md)、[Space](./space/index.md)
 - [Loading](./loading/index.md)
+- [Icon](./icon/index.md)、[Text](./text/index.md)
 - [ImagePreview](./image-preview/index.md)
 - [Slider](./slider/index.md)
 - [Skeleton](./skeleton/index.md)

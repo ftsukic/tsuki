@@ -1,10 +1,8 @@
 /**
- * @title theme
+ * @title Theme
  * @description Demonstrates Surface theme.
  */
-import { Text } from 'react-native'
-import { Surface } from '../..'
-import { ConfigProvider } from '../../../theme'
+import { ConfigProvider, Surface, Text } from '@ftsukic/tsuki'
 
 export default function Theme() {
   return (
@@ -15,7 +13,7 @@ export default function Theme() {
       }}
     >
       <Surface bordered>
-        <Text>Local theme</Text>
+        <Text style={{ color: '#4c1d95' }}>Local theme</Text>
       </Surface>
     </ConfigProvider>
   )

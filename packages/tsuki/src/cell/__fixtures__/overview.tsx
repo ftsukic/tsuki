@@ -1,7 +1,3 @@
-/**
- * @title Cell
- * @description Settings rows, interactive rows, and grouped content.
- */
 import { ScrollView } from 'react-native'
 import Basic from './examples/basic'
 import Composition from './examples/composition'
@@ -25,7 +21,10 @@ import Theme from './examples/theme'
 
 export default function CellOverview() {
   return (
-    <ScrollView contentContainerStyle={{ gap: 16, paddingBottom: 16 }}>
+    <ScrollView
+      contentContainerStyle={{ gap: 16, padding: 16 }}
+      keyboardShouldPersistTaps="handled"
+    >
       <Basic />
       <Composition />
       <Horizontal />

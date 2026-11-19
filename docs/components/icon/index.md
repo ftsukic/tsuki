@@ -1,25 +1,19 @@
-# Icon 图标
+# Icon
 
-从 `@ftsukic/tsuki` 导入 `Icon` 和类型 `IconProps`、`IconName`、`IconDefinition`。
+- [示例源码](../../../packages/tsuki/bak/src/icon/__fixtures__/overview.tsx)
 
-`name` 接受内置名称或 Ant Design SVG 定义。内置名称包括 `CheckCircleTwoTone`、`CheckOutlined`、`CloseOutlined`、`DeleteOutlined`、`InfoCircleOutlined`、`LeftOutlined`、`PlusOutlined`、`RightOutlined` 和 `SearchOutlined`。无效名称不渲染内容。应用可以按需从 `@ant-design/icons-svg/lib/asn/<名称>` 导入定义并传给 `name`。
+`Icon` 使用 `@ant-design/icons-svg` 图标定义，并通过 `react-native-svg` 渲染到 React Native。H5 文档预览使用 `react-native-svg` 的 Web 实现。
 
-| 属性 | 行为 |
-| --- | --- |
-| `size` | SVG 宽高，默认 24 |
-| `color` | SVG 前景色，默认使用当前主题的 `colorForeground` |
-| `twoToneColor` | 单值覆盖次色，默认次色为 `colorMuted`。也可传入 `[主色, 次色]` |
-| `rotation` | SVG 旋转角度，单位为度 |
-| `className`、`style` | 根容器样式。通过 `color` 设置 SVG 前景色 |
-| `svgStyle` | SVG 自身样式，在 rotation 对应的 transform 之后应用 |
-| `onPress`、`disabled` | 提供 `onPress` 时使用 React Native Pressable，默认无障碍角色为 button |
-| `touchableSize`、`hitSlop` | 默认触摸目标为 44，超出 SVG 尺寸的部分通过 hit slop 扩展。显式 `hitSlop` 优先，父容器边界限制触摸范围 |
+```text
+import { Icon } from '@ftsukic/tsuki';
 
-支持根容器的 React Native View props，包括 `accessibilityLabel`、`accessibilityRole` 和 `accessibilityState`。为可点击的图标提供描述操作的 `accessibilityLabel`。
+<Icon name="CheckOutlined" size={20} color="#07C160" />;
+```
 
-静态和函数式 SVG AST 均可用。渲染器支持常见形状、分组、剪裁、遮罩、渐变及符号引用，转换诸如 `stroke-width` 的属性名，并以解析后的前景色替换 `currentColor`。
+公开 Props 包括 `name`、`size`、`color`、`rotation`、`style`、`svgStyle`、`disabled`、`touchableSize`、`twoToneColor` 和 `onPress`。`name` 可以是内置 `IconName` 或自定义 `IconDefinition`。
 
-- [Playground 与 Fixture](../../../packages/tsuki/src/icon/__fixtures__/overview.tsx)
-- [双色图标](../../../packages/tsuki/src/icon/__fixtures__/examples/two-tone.tsx)
-- [自定义定义](../../../packages/tsuki/src/icon/__fixtures__/examples/custom.tsx)
-- [交互](../../../packages/tsuki/src/icon/__fixtures__/examples/interactive.tsx)
+传入 `onPress` 时，组件使用 Pressable 根容器。`touchableSize` 默认为 `44`，通过 `hitSlop` 扩展点击范围，不改变图标布局尺寸；显式传入 `hitSlop` 时优先使用该值。单独传入 `touchableSize` 不会启用交互。
+
+无障碍属性作用于根容器；`style` 设置根容器样式，`svgStyle` 设置内部 SVG 样式。`color` 支持 React Native 的字符串颜色、`PlatformColor` 和 `DynamicColorIOS`。自定义图标的子节点遵循 SVG 的 `fill` 和 `stroke` 继承。
+
+组件入口只导出 `Icon`、`IconProps`、`IconName`。自定义图标定义从 `@ant-design/icons-svg` 直接导入；底层渲染组件和图标映射不作为公共 API。

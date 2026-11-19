@@ -1,13 +1,19 @@
 const { getDefaultConfig } = require('expo/metro-config')
 const path = require('node:path')
+const fs = require('node:fs')
+const { withNativewind } = require('nativewind/metro')
 
 const config = getDefaultConfig(__dirname)
+const v2SourceRoot = path.resolve(__dirname, '../../packages/tsuki/src')
 const legacySourceRoot = path.resolve(__dirname, '../../packages/tsuki/bak/src')
 const legacyPlaygroundAssetsPrefix = '../../../../../../apps/playground/assets/'
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
   if (moduleName === '@ftsukic/tsuki') {
-    return context.resolveRequest(context, legacySourceRoot, platform)
+    const fromV2 = path.relative(v2SourceRoot, context.originModulePath)
+    const sourceRoot =
+      fromV2.startsWith('..') || path.isAbsolute(fromV2) ? legacySourceRoot : v2SourceRoot
+    return context.resolveRequest(context, sourceRoot, platform)
   }
 
   const legacySubpathPrefix = '@ftsukic/tsuki/'
@@ -25,7 +31,15 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     return context.resolveRequest(context, assetPath, platform)
   }
 
-  return context.resolveRequest(context, moduleName, platform)
+  const origin =
+    moduleName === 'nativewind' ? { ...context, originModulePath: __filename } : context
+  return context.resolveRequest(origin, moduleName, platform)
 }
 
-module.exports = config
+// Theme controls override these defaults at runtime.
+const themeCss = fs.readFileSync(path.join(v2SourceRoot, 'theme/theme.css'), 'utf8')
+const themeVariables = [
+  ...new Set([...themeCss.matchAll(/(--tsuki-[\w-]+):/g)].map((match) => match[1])),
+]
+
+module.exports = withNativewind(config, { inlineVariables: { exclude: themeVariables } })

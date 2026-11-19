@@ -1,26 +1,11 @@
 /**
- * @title Button variants
- * @description Compare solid, outlined, and ghost Button variants with three sizes.
+ * @title Basic
+ * @description Updates the label when the action is pressed.
  */
+import { useState } from 'react'
 import { Button } from '@ftsukic/tsuki'
-import { Text, View } from 'react-native'
 
-export default function ButtonBasicExample() {
-  return (
-    <View style={{ gap: 12 }}>
-      <Button onPress={() => {}}>Continue</Button>
-      <Button variant="outlined" onPress={() => {}}>
-        Secondary action
-      </Button>
-      <Button variant="ghost" size="small" onPress={() => {}}>
-        Learn more
-      </Button>
-      <Button loading onPress={() => {}}>
-        Saving
-      </Button>
-      <Button icon={<Text>✓</Text>} classNames={{ icon: 'mr-2' }} onPress={() => {}}>
-        Completed
-      </Button>
-    </View>
-  )
+export default function Basic() {
+  const [count, setCount] = useState(0)
+  return <Button onPress={() => setCount((value) => value + 1)}>{`Pressed ${count} times`}</Button>
 }

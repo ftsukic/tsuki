@@ -2,8 +2,8 @@
  * @title Sections
  * @description A Card with all three optional sections.
  */
-import { Card } from '../..'
-import { Text } from '../../../text'
+
+import { Card, Text } from '@ftsukic/tsuki'
 
 export default function Sections() {
   return (

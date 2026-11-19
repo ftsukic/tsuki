@@ -1,14 +1,14 @@
 /**
- * @title CustomText
+ * @title Custom Text
  * @description Demonstrates Button custom text.
  */
-import { Button } from '../../button'
-import { Text } from '../../../text'
+
+import { Button, Text } from '@ftsukic/tsuki'
 
 export default function CustomText() {
   return (
-    <Button variant="solid">
-      <Text className="text-red-500">Custom</Text>
+    <Button variant="outlined">
+      <Text className="text-tsuki-danger">Custom</Text>
     </Button>
   )
 }

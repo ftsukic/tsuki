@@ -37,6 +37,13 @@ export function Example() {
 
 NativeWind v4/v5 的常规样式优先级为 **主题 → props → 类名 → 原生样式**。`!important` 工具类遵循 CSS 优先级。Playground 使用原生样式回退，类名效果可在两套 NativeWind Consumer 中预览。
 
-- [全部示例](../../../../packages/tsuki/src/surface/__fixtures__/overview.tsx)
-- [主题覆盖](../../../../packages/tsuki/src/surface/__fixtures__/examples/theme.tsx)
-- [类名覆盖](../../../../packages/tsuki/src/surface/__fixtures__/examples/custom-class.tsx)
+## 示例
+
+- [Playground Overview](../../../../packages/tsuki/src/surface/__fixtures__/overview.tsx)
+- [Basic](../../../../packages/tsuki/src/surface/__fixtures__/examples/basic.tsx)
+- [Bordered](../../../../packages/tsuki/src/surface/__fixtures__/examples/bordered.tsx)
+- [Custom class](../../../../packages/tsuki/src/surface/__fixtures__/examples/custom-class.tsx)
+- [Inset](../../../../packages/tsuki/src/surface/__fixtures__/examples/inset.tsx)
+- [Padding](../../../../packages/tsuki/src/surface/__fixtures__/examples/padding.tsx)
+- [Theme](../../../../packages/tsuki/src/surface/__fixtures__/examples/theme.tsx)
+- [Overflow](../../../../packages/tsuki/src/surface/__fixtures__/examples/overflow.tsx)

@@ -11,5 +11,5 @@
       "@ftsukic/tsuki/*": ["../../packages/tsuki/bak/src/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx"]
+  "include": ["**/*.ts", "**/*.tsx", "nativewind-env.d.ts"]
 }

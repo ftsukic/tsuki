@@ -1,9 +1,8 @@
 /**
- * @title inset
+ * @title Inset
  * @description Demonstrates Surface inset.
  */
-import { Text } from 'react-native'
-import { Surface } from '../..'
+import { Surface, Text } from '@ftsukic/tsuki'
 
 export default function Inset() {
   return (

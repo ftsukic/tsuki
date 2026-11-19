@@ -1,0 +1,653 @@
+{
+  "categories": [
+    "Tsuki v2",
+    "基础组件",
+    "表单组件",
+    "展示组件",
+    "导航组件",
+    "反馈组件",
+    "动效与手势"
+  ],
+  "entries": [
+    {
+      "id": "button-v2",
+      "component": "button",
+      "title": "Button",
+      "description": "Variants, sizes, loading and text cascade.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 0,
+      "fixturePath": "packages/tsuki/src/button/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "input-v2",
+      "component": "input",
+      "title": "Input",
+      "description": "Native text entry, accessories and validation.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 1,
+      "fixturePath": "packages/tsuki/src/input/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "text-v2",
+      "component": "text",
+      "title": "Text",
+      "description": "Typography variants, nesting and theme scopes.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 2,
+      "fixturePath": "packages/tsuki/src/text/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "icon-v2",
+      "component": "icon",
+      "title": "Icon",
+      "description": "SVG icons, colors and accessible actions.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 3,
+      "fixturePath": "packages/tsuki/src/icon/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "space-v2",
+      "component": "space",
+      "title": "Space",
+      "description": "Native layout, gaps, alignment and wrapping.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 4,
+      "fixturePath": "packages/tsuki/src/space/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "divider-v2",
+      "component": "divider",
+      "title": "Divider",
+      "description": "Separators, thickness and insets.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 5,
+      "fixturePath": "packages/tsuki/src/divider/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "surface-v2",
+      "component": "surface",
+      "title": "Surface",
+      "description": "Containers with padding, borders and clipping.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 6,
+      "fixturePath": "packages/tsuki/src/surface/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "card-v2",
+      "component": "card",
+      "title": "Card",
+      "description": "Composable sections, nested cards and actions.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 7,
+      "fixturePath": "packages/tsuki/src/card/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "cell-v2",
+      "component": "cell",
+      "title": "Cell",
+      "description": "Interactive rows, slots and grouped settings.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 8,
+      "fixturePath": "packages/tsuki/src/cell/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "button",
+      "component": "button",
+      "title": "Button",
+      "description": "按钮的变体、尺寸、图标与加载、形状、按钮组和按下反馈。",
+      "version": "v1",
+      "category": "基础组件",
+      "order": 0,
+      "fixturePath": "packages/tsuki/bak/src/button/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "cell",
+      "component": "cell",
+      "title": "Cell",
+      "description": "Cell 和 CellGroup 的语义布局用法预览。",
+      "version": "v1",
+      "category": "基础组件",
+      "order": 1,
+      "fixturePath": "packages/tsuki/bak/src/cell/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "icon",
+      "component": "icon",
+      "title": "Icon",
+      "description": "Icon 展示图标颜色、尺寸和可触摸图标。",
+      "version": "v1",
+      "category": "基础组件",
+      "order": 2,
+      "fixturePath": "packages/tsuki/bak/src/icon/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "layout",
+      "component": "layout",
+      "title": "Layout",
+      "description": "Layout 汇总 24 栅格、间距、偏移、换行和 Flexbox 对齐示例。",
+      "version": "v1",
+      "category": "基础组件",
+      "order": 3,
+      "fixturePath": "packages/tsuki/bak/src/layout/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "flex",
+      "component": "flex",
+      "title": "Flex",
+      "description": "Flex 汇总方向、换行、gap 以及两轴对齐能力。",
+      "version": "v1",
+      "category": "基础组件",
+      "order": 4,
+      "fixturePath": "packages/tsuki/bak/src/flex/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "space",
+      "component": "space",
+      "title": "Space",
+      "description": "Space 汇总横向、纵向、gap、换行和交叉轴对齐示例。",
+      "version": "v1",
+      "category": "基础组件",
+      "order": 5,
+      "fixturePath": "packages/tsuki/bak/src/space/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "text",
+      "component": "text",
+      "title": "Text",
+      "description": "Text 汇总基础文本、语义、尺寸和字重示例。",
+      "version": "v1",
+      "category": "基础组件",
+      "order": 6,
+      "fixturePath": "packages/tsuki/bak/src/text/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "surface",
+      "component": "surface",
+      "title": "Surface",
+      "description": "Surface provides a rounded visual container for related mobile content.",
+      "version": "v1",
+      "category": "基础组件",
+      "order": 7,
+      "fixturePath": "packages/tsuki/bak/src/surface/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "popup",
+      "component": "popup",
+      "title": "Popup",
+      "description": "Popup 通过 selector 汇总位置、交互、生命周期和主题示例，每次只挂载一个弹层。",
+      "version": "v1",
+      "category": "基础组件",
+      "order": 8,
+      "fixturePath": "packages/tsuki/bak/src/popup/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "toast",
+      "component": "toast",
+      "title": "Toast",
+      "description": "Toast 通过 selector 汇总类型、位置、交互和主题示例，每次只挂载一个提示案例。",
+      "version": "v1",
+      "category": "基础组件",
+      "order": 9,
+      "fixturePath": "packages/tsuki/bak/src/toast/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "provider",
+      "component": "provider",
+      "title": "TsukiProvider",
+      "description": "TsukiProvider 汇总应用级主题和 Portal 上下文入口示例。",
+      "version": "v1",
+      "category": "基础组件",
+      "order": 10,
+      "fixturePath": "packages/tsuki/bak/src/provider/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "theme",
+      "component": "theme",
+      "title": "Theme",
+      "description": "Theme 展示明暗算法、当前配置和解析后生效的主题参数。",
+      "version": "v1",
+      "category": "基础组件",
+      "order": 11,
+      "fixturePath": "packages/tsuki/bak/src/theme/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "portal",
+      "component": "portal",
+      "title": "Portal",
+      "description": "Tsuki 的浮层组件直接使用 react-native-teleport，应用负责提供 PortalProvider。",
+      "version": "v1",
+      "category": "基础组件",
+      "order": 12,
+      "fixturePath": "packages/tsuki/bak/src/portal/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "field",
+      "component": "field",
+      "title": "Field",
+      "description": "Field 系列适配器直接组合 Cell 与对应控件，日期时间选择器在确认后提交值。",
+      "version": "v1",
+      "category": "表单组件",
+      "order": 0,
+      "fixturePath": "packages/tsuki/bak/src/field/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "input",
+      "component": "input",
+      "title": "Input",
+      "description": "Input 汇总基础、密码、数字和多行输入模式。",
+      "version": "v1",
+      "category": "表单组件",
+      "order": 1,
+      "fixturePath": "packages/tsuki/bak/src/input/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "checkbox",
+      "component": "checkbox",
+      "title": "Checkbox",
+      "description": "Checkbox 汇总基础状态、多选分组、全选半选、FlashList 大列表、options、button variant 和主题定制示例。",
+      "version": "v1",
+      "category": "表单组件",
+      "order": 2,
+      "fixturePath": "packages/tsuki/bak/src/checkbox/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "radio",
+      "component": "radio",
+      "title": "Radio",
+      "description": "Radio 汇总独立选项、分组、button variant、禁用、形状、样式和主题示例。",
+      "version": "v1",
+      "category": "表单组件",
+      "order": 3,
+      "fixturePath": "packages/tsuki/bak/src/radio/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "switch",
+      "component": "switch",
+      "title": "Switch",
+      "description": "Switch supports tokenized sizes, custom values, loading and async confirmation.",
+      "version": "v1",
+      "category": "表单组件",
+      "order": 4,
+      "fixturePath": "packages/tsuki/bak/src/switch/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "slider",
+      "component": "slider",
+      "title": "Slider",
+      "description": "Slider 展示数值选择、步长刻度、禁用只读和外观定制。",
+      "version": "v1",
+      "category": "表单组件",
+      "order": 5,
+      "fixturePath": "packages/tsuki/bak/src/slider/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "search",
+      "component": "search",
+      "title": "Search",
+      "description": "Search 汇总 Vant 风格输入、左右扩展和搜索行为场景。",
+      "version": "v1",
+      "category": "表单组件",
+      "order": 6,
+      "fixturePath": "packages/tsuki/bak/src/search/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "picker",
+      "component": "picker",
+      "title": "Picker",
+      "description": "Picker 汇总 Cell + Popup 组合、Toolbar、单列、多列、级联、Loading、空数据和 FieldPicker 联动示例。",
+      "version": "v1",
+      "category": "表单组件",
+      "order": 7,
+      "fixturePath": "packages/tsuki/bak/src/picker/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "picker-group",
+      "component": "picker-group",
+      "title": "PickerGroup",
+      "description": "PickerGroup component overview.",
+      "version": "v1",
+      "category": "表单组件",
+      "order": 8,
+      "fixturePath": "packages/tsuki/bak/src/picker-group/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "date-picker",
+      "component": "date-picker",
+      "title": "DatePicker",
+      "description": "DatePicker 的 Vant 风格日期列、边界和 Popup 示例。 */",
+      "version": "v1",
+      "category": "表单组件",
+      "order": 9,
+      "fixturePath": "packages/tsuki/bak/src/date-picker/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "time-picker",
+      "component": "time-picker",
+      "title": "TimePicker",
+      "description": "TimePicker 的 Vant 时间范围、过滤和 Tsuki 步进示例。 */",
+      "version": "v1",
+      "category": "表单组件",
+      "order": 10,
+      "fixturePath": "packages/tsuki/bak/src/time-picker/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "date-time-picker",
+      "component": "date-time-picker",
+      "title": "DateTimePicker",
+      "description": "DateTimePicker 是本库组合日期和时间的 Picker-family 扩展。 */",
+      "version": "v1",
+      "category": "表单组件",
+      "order": 11,
+      "fixturePath": "packages/tsuki/bak/src/date-time-picker/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "action-sheet",
+      "component": "action-sheet",
+      "title": "ActionSheet",
+      "description": "ActionSheet 的基础菜单、状态和自定义内容预览。",
+      "version": "v1",
+      "category": "反馈组件",
+      "order": 0,
+      "fixturePath": "packages/tsuki/bak/src/action-sheet/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "dialog",
+      "component": "dialog",
+      "title": "Dialog",
+      "description": "Dialog 通过 selector 汇总各种交互和样式示例，每次只挂载一个浮层。",
+      "version": "v1",
+      "category": "反馈组件",
+      "order": 1,
+      "fixturePath": "packages/tsuki/bak/src/dialog/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "dropdown",
+      "component": "dropdown",
+      "title": "Dropdown",
+      "description": "Dropdown 汇总 Vant 风格菜单、选项面板、自定义内容、禁用状态、受控值和向上展开。",
+      "version": "v1",
+      "category": "反馈组件",
+      "order": 2,
+      "fixturePath": "packages/tsuki/bak/src/dropdown/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "floating-panel",
+      "component": "floating-panel",
+      "title": "FloatingPanel",
+      "description": "FloatingPanel 通过 selector 汇总拖动、锚点、安全区和主题示例，每次只挂载一个面板。",
+      "version": "v1",
+      "category": "反馈组件",
+      "order": 3,
+      "fixturePath": "packages/tsuki/bak/src/floating-panel/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "floating-bubble",
+      "component": "floating-bubble",
+      "title": "FloatingBubble",
+      "description": "FloatingBubble 汇总视口定位、拖动方向、磁吸、受控位置、自定义内容、安全区和主题示例。",
+      "version": "v1",
+      "category": "反馈组件",
+      "order": 4,
+      "fixturePath": "packages/tsuki/bak/src/floating-bubble/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "loading",
+      "component": "loading",
+      "title": "Loading",
+      "description": "Loading supports distinct circular and spinner indicators, text, layout, and theme slots.",
+      "version": "v1",
+      "category": "反馈组件",
+      "order": 5,
+      "fixturePath": "packages/tsuki/bak/src/loading/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "notify",
+      "component": "notify",
+      "title": "Notify",
+      "description": "Notify 汇总类型、受控显示、命令式交互、主题和顶部安全区示例，每次只挂载一个通知。",
+      "version": "v1",
+      "category": "反馈组件",
+      "order": 6,
+      "fixturePath": "packages/tsuki/bak/src/notify/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "overlay",
+      "component": "overlay",
+      "title": "Overlay",
+      "description": "Overlay 通过 selector 汇总遮罩、嵌入内容、交互和主题示例，每次只挂载一个遮罩。",
+      "version": "v1",
+      "category": "反馈组件",
+      "order": 7,
+      "fixturePath": "packages/tsuki/bak/src/overlay/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "swipe-cell",
+      "component": "swipe-cell",
+      "title": "SwipeCell",
+      "description": "默认展示微信效果，依次演示基础操作、触摸反馈、页面协调、列表和局部分组。",
+      "version": "v1",
+      "category": "反馈组件",
+      "order": 8,
+      "fixturePath": "packages/tsuki/bak/src/swipe-cell/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "avatar",
+      "component": "avatar",
+      "title": "Avatar",
+      "description": "Avatar 汇总尺寸、形状、来源、分组和角标组合示例。",
+      "version": "v1",
+      "category": "展示组件",
+      "order": 0,
+      "fixturePath": "packages/tsuki/bak/src/avatar/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "badge",
+      "component": "badge",
+      "title": "Badge",
+      "description": "Badge 汇总数字、红点、四角定位、standalone 和主题样式示例。",
+      "version": "v1",
+      "category": "展示组件",
+      "order": 1,
+      "fixturePath": "packages/tsuki/bak/src/badge/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "collapse",
+      "component": "collapse",
+      "title": "Collapse",
+      "description": "Collapse 的基础、手风琴、默认展开、禁用、受控和主题示例。",
+      "version": "v1",
+      "category": "展示组件",
+      "order": 2,
+      "fixturePath": "packages/tsuki/bak/src/collapse/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "divider",
+      "component": "divider",
+      "title": "Divider",
+      "description": "Divider 的横向 hairline、颜色、厚度和左右 inset 示例。",
+      "version": "v1",
+      "category": "展示组件",
+      "order": 3,
+      "fixturePath": "packages/tsuki/bak/src/divider/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "empty",
+      "component": "empty",
+      "title": "Empty",
+      "description": "Empty 汇总默认空状态、描述、图片、底部操作区域和主题定制示例。",
+      "version": "v1",
+      "category": "展示组件",
+      "order": 4,
+      "fixturePath": "packages/tsuki/bak/src/empty/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "image-preview",
+      "component": "image-preview",
+      "title": "ImagePreview",
+      "description": "ImagePreview 的基础、自定义 adapter、手势和缩略图连续过渡示例。 */",
+      "version": "v1",
+      "category": "展示组件",
+      "order": 5,
+      "fixturePath": "packages/tsuki/bak/src/image-preview/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "notice-bar",
+      "component": "notice-bar",
+      "title": "NoticeBar",
+      "description": "NoticeBar 汇总基础、组合内容、滚动、换行、交互、禁用和主题示例。",
+      "version": "v1",
+      "category": "展示组件",
+      "order": 6,
+      "fixturePath": "packages/tsuki/bak/src/notice-bar/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "popover",
+      "component": "popover",
+      "title": "Popover",
+      "description": "Popover 的 action 菜单、定位、主题、触发器和自定义内容预览。",
+      "version": "v1",
+      "category": "展示组件",
+      "order": 7,
+      "fixturePath": "packages/tsuki/bak/src/popover/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "progress",
+      "component": "progress",
+      "title": "Progress",
+      "description": "Progress supports tokenized line and circle indicators with animated updates.",
+      "version": "v1",
+      "category": "展示组件",
+      "order": 8,
+      "fixturePath": "packages/tsuki/bak/src/progress/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "skeleton",
+      "component": "skeleton",
+      "title": "Skeleton",
+      "description": "Skeleton covers content shapes, avatars, loading state, themes and animation.",
+      "version": "v1",
+      "category": "展示组件",
+      "order": 9,
+      "fixturePath": "packages/tsuki/bak/src/skeleton/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "swipe",
+      "component": "swipe",
+      "title": "Swipe",
+      "description": "Swipe component overview.",
+      "version": "v1",
+      "category": "展示组件",
+      "order": 10,
+      "fixturePath": "packages/tsuki/bak/src/swipe/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "tag",
+      "component": "tag",
+      "title": "Tag",
+      "description": "Tag 汇总语义类型、形状、尺寸、关闭和自定义颜色示例。",
+      "version": "v1",
+      "category": "展示组件",
+      "order": 11,
+      "fixturePath": "packages/tsuki/bak/src/tag/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "watermark",
+      "component": "watermark",
+      "title": "Watermark",
+      "description": "Watermark 汇总文字、图片、平铺布局、语义样式和主题 token 示例。",
+      "version": "v1",
+      "category": "展示组件",
+      "order": 12,
+      "fixturePath": "packages/tsuki/bak/src/watermark/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "bottom-bar",
+      "component": "bottom-bar",
+      "title": "BottomBar",
+      "description": "BottomBar 提供页面底部固定布局，可承载按钮组、输入框和任意操作内容。",
+      "version": "v1",
+      "category": "导航组件",
+      "order": 0,
+      "fixturePath": "packages/tsuki/bak/src/bottom-bar/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "grid",
+      "component": "grid",
+      "title": "Grid",
+      "description": "Grid 提供 Vant Mobile 语义的图标、文字和成员操作网格。",
+      "version": "v1",
+      "category": "导航组件",
+      "order": 1,
+      "fixturePath": "packages/tsuki/bak/src/grid/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "navbar",
+      "component": "navbar",
+      "title": "Navbar",
+      "description": "Vant-style Navbar layout, actions, fixed positioning, and safe-area examples.",
+      "version": "v1",
+      "category": "导航组件",
+      "order": 2,
+      "fixturePath": "packages/tsuki/bak/src/navbar/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "tabs",
+      "component": "tabs",
+      "title": "Tabs",
+      "description": "Tabs 汇总 line、card、禁用、横向滚动和受控切换示例。",
+      "version": "v1",
+      "category": "导航组件",
+      "order": 3,
+      "fixturePath": "packages/tsuki/bak/src/tabs/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "segmented",
+      "component": "segmented",
+      "title": "Segmented",
+      "description": "Segmented 汇总通知、筛选、尺寸、布局、形状和禁用示例。",
+      "version": "v1",
+      "category": "导航组件",
+      "order": 4,
+      "fixturePath": "packages/tsuki/bak/src/segmented/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "motion",
+      "component": "motion",
+      "title": "Motion",
+      "description": "分别查看过渡生命周期、属性动画、策略、预设与组件接入。",
+      "version": "v1",
+      "category": "动效与手势",
+      "order": 0,
+      "fixturePath": "packages/tsuki/bak/src/motion/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "gesture",
+      "component": "gesture",
+      "title": "Gesture",
+      "description": "Pan、Swipe、Tap 的基础手势、取消、稳定状态与嵌套滚动示例。",
+      "version": "v1",
+      "category": "动效与手势",
+      "order": 1,
+      "fixturePath": "packages/tsuki/bak/src/gesture/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "pressable",
+      "component": "pressable",
+      "title": "Pressable",
+      "description": "统一按压反馈、状态一致性、禁用、长按、节流与 Motion 策略。",
+      "version": "v1",
+      "category": "动效与手势",
+      "order": 2,
+      "fixturePath": "packages/tsuki/bak/src/pressable/__fixtures__/overview.tsx"
+    }
+  ]
+}

@@ -1,7 +1,4 @@
-/**
- * @title Text
- * @description Text variants, composition and theme scopes.
- */
+import { ScrollView } from 'react-native'
 import Basic from './examples/basic'
 import Variants from './examples/variants'
 import Nested from './examples/nested'
@@ -13,7 +10,10 @@ import DarkMode from './examples/dark-mode'
 
 export default function TextOverview() {
   return (
-    <>
+    <ScrollView
+      contentContainerStyle={{ gap: 16, padding: 16 }}
+      keyboardShouldPersistTaps="handled"
+    >
       <Basic />
       <Variants />
       <Nested />
@@ -22,6 +22,6 @@ export default function TextOverview() {
       <DeepNested />
       <Theme />
       <DarkMode />
-    </>
+    </ScrollView>
   )
 }

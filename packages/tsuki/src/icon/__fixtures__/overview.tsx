@@ -1,9 +1,4 @@
-/**
- * @title Icon
- * @description V2 icons with sizes, colors, custom SVG definitions and touch targets.
- */
-import { View } from 'react-native'
-import { TsukiProvider } from '../../theme'
+import { ScrollView } from 'react-native'
 import Basic from './examples/basic'
 import Sizes from './examples/sizes'
 import Colors from './examples/colors'
@@ -13,15 +8,16 @@ import Interactive from './examples/interactive'
 
 export default function IconOverview() {
   return (
-    <TsukiProvider scheme="light">
-      <View style={{ gap: 16 }}>
-        <Basic />
-        <Sizes />
-        <Colors />
-        <TwoTone />
-        <Custom />
-        <Interactive />
-      </View>
-    </TsukiProvider>
+    <ScrollView
+      contentContainerStyle={{ gap: 16, padding: 16 }}
+      keyboardShouldPersistTaps="handled"
+    >
+      <Basic />
+      <Sizes />
+      <Colors />
+      <TwoTone />
+      <Custom />
+      <Interactive />
+    </ScrollView>
   )
 }

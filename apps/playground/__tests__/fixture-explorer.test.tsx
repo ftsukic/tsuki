@@ -9,9 +9,6 @@ jest.mock('expo-router', () => ({ useRouter: () => ({ push: mockPush }) }), { vi
 jest.mock('../components/demo-provider', () => ({
   useDemoTheme: () => ({ mode: 'system', setMode: jest.fn() }),
 }))
-jest.mock('../fixtures/categories', () => ({
-  componentCategories: [{ title: '基础组件', components: ['button', 'cell'] }],
-}))
 
 jest.mock('../fixtures/catalog', () => {
   const React = jest.requireActual('react')
@@ -25,6 +22,8 @@ jest.mock('../fixtures/catalog', () => {
         Component: FirstOverview,
         component: 'button',
         description: 'Button overview description',
+        version: 'v1',
+        category: '基础组件',
         id: 'button',
         title: 'Button',
       },
@@ -32,7 +31,9 @@ jest.mock('../fixtures/catalog', () => {
         Component: SecondOverview,
         component: 'cell',
         description: 'Cell overview description',
-        id: 'cell',
+        version: 'v2',
+        category: 'Tsuki v2',
+        id: 'cell-v2',
         title: 'Cell',
       },
     ],
@@ -56,11 +57,19 @@ describe('FixtureExplorer component navigation', () => {
     expect(screen.getByText('组件游乐场')).toBeTruthy()
     expect(screen.getByText('Button')).toBeTruthy()
     expect(screen.getByText('Cell')).toBeTruthy()
-    await fireEvent.press(screen.getByText('Button'))
+    await fireEvent.press(screen.getByText('Cell'))
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/components/[id]',
-      params: { id: 'button' },
+      params: { id: 'cell-v2' },
     })
+  })
+
+  it('filters by version and preserves the category heading', async () => {
+    await render(<FixtureExplorer />)
+    await fireEvent.changeText(screen.getByLabelText('搜索组件'), 'Legacy v1')
+    expect(screen.getByText('基础组件')).toBeTruthy()
+    expect(screen.getByText('Button')).toBeTruthy()
+    expect(screen.queryByText('Cell')).toBeNull()
   })
 
   it('filters the component catalog by search text', async () => {

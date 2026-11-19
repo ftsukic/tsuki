@@ -1,7 +1,9 @@
 /**
  * @title Center
+ * @description Centers the title area against taller content.
  */
-import { Cell } from '../..'
+
+import { Cell } from '@ftsukic/tsuki'
 
 export default function Center() {
   return (

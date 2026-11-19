@@ -2,8 +2,7 @@
  * @title Horizontal spacing
  * @description Demonstrates horizontal spacing with Space.
  */
-import { Text } from 'react-native'
-import { Space } from '../..'
+import { Space, Text } from '@ftsukic/tsuki'
 
 export default function Basic() {
   return (

@@ -2,9 +2,6 @@
 
 Tsuki v2 Button wraps React Native Pressable. It keeps native interaction and accessibility props, adds CVA variants, a leading icon slot, and a loading state, and exposes utility classes and semantic slots.
 
-- [Variant examples](../../../../packages/tsuki/src/button/__fixtures__/examples/basic.tsx)
-- [Semantic classes and native styles](../../../../packages/tsuki/src/button/__fixtures__/examples/semantic-classes.tsx)
-
 ## API
 
 | Prop | Type | Default | Description |
@@ -26,6 +23,7 @@ Button inherits the remaining React Native `PressableProps`. Its default accessi
 The root classes use `bg-tsuki-primary`, `rounded-tsuki-button`, and `h-tsuki-button`. Override their CSS variables through `TsukiProvider` and `ConfigProvider`; the NativeWind bridge stays in the consuming app.
 
 ```tsx
+import { Button } from '@ftsukic/tsuki'
 import { Text } from 'react-native'
 
 ;<Button
@@ -38,3 +36,17 @@ import { Text } from 'react-native'
   Save
 </Button>
 ```
+
+## 示例
+
+- [Playground Overview](../../../../packages/tsuki/src/button/__fixtures__/overview.tsx)
+- [Basic](../../../../packages/tsuki/src/button/__fixtures__/examples/basic.tsx)
+- [Custom Text](../../../../packages/tsuki/src/button/__fixtures__/examples/custom-text.tsx)
+- [Nested Text](../../../../packages/tsuki/src/button/__fixtures__/examples/nested-text.tsx)
+- [Text Cascade](../../../../packages/tsuki/src/button/__fixtures__/examples/text-cascade.tsx)
+- [Classes and native styles](../../../../packages/tsuki/src/button/__fixtures__/examples/semantic-classes.tsx)
+- [Variants](../../../../packages/tsuki/src/button/__fixtures__/examples/variants.tsx)
+- [Sizes](../../../../packages/tsuki/src/button/__fixtures__/examples/sizes.tsx)
+- [Loading and disabled](../../../../packages/tsuki/src/button/__fixtures__/examples/states.tsx)
+- [Icon](../../../../packages/tsuki/src/button/__fixtures__/examples/icon.tsx)
+- [Theme](../../../../packages/tsuki/src/button/__fixtures__/examples/theme.tsx)

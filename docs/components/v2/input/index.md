@@ -2,10 +2,6 @@
 
 Tsuki v2 Input wraps React Native TextInput with a themed native container. It keeps TextInput value, keyboard, focus, submission, and accessibility behavior, with optional prefix/suffix content and a validation error state.
 
-- [Native input behavior](../../../../packages/tsuki/src/input/__fixtures__/examples/basic.tsx)
-- [Prefix, suffix, and error](../../../../packages/tsuki/src/input/__fixtures__/examples/accessories.tsx)
-- [Semantic classes and theme tokens](../../../../packages/tsuki/src/input/__fixtures__/examples/semantic-classes.tsx)
-
 ## API
 
 Input inherits React Native `TextInputProps` except `style` and `className`, which have library-level root semantics. `disabled` sets `editable={false}` and marks the accessibility state as disabled.
@@ -26,3 +22,13 @@ Input inherits React Native `TextInputProps` except `style` and `className`, whi
 `accessibilityLabel`, `placeholder`, `keyboardType`, `secureTextEntry`, focus handlers, and other native TextInput props pass through unchanged. When `error` is set, Input appends its message to an existing `accessibilityHint` or uses it as the hint. Native `style` props are applied after utility classes on the same slot; root `style` is last among the two root native styles and takes precedence over `styles.root`. Use `styles.input` for native TextInput typography and sizing, and `styles.prefix` / `styles.suffix` for accessory containers.
 
 The component reads `Input.borderRadius` and `Input.height` from the active scope through `--tsuki-input-border-radius` and `--tsuki-input-height`.
+
+## 示例
+
+- [Playground Overview](../../../../packages/tsuki/src/input/__fixtures__/overview.tsx)
+- [Native input behavior](../../../../packages/tsuki/src/input/__fixtures__/examples/basic.tsx)
+- [Prefix, suffix, and error](../../../../packages/tsuki/src/input/__fixtures__/examples/accessories.tsx)
+- [Input semantic styles](../../../../packages/tsuki/src/input/__fixtures__/examples/semantic-classes.tsx)
+- [Disabled](../../../../packages/tsuki/src/input/__fixtures__/examples/disabled.tsx)
+- [Password](../../../../packages/tsuki/src/input/__fixtures__/examples/password.tsx)
+- [Theme](../../../../packages/tsuki/src/input/__fixtures__/examples/theme.tsx)

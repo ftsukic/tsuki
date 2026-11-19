@@ -1,9 +1,8 @@
 /**
- * @title bordered
+ * @title Bordered
  * @description Demonstrates Surface bordered.
  */
-import { Text } from 'react-native'
-import { Surface } from '../..'
+import { Surface, Text } from '@ftsukic/tsuki'
 
 export default function Bordered() {
   return (

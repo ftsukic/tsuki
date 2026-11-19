@@ -2,8 +2,8 @@
  * @title Sizes
  * @description Compares explicit and default SVG sizes.
  */
+import { Icon } from '@ftsukic/tsuki'
 import { View } from 'react-native'
-import { Icon } from '../..'
 
 export default function Sizes() {
   return (

@@ -1,9 +1,9 @@
 /**
- * @title DarkMode
+ * @title Dark Mode
  * @description Shows the resolved primary color for this theme scope.
  */
-import { Text } from '../../index'
-import { TsukiProvider, useTsukiTheme } from '../../../theme'
+
+import { Text, TsukiProvider, useTsukiTheme } from '@ftsukic/tsuki'
 
 function ThemeText() {
   const { semantic } = useTsukiTheme()

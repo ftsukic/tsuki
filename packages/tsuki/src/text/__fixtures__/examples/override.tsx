@@ -2,7 +2,8 @@
  * @title Override
  * @description Demonstrates Text override.
  */
-import { Text, TextClassContext } from '../../index'
+
+import { Text, TextClassContext } from '@ftsukic/tsuki'
 
 export default function Override() {
   return (

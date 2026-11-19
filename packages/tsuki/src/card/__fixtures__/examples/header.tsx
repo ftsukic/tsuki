@@ -2,10 +2,8 @@
  * @title Header
  * @description A custom heading with an icon.
  */
-import { Card } from '../..'
-import { Icon } from '../../../icon'
-import { Space } from '../../../space'
-import { Text } from '../../../text'
+
+import { Card, Icon, Space, Text } from '@ftsukic/tsuki'
 
 export default function Header() {
   return (

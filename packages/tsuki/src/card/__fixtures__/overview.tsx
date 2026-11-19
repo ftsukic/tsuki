@@ -1,8 +1,4 @@
-/**
- * @title Card
- * @description V2 cards with optional content sections, actions, class and theme overrides.
- */
-import { View } from 'react-native'
+import { ScrollView } from 'react-native'
 import Basic from './examples/basic'
 import Composition from './examples/composition'
 import CustomClass from './examples/custom-class'
@@ -13,7 +9,10 @@ import Theme from './examples/theme'
 
 export default function CardOverview() {
   return (
-    <View style={{ gap: 12 }}>
+    <ScrollView
+      contentContainerStyle={{ gap: 16, padding: 16 }}
+      keyboardShouldPersistTaps="handled"
+    >
       <Basic />
       <Sections />
       <Header />
@@ -21,6 +20,6 @@ export default function CardOverview() {
       <Composition />
       <CustomClass />
       <Theme />
-    </View>
+    </ScrollView>
   )
 }

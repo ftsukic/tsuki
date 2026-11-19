@@ -1,9 +1,9 @@
 /**
- * @title TextCascade
+ * @title Text Cascade
  * @description Demonstrates Button text cascade.
  */
-import { Button } from '../../button'
-import { Text } from '../../../text'
+
+import { Button, Text } from '@ftsukic/tsuki'
 
 export default function TextCascade() {
   return (

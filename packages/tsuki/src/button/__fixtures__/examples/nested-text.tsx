@@ -1,9 +1,9 @@
 /**
- * @title NestedText
+ * @title Nested Text
  * @description Demonstrates Button nested text.
  */
-import { Button } from '../../button'
-import { Text } from '../../../text'
+
+import { Button, Text } from '@ftsukic/tsuki'
 
 export default function NestedText() {
   return (

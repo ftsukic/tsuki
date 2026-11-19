@@ -2,9 +2,8 @@
  * @title Theme
  * @description A local Card token override.
  */
-import { Card } from '../..'
-import { ConfigProvider } from '../../../theme'
-import { Text } from '../../../text'
+
+import { Card, ConfigProvider, Text } from '@ftsukic/tsuki'
 
 export default function Theme() {
   return (

@@ -2,9 +2,9 @@
  * @title Interactive
  * @description Increments a count from an accessible icon button.
  */
+import { Icon, Text } from '@ftsukic/tsuki'
 import { useState } from 'react'
-import { Text, View } from 'react-native'
-import { Icon } from '../..'
+import { View } from 'react-native'
 
 export default function Interactive() {
   const [count, setCount] = useState(0)

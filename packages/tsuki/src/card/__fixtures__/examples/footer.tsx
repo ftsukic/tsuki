@@ -2,10 +2,8 @@
  * @title Footer
  * @description An action placed in the footer.
  */
+import { Button, Card, Text } from '@ftsukic/tsuki'
 import { useState } from 'react'
-import { Card } from '../..'
-import { Button } from '../../../button'
-import { Text } from '../../../text'
 
 export default function Footer() {
   const [saved, setSaved] = useState(false)

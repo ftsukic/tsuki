@@ -2,6 +2,7 @@ const { execFileSync } = require('node:child_process')
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
+const { entries } = require('../apps/playground/fixtures/manifest.json')
 
 const repositoryRoot = path.resolve(__dirname, '..')
 const packageRoot = path.join(repositoryRoot, 'packages', 'tsuki')
@@ -46,7 +47,62 @@ function rewriteConsumerForTarball(name, tarballPath) {
   if (tsconfig.compilerOptions) delete tsconfig.compilerOptions.paths
   fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n')
 
+  stageCanonicalExamples(consumerRoot, name === 'nativewind-v4-consumer')
   return consumerRoot
+}
+
+function stageCanonicalExamples(consumerRoot, isV4) {
+  const fixtures = entries.filter((entry) => entry.version === 'v2')
+  const imports = fixtures.map(({ component, fixturePath }, index) => {
+    fs.cpSync(
+      path.dirname(path.join(repositoryRoot, fixturePath)),
+      path.join(consumerRoot, 'src/fixtures', component),
+      { recursive: true },
+    )
+    return 'import Preview' + index + " from './src/fixtures/" + component + "/overview'"
+  })
+  const previews = fixtures.map(
+    ({ title }, index) => '[' + JSON.stringify(title) + ', Preview' + index + ']',
+  )
+  if (!isV4) {
+    fs.appendFileSync(path.join(consumerRoot, 'global.css'), "\n@source './src/fixtures';\n")
+  }
+  fs.renameSync(path.join(consumerRoot, 'App.tsx'), path.join(consumerRoot, 'SmokeApp.tsx'))
+  const app = [
+    "import { useState } from 'react'",
+    "import { Button, serializeTheme, TsukiProvider, useTsukiTheme } from '@ftsukic/tsuki'",
+    "import { Pressable, ScrollView, Text, View } from 'react-native'",
+    isV4
+      ? "import { vars } from 'nativewind'"
+      : "import { VariableContextProvider } from 'nativewind'",
+    "import SmokeApp from './SmokeApp'",
+    ...imports,
+    'const previews = [' + previews.join(', ') + '] as const',
+    'function Examples() {',
+    '  const [selected, select] = useState<number | null>(null)',
+    '  const theme = useTsukiTheme()',
+    '  const Preview = selected === null ? null : previews[selected][1]',
+    '  const content = Preview ? <View style={{flex: 1}}><Button onPress={() => select(null)}>All examples</Button><Preview /></View> : (',
+    '    <ScrollView contentContainerStyle={{gap: 12, padding: 16}}>',
+    '      {previews.map(([name], index) => <Button key={name} onPress={() => select(index)}>{name}</Button>)}',
+    '    </ScrollView>',
+    '  )',
+    '  const variables = serializeTheme(theme)',
+    isV4
+      ? '  return <View style={[{flex: 1, backgroundColor: theme.semantic.colorBackground}, vars(variables)]}>{content}</View>'
+      : '  return <VariableContextProvider value={variables}><View style={{flex: 1, backgroundColor: theme.semantic.colorBackground}}>{content}</View></VariableContextProvider>',
+    '}',
+    'export default function App() {',
+    '  const [showExamples, setShowExamples] = useState(false)',
+    '  const [dark, setDark] = useState(false)',
+    '  return <View style={{ flex: 1 }}>',
+    '    <Pressable style={{paddingTop: 48, paddingHorizontal: 16}} onPress={() => setShowExamples(!showExamples)}><Text>{showExamples ? "Consumer smoke" : "Canonical examples"}</Text></Pressable>',
+    '    {showExamples ? <><Pressable style={{padding: 16}} onPress={() => setDark(!dark)}><Text>{dark ? "Light" : "Dark"}</Text></Pressable><TsukiProvider scheme={dark ? "dark" : "light"}><Examples /></TsukiProvider></> : <SmokeApp />}',
+    '  </View>',
+    '}',
+    '',
+  ].join('\n')
+  fs.writeFileSync(path.join(consumerRoot, 'App.tsx'), app)
 }
 
 function createTarball() {

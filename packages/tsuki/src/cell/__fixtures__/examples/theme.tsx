@@ -1,8 +1,9 @@
 /**
  * @title Theme
+ * @description Overrides Cell tokens for a local group.
  */
-import { Cell } from '../..'
-import { ConfigProvider } from '../../../theme'
+
+import { Cell, ConfigProvider } from '@ftsukic/tsuki'
 
 export default function Theme() {
   return (

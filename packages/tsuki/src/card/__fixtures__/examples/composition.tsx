@@ -2,9 +2,8 @@
  * @title Composition
  * @description Nested cards composed with text and layout primitives.
  */
-import { Card } from '../..'
-import { Space } from '../../../space'
-import { Text } from '../../../text'
+
+import { Card, Space, Text } from '@ftsukic/tsuki'
 
 export default function Composition() {
   return (

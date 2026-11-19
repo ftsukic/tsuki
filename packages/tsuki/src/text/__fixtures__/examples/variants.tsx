@@ -2,7 +2,8 @@
  * @title Variants
  * @description Demonstrates Text variants.
  */
-import { Text } from '../../index'
+
+import { Text } from '@ftsukic/tsuki'
 
 export default function Variants() {
   return (

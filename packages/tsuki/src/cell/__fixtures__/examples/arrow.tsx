@@ -1,7 +1,9 @@
 /**
  * @title Arrow
+ * @description Shows left and down navigation indicators.
  */
-import { Cell } from '../..'
+
+import { Cell } from '@ftsukic/tsuki'
 
 export default function Arrow() {
   return (

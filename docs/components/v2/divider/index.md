@@ -33,6 +33,11 @@ export function Example() {
 
 默认无障碍角色为 `separator`，支持调用方提供 `role`、`accessibilityRole` 或 `accessible={false}`。默认 `pointerEvents="none"`，调用方可覆盖。其他 React Native View props 传给根节点。
 
-- [基础与全部示例](../../../../packages/tsuki/src/divider/__fixtures__/overview.tsx)
-- [主题覆盖](../../../../packages/tsuki/src/divider/__fixtures__/examples/theme.tsx)
-- [NativeWind 类名覆盖](../../../../packages/tsuki/src/divider/__fixtures__/examples/custom-class.tsx)
+## 示例
+
+- [Playground Overview](../../../../packages/tsuki/src/divider/__fixtures__/overview.tsx)
+- [Basic](../../../../packages/tsuki/src/divider/__fixtures__/examples/basic.tsx)
+- [Custom Class](../../../../packages/tsuki/src/divider/__fixtures__/examples/custom-class.tsx)
+- [Options](../../../../packages/tsuki/src/divider/__fixtures__/examples/options.tsx)
+- [Orientation](../../../../packages/tsuki/src/divider/__fixtures__/examples/orientation.tsx)
+- [Theme](../../../../packages/tsuki/src/divider/__fixtures__/examples/theme.tsx)

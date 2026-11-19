@@ -1,7 +1,9 @@
 /**
  * @title Divider
+ * @description Compares automatic, hidden, and forced row separators.
  */
-import { Cell } from '../..'
+
+import { Cell } from '@ftsukic/tsuki'
 
 export default function Divider() {
   return (

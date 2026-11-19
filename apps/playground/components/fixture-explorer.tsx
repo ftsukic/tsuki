@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useRouter } from 'expo-router'
-import { FlatList, StyleSheet, View } from 'react-native'
+import { FlatList, StyleSheet, Text as NativeText, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Cell, Search, Segmented, Text, useToken } from '@ftsukic/tsuki'
 import { componentCatalog } from '@/fixtures/catalog'
-import { componentCategories } from '@/fixtures/categories'
+import { componentCategories, fixtureVersionLabel } from '@/fixtures/categories'
 import { useDemoTheme } from './demo-provider'
 
 export default function FixtureExplorer() {
@@ -14,19 +14,24 @@ export default function FixtureExplorer() {
   const [query, setQuery] = useState('')
   const keyword = query.trim().toLowerCase()
   const sections = componentCategories
-    .map((category) => ({
-      title: category.title,
-      data: category.components.flatMap((id) => {
-        const item = componentCatalog.find((entry) => entry.id === id)
-        return item &&
-          `${category.title} ${item.title} ${item.component} ${item.description}`
-            .toLowerCase()
-            .includes(keyword)
-          ? [item]
-          : []
-      }),
+    .map((section) => ({
+      ...section,
+      data: section.data.filter((item) =>
+        [
+          section.title,
+          item.title,
+          item.component,
+          item.description,
+          item.version,
+          fixtureVersionLabel[item.version],
+        ]
+          .join(' ')
+          .toLowerCase()
+          .includes(keyword),
+      ),
     }))
     .filter((section) => section.data.length > 0)
+  const firstLegacySection = sections.find((section) => section.version === 'v1')
   const resultCount = sections.reduce((count, section) => count + section.data.length, 0)
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: token.colorBgLayout }]}>
@@ -71,7 +76,7 @@ export default function FixtureExplorer() {
             <Search
               value={query}
               onChange={setQuery}
-              placeholder="搜索组件名称或功能"
+              placeholder="搜索组件名称、功能或版本"
               accessibilityLabel="搜索组件"
               shape="round"
               background={token.colorBgLayout}
@@ -80,24 +85,39 @@ export default function FixtureExplorer() {
           </View>
         }
         renderItem={({ item: section }) => (
-          <Cell.Group
-            title={section.title}
-            extra={`${section.data.length} 个组件`}
-            border={false}
-            styles={{ body: styles.groupBody }}
-          >
-            {section.data.map((item) => (
-              <Cell
-                key={item.id}
-                title={item.title}
-                description={item.description}
-                showArrow
-                onPress={() =>
-                  router.push({ pathname: '/components/[id]', params: { id: item.id } })
-                }
-              />
-            ))}
-          </Cell.Group>
+          <View style={styles.group}>
+            {section === firstLegacySection && <Text style={styles.sectionTitle}>Legacy v1</Text>}
+            <Cell.Group
+              title={section.title}
+              extra={`${section.data.length} 个组件`}
+              border={false}
+              styles={{ body: styles.groupBody }}
+            >
+              {section.data.map((item) => (
+                <Cell
+                  key={item.id}
+                  title={item.title}
+                  description={item.description}
+                  center
+                  trailing={
+                    <NativeText
+                      numberOfLines={1}
+                      style={[
+                        styles.badge,
+                        { color: token.colorPrimary, backgroundColor: token.colorBgLayout },
+                      ]}
+                    >
+                      {fixtureVersionLabel[item.version]}
+                    </NativeText>
+                  }
+                  showArrow
+                  onPress={() =>
+                    router.push({ pathname: '/components/[id]', params: { id: item.id } })
+                  }
+                />
+              ))}
+            </Cell.Group>
+          </View>
         )}
         ListEmptyComponent={
           <View style={styles.empty}>
@@ -125,6 +145,14 @@ const styles = StyleSheet.create({
   brand: { fontSize: 17, lineHeight: 24, fontWeight: '800', letterSpacing: 3 },
   title: { fontSize: 34, lineHeight: 44, fontWeight: '700', marginTop: 8 },
   description: { fontSize: 15, lineHeight: 23 },
+  group: { gap: 8 },
+  badge: {
+    fontSize: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    overflow: 'hidden',
+  },
   groupBody: { borderRadius: 16, overflow: 'hidden' },
   sectionRow: {
     flexDirection: 'row',

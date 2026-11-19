@@ -1,7 +1,9 @@
 /**
  * @title Custom Class
+ * @description Overrides the title utilities and root padding.
  */
-import { Cell } from '../..'
+
+import { Cell } from '@ftsukic/tsuki'
 
 export default function CustomClass() {
   return (

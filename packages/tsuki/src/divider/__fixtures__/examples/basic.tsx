@@ -2,7 +2,8 @@
  * @title Basic
  * @description Demonstrates Divider basic.
  */
-import { Divider } from '../..'
+
+import { Divider } from '@ftsukic/tsuki'
 
 export default function Basic() {
   return <Divider />

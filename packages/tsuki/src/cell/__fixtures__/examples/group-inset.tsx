@@ -1,7 +1,9 @@
 /**
  * @title Group Inset
+ * @description Insets a group of related rows.
  */
-import { Cell } from '../..'
+
+import { Cell } from '@ftsukic/tsuki'
 
 export default function GroupInset() {
   return (

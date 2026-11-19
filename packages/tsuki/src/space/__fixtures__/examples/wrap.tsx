@@ -2,8 +2,7 @@
  * @title Wrapping
  * @description Demonstrates wrapping with Space.
  */
-import { Text } from 'react-native'
-import { Space } from '../..'
+import { Space, Text } from '@ftsukic/tsuki'
 
 export default function Wrap() {
   return (

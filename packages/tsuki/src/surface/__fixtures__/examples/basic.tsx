@@ -1,9 +1,8 @@
 /**
- * @title basic
+ * @title Basic
  * @description Demonstrates Surface basic.
  */
-import { Text } from 'react-native'
-import { Surface } from '../..'
+import { Surface, Text } from '@ftsukic/tsuki'
 
 export default function Basic() {
   return (

@@ -17,10 +17,6 @@ export function Actions() {
 }
 ```
 
-- [纵向排列](../../../../packages/tsuki/src/space/__fixtures__/examples/vertical.tsx)使用 `direction="vertical"`。
-- [自动换行](../../../../packages/tsuki/src/space/__fixtures__/examples/wrap.tsx)使用 `wrap` 并限制容器尺寸。
-- [Tailwind 布局](../../../../packages/tsuki/src/space/__fixtures__/examples/custom-class.tsx)用 `flex-col gap-4` 覆盖 Space 的方向与间距。Playground 使用原生布局，NativeWind 类名效果可在 v4/v5 Consumer 中预览。
-
 | Prop        | 类型                         | 默认值       | 行为                       |
 | ----------- | ---------------------------- | ------------ | -------------------------- |
 | `direction` | `'horizontal' \| 'vertical'` | `horizontal` | 映射到 `flexDirection`     |
@@ -33,3 +29,12 @@ export function Actions() {
 常规样式按 **默认布局 → Space props → NativeWind 类名 → 原生 `style`** 合并。NativeWind 的 `!important` 工具类仍遵循 CSS 优先级。其它 `ViewProps` 直接传给同一个根 View。
 
 子节点直接参加原生布局，可使用 Fragment 或嵌套 Space。Space 负责方向、间距、换行和交叉轴对齐。主轴分布等复杂布局可使用 React Native View 的 Flexbox 样式。
+
+## 示例
+
+- [Playground Overview](../../../../packages/tsuki/src/space/__fixtures__/overview.tsx)
+- [Horizontal spacing](../../../../packages/tsuki/src/space/__fixtures__/examples/basic.tsx)
+- [Native Wind overrides](../../../../packages/tsuki/src/space/__fixtures__/examples/custom-class.tsx)
+- [Vertical spacing](../../../../packages/tsuki/src/space/__fixtures__/examples/vertical.tsx)
+- [Wrapping](../../../../packages/tsuki/src/space/__fixtures__/examples/wrap.tsx)
+- [Alignment](../../../../packages/tsuki/src/space/__fixtures__/examples/align.tsx)

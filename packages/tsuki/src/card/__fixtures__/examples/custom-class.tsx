@@ -1,9 +1,9 @@
 /**
- * @title CustomClass
+ * @title Custom Class
  * @description NativeWind utilities on the root and sections.
  */
-import { Card } from '../..'
-import { Text } from '../../../text'
+
+import { Card, Text } from '@ftsukic/tsuki'
 
 export default function CustomClass() {
   return (
