@@ -9,6 +9,7 @@ config.resolver.resolveRequest = (context, name, platform) => {
 }
 
 module.exports = withNativewind(config, {
+  warnings: 'verbose',
   inlineVariables: {
     exclude: [
       '--tsuki-color-primary',
