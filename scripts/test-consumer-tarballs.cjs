@@ -22,6 +22,8 @@ function run(command, args, cwd, options = {}) {
 function rewriteConsumerForTarball(name, tarballPath) {
   const sourceRoot = path.join(repositoryRoot, 'apps', name)
   const consumerRoot = path.join(tempRoot, name)
+  const fixturePackageRoot = path.join(repositoryRoot, 'packages', 'consumer-fixtures')
+  const stagedFixturePackageRoot = path.join(consumerRoot, 'consumer-fixtures')
   const excludedDirectories = new Set(['node_modules', '.expo', '.turbo', 'ios', 'android'])
 
   fs.cpSync(sourceRoot, consumerRoot, {
@@ -36,10 +38,28 @@ function rewriteConsumerForTarball(name, tarballPath) {
     },
   })
 
+  fs.cpSync(fixturePackageRoot, stagedFixturePackageRoot, {
+    recursive: true,
+    filter(sourcePath) {
+      const relativePath = path.relative(fixturePackageRoot, sourcePath)
+      const segments = relativePath.split(path.sep)
+      return (
+        !segments.includes('__tests__') &&
+        !segments.some((segment) => excludedDirectories.has(segment))
+      )
+    },
+  })
+
+  const stagedFixtureManifestPath = path.join(stagedFixturePackageRoot, 'package.json')
+  const stagedFixtureManifest = JSON.parse(fs.readFileSync(stagedFixtureManifestPath, 'utf8'))
+  stagedFixtureManifest.peerDependencies['@ftsukic/tsuki'] = '^1.0.0-beta.1'
+  fs.writeFileSync(stagedFixtureManifestPath, JSON.stringify(stagedFixtureManifest, null, 2) + '\n')
+
   const packageJsonPath = path.join(consumerRoot, 'package.json')
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
   const relativeTarball = path.relative(consumerRoot, tarballPath).split(path.sep).join('/')
   packageJson.dependencies['@ftsukic/tsuki'] = 'file:' + relativeTarball
+  packageJson.dependencies['@ftsukic/consumer-fixtures'] = 'file:./consumer-fixtures'
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n')
 
   const tsconfigPath = path.join(consumerRoot, 'tsconfig.json')

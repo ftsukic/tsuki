@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
+    "@ftsukic/consumer-fixtures": "workspace:*",
     "@ftsukic/tsuki": "workspace:*",
     "expo": "~57.0.32",
     "expo-dev-client": "~57.0.21",

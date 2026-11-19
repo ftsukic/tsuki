@@ -5,7 +5,7 @@ module.exports = {
   rootDir: __dirname,
   preset: '@react-native/jest-preset',
   resolver: 'react-native-reanimated/jest/resolver',
-  roots: ['<rootDir>/src'],
+  roots: ['<rootDir>/src', '<rootDir>/../consumer-fixtures'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': [
