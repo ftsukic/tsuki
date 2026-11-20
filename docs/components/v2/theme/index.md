@@ -56,6 +56,7 @@ import { Button, ConfigProvider } from '@ftsukic/tsuki'
 ```ts
 interface ThemeConfig {
   semantic?: Partial<SemanticTokens>
+  motion?: MotionConfig
   components?: {
     Button?: Partial<ButtonThemeTokens>
     Card?: Partial<CardThemeTokens>
@@ -66,9 +67,33 @@ interface ThemeConfig {
   }
   inherit?: boolean
 }
+
+interface MotionConfig {
+  enabled?: boolean
+  reducedMotion?: 'system' | 'always' | 'never'
+  durationScale?: number
+}
 ```
 
 `ConfigProvider` 只有 `theme` 和 `children`，不接收 `scheme`。Scheme 由最近的 `TsukiProvider` 决定并贯穿嵌套 scopes。
+
+## Motion policy
+
+Motion policy 是运行时配置，不会转换成 NativeWind CSS 变量。默认值为：
+
+```ts
+{
+  enabled: true,
+  reducedMotion: 'system',
+  durationScale: 1,
+}
+```
+
+`enabled: false`、`reducedMotion: 'always'`、系统减少动态效果正在启用时的 `'system'` 模式，或 `durationScale: 0` 会直接完成目标并照常通知完成；正数倍率缩放通用 Timing / Spring，Decay 保留速度参数。无效或负数倍率会沿用父级值（根 Theme 使用默认倍率）。嵌套 `ConfigProvider` 会按字段继承；`inherit: false` 重置为当前 scheme 的默认 Motion policy，再应用本层的 `motion` 覆盖。
+
+Button 和交互 Cell 已接入私有 Pressable Runtime，并读取最近 Theme scope 的 Motion policy：Button 使用按下时 scale `0.98`，Cell 在 `semantic.colorSurface` 与 `semantic.colorBorder` 之间切换。Motion 关闭、Reduced Motion 生效或 `durationScale: 0` 时直接更新目标，不丢失 pressed 状态。Pressable Runtime 不增加 package root export；Gesture 和 Overlay 仍未实现。
+
+`serializeTheme()` 只输出 Semantic 和 Component Token，不包含 Motion policy。
 
 ## Theme inheritance and updates
 
@@ -148,7 +173,7 @@ Component Token 按组件归组。数值单位为 React Native layout points；`
 | Cell | `gap: 8`, `verticalGap: 6`, `titleExtraGap: 4`, `valueExtraGap: 4`, `dividerWidth` | `StyleSheet.hairlineWidth` |
 | Cell | `groupTitlePaddingHorizontal: 16`, `groupTitlePaddingVertical: 10`, `groupInsetMarginHorizontal: 16`, `groupRadius: 12`, `disabledOpacity: 0.4` | — |
 
-The current model has 35 Component Token values across these six groups. Semantic color, component dimensions, and group layout are the supported Theme override surface; the API does not define global font-family, spacing-scale, or radius-scale token maps.
+The current model has 35 Component Token values across these six groups. Semantic color, component dimensions, group layout, and Motion policy are the supported Theme override surface; the API does not define global font-family, spacing-scale, or radius-scale token maps.
 
 ## NativeWind integration
 

@@ -35,7 +35,7 @@ import { Cell, CellGroup, Icon } from '@ftsukic/tsuki'
 | `border`, `divider` | Control the trailing divider. See the precedence below. |
 | `className`, `style`, `classNames`, `styles` | Root and slot styling. |
 
-Cell forwards native accessibility properties and press options. Interactive cells default to the button role. An explicit `role` or `accessibilityRole` takes precedence. Decorative arrows and divider lines are hidden from assistive technology.
+Cell forwards native accessibility properties and press options through the private Pressable Runtime. Interactive cells default to the button role. An explicit `role` or `accessibilityRole` takes precedence. Decorative arrows and divider lines are hidden from assistive technology. Interactive rows transition their background from `semantic.colorSurface` to `semantic.colorBorder`; the shared Theme Motion policy controls timing and Reduced Motion behavior. Non-interactive rows remain Views and do not mount the interaction runtime.
 
 ## CellGroup props
 
@@ -59,7 +59,7 @@ Use `classNames` for NativeWind classes and `styles` for native styles. Slot sty
 | Cell text | `title`, `titleExtra`, `description`, `value`, `valueExtra`, `trailing`, `required` |
 | CellGroup | `root`, `header`, `title`, `extraContainer`, `extra`, `body` |
 
-Override `theme.components.Cell` through `TsukiProvider` or a scoped `ConfigProvider`. It supplies row spacing, heights, text metrics, arrow size, divider width, group margins and radius, and disabled opacity. Background, text, required marker, and pressed colors follow semantic tokens for the active scheme. The same slots and tokens are available in NativeWind v4 and v5.
+Override `theme.components.Cell` through `TsukiProvider` or a scoped `ConfigProvider`. It supplies row spacing, heights, text metrics, arrow size, divider width, group margins and radius, and disabled opacity. Background, text, required marker, and pressed colors follow semantic tokens for the active scheme. Explicit root `styles.root` and `style` values retain their existing precedence and suppress feedback for an explicitly styled `backgroundColor`. The same slots and tokens are available in NativeWind v4 and v5.
 
 ```tsx
 <ConfigProvider theme={{ components: { Cell: { minHeight: 52, groupRadius: 16 } } }}>

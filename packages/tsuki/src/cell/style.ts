@@ -27,6 +27,7 @@ export function cellSlot<T extends Defaults>(
   dynamic: DynamicStyle,
   className?: string,
   style?: StyleProp<T>,
+  forceVariables = false,
 ) {
   const inline = StyleSheet.flatten(style)
   const paddingHorizontal = inline?.paddingHorizontal ?? inline?.padding
@@ -46,7 +47,7 @@ export function cellSlot<T extends Defaults>(
       columnGap: inline.columnGap ?? inline.gap,
     }),
   } as T
-  if (className) {
+  if (className || forceVariables) {
     const values: Record<string, ColorValue | number> = {}
     const classes: string[] = []
     for (const key of Object.keys(dynamic) as (keyof DynamicStyle)[]) {

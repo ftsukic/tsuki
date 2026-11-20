@@ -1,5 +1,7 @@
 # Motion System 仓库评估
 
+> 历史评估记录：文中将 Motion 描述为“当前已接入”的实现状态，与基线 `40f16dc` 的 v2 源码不符。本文保留为历史材料；当前架构方向见 [Tsuki v2 Interaction & Motion Architecture](../architecture/tsuki-v2-interaction-motion.md)，实际实现状态以源码和 package 配置为准。
+
 当前 Motion 使用现有 TsukiProvider / ThemeContext，按 Component → Preset → Primitive → Reanimated / RNGH 组织。直接统一当前设计，不维护旧版本别名或兼容参数分支。
 
 ## 文件职责

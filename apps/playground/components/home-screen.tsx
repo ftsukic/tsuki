@@ -29,6 +29,12 @@ const entries = [
     pathname: '/design-tokens',
     testID: 'home-design-tokens',
   },
+  {
+    title: 'Interaction Lab',
+    description: 'Tune v2 motion and press feedback, then explore native gesture behavior.',
+    pathname: '/labs/interaction',
+    testID: 'home-interaction-lab',
+  },
 ] as const
 
 export default function HomeScreen() {

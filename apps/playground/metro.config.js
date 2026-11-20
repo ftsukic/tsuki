@@ -16,6 +16,11 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     return context.resolveRequest(context, sourceRoot, platform)
   }
 
+  if (moduleName.startsWith('@tsuki-v2/')) {
+    const subpath = moduleName.slice('@tsuki-v2/'.length)
+    return context.resolveRequest(context, path.join(v2SourceRoot, subpath), platform)
+  }
+
   const legacySubpathPrefix = '@ftsukic/tsuki/'
   if (moduleName.startsWith(legacySubpathPrefix)) {
     const subpath = moduleName.slice(legacySubpathPrefix.length)

@@ -1,8 +1,10 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import { createElement, forwardRef } from 'react'
 import type { ComponentRef, RefAttributes } from 'react'
-import { ActivityIndicator, Pressable, View } from 'react-native'
-import type { PressableProps, ViewProps } from 'react-native'
+import { ActivityIndicator, View } from 'react-native'
+import type { Pressable, ViewProps } from 'react-native'
+import { PressableRuntime } from '../pressable/pressable'
+import type { PressableRuntimeProps } from '../pressable/types'
 import { semanticClassName } from '../style/semantic'
 import { Text } from '../text'
 import { TextClassContext } from '../text/context'
@@ -89,10 +91,11 @@ export const Button = forwardRef<ComponentRef<typeof Pressable>, ButtonProps>(fu
       : null
 
   return createElement(
-    Pressable,
+    PressableRuntime,
     {
       ...pressableProps,
       ref,
+      feedback: { mode: 'scale', pressedScale: 0.98 },
       disabled: disabled || loading,
       accessibilityState: {
         ...accessibilityState,
@@ -103,7 +106,7 @@ export const Button = forwardRef<ComponentRef<typeof Pressable>, ButtonProps>(fu
       className: rootClassName,
       // NativeWind v4 and v5 resolve this inline style after the className utilities.
       style: [styles?.root, style],
-    } as PressableProps & RefAttributes<ComponentRef<typeof Pressable>>,
+    } as PressableRuntimeProps & RefAttributes<ComponentRef<typeof Pressable>>,
     leadingContent,
     createElement(TextClassContext.Provider, { value: contentClassName }, content),
   )

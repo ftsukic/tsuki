@@ -70,3 +70,9 @@ packages/tsuki/src/picker/date-time/
 ```
 
 Directory 回答“这是谁的代码”；filename 回答“它做什么”。添加文件前，先判断它是 React component 还是 directory-level support capability。
+
+## Internal runtime module
+
+- `motion/`、`pressable/`、`gesture/`、`overlay/` 可以承载跨组件共享的私有运行时职责；它们不是 public component 目录，也不自动拥有 package export。
+- 这些目录中的 Hook、support file 和 barrel 遵循本 Rule 的命名约束。只有存在真实的内部导入需求时才创建 `index.ts`；不得从 package root 导出内部 barrel。
+- Overlay 的具体文件结构应在 Portal 技术 spike 决策后确定。

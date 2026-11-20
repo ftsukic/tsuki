@@ -1,4 +1,5 @@
 import { getDefaultTheme } from './defaults'
+import { mergeMotionConfig } from '../motion/config'
 import type { ResolvedTheme, ThemeConfig } from './types'
 
 export function mergeTheme(parent: ResolvedTheme, override?: ThemeConfig): ResolvedTheme {
@@ -6,6 +7,7 @@ export function mergeTheme(parent: ResolvedTheme, override?: ThemeConfig): Resol
 
   return {
     scheme: parent.scheme,
+    motion: mergeMotionConfig(base.motion, override?.motion),
     semantic: { ...base.semantic, ...override?.semantic },
     components: {
       Button: { ...base.components.Button, ...override?.components?.Button },

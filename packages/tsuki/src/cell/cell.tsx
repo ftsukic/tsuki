@@ -1,7 +1,9 @@
-import { createElement, useContext, useState } from 'react'
-import { Pressable, View } from 'react-native'
+import { createElement, useContext } from 'react'
+import { View } from 'react-native'
 import type { ViewStyle } from 'react-native'
 import { Divider } from '../divider'
+import { PressableRuntime } from '../pressable/pressable'
+import type { PressableRuntimeProps } from '../pressable/types'
 import { cn } from '../style/cn'
 import { useTsukiTheme } from '../theme/theme'
 import { CellLayout } from './cell-layout'
@@ -57,21 +59,20 @@ export function CellRoot({
     components: { Cell: tokens },
   } = useTsukiTheme()
   const position = useContext(CellGroupContext)
-  const [pressed, setPressed] = useState(false)
   const interactive = clickable ?? Boolean(onPress || onLongPress)
   const showDivider = border && (divider ?? (position !== null && position !== 'last'))
   const root = cellSlot<ViewStyle>(
     {},
     '',
     {
-      backgroundColor:
-        interactive && !disabled && (pressed || testOnly_pressed)
-          ? semantic.colorBorder
-          : semantic.colorSurface,
-      opacity: disabled ? tokens.disabledOpacity : 1,
+      backgroundColor: semantic.colorSurface,
+      ...(interactive ? {} : { opacity: disabled ? tokens.disabledOpacity : 1 }),
     },
     cn(classNames?.root, className),
-    [styles?.root, style],
+    interactive
+      ? [{ opacity: disabled ? tokens.disabledOpacity : 1 }, styles?.root, style]
+      : [styles?.root, style],
+    interactive,
   )
   const props = {
     ...viewProps,
@@ -123,7 +124,7 @@ export function CellRoot({
   if (!interactive) return createElement(View, props, layout)
 
   return createElement(
-    Pressable,
+    PressableRuntime,
     {
       ...props,
       disabled,
@@ -138,15 +139,14 @@ export function CellRoot({
       delayLongPress,
       unstable_pressDelay,
       testOnly_pressed,
-      onPressIn: (event) => {
-        setPressed(true)
-        onPressIn?.(event)
+      onPressIn,
+      onPressOut,
+      feedback: {
+        mode: 'background',
+        idleColor: semantic.colorSurface,
+        pressedColor: semantic.colorBorder,
       },
-      onPressOut: (event) => {
-        setPressed(false)
-        onPressOut?.(event)
-      },
-    },
+    } as PressableRuntimeProps,
     layout,
   )
 }

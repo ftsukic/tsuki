@@ -1,5 +1,11 @@
 import { StyleSheet } from 'react-native'
-import type { ResolvedTheme, ThemeScheme } from './types'
+import type { ResolvedMotionConfig, ResolvedTheme, ThemeScheme } from './types'
+
+export const DEFAULT_MOTION_CONFIG: ResolvedMotionConfig = {
+  enabled: true,
+  reducedMotion: 'system',
+  durationScale: 1,
+}
 
 const surface = { borderRadius: 12, padding: 16, borderWidth: StyleSheet.hairlineWidth }
 const cell = {
@@ -37,6 +43,7 @@ const card = {
 const THEMES: Record<ThemeScheme, ResolvedTheme> = {
   light: {
     scheme: 'light',
+    motion: { ...DEFAULT_MOTION_CONFIG },
     semantic: {
       colorPrimary: '#055FFD',
       colorPrimaryForeground: '#ffffff',
@@ -60,6 +67,7 @@ const THEMES: Record<ThemeScheme, ResolvedTheme> = {
   },
   dark: {
     scheme: 'dark',
+    motion: { ...DEFAULT_MOTION_CONFIG },
     semantic: {
       colorPrimary: '#4D8DFF',
       colorPrimaryForeground: '#111827',
@@ -87,6 +95,7 @@ export function getDefaultTheme(scheme: ThemeScheme): ResolvedTheme {
   const theme = THEMES[scheme]
   return {
     scheme,
+    motion: { ...theme.motion },
     semantic: { ...theme.semantic },
     components: {
       Button: { ...theme.components.Button },

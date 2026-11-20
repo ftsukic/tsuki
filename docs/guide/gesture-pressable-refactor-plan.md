@@ -1,5 +1,7 @@
 # Gesture 与 Pressable 分阶段重构计划
 
+> 历史迁移记录（2026-10-10）：阶段状态和 API 记录不代表基线 `40f16dc` 的当前 v2 源码。当前架构方向见 [Tsuki v2 Interaction & Motion Architecture](../architecture/tsuki-v2-interaction-motion.md)；实现与 public API 状态以当前源码和 exports 为准。
+
 > 后续更新：TsukiProvider 已移除默认 SwipeCellManager 与顶层按压作用域重置；旧 manager/控制器接口也已删除，页面协调使用 `useSwipeCellDismiss()`。下文保留此前迁移阶段记录，当前接入以 SwipeCell 组件文档为准。
 
 日期：2026-10-10。状态：阶段 1–5 的源码、API 与 canonical Fixture 已完成；阶段 6 已完成静态与构建验证，原生设备验收未执行。

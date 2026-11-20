@@ -7,6 +7,7 @@
     "types": ["jest"],
     "paths": {
       "@/*": ["./*"],
+      "@tsuki-v2/*": ["../../packages/tsuki/src/*"],
       "@ftsukic/tsuki": ["../../packages/tsuki/bak/src"],
       "@ftsukic/tsuki/*": ["../../packages/tsuki/bak/src/*"]
     }

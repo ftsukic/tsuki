@@ -18,6 +18,13 @@
 - 如果多个 component 共享 private domain capability，应将它放在所属 component 下或清晰命名的 internal domain module 中。不得仅因为多个 component 复用就创建新的 public component 或 root export。
 - internal domain module 必须表达真实职责；当 barrel 没有价值时可以不创建 `index.ts`，并且不得从 `packages/tsuki/src/index.ts` 导出。
 
+## Interaction runtime 边界
+
+- 交互运行时按 Motion、Pressable、Gesture、Overlay 分责。Motion 是动画底层能力，不依赖业务组件；Pressable 和 Gesture 可依赖 Motion；业务组件通过这些内部运行时接入交互。
+- Overlay 可依赖 Motion、可选 Gesture 和经决策选定的 Portal adapter。Portal 技术决策完成前，不复制 v1 Portal 实现，也不新增正式依赖。
+- 上述运行时属于 private capability module，不因目录名或内部 barrel 自动成为 public component 或 package API。不得引入通用 `domain/` 层来承载它们。
+- 运行时职责、依赖图和阶段范围见 `docs/architecture/tsuki-v2-interaction-motion.md`；实现状态以源码和 package 配置为准。
+
 ## root export
 
 - 只有当 consumer 需要稳定且有文档支持的 public contract 时，才添加 root export。

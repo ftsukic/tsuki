@@ -1,5 +1,13 @@
 export type ThemeScheme = 'light' | 'dark'
 
+export interface MotionConfig {
+  enabled?: boolean
+  reducedMotion?: 'system' | 'always' | 'never'
+  durationScale?: number
+}
+
+export type ResolvedMotionConfig = Required<MotionConfig>
+
 export interface SemanticTokens {
   colorPrimary: string
   colorPrimaryForeground: string
@@ -68,6 +76,7 @@ export interface CellThemeTokens {
 
 export interface ThemeConfig {
   semantic?: Partial<SemanticTokens>
+  motion?: MotionConfig
   components?: {
     Button?: Partial<ButtonThemeTokens>
     Card?: Partial<CardThemeTokens>
@@ -82,6 +91,7 @@ export interface ThemeConfig {
 export interface ResolvedTheme {
   scheme: ThemeScheme
   semantic: SemanticTokens
+  motion: ResolvedMotionConfig
   components: {
     Button: ButtonThemeTokens
     Card: CardThemeTokens

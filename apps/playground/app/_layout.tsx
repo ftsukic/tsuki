@@ -1,6 +1,7 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router'
 import { Stack } from 'expo-router/stack'
 import { StatusBar, View } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { useToken } from '@ftsukic/tsuki'
 import { DemoProvider, useDemoTheme } from '@/components/demo-provider'
 
@@ -8,9 +9,11 @@ export const unstable_settings = { initialRouteName: 'index' }
 
 export default function RootLayout() {
   return (
-    <DemoProvider>
-      <DemoStack />
-    </DemoProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <DemoProvider>
+        <DemoStack />
+      </DemoProvider>
+    </GestureHandlerRootView>
   )
 }
 
@@ -47,6 +50,7 @@ function DemoStack() {
           <Stack.Screen name="components/[id]" options={{ title: '组件预览' }} />
           <Stack.Screen name="theme-playground" options={{ title: 'Theme Playground' }} />
           <Stack.Screen name="design-tokens" options={{ title: 'Design Tokens' }} />
+          <Stack.Screen name="labs/interaction" options={{ headerShown: false }} />
         </Stack>
       </View>
     </ThemeProvider>

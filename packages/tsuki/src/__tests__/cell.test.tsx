@@ -1,8 +1,10 @@
-import { render, screen, userEvent } from '@testing-library/react-native'
-import { Fragment } from 'react'
+import { fireEvent, render, screen, userEvent } from '@testing-library/react-native'
+import { Fragment, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
+import * as Reanimated from 'react-native-reanimated'
 import { Cell, Text, TsukiProvider } from '..'
 
+/* eslint-disable testing-library/no-await-sync-events -- RNTL fireEvent uses async act in this suite. */
 jest.mock(
   'nativewind',
   () => ({
@@ -136,7 +138,7 @@ it('uses Pressable only for interactive cells and blocks disabled handlers', asy
 })
 
 it('merges semantic classes and native styles and uses the active theme', async () => {
-  await render(
+  const view = await render(
     <TsukiProvider scheme="dark" theme={{ components: { Cell: { minHeight: 57 } } }}>
       <Cell
         title="Title"
@@ -156,7 +158,12 @@ it('merges semantic classes and native styles and uses the active theme', async 
   expect(cell.props.className).toContain('bg-red-500')
   expect(cell.props.className).not.toContain('bg-blue-500')
   expect(styleOf(cell).opacity).toBe(0.8)
-  expect(cell.props.style[0]).toMatchObject({ '--tsuki-cell-bg-value': '#374151' })
+  expect(StyleSheet.flatten(cell.props.style)).toMatchObject({ '--tsuki-cell-bg-value': '#1f2937' })
+  const background = view.root?.queryAll(
+    (instance) => instance.props.testID === 'tsuki-press-feedback-background',
+  )[0]
+  expect(styleOf(background!).backgroundColor).toBe('#374151')
+  expect(styleOf(background!).opacity).toBe(1)
   expect(screen.getByText('Title').props.className).toContain('font-semibold')
   expect(styleOf(screen.getByText('Title'))).toMatchObject({
     '--tsuki-cell-line-height-value': '22px',
@@ -164,4 +171,104 @@ it('merges semantic classes and native styles and uses the active theme', async 
   })
   expect(screen.getByText('Value').props.className).toContain('text-red-500')
   expect(screen.getByTestId('cell-divider')).toBeOnTheScreen()
+})
+
+it('updates ordinary, clickable, and grouped Cell backgrounds across theme changes', async () => {
+  const tree = (scheme: 'light' | 'dark') => (
+    <TsukiProvider scheme={scheme}>
+      <Cell testID="plain-cell" title="Plain" />
+      <Cell testID="clickable-cell" title="Clickable" clickable />
+      <Cell.Group title="Grouped" testID="cell-group">
+        <Cell testID="group-cell-first" title="First" clickable />
+        <Cell testID="group-cell-last" title="Last" clickable />
+      </Cell.Group>
+    </TsukiProvider>
+  )
+
+  const view = await render(tree('light'))
+  expect(styleOf(screen.getByTestId('plain-cell')).backgroundColor).toBe('#f9fafb')
+  expect(
+    (styleOf(screen.getByTestId('clickable-cell')) as Record<string, unknown>)[
+      '--tsuki-cell-bg-value'
+    ],
+  ).toBe('#f9fafb')
+  expect(styleOf(screen.getByTestId('clickable-cell')).backgroundColor).toBeUndefined()
+  expect(
+    (styleOf(screen.getByTestId('group-cell-last')) as Record<string, unknown>)[
+      '--tsuki-cell-bg-value'
+    ],
+  ).toBe('#f9fafb')
+
+  await view.rerender(tree('dark'))
+  expect(styleOf(screen.getByTestId('plain-cell')).backgroundColor).toBe('#1f2937')
+  for (const testID of ['clickable-cell', 'group-cell-first', 'group-cell-last']) {
+    expect(
+      (styleOf(screen.getByTestId(testID)) as Record<string, unknown>)['--tsuki-cell-bg-value'],
+    ).toBe('#1f2937')
+    expect(styleOf(screen.getByTestId(testID)).backgroundColor).toBeUndefined()
+  }
+
+  await view.rerender(tree('light'))
+  expect(
+    (styleOf(screen.getByTestId('clickable-cell')) as Record<string, unknown>)[
+      '--tsuki-cell-bg-value'
+    ],
+  ).toBe('#f9fafb')
+})
+
+it('keeps NativeWind Cell classes at rest while retaining theme variables', async () => {
+  const view = await render(
+    <TsukiProvider scheme="light">
+      <Cell testID="nativewind-cell" title="Custom background" clickable className="bg-blue-500" />
+    </TsukiProvider>,
+  )
+
+  const cell = screen.getByTestId('nativewind-cell')
+  const background = view.root?.queryAll(
+    (instance) => instance.props.testID === 'tsuki-press-feedback-background',
+  )[0]
+  expect(background).toBeDefined()
+  expect(cell.props.className).toContain('bg-blue-500')
+  expect(styleOf(cell).backgroundColor).toBeUndefined()
+  expect((styleOf(cell) as Record<string, unknown>)['--tsuki-cell-bg-value']).toBe('#f9fafb')
+  expect(styleOf(background!).opacity).toBe(0)
+})
+
+it('uses the current theme when a clickable Cell changes theme during press-in', async () => {
+  const withTiming = Reanimated.withTiming as jest.Mock
+  withTiming.mockImplementation((target: number) => target)
+
+  function ChangeSchemeOnPress() {
+    const [scheme, setScheme] = useState<'light' | 'dark'>('light')
+
+    return (
+      <TsukiProvider scheme={scheme}>
+        <Cell
+          testID="theme-changing-cell"
+          title="Change theme while pressed"
+          clickable
+          onPressIn={() => setScheme('dark')}
+        />
+      </TsukiProvider>
+    )
+  }
+
+  const view = await render(<ChangeSchemeOnPress />)
+  const cell = screen.getByTestId('theme-changing-cell')
+  expect(styleOf(cell).backgroundColor).toBeUndefined()
+
+  await fireEvent(cell, 'pressIn')
+  expect((styleOf(cell) as Record<string, unknown>)['--tsuki-cell-bg-value']).toBe('#1f2937')
+  expect(styleOf(cell).backgroundColor).toBeUndefined()
+  const background = view.root?.queryAll(
+    (instance) => instance.props.testID === 'tsuki-press-feedback-background',
+  )[0]
+  expect(styleOf(background!)).toMatchObject({ backgroundColor: '#374151', opacity: 1 })
+
+  await fireEvent(cell, 'pressOut')
+  await view.rerender(<ChangeSchemeOnPress />)
+  const idleBackground = view.root?.queryAll(
+    (instance) => instance.props.testID === 'tsuki-press-feedback-background',
+  )[0]
+  expect(styleOf(idleBackground!).opacity).toBe(0)
 })

@@ -25,21 +25,28 @@ afterEach(async () => {
   mockPush.mockClear()
 })
 
-it('shows the catalog entry counts and three top-level destinations', async () => {
+it('shows the catalog entry counts and four top-level destinations', async () => {
   await render(<HomeScreen />)
 
   expect(screen.getByTestId('home-components')).toBeTruthy()
   expect(screen.getByTestId('home-theme-playground')).toBeTruthy()
   expect(screen.getByTestId('home-design-tokens')).toBeTruthy()
+  expect(screen.getByTestId('home-interaction-lab')).toBeTruthy()
   expect(screen.getByText(/Tsuki v2 · 9 examples\s+Legacy v1 · 55 examples/)).toBeTruthy()
 })
 
-it('navigates to Components, Theme Playground, and Design Tokens', async () => {
+it('navigates to Components, Theme Playground, Design Tokens, and Interaction Lab', async () => {
   await render(<HomeScreen />)
 
   await fireEvent.press(screen.getByTestId('home-components'))
   await fireEvent.press(screen.getByTestId('home-theme-playground'))
   await fireEvent.press(screen.getByTestId('home-design-tokens'))
+  await fireEvent.press(screen.getByTestId('home-interaction-lab'))
 
-  expect(mockPush.mock.calls).toEqual([['/components'], ['/theme-playground'], ['/design-tokens']])
+  expect(mockPush.mock.calls).toEqual([
+    ['/components'],
+    ['/theme-playground'],
+    ['/design-tokens'],
+    ['/labs/interaction'],
+  ])
 })

@@ -20,6 +20,13 @@
 - Public callback 使用 `onXxx`（`onChange`、`onPress`、`onConfirm`、`onCancel`、`onOpen`、`onClose`、`onVisibleChange`）。Internal event function 使用 `handleXxx`；不得将其暴露为 public prop。
 - Public component 必须保留或定义有意义的 React Native accessibility semantic，包括 platform 支持的 role、state、label 和 action。不要为了简化 internal implementation 而牺牲 accessibility behavior。
 
+## Pressable runtime compatibility
+
+- Pressable feedback runtime 是内部适配层。Button、Cell 等现有组件接入时保留当前 public Props、ref、原生事件顺序和 accessibility contract，不借集成新增公共 Pressable、Motion 或 Gesture API。
+- 对当前 Props 已暴露的 React Native Pressable 能力（例如 `disabled`、`hitSlop`、`pressRetentionOffset`、`testOnly_pressed` 和 press callbacks），不得在内部适配时丢弃或改变行为。
+- 内部 render props 或函数式 style 若接收 pressed 状态，必须与视觉反馈读取同一状态。不要因此扩大 Button、Cell 等组件当前静态 `style` 或 `children` contract。
+- 保留现有组件内联样式顺序（例如 Button 的 `styles.root` 在 `style` 之前）。同一属性发生冲突时，显式 `styles.root` / `style` 高于 pressed feedback，feedback 不覆盖被显式样式占用的属性；独立 overlay feedback 使用单独图层。通过聚焦测试固定该优先级。
+
 ## Naming compatibility exception
 
 - 当既有 public API 已经是稳定的 consumer-facing contract、有现有 docs / fixtures / tests / upstream compatibility 依据，且 rename 会形成 breaking change 时，可以保留不符合默认命名模板的名称。
