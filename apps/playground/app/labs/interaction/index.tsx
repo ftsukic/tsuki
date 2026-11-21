@@ -24,6 +24,13 @@ const labs = [
     path: '/labs/interaction/gesture',
     testID: 'interaction-lab-gesture',
   },
+  {
+    title: 'Overlay',
+    description:
+      'Root-scoped stacking, independent Mask / Content transitions, theme, touch, and Back.',
+    path: '/labs/interaction/overlay',
+    testID: 'interaction-lab-overlay',
+  },
 ] as const
 
 export default function InteractionLabIndex() {

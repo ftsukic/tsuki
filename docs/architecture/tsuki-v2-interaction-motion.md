@@ -1,6 +1,11 @@
 # Tsuki v2 Interaction & Motion Architecture
 
-> 状态：Batch 15 — Motion、Pressable、Pan/Swipe 与 Interaction Lab 已实现；Android 验收记录见本文末尾基线：`tsuki-1x-refactor`，`40f16dc` 范围：Motion、Pressable、Gesture、Overlay原则：先建立统一运行时，再迁移业务组件。
+| 项目 | 说明 |
+| --- | --- |
+| 状态 | Batch 15 — Motion、Pressable、Pan/Swipe 与 Interaction Lab 已实现；Batch 16B Overlay Registry lifecycle、双通道 Motion Transition 和 Playground Lab 已实现。自动化与 Android 设备验收结果及 iOS/HarmonyOS 未完成项见本文末尾。 |
+| 基线 | `tsuki-1x-refactor`，`879b90d`。 |
+| 范围 | Motion、Pressable、Gesture、Overlay。 |
+| 原则 | 先建立统一运行时，再迁移业务组件。 |
 
 本文记录 v2 交互与动效运行时的当前实现、目标边界、依赖方向和分批验收要求。规划部分不代表尚未完成的能力已存在于源码；源码、配置和 CI 是当前实现状态的事实来源。
 
@@ -26,7 +31,7 @@
 | Gesture | `packages/tsuki/src/gesture/` 提供私有 Pan/Swipe Runtime；Playground Interaction Lab 直接预览该 Runtime。 |
 | Theme motion policy | `ThemeConfig` / `ResolvedTheme` 含 `motion` 字段；`serializeTheme()` 不序列化该运行策略。 |
 | Gesture root | 当前 v2 `TsukiProvider` 不提供 `GestureHandlerRootView`；Playground 在应用根部提供，其他应用也必须自行提供。 |
-| Overlay / Portal | 当前 v2 没有 Overlay Runtime 或 Portal Host。`react-native-teleport` 是开发依赖，不是 peer dependency；v1 由应用提供 `PortalProvider`，当前 v2 TsukiProvider 没有 Host，v4/v5 Consumer 也未安装该依赖。 |
+| Overlay / Portal | Batch 16A.2 完成架构决策；Batch 16B 已实现每 Root 独立 Registry、稳定 Entry phase/generation、根 `TsukiProvider` 唯一 Host、Theme Bridge、Host 级 Back 适配、双通道 Motion Transition 与 Overlay Lab。运行时代码位于 `packages/tsuki/src/overlay/`；具体自动化和原生验收以本文末尾状态为准。View 是三端 Host 基线；iOS `FullWindowOverlay` 仍是可选验证项。`react-native-teleport` 仍是开发依赖而非运行时依赖；v1 归档实现依赖应用提供的 `PortalProvider`，v2 不引入 Teleport 或平台 Portal API。 |
 
 内部模块不会因为目录建立而成为 package API。当前 `packages/tsuki/src/index.ts` 和组件 barrel 中已存在的导出仍是兼容面；后续内部实现不得借机删除或改名。
 
@@ -34,12 +39,12 @@
 
 运行时分为四个内部模块：
 
-| 模块      | 职责                                                     |
-| --------- | -------------------------------------------------------- |
-| Motion    | 动画执行、配置解析、预设与过渡生命周期。                 |
-| Pressable | 原生按压事件与视觉反馈之间的适配。                       |
-| Gesture   | 手势识别、UI thread 运动、释放决策与吸附。               |
-| Overlay   | 浮层生命周期、层级与宿主适配；Portal 方案待 spike 决策。 |
+| 模块 | 职责 |
+| --- | --- |
+| Motion | 动画执行、配置解析、预设与过渡生命周期。 |
+| Pressable | 原生按压事件与视觉反馈之间的适配。 |
+| Gesture | 手势识别、UI thread 运动、释放决策与吸附。 |
+| Overlay | 通过应用级 Host 和内部 Registry 提供浮层挂载、更新、卸载、层级与宿主适配；具体组件拥有打开和关闭语义。 |
 
 ```text
 Button / Cell / future Popup / Dialog
@@ -50,12 +55,13 @@ Button / Cell / future Popup / Dialog
                  |
         Reanimated / Worklets
 
-Overlay ── Motion
-   ├────── Gesture (optional)
-   └────── Portal Adapter (pending decision)
+Overlay ── Motion (entry/exit; Mask + Content channels)
+   ├────── Gesture (optional interaction)
+   ├────── React Native View (Host rendering)
+   └────── existing ThemeContext (private bridge)
 ```
 
-此图描述目标依赖方向；当前源码只实现 Motion 与 Pressable，Gesture 和 Overlay 尚未实现。
+此图描述目标依赖方向；Motion、Pressable、Gesture、Overlay Host 和 Registry 均有对应私有源码实现。Overlay 的决策边界见 [Overlay Host 架构决策](./tsuki-v2-overlay-host-decision.md)。
 
 - Motion 不依赖业务组件。
 - 业务组件不得直接调用 `withTiming`、`withSpring` 或 `withDecay`；动画策略经 Motion primitive 和 preset 执行。
@@ -155,15 +161,19 @@ mass = mass
 
 应用根节点由宿主应用提供 `GestureHandlerRootView`。不得假设 TsukiProvider 会自动提供根节点。
 
-## 6. Overlay 与 Portal 决策
+## 6. Overlay Host 决策
 
-Overlay 暂不实现。先对独立 Portal 方案做技术验证，再建立 Overlay Runtime。候选方案：
+Batch 16B 已实现每个 React Root 独立的 `OverlayRegistry` 和根 `TsukiProvider` 唯一拥有的 `OverlayHost`。嵌套 `TsukiProvider` 复用 Registry 并保留自己的 ThemeContext，`ConfigProvider` 只负责主题作用域。当前内部调用仅从所属树的 Runtime Context 取得 Registry；Back 只交给最顶层未隐藏 Entry；Host 注销不等同于 Root 销毁，Root 永久销毁时由 StrictMode-safe lease 清理 Entry；Host StrictMode Effect replay 可以重新注册。当前实现与自动化结果见交付记录；原生验收按平台单独记录。
 
-1. 将 `react-native-teleport` 作为正式 peer dependency。
-2. 使用 React Native `Modal`。
-3. 使用独立的应用级 Overlay Host。
+Batch 16B 的 Entry 生命周期与 Motion 协作约定如下：
 
-Spike 必须覆盖多层顺序、Portal 生命周期、Android BackHandler、滚动锁、键盘避让、Safe Area、Accessibility、iOS/Android 真机表现和 npm tarball 消费者安装。通过 spike 记录取舍与宿主配置，再确定 Overlay 结构。未完成决策前，不新增 Portal 依赖或复制 v1 Portal 实现。
+```text
+registered/mount -> entering -> entered -> exiting (still registered) -> Registry.unmount
+```
+
+Entry 在进入和退出动画期间都保持注册。独立 Mask / Content Motion 通道的成功完成回调推进生命周期；所有需要动画的退出通道完成后才请求 Registry 卸载。Reduced Motion 或零时长动画仍须调用完成回调，不使用固定 Timeout。重复关闭与卸载必须幂等；退出期间重新打开时保留 Entry ID 和 React key，并使旧退出回调失效。Overlay Transition 的首个 entering frame 显式从 0 初始化，不依赖 `useTransitionProgress(true)` 的初始值语义。
+
+Batch 16B 增加了私有 Overlay Runtime 与真实 Registry/Host 驱动的 Playground Lab，没有增加 Overlay Runtime 公共 API。Lab 覆盖多层顺序、Host 注销/恢复、Theme 更新、Back 三种行为和触摸区域。Registry 解析、主题捕获、Back 行为、触摸、Safe Area、Keyboard、Accessibility、React Native `Modal` 边界和三端要求以 [Overlay Host 架构决策](./tsuki-v2-overlay-host-decision.md) 为准；原生验收不以自动化测试代替。
 
 ## 7. Arco 行为参考
 
@@ -197,27 +207,51 @@ packages/tsuki/src/
 │   ├── pressable.tsx
 │   ├── types.ts
 │   └── usePressFeedback.ts
-└── gesture/
-    ├── pan.ts
-    ├── swipe.ts
-    ├── resolve.ts
-    └── types.ts
+├── gesture/
+│   ├── pan.ts
+│   ├── swipe.ts
+│   ├── resolve.ts
+│   └── types.ts
+└── overlay/
+    ├── back-adapter.ts
+    ├── context.ts
+    ├── overlay-host.tsx
+    ├── registry.ts
+    ├── theme-bridge.tsx
+    ├── types.ts
+    ├── use-overlay-runtime.ts
+    └── transition/
+        ├── index.ts
+        ├── overlay-transition.tsx
+        ├── presets.ts
+        ├── transition-completion.ts
+        ├── transition-style.ts
+        ├── types.ts
+        └── use-overlay-transition.ts
 ```
 
-Motion、Pressable 与 Gesture 树列出当前源码文件。Overlay 的结构仍等待 Portal spike 决策。目录表示私有运行时职责，不代表 public component。Hook 文件遵循项目现有 camelCase 例外；不需要 barrel 的模块可以省略 `index.ts`。Pressable 与 Gesture Runtime 没有 barrel，也没有 root export。
+Motion、Pressable、Gesture 与 Overlay 树列出当前私有源码文件。Overlay transition 子模块的 `index.ts` 仅供 Overlay Host 内部导入；不新增 Overlay root barrel 或 package root export，也不代表 public component。Hook 文件遵循项目现有 camelCase 例外；不需要 barrel 的模块可以省略 `index.ts`。Pressable、Gesture 与 Overlay Runtime 均没有 package root export。
 
 ## 9. 实施批次与验收
 
-| Batch | 范围                  | 交付                                           |
-| ----- | --------------------- | ---------------------------------------------- |
-| 12    | Architecture          | 架构文档与 Rule 修订                           |
-| 13    | Motion                | 动画运行时与 Theme 集成                        |
-| 14    | Pressable             | 按压运行时及 Button/Cell 接入                  |
-| 15    | Gesture               | 私有 Pan/Swipe Runtime、运动算法与 Gesture Lab |
-| 16A   | Portal Spike          | Portal 技术决策                                |
-| 16B   | Overlay               | 浮层运行时                                     |
-| 17    | Arco Reference Lab    | 交互行为验收                                   |
-| 18    | Component Integration | 组件接入与回归                                 |
+| Batch | 范围                       | 交付                                                   |
+| ----- | -------------------------- | ------------------------------------------------------ |
+| 12    | Architecture               | 架构文档与 Rule 修订                                   |
+| 13    | Motion                     | 动画运行时与 Theme 集成                                |
+| 14    | Pressable                  | 按压运行时及 Button/Cell 接入                          |
+| 15    | Gesture                    | 私有 Pan/Swipe Runtime、运动算法与 Gesture Lab         |
+| 16A   | Overlay Host Decision      | Host 架构决策文档与架构 Rule 更新                      |
+| 16A.1 | Architecture Clarification | Root 所有权、命令式 Root 绑定、Back 与生命周期规则补充 |
+| 16A.2 | Reference Study & Decision | 参考源码研究、最终 Host/API/生命周期决策               |
+| 16B.0 | iOS Host Layer Validation  | View 与 FullWindowOverlay 原生层级、触摸及无障碍比较   |
+| 16B.1 | Registry & Entry           | 每 Root Registry、稳定 Entry、订阅和生命周期           |
+| 16B.2 | Host & Theme Bridge        | Root Host、Provider 接线和 Theme Context Bridge        |
+| 16B.3 | Declarative Primitive      | 内部 Portal primitive 与显式组件 Context 桥接          |
+| 16B.4 | Imperative Controller      | 显式绑定 Root 的 open/update/close 控制器              |
+| 16B.5 | Back & Motion              | Back、Accessibility 与过渡完成协作                     |
+| 16B.6 | Overlay Lab & Acceptance   | 实验台及三平台验收                                     |
+| 17    | Arco Reference Lab         | 交互行为验收                                           |
+| 18    | Component Integration      | 组件接入与回归                                         |
 
 每个 Batch 独立审查和验收。自动化验收至少覆盖：Motion 参数归一化、Spring 参数计算、动画反向接管、旧回调失效、Reduced Motion 完成通知、Pressable 事件顺序、Gesture 方向锁、Swipe 阈值与速度判定、Snap 和 Resistance。
 
@@ -229,7 +263,8 @@ NativeWind v4、v5 必须使用独立 Consumer 验证 TypeScript、Package Build
 - 重写 Design Token 或 NativeWind CSS 架构。
 - 新增公开 Reanimated Hook、SharedValue 或 Worklet API。
 - 批量修改现有组件 API。
-- 未完成 Portal spike 就增加 Portal 依赖。
+- 将 `react-native-teleport` 或平台 Portal API 引入 v2 Runtime。
+- 将 React Native `Modal` 用作通用 Overlay Host。
 - 强制所有动画使用 Spring。
 
 ## 11. Batch 14.1 — Theme transition consistency
@@ -302,3 +337,89 @@ Playground 在 `apps/playground/app/labs/interaction/` 提供 Interaction Lab。
 - Nested Scroll 默认协调模式下，横向拖动激活 Pan 并取消行内 Tap；纵向拖动滚动内层列表，列表外的标题与协调控件保持原位。
 
 Android 验收不代表 iOS 或 HarmonyOS 原生设备验收；本轮未在这些平台运行设备验证。
+
+## 13. Batch 16B — Overlay Runtime
+
+### 实现范围
+
+- 每个根 `TsukiProvider` 持有独立 Registry 和唯一 Host；嵌套 `TsukiProvider` / `ConfigProvider` 复用 Registry，并为 Entry 捕获当前 Theme scope。
+- Registry 提供稳定 Entry ID、不可变 Snapshot、更新不重排、幂等卸载、无 Host 时排队和 StrictMode-safe Host 注册租约。
+- Host 用 React Native `View` 渲染有序层，根节点与 layer wrapper 使用 `box-none`；Entry 通过现有 `ThemeContext` Bridge 恢复并跟随其来源 scope 的主题提交。
+- Android 与 Harmony 平台使用 Host 生命周期内单个 `BackHandler` 订阅；iOS 不注册硬件 Back 行为。没有增加 public Overlay API、package root export 或依赖。
+- Playground Overlay Lab 直接调用私有 Runtime，覆盖多层顺序、Back、Theme 和触摸；没有新增 Fixture Catalog 项目。
+
+### 自动化结果
+
+下列命令均在本轮实际运行并以退出码 0 完成：
+
+| 命令 | 结果 |
+| --- | --- |
+| `pnpm run package:typecheck` | 通过 |
+| `pnpm run package:test:v2` | 14 suites / 116 tests 通过 |
+| `pnpm run playground:typecheck` | 通过 |
+| `pnpm run playground:test` | 10 suites / 29 tests 通过 |
+| `pnpm run lint` | 通过 |
+| `pnpm run build` | 通过 |
+| `pnpm run consumers:tarball` | v4/v5 tarball 类型检查及 iOS/Android bundle 通过 |
+| `pnpm run fixtures:check` | 64 fixtures 通过 |
+| 目标 Markdown / TS / TSX 的 `pnpm exec prettier --check` | 通过 |
+| `git diff --check` | 通过 |
+
+### Android 设备验收
+
+- Playground Development Build 在 Pixel 10、Android API 37 模拟器（`emulator-5554`，1080 × 2424）上构建并运行。`npx expo run:android --no-bundler` 退出码 0。`@expo/agent-cli dev --android --device emulator-5554 --detach --wait-ready --port 8081` 退出码 1：设备选择步骤未识别该 ADB serial；改用 Expo CLI 无设备参数的本机 Android build 后成功安装。Runtime tree 未能连接 RN DevTools，因此实际交互通过 Android UI hierarchy、触摸和硬件 Back 输入检查。
+- Stack Lab 实际显示三个叠层，最新 Entry 绘制在最上方；更新顶层保留顺序，删除中间 Entry 后剩余顺序为 1、3。点击底层页面控制区仍能更新和清除未覆盖的 Entry。
+- 临时注销 Host 后 Entry 留在 Registry 且不再绘制；重新注册后同一 Entry 顺序恢复。切回 Interaction Lab 时根 Host 数量仍为 1。
+- Android 硬件 Back 分别验证 `dismiss` 移除顶层、`consume` 保留顶层、`passthrough` 返回 Interaction Lab。一次按键只更新一次 Registry Back 结果；单元测试还验证 passthrough 不向下扫描。
+- Root Theme overlay 在 Android 夜间模式 light → dark → light 更新期间保持挂载；scheme、primary 和 background 均跟随。ConfigProvider overlay 从蓝色 primary 更新为 rose（`#e11d48`）；嵌套 Light / Dark Provider overlay 分别呈现各自 scheme 和颜色。
+- Touch Lab 实际验证无遮罩卡片外的页面点击穿透、全屏遮罩外侧与内容区域分别响应、叠层内顶层内容先响应且空白区域交给下层 mask。
+- 为验证系统主题传播，测试期间将模拟器从系统 light 临时切换到 dark 再切回 light；最终夜间模式为 `no`，恢复为测试前状态。
+
+### iOS 与 HarmonyOS
+
+- iOS 原生绘制、Safe Area、键盘和 VoiceOver 未在设备上验收。
+- HarmonyOS 未完成原生验收：当前仓库没有 RNOH 宿主或锁定的 RNOH target version。该适配依赖宿主根 ArkUI `onBackPress` 调用 `dispatchBackPress()` 后转发到 RN；参见 [RNOH 接入文档](https://gitee.com/openharmony-sig/ohos_react_native/blob/master/docs/zh-cn/RN-Native%E6%8E%A5%E5%85%A5.md)。当前 `BackHandler` 事件订阅和清理模式遵循 [React Native BackHandler 文档](https://reactnative.dev/docs/0.86/backhandler)，但不能据 Android 验收推断 Harmony 兼容。
+
+## 14. Batch 16B — Overlay Transition Runtime follow-up
+
+本轮在 Batch 16B Overlay Host 之上加入私有 Transition Runtime。Registry 明确记录 `hidden / entering / entered / exiting` presentation phase，并以 Entry ID 与 generation 拒绝过期完成回调；关闭时保留 Entry 与 Host 子树，等 Mask 和 Content 两条动画通道都完成后才卸载。重新打开或反转时会推进 generation，因此旧动画不能清理新一轮展示。Reduced Motion 使用同一完成路径立即收敛，不通过 timeout 推断动画结束。
+
+- Mask 与 Content 使用独立 MotionValue / SharedValue。预设分别配置两条通道；Timing 和 Spring 参数可独立调节。取消、反转和并行 Entry 都由当前动画 generation 管理。
+- Worklet 进度 reaction 只捕获数值 generation，不捕获含 React 内容的 Overlay Entry；Android 重开检查中未再出现 FiberNode Worklet 警告。
+- Playground 新增 Transitions Lab：提供预设、Mask / Content 选择、Timing / Spring 调参、打开与关闭、进入中关闭、退出中重开、快速序列、并行层、Back 和 Reduced Motion；诊断区展示 Entry ID、phase、两路进度、动画类型、generation、完成状态和 Registry 数量。
+- 覆盖无 Mask 时仅等待 Content 的完成路径，也覆盖多个可见通道协调、StrictMode Provider 生命周期、Entry 重开稳定性和 duration 0。没有新增 public API、package root export 或依赖。
+
+### 自动化结果
+
+本轮实际运行且通过：
+
+| 命令 | 结果 |
+| --- | --- |
+| `pnpm run package:typecheck` | 通过 |
+| `pnpm run package:test:v2` | 15 suites / 124 tests 通过 |
+| `pnpm run playground:typecheck` | 通过 |
+| `pnpm run playground:test` | 10 suites / 31 tests 通过；日志有来自 `packages/tsuki/bak` 历史代码的 Reanimated 提示，不影响通过 |
+| `pnpm run lint` | 通过，零 warning |
+| 目标文件 `pnpm exec prettier --check` | 通过 |
+| `git diff --check` | 通过 |
+
+### Android 设备验收
+
+- Pixel 10 / Android API 37 模拟器 `emulator-5554`（1080 × 2424）完成 Development Build 构建并安装。Expo Agent 首次按 ADB serial 选择设备失败；改用本机 Expo CLI build 和本地 Agent CLI 服务后，Metro、设备 runtime tree 与应用均连接成功，runtime error 检查没有报告错误。
+- 在设备上验证进入中关闭、退出中重开、快速打开关闭序列、Mask None、Reduced Motion 和并行层。重开沿用原 Entry ID，generation 前进；并行 Entry 按层级绘制，移除上层后下层仍在。快速序列和 Reduced Motion 关闭最终都将 Registry 数量收敛到 0。
+- Android 硬件 Back 对两个活动 Entry 各消费一次，数量依次从 2 到 1、再到 0，停留在 Transitions Lab。UIAutomator hierarchy 确认 Mask 占满屏幕、Content 可点击；实体点按卡片内容和遮罩外侧都分别关闭 Entry。
+- 设备运行观察了动画完成状态、反转和交互结果；本轮没有录制逐帧视频或测量帧率，因此不将此验收描述为帧级平滑度检查。
+
+本轮未运行 iOS 或 HarmonyOS 原生设备验收。实现和自动化结果不能替代这两个平台上的设备确认。
+
+## 15. Batch 16B.5.6 — Transition Review Fixes
+
+本批次修复 Overlay Transition 的 Progress Listener 调度，并让 Transition Style 按 `entering` / `exiting` 生命周期选择 `MotionPreset.enter` 或 `MotionPreset.exit`。进度仍使用原有可见度 SharedValue；Enter 将 `0 → 1` 映射到 `enter.from → enter.to`，Exit 将 `1 → 0` 映射到 `exit.from → exit.to`。位移继续按屏幕宽高归一化，缺省属性保持 identity 值。已有对称预设的 Enter / Exit 画面保持一致。
+
+Progress reaction 在 UI Worklet 侧读取 listener-presence SharedValue。没有 listener 时不调用 `scheduleOnRN`；有 listener 时仅在 10% 档位改变时通知。JS 侧保留 `onProgressRef`，listener 增删通过 effect 同步到 SharedValue；Mask 和 Content 使用相同门控逻辑。
+
+测试用可控 Timing / Spring 完成回调覆盖双通道进入和退出、两种完成顺序、重复完成、取消、Enter / Exit 反转、旧 generation 回调、稳定 SharedValue、无 Mask 单通道和 Progress Listener 动态增删。独立 Style 测试覆盖 Enter / Exit 端点、非对称 opacity / scale / 位移、屏幕尺寸归一化、缺省属性和现有对称预设。
+
+Playground 的 Transition Lab 加入仅供内部验收的非对称 preset，用于实际宿主上的 Enter / Exit 验收。没有新增公共 API、根导出、package export 或第三方依赖。
+
+本批次最终自动化结果和 Android 模拟器验收明细见 [Batch 16B.5.6 完成报告](./tsuki-v2-16b-5-6-completion-report.md)。

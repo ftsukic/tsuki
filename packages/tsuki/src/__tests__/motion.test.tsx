@@ -213,6 +213,7 @@ describe('Motion animation primitives', () => {
       'fade-up',
       'fade-down',
       'spring-scale',
+      'overlay-asymmetric-test',
     ])
     expect(MOTION_PRESETS['spring-scale'].animation).toBe('spring')
     expect(MOTION_PRESETS['fade-up'].enter.from).toMatchObject({ opacity: 0, translateY: 1 })

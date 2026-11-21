@@ -1,6 +1,6 @@
 # Tsuki v2 Interaction Lab
 
-Interaction Lab 是 Playground 中独立的交互实验区，用于直接操作 Tsuki v2 的 Motion、Pressable 和 Gesture Runtime。它不属于组件 Fixture Catalog，也不会增加 `@ftsukic/tsuki` 的公共 API。
+Interaction Lab 是 Playground 中独立的交互实验区，用于直接操作 Tsuki v2 的 Motion、Pressable、Gesture 和 Overlay Runtime。它不属于组件 Fixture Catalog，也不会增加 `@ftsukic/tsuki` 的公共 API。
 
 ## 打开 Lab
 
@@ -10,7 +10,7 @@ Interaction Lab 是 Playground 中独立的交互实验区，用于直接操作 
 pnpm --dir apps/playground start
 ```
 
-从首页进入 **Interaction Lab**，再选择 Motion、Pressable 或 Gesture。Playground 根节点已提供 `GestureHandlerRootView`；其他应用使用 Gesture Handler 时仍需由宿主应用配置根节点。
+从首页进入 **Interaction Lab**，再选择 Motion、Pressable、Gesture 或 Overlay。Playground 根节点已提供 `GestureHandlerRootView`；其他应用使用 Gesture Handler 时仍需由宿主应用配置根节点。
 
 ## 实验页面
 
@@ -31,6 +31,12 @@ pnpm --dir apps/playground start
 - **Nested Scroll**：在纵向滚动区域中横向拖动，比较 `requireToFail` 与 simultaneous 协调，并检查拖动与点按竞争时只有点按触发的行为。
 
 数值面板只在方向改变、手势生命周期变化或手势结束时更新。连续位移由 UI Thread 上的 SharedValue 驱动。
+
+### Overlay
+
+Overlay Lab 使用 Playground 根 `TsukiProvider` 持有的 Registry 和 Host。Transitions 面板可以单独选择 Mask 与 Content 的预设、Timing / Spring、时长和弹簧参数，并验证进入中关闭、退出中重开、快速连续切换、多 Entry、Back 顺序和 Reduced Motion。进度调试以每 10% 为步长通过现有 Motion SharedValue 汇报，不按每帧触发 React state 更新。
+
+同一 Overlay 页面还提供 Stack、Back、Theme 和 Touch 面板，用于检查稳定层级、三种 Back 行为、Theme Bridge 与底层触摸穿透。
 
 ## 实现边界
 

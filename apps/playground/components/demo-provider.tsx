@@ -3,6 +3,7 @@ import { useColorScheme } from 'react-native'
 import { PortalProvider } from 'react-native-teleport'
 import { KeyboardProvider } from 'react-native-keyboard-controller'
 import { ImagePreview, darkAlgorithm, defaultAlgorithm, TsukiProvider } from '@ftsukic/tsuki'
+import { TsukiProvider as V2TsukiProvider } from '@tsuki-v2/theme/tsuki-provider'
 
 type ThemeMode = 'system' | 'light' | 'dark'
 const DemoThemeContext = createContext<{
@@ -23,12 +24,19 @@ export function DemoProvider({ children }: PropsWithChildren) {
             safeArea
             theme={{ algorithm: dark ? darkAlgorithm : defaultAlgorithm, seed: { fontSize: 18 } }}
           >
-            <ImagePreview.Provider>{children}</ImagePreview.Provider>
+            <ImagePreview.Provider>
+              <V2ApplicationRoot>{children}</V2ApplicationRoot>
+            </ImagePreview.Provider>
           </TsukiProvider>
         </PortalProvider>
       </KeyboardProvider>
     </DemoThemeContext.Provider>
   )
+}
+
+function V2ApplicationRoot({ children }: PropsWithChildren) {
+  const { dark } = useDemoTheme()
+  return <V2TsukiProvider scheme={dark ? 'dark' : 'light'}>{children}</V2TsukiProvider>
 }
 
 export function useDemoTheme() {
