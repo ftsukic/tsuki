@@ -218,7 +218,7 @@ The v5 stylesheet export is `@ftsukic/tsuki/nativewind-v5.css`; `@ftsukic/tsuki/
 @source './node_modules/@ftsukic/tsuki/dist';
 ```
 
-Configure PostCSS with `@tailwindcss/postcss` and Metro with `withNativewind`. The Metro config must exclude every dynamic `--tsuki-*` variable emitted by `serializeTheme()` from inlining. See the [complete v5 Metro config](../../../../apps/nativewind-v5-consumer/metro.config.js) for the current list.
+Configure PostCSS with `@tailwindcss/postcss` and Metro with `withNativewind`. The Metro config must exclude every dynamic `--tsuki-*` variable emitted by `serializeTheme()` from inlining. See the [complete v5 Metro config](../../../../apps/playground-nw5/metro.config.js) for the current list.
 
 ## `serializeTheme()` and variable scopes
 

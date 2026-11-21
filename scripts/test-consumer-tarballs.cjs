@@ -67,7 +67,7 @@ function rewriteConsumerForTarball(name, tarballPath) {
   if (tsconfig.compilerOptions) delete tsconfig.compilerOptions.paths
   fs.writeFileSync(tsconfigPath, JSON.stringify(tsconfig, null, 2) + '\n')
 
-  stageCanonicalExamples(consumerRoot, name === 'nativewind-v4-consumer')
+  stageCanonicalExamples(consumerRoot, name === 'playground-nw4')
   return consumerRoot
 }
 
@@ -147,7 +147,7 @@ function createTarball() {
 try {
   const tarballPath = createTarball()
 
-  for (const consumerName of ['nativewind-v4-consumer', 'nativewind-v5-consumer']) {
+  for (const consumerName of ['playground-nw4', 'playground-nw5']) {
     const consumerRoot = rewriteConsumerForTarball(consumerName, tarballPath)
     console.log('\nVerifying packed package in ' + consumerName)
     run('npm', ['install', '--no-audit', '--no-fund'], consumerRoot)

@@ -313,7 +313,7 @@ Reanimated 4.7.1 会过滤颜色属性上的 `undefined`，因此返回 `backgro
   - `pnpm run consumers:tarball`：通过，v4/v5 tarball 均完成类型检查及 Expo 开发 bundle，退出码 0。该脚本同时导出了 iOS 与 Android 静态 bundle；这不属于 iOS 设备验收。日志包含 NativeWind 丢弃 41 条 React Native 不支持的 CSS 声明、npm 安装脚本提示和 Node deprecation 提示，均未导致失败。
   - `pnpm run changeset:status`：命令成功，退出码 0；现有 changeset 集合报告 `@ftsukic/tsuki` 为 major。本次独立修复 changeset `.changeset/steady-cell-theme-feedback.md` 为 patch。
   - `git diff --check`：通过，退出码 0（最终检查）。
-- `apps/nativewind-v5-consumer/android` 已核实为 Expo Prebuild 目录：忽略规则来自该 Consumer 的 `.gitignore`，Git 跟踪文件数为 0，配置 package 为 `com.ftsukic.tsukinativewindv5`，目录中的 Android 原生入口与配置对应。未发现 Gradle / `expo run:android` 构建进程占用它。系统自动审查最初拒绝了递归删除操作；用户随后手动清理。最终确认该目录不存在，未触碰其他 Consumer 目录。
+- `apps/playground-nw5/android` 已核实为 Expo Prebuild 目录：忽略规则来自该 Consumer 的 `.gitignore`，Git 跟踪文件数为 0，配置 package 为 `com.ftsukic.tsukinativewindv5`，目录中的 Android 原生入口与配置对应。未发现 Gradle / `expo run:android` 构建进程占用它。系统自动审查最初拒绝了递归删除操作；用户随后手动清理。最终确认该目录不存在，未触碰其他 Consumer 目录。
 - 最终 Git 状态仍在 `tsuki-1x-refactor`，没有 staged 文件；Batch 12、13、14 和 14.1 的既有 dirty changes 均保留，临时 Consumer 页面 `App.tsx` 已按原始哈希恢复且没有出现在 Git Status 中。用于恢复的哈希副本也已由用户手动删除，最终确认不存在。本次没有增加公共 export，没有提交、推送或发布。
 - iOS: `Skipped by decision — not included in Batch 14.1 acceptance criteria.`
 

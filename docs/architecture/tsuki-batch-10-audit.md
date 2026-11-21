@@ -10,7 +10,7 @@
 
 ## Consumer 重复与环境差异
 
-`apps/nativewind-v4-consumer/App.tsx` 和 `apps/nativewind-v5-consumer/App.tsx` 各有 351 行。逐行比较后，只有 5 行环境差异：NativeWind 的变量桥接 import、桥接组件实现，以及标题中的版本名；其余 346 行相同（98.6%）。
+`apps/playground-nw4/App.tsx` 和 `apps/playground-nw5/App.tsx` 各有 351 行。逐行比较后，只有 5 行环境差异：NativeWind 的变量桥接 import、桥接组件实现，以及标题中的版本名；其余 346 行相同（98.6%）。
 
 相同部分已经覆盖 Button、Input、Text、Icon、Space、Divider、Surface、Card、Cell 和 CellGroup，以及主题覆盖、受控交互状态、Light/Dark/System 切换、嵌套 ConfigProvider、`className`/`classNames` 和原生 `style`/`styles` 覆盖。
 

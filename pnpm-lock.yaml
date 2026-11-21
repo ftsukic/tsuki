@@ -222,7 +222,7 @@ importers:
         specifier: ^3.9.10
         version: 3.9.10
 
-  apps/nativewind-v4-consumer:
+  apps/playground-nw4:
     dependencies:
       '@ftsukic/consumer-fixtures':
         specifier: workspace:*
@@ -283,7 +283,7 @@ importers:
         specifier: ~6.0.3
         version: 6.0.3
 
-  apps/nativewind-v5-consumer:
+  apps/playground-nw5:
     dependencies:
       '@ftsukic/consumer-fixtures':
         specifier: workspace:*

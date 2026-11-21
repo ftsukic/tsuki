@@ -53,10 +53,10 @@ The app chooses its own CSS runtime, utility generation, and variable bridge. Th
 
 | Consumer | Workspace runtime | CSS setup | Runtime variable bridge |
 | --- | --- | --- | --- |
-| `apps/nativewind-v4-consumer/` | NativeWind `4.2.7`, Tailwind `3.4.17`, `react-native-css-interop` `0.2.7` | Tailwind preset `@ftsukic/tsuki/nativewind-v4-preset`; global CSS imports the installed `dist/theme/theme.css`. | `vars(serializeTheme(theme))` on a React Native `View`. |
-| `apps/nativewind-v5-consumer/` | NativeWind `5.0.0-rc.1`, `react-native-css` `3.1.0-rc.1`, Tailwind `4.1.12` | Global CSS imports Tailwind utilities, `nativewind/theme`, `@ftsukic/tsuki/theme.css`, and `@ftsukic/tsuki/nativewind-v5.css`. | `VariableContextProvider` receives `serializeTheme(theme)`. |
+| `apps/playground-nw4/` | NativeWind `4.2.7`, Tailwind `3.4.17`, `react-native-css-interop` `0.2.7` | Tailwind preset `@ftsukic/tsuki/nativewind-v4-preset`; global CSS imports the installed `dist/theme/theme.css`. | `vars(serializeTheme(theme))` on a React Native `View`. |
+| `apps/playground-nw5/` | NativeWind `5.0.0-rc.1`, `react-native-css` `3.1.0-rc.1`, Tailwind `4.1.12` | Global CSS imports Tailwind utilities, `nativewind/theme`, `@ftsukic/tsuki/theme.css`, and `@ftsukic/tsuki/nativewind-v5.css`. | `VariableContextProvider` receives `serializeTheme(theme)`. |
 
-Both apps currently use Expo SDK `57.0.32`, React Native `0.86.3`, and React `19.2.3`. NativeWind v5 is a release candidate in this pinned workspace. For a nested theme scope, render that app's variable bridge within the matching `ConfigProvider`; this makes the child variables available to its descendants. Full runnable settings are in the [v4 Consumer](../../apps/nativewind-v4-consumer/) and [v5 Consumer](../../apps/nativewind-v5-consumer/).
+Both apps currently use Expo SDK `57.0.32`, React Native `0.86.3`, and React `19.2.3`. NativeWind v5 is a release candidate in this pinned workspace. For a nested theme scope, render that app's variable bridge within the matching `ConfigProvider`; this makes the child variables available to its descendants. Full runnable settings are in the [v4 Consumer](../../apps/playground-nw4/) and [v5 Consumer](../../apps/playground-nw5/).
 
 ## Playground and fixture catalog
 

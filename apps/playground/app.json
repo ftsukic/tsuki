@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Tsuki Playground",
+    "name": "Tsuki",
     "slug": "playground",
     "version": "1.0.0",
     "platforms": ["ios", "android"],

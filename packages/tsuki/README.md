@@ -133,7 +133,7 @@ Import the package's static theme stylesheet from the installed file in the app'
 @tailwind utilities;
 ```
 
-Tailwind 3's `postcss-import` does not resolve this package's CSS export map in the current consumer setup, so use the installed `dist/theme/theme.css` path shown above. Configure Metro with `withNativeWind` and configure Babel with the NativeWind preset. The repository has the complete [v4 Tailwind config](https://github.com/ftsukic/tsuki/blob/main/apps/nativewind-v4-consumer/tailwind.config.js), [Metro config](https://github.com/ftsukic/tsuki/blob/main/apps/nativewind-v4-consumer/metro.config.js), and [Babel config](https://github.com/ftsukic/tsuki/blob/main/apps/nativewind-v4-consumer/babel.config.js).
+Tailwind 3's `postcss-import` does not resolve this package's CSS export map in the current consumer setup, so use the installed `dist/theme/theme.css` path shown above. Configure Metro with `withNativeWind` and configure Babel with the NativeWind preset. The repository has the complete [v4 Tailwind config](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw4/tailwind.config.js), [Metro config](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw4/metro.config.js), and [Babel config](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw4/babel.config.js).
 
 Inject runtime theme variables with NativeWind v4's `vars()`:
 
@@ -165,7 +165,7 @@ The repository validation app pins NativeWind `5.0.0-rc.1`, `react-native-css` `
 @source './node_modules/@ftsukic/tsuki/dist';
 ```
 
-Use `@tailwindcss/postcss` in PostCSS and `withNativewind` in Metro. The Metro config must exclude the complete set of dynamic `--tsuki-*` theme variables from inlining; copy the [v5 Metro config](https://github.com/ftsukic/tsuki/blob/main/apps/nativewind-v5-consumer/metro.config.js). The [v5 PostCSS config](https://github.com/ftsukic/tsuki/blob/main/apps/nativewind-v5-consumer/postcss.config.js) and [global stylesheet](https://github.com/ftsukic/tsuki/blob/main/apps/nativewind-v5-consumer/global.css) are runnable references.
+Use `@tailwindcss/postcss` in PostCSS and `withNativewind` in Metro. The Metro config must exclude the complete set of dynamic `--tsuki-*` theme variables from inlining; copy the [v5 Metro config](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw5/metro.config.js). The [v5 PostCSS config](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw5/postcss.config.js) and [global stylesheet](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw5/global.css) are runnable references.
 
 Inject runtime values with NativeWind v5's `VariableContextProvider`:
 
@@ -193,8 +193,8 @@ For nested `ConfigProvider` scopes, put a matching variable bridge inside each s
 - [Architecture and consumer setup](https://github.com/ftsukic/tsuki/blob/main/docs/architecture/tsuki-v2-project-framework.md)
 - [Expo Playground](https://github.com/ftsukic/tsuki/tree/main/apps/playground)
 - [Canonical v2 fixtures](https://github.com/ftsukic/tsuki/tree/main/packages/tsuki/src)
-- [NativeWind v4 Consumer](https://github.com/ftsukic/tsuki/tree/main/apps/nativewind-v4-consumer)
-- [NativeWind v5 Consumer](https://github.com/ftsukic/tsuki/tree/main/apps/nativewind-v5-consumer)
+- [NativeWind v4 Playground](https://github.com/ftsukic/tsuki/tree/main/apps/playground-nw4)
+- [NativeWind v5 Playground](https://github.com/ftsukic/tsuki/tree/main/apps/playground-nw5)
 
 ## License
 

@@ -47,8 +47,8 @@
   },
   "scripts": {
     "generate:fixtures": "node ../../scripts/generate-fixture-catalog.cjs",
-    "start": "pnpm run generate:fixtures && expo start",
-    "android": "pnpm run generate:fixtures && expo run:android",
+    "start": "pnpm run generate:fixtures && node ../../scripts/playgrounds.cjs start --dev-client --port 18761",
+    "android": "pnpm run generate:fixtures && expo run:android --port 18761",
     "ios": "pnpm run generate:fixtures && expo run:ios",
     "typecheck": "tsc --noEmit",
     "config": "pnpm run generate:fixtures && expo config --type public",

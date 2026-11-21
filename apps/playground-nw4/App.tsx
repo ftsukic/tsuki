@@ -3,7 +3,7 @@ import { ConsumerDemo } from '@ftsukic/consumer-fixtures'
 import type { ConsumerAppearance, ConsumerThemeVariablesProps } from '@ftsukic/consumer-fixtures'
 import { serializeTheme, TsukiProvider, useTsukiTheme } from '@ftsukic/tsuki'
 import type { ThemeScheme } from '@ftsukic/tsuki'
-import { VariableContextProvider } from 'nativewind'
+import { vars } from 'nativewind'
 import { useColorScheme, View } from 'react-native'
 import './global.css'
 
@@ -11,11 +11,9 @@ function ThemeVariables({ children, className, style }: ConsumerThemeVariablesPr
   const theme = useTsukiTheme()
 
   return (
-    <VariableContextProvider value={serializeTheme(theme)}>
-      <View className={className} style={[{ flex: 1 }, style]}>
-        {children}
-      </View>
-    </VariableContextProvider>
+    <View className={className} style={[vars(serializeTheme(theme)), { flex: 1 }, style]}>
+      {children}
+    </View>
   )
 }
 
@@ -39,7 +37,7 @@ export default function App() {
           appearance={appearance}
           onCycleAppearance={cycleAppearance}
           scheme={scheme}
-          title="Tsuki NativeWind v5"
+          title="NW4"
         />
       </ThemeVariables>
     </TsukiProvider>
