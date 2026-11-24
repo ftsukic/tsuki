@@ -1,6 +1,6 @@
 # @ftsukic/tsuki
 
-Tsuki is a React Native UI component library. Tsuki v2 is the current package API and contains nine component families, a light/dark theme system, and explicit NativeWind stylesheet resources. The v1 implementation remains in the repository at `packages/tsuki/bak/src`; it is not part of this npm package.
+Tsuki is a React Native UI component library. Tsuki v2 is the current package API and contains fourteen component families (including the overlay and floating layer), a light/dark theme system, and explicit NativeWind stylesheet resources. The v1 implementation remains in the repository at `packages/tsuki/bak/src`; it is not part of this npm package.
 
 ## Install
 
@@ -64,19 +64,24 @@ export function ThemeRoot({ children }: PropsWithChildren) {
 
 ## Components
 
-The package root is the supported JavaScript entry point. It exports these nine component families; `CellGroup` is exported with the `Cell` family.
+The package root is the supported JavaScript entry point. It exports these fourteen component families; `CellGroup` is exported with the `Cell` family, and `useDialog` / `createDialogService` / `DialogServiceBridge` are exported with `Dialog`.
 
 | Component | Main capabilities |
 | --- | --- |
 | [`Button`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/button/index.md) | Pressable interaction, solid/outlined/ghost variants, three sizes, leading icon, loading and disabled states, semantic text slots. |
 | [`Card`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/card/index.md) | Surface-backed content container with optional `Header`, `Body`, and `Footer` sections. |
 | [`Cell` / `CellGroup`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/cell/index.md) | Settings and information rows, descriptions, values, leading/trailing content, actions, arrows, dividers, and grouped inset layouts. |
+| [`Dialog`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/dialog/index.md) | Modal prompts with async `beforeClose`, keyboard avoidance, in-tree `useDialog()`, and out-of-tree `createDialogService()`. |
 | [`Divider`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/divider/index.md) | Horizontal and vertical separators with theme thickness, color, and inset. |
 | [`Icon`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/icon/index.md) | Curated Ant Design SVG icons, custom SVG definitions, two-tone colors, rotation, and optional accessible press targets. |
-| [`Input`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/input/index.md) | Native `TextInput` behavior, controlled or initial values, prefix/suffix content, disabled state, and validation error feedback. |
+| [`Input`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/input/index.md) | Native `TextInput` behavior, controlled or initial values, multiline support, prefix/suffix content, disabled state, and validation error feedback. |
+| [`Popover`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/popover/index.md) | Trigger-anchored interactive panels with collision avoidance, `asChild` trigger composition, outside-press, and Android Back dismissal. |
+| [`Popup`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/popup/index.md) | Five-position sheets and drawers with directional rounding, opt-in scrolling, close button, safe-area insets, and keyboard avoidance. |
+| [`Portal`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/portal/index.md) | Named host and declarative portal primitive for lifting subtrees into the root or custom host layers. |
 | [`Space`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/space/index.md) | Horizontal or vertical layout, gaps, alignment, wrapping, and native View props. |
 | [`Surface`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/surface/index.md) | Themed background, radius, padding, optional border, inset, clipping, and child layout. |
 | [`Text`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/text/index.md) | Native Text props and refs, six typography variants, nesting, and `TextClassContext` class inheritance. |
+| [`Tooltip`](https://github.com/ftsukic/tsuki/blob/main/docs/components/v2/tooltip/index.md) | Non-modal floating hints over `OverlayPortal` with long-press/press triggers, `asChild`, auto-close duration, and frozen exit positioning. |
 
 ## Theme scopes
 
@@ -135,20 +140,34 @@ Import the package's static theme stylesheet from the installed file in the app'
 
 Tailwind 3's `postcss-import` does not resolve this package's CSS export map in the current consumer setup, so use the installed `dist/theme/theme.css` path shown above. Configure Metro with `withNativeWind` and configure Babel with the NativeWind preset. The repository has the complete [v4 Tailwind config](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw4/tailwind.config.js), [Metro config](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw4/metro.config.js), and [Babel config](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw4/babel.config.js).
 
-Inject runtime theme variables with NativeWind v4's `vars()`:
+Inject runtime theme variables across the root tree, nested `ConfigProvider` scopes, and `OverlayHost` portals by passing `renderThemeScope` to `TsukiProvider`:
 
 ```tsx
-import { serializeTheme, useTsukiTheme } from '@ftsukic/tsuki'
+import { TsukiProvider, type ThemeScopeRenderProps } from '@ftsukic/tsuki'
 import { vars } from 'nativewind'
-import { View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 
-function ThemeVariables({ children }: React.PropsWithChildren) {
-  const theme = useTsukiTheme()
-  return <View style={[vars(serializeTheme(theme)), { flex: 1 }]}>{children}</View>
+function renderThemeScope({ variables, kind, children }: ThemeScopeRenderProps) {
+  const scopeStyle =
+    kind === 'root' ? { flex: 1 } : kind === 'overlay' ? StyleSheet.absoluteFillObject : undefined
+  return (
+    <View
+      pointerEvents={kind === 'overlay' ? 'box-none' : undefined}
+      style={[vars(variables), scopeStyle]}
+    >
+      {children}
+    </View>
+  )
+}
+
+export default function App() {
+  return (
+    <TsukiProvider scheme="light" renderThemeScope={renderThemeScope}>
+      <AppContent />
+    </TsukiProvider>
+  )
 }
 ```
-
-Place this bridge below the `TsukiProvider` or `ConfigProvider` whose variables it should provide.
 
 ### NativeWind v5 and Tailwind CSS v4
 
@@ -165,26 +184,26 @@ The repository validation app pins NativeWind `5.0.0-rc.1`, `react-native-css` `
 @source './node_modules/@ftsukic/tsuki/dist';
 ```
 
-Use `@tailwindcss/postcss` in PostCSS and `withNativewind` in Metro. The Metro config must exclude the complete set of dynamic `--tsuki-*` theme variables from inlining; copy the [v5 Metro config](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw5/metro.config.js). The [v5 PostCSS config](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw5/postcss.config.js) and [global stylesheet](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw5/global.css) are runnable references.
+Use `@tailwindcss/postcss` in PostCSS and `withNativewind` in Metro. Import `TSUKI_CSS_VARIABLES` from `@ftsukic/tsuki/theme-variables` in `metro.config.js` so dynamic `--tsuki-*` variables are excluded from static CSS inlining automatically (see the [v5 Metro config](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw5/metro.config.js), [PostCSS config](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw5/postcss.config.js), and [global stylesheet](https://github.com/ftsukic/tsuki/blob/main/apps/playground-nw5/global.css)).
 
-Inject runtime values with NativeWind v5's `VariableContextProvider`:
+Inject runtime values across the root tree, nested `ConfigProvider` scopes, and `OverlayHost` portals via `renderThemeScope`:
 
 ```tsx
-import { serializeTheme, useTsukiTheme } from '@ftsukic/tsuki'
+import { TsukiProvider, type ThemeScopeRenderProps } from '@ftsukic/tsuki'
 import { VariableContextProvider } from 'nativewind'
-import { View } from 'react-native'
 
-function ThemeVariables({ children }: React.PropsWithChildren) {
-  const theme = useTsukiTheme()
+function renderThemeScope({ variables, children }: ThemeScopeRenderProps) {
+  return <VariableContextProvider value={variables}>{children}</VariableContextProvider>
+}
+
+export default function App() {
   return (
-    <VariableContextProvider value={serializeTheme(theme)}>
-      <View style={{ flex: 1 }}>{children}</View>
-    </VariableContextProvider>
+    <TsukiProvider scheme="light" renderThemeScope={renderThemeScope}>
+      <AppContent />
+    </TsukiProvider>
   )
 }
 ```
-
-For nested `ConfigProvider` scopes, put a matching variable bridge inside each scope so its CSS variables apply only to that scope's descendants.
 
 ## Documentation and examples
 

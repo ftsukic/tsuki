@@ -2,7 +2,7 @@
 
 | 项目 | 说明 |
 | --- | --- |
-| 决策状态 | 已采纳；Batch 16A、16A.1 与 16A.2 完成架构决策；Batch 16B 已实现 Registry 生命周期、统一双通道 Transition Runtime 与 Playground Lab。自动化和 Android 设备验收状态见交付记录。 |
+| 决策状态 | 已采纳；Batch 16A、16A.1 与 16A.2 完成架构决策；Batch 16B 已实现 Registry 生命周期、统一双通道 Transition Runtime、内部声明式 Portal、Root-bound Imperative Controller、Accessibility Runtime 与 Playground Lab。Batch 16B.5 的 Android TalkBack 交互验收仍 Pending，结果见对应交付记录。 |
 | 决策日期 | 2026-11-20 |
 | 适用范围 | Tsuki v2，同一 React Root 中的多个浮层。 |
 
@@ -129,13 +129,21 @@ v2 继续使用现有 `ThemeContext`、`ResolvedTheme`、`TsukiProvider` 和 `Co
 
 `Dialog.Root` 管理组件自身的 open state，支持 controlled (`open` / `onOpenChange`) 与 uncontrolled (`defaultOpen`) 两种模式。Trigger 请求打开；Portal 把内容交给私有 Registry；Overlay 管理遮罩；Content 管理内容布局和 Accessibility；Title、Description、Close 提供各自语义。组件 Root Context 必须显式桥接到 Host 中的 Entry。此示例不新增通用 public Portal API，也不规定本批次的组件 public contract。
 
+Batch 16B.3 已加入私有 `OverlayPortal`。它接收受控 `visible`、`backBehavior`、可选 `onBack`、`transition`、`mask` 和 children；自身不创建业务 open state，不决定遮罩样式、Content 布局、Safe Area 或 Keyboard 行为，也不进入 package root exports。首次 `visible=true` 时，它从当前位置的 Overlay Runtime Context 解析 Root Registry，并通过 commit 阶段的 layout effect 创建 Entry；后续 props 更新使用同一 ID。首次 `visible=false` 不创建 Entry。
+
+关闭时 Portal 只把现有 Entry 更新为 `exiting`，保持内容、Mask 和 React key，等待 Host 的 Mask / Content Transition 完成。退出完成后 Registry 删除 Entry；若 Portal 仍挂载且之后再次显示，旧 ID 的更新会失败并被回收，随后创建新 Entry。退出中重开则更新原 Entry，保留 ID，并由 generation 拒绝旧完成回调。真实卸载使用本地生命周期 lease 延迟清理一个 microtask，使 StrictMode 的同步 cleanup/setup 重放可重新取得同一 Entry；真正失去所有者后会幂等卸载 Entry。
+
+Portal 捕获当前 `ResolvedTheme` 与 theme scope，沿用现有 Theme Bridge。任意业务 Context 不会自动跨越 Host；组件必须像 Dialog Root 一样将所需 Provider 显式放入 Portal children。Portal 不订阅完整 Registry Entry Snapshot。
+
 ### Imperative Controller Boundary
 
 内部 controller 可以提供 `controller.open(config)` 并返回 `{ close(), update(nextConfig) }` 句柄。实际 public API 由具体组件设计阶段决定。
 
-- 树内入口通过私有 Overlay Runtime Context 解析当前 Root Registry，并捕获调用位置的 `ResolvedTheme`。
-- 树外入口必须使用显式绑定到所属 Root 的 controller，并使用该 Root 的根主题；没有明确 Root 时必须显式失败。
-- 更新保留同一 Entry ID、React key 和层级位置。关闭请求不立即移除 Entry。
+- 私有 `useOverlayController()` 默认绑定 Hook 所在的 Root Registry，并捕获调用位置的 `ResolvedTheme` 与 Theme scope；显式传入 `'root'` 时，Controller 使用该 Root 的根 Theme。`'root'` Controller 适合在树内取得后交给外部服务，服务调用始终绑定原 Root，不读取调用者的业务 Context。
+- Hook owner 卸载后不再接受新的 `open()`；该 owner 创建的活动 Entry 进入正常退出动画，旧 Handle 的 `update()` / `close()` 返回 `false`。StrictMode 同步 Effect 重放由 lease 保留同一 owner；Root 永久销毁时 Registry 直接失效。
+- `open()` 创建新的可见 Entry 并返回带稳定 ID 的 Handle。`update()` 不包含 `visible`，因此保留 Entry ID、React key 和层级位置；Entry 退出中仍可更新内容，但更新不会重新打开它。退出完成或 Root dispose 后，旧 Handle 不能修改 Entry。
+- 首次 `close()` 通过 Registry 设置 `visible=false`，复用现有 Mask / Content Transition 和 generation 完成路径；Entry 完成退出后才卸载。重复关闭、已卸载 Entry 的关闭和更新均返回 `false`。再次打开需要新的 `open()`，不会复活旧 Handle。
+- `backBehavior='dismiss'` 必须提供 `onBack`，并复用 Host 当前统一 Back 分发；Controller 不注册独立 BackHandler。
 - 不创建每 Entry 独立 React Root，不使用模块级 active renderer，也不让 Registry 猜测调用者 ThemeContext。
 
 ### 声明式调用
@@ -200,6 +208,8 @@ Registry.unmount
 - Registry membership 与 Entry presentation phase 分开管理。Entry 在 entering、entered 和 exiting 期间仍属于 Registry；退出时仍参与绘制和层级排序。
 - `OverlayEntry` 以 `hidden`、`entering`、`entered`、`exiting` 表达 presentation phase，并带有递增 generation。关闭请求进入 `exiting`；重新打开进入 `entering` 并保留同一 Entry ID/React key。旧 generation 的完成通知不改变当前 Entry。
 - 组件拥有打开、关闭和受控状态语义；Motion Runtime 执行进入和退出动画；Registry 只呈现 Entry 并管理其生命周期。
+- 声明式 Portal 的 Entry 创建和更新发生在 React commit 阶段。Portal owner 的卸载清理使用可被 StrictMode replay 重新取得的本地 lease；普通隐藏仍由 Transition completion 结束，而不把退出等同于组件卸载。
+- Imperative Controller 的 Hook owner 使用同样的 StrictMode-safe lease。最终卸载时，owner 让自己创建且尚未退出的 Entry 进入 `exiting`，而不是立即卸载；由 Host 的正常双通道完成通知释放 Entry。Root dispose 是清空 Registry 的最终边界。
 - 关闭请求进入 `exiting` 后，Entry 继续挂载。内部 `OverlayEntryTransition` 为 Mask 和 Content 创建独立的现有 MotionValue 通道；所有实际参与退出的通道成功完成后才通知 Registry 卸载。没有动画的通道不阻塞协调；Reduced Motion 或零时长完成也必须通知。不得用固定 Timeout 替代动画完成通知。
 - `update` 不创建新 Entry、不重置层级顺序，也不重复触发打开生命周期。
 - 重复 close / `unmount` 不产生额外回调或异常；卸载后旧句柄不能更新已删除的 Entry。若 exiting Entry 重新打开，保留 ID/key 并使过期的 exit 回调失效。
@@ -272,6 +282,8 @@ type OverlayBackBehavior = 'dismiss' | 'consume' | 'passthrough'
 - 遮罩与面板是独立的 Accessibility 边界；遮罩是否可访问、是否可触发关闭由组件 contract 决定。
 - VoiceOver、Android Accessibility/TalkBack 和 HarmonyOS Accessibility 分别验收，模拟测试不能替代设备验证。
 
+Batch 16B.5 在每个根 `TsukiProvider` 的页面子树上设置私有 Accessibility boundary；`OverlayHost` 保持为其同级节点。最高层有效 modal 决定隔离边界；退出完成前继续隔离页面和下层 modal。边界上方的 non-modal Entry 保持可访问；只有 non-modal Entry 时不隔离页面。初始和返回焦点使用业务元素提供的 ref，并在目标布局就绪、屏幕阅读器启用且 Entry generation 有效时发送原生 focus 事件。该 Runtime 与 `OverlayPortal`、`useOverlayController()` 共用 Registry 规则，不增加公共 export。Android TalkBack 的设备验收状态见 [Batch 16B.5 完成报告](./tsuki-v2-16b-5-completion-report.md)。
+
 ## 13. React Native Modal 对比与适用边界
 
 | 方案 | 适用点 | 本架构中的边界 |
@@ -305,7 +317,7 @@ type OverlayBackBehavior = 'dismiss' | 'consume' | 'passthrough'
 | 16B.5 | Back、Accessibility 与 Motion 协作 | 顶层 Back；焦点进入和恢复；逐 Entry 的模态语义；Reduced Motion 下进入/退出完成通知；不通过 Timeout 卸载。 |
 | 16B.6 | Overlay Lab 与三端验收 | 叠层、触摸穿透、状态保持、主题更新、生命周期、Back、VoiceOver/TalkBack/HarmonyOS Accessibility、导航和平台边界。 |
 
-Batch 16A.2 的路线表保留了当时的分阶段计划。Batch 16B 已按本轮实施范围落地基础 Registry、Host、Theme Bridge、Back 适配与 Playground Lab；具体自动化和设备验收结果应以对应交付记录为准。后续组件迁移和公共 API 设计仍需单独审查。设备和 package 验证记录实际平台与结果，不以静态检查代替运行验收。
+Batch 16A.2 的路线表保留了当时的分阶段计划。Batch 16B 已按本轮实施范围落地基础 Registry、Host、Theme Bridge、Back 适配、Accessibility Runtime 与 Playground Lab；具体自动化和设备验收结果应以对应交付记录为准。Batch 16B.5 的 TalkBack 线性导航与激活验收尚未全部确认，因此该批次保持 Pending。后续组件迁移和公共 API 设计仍需单独审查。设备和 package 验证记录实际平台与结果，不以静态检查代替运行验收。
 
 ### Batch 16B Transition Runtime
 
