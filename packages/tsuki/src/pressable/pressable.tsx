@@ -1,4 +1,4 @@
-import { createElement, forwardRef, useCallback } from 'react'
+import { createElement, forwardRef, useCallback, useLayoutEffect, useRef } from 'react'
 import type { ComponentRef, ReactNode, Ref, RefAttributes } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import type {
@@ -38,17 +38,31 @@ const NativePressableHost = forwardRef<ComponentRef<typeof Pressable>, NativePre
     },
     ref,
   ) {
+    const latestDynamicConflictsRef = useRef<PressStyleConflicts | null>(null)
     const resolveStyle = useCallback(
       (state: PressableStateCallbackType) => {
         const resolvedStyle =
           typeof pressableStyle === 'function' ? pressableStyle(state) : pressableStyle
-        styleConflicts.set(resolvePressStyleConflicts(resolvedStyle))
+        latestDynamicConflictsRef.current = resolvePressStyleConflicts(resolvedStyle)
         return [resolvedStyle, style]
       },
-      [pressableStyle, style, styleConflicts],
+      [pressableStyle, style],
     )
     const nativeStyle =
       typeof pressableStyle === 'function' ? resolveStyle : [pressableStyle, style]
+
+    useLayoutEffect(() => {
+      if (typeof pressableStyle !== 'function' || !latestDynamicConflictsRef.current) return
+      const next = latestDynamicConflictsRef.current
+      const current = styleConflicts.get()
+      if (
+        current.transform !== next.transform ||
+        current.opacity !== next.opacity ||
+        current.backgroundColor !== next.backgroundColor
+      ) {
+        styleConflicts.set(next)
+      }
+    })
 
     const renderChildren = useCallback(
       (state: PressableStateCallbackType) => (
@@ -92,6 +106,7 @@ export const PressableRuntime = forwardRef<ComponentRef<typeof Pressable>, Press
     ref,
   ) {
     const runtimeDisabled = disabled === true
+    const isDynamicStyle = typeof style === 'function'
     const {
       progress,
       styleConflicts,
@@ -101,7 +116,7 @@ export const PressableRuntime = forwardRef<ComponentRef<typeof Pressable>, Press
       feedback,
       runtimeDisabled,
       testOnly_pressed === true,
-      typeof style === 'function' ? undefined : style,
+      isDynamicStyle ? undefined : style,
     )
     const mode = feedback.mode
     const pressedOpacity =
@@ -113,37 +128,72 @@ export const PressableRuntime = forwardRef<ComponentRef<typeof Pressable>, Press
         ? (feedback.pressedScale ?? PRESS_FEEDBACK_PRESETS.scale.pressedValue)
         : PRESS_FEEDBACK_PRESETS.scale.pressedValue
     const pressedColor = feedback.mode === 'background' ? feedback.pressedColor : ''
-    const staticStyleConflicts =
-      typeof style === 'function' ? undefined : resolvePressStyleConflicts(style)
+    const staticConflicts = isDynamicStyle ? undefined : resolvePressStyleConflicts(style)
+    const hasStaticTransform = staticConflicts?.transform ?? false
+    const hasStaticOpacity = staticConflicts?.opacity ?? false
+    const hasStaticBackground = staticConflicts?.backgroundColor ?? false
+
+    useLayoutEffect(() => {
+      if (!staticConflicts) return
+      const current = styleConflicts.get()
+      if (
+        current.transform !== hasStaticTransform ||
+        current.opacity !== hasStaticOpacity ||
+        current.backgroundColor !== hasStaticBackground
+      ) {
+        styleConflicts.set({
+          transform: hasStaticTransform,
+          opacity: hasStaticOpacity,
+          backgroundColor: hasStaticBackground,
+        })
+      }
+    }, [hasStaticBackground, hasStaticOpacity, hasStaticTransform, staticConflicts, styleConflicts])
+
     const feedbackStyle = useAnimatedStyle(() => {
       'worklet'
 
       const amount = progress.get()
-      const conflicts = staticStyleConflicts ?? styleConflicts.get()
+      const opacityBlocked = isDynamicStyle ? styleConflicts.get().opacity : hasStaticOpacity
+      const transformBlocked = isDynamicStyle ? styleConflicts.get().transform : hasStaticTransform
 
-      if (mode === 'opacity' && !conflicts.opacity) {
+      if (mode === 'opacity' && !opacityBlocked) {
         return { opacity: 1 + (pressedOpacity - 1) * amount }
       }
 
-      if (mode === 'scale' && !conflicts.transform) {
+      if (mode === 'scale' && !transformBlocked) {
         return { transform: [{ scale: 1 + (pressedScale - 1) * amount }] }
       }
 
       return {}
-    })
+    }, [
+      hasStaticOpacity,
+      hasStaticTransform,
+      isDynamicStyle,
+      mode,
+      pressedOpacity,
+      pressedScale,
+      progress,
+      styleConflicts,
+    ])
     const backgroundFeedbackStyle = useAnimatedStyle(() => {
       'worklet'
 
-      const conflicts = staticStyleConflicts ?? styleConflicts.get()
+      const backgroundBlocked = isDynamicStyle
+        ? styleConflicts.get().backgroundColor
+        : hasStaticBackground
 
       return {
-        opacity: mode === 'background' && !conflicts.backgroundColor ? progress.get() : 0,
+        opacity: mode === 'background' && !backgroundBlocked ? progress.get() : 0,
       }
-    })
-    const overlayStyle = useAnimatedStyle(() => ({
-      opacity:
-        mode === 'overlay' ? PRESS_FEEDBACK_PRESETS.overlay.pressedValue * progress.get() : 0,
-    }))
+    }, [hasStaticBackground, isDynamicStyle, mode, progress, styleConflicts])
+    const overlayStyle = useAnimatedStyle(() => {
+      'worklet'
+
+      return {
+        opacity:
+          mode === 'overlay' ? PRESS_FEEDBACK_PRESETS.overlay.pressedValue * progress.get() : 0,
+      }
+    }, [mode, progress])
 
     const handlePressIn = useCallback(
       (event: GestureResponderEvent) => {
@@ -160,22 +210,8 @@ export const PressableRuntime = forwardRef<ComponentRef<typeof Pressable>, Press
       [onPressOut, stopFeedback],
     )
 
-    const feedbackOverlay =
-      feedback.mode === 'overlay'
-        ? createElement(AnimatedView, {
-            accessible: false,
-            importantForAccessibility: 'no-hide-descendants',
-            pointerEvents: 'none',
-            testID: 'tsuki-press-feedback-overlay',
-            style: [
-              StyleSheet.absoluteFill,
-              { backgroundColor: feedback.color ?? 'rgba(0, 0, 0, 0.08)' },
-              overlayStyle,
-            ],
-          })
-        : undefined
-    const rootStyle = typeof style === 'function' ? undefined : StyleSheet.flatten(style)
-    const backgroundFeedbackShape = {
+    const rootStyle = isDynamicStyle ? undefined : StyleSheet.flatten(style)
+    const feedbackShape = {
       ...(rootStyle?.borderRadius != null && { borderRadius: rootStyle.borderRadius }),
       ...(rootStyle?.borderTopLeftRadius != null && {
         borderTopLeftRadius: rootStyle.borderTopLeftRadius,
@@ -190,6 +226,21 @@ export const PressableRuntime = forwardRef<ComponentRef<typeof Pressable>, Press
         borderBottomRightRadius: rootStyle.borderBottomRightRadius,
       }),
     }
+    const feedbackOverlay =
+      feedback.mode === 'overlay'
+        ? createElement(AnimatedView, {
+            accessible: false,
+            importantForAccessibility: 'no-hide-descendants',
+            pointerEvents: 'none',
+            testID: 'tsuki-press-feedback-overlay',
+            style: [
+              StyleSheet.absoluteFill,
+              feedbackShape,
+              { backgroundColor: feedback.color ?? 'rgba(0, 0, 0, 0.08)' },
+              overlayStyle,
+            ],
+          })
+        : undefined
     const backgroundFeedback =
       feedback.mode === 'background'
         ? createElement(AnimatedView, {
@@ -199,7 +250,7 @@ export const PressableRuntime = forwardRef<ComponentRef<typeof Pressable>, Press
             testID: 'tsuki-press-feedback-background',
             style: [
               StyleSheet.absoluteFill,
-              backgroundFeedbackShape,
+              feedbackShape,
               { backgroundColor: pressedColor },
               backgroundFeedbackStyle,
             ],

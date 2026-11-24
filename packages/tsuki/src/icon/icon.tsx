@@ -1,5 +1,7 @@
-import { createElement } from 'react'
+import { createElement, forwardRef } from 'react'
+import type { ComponentRef, RefAttributes } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
+import type { PressableProps, ViewProps } from 'react-native'
 import { useTsukiTheme } from '../theme/theme'
 import { getIconDefinition } from './icon-definitions'
 import { renderIcon } from './svg-renderer'
@@ -15,23 +17,26 @@ function isTonePair(
   return Array.isArray(value)
 }
 
-export function Icon({
-  name,
-  className,
-  style,
-  svgStyle,
-  size = 24,
-  color,
-  twoToneColor,
-  rotation,
-  onPress,
-  disabled = false,
-  touchableSize = 44,
-  hitSlop,
-  accessibilityRole,
-  accessibilityState,
-  ...viewProps
-}: IconProps) {
+export const Icon = forwardRef<ComponentRef<typeof View>, IconProps>(function Icon(
+  {
+    name,
+    className,
+    style,
+    svgStyle,
+    size = 24,
+    color,
+    twoToneColor,
+    rotation,
+    onPress,
+    disabled = false,
+    touchableSize = 44,
+    hitSlop,
+    accessibilityRole,
+    accessibilityState,
+    ...viewProps
+  },
+  ref,
+) {
   const { semantic } = useTsukiTheme()
   const definition = typeof name === 'string' ? getIconDefinition(name) : name
   if (!definition) return null
@@ -48,7 +53,7 @@ export function Icon({
       svgStyle,
     ],
   })
-  const rootProps = { ...viewProps, className, style: [styles.root, style] }
+  const rootProps = { ...viewProps, ref, className, style: [styles.root, style] }
 
   if (!onPress)
     return createElement(
@@ -58,7 +63,7 @@ export function Icon({
         ...rootProps,
         accessibilityRole,
         accessibilityState,
-      },
+      } as ViewProps & RefAttributes<ComponentRef<typeof View>>,
       svg,
     )
 
@@ -75,7 +80,9 @@ export function Icon({
         ...accessibilityState,
         disabled: disabled || accessibilityState?.disabled,
       },
-    },
+    } as PressableProps & RefAttributes<ComponentRef<typeof Pressable>>,
     svg,
   )
-}
+})
+
+Icon.displayName = 'Icon'

@@ -11,13 +11,6 @@ import { PressableRuntime } from '../pressable/pressable'
 import type { PressFeedback } from '../pressable/types'
 
 /* eslint-disable testing-library/no-await-sync-events -- RNTL fireEvent uses async act in this suite. */
-jest.mock(
-  'nativewind',
-  () => ({
-    vars: (variables: Record<string, string | number>) => variables,
-  }),
-  { virtual: true },
-)
 
 const withTiming = Reanimated.withTiming as jest.Mock
 const withSpring = Reanimated.withSpring as jest.Mock

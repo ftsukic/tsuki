@@ -23,18 +23,22 @@ export const Input = forwardRef<ComponentRef<typeof TextInput>, InputProps>(func
   ref,
 ) {
   const hasError = Boolean(error)
+  const isMultiline = Boolean(textInputProps.multiline)
   const rootClassName = semanticClassName(
     classNames,
     'root',
-    'h-tsuki-input w-full flex-row items-center rounded-tsuki-input border border-tsuki-border bg-tsuki-surface px-3',
-    hasError ? 'border-tsuki-danger' : undefined,
+    [
+      'w-full flex-row items-center rounded-tsuki-input border border-tsuki-border bg-tsuki-surface px-3',
+      isMultiline ? 'min-h-tsuki-input py-2' : 'h-tsuki-input',
+      hasError ? 'border-tsuki-danger' : undefined,
+      disabled ? 'opacity-tsuki-input-disabled-opacity' : undefined,
+    ],
     className,
   )
-  const inputClassName = semanticClassName(
-    classNames,
-    'input',
-    'h-full min-w-0 flex-1 text-tsuki-foreground placeholder:text-tsuki-muted',
-  )
+  const inputClassName = semanticClassName(classNames, 'input', [
+    'min-w-0 flex-1 text-tsuki-foreground placeholder:text-tsuki-muted',
+    isMultiline ? undefined : 'h-full',
+  ])
 
   const input = createElement(TextInput, {
     ...textInputProps,

@@ -1,35 +1,29 @@
 import { render, screen } from '@testing-library/react-native'
+import { createRef } from 'react'
+import type { ComponentRef } from 'react'
 import { StyleSheet, View } from 'react-native'
 import { ConfigProvider, Divider, serializeTheme, Space, TsukiProvider, useTsukiTheme } from '..'
-
-jest.mock(
-  'nativewind',
-  () => ({
-    vars: (variables: Record<string, string | number>) => variables,
-  }),
-  { virtual: true },
-)
 
 function styleOf(id: string) {
   return StyleSheet.flatten(screen.getByTestId(id).props.style)
 }
 
-it('renders an accessible horizontal hairline and forwards View props', async () => {
+it('renders an accessible horizontal hairline using theme classes and forwards View props and ref', async () => {
   const onLayout = jest.fn()
-  await render(<Divider testID="divider" accessibilityLabel="Section break" onLayout={onLayout} />)
+  const ref = createRef<ComponentRef<typeof View>>()
+  await render(
+    <Divider ref={ref} testID="divider" accessibilityLabel="Section break" onLayout={onLayout} />,
+  )
   expect(screen.getByRole('separator', { name: 'Section break' }).props).toMatchObject({
     pointerEvents: 'none',
     onLayout,
+    className: 'self-stretch bg-tsuki-border h-tsuki-divider',
   })
-  expect(styleOf('divider')).toMatchObject({
-    height: StyleSheet.hairlineWidth,
-    marginHorizontal: 0,
-    alignSelf: 'stretch',
-    backgroundColor: '#e5e7eb',
-  })
+  expect(ref.current).not.toBeNull()
+  expect(screen.getByTestId('divider').props.style).toBeUndefined()
 })
 
-it('maps thickness and inset to the current orientation and honors native overrides', async () => {
+it('maps explicit thickness, color, and inset to the current orientation and honors inline overrides', async () => {
   const renderLines = (orientation: 'horizontal' | 'vertical') => (
     <Space>
       <Divider
@@ -40,7 +34,7 @@ it('maps thickness and inset to the current orientation and honors native overri
         inset={8}
         style={{ width: 5 }}
       />
-      <Divider testID="second" />
+      <Divider testID="second" orientation={orientation} />
     </Space>
   )
   const view = await render(renderLines('horizontal'))
@@ -49,6 +43,10 @@ it('maps thickness and inset to the current orientation and honors native overri
     marginHorizontal: 8,
     backgroundColor: '#ff0000',
   })
+  expect(screen.getByTestId('second').props.className).toBe(
+    'self-stretch bg-tsuki-border h-tsuki-divider',
+  )
+
   await view.rerender(renderLines('vertical'))
   expect(styleOf('first')).toMatchObject({
     width: 5,
@@ -56,7 +54,9 @@ it('maps thickness and inset to the current orientation and honors native overri
     backgroundColor: '#ff0000',
   })
   expect(styleOf('first')).not.toHaveProperty('height')
-  expect(styleOf('second')).toMatchObject({ height: StyleSheet.hairlineWidth })
+  expect(screen.getByTestId('second').props.className).toBe(
+    'self-stretch bg-tsuki-border w-tsuki-divider',
+  )
 })
 
 it('preserves caller accessibility roles and pointer events', async () => {
@@ -77,11 +77,11 @@ function ThicknessVariable() {
   )
 }
 
-it('merges and resets theme overrides, serializes thickness and updates with scheme changes', async () => {
-  const tree = (scheme: 'dark' | 'light', thickness: number) => (
+it('serializes nested and reset Divider thickness tokens into CSS variables', async () => {
+  await render(
     <TsukiProvider
-      scheme={scheme}
-      theme={{ semantic: { colorBorder: '#d1d5db' }, components: { Divider: { thickness } } }}
+      scheme="dark"
+      theme={{ semantic: { colorBorder: '#d1d5db' }, components: { Divider: { thickness: 3 } } }}
     >
       <View>
         <Divider testID="root" />
@@ -93,22 +93,18 @@ it('merges and resets theme overrides, serializes thickness and updates with sch
           </ConfigProvider>
         </ConfigProvider>
       </View>
-    </TsukiProvider>
+    </TsukiProvider>,
   )
-  const view = await render(tree('dark', 3))
-  expect(styleOf('root')).toMatchObject({ height: 3, backgroundColor: '#d1d5db' })
-  expect(styleOf('nested')).toMatchObject({ height: 5, backgroundColor: '#d1d5db' })
-  expect(styleOf('reset')).toMatchObject({
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#374151',
-  })
   expect(screen.getByTestId('variables').props.accessibilityLabel).toBe('5px')
-  await view.rerender(tree('light', 6))
-  expect(styleOf('root')).toMatchObject({ height: 6 })
-  expect(styleOf('reset')).toMatchObject({ backgroundColor: '#e5e7eb' })
+  expect(screen.getByTestId('root').props.className).toBe(
+    'self-stretch bg-tsuki-border h-tsuki-divider',
+  )
+  expect(screen.getByTestId('reset').props.className).toBe(
+    'self-stretch bg-tsuki-border h-tsuki-divider',
+  )
 })
 
-it('puts class color and size after props, and inline styles last', async () => {
+it('merges className overrides over theme classes and applies inline styles last', async () => {
   await render(
     <Divider
       testID="line"
@@ -120,13 +116,10 @@ it('puts class color and size after props, and inline styles last', async () => 
     />,
   )
   const { className, style } = screen.getByTestId('line').props
-  expect(className).toBe(
-    'self-stretch will-change-variable mx-[var(--tsuki-divider-inset)] bg-red-500 h-4',
-  )
-  expect(style[0]).toMatchObject({
-    '--tsuki-divider-color': '#123456',
-    '--tsuki-divider-size': 7,
-    '--tsuki-divider-inset': 8,
+  expect(className).toBe('self-stretch bg-red-500 h-4')
+  expect(StyleSheet.flatten(style)).toMatchObject({
+    height: 9,
+    marginHorizontal: 8,
+    backgroundColor: '#abcdef',
   })
-  expect(StyleSheet.flatten(style)).toMatchObject({ height: 9, backgroundColor: '#abcdef' })
 })

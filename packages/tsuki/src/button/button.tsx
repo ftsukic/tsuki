@@ -51,18 +51,20 @@ export const Button = forwardRef<ComponentRef<typeof Pressable>, ButtonProps>(fu
   ref,
 ) {
   const theme = useTsukiTheme()
+  const isDisabled = disabled || loading
   const rootClassName = semanticClassName(
     classNames,
     'root',
-    buttonVariants({ variant, size } satisfies ButtonVariants),
+    [
+      buttonVariants({ variant, size } satisfies ButtonVariants),
+      isDisabled ? 'opacity-tsuki-button-disabled-opacity' : undefined,
+    ],
     className,
   )
-  const contentClassName = semanticClassName(
-    classNames,
-    'content',
+  const contentClassName = semanticClassName(classNames, 'content', [
     'text-sm font-semibold',
     variant === 'solid' ? 'text-tsuki-primary-foreground' : 'text-tsuki-foreground',
-  )
+  ])
   const iconClassName = semanticClassName(classNames, 'icon', 'mr-2')
   const iconContainerProps = {
     className: iconClassName,
@@ -96,10 +98,10 @@ export const Button = forwardRef<ComponentRef<typeof Pressable>, ButtonProps>(fu
       ...pressableProps,
       ref,
       feedback: { mode: 'scale', pressedScale: 0.98 },
-      disabled: disabled || loading,
+      disabled: isDisabled,
       accessibilityState: {
         ...accessibilityState,
-        disabled: disabled || loading || accessibilityState?.disabled,
+        disabled: isDisabled || accessibilityState?.disabled,
         busy: loading || accessibilityState?.busy,
       },
       accessibilityRole: accessibilityRole ?? 'button',

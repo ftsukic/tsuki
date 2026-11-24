@@ -1,24 +1,27 @@
+import { forwardRef } from 'react'
+import type { ComponentRef } from 'react'
+import type { View } from 'react-native'
+import { cn } from '../style/cn'
 import { Surface } from '../surface'
-import { useTsukiTheme } from '../theme/theme'
 import { CardBody } from './card-body'
 import { CardFooter } from './card-footer'
 import { CardHeader } from './card-header'
 import type { CardProps } from './types'
 
-function CardRoot({ radius, padding, gap, ...props }: CardProps) {
-  const {
-    components: { Card: tokens },
-  } = useTsukiTheme()
-
+const CardRoot = forwardRef<ComponentRef<typeof View>, CardProps>(function Card(
+  { className, ...props },
+  ref,
+) {
   return (
     <Surface
       {...props}
-      radius={radius ?? tokens.borderRadius}
-      padding={padding ?? tokens.padding}
-      gap={gap ?? tokens.gap}
+      className={cn('rounded-tsuki-card p-tsuki-card gap-tsuki-card-gap', className)}
+      ref={ref}
     />
   )
-}
+})
+
+CardRoot.displayName = 'Card'
 
 export const Card = Object.assign(CardRoot, {
   Header: CardHeader,

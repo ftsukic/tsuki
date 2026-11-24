@@ -1,10 +1,11 @@
+import { createElement } from 'react'
 import { View } from 'react-native'
-import type { TextStyle, ViewStyle } from 'react-native'
-import { cn } from '../style/cn'
+import type { ViewProps } from 'react-native'
 import { Icon } from '../icon'
+import { cn } from '../style/cn'
+import { semanticClassName } from '../style/semantic'
 import { useTsukiTheme } from '../theme/theme'
 import { hasContent, renderCellText } from './normalize'
-import { cellSlot } from './style'
 import type { CellProps, CellStyles } from './types'
 
 type ViewSlot = Exclude<
@@ -14,9 +15,9 @@ type ViewSlot = Exclude<
 type TextSlot = Exclude<keyof CellStyles, ViewSlot>
 
 const alignments = {
-  left: ['flex-start', 'justify-start', 'text-left'],
-  center: ['center', 'justify-center', 'text-center'],
-  right: ['flex-end', 'justify-end', 'text-right'],
+  left: ['justify-start', 'text-left'],
+  center: ['justify-center', 'text-center'],
+  right: ['justify-end', 'text-right'],
 } as const
 const arrowRotation = { up: -90, down: 90, left: undefined, right: undefined }
 
@@ -71,158 +72,148 @@ export function CellLayout({
   const hasValueExtra = hasContent(valueExtra)
   const showTitle = hasTitle || hasExtra || required
   const showValue = hasValue || hasValueExtra
-  const fontSize = size === 'large' ? tokens.largeFontSize : tokens.fontSize
-  const [justifyContent, justifyClass, textAlignClass] = alignments[valueAlign]
-  const alignment = center ? 'center' : 'flex-start'
+  const isLarge = size === 'large'
+  const fontSizeClass = isLarge ? 'text-tsuki-cell-large-font-size' : 'text-tsuki-cell-font-size'
+  const [justifyClass, textAlignClass] = alignments[valueAlign]
   const alignmentClass = center ? 'items-center' : 'items-start'
-  const itemStyle: ViewStyle = { flexShrink: 0, maxWidth: '40%' }
 
-  function view(
-    slot: ViewSlot,
-    base: ViewStyle,
-    classes: string,
-    dynamic: Parameters<typeof cellSlot>[2] = {},
-  ) {
-    return cellSlot<ViewStyle>(base, classes, dynamic, classNames?.[slot], styles?.[slot])
+  function slotViewProps(slot: ViewSlot, baseClasses: string, extra?: ViewProps): ViewProps {
+    return {
+      ...extra,
+      className: semanticClassName(classNames, slot, baseClasses),
+      style: styles?.[slot],
+    } as ViewProps
   }
 
-  function text(slot: TextSlot, color: string, numberOfLines?: number) {
+  function slotTextProps(slot: TextSlot, colorClass: string, numberOfLines?: number) {
+    const isDescription = slot === 'description'
     return {
       numberOfLines,
-      ...cellSlot<TextStyle>(
-        { flexShrink: 1, ...(slot === 'value' && { textAlign: valueAlign }) },
-        cn('shrink', slot === 'value' && textAlignClass),
-        {
-          color,
-          fontSize: slot === 'description' ? tokens.descriptionFontSize : fontSize,
-          lineHeight: slot === 'description' ? tokens.descriptionLineHeight : tokens.lineHeight,
-        },
-        classNames?.[slot],
-        styles?.[slot],
-      ),
+      className: semanticClassName(classNames, slot, [
+        'shrink',
+        colorClass,
+        isDescription ? 'text-tsuki-cell-description-font-size' : fontSizeClass,
+        isDescription
+          ? 'leading-tsuki-cell-description-line-height'
+          : 'leading-tsuki-cell-line-height',
+        slot === 'value' ? textAlignClass : undefined,
+      ]),
+      style: styles?.[slot],
     }
   }
 
-  return (
-    <View
-      {...view(
-        'container',
-        { flexDirection: 'row', alignItems: alignment },
-        cn('flex-row', alignmentClass),
-        {
-          gap: tokens.gap,
-          minHeight: size === 'large' ? tokens.largeMinHeight : tokens.minHeight,
-          paddingHorizontal: tokens.paddingHorizontal,
-          paddingVertical: size === 'large' ? tokens.largePaddingVertical : tokens.paddingVertical,
-        },
-      )}
-    >
-      {hasContent(leading) && (
-        <View {...view('leading', itemStyle, 'shrink-0 max-w-[40%]')}>
-          {renderCellText(leading, {
-            style: { color: semantic.colorForeground, fontSize, lineHeight: tokens.lineHeight },
-          })}
-        </View>
-      )}
-      <View
-        style={{
-          flex: 1,
-          minWidth: 0,
-          flexDirection: vertical ? 'column' : 'row',
-          alignItems: vertical ? 'stretch' : alignment,
-          gap: vertical ? tokens.verticalGap : tokens.gap,
-        }}
-      >
-        {(showTitle || hasDescription) && (
-          <View
-            {...view(
-              'titleContainer',
-              { minWidth: 0, flex: vertical ? undefined : 1 },
-              cn('min-w-0', !vertical && 'flex-1'),
-            )}
-          >
-            {showTitle && (
-              <View
-                {...view(
-                  'titleRow',
-                  { flexDirection: 'row', alignItems: 'center', minWidth: 0 },
-                  'flex-row items-center min-w-0',
-                )}
-              >
-                {required &&
-                  renderCellText('*', {
-                    ...text('required', semantic.colorDanger),
-                    accessible: false,
-                  })}
-                {hasTitle &&
-                  renderCellText(title, text('title', semantic.colorForeground, titleLines))}
-                {hasExtra && (
-                  <View
-                    {...view(
-                      'titleExtraContainer',
-                      { flexShrink: 0, maxWidth: '50%' },
-                      'shrink-0 max-w-[50%]',
-                      {
-                        marginLeft: hasTitle ? tokens.titleExtraGap : 0,
-                      },
-                    )}
-                  >
-                    {renderCellText(titleExtra, text('titleExtra', semantic.colorForeground))}
-                  </View>
-                )}
-              </View>
-            )}
-            {hasDescription &&
-              renderCellText(description, text('description', semantic.colorMuted))}
-          </View>
-        )}
-        {showValue && (
-          <View
-            {...view(
+  return createElement(
+    View,
+    slotViewProps(
+      'container',
+      cn(
+        'flex-row gap-tsuki-cell-gap px-tsuki-cell-padding-horizontal',
+        alignmentClass,
+        isLarge
+          ? 'min-h-tsuki-cell-large-min-height py-tsuki-cell-large-padding-vertical'
+          : 'min-h-tsuki-cell-min-height py-tsuki-cell-padding-vertical',
+      ),
+    ),
+    hasContent(leading)
+      ? createElement(
+          View,
+          slotViewProps('leading', 'shrink-0 max-w-[40%]'),
+          renderCellText(leading, {
+            className: cn('text-tsuki-foreground leading-tsuki-cell-line-height', fontSizeClass),
+          }),
+        )
+      : null,
+    createElement(
+      View,
+      {
+        className: cn(
+          'flex-1 min-w-0',
+          vertical
+            ? 'flex-col items-stretch gap-tsuki-cell-vertical-gap'
+            : cn('flex-row gap-tsuki-cell-gap', alignmentClass),
+        ),
+      } as ViewProps,
+      showTitle || hasDescription
+        ? createElement(
+            View,
+            slotViewProps('titleContainer', cn('min-w-0', !vertical && 'flex-1')),
+            showTitle
+              ? createElement(
+                  View,
+                  slotViewProps('titleRow', 'flex-row items-center min-w-0'),
+                  required
+                    ? renderCellText('*', {
+                        ...slotTextProps('required', 'text-tsuki-danger'),
+                        accessible: false,
+                      })
+                    : null,
+                  hasTitle
+                    ? renderCellText(
+                        title,
+                        slotTextProps('title', 'text-tsuki-foreground', titleLines),
+                      )
+                    : null,
+                  hasExtra
+                    ? createElement(
+                        View,
+                        slotViewProps(
+                          'titleExtraContainer',
+                          cn('shrink-0 max-w-[50%]', hasTitle && 'ml-tsuki-cell-title-extra-gap'),
+                        ),
+                        renderCellText(
+                          titleExtra,
+                          slotTextProps('titleExtra', 'text-tsuki-foreground'),
+                        ),
+                      )
+                    : null,
+                )
+              : null,
+            hasDescription
+              ? renderCellText(description, slotTextProps('description', 'text-tsuki-muted'))
+              : null,
+          )
+        : null,
+      showValue
+        ? createElement(
+            View,
+            slotViewProps(
               'valueContainer',
-              {
-                minWidth: 0,
-                flex: vertical ? undefined : 1,
-                flexDirection: 'row',
-                justifyContent,
-                alignItems: alignment,
-              },
               cn('min-w-0 flex-row', !vertical && 'flex-1', justifyClass, alignmentClass),
-            )}
-          >
-            {hasValue && renderCellText(value, text('value', semantic.colorMuted, valueLines))}
-            {hasValueExtra && (
-              <View
-                {...view(
-                  'valueExtraContainer',
-                  { flexShrink: 0, maxWidth: '50%' },
-                  'shrink-0 max-w-[50%]',
-                  {
-                    marginLeft: hasValue ? tokens.valueExtraGap : 0,
-                  },
-                )}
-              >
-                {renderCellText(valueExtra, text('valueExtra', semantic.colorMuted))}
-              </View>
-            )}
-          </View>
-        )}
-      </View>
-      {hasContent(trailing) && (
-        <View {...view('trailingContainer', itemStyle, 'shrink-0 max-w-[40%]')}>
-          {renderCellText(trailing, text('trailing', semantic.colorMuted))}
-        </View>
-      )}
-      {showArrow && (
-        <View {...view('arrow', { flexShrink: 0 }, 'shrink-0')} pointerEvents="none">
+            ),
+            hasValue
+              ? renderCellText(value, slotTextProps('value', 'text-tsuki-muted', valueLines))
+              : null,
+            hasValueExtra
+              ? createElement(
+                  View,
+                  slotViewProps(
+                    'valueExtraContainer',
+                    cn('shrink-0 max-w-[50%]', hasValue && 'ml-tsuki-cell-value-extra-gap'),
+                  ),
+                  renderCellText(valueExtra, slotTextProps('valueExtra', 'text-tsuki-muted')),
+                )
+              : null,
+          )
+        : null,
+    ),
+    hasContent(trailing)
+      ? createElement(
+          View,
+          slotViewProps('trailingContainer', 'shrink-0 max-w-[40%]'),
+          renderCellText(trailing, slotTextProps('trailing', 'text-tsuki-muted')),
+        )
+      : null,
+    showArrow
+      ? createElement(
+          View,
+          slotViewProps('arrow', 'shrink-0', { pointerEvents: 'none' }),
           <Icon
             name={arrowDirection === 'left' ? 'LeftOutlined' : 'RightOutlined'}
             rotation={arrowRotation[arrowDirection]}
             size={tokens.iconSize}
             color={semantic.colorMuted}
-          />
-        </View>
-      )}
-    </View>
+          />,
+        )
+      : null,
   )
 }

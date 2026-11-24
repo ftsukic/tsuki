@@ -1,6 +1,8 @@
 import { cva } from 'class-variance-authority'
 
-export const textVariants = cva('text-tsuki-foreground', {
+export const TEXT_BASE_CLASS = 'text-tsuki-foreground'
+
+export const textVariants = cva('', {
   variants: {
     variant: {
       body: 'text-base',

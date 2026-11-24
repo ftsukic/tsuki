@@ -1,7 +1,16 @@
 import { fireEvent, render, screen } from '@testing-library/react-native'
-import { Button, cn, ConfigProvider, Input, serializeTheme, TsukiProvider, useTsukiTheme } from '..'
-import type { ResolvedTheme } from '..'
-import { StyleSheet, Text } from 'react-native'
+import {
+  Button,
+  cn,
+  ConfigProvider,
+  Input,
+  Portal,
+  serializeTheme,
+  TsukiProvider,
+  useTsukiTheme,
+} from '..'
+import type { ResolvedTheme, ThemeScopeKind, ThemeScopeRenderer } from '..'
+import { StyleSheet, Text, View } from 'react-native'
 
 function ThemeProbe({ testID }: { testID: string }) {
   const theme = useTsukiTheme()
@@ -76,6 +85,33 @@ describe('Tsuki v2 theme scopes', () => {
 
     expect(screen.getByTestId('dynamic-theme').props.children).toEqual(['#123456', ':', 56])
   })
+
+  it('bridges serialized CSS variables through renderThemeScope for root, ConfigProvider, and overlays', async () => {
+    const scopes: Array<{ kind: ThemeScopeKind; primary: string }> = []
+    const renderThemeScope: ThemeScopeRenderer = ({ kind, variables, children }) => {
+      scopes.push({ kind, primary: variables['--tsuki-color-primary'] })
+      return <View testID={`theme-scope-${kind}`}>{children}</View>
+    }
+
+    await render(
+      <TsukiProvider renderThemeScope={renderThemeScope} scheme="dark">
+        <ConfigProvider theme={{ semantic: { colorPrimary: '#7c3aed' } }}>
+          <Portal>
+            <Text>Portaled content</Text>
+          </Portal>
+        </ConfigProvider>
+      </TsukiProvider>,
+    )
+
+    expect(screen.getByText('Portaled content')).toBeTruthy()
+    expect(scopes).toEqual(
+      expect.arrayContaining([
+        { kind: 'root', primary: '#4D8DFF' },
+        { kind: 'scope', primary: '#7c3aed' },
+        { kind: 'overlay', primary: '#7c3aed' },
+      ]),
+    )
+  })
 })
 
 describe('Tsuki v2 class merging', () => {
@@ -84,7 +120,16 @@ describe('Tsuki v2 class merging', () => {
     ['h-12 h-tsuki-button', 'h-tsuki-button'],
     ['rounded-tsuki-button rounded-xl', 'rounded-xl'],
     ['rounded-xl rounded-tsuki-button', 'rounded-tsuki-button'],
+    ['rounded-tsuki-dialog rounded-2xl', 'rounded-2xl'],
+    ['rounded-tsuki-popup rounded-none', 'rounded-none'],
+    ['w-tsuki-dialog w-80', 'w-80'],
     ['bg-tsuki-primary bg-red-500', 'bg-red-500'],
+    ['bg-tsuki-surface-elevated bg-blue-500', 'bg-blue-500'],
+    ['text-tsuki-dialog-title text-red-500', 'text-tsuki-dialog-title text-red-500'],
+    ['text-tsuki-dialog-title text-lg', 'text-lg'],
+    ['text-tsuki-cell-font-size text-red-500', 'text-tsuki-cell-font-size text-red-500'],
+    ['opacity-tsuki-button-disabled-opacity opacity-50', 'opacity-50'],
+    ['duration-tsuki-popup duration-300', 'duration-300'],
   ])('merges %s to %s', (input, expected) => {
     expect(cn(input)).toBe(expected)
   })
@@ -147,6 +192,32 @@ describe('Tsuki v2 foundation components', () => {
     })
   })
 
+  it('lets primary className override classNames.root consistently with style > styles.root', async () => {
+    await render(
+      <>
+        <Button className="bg-red-500" classNames={{ root: 'bg-blue-500 px-8' }}>
+          Priority
+        </Button>
+        <Input
+          accessibilityLabel="Priority input"
+          className="border-red-500"
+          classNames={{ root: 'border-blue-500 px-6' }}
+        />
+      </>,
+    )
+
+    const buttonClassName = screen.getByRole('button').props.className as string
+    expect(buttonClassName).toContain('bg-red-500')
+    expect(buttonClassName).toContain('px-8')
+    expect(buttonClassName).not.toContain('bg-blue-500')
+
+    const inputRootClassName = screen.getByLabelText('Priority input').parent?.props
+      .className as string
+    expect(inputRootClassName).toContain('border-red-500')
+    expect(inputRootClassName).toContain('px-6')
+    expect(inputRootClassName).not.toContain('border-blue-500')
+  })
+
   it('forwards TextInput value and change behavior through Input', async () => {
     const onChangeText = jest.fn()
     const onFocus = jest.fn()
@@ -194,6 +265,34 @@ describe('Tsuki v2 foundation components', () => {
     expect(input.parent?.props.className).toContain('border-tsuki-danger')
     expect(screen.getByText('$').parent?.props.className).toBe('mr-1')
     expect(screen.getByText('USD').parent?.props.className).toBe('ml-1')
+  })
+
+  it('applies disabled opacity classes to Button and Input and adapts Input height for multiline', async () => {
+    await render(
+      <>
+        <Button disabled>Disabled Button</Button>
+        <Button loading>Loading Button</Button>
+        <Input accessibilityLabel="Disabled Input" disabled />
+        <Input accessibilityLabel="Notes" multiline />
+      </>,
+    )
+
+    expect(screen.getByRole('button', { name: 'Disabled Button' }).props.className).toContain(
+      'opacity-tsuki-button-disabled-opacity',
+    )
+    expect(screen.getByRole('button', { name: 'Loading Button' }).props.className).toContain(
+      'opacity-tsuki-button-disabled-opacity',
+    )
+
+    const disabledInputRoot = screen.getByLabelText('Disabled Input').parent?.props
+      .className as string
+    expect(disabledInputRoot).toContain('opacity-tsuki-input-disabled-opacity')
+
+    const notesInput = screen.getByLabelText('Notes')
+    const notesRootClasses = String(notesInput.parent?.props.className ?? '').split(/\s+/)
+    expect(notesInput.props.className).not.toContain('h-full')
+    expect(notesRootClasses).toContain('min-h-tsuki-input')
+    expect(notesRootClasses).not.toContain('h-tsuki-input')
   })
 
   it('gives disabled precedence over editable and reports the disabled state', async () => {

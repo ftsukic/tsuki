@@ -1,46 +1,39 @@
 import { render, screen } from '@testing-library/react-native'
-import { Fragment } from 'react'
+import { createRef, Fragment } from 'react'
+import type { ComponentRef } from 'react'
 import { StyleSheet } from 'react-native'
+import type { View } from 'react-native'
 import { Button, Icon, Space, Text } from '..'
 
-jest.mock(
-  'nativewind',
-  () => ({
-    vars: (variables: Record<string, string | number>) => variables,
-  }),
-  { virtual: true },
-)
-
-it('renders an empty native row by default and forwards View props', async () => {
+it('renders an empty native row by default and forwards View props and ref', async () => {
   const onLayout = jest.fn()
-  await render(<Space testID="space" accessibilityLabel="Actions" onLayout={onLayout} />)
+  const ref = createRef<ComponentRef<typeof View>>()
+  await render(<Space ref={ref} testID="space" accessibilityLabel="Actions" onLayout={onLayout} />)
 
   const space = screen.getByTestId('space')
-  expect(space.props).toMatchObject({ accessibilityLabel: 'Actions', onLayout })
-  expect(StyleSheet.flatten(space.props.style)).toMatchObject({
-    flexDirection: 'row',
-    flexWrap: 'nowrap',
+  expect(space.props).toMatchObject({
+    accessibilityLabel: 'Actions',
+    onLayout,
+    className: 'flex-row flex-nowrap',
   })
+  expect(ref.current).not.toBeNull()
   expect(space.children).toHaveLength(0)
 })
 
-it('maps layout props and updates the gap', async () => {
+it('maps layout props to Tailwind classes and dynamic gap style', async () => {
   const view = await render(
     <Space testID="space" direction="vertical" gap={7} wrap align="center" />,
   )
 
-  expect(StyleSheet.flatten(screen.getByTestId('space').props.style)).toMatchObject({
-    flexDirection: 'column',
-    gap: 7,
-    flexWrap: 'wrap',
-    alignItems: 'center',
-  })
+  expect(screen.getByTestId('space').props.className).toBe('flex-col flex-wrap items-center')
+  expect(StyleSheet.flatten(screen.getByTestId('space').props.style)).toMatchObject({ gap: 7 })
 
   await view.rerender(<Space testID="space" gap={19} />)
+  expect(screen.getByTestId('space').props.className).toBe('flex-row flex-nowrap')
   expect(StyleSheet.flatten(screen.getByTestId('space').props.style)).toMatchObject({ gap: 19 })
 })
 
-it('applies inline styles last and forwards classes with dynamic layout variables', async () => {
+it('merges custom classes cleanly and applies inline styles last', async () => {
   const view = await render(
     <Space testID="space" gap={7} wrap style={{ gap: 24, flexWrap: 'nowrap' }} />,
   )
@@ -52,10 +45,8 @@ it('applies inline styles last and forwards classes with dynamic layout variable
   await view.rerender(
     <Space testID="space" gap={9} className="flex-col gap-4" style={{ gap: 24 }} />,
   )
-  expect(screen.getByTestId('space').props).toMatchObject({
-    className: 'flex-nowrap will-change-variable flex-col gap-4',
-    style: [{ '--tsuki-space-gap': 9 }, { gap: 24 }, { rowGap: 24, columnGap: 24 }],
-  })
+  expect(screen.getByTestId('space').props.className).toBe('flex-nowrap flex-col gap-4')
+  expect(StyleSheet.flatten(screen.getByTestId('space').props.style)).toMatchObject({ gap: 24 })
 })
 
 it('keeps Fragment, nested Space and component children in their original order', async () => {

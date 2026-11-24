@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react-native'
-import { Fragment } from 'react'
+import { createRef, Fragment, memo } from 'react'
+import type { ComponentRef } from 'react'
 import { StyleSheet, View } from 'react-native'
 import {
   Cell,
@@ -15,13 +16,15 @@ function dividers(...ids: string[]) {
   return ids.map((id) => Boolean(screen.queryByTestId(`${id}-divider`)))
 }
 
-it('shares the compound export and counts only Cells while preserving fragments, arrays and custom children', async () => {
+const MemoCell = memo(Cell)
+
+it('shares the compound export and counts Cell and React.memo(Cell) while preserving fragments, arrays and custom children', async () => {
   const tree = (includeLast: boolean) => (
     <CellGroup title="Group" extra={5}>
       <Cell testID="first" title="First" />
       <Fragment>
         {false}
-        {[<Text key="custom">Custom</Text>, <Cell key="mid" testID="middle" title="Middle" />]}
+        {[<Text key="custom">Custom</Text>, <MemoCell key="mid" testID="middle" title="Middle" />]}
       </Fragment>
       {includeLast && <Cell testID="last" title="Last" />}
       <Text>After</Text>
@@ -60,17 +63,19 @@ function ThemeCheck() {
   return <Text testID="opacity-token">{variables['--tsuki-cell-disabled-opacity']}</Text>
 }
 
-it('uses Surface for inset styling, maps current theme, and restores scheme defaults', async () => {
-  const tree = (scheme: 'light' | 'dark', radius: number) => (
+it('uses Surface theme classes for inset styling, forwards ref, and serializes Cell theme tokens', async () => {
+  const ref = createRef<ComponentRef<typeof View>>()
+  await render(
     <TsukiProvider
-      scheme={scheme}
+      scheme="light"
       theme={{
         semantic: { colorSurface: '#abcdef' },
-        components: { Cell: { groupRadius: radius, groupInsetMarginHorizontal: 22 } },
+        components: { Cell: { groupRadius: 21, groupInsetMarginHorizontal: 22 } },
       }}
     >
       <View>
         <CellGroup
+          ref={ref}
           inset
           title="Inset"
           testID="group"
@@ -84,25 +89,19 @@ it('uses Surface for inset styling, maps current theme, and restores scheme defa
           <ThemeCheck />
         </ConfigProvider>
       </View>
-    </TsukiProvider>
+    </TsukiProvider>,
   )
-  const view = await render(tree('light', 21))
-  const body = () => screen.getByTestId('item').parent!
-  expect(StyleSheet.flatten(body().props.style)).toMatchObject({
-    borderRadius: 21,
-    padding: 0,
-    overflow: 'hidden',
-    backgroundColor: '#abcdef',
-  })
-  expect(StyleSheet.flatten(body().props.style)).not.toHaveProperty('borderWidth')
-  expect(StyleSheet.flatten(body().parent?.props.style).marginHorizontal).toBe(22)
+
+  expect(ref.current).not.toBeNull()
+  const body = screen.getByTestId('item').parent!
+  expect(body.props.className).toContain('rounded-tsuki-cell-group-radius')
+  expect(body.props.className).toContain('overflow-hidden')
+  expect(body.props.className).not.toContain('border-tsuki-surface-width')
+  expect(body.parent?.props.className).toContain('mx-tsuki-cell-group-inset-margin-horizontal')
+  expect(StyleSheet.flatten(body.props.style)).toMatchObject({ padding: 0 })
   expect(StyleSheet.flatten(screen.getByTestId('group').props.style).marginTop).toBe(5)
   expect(screen.getByTestId('opacity-token')).toHaveTextContent('0.4')
-  await view.rerender(tree('dark', 9))
-  expect(StyleSheet.flatten(body().props.style).borderRadius).toBe(9)
-  expect(StyleSheet.flatten(screen.getByTestId('default').props.style).backgroundColor).toBe(
-    '#1f2937',
-  )
+  expect(screen.getByTestId('default').props.className).toContain('bg-tsuki-surface')
 })
 
 it('adds only the enabled outer hairlines and leaves a single item without an internal divider', async () => {

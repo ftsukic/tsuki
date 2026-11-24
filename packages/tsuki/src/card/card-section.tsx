@@ -1,30 +1,28 @@
-import { createElement } from 'react'
+import { createElement, forwardRef } from 'react'
+import type { ComponentRef, RefAttributes } from 'react'
 import { View } from 'react-native'
+import type { ViewProps } from 'react-native'
 import { cn } from '../style/cn'
-import { nativeWindVariables } from '../style/nativewind-variables'
-import { useTsukiTheme } from '../theme/theme'
 import type { CardHeaderProps } from './types'
 
-export function CardSection({
-  token,
-  padding,
-  className,
-  style,
-  ...viewProps
-}: CardHeaderProps & { token: 'headerPadding' | 'bodyPadding' | 'footerPadding' }) {
-  const {
-    components: { Card: tokens },
-  } = useTsukiTheme()
-  const resolvedPadding = padding ?? tokens[token]
-  const variables = className
-    ? nativeWindVariables({ '--tsuki-card-section-padding-value': resolvedPadding })
-    : undefined
+const sectionPaddingClasses = {
+  headerPadding: 'p-tsuki-card-header',
+  bodyPadding: 'p-tsuki-card-body',
+  footerPadding: 'p-tsuki-card-footer',
+} as const
+
+export const CardSection = forwardRef<
+  ComponentRef<typeof View>,
+  CardHeaderProps & { token: keyof typeof sectionPaddingClasses }
+>(function CardSection({ token, padding, className, style, ...viewProps }, ref) {
   const props = {
     ...viewProps,
-    className: variables
-      ? cn('p-[var(--tsuki-card-section-padding-value)] will-change-variable', className)
-      : className,
-    style: [variables ?? { padding: resolvedPadding }, style],
-  }
+    ref,
+    className: cn(sectionPaddingClasses[token], className),
+    style: padding !== undefined ? [{ padding }, style] : style,
+  } as ViewProps & RefAttributes<ComponentRef<typeof View>> & { className?: string }
+
   return createElement(View, props)
-}
+})
+
+CardSection.displayName = 'CardSection'

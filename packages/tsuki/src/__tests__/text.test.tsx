@@ -25,9 +25,9 @@ it('renders native text and forwards native props and ref', async () => {
   expect(onPress).toHaveBeenCalledTimes(1)
 })
 
-it('applies the variant before the nearest provider and own classes', async () => {
+it('lets explicit variant typography override parent context while preserving inherited color', async () => {
   await render(
-    <TextClassContext.Provider value="text-tsuki-primary font-semibold">
+    <TextClassContext.Provider value="text-tsuki-primary text-sm font-semibold">
       <Text variant="heading">Inherited</Text>
       <TextClassContext.Provider value="text-tsuki-muted">
         <Text>Inner scope</Text>
@@ -39,7 +39,7 @@ it('applies the variant before the nearest provider and own classes', async () =
   )
 
   expect(screen.getByText('Inherited').props.className).toBe(
-    'text-2xl text-tsuki-primary font-semibold',
+    'text-tsuki-primary text-2xl font-bold',
   )
   expect(screen.getByText('Inner scope').props.className).toBe('text-base text-tsuki-muted')
   expect(screen.getByText('Override').props.className).toBe('text-2xl font-bold text-red-500')

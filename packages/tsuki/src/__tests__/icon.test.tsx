@@ -1,4 +1,6 @@
 import { render, screen, userEvent } from '@testing-library/react-native'
+import { createRef } from 'react'
+import type { ComponentRef } from 'react'
 import { processColor, StyleSheet, View } from 'react-native'
 import { ConfigProvider, Icon, TsukiProvider } from '..'
 import type { IconDefinition, IconName } from '..'
@@ -24,11 +26,13 @@ const custom: IconDefinition = {
   },
 }
 
-it('renders a built-in icon', async () => {
+it('renders a built-in icon and forwards ref', async () => {
+  const ref = createRef<ComponentRef<typeof View>>()
   const view = await render(
-    <Icon name="PlusOutlined" accessibilityRole="image" accessibilityLabel="Plus" />,
+    <Icon ref={ref} name="PlusOutlined" accessibilityRole="image" accessibilityLabel="Plus" />,
   )
   expect(screen.getByRole('image', { name: 'Plus' })).toBeOnTheScreen()
+  expect(ref.current).not.toBeNull()
   expect(JSON.stringify(view.toJSON())).toContain('RNSVGPath')
 })
 
