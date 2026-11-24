@@ -113,10 +113,25 @@ describe('OverlayRegistry', () => {
     expect(listener).not.toHaveBeenCalled()
   })
 
-  it('keeps an exiting entry as the Back target until its matching exit completes', () => {
+  it('routes Back to the owner without mutating phase first, and keeps an exiting entry as the Back target until exit completes', () => {
     const registry = createOverlayRegistry()
-    const onBack = jest.fn()
-    const id = addEntry(registry, { backBehavior: 'dismiss', onBack })
+    const onEntered = jest.fn()
+    const onExited = jest.fn()
+    const onBack = jest.fn(() => {
+      registry.update(id, { visible: false })
+    })
+    const id = registry.mount({
+      content: 'overlay',
+      backBehavior: 'dismiss',
+      onBack,
+      onEntered,
+      onExited,
+      theme: getDefaultTheme('light'),
+      themeScope: {},
+    })
+
+    expect(registry.completeEnter(id, registry.getSnapshot()[0].generation)).toBe(true)
+    expect(onEntered).toHaveBeenCalledTimes(1)
 
     expect(registry.dispatchBack()).toBe(true)
     const entry = registry.getSnapshot()[0]
@@ -125,7 +140,22 @@ describe('OverlayRegistry', () => {
     expect(onBack).toHaveBeenCalledTimes(1)
     expect(registry.getSnapshot()).toHaveLength(1)
     expect(registry.completeExit(id, entry.generation)).toBe(true)
+    expect(onExited).toHaveBeenCalledTimes(1)
     expect(registry.dispatchBack()).toBe(false)
+  })
+
+  it('keeps controlled entries open without exiting when onBack declines dismissal, and blocks Back while busy', () => {
+    const registry = createOverlayRegistry()
+    const declinedBack = jest.fn()
+    const id = addEntry(registry, { backBehavior: 'dismiss', onBack: declinedBack })
+
+    expect(registry.dispatchBack()).toBe(true)
+    expect(declinedBack).toHaveBeenCalledTimes(1)
+    expect(registry.getSnapshot()[0]).toMatchObject({ id, phase: 'entering', visible: true })
+
+    expect(registry.update(id, { busy: true })).toBe(true)
+    expect(registry.dispatchBack()).toBe(true)
+    expect(declinedBack).toHaveBeenCalledTimes(1)
   })
 
   it('does not publish when a Theme scope receives equivalent resolved values', () => {
@@ -151,6 +181,8 @@ describe('OverlayRegistry', () => {
         Card: { ...theme.components.Card },
         Cell: { ...theme.components.Cell },
         Divider: { ...theme.components.Divider },
+        Dialog: { ...theme.components.Dialog },
+        Popup: { ...theme.components.Popup },
         Input: { ...theme.components.Input },
         Surface: { ...theme.components.Surface },
       },
@@ -216,7 +248,9 @@ describe('OverlayRegistry', () => {
   it('dispatches dismiss to the top visible entry once and does not repeat while closing', () => {
     const registry = createOverlayRegistry()
     const lowerClose = jest.fn()
-    const topClose = jest.fn()
+    const topClose = jest.fn(() => {
+      registry.update(topId, { visible: false })
+    })
     addEntry(registry, { backBehavior: 'dismiss', onBack: lowerClose })
     const topId = addEntry(registry, { backBehavior: 'dismiss', onBack: topClose })
 

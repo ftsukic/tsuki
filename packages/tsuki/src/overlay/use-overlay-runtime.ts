@@ -1,18 +1,23 @@
 import { useCallback, useContext, useSyncExternalStore } from 'react'
 import { ThemeContext } from '../theme/context'
-import { OverlayRuntimeContext } from './context'
+import {
+  OverlayHostGeometryContext,
+  OverlayRegistryContext,
+  OverlayThemeScopeContext,
+} from './context'
 import type { OverlayBackBehavior, OverlayMountOptions, OverlayUpdate } from './types'
 
 export function useOverlayRuntime(scope: 'current' | 'root' = 'current') {
-  const runtime = useContext(OverlayRuntimeContext)
+  const registry = useContext(OverlayRegistryContext)
+  const themeContext = useContext(OverlayThemeScopeContext)
+  const geometry = useContext(OverlayHostGeometryContext)
   const currentTheme = useContext(ThemeContext)
-  if (!runtime) {
+  if (!registry || !themeContext || !geometry) {
     throw new Error('useOverlayRuntime must be used inside a root TsukiProvider.')
   }
 
-  const { registry } = runtime
-  const theme = scope === 'root' ? runtime.rootTheme : currentTheme
-  const themeScope = scope === 'root' ? runtime.rootThemeScope : runtime.themeScope
+  const theme = scope === 'root' ? themeContext.rootTheme : currentTheme
+  const themeScope = scope === 'root' ? themeContext.rootThemeScope : themeContext.themeScope
   const entries = useSyncExternalStore(
     registry.subscribe,
     registry.getSnapshot,
@@ -27,7 +32,11 @@ export function useOverlayRuntime(scope: 'current' | 'root' = 'current') {
     (options: {
       content: OverlayMountOptions['content']
       backBehavior: OverlayBackBehavior
+      accessibility?: OverlayMountOptions['accessibility']
       onBack?: () => void
+      onEntered?: () => void
+      onExited?: () => void
+      busy?: boolean
       visible?: boolean
       mask?: OverlayMountOptions['mask']
       transition?: OverlayMountOptions['transition']
@@ -41,7 +50,7 @@ export function useOverlayRuntime(scope: 'current' | 'root' = 'current') {
   )
   const unmount = useCallback((id: number) => registry.unmount(id), [registry])
   const dispatchBack = useCallback(() => registry.dispatchBack(), [registry])
-  const setHostEnabled = runtime.setHostEnabled
+  const setHostEnabled = geometry.setHostEnabled
 
   return {
     registry,
@@ -52,7 +61,7 @@ export function useOverlayRuntime(scope: 'current' | 'root' = 'current') {
     update,
     unmount,
     dispatchBack,
-    hostEnabled: runtime.hostEnabled,
+    hostEnabled: geometry.hostEnabled,
     setHostEnabled,
   }
 }

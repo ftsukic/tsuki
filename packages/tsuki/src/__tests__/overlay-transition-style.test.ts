@@ -31,10 +31,15 @@ describe('Overlay transition style', () => {
       transform: [{ translateX: 20 }, { translateY: -80 }, { scale: 1.05 }],
     })
     const exitEnd = createTransitionStyle(0, asymmetricPreset, 400, 800, 'exit')
+    const exitTransform = exitEnd.transform as Array<{
+      translateX?: number
+      translateY?: number
+      scale?: number
+    }>
     expect(exitEnd.opacity).toBeCloseTo(0.1)
-    expect(exitEnd.transform?.[0]?.translateX).toBeCloseTo(-60)
-    expect(exitEnd.transform?.[1]?.translateY).toBeCloseTo(160)
-    expect(exitEnd.transform?.[2]?.scale).toBeCloseTo(0.4)
+    expect(exitTransform[0]?.translateX).toBeCloseTo(-60)
+    expect(exitTransform[1]?.translateY).toBeCloseTo(160)
+    expect(exitTransform[2]?.scale).toBeCloseTo(0.4)
   })
 
   it('uses identity defaults for omitted attributes', () => {
