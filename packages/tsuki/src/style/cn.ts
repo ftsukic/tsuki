@@ -1,26 +1,10 @@
 import { clsx } from 'clsx'
 import type { ClassValue } from 'clsx'
 import { extendTailwindMerge } from 'tailwind-merge'
+import { TSUKI_TAILWIND_MERGE_EXTENSION } from './tsuki-tw-merge'
 
 const mergeTailwindClasses = extendTailwindMerge({
-  extend: {
-    theme: {
-      leading: ['tsuki-cell-slot', 'tsuki-cell-line-height', 'tsuki-cell-description-line-height'],
-      radius: ['tsuki-button', 'tsuki-card', 'tsuki-input', 'tsuki-surface'],
-      spacing: [
-        'tsuki-button',
-        'tsuki-card',
-        'tsuki-card-header',
-        'tsuki-card-body',
-        'tsuki-card-footer',
-        'tsuki-card-gap',
-        'tsuki-input',
-        'tsuki-divider',
-        'tsuki-surface',
-      ],
-    },
-    classGroups: { 'border-w': [{ border: ['tsuki-surface-width'] }] },
-  },
+  extend: TSUKI_TAILWIND_MERGE_EXTENSION,
 })
 
 export function cn(...inputs: ClassValue[]): string {

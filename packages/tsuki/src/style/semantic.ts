@@ -2,10 +2,15 @@ import type { ClassValue } from 'clsx'
 import { cn } from './cn'
 import type { ClassNames } from '../types'
 
+/**
+ * Resolves a component slot's Tailwind classes in strict priority order:
+ * base/default classes < semantic `classNames[slot]` < explicit primary `className`.
+ */
 export function semanticClassName<Slots extends string>(
   classNames: ClassNames<Slots> | undefined,
   slot: Slots,
-  ...classValues: ClassValue[]
+  baseClassName?: ClassValue,
+  overrideClassName?: ClassValue,
 ): string {
-  return cn(...classValues, classNames?.[slot])
+  return cn(baseClassName, classNames?.[slot], overrideClassName)
 }

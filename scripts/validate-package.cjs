@@ -17,6 +17,11 @@ const requiredExportTargets = [
   ['./nativewind-v4-preset', ['require'], './dist/theme/nativewind-v4-preset.cjs'],
   ['./nativewind-v4-preset', ['default'], './dist/theme/nativewind-v4-preset.cjs'],
   ['./nativewind-v5.css', [], './dist/theme/nativewind-v5.css'],
+  ['./theme-variables', ['import', 'types'], './dist/theme/theme-variables.d.ts'],
+  ['./theme-variables', ['import', 'default'], './dist/theme/theme-variables.mjs'],
+  ['./theme-variables', ['require', 'types'], './dist/theme/theme-variables.d.ts'],
+  ['./theme-variables', ['require', 'default'], './dist/theme/theme-variables.cjs'],
+  ['./theme-variables', ['default'], './dist/theme/theme-variables.cjs'],
 ]
 
 if (invalidInstallScripts.length > 0) {

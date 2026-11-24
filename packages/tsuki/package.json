@@ -37,7 +37,18 @@
       "require": "./dist/theme/nativewind-v4-preset.cjs",
       "default": "./dist/theme/nativewind-v4-preset.cjs"
     },
-    "./nativewind-v5.css": "./dist/theme/nativewind-v5.css"
+    "./nativewind-v5.css": "./dist/theme/nativewind-v5.css",
+    "./theme-variables": {
+      "import": {
+        "types": "./dist/theme/theme-variables.d.ts",
+        "default": "./dist/theme/theme-variables.mjs"
+      },
+      "require": {
+        "types": "./dist/theme/theme-variables.d.ts",
+        "default": "./dist/theme/theme-variables.cjs"
+      },
+      "default": "./dist/theme/theme-variables.cjs"
+    }
   },
   "files": [
     "assets",
@@ -72,7 +83,8 @@
     "test": "jest --config jest.config.cjs --runInBand",
     "release:check-package": "node ../../scripts/validate-package.cjs",
     "test:v2": "jest --config jest.v2.config.cjs --runInBand",
-    "typecheck:fixtures": "tsc -p tsconfig.fixtures.json --noEmit"
+    "typecheck:fixtures": "tsc -p tsconfig.fixtures.json --noEmit",
+    "typecheck:tests": "tsc -p tsconfig.test.json --noEmit"
   },
   "devDependencies": {
     "@babel/core": "^7.28.4",

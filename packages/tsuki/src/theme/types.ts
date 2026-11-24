@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 export type ThemeScheme = 'light' | 'dark'
 
 export interface MotionConfig {
@@ -18,17 +20,21 @@ export interface SemanticTokens {
   colorMuted: string
   colorBackground: string
   colorSurface: string
+  colorSurfaceElevated: string
   colorBorder: string
+  colorOverlay: string
 }
 
 export interface ButtonThemeTokens {
   borderRadius: number
   height: number
+  disabledOpacity: number
 }
 
 export interface InputThemeTokens {
   borderRadius: number
   height: number
+  disabledOpacity: number
 }
 
 export interface DividerThemeTokens {
@@ -74,6 +80,24 @@ export interface CellThemeTokens {
   disabledOpacity: number
 }
 
+export interface DialogThemeTokens {
+  width: number
+  borderRadius: number
+  backgroundColor: string
+  overlayColor: string
+  titleFontSize: number
+  messageFontSize: number
+  contentPadding: number
+  buttonHeight: number
+}
+
+export interface PopupThemeTokens {
+  backgroundColor: string
+  overlayColor: string
+  borderRadius: number
+  animationDuration: number
+}
+
 export interface ThemeConfig {
   semantic?: Partial<SemanticTokens>
   motion?: MotionConfig
@@ -82,6 +106,8 @@ export interface ThemeConfig {
     Card?: Partial<CardThemeTokens>
     Cell?: Partial<CellThemeTokens>
     Divider?: Partial<DividerThemeTokens>
+    Dialog?: Partial<DialogThemeTokens>
+    Popup?: Partial<PopupThemeTokens>
     Input?: Partial<InputThemeTokens>
     Surface?: Partial<SurfaceThemeTokens>
   }
@@ -97,9 +123,22 @@ export interface ResolvedTheme {
     Card: CardThemeTokens
     Cell: CellThemeTokens
     Divider: DividerThemeTokens
+    Dialog: DialogThemeTokens
+    Popup: PopupThemeTokens
     Input: InputThemeTokens
     Surface: SurfaceThemeTokens
   }
 }
 
 export type ThemeVariables = Record<`--tsuki-${string}`, string>
+
+export type ThemeScopeKind = 'root' | 'scope' | 'overlay'
+
+export interface ThemeScopeRenderProps {
+  theme: ResolvedTheme
+  variables: ThemeVariables
+  kind: ThemeScopeKind
+  children: ReactNode
+}
+
+export type ThemeScopeRenderer = (props: ThemeScopeRenderProps) => ReactNode

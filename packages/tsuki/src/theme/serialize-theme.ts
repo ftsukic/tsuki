@@ -14,7 +14,11 @@ export function serializeTheme(theme: ResolvedTheme): ThemeVariables {
   for (const [component, tokens] of Object.entries(theme.components)) {
     for (const [token, value] of Object.entries(tokens)) {
       variables[`--tsuki-${component.toLowerCase()}-${toKebabCase(token)}`] =
-        token === 'disabledOpacity' ? String(value) : `${value}px`
+        typeof value === 'number' && token !== 'disabledOpacity'
+          ? token === 'animationDuration'
+            ? `${value}ms`
+            : `${value}px`
+          : String(value)
     }
   }
 

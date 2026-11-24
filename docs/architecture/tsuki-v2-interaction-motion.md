@@ -2,7 +2,7 @@
 
 | 项目 | 说明 |
 | --- | --- |
-| 状态 | Batch 15 — Motion、Pressable、Pan/Swipe 与 Interaction Lab 已实现；Batch 16B Overlay Registry lifecycle、双通道 Motion Transition 和 Playground Lab 已实现。自动化与 Android 设备验收结果及 iOS/HarmonyOS 未完成项见本文末尾。 |
+| 状态 | Batch 15 — Motion、Pressable、Pan/Swipe 与 Interaction Lab 已实现；Batch 16B Overlay Registry、双通道 Motion Transition、声明式 Portal、Root-bound Imperative Controller 与 Accessibility Runtime 已实现。Batch 16B.5 的 TalkBack 激活和线性导航设备验收仍 Pending；自动化与各平台验收状态见本文末尾。 |
 | 基线 | `tsuki-1x-refactor`，`879b90d`。 |
 | 范围 | Motion、Pressable、Gesture、Overlay。 |
 | 原则 | 先建立统一运行时，再迁移业务组件。 |
@@ -31,7 +31,7 @@
 | Gesture | `packages/tsuki/src/gesture/` 提供私有 Pan/Swipe Runtime；Playground Interaction Lab 直接预览该 Runtime。 |
 | Theme motion policy | `ThemeConfig` / `ResolvedTheme` 含 `motion` 字段；`serializeTheme()` 不序列化该运行策略。 |
 | Gesture root | 当前 v2 `TsukiProvider` 不提供 `GestureHandlerRootView`；Playground 在应用根部提供，其他应用也必须自行提供。 |
-| Overlay / Portal | Batch 16A.2 完成架构决策；Batch 16B 已实现每 Root 独立 Registry、稳定 Entry phase/generation、根 `TsukiProvider` 唯一 Host、Theme Bridge、Host 级 Back 适配、双通道 Motion Transition 与 Overlay Lab。运行时代码位于 `packages/tsuki/src/overlay/`；具体自动化和原生验收以本文末尾状态为准。View 是三端 Host 基线；iOS `FullWindowOverlay` 仍是可选验证项。`react-native-teleport` 仍是开发依赖而非运行时依赖；v1 归档实现依赖应用提供的 `PortalProvider`，v2 不引入 Teleport 或平台 Portal API。 |
+| Overlay / Portal | Batch 16A.2 完成架构决策；Batch 16B 已实现每 Root 独立 Registry、稳定 Entry phase/generation、根 `TsukiProvider` 唯一 Host、Theme Bridge、Host 级 Back 适配、双通道 Motion Transition、声明式 Portal 和私有 `useOverlayController()`。命令式调用默认捕获当前 Theme scope；显式 `'root'` scope 可供 Root-bound 服务调用。运行时代码位于 `packages/tsuki/src/overlay/`；具体自动化和原生验收以本文末尾状态为准。View 是三端 Host 基线；iOS `FullWindowOverlay` 仍是可选验证项。`react-native-teleport` 仍是开发依赖而非运行时依赖；v1 归档实现依赖应用提供的 `PortalProvider`，v2 不引入 Teleport 或平台 Portal API。 |
 
 内部模块不会因为目录建立而成为 package API。当前 `packages/tsuki/src/index.ts` 和组件 barrel 中已存在的导出仍是兼容面；后续内部实现不得借机删除或改名。
 
@@ -423,3 +423,40 @@ Progress reaction 在 UI Worklet 侧读取 listener-presence SharedValue。没�
 Playground 的 Transition Lab 加入仅供内部验收的非对称 preset，用于实际宿主上的 Enter / Exit 验收。没有新增公共 API、根导出、package export 或第三方依赖。
 
 本批次最终自动化结果和 Android 模拟器验收明细见 [Batch 16B.5.6 完成报告](./tsuki-v2-16b-5-6-completion-report.md)。
+
+## 16. Batch 16B.3 — Declarative Overlay Primitive
+
+Overlay Runtime 新增私有 `packages/tsuki/src/overlay/overlay-portal.tsx`。`OverlayPortal` 以受控 `visible` 驱动 Entry，提交阶段从当前 `OverlayRuntimeContext` 解析所属 Root Registry，并捕获当前 Theme scope。它不维护业务 open state，不处理遮罩视觉样式或内容布局，也不进入 package root exports。
+
+- 首次 `visible=true` 创建 Entry；内容、Mask、Transition、Back 配置和可见状态更新保留现有 ID。首次 `visible=false` 不创建 Entry。
+- 隐藏会更新现有 Entry 为 `exiting`；Host 保留子树并协调已启用的 Mask / Content Transition。退出完成后 Registry 删除 Entry。Portal 若仍挂载，下一次显示会检测失效 ID 并创建新 Entry；退出期间重开则保留原 ID/key，推进 generation，使旧完成回调失效。
+- Portal 真正卸载时，通过本地 lease 延迟一个 microtask 清理其 Entry。StrictMode 同步 cleanup/setup replay 会重新取得同一所有权；真正卸载后没有后续 setup，Entry 会被幂等释放。Portal 不订阅完整 Registry Entry Snapshot。
+- Root 与嵌套 `ConfigProvider` / `TsukiProvider` 的 Theme 沿用既有 Theme Bridge。Dialog 等业务组件必须把所需 Context Provider 显式放入 Portal children；不提供任意 React Context 的通用自动桥接。
+- Back 使用 Host 现有统一分发；Portal 不注册独立 `BackHandler`。`dismiss` 的关闭回调由受控 owner 同步到 `visible=false`。
+
+Interaction Lab → Overlay → Declarative 使用真实 `OverlayPortal`，演示显隐、内容/Mask/Transition 更新、Theme、显式业务 Context、多 Portal、Provider owner 卸载和 StrictMode。独立 Runtime 诊断面板显示 Entry ID、数量、phase、generation、当前 Theme、Context 值和 Host 数量。
+
+本批次自动化命令、设备验收结果、Git 状态和未实现项见 [Batch 16B.3 完成报告](./tsuki-v2-16b-3-completion-report.md)。
+
+## 17. Batch 16B.4 — Root-bound Imperative Controller
+
+私有 `useOverlayController()` 由 Hook 所在的 Overlay Runtime Context 绑定到确定的 Root Registry。默认 `current` scope 捕获当前位置的 Theme 与 scope；显式 `'root'` scope 捕获所属 Root 的最新根 Theme，便于把 Controller 传给树外服务。该 Hook 不从模块级状态寻找 Root；缺少 Root 时会显式抛错。
+
+- `open()` 每次创建一个新的可见 Entry，并返回具有稳定 ID 的 `{ update(), close() }` Handle。Controller、Handle 和类型都只位于内部 `overlay/` 路径，没有新增 package root 或 package export。
+- `update()` 不接受 `visible`，内容、Mask、Transition 与 Back 配置更新都保留 ID、React key 和挂载顺序。Entry 已在退出期间时仍可更新配置，但不会复活；退出完成或 Root dispose 后，旧 Handle 失效。
+- 首次 `close()` 通过 Registry 进入 `exiting`，等待现有 Mask / Content Transition 协调完成后卸载。重复关闭返回 `false`。Back 复用 Host 的统一分发，不注册独立 BackHandler。
+- Hook owner 最终卸载时，由 StrictMode-safe lease 保留重放期间的所有权；确认真实卸载后，owner 创建的活动 Entry 进入正常退出动画。外部服务保存的 Controller 只能在其 Hook owner 保持挂载期间使用；旧 Handle 在 owner 卸载后失效。
+- Playground 的 Imperative Lab 使用真实 Root Runtime，覆盖 current/root Theme、多层 Entry、Update / Close、关闭中更新、快速关闭、重复关闭、Mask、Timing / Spring、Android Back、Declarative + Imperative 混合和 Registry 诊断。
+
+本批次的实际自动化、Android 验收、未执行项目和 Git 状态见 [Batch 16B.4 完成报告](./tsuki-v2-16b-4-completion-report.md)。
+
+## 18. Batch 16B.5 — Accessibility Runtime
+
+Overlay Runtime 为每个根 `TsukiProvider` 的页面子树提供私有 Accessibility boundary，并将根 `OverlayHost` 保留为同级节点。最高层有效 modal 隔离页面与下层 modal；退出动画完成前维持隔离。边界上方的 non-modal Entry 可以继续访问；只有 non-modal Entry 时页面保持可访问。
+
+- `OverlayPortal` 与 `useOverlayController()` 共用 Entry 的 `modal | non-modal` 语义，默认 non-modal；配置更新保留 Entry ID。
+- 初始焦点与返回焦点由内容 owner 通过 `RefObject<View | null>` 提供。Runtime 等待目标布局和屏幕阅读器状态，再按 Registry ID / generation 验证请求并发送原生 focus 事件；过期请求和 Root 卸载会取消调度。
+- 新增 Accessibility Lab 展示 modal 隔离、初始/返回焦点目标、嵌套 Portal、Controller Entry、关闭和运行时诊断。
+- 实现保留在私有 `packages/tsuki/src/overlay/accessibility/`，未新增公共 export、依赖或 Native Module。
+
+当前状态：自动化验证通过，Android 模拟器已启用真实 TalkBack，并观察到初始焦点和嵌套 modal 的 Back 焦点恢复。Windows `agent-device` 触控注入未能可靠区分 TalkBack 双击激活与连续触控；TalkBack 线性导航和 modal 内按钮激活尚未形成可重复、明确的设备证据。因此 **Batch 16B.5 保持 Pending Android TalkBack validation**，不得以自动化测试或 Accessibility tree snapshot 替代缺失的交互验收。详细结果、设备环境和剩余风险见 [Batch 16B.5 完成报告](./tsuki-v2-16b-5-completion-report.md)。

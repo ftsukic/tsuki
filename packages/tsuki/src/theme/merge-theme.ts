@@ -14,6 +14,8 @@ export function mergeTheme(parent: ResolvedTheme, override?: ThemeConfig): Resol
       Card: { ...base.components.Card, ...override?.components?.Card },
       Cell: { ...base.components.Cell, ...override?.components?.Cell },
       Divider: { ...base.components.Divider, ...override?.components?.Divider },
+      Dialog: { ...base.components.Dialog, ...override?.components?.Dialog },
+      Popup: { ...base.components.Popup, ...override?.components?.Popup },
       Input: { ...base.components.Input, ...override?.components?.Input },
       Surface: { ...base.components.Surface, ...override?.components?.Surface },
     },

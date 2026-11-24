@@ -1,3 +1,5 @@
+/* Generated from theme/defaults.ts by scripts/copy-theme-assets.cjs. */
+
 @theme inline {
   --color-tsuki-primary: var(--tsuki-color-primary);
   --color-tsuki-primary-foreground: var(--tsuki-color-primary-foreground);
@@ -8,14 +10,12 @@
   --color-tsuki-muted: var(--tsuki-color-muted);
   --color-tsuki-background: var(--tsuki-color-background);
   --color-tsuki-surface: var(--tsuki-color-surface);
+  --color-tsuki-surface-elevated: var(--tsuki-color-surface-elevated);
   --color-tsuki-border: var(--tsuki-color-border);
+  --color-tsuki-overlay: var(--tsuki-color-overlay);
   --radius-tsuki-button: var(--tsuki-button-border-radius);
-  --radius-tsuki-input: var(--tsuki-input-border-radius);
   --spacing-tsuki-button: var(--tsuki-button-height);
-  --spacing-tsuki-input: var(--tsuki-input-height);
-  --spacing-tsuki-divider: var(--tsuki-divider-thickness);
-  --radius-tsuki-surface: var(--tsuki-surface-border-radius);
-  --spacing-tsuki-surface: var(--tsuki-surface-padding);
+  --opacity-tsuki-button-disabled-opacity: var(--tsuki-button-disabled-opacity);
   --radius-tsuki-card: var(--tsuki-card-border-radius);
   --spacing-tsuki-card: var(--tsuki-card-padding);
   --spacing-tsuki-card-header: var(--tsuki-card-header-padding);
@@ -27,6 +27,9 @@
   --spacing-tsuki-cell-large-padding-vertical: var(--tsuki-cell-large-padding-vertical);
   --spacing-tsuki-cell-min-height: var(--tsuki-cell-min-height);
   --spacing-tsuki-cell-large-min-height: var(--tsuki-cell-large-min-height);
+  --text-tsuki-cell-font-size: var(--tsuki-cell-font-size);
+  --text-tsuki-cell-large-font-size: var(--tsuki-cell-large-font-size);
+  --text-tsuki-cell-description-font-size: var(--tsuki-cell-description-font-size);
   --spacing-tsuki-cell-icon-size: var(--tsuki-cell-icon-size);
   --spacing-tsuki-cell-gap: var(--tsuki-cell-gap);
   --spacing-tsuki-cell-vertical-gap: var(--tsuki-cell-vertical-gap);
@@ -40,11 +43,26 @@
   --spacing-tsuki-cell-group-inset-margin-horizontal: var(
     --tsuki-cell-group-inset-margin-horizontal
   );
-  --text-tsuki-cell-font-size: var(--tsuki-cell-font-size);
-  --text-tsuki-cell-large-font-size: var(--tsuki-cell-large-font-size);
-  --text-tsuki-cell-description-font-size: var(--tsuki-cell-description-font-size);
   --radius-tsuki-cell-group-radius: var(--tsuki-cell-group-radius);
   --opacity-tsuki-cell-disabled-opacity: var(--tsuki-cell-disabled-opacity);
+  --spacing-tsuki-divider: var(--tsuki-divider-thickness);
+  --spacing-tsuki-dialog: var(--tsuki-dialog-width);
+  --radius-tsuki-dialog: var(--tsuki-dialog-border-radius);
+  --text-tsuki-dialog-title: var(--tsuki-dialog-title-font-size);
+  --text-tsuki-dialog-message: var(--tsuki-dialog-message-font-size);
+  --spacing-tsuki-dialog-content: var(--tsuki-dialog-content-padding);
+  --spacing-tsuki-dialog-button: var(--tsuki-dialog-button-height);
+  --color-tsuki-dialog-overlay: var(--tsuki-dialog-overlay-color);
+  --color-tsuki-dialog-background: var(--tsuki-dialog-background-color);
+  --color-tsuki-popup-overlay: var(--tsuki-popup-overlay-color);
+  --radius-tsuki-popup: var(--tsuki-popup-border-radius);
+  --duration-tsuki-popup: var(--tsuki-popup-animation-duration);
+  --color-tsuki-popup-background: var(--tsuki-popup-background-color);
+  --radius-tsuki-input: var(--tsuki-input-border-radius);
+  --spacing-tsuki-input: var(--tsuki-input-height);
+  --opacity-tsuki-input-disabled-opacity: var(--tsuki-input-disabled-opacity);
+  --radius-tsuki-surface: var(--tsuki-surface-border-radius);
+  --spacing-tsuki-surface: var(--tsuki-surface-padding);
 }
 
 @utility border-tsuki-surface-width {
@@ -52,13 +70,6 @@
 }
 
 /* NativeWind maps untyped CSS line-height variables as font-size multipliers. */
-@utility leading-tsuki-cell-slot {
-  -rn-tsuki-line-height: var(--tsuki-cell-line-height-value);
-  -rn-native-mapping--rn-tsuki-line-height: &line-height;
-  @variant web {
-    line-height: var(--tsuki-cell-line-height-value);
-  }
-}
 
 @utility leading-tsuki-cell-line-height {
   -rn-tsuki-line-height: var(--tsuki-cell-line-height);

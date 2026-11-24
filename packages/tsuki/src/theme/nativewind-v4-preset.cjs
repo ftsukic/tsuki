@@ -1,3 +1,4 @@
+// Generated from theme/defaults.ts by scripts/copy-theme-assets.cjs.
 module.exports = {
   theme: {
     extend: {
@@ -12,21 +13,35 @@ module.exports = {
           muted: 'var(--tsuki-color-muted)',
           background: 'var(--tsuki-color-background)',
           surface: 'var(--tsuki-color-surface)',
+          'surface-elevated': 'var(--tsuki-color-surface-elevated)',
           border: 'var(--tsuki-color-border)',
+          overlay: 'var(--tsuki-color-overlay)',
+          'dialog-overlay': 'var(--tsuki-dialog-overlay-color)',
+          'dialog-background': 'var(--tsuki-dialog-background-color)',
+          'popup-overlay': 'var(--tsuki-popup-overlay-color)',
+          'popup-background': 'var(--tsuki-popup-background-color)',
         },
       },
       borderRadius: {
-        'tsuki-cell-group-radius': 'var(--tsuki-cell-group-radius)',
         'tsuki-button': 'var(--tsuki-button-border-radius)',
         'tsuki-card': 'var(--tsuki-card-border-radius)',
+        'tsuki-cell-group-radius': 'var(--tsuki-cell-group-radius)',
+        'tsuki-dialog': 'var(--tsuki-dialog-border-radius)',
+        'tsuki-popup': 'var(--tsuki-popup-border-radius)',
         'tsuki-input': 'var(--tsuki-input-border-radius)',
         'tsuki-surface': 'var(--tsuki-surface-border-radius)',
       },
       height: {
         'tsuki-button': 'var(--tsuki-button-height)',
+        'tsuki-dialog-button': 'var(--tsuki-dialog-button-height)',
         'tsuki-input': 'var(--tsuki-input-height)',
       },
       spacing: {
+        'tsuki-card': 'var(--tsuki-card-padding)',
+        'tsuki-card-header': 'var(--tsuki-card-header-padding)',
+        'tsuki-card-body': 'var(--tsuki-card-body-padding)',
+        'tsuki-card-footer': 'var(--tsuki-card-footer-padding)',
+        'tsuki-card-gap': 'var(--tsuki-card-gap)',
         'tsuki-cell-padding-horizontal': 'var(--tsuki-cell-padding-horizontal)',
         'tsuki-cell-padding-vertical': 'var(--tsuki-cell-padding-vertical)',
         'tsuki-cell-large-padding-vertical': 'var(--tsuki-cell-large-padding-vertical)',
@@ -43,13 +58,13 @@ module.exports = {
         'tsuki-cell-group-title-padding-vertical': 'var(--tsuki-cell-group-title-padding-vertical)',
         'tsuki-cell-group-inset-margin-horizontal':
           'var(--tsuki-cell-group-inset-margin-horizontal)',
-        'tsuki-card': 'var(--tsuki-card-padding)',
-        'tsuki-card-header': 'var(--tsuki-card-header-padding)',
-        'tsuki-card-body': 'var(--tsuki-card-body-padding)',
-        'tsuki-card-footer': 'var(--tsuki-card-footer-padding)',
-        'tsuki-card-gap': 'var(--tsuki-card-gap)',
         'tsuki-divider': 'var(--tsuki-divider-thickness)',
+        'tsuki-dialog': 'var(--tsuki-dialog-width)',
+        'tsuki-dialog-content': 'var(--tsuki-dialog-content-padding)',
         'tsuki-surface': 'var(--tsuki-surface-padding)',
+      },
+      transitionDuration: {
+        'tsuki-popup': 'var(--tsuki-popup-animation-duration)',
       },
       borderWidth: {
         'tsuki-surface-width': 'var(--tsuki-surface-border-width)',
@@ -58,14 +73,17 @@ module.exports = {
         'tsuki-cell-font-size': 'var(--tsuki-cell-font-size)',
         'tsuki-cell-large-font-size': 'var(--tsuki-cell-large-font-size)',
         'tsuki-cell-description-font-size': 'var(--tsuki-cell-description-font-size)',
+        'tsuki-dialog-title': 'var(--tsuki-dialog-title-font-size)',
+        'tsuki-dialog-message': 'var(--tsuki-dialog-message-font-size)',
       },
       lineHeight: {
-        'tsuki-cell-slot': 'var(--tsuki-cell-line-height-value)',
         'tsuki-cell-line-height': 'var(--tsuki-cell-line-height)',
         'tsuki-cell-description-line-height': 'var(--tsuki-cell-description-line-height)',
       },
       opacity: {
+        'tsuki-button-disabled-opacity': 'var(--tsuki-button-disabled-opacity)',
         'tsuki-cell-disabled-opacity': 'var(--tsuki-cell-disabled-opacity)',
+        'tsuki-input-disabled-opacity': 'var(--tsuki-input-disabled-opacity)',
       },
     },
   },
