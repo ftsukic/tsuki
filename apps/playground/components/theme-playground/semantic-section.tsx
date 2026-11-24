@@ -18,7 +18,9 @@ const semanticNames: (keyof SemanticTokens)[] = [
   'colorMuted',
   'colorBackground',
   'colorSurface',
+  'colorSurfaceElevated',
   'colorBorder',
+  'colorOverlay',
 ]
 
 export function SemanticSection({ currentTheme, lightTheme, darkTheme }: SemanticSectionProps) {
@@ -73,7 +75,7 @@ export function SemanticSection({ currentTheme, lightTheme, darkTheme }: Semanti
 }
 
 function ColorValue({ label, value, testID }: { label: string; value: string; testID: string }) {
-  const isColor = /^#[0-9a-f]{6}$/i.test(value)
+  const isColor = /^#[0-9a-f]{6}$/i.test(value) || /^rgba?\(/i.test(value)
   return (
     <View style={styles.colorValue} testID={testID}>
       <View

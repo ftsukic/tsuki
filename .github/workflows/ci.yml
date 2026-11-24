@@ -48,6 +48,9 @@ jobs:
       - name: Validate release policy
         run: node --test scripts/validate-release.test.cjs
 
+      - name: Validate Theme assets
+        run: pnpm run theme:check
+
       - name: Validate Fixture catalog
         run: pnpm run fixtures:check
 

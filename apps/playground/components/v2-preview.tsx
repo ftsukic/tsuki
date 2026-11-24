@@ -3,7 +3,12 @@ import { View } from 'react-native'
 import type { StyleProp, ViewStyle } from 'react-native'
 import { VariableContextProvider } from 'nativewind'
 import { serializeTheme, TsukiProvider, useTsukiTheme } from '../../../packages/tsuki/src'
+import type { ThemeScopeRenderer } from '../../../packages/tsuki/src'
 import { useDemoTheme } from './demo-provider'
+
+const renderThemeScope: ThemeScopeRenderer = ({ variables, children }) => (
+  <VariableContextProvider value={variables}>{children}</VariableContextProvider>
+)
 
 export function V2ThemeVariables({
   children,
@@ -20,8 +25,15 @@ export function V2ThemeVariables({
 export function V2Preview({ children }: PropsWithChildren) {
   const { dark } = useDemoTheme()
   return (
-    <TsukiProvider scheme={dark ? 'dark' : 'light'}>
-      <V2ThemeVariables style={{ flex: 1 }}>{children}</V2ThemeVariables>
+    <TsukiProvider renderThemeScope={renderThemeScope} scheme={dark ? 'dark' : 'light'}>
+      <V2PreviewSurface>{children}</V2PreviewSurface>
     </TsukiProvider>
+  )
+}
+
+function V2PreviewSurface({ children }: PropsWithChildren) {
+  const theme = useTsukiTheme()
+  return (
+    <View style={{ flex: 1, backgroundColor: theme.semantic.colorBackground }}>{children}</View>
   )
 }

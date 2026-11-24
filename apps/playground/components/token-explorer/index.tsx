@@ -118,13 +118,22 @@ function buildComponentGroup<K extends keyof ResolvedTheme['components']>(
   light: ResolvedTheme['components'][K],
   dark: ResolvedTheme['components'][K],
 ): TokenDetail[] {
-  const entries = Object.entries(current) as [keyof typeof current, number][]
+  const entries = Object.entries(current) as [string, number | string][]
   return entries.map(([token, value]) => ({
     name: `components.${component}.${String(token)}`,
     category: componentTokenCategory(component, String(token)),
     currentValue: formatComponentValue(String(token), value),
-    lightValue: formatComponentValue(String(token), Number(light[token])),
-    darkValue: formatComponentValue(String(token), Number(dark[token])),
+    lightValue: formatComponentValue(
+      String(token),
+      light[token as keyof typeof current] as number | string,
+    ),
+    darkValue: formatComponentValue(
+      String(token),
+      dark[token as keyof typeof current] as number | string,
+    ),
+    ...(typeof value === 'string' && (/^#[0-9a-f]{6}$/i.test(value) || /^rgba?\(/i.test(value))
+      ? { color: value }
+      : {}),
   }))
 }
 
@@ -141,8 +150,15 @@ function componentTokenCategory(component: keyof ResolvedTheme['components'], to
   ) {
     return 'Typography'
   }
+  if (component === 'Dialog' && ['titleFontSize', 'messageFontSize'].includes(token)) {
+    return 'Typography'
+  }
+  if (token === 'animationDuration') return 'Motion'
   if (
     [
+      'width',
+      'contentPadding',
+      'buttonHeight',
       'padding',
       'headerPadding',
       'bodyPadding',
@@ -165,7 +181,9 @@ function componentTokenCategory(component: keyof ResolvedTheme['components'], to
   return 'Component token'
 }
 
-function formatComponentValue(token: string, value: number) {
+function formatComponentValue(token: string, value: number | string) {
+  if (typeof value === 'string') return value
+  if (token === 'animationDuration') return `${value} ms`
   return token === 'disabledOpacity' ? String(value) : `${value} dp`
 }
 

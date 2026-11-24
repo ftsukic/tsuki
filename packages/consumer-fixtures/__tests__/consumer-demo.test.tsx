@@ -1,35 +1,32 @@
 /* RNTL v14 fireEvent returns a Promise; this lint rule still assumes synchronous events. */
 /* eslint-disable testing-library/no-await-sync-events */
 import { cleanup, fireEvent, render, screen } from '@testing-library/react-native'
-import { TsukiProvider, useTsukiTheme } from '@ftsukic/tsuki'
+import { TsukiProvider } from '@ftsukic/tsuki'
+import type { ThemeScopeRenderer } from '@ftsukic/tsuki'
 import { View } from 'react-native'
-import type { PropsWithChildren } from 'react'
 import { ConsumerDemo } from '../src'
-import type { ConsumerThemeVariablesProps } from '../src'
-
-jest.mock('nativewind', () => ({ vars: () => ({}) }), { virtual: true })
 
 const onCycleAppearance = jest.fn()
 
-function ThemeVariables({ children }: PropsWithChildren<ConsumerThemeVariablesProps>) {
-  const theme = useTsukiTheme()
-  return (
-    <View style={{ flex: 1, backgroundColor: theme.semantic.colorBackground }}>{children}</View>
-  )
-}
+const renderThemeScope: ThemeScopeRenderer = ({ theme, kind, children }) => (
+  <View
+    style={
+      kind === 'root' ? { flex: 1, backgroundColor: theme.semantic.colorBackground } : undefined
+    }
+  >
+    {children}
+  </View>
+)
 
 function App() {
   return (
-    <TsukiProvider scheme="light">
-      <ThemeVariables>
-        <ConsumerDemo
-          ThemeVariables={ThemeVariables}
-          appearance="system"
-          scheme="light"
-          title="Tsuki NativeWind consumer"
-          onCycleAppearance={onCycleAppearance}
-        />
-      </ThemeVariables>
+    <TsukiProvider renderThemeScope={renderThemeScope} scheme="light">
+      <ConsumerDemo
+        appearance="system"
+        scheme="light"
+        title="Tsuki NativeWind consumer"
+        onCycleAppearance={onCycleAppearance}
+      />
     </TsukiProvider>
   )
 }

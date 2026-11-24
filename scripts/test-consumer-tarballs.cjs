@@ -50,9 +50,12 @@ function rewriteConsumerForTarball(name, tarballPath) {
     },
   })
 
+  const tsukiPackageJson = JSON.parse(
+    fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'),
+  )
   const stagedFixtureManifestPath = path.join(stagedFixturePackageRoot, 'package.json')
   const stagedFixtureManifest = JSON.parse(fs.readFileSync(stagedFixtureManifestPath, 'utf8'))
-  stagedFixtureManifest.peerDependencies['@ftsukic/tsuki'] = '^1.0.0-beta.1'
+  stagedFixtureManifest.peerDependencies['@ftsukic/tsuki'] = `^${tsukiPackageJson.version}`
   fs.writeFileSync(stagedFixtureManifestPath, JSON.stringify(stagedFixtureManifest, null, 2) + '\n')
 
   const packageJsonPath = path.join(consumerRoot, 'package.json')
@@ -90,14 +93,18 @@ function stageCanonicalExamples(consumerRoot, isV4) {
   fs.renameSync(path.join(consumerRoot, 'App.tsx'), path.join(consumerRoot, 'SmokeApp.tsx'))
   const app = [
     "import { useState } from 'react'",
-    "import { Button, serializeTheme, TsukiProvider, useTsukiTheme } from '@ftsukic/tsuki'",
-    "import { Pressable, ScrollView, Text, View } from 'react-native'",
+    "import { Button, TsukiProvider, useTsukiTheme } from '@ftsukic/tsuki'",
+    "import type { ThemeScopeRenderer } from '@ftsukic/tsuki'",
+    "import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'",
     isV4
       ? "import { vars } from 'nativewind'"
       : "import { VariableContextProvider } from 'nativewind'",
     "import SmokeApp from './SmokeApp'",
     ...imports,
     'const previews = [' + previews.join(', ') + '] as const',
+    isV4
+      ? 'const renderThemeScope: ThemeScopeRenderer = ({ variables, kind, children }) => <View pointerEvents={kind === "overlay" ? "box-none" : undefined} style={[kind === "root" ? { flex: 1 } : kind === "overlay" ? StyleSheet.absoluteFill : undefined, vars(variables)]}>{children}</View>'
+      : 'const renderThemeScope: ThemeScopeRenderer = ({ variables, children }) => <VariableContextProvider value={variables}>{children}</VariableContextProvider>',
     'function Examples() {',
     '  const [selected, select] = useState<number | null>(null)',
     '  const theme = useTsukiTheme()',
@@ -107,17 +114,14 @@ function stageCanonicalExamples(consumerRoot, isV4) {
     '      {previews.map(([name], index) => <Button key={name} onPress={() => select(index)}>{name}</Button>)}',
     '    </ScrollView>',
     '  )',
-    '  const variables = serializeTheme(theme)',
-    isV4
-      ? '  return <View style={[{flex: 1, backgroundColor: theme.semantic.colorBackground}, vars(variables)]}>{content}</View>'
-      : '  return <VariableContextProvider value={variables}><View style={{flex: 1, backgroundColor: theme.semantic.colorBackground}}>{content}</View></VariableContextProvider>',
+    '  return <View style={{flex: 1, backgroundColor: theme.semantic.colorBackground}}>{content}</View>',
     '}',
     'export default function App() {',
     '  const [showExamples, setShowExamples] = useState(false)',
     '  const [dark, setDark] = useState(false)',
     '  return <View style={{ flex: 1 }}>',
     '    <Pressable style={{paddingTop: 48, paddingHorizontal: 16}} onPress={() => setShowExamples(!showExamples)}><Text>{showExamples ? "Consumer smoke" : "Canonical examples"}</Text></Pressable>',
-    '    {showExamples ? <><Pressable style={{padding: 16}} onPress={() => setDark(!dark)}><Text>{dark ? "Light" : "Dark"}</Text></Pressable><TsukiProvider scheme={dark ? "dark" : "light"}><Examples /></TsukiProvider></> : <SmokeApp />}',
+    '    {showExamples ? <><Pressable style={{padding: 16}} onPress={() => setDark(!dark)}><Text>{dark ? "Light" : "Dark"}</Text></Pressable><TsukiProvider renderThemeScope={renderThemeScope} scheme={dark ? "dark" : "light"}><Examples /></TsukiProvider></> : <SmokeApp />}',
     '  </View>',
     '}',
     '',

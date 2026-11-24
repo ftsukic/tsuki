@@ -28,13 +28,24 @@ afterEach(async () => {
 it('lists the existing semantic and component tokens with Light and Dark values', async () => {
   await render(<TokenExplorer />)
 
-  expect(await screen.findByText('45 available tokens')).toBeTruthy()
+  expect(await screen.findByText('61 available tokens')).toBeTruthy()
   expect(screen.getByTestId('color-tokens')).toBeTruthy()
   expect(screen.getByTestId('token-row-color-tokens-semantic.colorPrimary')).toBeTruthy()
   expect(
     screen.getByTestId('token-row-component-tokens-components.Button.borderRadius'),
   ).toBeTruthy()
   expect(screen.getByTestId('token-row-component-tokens-components.Cell.fontSize')).toBeTruthy()
+  expect(
+    screen.getByTestId('token-row-component-tokens-components.Dialog.backgroundColor'),
+  ).toBeTruthy()
+  expect(
+    screen.getByTestId('token-row-component-tokens-components.Popup.backgroundColor'),
+  ).toBeTruthy()
+  expect(
+    within(
+      screen.getByTestId('token-row-component-tokens-components.Dialog.backgroundColor'),
+    ).getByText('Dark: #1f2937'),
+  ).toBeTruthy()
   expect(
     within(
       screen.getByTestId('token-row-component-tokens-components.Button.borderRadius'),

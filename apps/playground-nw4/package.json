@@ -31,9 +31,9 @@
     "android:dev": "expo run:android --port 18762",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "typecheck": "npx --yes @expo/agent-cli@latest typecheck",
-    "config": "npx --yes @expo/agent-cli@latest config --type public",
-    "build:development": "npx --yes @expo/agent-cli@latest export --dev --platform ios && npx --yes @expo/agent-cli@latest export --dev --platform android"
+    "typecheck": "tsc --noEmit",
+    "config": "expo config --type public",
+    "build:development": "expo export --dev --platform ios && expo export --dev --platform android"
   },
   "private": true
 }

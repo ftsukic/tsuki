@@ -1,21 +1,27 @@
 import { useState } from 'react'
 import { ConsumerDemo } from '@ftsukic/consumer-fixtures'
-import type { ConsumerAppearance, ConsumerThemeVariablesProps } from '@ftsukic/consumer-fixtures'
-import { serializeTheme, TsukiProvider, useTsukiTheme } from '@ftsukic/tsuki'
-import type { ThemeScheme } from '@ftsukic/tsuki'
+import type { ConsumerAppearance } from '@ftsukic/consumer-fixtures'
+import { TsukiProvider } from '@ftsukic/tsuki'
+import type { ThemeScheme, ThemeScopeRenderer } from '@ftsukic/tsuki'
 import { vars } from 'nativewind'
-import { useColorScheme, View } from 'react-native'
+import { StyleSheet, useColorScheme, View } from 'react-native'
 import './global.css'
 
-function ThemeVariables({ children, className, style }: ConsumerThemeVariablesProps) {
-  const theme = useTsukiTheme()
+const styles = StyleSheet.create({
+  root: { flex: 1 },
+})
 
-  return (
-    <View className={className} style={[vars(serializeTheme(theme)), { flex: 1 }, style]}>
-      {children}
-    </View>
-  )
-}
+const renderThemeScope: ThemeScopeRenderer = ({ variables, kind, children }) => (
+  <View
+    pointerEvents={kind === 'overlay' ? 'box-none' : undefined}
+    style={[
+      kind === 'root' ? styles.root : kind === 'overlay' ? StyleSheet.absoluteFill : undefined,
+      vars(variables),
+    ]}
+  >
+    {children}
+  </View>
+)
 
 export default function App() {
   const systemScheme = useColorScheme()
@@ -30,16 +36,13 @@ export default function App() {
   }
 
   return (
-    <TsukiProvider scheme={scheme}>
-      <ThemeVariables>
-        <ConsumerDemo
-          ThemeVariables={ThemeVariables}
-          appearance={appearance}
-          onCycleAppearance={cycleAppearance}
-          scheme={scheme}
-          title="NW4"
-        />
-      </ThemeVariables>
+    <TsukiProvider renderThemeScope={renderThemeScope} scheme={scheme}>
+      <ConsumerDemo
+        appearance={appearance}
+        onCycleAppearance={cycleAppearance}
+        scheme={scheme}
+        title="NW4"
+      />
     </TsukiProvider>
   )
 }

@@ -7,9 +7,11 @@
   },
   "scripts": {
     "build": "pnpm --filter @ftsukic/tsuki run build",
+    "theme:generate": "node scripts/copy-theme-assets.cjs --generate",
+    "theme:check": "node scripts/copy-theme-assets.cjs --check",
     "fixtures:generate": "pnpm --filter playground run generate:fixtures",
     "fixtures:check": "node scripts/generate-fixture-catalog.cjs --check",
-    "typecheck": "pnpm run package:typecheck && pnpm run package:fixtures:typecheck && pnpm run package:consumer-fixtures:typecheck && pnpm run consumers:typecheck && pnpm run playground:typecheck",
+    "typecheck": "pnpm run package:typecheck && pnpm run package:fixtures:typecheck && pnpm run package:tests:typecheck && pnpm run package:consumer-fixtures:typecheck && pnpm run consumers:typecheck && pnpm run playground:typecheck",
     "package:typecheck": "pnpm --filter @ftsukic/tsuki run typecheck",
     "package:test": "pnpm --filter @ftsukic/tsuki run test",
     "playground:typecheck": "pnpm --filter playground run typecheck",
@@ -44,6 +46,7 @@
     "consumer:v4:android": "pnpm --filter playground-nw4 run android:dev",
     "consumer:v5:android": "pnpm --filter playground-nw5 run android:dev",
     "package:fixtures:typecheck": "pnpm --filter @ftsukic/tsuki run typecheck:fixtures",
+    "package:tests:typecheck": "pnpm --filter @ftsukic/tsuki run typecheck:tests",
     "package:consumer-fixtures:typecheck": "pnpm --filter @ftsukic/consumer-fixtures run typecheck",
     "playgrounds:dev": "node scripts/playgrounds.cjs prepare && pnpm --parallel --stream --filter playground --filter playground-nw4 --filter playground-nw5 run start",
     "playgrounds:install:android": "node scripts/playgrounds.cjs install:android"

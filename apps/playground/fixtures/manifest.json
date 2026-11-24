@@ -100,6 +100,56 @@
       "fixturePath": "packages/tsuki/src/cell/__fixtures__/overview.tsx"
     },
     {
+      "id": "portal-v2",
+      "component": "portal",
+      "title": "Portal",
+      "description": "Root-scoped mounting, concurrent entries and theme bridging.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 9,
+      "fixturePath": "packages/tsuki/src/portal/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "tooltip-v2",
+      "component": "tooltip",
+      "title": "Tooltip",
+      "description": "Long-press hints, placement, ScrollView repositioning and theme.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 10,
+      "fixturePath": "packages/tsuki/src/tooltip/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "popover-v2",
+      "component": "popover",
+      "title": "Popover",
+      "description": "Anchored interactive panels, outside dismissal, Back and theme.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 11,
+      "fixturePath": "packages/tsuki/src/popover/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "dialog-v2",
+      "component": "dialog",
+      "title": "Dialog",
+      "description": "Controlled prompts, async close checks and Root-bound Promise services.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 12,
+      "fixturePath": "packages/tsuki/src/dialog/__fixtures__/overview.tsx"
+    },
+    {
+      "id": "popup-v2",
+      "component": "popup",
+      "title": "Popup",
+      "description": "Five positions, dismissal, keyboard and safe area, nested overlays, and theme.",
+      "version": "v2",
+      "category": "Tsuki v2",
+      "order": 13,
+      "fixturePath": "packages/tsuki/src/popup/__fixtures__/overview.tsx"
+    },
+    {
       "id": "button",
       "component": "button",
       "title": "Button",

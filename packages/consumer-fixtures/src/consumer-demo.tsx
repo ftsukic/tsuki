@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { ComponentType, PropsWithChildren } from 'react'
 import {
   Button,
   Card,
@@ -16,22 +15,15 @@ import {
   useTsukiTheme,
 } from '@ftsukic/tsuki'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
-import type { StyleProp, ViewStyle } from 'react-native'
 import type { ThemeScheme } from '@ftsukic/tsuki'
 
 export type ConsumerAppearance = 'system' | ThemeScheme
-
-export interface ConsumerThemeVariablesProps extends PropsWithChildren {
-  className?: string
-  style?: StyleProp<ViewStyle>
-}
 
 export interface ConsumerDemoProps {
   title: string
   appearance: ConsumerAppearance
   scheme: ThemeScheme
   onCycleAppearance: () => void
-  ThemeVariables: ComponentType<ConsumerThemeVariablesProps>
 }
 
 const styles = StyleSheet.create({
@@ -80,7 +72,7 @@ function NestedScopeContent() {
     </>
   )
 }
-function NestedScope({ ThemeVariables }: Pick<ConsumerDemoProps, 'ThemeVariables'>) {
+function NestedScope() {
   return (
     <ConfigProvider
       theme={{
@@ -91,21 +83,18 @@ function NestedScope({ ThemeVariables }: Pick<ConsumerDemoProps, 'ThemeVariables
         },
       }}
     >
-      <ThemeVariables className="gap-3 rounded-xl border border-tsuki-border bg-tsuki-surface p-4">
+      <Surface
+        bordered
+        className="gap-3 rounded-xl border border-tsuki-border bg-tsuki-surface p-4"
+      >
         <Text className="text-tsuki-foreground font-medium">Nested override</Text>
         <NestedScopeContent />
-      </ThemeVariables>
+      </Surface>
     </ConfigProvider>
   )
 }
 
-export function ConsumerDemo({
-  title,
-  appearance,
-  scheme,
-  onCycleAppearance,
-  ThemeVariables,
-}: ConsumerDemoProps) {
+export function ConsumerDemo({ title, appearance, scheme, onCycleAppearance }: ConsumerDemoProps) {
   const theme = useTsukiTheme()
   const [cardSaved, setCardSaved] = useState(false)
   const [cellCount, setCellCount] = useState(0)
@@ -360,7 +349,7 @@ export function ConsumerDemo({
         <Text style={{ width: 80 }}>Wrap A</Text>
         <Text style={{ width: 80 }}>Wrap B</Text>
       </Space>
-      <NestedScope ThemeVariables={ThemeVariables} />
+      <NestedScope />
     </ScrollView>
   )
 }
