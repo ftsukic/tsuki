@@ -1,20 +1,11 @@
 import { useCallback, useContext, useMemo, useRef, useState } from 'react'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { OverlayPortal } from '../overlay/overlay-portal'
-import { OVERLAY_TRANSITION_PRESETS } from '../overlay/transition/presets'
-import type { OverlayTransitionConfig } from '../overlay/transition/types'
+import { createPopupTransition } from '../overlay/transition/presets'
 import { useTsukiTheme } from '../theme/theme'
 import { PopupContent } from './popup-content'
 import { PopupMask } from './popup-mask'
-import type { PopupPosition, PopupProps } from './types'
-
-const TRANSITION_PRESET_BY_POSITION = {
-  center: 'centerPopup',
-  top: 'topPopup',
-  bottom: 'bottomPopup',
-  left: 'leftPopup',
-  right: 'rightPopup',
-} as const satisfies Record<PopupPosition, keyof typeof OVERLAY_TRANSITION_PRESETS>
+import type { PopupProps } from './types'
 
 export function Popup({
   visible,
@@ -71,14 +62,10 @@ export function Popup({
     if (closeOnPressOverlay) requestVisible(false)
   }, [closeOnPressOverlay, onPressOverlay, requestVisible])
 
-  const transition = useMemo<OverlayTransitionConfig>(() => {
-    const preset = OVERLAY_TRANSITION_PRESETS[TRANSITION_PRESET_BY_POSITION[position]]
-    const animation = { duration: theme.components.Popup.animationDuration }
-    return {
-      mask: preset.mask ? { ...preset.mask, animation } : undefined,
-      content: preset.content ? { ...preset.content, animation } : undefined,
-    }
-  }, [position, theme.components.Popup.animationDuration])
+  const transition = useMemo(
+    () => createPopupTransition(position, theme.components.Popup.animationDuration),
+    [position, theme.components.Popup.animationDuration],
+  )
   const accessibility = useMemo(
     () => ({
       mode: modal ? ('modal' as const) : ('non-modal' as const),

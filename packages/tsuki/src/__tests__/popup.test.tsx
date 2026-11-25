@@ -7,8 +7,10 @@ import { Pressable, Text } from 'react-native'
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context'
 import { Dialog, Popup, Portal, TsukiProvider, ConfigProvider } from '..'
 import { MOTION_PRESETS } from '../motion/presets'
+import { OverlayTransitionContext } from '../overlay/transition/transition-context'
 import { createTransitionStyle } from '../overlay/transition/transition-style'
 import { useOverlayRuntime } from '../overlay/use-overlay-runtime'
+import { PopupContent } from '../popup/popup-content'
 import {
   getPopupKeyboardOverlap,
   getPopupSafeAreaInset,
@@ -107,7 +109,7 @@ it('does not create a touch blocker when overlay is false', async () => {
 
 it('maps five positions to directionally correct content transitions and fades the mask', async () => {
   const positions: Array<[PopupPosition, string, number]> = [
-    ['center', 'scale-fade', 1],
+    ['center', 'dialog-zoom', 1],
     ['top', 'slide-down', -1],
     ['bottom', 'slide-up', 1],
     ['left', 'slide-right', -1],
@@ -128,18 +130,61 @@ it('maps five positions to directionally correct content transitions and fades t
   positions.forEach(([position, presetName, direction], index) => {
     expect(entries[index].transition?.content?.preset).toBe(presetName)
     expect(entries[index].transition?.mask?.preset).toBe('fade')
+    if (position === 'center') {
+      expect(entries[index].transition?.content?.enter).toMatchObject({ duration: 200 })
+      expect(entries[index].transition?.content?.exit).toMatchObject({ duration: 150 })
+    } else {
+      expect(entries[index].transition?.content?.enter).toMatchObject({ duration: 240 })
+      expect(entries[index].transition?.content?.exit).toMatchObject({ duration: 180 })
+    }
     const preset = MOTION_PRESETS[presetName as keyof typeof MOTION_PRESETS]
-    const style = createTransitionStyle(0, preset, 400, 800, 'enter')
+    const style = createTransitionStyle(0, preset, 400, 260, 'enter')
     const transform = style.transform?.[0]
     if (position === 'center') {
       expect(style.opacity).toBe(0)
-      expect(transform).toMatchObject({ scale: expect.any(Number) })
+      expect(transform).toMatchObject({ scale: 0.9 })
     } else if (position === 'left' || position === 'right') {
       expect(transform).toEqual({ translateX: direction * 400 })
     } else {
-      expect(transform).toEqual({ translateY: direction * 800 })
+      expect(transform).toEqual({ translateY: direction * 260 })
     }
   })
+})
+
+it('reports measured Popup container size to OverlayTransitionContext so slides match panel height', async () => {
+  const reportContentSize = jest.fn()
+  await render(
+    <OverlayTransitionContext.Provider
+      value={{
+        contentProgress: { get: () => 1 } as never,
+        stage: 'enter',
+        reportContentSize,
+        setLocalContentTarget: jest.fn(),
+      }}
+    >
+      <PopupContent
+        bottomSafeAreaInset={0}
+        closeable={false}
+        keyboardAvoiding={false}
+        position="bottom"
+        round={false}
+        safeAreaInsetBottom={false}
+        safeAreaInsetTop={false}
+        scrollable={false}
+        testID="measured-popup"
+        topSafeAreaInset={0}
+      >
+        <Text>Measured sheet</Text>
+      </PopupContent>
+    </OverlayTransitionContext.Provider>,
+  )
+
+  await act(async () => {
+    screen.getByTestId('measured-popup-container').props.onLayout?.({
+      nativeEvent: { layout: { x: 0, y: 584, width: 390, height: 260 } },
+    })
+  })
+  expect(reportContentSize).toHaveBeenCalledWith(390, 260)
 })
 
 it('closes an uncontrolled Popup through the mask and retains its Entry through exit', async () => {

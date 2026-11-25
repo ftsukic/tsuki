@@ -11,6 +11,7 @@ import {
 } from 'react-native'
 import { measureViewInWindow } from '../floating/measure'
 import { Icon } from '../icon'
+import { useOverlayTransitionContext } from '../overlay/transition/transition-context'
 import { semanticClassName } from '../style/semantic'
 import {
   getPopupContainerStyle,
@@ -74,6 +75,15 @@ export function PopupContent({
 }: PopupContentProps) {
   const rootRef = useRef<NativeView>(null)
   const measureGenRef = useRef(0)
+  const transitionContext = useOverlayTransitionContext()
+  const reportContentSize = transitionContext?.reportContentSize
+  const handleContainerLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      const { width, height } = event.nativeEvent.layout
+      reportContentSize?.(width, height)
+    },
+    [reportContentSize],
+  )
   const [hostFrame, setHostFrame] = useState<PopupHostFrame>({
     x: 0,
     y: 0,
@@ -193,6 +203,7 @@ export function PopupContent({
               ['overflow-hidden bg-tsuki-popup-background', getPopupRoundClass(position, round)],
               className,
             ),
+            onLayout: handleContainerLayout,
             style: [
               popupLayoutStyles.container,
               getPopupContainerStyle(position, layoutWidth, layoutHeight),
