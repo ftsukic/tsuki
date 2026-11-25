@@ -12,6 +12,7 @@ export type MotionPresetName =
   | 'fade-up'
   | 'fade-down'
   | 'spring-scale'
+  | 'dialog-zoom'
   | 'overlay-asymmetric-test'
 
 const offset = DEFAULT_MOTION_SLIDE_OFFSET
@@ -40,6 +41,17 @@ export const MOTION_PRESETS: Record<MotionPresetName, MotionPreset> = {
   'fade-up': preset({ opacity: 0, translateY: offset }, { opacity: 1, translateY: 0 }),
   'fade-down': preset({ opacity: 0, translateY: -offset }, { opacity: 1, translateY: 0 }),
   'spring-scale': preset({ scale }, { scale: 1 }, 'spring'),
+  'dialog-zoom': {
+    enter: {
+      from: { opacity: 0, scale: 0.9 },
+      to: { opacity: 1, scale: 1 },
+    },
+    exit: {
+      from: { opacity: 1, scale: 1 },
+      to: { opacity: 0, scale: 0.96 },
+    },
+    animation: 'timing',
+  },
   // Used by the private Overlay Lab to exercise distinct Enter and Exit frames.
   'overlay-asymmetric-test': {
     enter: {

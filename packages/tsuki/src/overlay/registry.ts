@@ -135,6 +135,7 @@ export function createOverlayRegistry(): OverlayRegistry {
       ? patch.onExited
       : current.onExited
     const busy = patch.busy ?? current.busy
+    const ready = patch.ready ?? current.ready
     requireDismissHandler(backBehavior, onBack)
 
     const requestedVisible =
@@ -154,6 +155,7 @@ export function createOverlayRegistry(): OverlayRegistry {
       ...current,
       ...patch,
       visible: requestedVisible,
+      ready,
       phase,
       generation,
       backBehavior,
@@ -216,6 +218,7 @@ export function createOverlayRegistry(): OverlayRegistry {
           phase,
           generation: visible ? 1 : 0,
           visible,
+          ready: options.ready ?? true,
           closing: false,
           busy: options.busy ?? false,
           backBehavior: options.backBehavior,

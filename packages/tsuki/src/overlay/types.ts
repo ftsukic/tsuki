@@ -36,6 +36,8 @@ export interface OverlayEntry {
   readonly generation: number
   /** Requested visibility; an exiting entry remains rendered until its transition completes. */
   readonly visible: boolean
+  /** When false, holds entering progress at 0 until initial layout/anchor measurement is ready. */
+  readonly ready: boolean
   /** Compatibility summary for Back handling while an entry is exiting. */
   readonly closing: boolean
   /** Blocks dismiss Back routing while an async guard (e.g. beforeClose) is pending. */
@@ -86,6 +88,7 @@ export interface OverlayMountOptions {
   onExited?: () => void
   busy?: boolean
   visible?: boolean
+  ready?: boolean
   mask?: ReactNode
   transition?: OverlayTransitionConfig
   accessibility?: OverlayAccessibilityConfig
@@ -101,6 +104,7 @@ export interface OverlayUpdate {
   accessibility?: OverlayAccessibilityConfig | undefined
   onTransitionProgress?: OverlayTransitionProgressListener
   visible?: boolean
+  ready?: boolean
   closing?: boolean
   busy?: boolean
   backBehavior?: OverlayBackBehavior

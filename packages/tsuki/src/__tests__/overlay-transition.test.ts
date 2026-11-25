@@ -8,6 +8,7 @@ import { TsukiProvider } from '../theme/tsuki-provider'
 import { createOverlayRegistry } from '../overlay/registry'
 import type { OverlayEntry, OverlayRegistry } from '../overlay/types'
 import { useOverlayTransition } from '../overlay/transition/use-overlay-transition'
+import { MOTION_EASING } from '../motion/easing'
 import type { OverlayTransitionConfig } from '../overlay/transition/types'
 
 type AnimationCallback = (finished?: boolean) => void
@@ -283,6 +284,92 @@ describe('Overlay transition lifecycle', () => {
     await act(async () => getAnimationCallback(springMock)(true))
     expect(registry.getSnapshot()[0].phase).toBe('entered')
     expect(completeEnter).toHaveBeenCalledTimes(1)
+    await utils.unmount()
+  })
+
+  it('uses distinct enter and exit durations and Arco easings when configured', async () => {
+    const registry = createOverlayRegistry()
+    const { id, entry } = createEntry(registry, {
+      transition: {
+        mask: {
+          preset: 'fade',
+          enter: { duration: 180, easing: MOTION_EASING.decelerate },
+          exit: { duration: 140, easing: MOTION_EASING.accelerate },
+        },
+        content: {
+          preset: 'dialog-zoom',
+          enter: { duration: 200, easing: MOTION_EASING.standard },
+          exit: { duration: 150, easing: MOTION_EASING.accelerate },
+        },
+      },
+    })
+    const utils = await renderHook(
+      ({ currentEntry }: { currentEntry: OverlayEntry }) =>
+        useOverlayTransition(currentEntry, registry),
+      { initialProps: { currentEntry: entry }, wrapper: createMotionWrapper },
+    )
+
+    expect(timingMock).toHaveBeenNthCalledWith(
+      1,
+      1,
+      expect.objectContaining({ duration: 200, easing: MOTION_EASING.standard }),
+      expect.any(Function),
+    )
+    expect(timingMock).toHaveBeenNthCalledWith(
+      2,
+      1,
+      expect.objectContaining({ duration: 180, easing: MOTION_EASING.decelerate }),
+      expect.any(Function),
+    )
+
+    registry.completeEnter(id, entry.generation)
+    registry.update(id, { visible: false })
+    timingMock.mockClear()
+    await utils.rerender({ currentEntry: registry.getSnapshot()[0] })
+
+    expect(timingMock).toHaveBeenNthCalledWith(
+      1,
+      0,
+      expect.objectContaining({ duration: 150, easing: MOTION_EASING.accelerate }),
+      expect.any(Function),
+    )
+    expect(timingMock).toHaveBeenNthCalledWith(
+      2,
+      0,
+      expect.objectContaining({ duration: 140, easing: MOTION_EASING.accelerate }),
+      expect.any(Function),
+    )
+    await utils.unmount()
+  })
+
+  it('defers entering animation while ready is false until initial measurement completes', async () => {
+    const registry = createOverlayRegistry()
+    const id = registry.mount({
+      content: 'floating-content',
+      ready: false,
+      transition: { content: { preset: 'scale-fade', enter: { duration: 160 } } },
+      backBehavior: 'dismiss',
+      onBack: jest.fn(),
+      theme: getDefaultTheme('light'),
+      themeScope: {},
+    })
+    const utils = await renderHook(
+      ({ currentEntry }: { currentEntry: OverlayEntry }) =>
+        useOverlayTransition(currentEntry, registry),
+      { initialProps: { currentEntry: registry.getSnapshot()[0] }, wrapper: createMotionWrapper },
+    )
+
+    expect(timingMock).not.toHaveBeenCalled()
+    expect(utils.result.current.contentProgress.get()).toBe(0)
+
+    registry.update(id, { ready: true })
+    await utils.rerender({ currentEntry: registry.getSnapshot()[0] })
+
+    expect(timingMock).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ duration: 160 }),
+      expect.any(Function),
+    )
     await utils.unmount()
   })
 })

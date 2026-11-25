@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useLayoutEffect, useRef } from 'react'
 import { useAnimatedReaction, useSharedValue } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
 import type { OverlayEntry, OverlayRegistry } from '../types'
@@ -31,7 +31,7 @@ export function useOverlayTransition(entry: OverlayEntry, registry: OverlayRegis
   const hasProgressListener = useSharedValue(typeof entry.onTransitionProgress === 'function')
   onProgressRef.current = entry.onTransitionProgress
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     hasProgressListener.set(typeof entry.onTransitionProgress === 'function')
   }, [entry.onTransitionProgress, hasProgressListener])
 
@@ -43,32 +43,38 @@ export function useOverlayTransition(entry: OverlayEntry, registry: OverlayRegis
   )
 
   useAnimatedReaction(
-    () => Math.round(maskValue.get() * 10) * 2 + (hasProgressListener.get() ? 1 : 0),
+    () => (hasProgressListener.get() ? Math.round(maskValue.get() * 10) * 2 + 1 : 0),
     (encodedStep, previous) => {
+      if (encodedStep === 0 || !hasMask) return
       const step = Math.floor(encodedStep / 2)
       const previousStep =
-        previous === null || previous === undefined ? undefined : Math.floor(previous / 2)
-      const isListening = encodedStep - step * 2 === 1
-      if (!isListening || step === previousStep || !hasMask) return
+        previous === null || previous === undefined || previous === 0
+          ? undefined
+          : Math.floor(previous / 2)
+      if (step === previousStep) return
       scheduleOnRN(reportProgress, 'mask', step, entryGeneration)
     },
   )
   useAnimatedReaction(
-    () => Math.round(contentValue.get() * 10) * 2 + (hasProgressListener.get() ? 1 : 0),
+    () => (hasProgressListener.get() ? Math.round(contentValue.get() * 10) * 2 + 1 : 0),
     (encodedStep, previous) => {
+      if (encodedStep === 0) return
       const step = Math.floor(encodedStep / 2)
       const previousStep =
-        previous === null || previous === undefined ? undefined : Math.floor(previous / 2)
-      const isListening = encodedStep - step * 2 === 1
-      if (!isListening || step === previousStep) return
+        previous === null || previous === undefined || previous === 0
+          ? undefined
+          : Math.floor(previous / 2)
+      if (step === previousStep) return
       scheduleOnRN(reportProgress, 'content', step, entryGeneration)
     },
   )
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (entry.phase === 'hidden' || entry.phase === 'entered') return
+    if (entry.phase === 'entering' && !entry.ready) return
 
     const phase = entry.phase
+    const stage = phase === 'entering' ? 'enter' : 'exit'
     const generation = entry.generation
     const run = ++transitionRun.current
     const target = phase === 'entering' ? 1 : 0
@@ -81,11 +87,13 @@ export function useOverlayTransition(entry: OverlayEntry, registry: OverlayRegis
 
     const resolvedContent = contentRef.current
     const resolvedMask = maskRef.current
-    animateContentTo(target, getTransitionAnimation(resolvedContent), () =>
+    animateContentTo(target, getTransitionAnimation(resolvedContent, stage), () =>
       completion.complete('content'),
     )
     if (hasMask && resolvedMask) {
-      animateMaskTo(target, getTransitionAnimation(resolvedMask), () => completion.complete('mask'))
+      animateMaskTo(target, getTransitionAnimation(resolvedMask, stage), () =>
+        completion.complete('mask'),
+      )
     }
 
     return () => {
@@ -102,6 +110,7 @@ export function useOverlayTransition(entry: OverlayEntry, registry: OverlayRegis
     entry.generation,
     entry.id,
     entry.phase,
+    entry.ready,
     hasMask,
     registry,
   ])

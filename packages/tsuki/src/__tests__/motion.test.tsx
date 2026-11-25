@@ -213,6 +213,7 @@ describe('Motion animation primitives', () => {
       'fade-up',
       'fade-down',
       'spring-scale',
+      'dialog-zoom',
       'overlay-asymmetric-test',
     ])
     expect(MOTION_PRESETS['spring-scale'].animation).toBe('spring')

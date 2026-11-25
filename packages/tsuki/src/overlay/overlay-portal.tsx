@@ -8,6 +8,7 @@ import { useStrictUnmountCleanup } from './use-strict-mount-cleanup'
 
 export interface OverlayPortalProps {
   visible: boolean
+  ready?: boolean
   backBehavior: OverlayBackBehavior
   onBack?: () => void
   onEntered?: () => void
@@ -27,6 +28,7 @@ interface OverlayPortalEntry {
 /** Internal declarative bridge into the Overlay Registry owned by the current React Root. */
 export function OverlayPortal({
   visible,
+  ready = true,
   backBehavior,
   onBack,
   onEntered,
@@ -63,6 +65,7 @@ export function OverlayPortal({
         transition,
         accessibility,
         visible,
+        ready,
         busy,
         backBehavior,
         onBack,
@@ -91,6 +94,7 @@ export function OverlayPortal({
         onBack,
         onEntered,
         onExited,
+        ready,
         visible: false,
       })
     ) {
@@ -106,6 +110,7 @@ export function OverlayPortal({
     onBack,
     onEntered,
     onExited,
+    ready,
     registry,
     theme,
     themeScope,

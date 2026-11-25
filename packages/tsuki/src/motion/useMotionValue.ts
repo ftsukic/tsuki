@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
+import { useCallback, useLayoutEffect, useRef } from 'react'
 import { cancelAnimation, useSharedValue } from 'react-native-reanimated'
 import type { SharedValue } from 'react-native-reanimated'
 import { scheduleOnRN } from 'react-native-worklets'
@@ -103,7 +103,7 @@ export function useMotionValue(initialValue: number): MotionValueController {
     active.onComplete?.(true)
   }, [shouldAnimate, value])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     mountedRef.current = true
 
     return () => {
