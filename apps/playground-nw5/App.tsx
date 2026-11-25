@@ -7,8 +7,26 @@ import { VariableContextProvider } from 'nativewind'
 import { useColorScheme } from 'react-native'
 import './global.css'
 
+const nativeWindVariablesCache = new WeakMap<
+  Record<string, string>,
+  Record<string, string | number>
+>()
+
+function toNativeWindVariables(variables: Record<string, string>): Record<string, string | number> {
+  const cached = nativeWindVariablesCache.get(variables)
+  if (cached) return cached
+  const resolved: Record<string, string | number> = {}
+  for (const [key, value] of Object.entries(variables)) {
+    resolved[key] = /^-?\d+(?:\.\d+)?$/.test(value) ? Number(value) : value
+  }
+  nativeWindVariablesCache.set(variables, resolved)
+  return resolved
+}
+
 const renderThemeScope: ThemeScopeRenderer = ({ variables, children }) => (
-  <VariableContextProvider value={variables}>{children}</VariableContextProvider>
+  <VariableContextProvider value={toNativeWindVariables(variables)}>
+    {children}
+  </VariableContextProvider>
 )
 
 export default function App() {
