@@ -75,9 +75,16 @@ it('opens a Tooltip through OverlayPortal with transition, outside-tap, and Back
   expect(registry.getPortalSnapshot()).toHaveLength(0)
 
   await waitFor(() => {
-    const bubbleStyle = StyleSheet.flatten(getNodeWithTestID('tsuki-tooltip-content').props.style)
+    const bubbleStyle = StyleSheet.flatten(
+      getNodeWithTestID('tsuki-tooltip-positioner').props.style,
+    )
     expect(bubbleStyle).toMatchObject({ left: 8, top: 47 })
   })
+  expect(registry.getSnapshot()[0].ready).toBe(true)
+  expect(registry.getSnapshot()[0].transition?.content?.enter).toMatchObject({ duration: 140 })
+  expect(registry.getSnapshot()[0].transition?.content?.exit).toMatchObject({ duration: 100 })
+  // Default closeOnPressOutside=false leaves surrounding UI unobstructed.
+  expect(screen.queryByTestId('tsuki-tooltip-outside', { includeHiddenElements: true })).toBeNull()
   expect(getNodeWithTestID('tsuki-tooltip-content').props.className).toContain(
     'bg-tsuki-foreground',
   )
@@ -98,6 +105,7 @@ it('supports press-triggered Tooltip with asChild Button and outside press dismi
       <RegistryCapture onRegistry={(registry) => (registryStore.current = registry)} />
       <Tooltip
         asChild
+        closeOnPressOutside
         content="Tap hint"
         onVisibleChange={onVisibleChange}
         testID="press-tooltip-trigger"
@@ -153,14 +161,20 @@ it('supports Popover asChild with Button, closes on outside press and Back, and 
   const registry = requireRegistry(registryStore)
   expect(onVisibleChange).toHaveBeenLastCalledWith(true)
   expect(registry.getSnapshot()).toHaveLength(1)
+  expect(registry.getSnapshot()[0].transition?.mask).toBeUndefined()
+  expect(registry.getSnapshot()[0].transition?.content?.enter).toMatchObject({ duration: 160 })
+  expect(registry.getSnapshot()[0].transition?.content?.exit).toMatchObject({ duration: 120 })
   expect(getNodeWithTestID('tsuki-popover-content').props.className).toContain(
     'bg-tsuki-surface-elevated',
   )
 
   await waitFor(() => {
-    const bubbleStyle = StyleSheet.flatten(getNodeWithTestID('tsuki-popover-content').props.style)
+    const bubbleStyle = StyleSheet.flatten(
+      getNodeWithTestID('tsuki-popover-positioner').props.style,
+    )
     expect(bubbleStyle).toMatchObject({ left: 8, top: 47 })
   })
+  expect(registry.getSnapshot()[0].ready).toBe(true)
 
   await fireEvent.press(
     screen.getByTestId('tsuki-popover-outside', { includeHiddenElements: true }),
@@ -224,11 +238,13 @@ it('keeps controlled Popover open when Back is declined and freezes coordinates 
   expect(registry.getSnapshot()[0].phase).toBe('entering')
 
   const beforeCloseStyle = StyleSheet.flatten(
-    getNodeWithTestID('tsuki-popover-content').props.style,
+    getNodeWithTestID('tsuki-popover-positioner').props.style,
   )
   await act(async () => visibleState.set(false))
   expect(registry.getSnapshot()[0].phase).toBe('exiting')
-  const duringExitStyle = StyleSheet.flatten(getNodeWithTestID('tsuki-popover-content').props.style)
+  const duringExitStyle = StyleSheet.flatten(
+    getNodeWithTestID('tsuki-popover-positioner').props.style,
+  )
   expect(duringExitStyle).toMatchObject({
     left: beforeCloseStyle.left,
     top: beforeCloseStyle.top,

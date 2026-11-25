@@ -2,9 +2,11 @@ import { createElement, useCallback, useEffect, useMemo, useRef, useState } from
 import type { ReactNode, RefObject } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import type { LayoutChangeEvent, View as NativeView } from 'react-native'
+import { FloatingBubbleTransition } from '../floating/bubble-transition'
 import { FloatingTrigger } from '../floating/trigger'
 import { useFloating } from '../floating/useFloating'
 import type { FloatingPosition } from '../floating/types'
+import { MOTION_EASING } from '../motion/easing'
 import { OverlayPortal } from '../overlay/overlay-portal'
 import type { OverlayTransitionConfig } from '../overlay/transition/types'
 import { cn } from '../style/cn'
@@ -13,7 +15,11 @@ import { Text } from '../text'
 import type { TooltipProps } from './types'
 
 const TOOLTIP_TRANSITION: OverlayTransitionConfig = {
-  content: { preset: 'scale-fade' },
+  content: {
+    preset: 'scale-fade',
+    enter: { duration: 140, easing: MOTION_EASING.standard },
+    exit: { duration: 100, easing: MOTION_EASING.accelerate },
+  },
 }
 
 export function Tooltip({
@@ -26,7 +32,7 @@ export function Tooltip({
   afterOpen,
   afterClose,
   closeOnBack = true,
-  closeOnPressOutside = true,
+  closeOnPressOutside = false,
   autoCloseDuration,
   disabled = false,
   asChild = false,
@@ -146,6 +152,7 @@ export function Tooltip({
         onBack={closeOnBack ? handleClose : undefined}
         onEntered={afterOpen}
         onExited={handleExited}
+        ready={floating.position !== null}
         transition={TOOLTIP_TRANSITION}
         visible={isVisible}
       >
@@ -180,7 +187,6 @@ function TooltipBubble({
   position: FloatingPosition | null
   styles: TooltipProps['styles']
 }) {
-  const positionStyle = resolvePositionStyle(position)
   const simpleContent = typeof content === 'string' || typeof content === 'number'
 
   const bubbleProps = {
@@ -194,37 +200,37 @@ function TooltipBubble({
     ref: contentRef,
     role: 'tooltip' as const,
     className: cn(
-      'absolute max-w-[280px] overflow-hidden rounded-lg bg-tsuki-foreground px-3 py-2 shadow-sm',
+      'max-w-[280px] overflow-hidden rounded-lg bg-tsuki-foreground px-3 py-2 shadow-sm',
       classNames?.content,
     ),
-    style: [styles?.content, positionStyle],
+    style: styles?.content,
     testID: 'tsuki-tooltip-content',
   }
 
-  return createElement(
-    View,
-    bubbleProps,
-    simpleContent
-      ? createElement(
-          Text,
-          {
-            className: cn('text-xs text-tsuki-background', classNames?.text),
-            style: styles?.text,
-          },
-          content,
-        )
-      : content,
+  return (
+    <FloatingBubbleTransition
+      enterOffset={4}
+      enterScale={0.94}
+      exitOffset={3}
+      exitScale={0.97}
+      pointerEvents="none"
+      position={position}
+      testID="tsuki-tooltip-positioner"
+    >
+      {createElement(
+        View,
+        bubbleProps,
+        simpleContent
+          ? createElement(
+              Text,
+              {
+                className: cn('text-xs text-tsuki-background', classNames?.text),
+                style: styles?.text,
+              },
+              content,
+            )
+          : content,
+      )}
+    </FloatingBubbleTransition>
   )
-}
-
-function resolvePositionStyle(position: FloatingPosition | null) {
-  return position
-    ? {
-        position: 'absolute' as const,
-        left: position.x,
-        top: position.y,
-        maxWidth: position.maxWidth,
-        maxHeight: position.maxHeight,
-      }
-    : { position: 'absolute' as const, left: 0, top: 0, opacity: 0 }
 }

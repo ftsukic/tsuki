@@ -2,9 +2,11 @@ import { createElement, useCallback, useMemo, useRef, useState } from 'react'
 import type { ReactNode, RefObject } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import type { LayoutChangeEvent, View as NativeView } from 'react-native'
+import { FloatingBubbleTransition } from '../floating/bubble-transition'
 import { FloatingTrigger } from '../floating/trigger'
 import { useFloating } from '../floating/useFloating'
 import type { FloatingPosition } from '../floating/types'
+import { MOTION_EASING } from '../motion/easing'
 import { OverlayPortal } from '../overlay/overlay-portal'
 import type { OverlayTransitionConfig } from '../overlay/transition/types'
 import { cn } from '../style/cn'
@@ -13,8 +15,11 @@ import { Text } from '../text'
 import type { PopoverProps } from './types'
 
 const POPOVER_TRANSITION: OverlayTransitionConfig = {
-  mask: { preset: 'fade' },
-  content: { preset: 'scale-fade' },
+  content: {
+    preset: 'scale-fade',
+    enter: { duration: 160, easing: MOTION_EASING.standard },
+    exit: { duration: 120, easing: MOTION_EASING.accelerate },
+  },
 }
 
 export function Popover({
@@ -127,6 +132,7 @@ export function Popover({
         onBack={closeOnBack ? handleClose : undefined}
         onEntered={afterOpen}
         onExited={handleExited}
+        ready={floating.position !== null}
         transition={POPOVER_TRANSITION}
         visible={isVisible}
       >
@@ -158,8 +164,6 @@ function PopoverBubble({
   position: FloatingPosition | null
   styles: PopoverProps['styles']
 }) {
-  const positionStyle = resolvePositionStyle(position)
-
   const bubbleProps = {
     accessibilityElementsHidden: !position,
     accessible: false,
@@ -169,37 +173,37 @@ function PopoverBubble({
     ref: contentRef,
     role: 'none' as const,
     className: cn(
-      'absolute max-w-full overflow-hidden rounded-lg border border-tsuki-border bg-tsuki-surface-elevated p-3 shadow-md',
+      'max-w-full overflow-hidden rounded-lg border border-tsuki-border bg-tsuki-surface-elevated p-3 shadow-md',
       classNames?.content,
     ),
-    style: [styles?.content, positionStyle],
+    style: styles?.content,
     testID: 'tsuki-popover-content',
   }
 
-  return createElement(
-    View,
-    bubbleProps,
-    typeof content === 'string' || typeof content === 'number'
-      ? createElement(
-          Text,
-          {
-            className: cn('text-tsuki-foreground', classNames?.text),
-            style: styles?.text,
-          },
-          content,
-        )
-      : content,
+  return (
+    <FloatingBubbleTransition
+      enterOffset={4}
+      enterScale={0.92}
+      exitOffset={3}
+      exitScale={0.96}
+      pointerEvents="box-none"
+      position={position}
+      testID="tsuki-popover-positioner"
+    >
+      {createElement(
+        View,
+        bubbleProps,
+        typeof content === 'string' || typeof content === 'number'
+          ? createElement(
+              Text,
+              {
+                className: cn('text-tsuki-foreground', classNames?.text),
+                style: styles?.text,
+              },
+              content,
+            )
+          : content,
+      )}
+    </FloatingBubbleTransition>
   )
-}
-
-function resolvePositionStyle(position: FloatingPosition | null) {
-  return position
-    ? {
-        position: 'absolute' as const,
-        left: position.x,
-        top: position.y,
-        maxWidth: position.maxWidth,
-        maxHeight: position.maxHeight,
-      }
-    : { position: 'absolute' as const, left: 0, top: 0, opacity: 0 }
 }
