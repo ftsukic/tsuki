@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react'
 import { useOverlayController } from '../overlay/useOverlayController'
 import { useStrictUnmountCleanup } from '../overlay/use-strict-mount-cleanup'
+import { useTsukiTheme } from '../theme/theme'
 import { createBoundDialogController } from './imperative'
 import type { DialogController } from './types'
 
@@ -10,6 +11,9 @@ import type { DialogController } from './types'
  */
 export function useDialog(): DialogController {
   const overlayController = useOverlayController()
+  const theme = useTsukiTheme()
+  const durationRef = useRef(theme.components.Dialog.animationDuration)
+  durationRef.current = theme.components.Dialog.animationDuration
   const requestsRef = useRef(new Map())
   const nextIdRef = useRef(1)
   const activeRef = useRef(true)
@@ -22,6 +26,7 @@ export function useDialog(): DialogController {
         () => nextIdRef.current++,
         () => activeRef.current,
         'Cannot open a Dialog from an unmounted useDialog() owner.',
+        () => durationRef.current,
       ),
     [overlayController],
   )

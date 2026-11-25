@@ -50,6 +50,7 @@ const TSUKI_CSS_VARIABLES = Object.freeze([
   '--tsuki-dialog-content-padding',
   '--tsuki-dialog-button-height',
   '--tsuki-dialog-overlay-color',
+  '--tsuki-dialog-animation-duration',
   '--tsuki-dialog-background-color',
   '--tsuki-popup-overlay-color',
   '--tsuki-popup-border-radius',

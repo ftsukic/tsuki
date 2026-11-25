@@ -53,6 +53,7 @@
   --spacing-tsuki-dialog-content: var(--tsuki-dialog-content-padding);
   --spacing-tsuki-dialog-button: var(--tsuki-dialog-button-height);
   --color-tsuki-dialog-overlay: var(--tsuki-dialog-overlay-color);
+  --duration-tsuki-dialog: var(--tsuki-dialog-animation-duration);
   --color-tsuki-dialog-background: var(--tsuki-dialog-background-color);
   --color-tsuki-popup-overlay: var(--tsuki-popup-overlay-color);
   --radius-tsuki-popup: var(--tsuki-popup-border-radius);

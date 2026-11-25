@@ -47,6 +47,7 @@ const dialog = {
   contentPadding: 20,
   buttonHeight: 48,
   overlayColor: 'rgba(0, 0, 0, 0.45)',
+  animationDuration: 200,
 }
 const popup = {
   overlayColor: 'rgba(0, 0, 0, 0.45)',

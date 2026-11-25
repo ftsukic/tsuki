@@ -106,6 +106,7 @@ function describeComponentToken(component, token, cssVar) {
       if (token === 'contentPadding')
         return { kind: 'spacing', key: 'tsuki-dialog-content', cssVar }
       if (token === 'buttonHeight') return { kind: 'height', key: 'tsuki-dialog-button', cssVar }
+      if (token === 'animationDuration') return { kind: 'duration', key: 'tsuki-dialog', cssVar }
       break
     case 'Popup':
       if (token === 'backgroundColor') {

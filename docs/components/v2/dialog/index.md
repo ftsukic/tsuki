@@ -116,6 +116,7 @@ Both `useDialog()` and `createDialogService()` return a `DialogController` with 
         messageFontSize: 14,
         contentPadding: 24,
         buttonHeight: 48,
+        animationDuration: 200,
       },
     },
   }}
@@ -124,7 +125,7 @@ Both `useDialog()` and `createDialogService()` return a `DialogController` with 
 </ConfigProvider>
 ```
 
-NativeWind v4 and v5 expose `w-tsuki-dialog`, `rounded-tsuki-dialog`, `bg-tsuki-dialog-background`, `bg-tsuki-dialog-overlay`, `px-tsuki-dialog-content`, `pt-tsuki-dialog-content`, `text-tsuki-dialog-title`, and `text-tsuki-dialog-message`. Dialog renders purely with NativeWind-first `--tsuki-*` token classes bridged through `TsukiProvider`'s `renderThemeScope`; `classNames` / `className` and `styles` / `style` override defaults predictably.
+NativeWind v4 and v5 expose `w-tsuki-dialog`, `rounded-tsuki-dialog`, `bg-tsuki-dialog-background`, `bg-tsuki-dialog-overlay`, `px-tsuki-dialog-content`, `pt-tsuki-dialog-content`, `text-tsuki-dialog-title`, `text-tsuki-dialog-message`, and `duration-tsuki-dialog`. Dialog renders purely with NativeWind-first `--tsuki-*` token classes bridged through `TsukiProvider`'s `renderThemeScope`; `classNames` / `className` and `styles` / `style` override defaults predictably.
 
 ## Examples
 

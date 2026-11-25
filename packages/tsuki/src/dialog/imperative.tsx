@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect, useSyncExternalStore } from 'react'
 import { DialogContent, DialogMask } from './dialog-content'
-import { OVERLAY_TRANSITION_PRESETS } from '../overlay/transition/presets'
+import { createDialogTransition } from '../overlay/transition/presets'
 import { useDialogState } from './useDialogState'
 import type { OverlayController, OverlayHandle } from '../overlay/controller'
 import type { OverlayRegistry } from '../overlay/types'
+import { useTsukiTheme } from '../theme/theme'
 import type {
   DialogController,
   DialogHandle,
@@ -23,10 +24,17 @@ interface DialogRequest {
   settled: boolean
 }
 
+interface DialogServiceRegistration {
+  controller: OverlayController
+  getAnimationDuration: () => number
+  lease: number
+  pending: boolean
+}
+
 interface DialogServiceBinding {
   controller: OverlayController
   registry: OverlayRegistry
-  registrations: Map<symbol, { controller: OverlayController; lease: number; pending: boolean }>
+  registrations: Map<symbol, DialogServiceRegistration>
 }
 
 interface DialogServiceState {
@@ -43,12 +51,12 @@ function hasActiveBinding(binding: DialogServiceBinding | null): binding is Dial
   )
 }
 
-function getActiveController(state: DialogServiceState): OverlayController | null {
+function getActiveRegistration(state: DialogServiceState): DialogServiceRegistration | null {
   if (!hasActiveBinding(state.binding)) return null
   const active = [...state.binding.registrations.values()]
     .filter((registration) => !registration.pending)
     .at(-1)
-  return active?.controller ?? null
+  return active ?? null
 }
 
 function settleRequest(
@@ -92,6 +100,7 @@ export function openDialogWithController(
   nextId: number,
   options: DialogOptions,
   canContinue: () => boolean,
+  animationDuration = 200,
 ): DialogHandle {
   let resolveResult!: (result: DialogResult) => void
   const result = new Promise<DialogResult>((resolve) => {
@@ -124,7 +133,7 @@ export function openDialogWithController(
         />
       ),
       mask: createMask(request),
-      transition: OVERLAY_TRANSITION_PRESETS.dialog,
+      transition: createDialogTransition(animationDuration),
       accessibility: {
         mode: 'modal',
         initialFocusRef: request.options.initialFocusRef,
@@ -176,6 +185,7 @@ export function createBoundDialogController(
   nextId: () => number,
   canContinue: () => boolean,
   missingMessage: string,
+  getAnimationDuration: () => number = () => 200,
 ): DialogController {
   function open(options: DialogOptions = {}): DialogHandle {
     const controller = getController()
@@ -192,7 +202,14 @@ export function createBoundDialogController(
       closeRequestProgrammatically(requests, previous)
     }
 
-    return openDialogWithController(controller, requests, nextId(), options, canContinue)
+    return openDialogWithController(
+      controller,
+      requests,
+      nextId(),
+      options,
+      canContinue,
+      getAnimationDuration(),
+    )
   }
 
   return Object.freeze({
@@ -227,11 +244,12 @@ export function createDialogService(): DialogService {
     nextRequestId: 1,
   }
   const service = createBoundDialogController(
-    () => getActiveController(state),
+    () => getActiveRegistration(state)?.controller ?? null,
     state.requests,
     () => state.nextRequestId++,
     () => hasActiveBinding(state.binding),
     'DialogService requires a mounted DialogServiceBridge inside TsukiProvider.',
+    () => getActiveRegistration(state)?.getAnimationDuration() ?? 200,
   )
   serviceStates.set(service, state)
   return service
@@ -241,6 +259,7 @@ export function bindDialogService(
   service: DialogService,
   controller: OverlayController,
   registry: OverlayRegistry,
+  getAnimationDuration: () => number = () => 200,
 ): symbol {
   const state = getState(service)
   const current = state.binding
@@ -258,7 +277,12 @@ export function bindDialogService(
     current?.registry === registry ? current : { controller, registry, registrations: new Map() }
   const token = Symbol('dialog-service-binding')
   binding.controller = controller
-  binding.registrations.set(token, { controller, lease: 0, pending: false })
+  binding.registrations.set(token, {
+    controller,
+    getAnimationDuration,
+    lease: 0,
+    pending: false,
+  })
   state.binding = binding
   return token
 }
@@ -327,8 +351,15 @@ function ImperativeDialogContent({
       request.overlayHandle?.close()
     },
   })
-
+  const theme = useTsukiTheme()
+  const dialogDuration = theme.components.Dialog.animationDuration
   const { busy, pendingAction, requestAction, requestDismiss } = dialogState
+
+  useLayoutEffect(() => {
+    request.overlayHandle?.update({
+      transition: createDialogTransition(dialogDuration),
+    })
+  }, [dialogDuration, request])
 
   useLayoutEffect(() => {
     request.dismissFromOwner = requestDismiss
@@ -350,7 +381,7 @@ function ImperativeDialogContent({
       onCancelPress={() => requestAction('cancel')}
       onConfirmPress={() => requestAction('confirm')}
       pendingAction={pendingAction}
-      visible={dialogState.visible}
+      visible
     />
   )
 }

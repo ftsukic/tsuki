@@ -1,7 +1,8 @@
 import { forwardRef, useCallback, useMemo } from 'react'
 import type { View } from 'react-native'
 import { OverlayPortal } from '../overlay/overlay-portal'
-import { OVERLAY_TRANSITION_PRESETS } from '../overlay/transition/presets'
+import { createDialogTransition } from '../overlay/transition/presets'
+import { useTsukiTheme } from '../theme/theme'
 import { useDialogState } from './useDialogState'
 import { DialogContent, DialogMask } from './dialog-content'
 import type { DialogProps } from './types'
@@ -24,6 +25,7 @@ export const Dialog = forwardRef<View, DialogProps>(function Dialog(props, ref) 
     classNames,
     styles,
   } = props
+  const theme = useTsukiTheme()
   const state = useDialogState({
     visible,
     defaultVisible,
@@ -35,6 +37,10 @@ export const Dialog = forwardRef<View, DialogProps>(function Dialog(props, ref) 
   const requestDismiss = state.requestDismiss
   const handleMaskPress = useCallback(() => requestDismiss('overlay'), [requestDismiss])
   const handleBack = useCallback(() => requestDismiss('back'), [requestDismiss])
+  const transition = useMemo(
+    () => createDialogTransition(theme.components.Dialog.animationDuration),
+    [theme.components.Dialog.animationDuration],
+  )
   const accessibility = useMemo(
     () => ({ mode: 'modal' as const, initialFocusRef, returnFocusRef }),
     [initialFocusRef, returnFocusRef],
@@ -61,7 +67,7 @@ export const Dialog = forwardRef<View, DialogProps>(function Dialog(props, ref) 
       onBack={closeOnBack ? handleBack : undefined}
       onEntered={afterOpen}
       onExited={afterClose}
-      transition={OVERLAY_TRANSITION_PRESETS.dialog}
+      transition={transition}
       visible={state.visible}
     >
       <DialogContent

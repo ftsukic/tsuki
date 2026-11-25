@@ -64,6 +64,7 @@ module.exports = {
         'tsuki-surface': 'var(--tsuki-surface-padding)',
       },
       transitionDuration: {
+        'tsuki-dialog': 'var(--tsuki-dialog-animation-duration)',
         'tsuki-popup': 'var(--tsuki-popup-animation-duration)',
       },
       borderWidth: {

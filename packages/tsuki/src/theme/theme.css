@@ -52,6 +52,7 @@
   --tsuki-dialog-content-padding: 20px;
   --tsuki-dialog-button-height: 48px;
   --tsuki-dialog-overlay-color: rgba(0, 0, 0, 0.45);
+  --tsuki-dialog-animation-duration: 200ms;
   --tsuki-dialog-background-color: #ffffff;
   --tsuki-popup-overlay-color: rgba(0, 0, 0, 0.45);
   --tsuki-popup-border-radius: 16px;
@@ -116,6 +117,7 @@
   --tsuki-dialog-content-padding: 20px;
   --tsuki-dialog-button-height: 48px;
   --tsuki-dialog-overlay-color: rgba(0, 0, 0, 0.45);
+  --tsuki-dialog-animation-duration: 200ms;
   --tsuki-dialog-background-color: #1f2937;
   --tsuki-popup-overlay-color: rgba(0, 0, 0, 0.45);
   --tsuki-popup-border-radius: 16px;

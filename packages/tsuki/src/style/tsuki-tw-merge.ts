@@ -67,7 +67,7 @@ export const TSUKI_TAILWIND_MERGE_EXTENSION = {
   },
   classGroups: {
     'border-w': [{ border: ['tsuki-surface-width'] }],
-    duration: [{ duration: ['tsuki-popup'] }],
+    duration: [{ duration: ['tsuki-dialog', 'tsuki-popup'] }],
     opacity: [
       {
         opacity: [

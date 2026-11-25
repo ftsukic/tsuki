@@ -89,6 +89,7 @@ export interface DialogThemeTokens {
   messageFontSize: number
   contentPadding: number
   buttonHeight: number
+  animationDuration: number
 }
 
 export interface PopupThemeTokens {
