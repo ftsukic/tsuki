@@ -32,11 +32,11 @@ module.exports = {
         'tsuki-surface': 'var(--tsuki-surface-border-radius)',
       },
       height: {
-        'tsuki-button': 'var(--tsuki-button-height)',
         'tsuki-dialog-button': 'var(--tsuki-dialog-button-height)',
         'tsuki-input': 'var(--tsuki-input-height)',
       },
       spacing: {
+        'tsuki-button': 'var(--tsuki-button-height)',
         'tsuki-card': 'var(--tsuki-card-padding)',
         'tsuki-card-header': 'var(--tsuki-card-header-padding)',
         'tsuki-card-body': 'var(--tsuki-card-body-padding)',

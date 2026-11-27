@@ -1,6 +1,6 @@
 /**
  * @title Variants
- * @description Compares solid, outlined, and ghost buttons.
+ * @description Compares solid, outlined, ghost, and link buttons.
  */
 import { Button } from '@ftsukic/tsuki'
 import { View } from 'react-native'
@@ -11,6 +11,9 @@ export default function Variants() {
       <Button>Solid</Button>
       <Button variant="outlined">Outlined</Button>
       <Button variant="ghost">Ghost</Button>
+      <View style={{ alignItems: 'flex-start' }}>
+        <Button variant="link">Link</Button>
+      </View>
     </View>
   )
 }

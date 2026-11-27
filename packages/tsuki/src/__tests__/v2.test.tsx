@@ -150,6 +150,93 @@ describe('Tsuki v2 foundation components', () => {
     expect(className).not.toContain('bg-tsuki-primary')
   })
 
+  it('supports round and circular icon button shapes without trailing icon margin', async () => {
+    await render(
+      <>
+        <Button shape="round">Pill</Button>
+        <Button
+          shape="circle"
+          size="small"
+          accessibilityLabel="Small icon action"
+          icon={<Text>+</Text>}
+        />
+        <Button
+          shape="circle"
+          size="medium"
+          accessibilityLabel="Medium icon action"
+          icon={<Text>✓</Text>}
+        />
+        <Button
+          shape="circle"
+          size="large"
+          accessibilityLabel="Large icon action"
+          icon={<Text>!</Text>}
+        />
+        <Button shape="circle" loading accessibilityLabel="Loading icon action" />
+      </>,
+    )
+
+    const pillClasses = String(screen.getByRole('button', { name: 'Pill' }).props.className).split(
+      /\s+/,
+    )
+    expect(pillClasses).toContain('rounded-full')
+    expect(pillClasses).not.toContain('rounded-tsuki-button')
+    expect(pillClasses).toContain('px-4')
+
+    const smallCircleClasses = String(
+      screen.getByRole('button', { name: 'Small icon action' }).props.className,
+    ).split(/\s+/)
+    expect(smallCircleClasses).toEqual(
+      expect.arrayContaining(['rounded-full', 'h-9', 'w-9', 'px-0']),
+    )
+    expect(smallCircleClasses).not.toContain('px-3')
+    expect(screen.getByText('+').parent?.props.className).toBe('')
+
+    const mediumCircleClasses = String(
+      screen.getByRole('button', { name: 'Medium icon action' }).props.className,
+    ).split(/\s+/)
+    expect(mediumCircleClasses).toEqual(
+      expect.arrayContaining(['rounded-full', 'h-tsuki-button', 'w-tsuki-button', 'px-0']),
+    )
+    expect(mediumCircleClasses).not.toContain('px-4')
+    expect(screen.getByText('✓').parent?.props.className).toBe('')
+
+    const largeCircleClasses = String(
+      screen.getByRole('button', { name: 'Large icon action' }).props.className,
+    ).split(/\s+/)
+    expect(largeCircleClasses).toEqual(
+      expect.arrayContaining(['rounded-full', 'h-12', 'w-12', 'px-0']),
+    )
+    expect(largeCircleClasses).not.toContain('px-5')
+
+    const loadingCircle = screen.getByRole('button', { name: 'Loading icon action' })
+    expect(loadingCircle.props.accessibilityState).toMatchObject({ busy: true, disabled: true })
+  })
+
+  it('renders link buttons with compact sizing, primary text, and default hitSlop', async () => {
+    await render(
+      <>
+        <Button variant="link">Forgot password</Button>
+        <Button variant="link" hitSlop={16}>
+          Custom hitSlop
+        </Button>
+      </>,
+    )
+
+    const linkButton = screen.getByRole('button', { name: 'Forgot password' })
+    const linkClasses = String(linkButton.props.className).split(/\s+/)
+    expect(linkClasses).toEqual(expect.arrayContaining(['bg-transparent', 'h-auto', 'px-0']))
+    expect(linkClasses).not.toContain('h-tsuki-button')
+    expect(linkClasses).not.toContain('px-4')
+    expect(linkButton.props.hitSlop).toEqual({ top: 8, bottom: 8, left: 8, right: 8 })
+    expect(String(screen.getByText('Forgot password').props.className)).toContain(
+      'text-tsuki-primary',
+    )
+
+    const customHitSlopButton = screen.getByRole('button', { name: 'Custom hitSlop' })
+    expect(customHitSlopButton.props.hitSlop).toBe(16)
+  })
+
   it('exposes an accessible Button press action', async () => {
     const onPress = jest.fn()
     await render(<Button onPress={onPress}>Save</Button>)

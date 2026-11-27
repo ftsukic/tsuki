@@ -165,16 +165,7 @@ export const PressableRuntime = forwardRef<ComponentRef<typeof Pressable>, Press
       }
 
       return {}
-    }, [
-      hasStaticOpacity,
-      hasStaticTransform,
-      isDynamicStyle,
-      mode,
-      pressedOpacity,
-      pressedScale,
-      progress,
-      styleConflicts,
-    ])
+    })
     const backgroundFeedbackStyle = useAnimatedStyle(() => {
       'worklet'
 
@@ -185,7 +176,7 @@ export const PressableRuntime = forwardRef<ComponentRef<typeof Pressable>, Press
       return {
         opacity: mode === 'background' && !backgroundBlocked ? progress.get() : 0,
       }
-    }, [hasStaticBackground, isDynamicStyle, mode, progress, styleConflicts])
+    })
     const overlayStyle = useAnimatedStyle(() => {
       'worklet'
 
@@ -193,7 +184,7 @@ export const PressableRuntime = forwardRef<ComponentRef<typeof Pressable>, Press
         opacity:
           mode === 'overlay' ? PRESS_FEEDBACK_PRESETS.overlay.pressedValue * progress.get() : 0,
       }
-    }, [mode, progress])
+    })
 
     const handlePressIn = useCallback(
       (event: GestureResponderEvent) => {

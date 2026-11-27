@@ -2,8 +2,10 @@ import type { ReactNode } from 'react'
 import type { PressableProps, StyleProp, TextStyle, ViewStyle } from 'react-native'
 import type { ClassNames } from '../types'
 
-export type ButtonVariant = 'solid' | 'outlined' | 'ghost'
+export type ButtonVariant = 'solid' | 'outlined' | 'ghost' | 'link'
 export type ButtonSize = 'small' | 'medium' | 'large'
+export type ButtonShape = 'default' | 'round' | 'circle'
+export type ButtonPressFeedback = 'scale' | 'opacity' | 'overlay' | 'none'
 
 export type ButtonClassNames = ClassNames<'root' | 'content' | 'icon'>
 
@@ -18,6 +20,8 @@ export interface ButtonProps extends Omit<PressableProps, 'children' | 'style' |
   icon?: ReactNode
   variant?: ButtonVariant
   size?: ButtonSize
+  shape?: ButtonShape
+  pressFeedback?: ButtonPressFeedback
   loading?: boolean
   className?: string
   classNames?: ButtonClassNames

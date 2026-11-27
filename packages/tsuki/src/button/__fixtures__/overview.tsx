@@ -6,6 +6,8 @@ import TextCascade from './examples/text-cascade'
 import SemanticClasses from './examples/semantic-classes'
 import Variants from './examples/variants'
 import Sizes from './examples/sizes'
+import Shapes from './examples/shapes'
+import PressFeedbackExample from './examples/press-feedback'
 import States from './examples/states'
 import IconExample from './examples/icon'
 import Theme from './examples/theme'
@@ -19,6 +21,8 @@ export default function ButtonOverview() {
       <Basic />
       <Variants />
       <Sizes />
+      <Shapes />
+      <PressFeedbackExample />
       <States />
       <IconExample />
       <Theme />

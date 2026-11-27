@@ -56,7 +56,7 @@ function describeComponentToken(component, token, cssVar) {
   switch (component) {
     case 'Button':
       if (token === 'borderRadius') return { kind: 'radius', key: 'tsuki-button', cssVar }
-      if (token === 'height') return { kind: 'height', key: 'tsuki-button', cssVar }
+      if (token === 'height') return { kind: 'spacing', key: 'tsuki-button', cssVar }
       if (token === 'disabledOpacity') {
         return { kind: 'opacity', key: 'tsuki-button-disabled-opacity', cssVar }
       }

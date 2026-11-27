@@ -486,3 +486,57 @@ it('keeps Button feedback, style order, accessibility, and Cell feedback behavio
   expect(screen.getByTestId('cell-divider')).toBeOnTheScreen()
   expect(screen.getByTestId('plain-cell').props.accessibilityRole).toBeUndefined()
 })
+
+it('supports switching Button pressFeedback modes between scale, opacity, overlay, and none', async () => {
+  await render(
+    runtime(
+      <>
+        <Button pressFeedback="opacity" testOnly_pressed>
+          Opacity
+        </Button>
+        <Button pressFeedback="overlay" testOnly_pressed>
+          Overlay
+        </Button>
+        <Button pressFeedback="none" testOnly_pressed>
+          None
+        </Button>
+      </>,
+    ),
+  )
+
+  const opacityButton = screen.getByRole('button', { name: 'Opacity' })
+  expect(styleOf(opacityButton).opacity).toBeCloseTo(PRESS_FEEDBACK_PRESETS.opacity.pressedValue)
+  expect(styleOf(opacityButton).transform).toBeUndefined()
+
+  const overlayButton = screen.getByRole('button', { name: 'Overlay' })
+  expect(String(overlayButton.props.className).split(/\s+/)).toContain('overflow-hidden')
+  expect(
+    screen.getByTestId('tsuki-press-feedback-overlay', { includeHiddenElements: true }),
+  ).toBeTruthy()
+
+  const noneButton = screen.getByRole('button', { name: 'None' })
+  expect(styleOf(noneButton).transform).toBeUndefined()
+  expect(styleOf(noneButton).opacity).toBeUndefined()
+})
+
+it('defaults link Button pressFeedback to opacity while allowing explicit override', async () => {
+  await render(
+    runtime(
+      <>
+        <Button variant="link" testOnly_pressed>
+          Link default
+        </Button>
+        <Button variant="link" pressFeedback="scale" testOnly_pressed>
+          Link scale
+        </Button>
+      </>,
+    ),
+  )
+
+  const linkDefault = screen.getByRole('button', { name: 'Link default' })
+  expect(styleOf(linkDefault).opacity).toBeCloseTo(PRESS_FEEDBACK_PRESETS.opacity.pressedValue)
+  expect(styleOf(linkDefault).transform).toBeUndefined()
+
+  const linkScale = screen.getByRole('button', { name: 'Link scale' })
+  expect(styleOf(linkScale).transform).toEqual([{ scale: 0.98 }])
+})
