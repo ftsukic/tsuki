@@ -132,44 +132,132 @@ function run(command, args, cwd, env = process.env) {
   })
 }
 
-function connectedEmulator(requested) {
-  if (requested && !/^emulator-\d+$/.test(requested))
-    throw new Error(`Connected emulator not found: ${requested}`)
-  const output = adb(['devices'], { encoding: 'utf8' })
-  const devices = output
+const defaultMuMuPort = Number(process.env.MUMU_ADB_PORT || 16384)
+
+function isPortOpen(host, port, timeout = 250) {
+  return new Promise((resolve) => {
+    const socket = net.createConnection({ host, port })
+    const finish = (open) => {
+      socket.destroy()
+      resolve(open)
+    }
+    socket.setTimeout(timeout, () => finish(false))
+    socket.once('error', () => finish(false))
+    socket.once('connect', () => finish(true))
+  })
+}
+
+async function ensureAndroidDeviceConnected() {
+  const mumuOpen = await isPortOpen('127.0.0.1', defaultMuMuPort)
+  const adbEnv = mumuOpen ? { ...process.env, ADB_LOCAL_TRANSPORT_MAX_PORT: '5553' } : process.env
+  const target = `127.0.0.1:${defaultMuMuPort}`
+
+  if (mumuOpen) {
+    let devices = parseAdbDevices(adb(['devices', '-l'], { encoding: 'utf8', env: adbEnv }))
+    if (devices.some(({ serial }) => serial.startsWith('emulator-'))) {
+      // Restart ADB with local transport scanning capped at 5553 so MuMu's 5555
+      // (and other non-AVD emulators on 5557+) do not appear as emulator-5554/5556.
+      try {
+        adb(['kill-server'], { encoding: 'utf8', env: adbEnv })
+      } catch {
+        /* Server may already be stopped. */
+      }
+      adb(['start-server'], { encoding: 'utf8', env: adbEnv })
+      devices = []
+    }
+    if (!devices.some(({ serial }) => serial === target)) {
+      adb(['connect', target], { encoding: 'utf8', env: adbEnv })
+      console.log(`Connected MuMu emulator via ADB: ${target}`)
+      devices = parseAdbDevices(adb(['devices', '-l'], { encoding: 'utf8', env: adbEnv }))
+    }
+    return { devices, env: adbEnv }
+  }
+
+  return {
+    devices: parseAdbDevices(adb(['devices', '-l'], { encoding: 'utf8', env: adbEnv })),
+    env: adbEnv,
+  }
+}
+
+function runInteractive(command, args, cwd, env = process.env) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, args, { cwd, env, stdio: 'inherit' })
+    child.once('error', reject)
+    child.once('exit', (code, signal) => {
+      if (code === 0) resolve()
+      else reject(new Error(`${command} failed (${signal || code})`))
+    })
+  })
+}
+
+function parseAdbDevices(output) {
+  return output
     .split(/\r?\n/)
-    .map((line) => line.trim().split(/\s+/))
-    .filter(([serial, state]) => serial.startsWith('emulator-') && state === 'device')
-    .map(([serial]) => serial)
-  if (requested && !devices.includes(requested))
+    .slice(1)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [serial, state, ...details] = line.split(/\s+/)
+      const modelToken = details.find((entry) => entry.startsWith('model:'))
+      const model = modelToken ? modelToken.slice('model:'.length) : undefined
+      return { serial, state, model }
+    })
+    .filter(({ serial, state }) => Boolean(serial) && state === 'device')
+}
+
+function connectedEmulator(requested) {
+  if (requested && !/^(emulator-\d+|[^\s:]+:\d+)$/.test(requested))
+    throw new Error(`Connected emulator not found: ${requested}`)
+  const output = adb(['devices', '-l'], { encoding: 'utf8' })
+  const devices = parseAdbDevices(output)
+  if (requested && !devices.some(({ serial }) => serial === requested))
     throw new Error(`Connected emulator not found: ${requested}`)
   if (!requested && devices.length !== 1) {
     throw new Error(
       `Expected one connected emulator; found ${devices.length}. Use --device <adb-serial>.`,
     )
   }
-  const serial = requested || devices[0]
-  const name = adb(['-s', serial, 'emu', 'avd', 'name'], { encoding: 'utf8' })
-    .split(/\r?\n/)
-    .find((line) => line.trim() && line.trim() !== 'OK')
-    .trim()
-  return { serial, name }
+  const target = requested ? devices.find(({ serial }) => serial === requested) : devices[0]
+  const name = target.serial.startsWith('emulator-')
+    ? adb(['-s', target.serial, 'emu', 'avd', 'name'], { encoding: 'utf8' })
+        .split(/\r?\n/)
+        .find((line) => line.trim() && line.trim() !== 'OK')
+        .trim()
+    : target.model || `Device ${target.serial}`
+  return { serial: target.serial, name }
 }
 
 async function main([action, ...args]) {
   if (action === 'check') return checkPorts()
   if (action === 'prepare') {
     await checkPorts()
-    const output = adb(['devices'], { encoding: 'utf8' })
-    for (const line of output.split(/\r?\n/)) {
-      const [serial, state] = line.trim().split(/\s+/)
-      if (!serial.startsWith('emulator-') || state !== 'device') continue
+    const { devices, env } = await ensureAndroidDeviceConnected()
+    for (const { serial } of devices) {
       for (const { port } of projects) {
-        adb(['-s', serial, 'reverse', `tcp:${port}`, `tcp:${port}`])
+        adb(['-s', serial, 'reverse', `tcp:${port}`, `tcp:${port}`], { env })
       }
       console.log(`ADB reverse ready on ${serial}: ${projects.map(({ port }) => port).join(', ')}`)
     }
     return
+  }
+  if (action === 'android') {
+    const { devices, env } = await ensureAndroidDeviceConnected()
+    const portIndex = args.indexOf('--port')
+    const port = portIndex !== -1 ? args[portIndex + 1] : undefined
+    if (port && /^\d+$/.test(port)) {
+      for (const { serial } of devices) {
+        adb(['-s', serial, 'reverse', `tcp:${port}`, `tcp:${port}`], { env })
+      }
+    }
+    return runInteractive(
+      process.execPath,
+      [expoCli(process.cwd()), 'run:android', ...args],
+      process.cwd(),
+      {
+        ...env,
+        EXPO_OFFLINE: env.EXPO_OFFLINE ?? '1',
+      },
+    )
   }
   if (action === 'start') {
     const project = projects.find(({ directory }) => path.basename(process.cwd()) === directory)
@@ -186,6 +274,7 @@ async function main([action, ...args]) {
   if (action === 'install:android') {
     if (args.length && (args.length !== 2 || args[0] !== '--device'))
       throw new Error('Usage: install:android [--device <adb-serial>]')
+    if (!args[1]) await ensureAndroidDeviceConnected()
     const device = connectedEmulator(args[1])
     console.log(
       `Installing all three apps on ${device.serial} (${device.name}). Metro will not be started.`,
@@ -283,7 +372,7 @@ async function main([action, ...args]) {
         throw new Error(`[${project.name}] Android install stopped: ${error.message}`)
       }
     }
-  } else throw new Error('Expected check, prepare, start, or install:android')
+  } else throw new Error('Expected check, prepare, start, android, or install:android')
 }
 
 if (require.main === module)
@@ -292,4 +381,4 @@ if (require.main === module)
     process.exitCode = error.code === 'INTERRUPTED' ? 130 : 1
   })
 
-module.exports = { checkPorts, projects, nativeFingerprint, fileHash }
+module.exports = { checkPorts, projects, nativeFingerprint, fileHash, parseAdbDevices, isPortOpen }

@@ -5,7 +5,13 @@ const path = require('node:path')
 const fs = require('node:fs')
 const os = require('node:os')
 const { test } = require('node:test')
-const { checkPorts, projects, nativeFingerprint } = require('./playgrounds.cjs')
+const {
+  checkPorts,
+  projects,
+  nativeFingerprint,
+  parseAdbDevices,
+  isPortOpen,
+} = require('./playgrounds.cjs')
 
 test('fixed port conflicts identify the app and fail without starting another port', async () => {
   for (const project of projects) {
@@ -60,4 +66,33 @@ test('APK reuse follows native inputs and ABI, while JS and generated outputs do
   } finally {
     fs.rmSync(cwd, { recursive: true, force: true })
   }
+})
+
+test('parseAdbDevices recognizes both TCP emulators (e.g. MuMu) and AVD emulators', () => {
+  const sample = [
+    'List of devices attached',
+    '127.0.0.1:16384        device product:aurora model:24031PN0DC device:aurora transport_id:1',
+    'emulator-5554          device product:sdk_phone64_x86_64 model:Pixel_10 device:emu64x transport_id:2',
+    'emulator-5556          offline transport_id:3',
+    '',
+  ].join('\n')
+  assert.deepEqual(parseAdbDevices(sample), [
+    { serial: '127.0.0.1:16384', state: 'device', model: '24031PN0DC' },
+    { serial: 'emulator-5554', state: 'device', model: 'Pixel_10' },
+  ])
+})
+
+test('isPortOpen detects listening and closed local TCP ports', async () => {
+  const server = net.createServer((socket) => socket.destroy())
+  await new Promise((resolve, reject) => {
+    server.once('error', reject)
+    server.listen(0, '127.0.0.1', resolve)
+  })
+  const { port } = server.address()
+  try {
+    assert.equal(await isPortOpen('127.0.0.1', port), true)
+  } finally {
+    await new Promise((resolve) => server.close(resolve))
+  }
+  assert.equal(await isPortOpen('127.0.0.1', port), false)
 })
