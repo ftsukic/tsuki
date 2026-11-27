@@ -1,12 +1,14 @@
 import { createTransitionCompletion } from '../overlay/transition/transition-completion'
-import { act, cleanup, renderHook } from '@testing-library/react-native'
-import { createElement, type PropsWithChildren } from 'react'
+import { act, cleanup, render, renderHook } from '@testing-library/react-native'
+import { createElement, useLayoutEffect, type PropsWithChildren } from 'react'
 import * as Reanimated from 'react-native-reanimated'
 import * as Worklets from 'react-native-worklets'
 import { getDefaultTheme } from '../theme/defaults'
 import { TsukiProvider } from '../theme/tsuki-provider'
 import { createOverlayRegistry } from '../overlay/registry'
 import type { OverlayEntry, OverlayRegistry } from '../overlay/types'
+import { OverlayEntryTransition } from '../overlay/transition/overlay-transition'
+import { useOverlayTransitionContext } from '../overlay/transition/transition-context'
 import { useOverlayTransition } from '../overlay/transition/use-overlay-transition'
 import { MOTION_EASING } from '../motion/easing'
 import type { OverlayTransitionConfig } from '../overlay/transition/types'
@@ -440,5 +442,50 @@ describe('Overlay transition progress listeners', () => {
     expect(scheduleOnRNMock).toHaveBeenCalledTimes(2)
     expect(onProgress).toHaveBeenCalledTimes(2)
     await utils.unmount()
+  })
+})
+
+describe('OverlayEntryTransition local content target handoff', () => {
+  it('resets outer content animated style to identity opacity and transform when claimed locally', async () => {
+    const updaters: Array<() => Record<string, unknown>> = []
+    jest.spyOn(Reanimated, 'useAnimatedStyle').mockImplementation(((updater: () => unknown) => {
+      updaters.push(updater as () => Record<string, unknown>)
+      return updater()
+    }) as typeof Reanimated.useAnimatedStyle)
+
+    function LocalTargetConsumer() {
+      const ctx = useOverlayTransitionContext()
+      const setLocalContentTarget = ctx?.setLocalContentTarget
+      useLayoutEffect(() => {
+        if (!setLocalContentTarget) return
+        setLocalContentTarget(true)
+        return () => setLocalContentTarget(false)
+      }, [setLocalContentTarget])
+      return null
+    }
+
+    const registry = createOverlayRegistry()
+    registry.mount({
+      content: createElement(LocalTargetConsumer),
+      ready: false,
+      transition: { content: { preset: 'scale-fade', enter: { duration: 160 } } },
+      backBehavior: 'dismiss',
+      onBack: jest.fn(),
+      theme: getDefaultTheme('light'),
+      themeScope: {},
+    })
+    const entry = registry.getSnapshot()[0]
+
+    await render(
+      createElement(
+        createMotionWrapper,
+        null,
+        createElement(OverlayEntryTransition, { entry, registry }),
+      ),
+    )
+
+    const contentUpdater = updaters.at(-1)
+    expect(contentUpdater).toBeDefined()
+    expect(contentUpdater?.()).toEqual({ opacity: 1, transform: [] })
   })
 })

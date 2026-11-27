@@ -50,15 +50,13 @@ export function OverlayEntryTransition({
     [progress.contentProgress, reportContentSize, setLocalContentTarget, stage],
   )
 
-  const maskStyle = useAnimatedStyle(
-    () =>
-      maskPreset
-        ? createTransitionStyle(progress.maskProgress.get(), maskPreset, width, height, stage)
-        : {},
-    [height, maskPreset, stage, width],
+  const maskStyle = useAnimatedStyle(() =>
+    maskPreset
+      ? createTransitionStyle(progress.maskProgress.get(), maskPreset, width, height, stage)
+      : {},
   )
   const contentStyle = useAnimatedStyle(() => {
-    if (localContentClaimed.get()) return {}
+    if (localContentClaimed.get()) return { opacity: 1, transform: [] }
     const mw = measuredWidth.get()
     const mh = measuredHeight.get()
     return createTransitionStyle(
@@ -68,7 +66,7 @@ export function OverlayEntryTransition({
       mh > 0 ? mh : height,
       stage,
     )
-  }, [contentPreset, height, stage, width])
+  })
   const hidden = entry.phase === 'hidden'
   const exiting = entry.phase === 'exiting'
 
