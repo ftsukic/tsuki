@@ -1,7 +1,8 @@
 import { useLayoutEffect } from 'react'
 import type { ReactNode } from 'react'
-import Animated, { useAnimatedStyle } from 'react-native-reanimated'
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 import { useOverlayTransitionContext } from '../overlay/transition/transition-context'
+import type { FloatingScrollOffsetPair } from './scroll-scope'
 import type { FloatingPlacement, FloatingPosition } from './types'
 
 interface FloatingBubbleTransitionProps {
@@ -11,6 +12,9 @@ interface FloatingBubbleTransitionProps {
   enterOffset?: number
   exitOffset?: number
   pointerEvents?: 'none' | 'box-none'
+  scrollOffsets?: ReadonlyArray<FloatingScrollOffsetPair>
+  anchorScrollOffset?: { x: number; y: number }
+  followScroll?: boolean
   testID?: string
   children: ReactNode
 }
@@ -43,6 +47,9 @@ export function FloatingBubbleTransition({
   enterOffset = 4,
   exitOffset = 3,
   pointerEvents = 'box-none',
+  scrollOffsets,
+  anchorScrollOffset,
+  followScroll = false,
   testID,
   children,
 }: FloatingBubbleTransitionProps) {
@@ -51,6 +58,13 @@ export function FloatingBubbleTransition({
   const contentProgress = transitionContext?.contentProgress
   const stage = transitionContext?.stage ?? 'enter'
   const resolvedPlacement = position?.placement
+  const anchorScrollX = useSharedValue(anchorScrollOffset?.x ?? 0)
+  const anchorScrollY = useSharedValue(anchorScrollOffset?.y ?? 0)
+
+  useLayoutEffect(() => {
+    anchorScrollX.set(anchorScrollOffset?.x ?? 0)
+    anchorScrollY.set(anchorScrollOffset?.y ?? 0)
+  }, [anchorScrollOffset?.x, anchorScrollOffset?.y, anchorScrollX, anchorScrollY])
 
   useLayoutEffect(() => {
     if (!setLocalContentTarget) return
@@ -58,8 +72,29 @@ export function FloatingBubbleTransition({
     return () => setLocalContentTarget(false)
   }, [setLocalContentTarget])
 
+  const hasScrollTracking = Boolean(followScroll && scrollOffsets && scrollOffsets.length > 0)
+
   const animatedStyle = useAnimatedStyle(() => {
-    if (!contentProgress) return {}
+    let scrollDeltaX = 0
+    let scrollDeltaY = 0
+    if (hasScrollTracking && scrollOffsets) {
+      let currentX = 0
+      let currentY = 0
+      for (let i = 0; i < scrollOffsets.length; i += 1) {
+        currentX += scrollOffsets[i].x.get()
+        currentY += scrollOffsets[i].y.get()
+      }
+      scrollDeltaX = currentX - anchorScrollX.get()
+      scrollDeltaY = currentY - anchorScrollY.get()
+    }
+
+    if (!contentProgress) {
+      if (!hasScrollTracking) return {}
+      return {
+        transform: [{ translateX: -scrollDeltaX }, { translateY: -scrollDeltaY }],
+      }
+    }
+
     const progress = contentProgress.get()
     const isEnter = stage === 'enter'
     const fromScale = isEnter ? enterScale : exitScale
@@ -69,16 +104,20 @@ export function FloatingBubbleTransition({
 
     return {
       opacity: progress,
-      transform: [{ translateX: offset.x }, { translateY: offset.y }, { scale }],
+      transform: [
+        { translateX: offset.x - scrollDeltaX },
+        { translateY: offset.y - scrollDeltaY },
+        { scale },
+      ],
     }
-  }, [contentProgress, enterOffset, enterScale, exitOffset, exitScale, resolvedPlacement, stage])
+  })
 
   const positionStyle = resolvePositionStyle(position)
 
   return (
     <Animated.View
       pointerEvents={position ? pointerEvents : 'none'}
-      style={[positionStyle, transitionContext ? animatedStyle : undefined]}
+      style={[positionStyle, transitionContext || hasScrollTracking ? animatedStyle : undefined]}
       testID={testID}
     >
       {children}

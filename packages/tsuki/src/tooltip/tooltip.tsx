@@ -3,6 +3,7 @@ import type { ReactNode, RefObject } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import type { LayoutChangeEvent, View as NativeView } from 'react-native'
 import { FloatingBubbleTransition } from '../floating/bubble-transition'
+import type { FloatingScrollOffsetPair } from '../floating/scroll-scope'
 import { FloatingTrigger } from '../floating/trigger'
 import { useFloating } from '../floating/useFloating'
 import type { FloatingPosition } from '../floating/types'
@@ -43,6 +44,7 @@ export function Tooltip({
   collisionPadding = 8,
   avoidCollisions = true,
   repositionKey,
+  scrollBehavior = 'follow',
   accessibilityLabel,
   accessibilityHint,
   className,
@@ -96,6 +98,15 @@ export function Tooltip({
     repositionKey,
     destination: 'root',
   })
+
+  useEffect(() => {
+    const scope = floating.scrollScope
+    if (!isVisible || !scope) return
+    if (scrollBehavior === 'dismiss') {
+      return scope.subscribeScroll(handleClose)
+    }
+    return scope.subscribeScrollEnd(floating.reposition)
+  }, [floating.reposition, floating.scrollScope, handleClose, isVisible, scrollBehavior])
   const accessibility = useMemo(
     () => ({ mode: 'non-modal' as const, initialFocusRef, returnFocusRef }),
     [initialFocusRef, returnFocusRef],
@@ -111,7 +122,7 @@ export function Tooltip({
     />
   ) : undefined
   const anchorProps = {
-    className: semanticClassName(classNames, 'root', undefined, className),
+    className: semanticClassName(classNames, 'root', 'self-start', className),
     collapsable: false,
     onLayout: floating.onAnchorLayout,
     onTouchMove: floating.onAnchorTouchMove,
@@ -158,11 +169,14 @@ export function Tooltip({
       >
         <TooltipBubble
           accessibilityLabel={textContent}
+          anchorScrollOffset={floating.scrollOffset}
           classNames={classNames}
           content={content}
           contentRef={contentRef}
+          followScroll={scrollBehavior === 'follow'}
           onContentLayout={floating.onContentLayout}
           position={floating.position}
+          scrollOffsets={floating.scrollScope?.offsets}
           styles={styles}
         />
       </OverlayPortal>
@@ -172,19 +186,25 @@ export function Tooltip({
 
 function TooltipBubble({
   accessibilityLabel,
+  anchorScrollOffset,
   classNames,
   contentRef,
   content,
+  followScroll,
   onContentLayout,
   position,
+  scrollOffsets,
   styles,
 }: {
   accessibilityLabel?: string
+  anchorScrollOffset: { x: number; y: number }
   classNames: TooltipProps['classNames']
   contentRef: RefObject<NativeView | null>
   content: ReactNode
+  followScroll: boolean
   onContentLayout: (event: LayoutChangeEvent) => void
   position: FloatingPosition | null
+  scrollOffsets?: ReadonlyArray<FloatingScrollOffsetPair>
   styles: TooltipProps['styles']
 }) {
   const simpleContent = typeof content === 'string' || typeof content === 'number'
@@ -209,12 +229,15 @@ function TooltipBubble({
 
   return (
     <FloatingBubbleTransition
+      anchorScrollOffset={anchorScrollOffset}
       enterOffset={4}
       enterScale={0.94}
       exitOffset={3}
       exitScale={0.97}
+      followScroll={followScroll}
       pointerEvents="none"
       position={position}
+      scrollOffsets={scrollOffsets}
       testID="tsuki-tooltip-positioner"
     >
       {createElement(

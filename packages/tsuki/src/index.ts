@@ -39,12 +39,25 @@ export type {
   DialogStyles,
   DialogTheme,
 } from './dialog'
+export { FloatingScrollScope, FloatingScrollView } from './floating/scroll-scope'
+export type {
+  FloatingScrollBehavior,
+  FloatingScrollProps,
+  FloatingScrollScopeProps,
+  FloatingScrollViewProps,
+} from './floating/types'
 export { Icon } from './icon'
 export type { IconDefinition, IconName, IconProps } from './icon'
 export { Input } from './input'
 export type { InputClassNames, InputProps, InputStyles } from './input'
 export { Popover } from './popover'
-export type { PopoverClassNames, PopoverPlacement, PopoverProps, PopoverStyles } from './popover'
+export type {
+  PopoverClassNames,
+  PopoverPlacement,
+  PopoverProps,
+  PopoverScrollBehavior,
+  PopoverStyles,
+} from './popover'
 export { Popup } from './popup'
 export type { PopupClassNames, PopupPosition, PopupProps, PopupStyles } from './popup'
 export { Portal, PortalHost } from './portal'
@@ -61,6 +74,7 @@ export type {
   TooltipClassNames,
   TooltipPlacement,
   TooltipProps,
+  TooltipScrollBehavior,
   TooltipStyles,
   TooltipTrigger,
 } from './tooltip'

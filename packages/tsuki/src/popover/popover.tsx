@@ -1,11 +1,12 @@
-import { createElement, useCallback, useMemo, useRef, useState } from 'react'
+import { createElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode, RefObject } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
-import type { LayoutChangeEvent, View as NativeView } from 'react-native'
+import type { LayoutChangeEvent, StyleProp, View as NativeView, ViewStyle } from 'react-native'
 import { FloatingBubbleTransition } from '../floating/bubble-transition'
+import type { FloatingScrollOffsetPair } from '../floating/scroll-scope'
 import { FloatingTrigger } from '../floating/trigger'
 import { useFloating } from '../floating/useFloating'
-import type { FloatingPosition } from '../floating/types'
+import type { FloatingArrowPosition, FloatingPosition } from '../floating/types'
 import { MOTION_EASING } from '../motion/easing'
 import { OverlayPortal } from '../overlay/overlay-portal'
 import type { OverlayTransitionConfig } from '../overlay/transition/types'
@@ -22,6 +23,54 @@ const POPOVER_TRANSITION: OverlayTransitionConfig = {
   },
 }
 
+const POPOVER_ARROW_SIZE = 10
+const POPOVER_ARROW_PADDING = 10
+
+function extractArrowSurfaceClasses(contentClassName?: string): string | undefined {
+  if (!contentClassName) return undefined
+  const tokens = contentClassName
+    .split(/\s+/)
+    .filter(
+      (token) =>
+        /^(?:bg-|border-)/.test(token) &&
+        !/^border-(?:\d+|x|y|t|r|b|l|s|e|solid|dashed|dotted|double|hidden|none)(?:-|$)/.test(
+          token,
+        ),
+    )
+  return tokens.length ? tokens.join(' ') : undefined
+}
+
+function extractArrowSurfaceStyle(contentStyle?: StyleProp<ViewStyle>): ViewStyle | undefined {
+  if (!contentStyle) return undefined
+  const flattened = StyleSheet.flatten(contentStyle)
+  if (!flattened) return undefined
+  const style: ViewStyle = {}
+  if (flattened.backgroundColor !== undefined) style.backgroundColor = flattened.backgroundColor
+  if (flattened.borderColor !== undefined) style.borderColor = flattened.borderColor
+  return style.backgroundColor !== undefined || style.borderColor !== undefined ? style : undefined
+}
+
+function resolveArrowStyle(arrow: FloatingArrowPosition): ViewStyle {
+  const half = POPOVER_ARROW_SIZE / 2
+  const base: ViewStyle = {
+    position: 'absolute',
+    width: POPOVER_ARROW_SIZE,
+    height: POPOVER_ARROW_SIZE,
+    transform: [{ rotate: '45deg' }],
+    zIndex: 1,
+  }
+  if (arrow.side === 'top') {
+    return { ...base, top: -half, left: arrow.x, borderTopWidth: 1, borderLeftWidth: 1 }
+  }
+  if (arrow.side === 'bottom') {
+    return { ...base, bottom: -half, left: arrow.x, borderBottomWidth: 1, borderRightWidth: 1 }
+  }
+  if (arrow.side === 'left') {
+    return { ...base, left: -half, top: arrow.y, borderBottomWidth: 1, borderLeftWidth: 1 }
+  }
+  return { ...base, right: -half, top: arrow.y, borderTopWidth: 1, borderRightWidth: 1 }
+}
+
 export function Popover({
   children,
   content,
@@ -35,9 +84,11 @@ export function Popover({
   returnFocusRef,
   placement = 'bottom',
   offset = 8,
+  arrow = true,
   collisionPadding = 8,
   avoidCollisions = true,
   repositionKey,
+  scrollBehavior = 'follow',
   asChild = false,
   closeOnPressOutside = true,
   disabled = false,
@@ -80,9 +131,20 @@ export function Popover({
     offset,
     collisionPadding,
     avoidCollisions,
+    arrowSize: POPOVER_ARROW_SIZE,
+    arrowPadding: POPOVER_ARROW_PADDING,
     repositionKey,
     destination: 'root',
   })
+
+  useEffect(() => {
+    const scope = floating.scrollScope
+    if (!isVisible || !scope) return
+    if (scrollBehavior === 'dismiss') {
+      return scope.subscribeScroll(handleClose)
+    }
+    return scope.subscribeScrollEnd(floating.reposition)
+  }, [floating.reposition, floating.scrollScope, handleClose, isVisible, scrollBehavior])
   const accessibility = useMemo(
     () => ({ mode: 'non-modal' as const, initialFocusRef, returnFocusRef }),
     [initialFocusRef, returnFocusRef],
@@ -98,7 +160,7 @@ export function Popover({
     />
   ) : undefined
   const anchorProps = {
-    className: semanticClassName(classNames, 'root', undefined, className),
+    className: semanticClassName(classNames, 'root', 'self-start', className),
     collapsable: false,
     onLayout: floating.onAnchorLayout,
     onTouchMove: floating.onAnchorTouchMove,
@@ -137,11 +199,15 @@ export function Popover({
         visible={isVisible}
       >
         <PopoverBubble
+          anchorScrollOffset={floating.scrollOffset}
+          arrow={arrow}
           classNames={classNames}
           content={content}
           contentRef={contentRef}
+          followScroll={scrollBehavior === 'follow'}
           onContentLayout={floating.onContentLayout}
           position={floating.position}
+          scrollOffsets={floating.scrollScope?.offsets}
           styles={styles}
         />
       </OverlayPortal>
@@ -150,18 +216,26 @@ export function Popover({
 }
 
 function PopoverBubble({
+  anchorScrollOffset,
+  arrow,
   classNames,
   content,
   contentRef,
+  followScroll,
   onContentLayout,
   position,
+  scrollOffsets,
   styles,
 }: {
+  anchorScrollOffset: { x: number; y: number }
+  arrow: boolean
   classNames: PopoverProps['classNames']
   content: ReactNode
   contentRef: RefObject<NativeView | null>
+  followScroll: boolean
   onContentLayout: (event: LayoutChangeEvent) => void
   position: FloatingPosition | null
+  scrollOffsets?: ReadonlyArray<FloatingScrollOffsetPair>
   styles: PopoverProps['styles']
 }) {
   const bubbleProps = {
@@ -180,14 +254,38 @@ function PopoverBubble({
     testID: 'tsuki-popover-content',
   }
 
+  const arrowProps =
+    arrow && position
+      ? {
+          accessibilityElementsHidden: true,
+          accessible: false,
+          importantForAccessibility: 'no-hide-descendants' as const,
+          pointerEvents: 'none' as const,
+          className: cn(
+            'border-tsuki-border bg-tsuki-surface-elevated',
+            extractArrowSurfaceClasses(classNames?.content),
+            classNames?.arrow,
+          ),
+          style: [
+            resolveArrowStyle(position.arrow),
+            extractArrowSurfaceStyle(styles?.content),
+            styles?.arrow,
+          ],
+          testID: 'tsuki-popover-arrow',
+        }
+      : null
+
   return (
     <FloatingBubbleTransition
+      anchorScrollOffset={anchorScrollOffset}
       enterOffset={4}
       enterScale={0.92}
       exitOffset={3}
       exitScale={0.96}
+      followScroll={followScroll}
       pointerEvents="box-none"
       position={position}
+      scrollOffsets={scrollOffsets}
       testID="tsuki-popover-positioner"
     >
       {createElement(
@@ -204,6 +302,7 @@ function PopoverBubble({
             )
           : content,
       )}
+      {arrowProps ? createElement(View, arrowProps) : null}
     </FloatingBubbleTransition>
   )
 }

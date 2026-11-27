@@ -1,16 +1,22 @@
 import type { ReactNode, RefObject } from 'react'
 import type { StyleProp, TextStyle, View, ViewStyle } from 'react-native'
 import type { ClassNames } from '../types'
-import type { FloatingCollisionPadding, FloatingPlacement } from '../floating/types'
+import type {
+  FloatingCollisionPadding,
+  FloatingPlacementOption,
+  FloatingScrollBehavior,
+} from '../floating/types'
 
-export type PopoverPlacement = FloatingPlacement
+export type PopoverPlacement = FloatingPlacementOption
+export type PopoverScrollBehavior = FloatingScrollBehavior
 
-export type PopoverClassNames = ClassNames<'root' | 'content' | 'text'>
+export type PopoverClassNames = ClassNames<'root' | 'content' | 'text' | 'arrow'>
 
 export interface PopoverStyles {
   root?: StyleProp<ViewStyle>
   content?: StyleProp<ViewStyle>
   text?: StyleProp<TextStyle>
+  arrow?: StyleProp<ViewStyle>
 }
 
 export interface PopoverProps {
@@ -26,9 +32,11 @@ export interface PopoverProps {
   returnFocusRef?: RefObject<View | null>
   placement?: PopoverPlacement
   offset?: number
+  arrow?: boolean
   collisionPadding?: FloatingCollisionPadding
   avoidCollisions?: boolean
   repositionKey?: string | number
+  scrollBehavior?: PopoverScrollBehavior
   asChild?: boolean
   closeOnPressOutside?: boolean
   disabled?: boolean

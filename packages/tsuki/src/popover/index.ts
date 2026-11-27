@@ -1,2 +1,8 @@
 export { Popover } from './popover'
-export type { PopoverClassNames, PopoverPlacement, PopoverProps, PopoverStyles } from './types'
+export type {
+  PopoverClassNames,
+  PopoverPlacement,
+  PopoverProps,
+  PopoverScrollBehavior,
+  PopoverStyles,
+} from './types'

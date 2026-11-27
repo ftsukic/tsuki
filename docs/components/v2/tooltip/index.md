@@ -29,11 +29,12 @@ function HelpHint() {
 | `defaultVisible` | `boolean` | `false` | Initial visibility when `visible` is not supplied. |
 | `onVisibleChange` | `(visible: boolean) => void` | — | Called when the trigger, outside press, Back, or `autoCloseDuration` requests a visibility change. |
 | `afterOpen`, `afterClose` | `() => void` | — | Lifecycle callbacks fired after enter/exit transitions finish. |
-| `placement` | `TooltipPlacement` | `'top'` | Preferred side and alignment (`top`, `bottom`, `left`, `right`, each with optional `-start` or `-end`). |
+| `placement` | `TooltipPlacement` | `'top'` | Preferred side and alignment (`top`, `bottom`, `left`, `right`, each with optional `-start` or `-end`), or `'auto'` to pick the side with the most available space. |
 | `offset` | `number` | `8` | Gap between the trigger and the hint, in React Native layout units. |
 | `collisionPadding` | `number \| Partial<Record<'top' \| 'right' \| 'bottom' \| 'left', number>>` | `8` | Minimum spacing from the destination Host edges. |
 | `avoidCollisions` | `boolean` | `true` | Flip to the opposite side and keep the hint within the Host bounds when possible. |
 | `repositionKey` | `string \| number` | — | Change this value to request a fresh anchor measurement, for example from a ScrollView `onScroll`. |
+| `scrollBehavior` | `'follow' \| 'dismiss'` | `'follow'` | Behavior when an ancestor `FloatingScrollView` / `FloatingScrollScope` scrolls: `'follow'` tracks the trigger on the UI thread (0-jitter with `FloatingScrollView`) and remeasures on scroll end; `'dismiss'` closes the Tooltip when scrolling starts. |
 | `asChild` | `boolean` | `false` | Clones the single React element child and merges press/long-press handlers and accessibility state without adding an extra `Pressable` wrapper. |
 | `closeOnPressOutside` | `boolean` | `false` | When `true`, renders a transparent hit-test layer that closes the Tooltip on outside press. |
 | `closeOnBack` | `boolean` | `true` | Whether Android Back requests dismissal. |

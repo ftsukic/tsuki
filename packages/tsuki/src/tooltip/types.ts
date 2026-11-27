@@ -1,10 +1,15 @@
 import type { ReactNode, RefObject } from 'react'
 import type { StyleProp, TextStyle, View, ViewStyle } from 'react-native'
 import type { ClassNames } from '../types'
-import type { FloatingCollisionPadding, FloatingPlacement } from '../floating/types'
+import type {
+  FloatingCollisionPadding,
+  FloatingPlacementOption,
+  FloatingScrollBehavior,
+} from '../floating/types'
 
-export type TooltipPlacement = FloatingPlacement
+export type TooltipPlacement = FloatingPlacementOption
 export type TooltipTrigger = 'long-press' | 'press'
+export type TooltipScrollBehavior = FloatingScrollBehavior
 
 export type TooltipClassNames = ClassNames<'root' | 'content' | 'text'>
 
@@ -35,6 +40,7 @@ export interface TooltipProps {
   collisionPadding?: FloatingCollisionPadding
   avoidCollisions?: boolean
   repositionKey?: string | number
+  scrollBehavior?: TooltipScrollBehavior
   accessibilityLabel?: string
   accessibilityHint?: string
   className?: string

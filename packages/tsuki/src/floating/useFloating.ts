@@ -7,7 +7,8 @@ import { PortalHostGeometryContext } from '../portal/context'
 import { calculateFloatingPosition } from './collision'
 import { windowRectToHost } from './geometry'
 import { measureViewInWindow } from './measure'
-import type { FloatingCollisionPadding, FloatingPlacement, FloatingPosition } from './types'
+import { useFloatingScrollContext } from './scroll-scope'
+import type { FloatingCollisionPadding, FloatingPlacementOption, FloatingPosition } from './types'
 
 export interface UseFloatingOptions {
   anchorRef: RefObject<View | null>
@@ -17,10 +18,12 @@ export interface UseFloatingOptions {
    * measured position instead of snapping back to null until unmount.
    */
   mounted?: boolean
-  placement: FloatingPlacement
+  placement: FloatingPlacementOption
   offset: number
   collisionPadding?: FloatingCollisionPadding
   avoidCollisions?: boolean
+  arrowSize?: number
+  arrowPadding?: number
   repositionKey?: string | number
   destination?: 'current' | 'root'
 }
@@ -33,7 +36,30 @@ function samePosition(left: FloatingPosition | null, right: FloatingPosition | n
     left.y === right.y &&
     left.placement === right.placement &&
     left.maxWidth === right.maxWidth &&
-    left.maxHeight === right.maxHeight
+    left.maxHeight === right.maxHeight &&
+    left.arrow.side === right.arrow.side &&
+    left.arrow.x === right.arrow.x &&
+    left.arrow.y === right.arrow.y
+  )
+}
+
+const ZERO_SCROLL_OFFSET = { x: 0, y: 0 }
+
+interface MeasuredPlacement {
+  position: FloatingPosition | null
+  scrollOffset: { x: number; y: number }
+}
+
+const EMPTY_PLACEMENT: MeasuredPlacement = {
+  position: null,
+  scrollOffset: ZERO_SCROLL_OFFSET,
+}
+
+function samePlacement(left: MeasuredPlacement, right: MeasuredPlacement): boolean {
+  return (
+    samePosition(left.position, right.position) &&
+    left.scrollOffset.x === right.scrollOffset.x &&
+    left.scrollOffset.y === right.scrollOffset.y
   )
 }
 
@@ -45,12 +71,15 @@ export function useFloating({
   offset,
   collisionPadding,
   avoidCollisions,
+  arrowSize,
+  arrowPadding,
   repositionKey,
   destination = 'current',
 }: UseFloatingOptions) {
   const geometry = useContext(OverlayHostGeometryContext)
   if (!geometry) throw new Error('Floating content must be rendered inside a root TsukiProvider.')
   const portalHost = useContext(PortalHostGeometryContext)
+  const scrollScope = useFloatingScrollContext()
   const destinationHostRef =
     destination === 'root' ? geometry.rootHostRef : (portalHost?.ref ?? geometry.rootHostRef)
   const destinationHostLayoutVersion =
@@ -69,56 +98,96 @@ export function useFloating({
 
   const { width, height } = useWindowDimensions()
   const [contentSize, setContentSize] = useState<{ width: number; height: number } | null>(null)
-  const [position, setPosition] = useState<FloatingPosition | null>(null)
+  const [measured, setMeasured] = useState<MeasuredPlacement>(EMPTY_PLACEMENT)
   const generationRef = useRef(0)
+  const inFlightRef = useRef(false)
+  const needsRemeasureRef = useRef(false)
   const pendingFrameRef = useRef<number | null>(null)
+  const hasMountedRef = useRef(false)
 
   const measure = useCallback(() => {
-    const generation = ++generationRef.current
     if (!enabled || !contentSize) {
-      if (!mounted) setPosition(null)
+      generationRef.current += 1
+      inFlightRef.current = false
+      needsRemeasureRef.current = false
+      if (!mounted) {
+        setMeasured((current) => (current.position === null ? current : EMPTY_PLACEMENT))
+      }
       return
     }
 
     const anchorView = anchorRef.current
     const hostView = destinationHostRef.current
     if (!anchorView || !hostView) {
-      if (!mounted) setPosition(null)
+      generationRef.current += 1
+      inFlightRef.current = false
+      needsRemeasureRef.current = false
+      if (!mounted) {
+        setMeasured((current) => (current.position === null ? current : EMPTY_PLACEMENT))
+      }
       return
     }
+
+    if (inFlightRef.current) {
+      needsRemeasureRef.current = true
+      return
+    }
+
+    const generation = ++generationRef.current
+    inFlightRef.current = true
+    needsRemeasureRef.current = false
+    const scrollOffsetSnapshot = scrollScope?.getTotalOffset() ?? ZERO_SCROLL_OFFSET
 
     void Promise.all([measureViewInWindow(anchorView), measureViewInWindow(hostView)])
       .then(([anchorWindowRect, hostWindowRect]) => {
         if (generationRef.current !== generation) return
+        inFlightRef.current = false
         if (!anchorWindowRect || !hostWindowRect) {
-          setPosition((current) => (current === null ? current : null))
-          return
+          setMeasured((current) => (current.position === null ? current : EMPTY_PLACEMENT))
+        } else {
+          const anchor = windowRectToHost(anchorWindowRect, hostWindowRect)
+          const next = calculateFloatingPosition({
+            anchor,
+            content: contentSize,
+            boundary: {
+              x: 0,
+              y: 0,
+              width: hostWindowRect.width,
+              height: hostWindowRect.height,
+            },
+            placement,
+            offset,
+            collisionPadding: { top: padTop, right: padRight, bottom: padBottom, left: padLeft },
+            avoidCollisions,
+            arrowSize,
+            arrowPadding,
+            isRTL: I18nManager.isRTL,
+          })
+          const nextMeasured: MeasuredPlacement = {
+            position: next,
+            scrollOffset: scrollOffsetSnapshot,
+          }
+          setMeasured((current) => (samePlacement(current, nextMeasured) ? current : nextMeasured))
         }
 
-        const anchor = windowRectToHost(anchorWindowRect, hostWindowRect)
-        const next = calculateFloatingPosition({
-          anchor,
-          content: contentSize,
-          boundary: {
-            x: 0,
-            y: 0,
-            width: hostWindowRect.width,
-            height: hostWindowRect.height,
-          },
-          placement,
-          offset,
-          collisionPadding: { top: padTop, right: padRight, bottom: padBottom, left: padLeft },
-          avoidCollisions,
-          isRTL: I18nManager.isRTL,
-        })
-        setPosition((current) => (samePosition(current, next) ? current : next))
+        if (needsRemeasureRef.current) {
+          needsRemeasureRef.current = false
+          measure()
+        }
       })
       .catch(() => {
         if (generationRef.current !== generation) return
-        setPosition((current) => (current === null ? current : null))
+        inFlightRef.current = false
+        setMeasured((current) => (current.position === null ? current : EMPTY_PLACEMENT))
+        if (needsRemeasureRef.current) {
+          needsRemeasureRef.current = false
+          measure()
+        }
       })
   }, [
     anchorRef,
+    arrowPadding,
+    arrowSize,
     avoidCollisions,
     contentSize,
     destinationHostRef,
@@ -130,10 +199,16 @@ export function useFloating({
     padRight,
     padTop,
     placement,
+    scrollScope,
   ])
 
   const scheduleMeasure = useCallback(() => {
-    if (!enabled || pendingFrameRef.current !== null) return
+    if (!enabled) return
+    if (inFlightRef.current) {
+      needsRemeasureRef.current = true
+      return
+    }
+    if (pendingFrameRef.current !== null) return
     pendingFrameRef.current = requestAnimationFrame(() => {
       pendingFrameRef.current = null
       measure()
@@ -151,22 +226,36 @@ export function useFloating({
 
   useEffect(() => {
     if (enabled) measure()
-    else if (!mounted) setPosition((current) => (current === null ? current : null))
+    else if (!mounted) {
+      setMeasured((current) => (current.position === null ? current : EMPTY_PLACEMENT))
+    }
 
     return () => {
       generationRef.current += 1
+      inFlightRef.current = false
+      needsRemeasureRef.current = false
       if (pendingFrameRef.current !== null) {
         cancelAnimationFrame(pendingFrameRef.current)
         pendingFrameRef.current = null
       }
     }
-  }, [enabled, mounted, height, measure, repositionKey, destinationHostLayoutVersion, width])
+  }, [enabled, mounted, height, measure, destinationHostLayoutVersion, width])
+
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true
+      return
+    }
+    if (enabled) measure()
+  }, [enabled, measure, repositionKey])
 
   return {
-    position,
+    position: measured.position,
+    scrollOffset: measured.scrollOffset,
+    scrollScope,
     onContentLayout,
     onAnchorLayout: scheduleMeasure,
-    onAnchorTouchMove: scheduleMeasure,
+    onAnchorTouchMove: scrollScope ? undefined : scheduleMeasure,
     reposition: scheduleMeasure,
   }
 }

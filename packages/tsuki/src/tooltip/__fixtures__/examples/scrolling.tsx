@@ -1,37 +1,37 @@
 /**
  * @title ScrollView anchor
- * @description Sends the scroll offset as repositionKey so a stationary trigger is remeasured while scrolling.
+ * @description Uses FloatingScrollView (UI-thread scroll tracking) so Tooltip can follow smoothly without jitter or dismiss on scroll.
  */
-import { Tooltip } from '@ftsukic/tsuki'
-import { ScrollView, Text, View } from 'react-native'
-import { useState } from 'react'
+import { FloatingScrollView, Tooltip } from '@ftsukic/tsuki'
+import { Text, View } from 'react-native'
 
 export default function TooltipScrolling() {
-  const [scrollOffset, setScrollOffset] = useState(0)
-
   return (
-    <ScrollView
-      nestedScrollEnabled
-      onScroll={(event) => setScrollOffset(event.nativeEvent.contentOffset.y)}
-      scrollEventThrottle={32}
-      style={{ maxHeight: 220 }}
-    >
+    <FloatingScrollView nestedScrollEnabled style={{ maxHeight: 220 }}>
       <View style={{ gap: 28, padding: 16 }}>
-        {Array.from({ length: 8 }, (_, index) => (
+        {Array.from({ length: 6 }, (_, index) => (
           <Text key={index}>Scroll to move this anchor ({index + 1})</Text>
         ))}
         <Tooltip
-          content="This hint follows its trigger as the list moves."
+          content="This hint follows its trigger smoothly while scrolling."
           placement="top"
-          repositionKey={scrollOffset}
+          scrollBehavior="follow"
           trigger="press"
         >
-          <Text>Tap, then scroll to reposition</Text>
+          <Text>Tap, then scroll (follow)</Text>
         </Tooltip>
-        {Array.from({ length: 8 }, (_, index) => (
-          <Text key={index}>Scrollable content ({index + 9})</Text>
+        <Tooltip
+          content="This hint closes automatically when scrolling starts."
+          placement="bottom"
+          scrollBehavior="dismiss"
+          trigger="press"
+        >
+          <Text>Tap, then scroll (dismiss)</Text>
+        </Tooltip>
+        {Array.from({ length: 6 }, (_, index) => (
+          <Text key={index}>Scrollable content ({index + 7})</Text>
         ))}
       </View>
-    </ScrollView>
+    </FloatingScrollView>
   )
 }

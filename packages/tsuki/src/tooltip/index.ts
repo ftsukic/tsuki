@@ -3,6 +3,7 @@ export type {
   TooltipClassNames,
   TooltipPlacement,
   TooltipProps,
+  TooltipScrollBehavior,
   TooltipStyles,
   TooltipTrigger,
 } from './types'

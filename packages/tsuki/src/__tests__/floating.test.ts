@@ -110,4 +110,45 @@ describe('Floating placement geometry', () => {
     })
     expect(measureInWindow).toHaveBeenCalledTimes(1)
   })
+
+  it('picks the side with the most available space when placement is auto', () => {
+    const nearBottom = { x: 80, y: 135, width: 40, height: 15 }
+    expect(
+      calculateFloatingPosition({
+        anchor: nearBottom,
+        content,
+        boundary,
+        placement: 'auto',
+        offset: 8,
+      }),
+    ).toMatchObject({ placement: 'top', arrow: { side: 'bottom' } })
+
+    const nearTop = { x: 80, y: 8, width: 40, height: 15 }
+    expect(
+      calculateFloatingPosition({
+        anchor: nearTop,
+        content,
+        boundary,
+        placement: 'auto',
+        offset: 8,
+      }),
+    ).toMatchObject({ placement: 'bottom', arrow: { side: 'top' } })
+  })
+
+  it('centers the arrow on the anchor and clamps it inside rounded corners when shifted', () => {
+    const nearLeft = { x: 4, y: 100, width: 20, height: 20 }
+    const result = calculateFloatingPosition({
+      anchor: nearLeft,
+      content: { width: 120, height: 40 },
+      boundary,
+      placement: 'top',
+      offset: 8,
+      collisionPadding: 8,
+      arrowSize: 10,
+      arrowPadding: 10,
+    })
+    expect(result.x).toBe(8)
+    // Anchor center is at 14, relative to x=8 is 6, minus arrowSize/2 = 1 -> clamped to arrowPadding=10.
+    expect(result.arrow).toEqual({ side: 'bottom', x: 10 })
+  })
 })
